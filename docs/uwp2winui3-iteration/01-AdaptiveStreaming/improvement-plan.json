@@ -1,0 +1,41 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Test-AppLaunch.ps1 and winapp run fail with 0x80070003 on subst drives, causing agent to waste ~40 turns on misleading 'Developer Mode / MAX_PATH' diagnostic",
+      "evidence": "lessons.json dev_agent_struggles[0]: 'Repeated 0x80070003 package registration failure across ~40 turns'; root_cause: 'B: drive is a subst drive... Windows deployment service cannot resolve virtual/subst drives'",
+      "root_cause": "Test-AppLaunch.ps1 resolves the layout path but never checks whether it resides on a subst/virtual drive. Windows package registration APIs silently fail with path-not-found on subst drives. The script then emits a generic 'Developer Mode / MAX_PATH' hint that sends the agent on a wild goose chase.",
+      "tier": 1,
+      "change": "Insert subst-drive detection after layout path resolution in Test-AppLaunch.ps1. Runs `subst` command, matches the drive letter, and transparently rewrites Layout to the real filesystem path with an explanatory note.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+      "expected_effect": "Agent never sees 0x80070003 from subst drives; package registration succeeds on first attempt, saving ~40 turns",
+      "falsifiable_check": "On re-run with a subst-drive workspace, Test-AppLaunch.ps1 emits 'resolved to real path' and winapp run succeeds without 0x80070003; total parity-phase turns < 20"
+    },
+    {
+      "problem": "MediaPlayerElement does not expose AutomationProperties.AutomationId through UIA, causing 3 scenarios to fail parity (agent spent ~20 turns debugging before discovering the wrapper pattern)",
+      "evidence": "lessons.json dev_agent_struggles[2]: 'Scenarios 2, 5, 6 failing parity because MediaPlayerElement AutomationId not visible in UIA tree'; discrepancies.json visual_discrepancies: all 3 entries cite 'mediaPlayerElement AutomationId not exposed via UIA'",
+      "root_cause": "MediaPlayerElement's automation peer in WinUI 3 does not surface AutomationId. This is a known platform limitation, but neither MIGRATION-PATTERNS.md nor the parity-check SKILL.md documented the workaround (wrap in Grid/Border).",
+      "tier": 3,
+      "change": "Add explicit MediaPlayerElement UIA wrapper guidance to (a) MIGRATION-PATTERNS.md in the controls-that-need-element-level-swaps table, and (b) winui3-parity-check SKILL.md in a new 'Controls that don't expose AutomationId' subsection. Tier 3 chosen because the fix is XAML-structural and context-dependent — a script can't know which element to wrap without understanding the page layout.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui3-parity-check/SKILL.md",
+      "expected_effect": "Agent applies wrapper pattern immediately on first parity failure for MediaPlayerElement, saving ~18 turns of debugging",
+      "falsifiable_check": "On re-run, scenarios 2/5/6 pass parity (MediaPlayerElement found via wrapper AutomationId); agent applies wrapper within 2 turns of seeing 'MediaPlayerElement not found' in parity report"
+    },
+    {
+      "problem": "App launched but exited before Capture-AppScenarios.ps1 could connect via UIA (3 turns lost)",
+      "evidence": "lessons.json dev_agent_struggles[1]: 'App launched with PID 9404 but crashed/exited before capture script could connect via UIA'",
+      "root_cause": "Capture-AppScenarios.ps1 requires a separately-launched app process. If the app exits quickly (lifecycle timeout, foreground loss), capture fails. A combined launch-and-capture flow would eliminate this race.",
+      "tier": 0,
+      "change": "HUMAN: Capture-AppScenarios.ps1 should accept a -LaunchCommand parameter that handles app lifecycle (launch, wait for window, capture, then stop). This eliminates the race between separate launch and capture steps.",
+      "file": "HUMAN: skills/winui3-parity-check/scripts/Capture-AppScenarios.ps1",
+      "expected_effect": "Eliminates the app-died-before-capture failure mode entirely",
+      "falsifiable_check": "On re-run with integrated launch, capture never reports 'process died before capture' and all scenarios are captured on first attempt"
+    }
+  ],
+  "deferred_to_human": [
+    "Tier 0: Capture-AppScenarios.ps1 should accept a -LaunchCommand parameter to own app lifecycle (launch → wait-for-window → capture → stop), eliminating the race between separate launch and capture steps",
+    "Tier 0: Benchmark harness should resolve subst drives before passing workspace paths to agents, so no script-level fix is needed at all"
+  ]
+}

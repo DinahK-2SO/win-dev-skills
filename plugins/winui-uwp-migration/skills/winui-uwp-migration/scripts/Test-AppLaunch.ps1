@@ -137,6 +137,23 @@ if ($PSCmdlet.ParameterSetName -eq 'Target') {
 if (-not (Test-Path -LiteralPath $Layout)) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "Layout folder not found: $Layout") }
 $Layout = (Resolve-Path -LiteralPath $Layout).Path
 
+# ---- Subst-drive detection ---------------------------------------------------
+# Windows package registration (Add-AppxPackage / winapp run) cannot resolve subst
+# or virtual drive letters. Detect this early and resolve to the real path so the
+# agent doesn't burn turns on cryptic 0x80070003 errors.
+$layoutDrive = Split-Path -Qualifier $Layout
+if ($layoutDrive) {
+    $substOutput = & subst 2>&1 | Out-String
+    $driveLetter = $layoutDrive.TrimEnd(':')
+    if ($substOutput -match "(?m)^${driveLetter}:\\:\s*=>\s*(.+)$") {
+        $realBase = $matches[1].Trim()
+        $relPart = $Layout.Substring($layoutDrive.Length)
+        $Layout = Join-Path $realBase $relPart
+        Write-Host "NOTE: Layout was on subst drive $layoutDrive - resolved to real path: $Layout"
+        Write-Host "      (Package registration requires real filesystem paths, not subst drives.)"
+    }
+}
+
 # Sanity: the layout needs an exe + a manifest, else winapp run can't launch it.
 $exes = @(Get-ChildItem -LiteralPath $Layout -Filter '*.exe' -File -ErrorAction SilentlyContinue)
 $exeNames = @($exes | ForEach-Object { [System.IO.Path]::GetFileNameWithoutExtension($_.Name) })

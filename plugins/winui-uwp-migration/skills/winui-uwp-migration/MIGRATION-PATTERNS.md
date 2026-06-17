@@ -566,7 +566,7 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 | UWP element | WinUI 3 element | Notes |
 |---|---|---|
-| `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. |
+| `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. **UIA note:** `MediaPlayerElement` does not expose `AutomationProperties.AutomationId` through its automation peer. Wrap in a `<Grid>` or `<Border>` and set the `AutomationProperties.AutomationId` on the wrapper so UIA tools can find it. |
 | `<InkCanvas … />` | _(none — defer)_ | Not supported. |
 | `<Pivot>` / `<PivotItem>` | `<TabView>` / `<TabViewItem>`, or `<controls:Pivot>` from `CommunityToolkit.WinUI.UI.Controls` | Pick based on the source's intent (top-tab vs swipe pivot). |
 | `<Hub>` / `<HubSection>` | Hand-rolled `<NavigationView>` with section grouping, or `<ScrollViewer>` with stacked sections. | No drop-in equivalent. |

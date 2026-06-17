@@ -1,0 +1,70 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Successfully scaffolded migration with 23 files, namespace rewrites, and TODO injection in one step (turn 7)" },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "Provided correct threading pattern (CoreDispatcher→DispatcherQueue) that the agent applied across all 20 TODOs (turn 11)" },
+    { "tool": "Capture-AppScenarios.ps1", "evidence": "Successfully captured all 7 scenarios via UIA navigation once the app was running (turn 109)" },
+    { "tool": "Compare-Parity.ps1", "evidence": "Provided actionable per-scenario pass/fail breakdown that guided subsequent fixes (turn 110)" }
+  ],
+  "tools_problematic": [
+    { "tool": "Test-AppLaunch.ps1", "problem": "Cannot resolve subst drives; reports 'unavailable' with misleading hint about Developer Mode/MAX_PATH when the real issue is subst drive incompatibility with Windows package registration", "evidence": "Turns 14-20 in parity phase: repeated 'error 0x80070003: Opening file from location: AppxManifest.xml' with 'Usually Developer Mode off... not a migration defect'" },
+    { "tool": "winapp run", "problem": "Fails silently on subst drives without diagnosing the root cause", "evidence": "winapp run returned 0x80070003 repeatedly from turn 9 through turn 48 regardless of path shortening attempts" }
+  ],
+  "tool_limitations": [
+    { "tool": "Test-AppLaunch.ps1", "limitation": "Does not detect subst/virtual drives and warn the user that package registration requires real filesystem paths", "suggested_tweak": "Add a check: if the resolved layout path starts with a subst drive letter, resolve to the real path via (Get-Item $path).Target or subst output, and warn the agent" },
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Source path resolution assumed relative location under the trial directory (uwp-samples-standalone subfolder), which didn't exist; agent had to manually locate the correct path at B:\\agent-benchmark\\uwp-samples-standalone", "suggested_tweak": "The prompt hint '../../../uwp-samples-standalone' should resolve relative to the working directory, or the script should search common known locations" }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "MediaPlayerElement AutomationProperties.AutomationId", "special_handling": "MediaPlayerElement does not expose AutomationId through UIA. Must wrap in a Grid or Border with the AutomationId set on the wrapper to make it discoverable by UIA inspection tools." }
+  ],
+  "errors_encountered": [
+    { "error": "Source not found: B:\\agent-benchmark\\results\\run23\\...\\uwp-samples-standalone\\Samples\\AdaptiveStreaming\\cs", "root_cause": "Build prompt hinted at relative path '../../../uwp-samples-standalone' but the actual location was B:\\agent-benchmark\\uwp-samples-standalone (not under the trial directory)", "fix": "Agent searched parent directories and found the correct path at turn 6-7" },
+    { "error": "0x80070003: Opening file from location: AppxManifest.xml failed with error: The system cannot find the path specified", "root_cause": "B: drive is a subst mapping to C:\\ado\\win-dev-skills-benchmark; Windows package registration (Add-AppxPackage/winapp run) cannot resolve subst drive letters", "fix": "Agent changed OutputPath to C:\\ado\\w\\o\\ (real filesystem path) at turn 48-50" },
+    { "error": "App launched (PID 9404) but process died before capture", "root_cause": "First app launch used dotnet run without --no-build which held the shell; by the time capture script ran, the app had already exited (likely lifecycle timeout or foreground loss)", "fix": "Agent re-launched with dotnet run and captured immediately in subsequent attempt" }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Parity phase, turns 9-50",
+      "symptom": "Repeated 0x80070003 package registration failure across ~40 turns despite trying different layout paths, output path shortcuts, and winapp invocation variants",
+      "turns_or_retries": "~40 turns (turns 9 through 50 in parity check phase)",
+      "root_cause": "B: drive is a subst drive (B: => C:\\ado\\win-dev-skills-benchmark); Windows deployment service cannot resolve virtual/subst drives for package registration",
+      "how_resolved": "Agent eventually ran 'subst' command (turn 47), discovered B: was virtual, and switched OutputPath to a real C:\\ path",
+      "preventable_by": "Test-AppLaunch.ps1 or the skill bootstrap should detect subst drives and auto-resolve to the real path, or the skill guidance should explicitly warn about subst/junction incompatibility with package registration"
+    },
+    {
+      "where": "Parity phase, turn 52",
+      "symptom": "App launched with PID 9404 but crashed/exited before capture script could connect via UIA",
+      "turns_or_retries": "3 turns to diagnose and re-launch",
+      "root_cause": "dotnet run launches the app detached but the app window may close quickly if not kept in foreground; the capture script ran in a separate shell and by then the app was gone",
+      "how_resolved": "Agent re-launched the app and ran capture immediately in the same flow",
+      "preventable_by": "Capture-AppScenarios.ps1 should accept a launch command and handle app lifecycle itself, or the skill should instruct the agent to use dotnet run --no-build in async mode and immediately capture"
+    },
+    {
+      "where": "Parity phase, turns 95-116",
+      "symptom": "Scenarios 2, 5, 6 failing parity because MediaPlayerElement AutomationId not visible in UIA tree",
+      "turns_or_retries": "~20 turns debugging UIA dumps, trying AutomationId approaches",
+      "root_cause": "MediaPlayerElement does not expose AutomationProperties.AutomationId through UIA; the control's automation peer doesn't surface the property",
+      "how_resolved": "Wrapped MediaPlayerElement in a Grid with the AutomationId on the Grid (turn 115)",
+      "preventable_by": "Parity check skill/documentation should note that MediaPlayerElement requires a wrapper element for AutomationId exposure, or Extract-UwpFeatureChecklist should not require mediaPlayerElement detection by AutomationId"
+    },
+    {
+      "where": "Migration phase, turns 2-7",
+      "symptom": "Initialize-UwpMigration.ps1 failed with 'Source not found' because the relative path hint in the prompt didn't resolve",
+      "turns_or_retries": "5 turns searching for correct path",
+      "root_cause": "Prompt said source was at '../../../uwp-samples-standalone/Samples/AdaptiveStreaming/cs' relative to app dir, but the actual location was B:\\agent-benchmark\\uwp-samples-standalone (not relative to trial dir)",
+      "how_resolved": "Agent searched parent directories with Get-ChildItem and Test-Path to locate the correct absolute path",
+      "preventable_by": "Prompt should provide the absolute path to UWP source, or Initialize-UwpMigration should search known locations automatically"
+    }
+  ],
+  "missing_tooling": [
+    { "need": "Subst-drive detection and auto-resolution in deployment tooling", "would_have_saved": "~40 turns of trial-and-error with package registration failures" },
+    { "need": "A 'launch-and-capture' combined command that handles app lifecycle", "would_have_saved": "Multiple turns where app died before capture could connect" }
+  ],
+  "env_issues": [
+    { "issue": "B: drive is a subst mapping (B: => C:\\ado\\win-dev-skills-benchmark); Windows package registration APIs cannot resolve subst drives", "workaround": "Output build artifacts to a real C:\\ path (C:\\ado\\w\\o\\) instead of the subst drive" },
+    { "issue": "Trial directory path is extremely long (~180 chars), causing MAX_PATH issues with intermediate build outputs", "workaround": "Set BaseIntermediateOutputPath to a short path (B:\\i\\ or C:\\ado\\w\\i\\)" }
+  ]
+}

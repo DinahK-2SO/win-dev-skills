@@ -1,0 +1,38 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "score": 0,
+  "builds": false,
+  "runs": false,
+  "requirements": [
+    {
+      "id": 0,
+      "text": "Trial timed out before final scoring",
+      "status": "fail",
+      "reason": "Agent exhausted time budget; harness recorded timeout with no final metrics",
+      "suspected_skill_gap": "Subst-drive incompatibility in deployment tooling consumed ~40 turns that should have taken 1-2 turns with proper detection, leaving insufficient time for parity remediation loop"
+    }
+  ],
+  "visual_discrepancies": [
+    {
+      "feature": "Scenario 2 - Event Handlers",
+      "uwp": "MediaPlayerElement with transport controls visible, bitrate icons, and description text",
+      "winui": "All controls present but mediaPlayerElement AutomationId not exposed via UIA, causing parity checker to mark as fail (0/1 controls found)",
+      "screenshot_ref": "uwp-scenario2-event-handlers.png"
+    },
+    {
+      "feature": "Scenario 5 - Metadata",
+      "uwp": "MediaPlayerElement with transport controls and timed metadata display",
+      "winui": "All controls present but mediaPlayerElement AutomationId not exposed via UIA, causing parity checker to mark as fail (0/1 controls found)",
+      "screenshot_ref": "uwp-scenario5-metadata.png"
+    },
+    {
+      "feature": "Scenario 6 - Ad Insertion",
+      "uwp": "MediaPlayerElement with ad break scheduling controls",
+      "winui": "All controls present but mediaPlayerElement AutomationId not exposed via UIA, causing parity checker to mark as fail (0/1 controls found)",
+      "screenshot_ref": "uwp-scenario6-ad-insertion.png"
+    }
+  ],
+  "missing_features": [],
+  "summary": "The trial timed out (score=0) but the app was actually building and running with 57.1% parity (4/7 scenarios passing). The agent spent ~40 of its 116 turns fighting a subst-drive package registration issue unrelated to the migration itself. Once resolved, the remaining failures were all due to MediaPlayerElement not exposing AutomationId through UIA — a tooling/detection issue rather than a missing feature. The agent was in the process of fixing this (wrapping in Grid) when it timed out. With the subst-drive issue pre-resolved, this migration would likely have scored 80-100%."
+}

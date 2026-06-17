@@ -1,0 +1,9 @@
+Read the code of "..\..\..\uwp-samples-standalone\Samples\AdaptiveStreaming\cs\" thoroughly and create a WinUI3 version of it. 
+
+Hint: the shared contents are in "..\..\..\uwp-samples-standalone\SharedContent\"
+
+IMPORTANT: Create the project in the current directory: B:\agent-benchmark\results\run23\AdaptiveStreaming_winui3-fromuwp-migration-parity-user--DinahK-2SO--uwp2winui3-parity-agent__test-260617-161758_s46_i1\app
+
+After the migration's own validator (Validate-UwpMigration.ps1) reports PASS, you are NOT finished: run the winui3-parity-check skill as the final step. Extract the UWP feature checklist from the original source, run the migrated WinUI 3 app, capture each scenario, and run Compare-Parity.ps1. Fix every PARTIAL/FAIL scenario (missing controls, dead handlers, blank pages) and re-capture until Compare-Parity.ps1 exits 0 (PASS). Only then declare the migration done.
+
+Do NOT run any git operations (git add, git commit, git status, etc.) — focus only on building the app.
