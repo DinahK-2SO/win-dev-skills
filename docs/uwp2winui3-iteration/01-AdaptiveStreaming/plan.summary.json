@@ -1,0 +1,17 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Auto-patch csproj to remove System.Net.Http implicit using when source uses Windows.Web.Http (Tier 1 script fix eliminates CS0104 HttpClient ambiguity before first build)",
+    "Document CS0104 HttpClient/Windows.Web.Http pattern in MIGRATION-PATTERNS.md as fallback for post-bootstrap files",
+    "Add vertical space budget warning to SKILL.md shell conversion: set MinHeight on MediaPlayerElement in Height='*' rows to prevent zero-height collapse under NavigationView shells",
+    "Generalize build-output filtering warning in SKILL.md to cover Select-String/Select-Object alongside Where-Object, preventing 7-minute agent stalls"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": []
+}

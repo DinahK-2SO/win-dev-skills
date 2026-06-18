@@ -1,0 +1,14 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "MIGRATION-MAPPING.md rows left at Status=copied until final bulk update",
+      "evidence": "session-log.txt L8341-8344: Validator reported 'FAIL: 121 row(s) still Status=copied'. Agent then bulk-replaced all rows from 'copied' to 'done' in one PowerShell command (L8441-8443) rather than flipping each row as files were migrated.",
+      "covered_clearly_at": "SKILL.md Step 1 (line 90): 'Flip Status from copied → done (or deferred) as each row is finished.' — this is explicit, prominent, and unambiguous. Also Step 4 (line 154): Validator checks 'no row stuck at Status = copied'.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The instruction to flip rows incrementally is explicit in both Step 1 and Step 4. The agent chose to defer this bookkeeping and fixed it with a bulk update when the validator caught it. A capable model on re-run would either flip rows incrementally or at least remember to bulk-update before running the validator."
+    }
+  ]
+}

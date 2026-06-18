@@ -1,0 +1,38 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0104 HttpClient ambiguity between System.Net.Http and Windows.Web.Http when ImplicitUsings is enabled",
+      "evidence": "skill-defects.json item 1; lessons.json errors_encountered[0]: 14+ CS0104 errors across 6 files; dev_agent_struggles[1]: agent fixed in 1 turn but skill had no coverage. MIGRATION-PATTERNS.md only covers CS0104 for LaunchActivatedEventArgs (Windows.UI.Xaml vs Microsoft.UI.Xaml).",
+      "root_cause": ".NET SDK projects with ImplicitUsings (default since .NET 6) auto-import System.Net.Http, which conflicts with Windows.Web.Http types used in UWP code doing HTTP interception. The bootstrap script doesn't detect this and the patterns doc doesn't mention it.",
+      "tier": 1,
+      "change": "Add a post-copy step in Initialize-UwpMigration.ps1 that scans copied .cs files for 'Windows.Web.Http' usage. If any file references this namespace, patch the target .csproj to add <Using Remove=\"System.Net.Http\" /> in an ItemGroup — eliminating the ambiguity before the agent ever builds. Also add a CS0104 subsection in MIGRATION-PATTERNS.md documenting the pattern for cases the script misses.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Zero CS0104 HttpClient ambiguity errors on any UWP project using Windows.Web.Http types. Build succeeds on first attempt for HTTP-interception scenarios.",
+      "falsifiable_check": "Re-run on AdaptiveStreaming: 0 CS0104 errors related to HttpClient/HttpRequestMessage/HttpResponseMessage. Agent does not need to manually add <Using Remove> to .csproj."
+    },
+    {
+      "problem": "MediaPlayerElement squeezed to zero height in NavigationView shell when scenario pages have heavy Auto-row content",
+      "evidence": "skill-coverage-gaps.json item 1; discrepancies.json requirements 3, 4, 7 all partial (MediaPlayerElement w=0, h=0, isOffscreen=true). Shell conversion guidance in SKILL.md covers NavigationView+Frame but omits vertical space budget.",
+      "root_cause": "UWP's full-screen Page model gives Height='*' rows ample space. WinUI 3 desktop windows with NavigationView shells have less available height (header + status panels consume 250+ px). Content-heavy pages overflow the remaining space, collapsing the * row to zero.",
+      "tier": 3,
+      "change": "Add a layout warning to SKILL.md's shell conversion section: when scenario pages use Height='*' rows for media/stretch elements, the shell must not consume excessive viewport height. Recommend MinHeight on MediaPlayerElement and similar stretch-to-fill controls. Tier 1/2 not feasible because the correct MinHeight depends on per-page layout context that a script can't determine.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent sets MinHeight on MediaPlayerElement in content-heavy pages, preventing zero-height collapse. Requirements 3, 4, 7 go partial→pass.",
+      "falsifiable_check": "Re-run on AdaptiveStreaming: MediaPlayerElement visible (h > 0) in scenarios 3, 4, 7. Score goes from 77 to 100."
+    },
+    {
+      "problem": "Build output filtering warning names only Where-Object, not Select-String or other filtering cmdlets",
+      "evidence": "skill-coverage-gaps.json item 2; lessons.json dev_agent_struggles[0]: agent used Select-String to filter build output, which hung for ~7 minutes (5 retries). SKILL.md line 139 warns about Where-Object but not Select-String.",
+      "root_cause": "The warning is narrowly scoped to one cmdlet name. Agents use Select-String, Select-Object, and other PowerShell filtering cmdlets interchangeably. A warning that names only Where-Object is bypassed when the agent reaches for an equivalent.",
+      "tier": 3,
+      "change": "Broaden the warning in SKILL.md Step 3 to explicitly name Select-String and Select-Object alongside Where-Object, and generalize the rule to 'any filtering cmdlet'. Tier 1/2 not feasible: this is about agent command construction, not a scriptable check.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent avoids piping build output through Select-String or any other filter. No 7-minute stalls on filtered build commands.",
+      "falsifiable_check": "Re-run: agent never pipes dotnet build through Select-String/Where-Object/Select-Object. Zero polling loops on empty build output."
+    }
+  ],
+  "deferred_to_human": []
+}

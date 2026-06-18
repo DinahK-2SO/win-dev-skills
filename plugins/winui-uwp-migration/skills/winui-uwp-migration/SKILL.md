@@ -101,7 +101,16 @@ Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 
 If the source shell doesn't match anything above, preserve its structure as faithfully as controls allow.
 
-**Navigation invariants** (apply regardless of shell control choice):
+> **Vertical space budget:** UWP pages run full-screen, so a `Height="*"` Grid row
+> for a `MediaPlayerElement` (or any stretch-to-fill element) gets ample space. In a
+> WinUI 3 desktop window with a `NavigationView` shell, the header bar and any
+> status/description panels can consume 250+ pixels, leaving content-heavy pages with
+> no room for the `*` row. **Always set `MinHeight="300"` (or an appropriate value) on
+> `MediaPlayerElement` and other stretch-to-fill elements** that live in a `Height="*"`
+> row — this prevents them from collapsing to zero when sibling `Auto` rows overflow
+> the remaining viewport height.
+
+**Navigation invariants**(apply regardless of shell control choice):
 
 1. Every non-deferred source scenario / page is reachable from the target's primary navigation surface.
 2. Order matches the source.
@@ -136,7 +145,7 @@ When the app **crashes at launch**, fix the frame the captured stack names — t
 > **Build command discipline (avoid agent stalls):**
 >
 > - Prefer `winapp build` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (A bare `winapp run` works too, but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
-> - If you must shell out to `dotnet build` / `dotnet run`, **do not** pipe the output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
+> - If you must shell out to `dotnet build` / `dotnet run`, **do not** pipe the output through **any filtering cmdlet** (`Where-Object`, `Select-String`, `Select-Object`, or equivalent) while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
 > - When using `dotnet` from the powershell tool, either (a) run **sync**, or (b) leave output unfiltered, or (c) append an exit sentinel so there is always a final line to read, e.g. `dotnet build -c Debug; "BUILD_EXIT=$LASTEXITCODE"`.
 
 ### Step 4 — Validate (mandatory before declaring done)

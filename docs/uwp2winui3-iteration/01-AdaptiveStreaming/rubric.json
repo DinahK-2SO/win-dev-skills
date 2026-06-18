@@ -1,0 +1,246 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "created_at": "2026-06-18T16:47:10Z",
+  "uwp_capture_status": "failed: UWP app crashed at startup in Windows.UI.Xaml.dll (0xc000027b) — legacy XAML stowed exception on newer OS build",
+  "features": [
+    {
+      "id": "scenario-navigation",
+      "area": "Navigation",
+      "name": "Scenario list navigation",
+      "description": "The app displays a left-side scenario list with 7 scenarios. Clicking a scenario navigates to the corresponding page in the right content area.",
+      "expected_behaviour": [
+        "A ListBox/ListView on the left shows all 7 scenario titles",
+        "Clicking a scenario title loads the corresponding scenario page in the content frame",
+        "The selected scenario is visually highlighted in the list"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s1-load-button",
+      "area": "Scenario 1 — Simplest Adaptive Streaming",
+      "name": "Load button triggers media playback",
+      "description": "Scenario 1 has a single 'Load' button that creates a MediaSource from a hardcoded HLS manifest URI and sets it on the MediaPlayerElement.",
+      "expected_behaviour": [
+        "A 'Load' button is visible below the scenario description",
+        "Clicking 'Load' begins loading the adaptive streaming content into the MediaPlayerElement",
+        "The MediaPlayerElement displays video content after loading completes"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "media-player-transport-controls",
+      "area": "Shared",
+      "name": "MediaPlayerElement with transport controls",
+      "description": "All scenarios (1–6) display a MediaPlayerElement with built-in transport controls (play/pause, seek bar, volume, full screen).",
+      "expected_behaviour": [
+        "A MediaPlayerElement is visible in the main content area of each scenario",
+        "Transport controls (play, pause, seek slider, volume, full-screen) are enabled and functional",
+        "AreTransportControlsEnabled is true for scenarios 1–6"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "content-selector-load-id",
+      "area": "Content Selector",
+      "name": "Load content by ID from ComboBox",
+      "description": "Scenarios 2–7 include a ContentSelector user control with a ComboBox of predefined content items and a 'Load Id' button.",
+      "expected_behaviour": [
+        "A ComboBox lists available adaptive content models (HLS, DASH, Live, PlayReady, etc.)",
+        "Clicking 'Load Id' loads the selected content model's manifest URI",
+        "The 'Set Source' button becomes enabled after content is successfully loaded"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "content-selector-load-uri",
+      "area": "Content Selector",
+      "name": "Load content by custom URI",
+      "description": "The ContentSelector includes a 'Load Uri' button and a TextBox where users can type a custom manifest URI.",
+      "expected_behaviour": [
+        "A TextBox is visible for entering a custom URI",
+        "Clicking 'Load Uri' attempts to create an AdaptiveMediaSource from the entered URI",
+        "Invalid URIs produce a log message indicating the error"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "content-selector-set-source",
+      "area": "Content Selector",
+      "name": "Set Source and AutoPlay checkbox",
+      "description": "After loading content, the 'Set Source' button assigns the MediaPlaybackItem to the MediaPlayer. An AutoPlay checkbox controls auto-play behaviour.",
+      "expected_behaviour": [
+        "'Set Source' button is disabled until content is loaded, then becomes enabled",
+        "Clicking 'Set Source' assigns the loaded content to the MediaPlayer and begins playback resolution",
+        "The 'AutoPlay' checkbox toggles auto-play on the MediaPlayer"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s2-bitrate-indicators",
+      "area": "Scenario 2 — Event Handlers",
+      "name": "Download and playback bitrate indicators",
+      "description": "Scenario 2 displays real-time download and playback bitrate values with bar-chart SymbolIcons that update as the adaptive stream changes bitrate.",
+      "expected_behaviour": [
+        "Download bitrate is shown with a Download icon, a bar-level SymbolIcon, and a numeric value",
+        "Playback bitrate is shown with a Play icon, a bar-level SymbolIcon, and a numeric value",
+        "Icons update dynamically when DownloadBitrateChanged or PlaybackBitrateChanged events fire"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s2-event-log",
+      "area": "Scenario 2 — Event Handlers",
+      "name": "Event logging view",
+      "description": "Scenarios 2–7 include a LogView control at the bottom that displays runtime events (MediaPlayer, MediaSource, AdaptiveMediaSource events) as scrollable text.",
+      "expected_behaviour": [
+        "A log panel is visible at the bottom of the page",
+        "Events such as MediaOpened, DownloadBitrateChanged, PlaybackBitrateChanged are logged with timestamps",
+        "The log scrolls to show the most recent entries"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s3-auth-radio-buttons",
+      "area": "Scenario 3 — Request Modification",
+      "name": "Authorization method radio buttons",
+      "description": "Scenario 3 provides four radio buttons to select AES key authorization method: None, Authorization Header, URL Query Parameter, or Application Downloaded.",
+      "expected_behaviour": [
+        "Four radio buttons are visible: None, Authorization Header, Url Query Parameter, Application Downloaded",
+        "'Authorization Header' is checked by default",
+        "Selecting a different radio button changes how key requests are authenticated"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s3-hdcp-protection",
+      "area": "Scenario 3 — Request Modification",
+      "name": "HDCP protection level controls",
+      "description": "Scenario 3 includes radio buttons for desired HDCP minimum protection (Off, On, On With Type Enforcement) and displays the effective protection level with a max bitrate.",
+      "expected_behaviour": [
+        "Three HDCP radio buttons are visible: HDCP Off (default), HDCP On, HDCP On With Type Enforcement",
+        "An 'Effective protection' text displays the current HDCP status and associated max bitrate",
+        "Changing HDCP selection updates the effective protection text and may restrict available bitrates"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s4-bitrate-tuning",
+      "area": "Scenario 4 — Adaptive Streaming Tuning",
+      "name": "Min/Initial/Max bitrate ComboBoxes",
+      "description": "Scenario 4 provides three ComboBoxes to set the DesiredMinBitrate, InitialBitrate, and DesiredMaxBitrate on the AdaptiveMediaSource.",
+      "expected_behaviour": [
+        "Three ComboBoxes labeled 'Min Bitrate', 'Initial Bitrate', and 'Max Bitrate' are populated with available bitrate values",
+        "Changing a ComboBox selection updates the corresponding property on the AdaptiveMediaSource",
+        "Invalid combinations (min > initial or initial > max) are rejected and the selection reverts"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "s4-advanced-tuning",
+      "area": "Scenario 4 — Adaptive Streaming Tuning",
+      "name": "Downgrade ratio and headroom ratio settings",
+      "description": "Scenario 4 includes TextBoxes and Set buttons for BitrateDowngradeTriggerRatio and DesiredBitrateHeadroomRatio advanced settings.",
+      "expected_behaviour": [
+        "A 'Downgrade ratio' TextBox and 'Set' button are visible",
+        "A 'Desired headroom ratio' TextBox and 'Set' button are visible",
+        "Clicking 'Set' applies the entered numeric value to the AdaptiveMediaSource.AdvancedSettings"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s4-inbound-bitrate",
+      "area": "Scenario 4 — Adaptive Streaming Tuning",
+      "name": "Inbound bits per second display",
+      "description": "Scenario 4 displays the current InboundBitsPerSecond value, polled every 2 seconds, alongside the download and playback bitrate indicators.",
+      "expected_behaviour": [
+        "An inbound bitrate value is displayed with a network icon",
+        "The value updates periodically (every ~2 seconds) while content is playing",
+        "The display uses a SymbolIcon and a TextBlock showing the numeric value"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s5-metadata-display",
+      "area": "Scenario 5 — Metadata",
+      "name": "Timed metadata display",
+      "description": "Scenario 5 demonstrates consuming timed metadata (HLS m3u8 comments, ID3 tags, DASH emsg boxes). Metadata events are logged in the LogView.",
+      "expected_behaviour": [
+        "The scenario description mentions HLS and DASH timed metadata support",
+        "A ContentSelector and MediaPlayerElement are present for loading metadata-bearing streams",
+        "Metadata events (TimedMetadataTracksChanged, CueEntered) are logged in the log panel"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s6-ad-insertion",
+      "area": "Scenario 6 — Ad Insertion",
+      "name": "Pre-roll, mid-roll, and post-roll ads",
+      "description": "Scenario 6 demonstrates MediaBreak-based ad insertion with two pre-roll ads, two mid-roll ads at 10% of content duration, and a post-roll ad.",
+      "expected_behaviour": [
+        "Pre-roll ads play before the main content starts (Red Sky and Flowers videos)",
+        "Mid-roll ads play at approximately 10% into the main content",
+        "A post-roll ad plays after the main content ends",
+        "Ad playback progress events are logged in the log panel"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "s7-seekable-window-controls",
+      "area": "Scenario 7 — Live Seekable Range",
+      "name": "Seekable window configuration",
+      "description": "Scenario 7 shows MaxSeekableWindowSize (read-only), DesiredSeekableWindowSize (editable), DesiredLiveOffset (editable), and MinLiveOffset (read-only) for live DVR content.",
+      "expected_behaviour": [
+        "MaxSeekableWindowSize and MinLiveOffset are displayed as read-only text",
+        "DesiredSeekableWindowSize has a TextBox and 'Set' button to configure the DVR window size",
+        "DesiredLiveOffset has a TextBox and 'Set' button to configure the live offset",
+        "Values update after clicking 'Set' to reflect the applied configuration"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s7-position-slider",
+      "area": "Scenario 7 — Live Seekable Range",
+      "name": "Position slider and time display",
+      "description": "Scenario 7 includes a custom position slider with StartPosition, CurrentPosition, and EndPosition labels that track the live seekable range.",
+      "expected_behaviour": [
+        "A horizontal Slider control spans the width of the content area",
+        "StartPosition, CurrentPosition, and EndPosition labels display time values",
+        "The slider position updates in real-time as the media plays",
+        "Seekable ranges update when SeekableRangesChanged event fires"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s7-discrete-controls",
+      "area": "Scenario 7 — Live Seekable Range",
+      "name": "Seek and playback control buttons",
+      "description": "Scenario 7 provides discrete seek buttons (<<15m, <<5m, <<30s, <<2s, 2s>>, 30s>>, 5m>>, 15m>>), Play/Pause, GoToStart, GoToLive, and Log Times buttons for live content navigation.",
+      "expected_behaviour": [
+        "Seek buttons (<<15m through 15m>>) seek forward/backward by the indicated time amount",
+        "GoToStart seeks to the beginning of the seekable range",
+        "GoToLive seeks to the end of the seekable range (live edge)",
+        "Play and Pause buttons toggle playback state and enable/disable based on current state",
+        "Log Times button logs the current time correlation data"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

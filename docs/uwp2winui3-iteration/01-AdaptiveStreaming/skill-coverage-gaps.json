@@ -1,0 +1,23 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "MediaPlayerElement squeezed to zero height in scenarios with heavy Auto-row content (scenarios 3, 4, 7)",
+      "evidence": "results.json requirements 3, 4, 7 all partial. Screenshots 03_Network_Request_Modification.png, 04_Adaptive_Streaming_Tuning.png, 07_Live_Seekable_Range.png all show no MediaPlayerElement visible. UIA reports MediaControlsCommandBar at w=0, h=0, isOffscreen=true. The dev-agent's MainPage.xaml includes a StatusPanel with MaxHeight=200 plus NavigationView header overhead.",
+      "covered_at": "SKILL.md Step 2 'Shell conversion' section (lines 92-109) — covers NavigationView+Frame as the target shell pattern for SDK-sample idiom. Also MIGRATION-PATTERNS.md line 569 covers MediaElement→MediaPlayerElement control swap.",
+      "why_missed": "under-emphasized — shell conversion guidance says 'NavigationView + Frame' but doesn't mention vertical space budget, MinHeight for media elements, or the risk of Auto-height overflow in content-heavy pages. The guidance focuses on navigation structure, not layout constraints.",
+      "proposed_improvement": "Add a warning box under the shell conversion table in SKILL.md: 'When scenario pages use Height=\"*\" rows for media elements (MediaPlayerElement, Image), ensure the shell layout does not consume excessive viewport height. NavigationView header + status panels can claim 250+ pixels. Add MinHeight=\"200\" (or appropriate value) to media elements to prevent them from collapsing to zero when Auto-height siblings overflow the remaining space. Alternatively, remove or collapse non-essential StatusPanel/StatusBorder sections from the shell if the UWP source didn't have them.' Also add a note in MIGRATION-PATTERNS.md under the MediaElement→MediaPlayerElement row: 'Always set MinHeight on MediaPlayerElement when it lives in a Height=\"*\" Grid row — unlike UWP's full-screen Page model, WinUI 3 desktop windows with NavigationView shells have less available height.'",
+      "generalizes": "Many UWP SDK samples use the Auto/*/Auto Grid pattern with MediaPlayerElement or other stretch-to-fill elements in the * row. When these are placed inside a NavigationView shell (the recommended migration target), the shell's header and any extra panels reduce available height, potentially collapsing the * row to zero on content-heavy pages. This is a systematic layout risk across all media-centric UWP samples."
+    },
+    {
+      "problem": "Build output filtering warning doesn't mention Select-String (only mentions Where-Object)",
+      "evidence": "session-log.txt L8265-8318: Agent ran 'winapp build 2>&1 | Select-String -Pattern ...' which returned BUILD_EXIT=1 with no visible errors. Then ran 'dotnet build | Select-String' which hung. Agent polled read_powershell 5 times (120s, 60s, 60s, 90s, 120s) before killing the shell. ~7 minutes wasted.",
+      "covered_at": "SKILL.md Step 3 'Build command discipline' warning box (lines 136-140) — warns about 'Where-Object { $_ -match ... }' swallowing output.",
+      "why_missed": "not prominent — the warning specifically names Where-Object but not Select-String. The agent used Select-String (a functionally equivalent PowerShell cmdlet for line filtering) and hit the exact same problem. The warning needs to be generalized to cover all output-filtering cmdlets.",
+      "proposed_improvement": "Change the warning text from 'do not pipe the output through a filter like `Where-Object { $_ -match ... }`' to 'do not pipe the output through any filtering cmdlet (`Where-Object`, `Select-String`, `Select-Object`, etc.)'. Add Select-String to the explicit example. This makes the guidance complete for the common PowerShell filtering patterns.",
+      "generalizes": "Agents use various PowerShell filtering cmdlets interchangeably. A warning that names only one cmdlet will be bypassed when the agent reaches for an equivalent. Generalizing to 'any filtering cmdlet' covers all cases."
+    }
+  ]
+}

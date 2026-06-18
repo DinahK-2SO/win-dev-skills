@@ -1,0 +1,29 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "winui-uwp-migration skill (bootstrap script)", "evidence": "Bootstrap correctly scaffolded WinUI 3 project, copied 121 files, injected TODO markers, and generated MIGRATION-MAPPING.md. Agent completed migration successfully on first attempt." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught two issues the agent missed: residue UWP comment in Styles.xaml (L313) and all 121 MIGRATION-MAPPING.md rows stuck at Status=copied. Agent fixed both and re-ran to PASS." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [
+    { "api": "Windows.Web.Http.HttpClient (ambiguity with System.Net.Http.HttpClient)", "why_tried": "UWP AdaptiveStreaming sample uses Windows.Web.Http.HttpClient for IHttpFilter-based request modification. The migrated code retains Windows.Web.Http usings, but .NET SDK ImplicitUsings injects System.Net.Http into scope.", "root_cause": "CS0104 ambiguous reference. .NET SDK projects with <ImplicitUsings>enable</ImplicitUsings> auto-import System.Net.Http, which conflicts with Windows.Web.Http types (HttpClient, HttpRequestMessage, HttpResponseMessage) used by the UWP sample.", "fix": "Agent added <Using Remove=\"System.Net.Http\" /> to the .csproj ItemGroup, which resolved all 14+ CS0104 errors in one shot." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Web.Http.IHttpFilter", "special_handling": "IHttpFilter implementations (e.g. AdaptiveMediaSourceHttpFilterLogger, AddAuthorizationHeaderFilter) use Windows.Web.Http types that conflict with System.Net.Http under ImplicitUsings. Must remove the System.Net.Http implicit using or fully qualify all Windows.Web.Http types." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0104: 'HttpClient' is an ambiguous reference between 'System.Net.Http.HttpClient' and 'Windows.Web.Http.HttpClient' (14+ occurrences across 6 files)", "root_cause": ".NET SDK ImplicitUsings auto-imports System.Net.Http, conflicting with Windows.Web.Http types used by the UWP sample's IHttpFilter-based network stack.", "fix": "Added <Using Remove=\"System.Net.Http\" /> to .csproj." },
+    { "error": "CS0535: 'AdaptiveMediaSourceHttpFilterLogger' does not implement interface member 'IHttpFilter.SendRequestAsync(HttpRequestMessage)'", "root_cause": "Caused by the same HttpClient ambiguity — the compiler couldn't resolve HttpRequestMessage to the correct Windows.Web.Http type.", "fix": "Resolved automatically when the System.Net.Http implicit using was removed." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Final build verification (outer agent, post-validator PASS)", "symptom": "Agent ran 'winapp build 2>&1 | Select-String -Pattern error|warning...' which returned BUILD_EXIT=1 but no error details (Select-String swallowed all output). Then ran 'dotnet build' piped through Select-String, which hung for 4+ read_powershell retries (120s, 60s, 60s, 90s, 120s) before agent killed the shell.", "turns_or_retries": "5 retries over ~7 minutes of wall time", "root_cause": "Select-String filter swallowed build output the same way Where-Object does. The skill warns about Where-Object but not Select-String.", "how_resolved": "Agent stopped the shell and re-ran with 'dotnet build --no-incremental 2>&1 | Where-Object { $_ -match \"error CS|Build (succeeded|failed)\" }' which worked because there were matching lines.", "preventable_by": "Skill should warn about ALL output-filtering cmdlets (Select-String, Where-Object, etc.) or recommend 'winapp build' exclusively." },
+    { "where": "CS0104 HttpClient ambiguity", "symptom": "Build failed with 17 errors (14 CS0104, 2 CS0535, 1 WMC9999) all stemming from System.Net.Http vs Windows.Web.Http conflict.", "turns_or_retries": "1 turn — agent diagnosed and fixed immediately", "root_cause": "ImplicitUsings adds System.Net.Http which conflicts with Windows.Web.Http. Skill only covers CS0104 for Windows.UI.Xaml vs Microsoft.UI.Xaml types (LaunchActivatedEventArgs).", "how_resolved": "Agent added <Using Remove=\"System.Net.Http\" /> to .csproj.", "preventable_by": "Add a dedicated CS0104 subsection for System.Net.Http vs Windows.Web.Http conflict in MIGRATION-PATTERNS.md, specifically mentioning the ImplicitUsings mechanism." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Smoke launch in validator reported WARN: 'winapp run did not register the app (no AUMID, no PID) - Failed to register package... error 0x80070003'", "workaround": "Validator correctly treated this as a non-fatal WARN (environment/deploy issue, not a migration defect). App was launched successfully by the parity checker separately." }
+  ]
+}

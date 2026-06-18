@@ -1,0 +1,23 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "score": 77,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Scenario 1 — Simplest Adaptive Streaming: Load button, MediaPlayerElement visible", "status": "pass", "reason": "", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Scenario 2 — Event Handlers: ContentSelector, MediaPlayerElement, bitrate indicators, LogView visible", "status": "pass", "reason": "Script failed on selectors but overridden by screenshot evidence.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Scenario 3 — Request Modification: All controls + MediaPlayerElement + LogView visible", "status": "partial", "reason": "All radio buttons and controls pass. MediaPlayerElement squeezed to zero height (w=0, h=0, isOffscreen=true). Screenshot confirms no transport controls visible.", "suspected_skill_gap": "Shell conversion guidance (SKILL.md Step 2) recommends NavigationView+Frame but doesn't warn about vertical space budget. The dev-agent's MainPage includes a NavigationView header + StatusPanel (MaxHeight=200) that consume viewport height. Scenarios with heavy Auto-row content (radio buttons, HDCP controls) leave no room for the MediaPlayerElement's Height='*' row. Skill should recommend MinHeight on media elements or warn about layout constraints in multi-control pages." },
+    { "id": 4, "text": "Scenario 4 — Adaptive Streaming Tuning: Bitrate tuning controls + MediaPlayerElement visible", "status": "partial", "reason": "All ComboBoxes, TextBoxes, and bitrate indicators present. MediaPlayerElement has same 0-height layout bug (w=0, h=0, isOffscreen=true). Screenshot shows no transport controls.", "suspected_skill_gap": "Same shell layout issue as requirement 3. The MediaPlayerElement gets zero height because Auto-row content (ContentSelector + bitrate icons + 3 ComboBoxes + 2 ratio TextBoxes) plus the shell overhead exceeds viewport height." },
+    { "id": 5, "text": "Scenario 5 — Metadata: ContentSelector, MediaPlayerElement, LogView visible", "status": "pass", "reason": "Script failed on selectors but overridden by screenshot evidence.", "suspected_skill_gap": "" },
+    { "id": 6, "text": "Scenario 6 — Ad Insertion: ContentSelector, MediaPlayerElement, LogView visible", "status": "pass", "reason": "Script failed on selectors but overridden by screenshot evidence.", "suspected_skill_gap": "" },
+    { "id": 7, "text": "Scenario 7 — Live Seekable Range: DVR controls, seekable window, MediaPlayerElement, LogView visible", "status": "partial", "reason": "All DVR controls pass (DesiredSeekableWindowSizeButton, DesiredLiveOffsetButton, GoToLive, GoToStart). MediaPlayerElement completely absent from UIA tree (0 matches). Screenshot confirms no video player visible.", "suspected_skill_gap": "Same root cause as requirements 3 and 4, compounded by Scenario 7 having FOUR Grid rows (Auto/*/Auto/Auto) with extensive custom controls in rows 2 and 3 (seekable window grid, position slider grid, 13 discrete buttons, LogView). The MediaPlayerElement's '*' row gets zero or negative available height." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "MediaPlayerElement in Scenario 3", "uwp": "MediaPlayerElement visible between controls and log panel", "winui": "MediaPlayerElement completely invisible — zero height due to layout overflow", "screenshot_ref": "03_Network_Request_Modification.png" },
+    { "feature": "MediaPlayerElement in Scenario 4", "uwp": "MediaPlayerElement visible between controls and log panel", "winui": "MediaPlayerElement completely invisible — zero height due to layout overflow", "screenshot_ref": "04_Adaptive_Streaming_Tuning.png" },
+    { "feature": "MediaPlayerElement in Scenario 7", "uwp": "MediaPlayerElement visible between ContentSelector and DVR controls", "winui": "MediaPlayerElement completely absent from visual tree", "screenshot_ref": "07_Live_Seekable_Range.png" }
+  ],
+  "missing_features": [],
+  "summary": "Score 77/100. Builds and runs. 4 of 7 requirements pass fully. Requirements 3, 4, 7 are partial because MediaPlayerElement is squeezed to zero height in scenarios with heavy control content. The root cause is the shell layout: NavigationView header + StatusPanel consume ~250px of viewport height, and scenarios with many Auto-height controls (radio buttons, ComboBoxes, DVR controls) overflow the remaining space, leaving nothing for the MediaPlayerElement's Height='*' row. Scenarios 2, 5, 6 work because they have fewer controls above the MediaPlayerElement. The CS0104 HttpClient ambiguity was the only build error and was fixed in one turn."
+}

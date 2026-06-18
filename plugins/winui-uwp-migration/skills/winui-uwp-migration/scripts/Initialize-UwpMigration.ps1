@@ -118,6 +118,38 @@ foreach ($f in $nsFiles) {
 }
 Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 
+# ─── 3a. Patch csproj when source uses Windows.Web.Http ────────────────────────
+# .NET SDK projects with ImplicitUsings auto-import System.Net.Http, which
+# conflicts with Windows.Web.Http types (HttpClient, HttpRequestMessage,
+# HttpResponseMessage, IHttpFilter). Detect usage and add <Using Remove> to
+# eliminate CS0104 ambiguity before the agent ever builds.
+$wwHttpFiles = @()
+foreach ($f in $nsFiles) {
+    if ($f.Extension -ne '.cs') { continue }
+    $csText = [System.IO.File]::ReadAllText($f.FullName)
+    if ($csText -match 'Windows\.Web\.Http') {
+        $wwHttpFiles += $f.FullName
+    }
+}
+if ($wwHttpFiles.Count -gt 0) {
+    $targetCsproj = Get-ChildItem -Path $Target -Filter '*.csproj' -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($targetCsproj) {
+        $csprojText = [System.IO.File]::ReadAllText($targetCsproj.FullName)
+        if ($csprojText -notmatch 'Using\s+Remove\s*=\s*"System\.Net\.Http"') {
+            $usingRemoveBlock = @"
+
+  <ItemGroup>
+    <!-- Windows.Web.Http types conflict with System.Net.Http under ImplicitUsings -->
+    <Using Remove="System.Net.Http" />
+  </ItemGroup>
+"@
+            $csprojText = $csprojText -replace '(</Project>)', "$usingRemoveBlock`r`n`$1"
+            [System.IO.File]::WriteAllText($targetCsproj.FullName, $csprojText)
+            Write-Host "    Patched $($targetCsproj.Name): added <Using Remove=""System.Net.Http"" /> ($($wwHttpFiles.Count) file(s) use Windows.Web.Http)"
+        }
+    }
+}
+
 # ─── 4a. Filter-prone class neutralization ────────────────────────────────────
 # Some SDK Samples boilerplate helpers contain UWP-specific patterns whose
 # WinUI 3 equivalents require low-level Win32 keyboard interop. The model

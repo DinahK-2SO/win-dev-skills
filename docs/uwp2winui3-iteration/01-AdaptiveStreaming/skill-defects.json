@@ -1,0 +1,17 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0104 HttpClient ambiguity between System.Net.Http and Windows.Web.Http caused by ImplicitUsings",
+      "evidence": "session-log.txt L8234-8249: 14+ CS0104 errors across 6 files (ContentSelector.xaml.cs, Scenario2-7.xaml.cs, AdaptiveMediaSourceHttpFilterLogger.cs). Also 2 CS0535 errors from cascading type resolution failure.",
+      "skill_search": "Grepped MIGRATION-PATTERNS.md for 'HttpClient', 'System.Net.Http', 'Windows.Web.Http', 'ImplicitUsings' — no matches. Only CS0104 coverage is for LaunchActivatedEventArgs (Windows.UI.Xaml vs Microsoft.UI.Xaml namespaces).",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill's CS0104 section covers the Windows.UI.Xaml ↔ Microsoft.UI.Xaml namespace collision but not the System.Net.Http ↔ Windows.Web.Http collision. .NET SDK projects with <ImplicitUsings>enable</ImplicitUsings> (the default since .NET 6) auto-import System.Net.Http, which conflicts with Windows.Web.Http types used in UWP samples that do HTTP interception (IHttpFilter, HttpClient, HttpRequestMessage, HttpResponseMessage).",
+      "proposed_fix": "Add a new subsection to MIGRATION-PATTERNS.md under 'Common build errors after the namespace rewrite': ### CS0104: 'HttpClient' is an ambiguous reference between System.Net.Http and Windows.Web.Http. Explain that .NET SDK projects auto-import System.Net.Http via ImplicitUsings, which conflicts with Windows.Web.Http. Fix: add <Using Remove=\"System.Net.Http\" /> to an <ItemGroup> in the .csproj. Note that this applies to any UWP code using Windows.Web.Http types (HttpClient, HttpRequestMessage, HttpResponseMessage, IHttpFilter).",
+      "generalizes": "Any UWP sample or app that uses the Windows.Web.Http networking stack (IHttpFilter, HttpClient for WinRT, etc.) will hit this exact ambiguity when migrated to a .NET SDK-style project with ImplicitUsings. This is very common in media streaming, authentication, and network interception scenarios."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+﻿[Window] Name='AdaptiveStreaming' Class='WinUIDesktopWin32WindowClass' AutoId='' Enabled=True
+  [Pane] Name='Non Client Input Sink Window' Class='InputNonClientPointerSource' AutoId='' Enabled=True
+  [Pane] Name='AppWindow Custom Title Bar' Class='ReunionWindowingCaptionControls' AutoId='' Enabled=True
+    [Button] Name='Minimize' Class='' AutoId='Minimize' Enabled=True
+    [Button] Name='Maximize' Class='' AutoId='Maximize' Enabled=True
+    [Button] Name='Close' Class='' AutoId='Close' Enabled=True
+  [Pane] Name='' Class='Microsoft.UI.Content.DesktopChildSiteBridge' AutoId='' Enabled=True
+    [Pane] Name='' Class='InputSiteWindowClass' AutoId='' Enabled=True
+      [TitleBar] Name='AdaptiveStreaming' Class='Microsoft.UI.Xaml.Controls.TitleBar' AutoId='AppTitleBar' Enabled=True
+        [Image] Name='' Class='Image' AutoId='' Enabled=True
+        [Text] Name='AdaptiveStreaming' Class='TextBlock' AutoId='PART_TitleText' Enabled=True
+      [Custom] Name='' Class='' AutoId='NavView' Enabled=True
+        [Button] Name='Close Navigation' Class='Button' AutoId='TogglePaneButton' Enabled=True
+        [Window] Name='' Class='SplitViewPane' AutoId='PaneRoot' Enabled=True
+        [Text] Name='AdaptiveStreaming' Class='TextBlock' AutoId='SampleTitle' Enabled=True
+        [Text] Name='Description:' Class='TextBlock' AutoId='' Enabled=True
+        [Text] Name='This scenario demonstrates simple Ad insertion with playback progress reporting. We add two pre-roll ads, two mid-roll ads at 10% into the main content, and a post-roll ad. For each of these ads, and the main content, we re-use the Custom TimedMetadataTracks from the Metadata sample to raise playback progress events.' Class='TextBlock' AutoId='' Enabled=True
+        [Button] Name='Load Id:' Class='Button' AutoId='LoadId' Enabled=True
+        [ComboBox] Name='' Class='ComboBox' AutoId='SelectedContent' Enabled=True
+        [Button] Name='Load Uri:' Class='Button' AutoId='LoadUri' Enabled=True
+        [Edit] Name='' Class='TextBox' AutoId='UriBox' Enabled=True
+        [Button] Name='Set Source' Class='Button' AutoId='SetSource' Enabled=False
+        [CheckBox] Name='AutoPlay' Class='CheckBox' AutoId='AutoPlay' Enabled=True
+        [Slider] Name='Seek' Class='SeekSliderAutomationPeer' AutoId='ProgressSlider' Enabled=True
+        [Text] Name='Time elapsed' Class='TextBlock' AutoId='TimeElapsedElement' Enabled=True
+        [Text] Name='Time remaining' Class='TextBlock' AutoId='TimeRemainingElement' Enabled=True
+        [] Name='' Class='ApplicationBar' AutoId='MediaControlsCommandBar' Enabled=True
+        [Button] Name='Copy log' Class='Button' AutoId='' Enabled=True
+        [Button] Name='Clear log' Class='Button' AutoId='' Enabled=True
+        [Text] Name='Logging level:' Class='TextBlock' AutoId='' Enabled=True
+        [ComboBox] Name='' Class='ComboBox' AutoId='LogLevelComboBox' Enabled=True
+        [Pane] Name='' Class='ScrollViewer' AutoId='ListBoxScrollViewer' Enabled=True
+

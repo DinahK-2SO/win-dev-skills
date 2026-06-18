@@ -27,6 +27,16 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0104: 'HttpClient' is an ambiguous reference between 'System.Net.Http' and 'Windows.Web.Http'`
+
+UWP apps that use `Windows.Web.Http` types (`HttpClient`, `HttpRequestMessage`, `HttpResponseMessage`, `IHttpFilter`) hit this when migrated to a .NET SDK-style project because `<ImplicitUsings>enable</ImplicitUsings>` (the default since .NET 6) auto-imports `System.Net.Http`. The bootstrap script detects `Windows.Web.Http` usage and patches the `.csproj` automatically. If the error still appears (e.g. a file was added after bootstrap), add this to an `<ItemGroup>`:
+
+```xml
+<Using Remove="System.Net.Http" />
+```
+
+This removes only the implicit `using` — code that explicitly writes `using System.Net.Http;` is unaffected. The cascading `CS0535` errors ("does not implement interface member `IHttpFilter.SendRequestAsync(HttpRequestMessage)`") also disappear once the ambiguity is resolved.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
