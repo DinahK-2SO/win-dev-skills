@@ -118,6 +118,45 @@ foreach ($f in $nsFiles) {
 }
 Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 
+# ─── 3b. Implicit-using conflict mitigation: Windows.Web.Http vs System.Net.Http ──
+# SDK-style projects implicitly import System.Net.Http. If any copied .cs file uses
+# Windows.Web.Http, the two HttpClient types clash (CS0104). Detect and fix in the csproj.
+$wwwHttpFound = $false
+foreach ($f in $nsFiles) {
+    if ($f.Extension -ne '.cs') { continue }
+    $csText = [System.IO.File]::ReadAllText($f.FullName)
+    if ($csText -match 'Windows\.Web\.Http') {
+        $wwwHttpFound = $true
+        break
+    }
+}
+if ($wwwHttpFound) {
+    $csprojFiles = Get-ChildItem -Path $Target -Filter '*.csproj' -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch '\\(bin|obj|\.uwp-source)\\' }
+    foreach ($csp in $csprojFiles) {
+        $cspText = [System.IO.File]::ReadAllText($csp.FullName)
+        if ($cspText -notmatch 'Using\s+Remove\s*=\s*[''"]System\.Net\.Http[''"]') {
+            # Insert <Using Remove="System.Net.Http" /> into the first <ItemGroup>, or create one
+            if ($cspText -match '(?m)([ \t]*)<ItemGroup>') {
+                $indent = $matches[1]
+                $cspText = $cspText -replace '(?m)([ \t]*<ItemGroup>)', "`$1`r`n$indent  <Using Remove=`"System.Net.Http`" />"
+                # Only replace the first occurrence
+                $firstIdx = $cspText.IndexOf("<Using Remove=`"System.Net.Http`" />")
+                $secondIdx = $cspText.IndexOf("<Using Remove=`"System.Net.Http`" />", $firstIdx + 1)
+                if ($secondIdx -ge 0) {
+                    $cspText = $cspText.Remove($secondIdx, "<Using Remove=`"System.Net.Http`" />`r`n".Length)
+                }
+            } else {
+                $cspText = $cspText -replace '(</Project>)', "  <ItemGroup>`r`n    <Using Remove=`"System.Net.Http`" />`r`n  </ItemGroup>`r`n`$1"
+            }
+            [System.IO.File]::WriteAllText($csp.FullName, $cspText)
+            Write-Host "    Injected <Using Remove='System.Net.Http' /> into $($csp.Name) (Windows.Web.Http detected)"
+        }
+    }
+} else {
+    Write-Host "    No Windows.Web.Http usage detected — skipping implicit-using fix"
+}
+
 # ─── 4a. Filter-prone class neutralization ────────────────────────────────────
 # Some SDK Samples boilerplate helpers contain UWP-specific patterns whose
 # WinUI 3 equivalents require low-level Win32 keyboard interop. The model
@@ -377,6 +416,61 @@ foreach ($rel in $sortedFiles) {
             $fileMode[$rel] = 'BATCH'
         }
     }
+}
+
+# ─── 4d. MediaPlayerElement layout detection ──────────────────────────────────
+# XAML pages with MediaPlayerElement inside a Grid that uses Auto + star rows
+# need layout adjustment to prevent the player from being squeezed. Inject a
+# TODO pointing to PATTERNS.md#media-player-layout.
+$mpeLayoutTodos = 0
+foreach ($rel in $sortedFiles) {
+    $ext = [System.IO.Path]::GetExtension($rel).ToLowerInvariant()
+    if ($ext -ne '.xaml') { continue }
+    $full = Join-Path $Target $rel
+    if (-not (Test-Path -LiteralPath $full)) { continue }
+    $xamlText = [System.IO.File]::ReadAllText($full)
+    # Only target files that contain MediaPlayerElement AND a star-height RowDefinition
+    if ($xamlText -notmatch '<MediaPlayerElement\b') { continue }
+    if ($xamlText -notmatch 'Height\s*=\s*"\*"') { continue }
+    # Inject TODO above the <MediaPlayerElement line
+    $xamlLines = $xamlText -split "`r?`n"
+    $injected = $false
+    for ($i = 0; $i -lt $xamlLines.Count; $i++) {
+        if ($xamlLines[$i] -match '^\s*<MediaPlayerElement\b') {
+            # Skip if already has a TODO
+            if ($i -gt 0 -and $xamlLines[$i-1] -match 'TODO\[migrate-') { continue }
+            $indent = ''
+            if ($xamlLines[$i] -match '^(\s*)') { $indent = $matches[1] }
+            $todoSeq++
+            $seqStr = $todoSeq.ToString('000')
+            $todoLine = "$indent<!-- TODO[migrate-$seqStr]: see PATTERNS.md#media-player-layout -->"
+            $xamlLinesList = [System.Collections.Generic.List[string]]::new()
+            $xamlLinesList.AddRange([string[]]$xamlLines)
+            $xamlLinesList.Insert($i, $todoLine)
+            $xamlLines = $xamlLinesList.ToArray()
+            $todoCountTotal++
+            $mpeLayoutTodos++
+            $injected = $true
+            break  # one TODO per file is enough
+        }
+    }
+    if ($injected) {
+        $newXaml = ($xamlLines -join "`r`n")
+        if ($xamlText -match "`r?`n$" -and -not ($newXaml -match "`r?`n$")) {
+            $newXaml += "`r`n"
+        }
+        [System.IO.File]::WriteAllText($full, $newXaml)
+        # Upgrade triage if it was migrate-as-is
+        if ($fileTriage.ContainsKey($rel) -and $fileTriage[$rel].Label -eq 'migrate-as-is') {
+            $fileTriage[$rel] = @{ Label = 'migrate-with-adaptation' }
+            if (-not $fileMode.ContainsKey($rel)) {
+                $fileMode[$rel] = 'BATCH'
+            }
+        }
+    }
+}
+if ($mpeLayoutTodos -gt 0) {
+    Write-Host "    MediaPlayerElement layout TODOs injected: $mpeLayoutTodos file(s)"
 }
 
 # Count triage buckets for stdout

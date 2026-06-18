@@ -1,0 +1,86 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "score": 78,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    {
+      "id": 1,
+      "text": "Requirement 1",
+      "status": "pass",
+      "reason": "",
+      "suspected_skill_gap": ""
+    },
+    {
+      "id": 2,
+      "text": "Requirement 2",
+      "status": "pass",
+      "reason": "",
+      "suspected_skill_gap": ""
+    },
+    {
+      "id": 3,
+      "text": "Requirement 3",
+      "status": "partial",
+      "reason": "Navigation item '3) Network Request Modification' works. ContentSelector (LoadId button+dropdown), authorization RadioButtons (None/AuthorizationHeader/UrlQueryParameter/ApplicationDownloaded), HDCP RadioButtons, and LogView are all present and visible (confirmed manual-s3.png). However, the MediaPlayerElement in Grid.Row=1 (* height) is squeezed to ~80px by the tall auto-height row 0 (description + auth panels), making transport controls invisible in the screenshot. 'Load Uri:' row also not visible in ContentSelector on this scenario.",
+      "suspected_skill_gap": "Migration skill does not provide layout guidance for pages where a tall auto-height Row 0 (description + multiple control panels) pushes a star-height MediaPlayerElement row below the visible area. The skill should recommend adding MinHeight to the MediaPlayerElement row or wrapping the controls in a ScrollViewer with MaxHeight to cap expansion."
+    },
+    {
+      "id": 4,
+      "text": "Requirement 4",
+      "status": "partial",
+      "reason": "Navigation item '4) Adaptive Streaming Tuning' works. ContentSelector, DesiredMinBitrateList/InitialBitrateList/DesiredMaxBitrateList ComboBoxes, downgrade ratio TextBox, headroom ratio TextBox, and LogView are all present (confirmed via winapp ui inspect and manual-s4.png). MediaPlayerElement in Grid.Row=1 (* height) is squished to ~30px due to the large auto-height row 0 taking most vertical space — transport controls not visible in screenshot.",
+      "suspected_skill_gap": "Same as requirement 3: no layout guidance in migration skill for MediaPlayerElement sizing when sibling grid rows have large auto-height content. The Grid row definitions were faithfully copied from UWP but the rendering behavior differs in WinUI 3 or the window size differs from the UWP design assumptions."
+    },
+    {
+      "id": 5,
+      "text": "Requirement 5",
+      "status": "pass",
+      "reason": "",
+      "suspected_skill_gap": ""
+    },
+    {
+      "id": 6,
+      "text": "Requirement 6",
+      "status": "pass",
+      "reason": "",
+      "suspected_skill_gap": ""
+    },
+    {
+      "id": 7,
+      "text": "Requirement 7",
+      "status": "partial",
+      "reason": "Navigation item '7) Live Seekable Range' works. ContentSelector, MaxSeekableWindowSize/DesiredSeekableWindowSize/DesiredLiveOffset/MinLiveOffset labels and inputs, PositionSlider, GoToStart/GoToLive buttons, all seek buttons (<<15m, <<5m, <<30s, <<2s, 2s>>, 30s>>, etc.), and LogView all present (confirmed manual-s7.png and winapp ui search). MediaPlayerElement in Grid.Row=1 (* height) is not visible — squeezed by the large auto-height custom controls block (SeekableWindowControls + PositionUpdateControls + DiscreteControls + Log).",
+      "suspected_skill_gap": "Same pattern: Scenario 7 has the tallest control block (seekable window + position + discrete seek + log), completely consuming the window height. Migration skill should add guidance to either set MinHeight='300' on the MediaPlayerElement row or restructure the layout to use a ScrollViewer for the controls section."
+    }
+  ],
+  "visual_discrepancies": [
+    {
+      "feature": "MediaPlayerElement visibility in Scenario 3",
+      "uwp": "MediaPlayerElement occupies the bottom portion of the page with visible transport controls (play/pause, seek, volume)",
+      "winui": "MediaPlayerElement is squeezed to ~80px strip at the bottom; transport controls are not visible. The auto-height Row 0 with description text, ContentSelector, auth radio buttons, and HDCP radio buttons consumes most vertical space.",
+      "screenshot_ref": "screenshots/manual-s3.png"
+    },
+    {
+      "feature": "MediaPlayerElement visibility in Scenario 4",
+      "uwp": "MediaPlayerElement visible below the tuning controls with transport controls",
+      "winui": "MediaPlayerElement is squished to ~30px. Row 0 containing description, ContentSelector, bitrate indicators, 3 ComboBoxes, downgrade/headroom ratios, and LogView takes all vertical space.",
+      "screenshot_ref": "screenshots/manual-s4.png"
+    },
+    {
+      "feature": "MediaPlayerElement visibility in Scenario 7",
+      "uwp": "MediaPlayerElement visible between controls and log section with transport controls",
+      "winui": "MediaPlayerElement is not visible at all. Row 0 with description, ContentSelector, seekable window controls, position controls, discrete seek buttons (12 buttons), and LogView completely fills the window.",
+      "screenshot_ref": "screenshots/manual-s7.png"
+    },
+    {
+      "feature": "ContentSelector 'Load Uri' row in Scenario 3",
+      "uwp": "Load Uri button and text box visible in ContentSelector",
+      "winui": "Load Uri row is not visible in Scenario 3 screenshot (manual-s3.png) — the ContentSelector appears to show only Load Id and Set Source/AutoPlay, possibly cropped or collapsed",
+      "screenshot_ref": "screenshots/manual-s3.png"
+    }
+  ],
+  "missing_features": [],
+  "summary": "The AdaptiveStreaming migration scores 78 with all 14 rubric features passing in independent evaluation (migration-score.json: 100% weighted). The 22-point deduction comes from the parity checker's requirements 3, 4, and 7 being marked 'partial' due to a single systematic issue: MediaPlayerElement is squeezed or invisible in scenarios with tall control panels. The Grid layout uses Auto-height for Row 0 (controls) and star-height for Row 1 (MediaPlayerElement), but when Row 0 content is tall (auth panels, tuning controls, seekable range controls), it consumes all available vertical space. This is a layout pattern issue that the migration faithfully copied from UWP but renders differently in WinUI 3's window sizing. All 7 scenarios navigate correctly, all controls are present and functional, and 0 UWP API residue remains after migration."
+}

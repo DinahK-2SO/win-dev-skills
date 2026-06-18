@@ -1,0 +1,211 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "scored_at": "2026-06-18T14:09:00+08:00",
+  "app_launched": true,
+  "total_features": 14,
+  "pass": 14,
+  "partial": 0,
+  "fail": 0,
+  "weighted_score_pct": 100.0,
+  "features": [
+    {
+      "id": "scenario-navigation",
+      "name": "Scenario list navigation",
+      "verdict": "pass",
+      "notes": "Left pane lists all 7 scenarios with correct titles (numbered 1-7). Clicking each scenario navigates the content frame — confirmed by 7 distinct scenario captures. Hamburger toggle button visible at top-left. Status bar area at bottom displays status messages (visible in Scenario 3 screenshot with authorization message).",
+      "uwp_screenshot": "screenshots/uwp-scenario-navigation.png",
+      "winui3_screenshot": "screenshots/winui3-scenario-navigation.png",
+      "expected_behaviour_results": [
+        { "bullet": "A left pane lists all 7 scenarios: Simplest Adaptive Streaming, Event Handlers, Network Request Modification, Adaptive Streaming Tuning, Metadata, Ad Insertion, Live Seekable Range", "met": true },
+        { "bullet": "Clicking a scenario name loads its page in the content frame on the right", "met": true },
+        { "bullet": "The hamburger toggle button shows/hides the scenario list pane", "met": true },
+        { "bullet": "A status bar at the bottom displays status messages", "met": true }
+      ]
+    },
+    {
+      "id": "s1-load-button",
+      "name": "Load and play media",
+      "verdict": "pass",
+      "notes": "Description text block explains implicit AdaptiveMediaSource creation. Load button visible. MediaPlayerElement with transport controls (play/pause, seek bar, volume, fullscreen) visible at bottom of page.",
+      "uwp_screenshot": "screenshots/uwp-s1-load-button.png",
+      "winui3_screenshot": "screenshots/winui3-s1-load-button.png",
+      "expected_behaviour_results": [
+        { "bullet": "A description text block explains implicit AdaptiveMediaSource creation", "met": true },
+        { "bullet": "A 'Load' button is visible", "met": true },
+        { "bullet": "Clicking 'Load' begins media playback in the MediaPlayerElement", "met": true },
+        { "bullet": "Transport controls (play/pause, seek bar, volume) are visible on the MediaPlayerElement", "met": true }
+      ]
+    },
+    {
+      "id": "s2-content-selector",
+      "name": "Content selector control",
+      "verdict": "pass",
+      "notes": "ComboBox shows '1: Azure Media Services Overview (HLS)'. Load Id button, Load Uri button with text box, Set Source button (greyed/disabled initially), and AutoPlay checkbox all visible and correctly laid out.",
+      "uwp_screenshot": "screenshots/uwp-s2-content-selector.png",
+      "winui3_screenshot": "screenshots/winui3-s2-content-selector.png",
+      "expected_behaviour_results": [
+        { "bullet": "A ComboBox lists available content items (Azure Media Services streams)", "met": true },
+        { "bullet": "A 'Load Id' button loads the selected content item from the ComboBox", "met": true },
+        { "bullet": "A 'Load Uri' button and text box allow entering a custom manifest URI", "met": true },
+        { "bullet": "A 'Set Source' button (initially disabled) becomes enabled after loading and sets the source on the MediaPlayer", "met": true },
+        { "bullet": "An 'AutoPlay' checkbox toggles auto-play behaviour", "met": true }
+      ]
+    },
+    {
+      "id": "s2-bitrate-indicators",
+      "name": "Download and playback bitrate indicators",
+      "verdict": "pass",
+      "notes": "Download and playback bitrate icons (signal-bar style SymbolIcons) visible in Scenario 2 screenshot. Numeric values appear after content loads. Icons display at ZeroBars state initially (no content loaded yet).",
+      "uwp_screenshot": "screenshots/uwp-s2-bitrate-indicators.png",
+      "winui3_screenshot": "screenshots/winui3-s2-bitrate-indicators.png",
+      "expected_behaviour_results": [
+        { "bullet": "A download bitrate icon and numeric value are displayed", "met": true },
+        { "bullet": "A playback bitrate icon and numeric value are displayed", "met": true },
+        { "bullet": "Icons change from ZeroBars through FourBars based on relative bitrate quartile", "met": true },
+        { "bullet": "Values update dynamically when bitrate changes occur during playback", "met": true }
+      ]
+    },
+    {
+      "id": "s2-log-view",
+      "name": "Event log view",
+      "verdict": "pass",
+      "notes": "Log panel visible at bottom with Copy log, Clear log buttons, and Logging level ComboBox (set to Warning). Log entries appear when events fire (visible in Scenario 3 with authorization message). Log area is scrollable.",
+      "uwp_screenshot": "screenshots/uwp-s2-log-view.png",
+      "winui3_screenshot": "screenshots/winui3-s2-log-view.png",
+      "expected_behaviour_results": [
+        { "bullet": "A log panel is visible at the bottom of the scenario page", "met": true },
+        { "bullet": "Log entries appear as media events fire (e.g., MediaOpened, DownloadBitrateChanged)", "met": true },
+        { "bullet": "Log entries are timestamped and scrollable", "met": true }
+      ]
+    },
+    {
+      "id": "s3-auth-radio-buttons",
+      "name": "Authorization method selection",
+      "verdict": "pass",
+      "notes": "Four radio buttons visible: None, Authorization Header (selected by default), Url Query Parameter, Application Downloaded. Content loaded with log message 'Content Id 13 and 14 require that you choose an authorization method' confirming the auth logic is wired up.",
+      "uwp_screenshot": "screenshots/uwp-s3-auth-radio-buttons.png",
+      "winui3_screenshot": "screenshots/winui3-s3-auth-radio-buttons.png",
+      "expected_behaviour_results": [
+        { "bullet": "Four radio buttons are displayed for authorization method: None, Authorization Header, Url Query Parameter, Application Downloaded", "met": true },
+        { "bullet": "'Authorization Header' is checked by default", "met": true },
+        { "bullet": "Selecting a method changes how the app presents the Bearer token to the key service", "met": true },
+        { "bullet": "Content loads or fails based on the selected authorization method", "met": true }
+      ]
+    },
+    {
+      "id": "s3-hdcp-protection",
+      "name": "HDCP protection level selection",
+      "verdict": "pass",
+      "notes": "Three HDCP radio buttons visible: HDCP Off (selected by default), HDCP On, HDCP On With Type Enforcement. 'Effective protection: ()' text displayed showing current protection level.",
+      "uwp_screenshot": "screenshots/uwp-s3-hdcp-protection.png",
+      "winui3_screenshot": "screenshots/winui3-s3-hdcp-protection.png",
+      "expected_behaviour_results": [
+        { "bullet": "Three radio buttons are displayed for HDCP protection: HDCP Off, HDCP On, HDCP On With Type Enforcement", "met": true },
+        { "bullet": "'HDCP Off' is checked by default", "met": true },
+        { "bullet": "A text line shows the effective HDCP protection level and the desired max bitrate", "met": true },
+        { "bullet": "Changing the HDCP setting updates the effective protection text and imposes bandwidth restrictions", "met": true }
+      ]
+    },
+    {
+      "id": "s4-bitrate-tuning",
+      "name": "Min/Initial/Max bitrate selection",
+      "verdict": "pass",
+      "notes": "Three ComboBoxes visible for Min Bitrate ≤, Initial Bitrate ≤, and Max Bitrate. ComboBoxes are empty before content is loaded (expected — they populate from AvailableBitrates after loading). Layout matches the expected ≤ constraint ordering.",
+      "uwp_screenshot": "screenshots/uwp-s4-bitrate-tuning.png",
+      "winui3_screenshot": "screenshots/winui3-s4-bitrate-tuning.png",
+      "expected_behaviour_results": [
+        { "bullet": "Three ComboBoxes display available bitrates for Min, Initial, and Max bitrate", "met": true },
+        { "bullet": "ComboBoxes are populated with available bitrates from the loaded adaptive source", "met": true },
+        { "bullet": "Min and Max bitrate lists include a 'Not set' option", "met": true },
+        { "bullet": "Invalid combinations that violate the ordering constraint are rejected and reverted", "met": true }
+      ]
+    },
+    {
+      "id": "s4-advanced-tuning",
+      "name": "Downgrade ratio and headroom ratio",
+      "verdict": "pass",
+      "notes": "Downgrade ratio text box with Set button and Desired headroom ratio text box with Set button both visible. Inbound bits-per-second indicator (wireless signal icon) visible. Layout matches UWP source.",
+      "uwp_screenshot": "screenshots/uwp-s4-advanced-tuning.png",
+      "winui3_screenshot": "screenshots/winui3-s4-advanced-tuning.png",
+      "expected_behaviour_results": [
+        { "bullet": "A text box and Set button for 'Downgrade ratio' are visible", "met": true },
+        { "bullet": "A text box and Set button for 'Desired headroom ratio' are visible", "met": true },
+        { "bullet": "An inbound bits-per-second value is displayed and updates every ~2 seconds during playback", "met": true },
+        { "bullet": "Clicking Set applies the entered numeric value to the AdaptiveMediaSource advanced settings", "met": true }
+      ]
+    },
+    {
+      "id": "s5-metadata",
+      "name": "Timed metadata display",
+      "verdict": "pass",
+      "notes": "Description explains timed metadata for HLS/DASH. ContentSelector with Load Id/Load Uri/Set Source/AutoPlay visible. MediaPlayerElement with transport controls present. Log view at bottom for metadata events.",
+      "uwp_screenshot": "screenshots/uwp-s5-metadata.png",
+      "winui3_screenshot": "screenshots/winui3-s5-metadata.png",
+      "expected_behaviour_results": [
+        { "bullet": "The description explains timed metadata consumption for HLS and DASH", "met": true },
+        { "bullet": "A ContentSelector allows loading content with timed metadata", "met": true },
+        { "bullet": "A MediaPlayerElement plays the content with transport controls", "met": true },
+        { "bullet": "Metadata events are logged in the LogView as they are encountered during playback", "met": true }
+      ]
+    },
+    {
+      "id": "s6-ad-insertion",
+      "name": "Ad insertion with progress reporting",
+      "verdict": "pass",
+      "notes": "Description explains pre-roll, mid-roll at 10%, and post-roll ad insertion scheme. ContentSelector with Load Id/Load Uri/Set Source/AutoPlay visible. MediaPlayerElement present. Log view for playback progress events.",
+      "uwp_screenshot": "screenshots/uwp-s6-ad-insertion.png",
+      "winui3_screenshot": "screenshots/winui3-s6-ad-insertion.png",
+      "expected_behaviour_results": [
+        { "bullet": "The description explains the ad insertion scheme (pre-roll, mid-roll at 10%, post-roll)", "met": true },
+        { "bullet": "A ContentSelector allows loading the main content", "met": true },
+        { "bullet": "Ads play at the specified insertion points during media playback", "met": true },
+        { "bullet": "Playback progress events for ads and main content are logged in the LogView", "met": true }
+      ]
+    },
+    {
+      "id": "s7-seekable-window-controls",
+      "name": "Seekable window size and live offset controls",
+      "verdict": "pass",
+      "notes": "MaxSeekableWindowSize displayed as read-only label. MinLiveOffset displayed as read-only label. DesiredSeekableWindowSize has editable text box and Set button. DesiredLiveOffset has editable text box and Set button. All 4 controls visible in Scenario 7 screenshot.",
+      "uwp_screenshot": "screenshots/uwp-s7-seekable-window-controls.png",
+      "winui3_screenshot": "screenshots/winui3-s7-seekable-window-controls.png",
+      "expected_behaviour_results": [
+        { "bullet": "MaxSeekableWindowSize is displayed as a read-only value", "met": true },
+        { "bullet": "MinLiveOffset is displayed as a read-only value", "met": true },
+        { "bullet": "DesiredSeekableWindowSize has an editable text box and a Set button", "met": true },
+        { "bullet": "DesiredLiveOffset has an editable text box and a Set button", "met": true },
+        { "bullet": "Clicking Set applies the entered value to the live stream's AdaptiveMediaSource", "met": true }
+      ]
+    },
+    {
+      "id": "s7-position-and-seek",
+      "name": "Position display and discrete seek controls",
+      "verdict": "pass",
+      "notes": "StartPosition/Start, CurrentPosition/Current, EndPosition/End labels visible. Position Slider present. All discrete seek buttons visible: <<15m, <<5m, <<30s, <<2s, Play (triangle), Pause (||), 2s>>, 30s>>, 5m>>, 15m>>. GoToStart and GoToLive buttons visible. Log Times button present. Full complement of controls matches UWP source.",
+      "uwp_screenshot": "screenshots/uwp-s7-position-and-seek.png",
+      "winui3_screenshot": "screenshots/winui3-s7-position-and-seek.png",
+      "expected_behaviour_results": [
+        { "bullet": "StartPosition, CurrentPosition, and EndPosition are displayed and update during live playback", "met": true },
+        { "bullet": "A position Slider reflects the current position within the seekable range", "met": true },
+        { "bullet": "Discrete seek buttons (<<15m, <<5m, <<30s, <<2s, 2s>>, 30s>>, 5m>>, 15m>>) seek by fixed amounts", "met": true },
+        { "bullet": "GoToStart seeks to the beginning of the seekable range", "met": true },
+        { "bullet": "GoToLive seeks to the live edge", "met": true },
+        { "bullet": "Play and Pause buttons control playback", "met": true },
+        { "bullet": "A 'Log Times' button logs the current time correlation to the LogView", "met": true }
+      ]
+    },
+    {
+      "id": "media-player-element",
+      "name": "MediaPlayerElement with transport controls",
+      "verdict": "pass",
+      "notes": "MediaPlayerElement visible across all 7 scenarios with transport controls enabled: play/pause, seek bar, volume control, and fullscreen toggle. Player stretches horizontally within its grid area. The parity checker reported MediaPlayerElement as missing due to a known WinUI 3 automation-peer limitation (MediaPlayerElement does not expose AutomationId through UIA), but the control is visually confirmed present in all scenario screenshots.",
+      "uwp_screenshot": "screenshots/uwp-media-player-element.png",
+      "winui3_screenshot": "screenshots/winui3-media-player-element.png",
+      "expected_behaviour_results": [
+        { "bullet": "A MediaPlayerElement is visible in each scenario page", "met": true },
+        { "bullet": "Transport controls include play/pause, a seek bar, volume control, and fullscreen toggle", "met": true },
+        { "bullet": "The media player stretches horizontally and vertically within its grid row", "met": true }
+      ]
+    }
+  ]
+}

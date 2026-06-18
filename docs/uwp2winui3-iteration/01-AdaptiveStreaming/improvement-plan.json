@@ -1,0 +1,41 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "MediaPlayerElement squeezed/invisible in scenarios with tall control panels (requirements 3, 4, 7 scored partial — 22-point loss)",
+      "evidence": "discrepancies.json visual_discrepancies: Scenarios 3/4/7 MediaPlayerElement at 30-80px or invisible. requirements 3/4/7 status=partial. lessons.json missing_tooling[1]: 'Grid layout validation or MediaPlayerElement sizing guidance'. suspected_skill_gap identical across all three.",
+      "root_cause": "UWP Grid row definitions (Auto for controls, * for media) render differently in WinUI 3 desktop windows — the auto row expands uncapped, starving the * row. The migration skill has no layout pattern for this, so the agent faithfully copies the UWP layout without adjustment.",
+      "tier": 2,
+      "change": "Add a new #media-player-layout anchor section in MIGRATION-PATTERNS.md documenting the Auto-row starvation problem and prescribing MinHeight or ScrollViewer+MaxHeight for the controls row. Add a detection rule in Initialize-UwpMigration.ps1 that scans XAML for MediaPlayerElement inside Grid rows with star height and injects a TODO[migrate-NNN] pointing to the new anchor.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Requirements 3, 4, 7 go partial→pass (+22 points). MediaPlayerElement visible with usable transport controls in all scenarios.",
+      "falsifiable_check": "On re-run, Validate-UwpMigration finds 0 MediaPlayerElement-in-starved-row warnings; discrepancies.json has 0 'squeezed' or 'not visible' entries for MediaPlayerElement; requirements 3/4/7 status=pass."
+    },
+    {
+      "problem": "CS0104 HttpClient ambiguity between Windows.Web.Http and implicit System.Net.Http caused build failure cycle",
+      "evidence": "lessons.json errors_encountered[1]: CS0104 HttpClient ambiguous reference. dev_agent_struggles[1] 'Build error cycle': 6 consecutive build failures, ~1200 events. special_apis[0]: Windows.Web.Http.HttpClient vs System.Net.Http.HttpClient.",
+      "root_cause": "SDK-style csproj implicitly imports System.Net.Http. UWP apps using Windows.Web.Http (common in streaming/auth scenarios) hit CS0104 ambiguity. Neither MIGRATION-PATTERNS.md nor the bootstrap script detect or handle this.",
+      "tier": 1,
+      "change": "Add post-copy detection in Initialize-UwpMigration.ps1: scan all copied .cs files for 'Windows.Web.Http' usage; if found, inject <Using Remove='System.Net.Http' /> into the target csproj. Add a new #implicit-using-conflicts anchor section in MIGRATION-PATTERNS.md documenting the pattern.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "CS0104 HttpClient ambiguity never occurs. Build failure cycle reduced by at least 1 iteration.",
+      "falsifiable_check": "On re-run, 0 CS0104 errors mentioning HttpClient in the build log; the csproj contains <Using Remove='System.Net.Http' /> when source uses Windows.Web.Http."
+    },
+    {
+      "problem": "Threading TODO didn't warn about caller-side await removal, causing revisit cycles",
+      "evidence": "lessons.json dev_agent_struggles[2]: 'Threading TODO resolution' — ~300 events, had to revisit Scenario2 and Scenario4 to fix await-on-void. 'The TODO comments marked the Dispatcher.RunAsync call site but didn't explain that callers must also drop await since TryEnqueue is synchronous void.'",
+      "root_cause": "The #threading section in MIGRATION-PATTERNS.md shows the API replacement but omits that TryEnqueue returns bool (not Task), so callers that previously awaited Dispatcher.RunAsync must drop the await. The agent discovers this only through CS4008/CS0029 compile errors.",
+      "tier": 3,
+      "change": "Extend the #threading section in MIGRATION-PATTERNS.md with an explicit 'Caller-side changes' callout explaining that TryEnqueue returns bool, await must be dropped, and helper methods wrapping RunAsync that returned Task should change to void/bool return type.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent resolves threading TODOs correctly on first pass without revisits. Build-fix cycle for await-on-void eliminated.",
+      "falsifiable_check": "On re-run, 0 CS4008/CS0029 errors related to awaiting TryEnqueue; no revisits to previously-completed threading TODOs in the build log."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier 0: The benchmark output directory path exceeds 200 chars, triggering WMC9999 XAML compiler errors. Consider shortening the harness's working directory path.",
+    "Tier 0: Sub-agent delegation failed 4 times for the full migration scope. The harness/agent framework may need better sub-agent context budgets or task decomposition support."
+  ]
+}

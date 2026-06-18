@@ -39,6 +39,19 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
 
+<a id="implicit-using-conflicts"></a>
+### `CS0104: 'HttpClient' is an ambiguous reference` (implicit using conflicts)
+
+SDK-style projects implicitly import `System.Net.Http`. UWP apps that use `Windows.Web.Http` (common in adaptive streaming, auth, and network scenarios) hit CS0104 because both namespaces define `HttpClient`, `HttpRequestMessage`, and `HttpResponseMessage`.
+
+Fix — add to the csproj `<ItemGroup>`:
+
+```xml
+<Using Remove="System.Net.Http" />
+```
+
+The bootstrap script (`Initialize-UwpMigration.ps1`) now detects `Windows.Web.Http` usage in copied source files and injects this automatically. If you hit CS0104 on `HttpClient` anyway (e.g. a file was added after bootstrap), apply the fix above manually.
+
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
 Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding files in `MIGRATION-MAPPING.md` get `Triage label = defer`; cite the specific API in `MIGRATION-DEFERRED.md`.
@@ -93,6 +106,8 @@ WinUI 3:
 DispatcherQueue.TryEnqueue(() => StatusText.Text = "Done");
 DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () => ProgressBar.Value = 100);
 ```
+
+**Caller-side changes (critical):** `Dispatcher.RunAsync` returns `IAsyncAction` (awaitable). `DispatcherQueue.TryEnqueue` returns `bool` (synchronous, fire-and-forget). Every call site that previously used `await Dispatcher.RunAsync(...)` must **drop the `await`**. Helper methods that wrapped `RunAsync` and returned `Task` should change their return type to `void` (or `bool` if the caller needs the enqueue result). Failing to do this causes CS4008 ("cannot await void") or CS0029 ("cannot convert bool to Task") — fix by removing `await` and adjusting the method signature, not by wrapping `TryEnqueue` in `Task.Run`.
 
 Cache the queue off the UI thread via `DispatcherQueue.GetForCurrentThread()`. UWP's ASTA reentrancy protection is gone — watch for reentrancy in async code that pumps messages. See the official [threading guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/threading).
 
@@ -366,6 +381,30 @@ If you do custom text rendering with DirectWrite, switch to **DWriteCore** — t
 | `WebAuthenticationBroker` | `Microsoft.Security.Authentication.OAuth` — WinAppSDK 1.7+ |
 | Background acrylic via `AcrylicBrush` BackgroundSource | `DesktopAcrylicController` (Microsoft.UI.Composition.SystemBackdrops) |
 | `InkCanvas` | Not yet supported |
+
+<a id="media-player-layout"></a>
+### MediaPlayerElement Grid layout (Auto-row starvation)
+
+UWP samples commonly use a Grid with `RowDefinition Height="Auto"` for controls and `Height="*"` for MediaPlayerElement. In WinUI 3 desktop windows, when the Auto row contains tall content (multiple panels, radio buttons, ComboBoxes, log views), it expands uncapped and starves the star row — squeezing MediaPlayerElement to 0-80px with invisible transport controls.
+
+Fix — apply **one** of these to the Grid containing the MediaPlayerElement:
+
+```xml
+<!-- Option A: cap the controls row so the media player always has space -->
+<Grid.RowDefinitions>
+    <RowDefinition Height="Auto" MaxHeight="400" />
+    <RowDefinition Height="*" MinHeight="300" />
+</Grid.RowDefinitions>
+<!-- Wrap the controls row content in a ScrollViewer if it may exceed MaxHeight -->
+
+<!-- Option B: give both rows proportional space -->
+<Grid.RowDefinitions>
+    <RowDefinition Height="*" />
+    <RowDefinition Height="*" MinHeight="300" />
+</Grid.RowDefinitions>
+```
+
+Prefer Option A when the page has many controls above the player; prefer Option B when controls are short. The bootstrap injects `TODO[migrate-NNN]: see PATTERNS.md#media-player-layout` on XAML lines containing `<MediaPlayerElement` inside a Grid with a star-height row definition.
 
 <a id="storage"></a>
 ## Storage and Settings

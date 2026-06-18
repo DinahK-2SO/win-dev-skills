@@ -1,0 +1,113 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "tools_helpful": [
+    {
+      "tool": "winui-uwp-migration skill (bootstrap)",
+      "evidence": "Bootstrap script correctly identified all 20 threading TODOs, generated MIGRATION-MAPPING.md, and scaffolded the WinUI 3 project structure. Agent at L160: 'Bootstrap complete. Now let me read the mapping to understand what needs migration.'"
+    },
+    {
+      "tool": "Validate-UwpMigration",
+      "evidence": "Validator caught Styles.xaml UWP residue comment and MIGRATION-MAPPING.md status inconsistency that the agent fixed before final pass (L2946, L3002)."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Sub-agent delegation for migration",
+      "problem": "The outer agent launched a background sub-agent ('adaptive-streaming-migration') at least 4 times (L564, L1124, L1229, L1322 notifications), but all attempts either failed or produced incomplete work. The outer agent ultimately did all the migration itself.",
+      "evidence": "Four separate 'Background agent completed' notifications visible in build-events.jsonl, yet the outer agent continued manually creating files and fixing TODOs after each notification."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "winui-uwp-migration bootstrap",
+      "limitation": "Bootstrap marked PlayReadyHelper.cs as 'migrate-as-is' and did not inject a TODO for the unused 'using Windows.UI.Core' import, leaving UWP residue the agent had to find manually at L2703.",
+      "suggested_tweak": "The bootstrap should scan 'migrate-as-is' files for UWP-only using directives (Windows.UI.Core, Windows.UI.Xaml.*) and either remove them or inject TODOs, even for files that don't need functional changes."
+    },
+    {
+      "tool": "winui-uwp-migration bootstrap",
+      "limitation": "Bootstrap did not warn about or handle implicit using conflicts. The generated csproj implicitly imported System.Net.Http which conflicted with Windows.Web.Http types used in the UWP source (HttpClient, HttpRequestMessage, HttpResponseMessage).",
+      "suggested_tweak": "Add a post-scaffold step in the migration skill that detects Windows.Web.Http usage in source files and automatically adds <Using Remove='System.Net.Http' /> to the csproj to prevent ambiguity errors."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    {
+      "api": "Windows.Web.Http.HttpClient vs System.Net.Http.HttpClient",
+      "special_handling": "When UWP code uses Windows.Web.Http.HttpClient (common in adaptive streaming auth scenarios), the WinUI 3 csproj must exclude System.Net.Http from implicit usings to avoid CS0104 ambiguity. Fix: <Using Remove='System.Net.Http' /> in csproj."
+    },
+    {
+      "api": "CoreDispatcher.RunAsync → DispatcherQueue.TryEnqueue",
+      "special_handling": "All 20 Dispatcher.RunAsync calls across 7 scenario files + ContentSelector needed conversion to DispatcherQueue.TryEnqueue. The async Task wrapper pattern must be removed (TryEnqueue is fire-and-forget void, not awaitable). Callers using 'await' on the old dispatcher methods must drop the await."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "NETSDK1022: Duplicate 'Page' items were included",
+      "root_cause": "The SDK-style csproj auto-globs .xaml files as Page items. The bootstrap or agent explicitly added Page items in the csproj that duplicated the auto-globbed entries.",
+      "fix": "Removed explicit Page entries from csproj, relying on SDK auto-globbing."
+    },
+    {
+      "error": "CS0104: 'HttpClient' is an ambiguous reference between 'System.Net.Http.HttpClient' and 'Windows.Web.Http.HttpClient'",
+      "root_cause": "SDK-style csproj implicitly imports System.Net.Http. UWP source uses Windows.Web.Http types. Both namespaces define HttpClient, HttpRequestMessage, HttpResponseMessage.",
+      "fix": "Added <Using Remove='System.Net.Http' /> to csproj ItemGroup."
+    },
+    {
+      "error": "WMC9999: Xaml Internal Error — Could not find a part of the path",
+      "root_cause": "The benchmark output directory path is extremely long (>200 chars). The WinUI XAML markup compiler has issues with long intermediate paths during XamlTypeInfo generation.",
+      "fix": "Agent cleaned obj/bin directories and retried builds. Eventually succeeded after a clean rebuild, suggesting stale intermediate files compounded the long-path issue."
+    },
+    {
+      "error": "MSB4276: SDK resolver failed to resolve 'Microsoft.NET.SDK.WorkloadAutoImportPropsLocator'",
+      "root_cause": "Transient SDK environment issue on the benchmark machine — the workload locator SDK directory didn't exist.",
+      "fix": "Build succeeded on retry; transient environment issue."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Sub-agent delegation (L540–L1322)",
+      "symptom": "Agent launched background sub-agent 4 times for the full migration. Each time the sub-agent either failed or produced incomplete output, and the outer agent had to continue the work manually.",
+      "turns_or_retries": "4 sub-agent launches over ~760 events; outer agent then did all the actual file creation and TODO fixing itself",
+      "root_cause": "The migration task scope (15+ SharedContent files, 7 scenario files, csproj rewrite, 20 threading TODOs) was too large for a single sub-agent prompt. The sub-agent lacked sufficient context about the full file set and migration patterns.",
+      "how_resolved": "Outer agent abandoned sub-agent approach and did file-by-file migration manually (L873 onward).",
+      "preventable_by": "Migration skill could provide a step-by-step migration plan or checklist that the agent follows sequentially, rather than trying to delegate the entire migration at once. Alternatively, the skill could scaffold more of the code (e.g., pre-copy SharedContent files with namespace replacements applied) so less manual work remains."
+    },
+    {
+      "where": "Build error cycle (builds 1–6, L1667–L2854)",
+      "symptom": "6 consecutive build failures before first success. Each failure required a different fix: duplicate Page items, HttpClient ambiguity, WMC9999 long path. Agent spent ~1200 events (L1667–L2861) in the build-fix cycle.",
+      "turns_or_retries": "6 failed builds, each requiring diagnosis and fix",
+      "root_cause": "Multiple independent build issues accumulated during scaffolding: csproj structure errors, namespace conflicts, and environment-specific XAML compiler path issues.",
+      "how_resolved": "Agent fixed each issue sequentially: removed duplicate Page entries, added Using Remove for System.Net.Http, cleaned obj/bin for WMC9999.",
+      "preventable_by": "Migration skill's csproj template should (1) not add explicit Page items since SDK auto-globs them, (2) include <Using Remove='System.Net.Http' /> when Windows.Web.Http is detected in source, and (3) document WMC9999 long-path workaround (clean build or use shorter output paths)."
+    },
+    {
+      "where": "Threading TODO resolution (L1327–L1626)",
+      "symptom": "Agent worked through 20 threading TODOs one file at a time, with several mid-course corrections when it realized callers still used 'await' on the now-void TryEnqueue wrappers.",
+      "turns_or_retries": "~300 events across 7 scenario files; had to revisit Scenario2 and Scenario4 to fix await-on-void issues",
+      "root_cause": "The TODO comments marked the Dispatcher.RunAsync call site but didn't explain that callers must also drop 'await' since TryEnqueue is synchronous void. Agent had to discover this through compilation errors.",
+      "how_resolved": "Agent compiled, saw CS4008/CS0029 errors for awaiting void, then fixed callers.",
+      "preventable_by": "Migration skill's TODO template for #threading should include a note: 'Also update callers — TryEnqueue returns bool, not Task. Remove await from call sites.' Or better, the PATTERNS.md #threading section should explicitly document the caller-side changes needed."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Automated SharedContent file copier with namespace replacement",
+      "would_have_saved": "The agent spent ~200 events (L873–L1043) reading and copying 15+ SharedContent files (Logging, Styles) with manual Windows.UI.Xaml → Microsoft.UI.Xaml replacements. A skill command like 'Copy-SharedContent -Source ... -Target ... -ReplaceNamespaces' would have handled this in one step."
+    },
+    {
+      "need": "Grid layout validation or MediaPlayerElement sizing guidance",
+      "would_have_saved": "The MediaPlayerElement is squeezed to ~30-80px in scenarios 3, 4, and 7 because the controls row uses Height='Auto' and takes all vertical space. The migration skill should document that Grid rows containing MediaPlayerElement must use MinHeight or a star-sized row with adequate minimum to prevent squishing when sibling auto-rows are tall."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "WMC9999 XAML compiler error due to extremely long benchmark output path (>200 chars)",
+      "workaround": "Clean obj/bin and retry build. The error is intermittent and related to intermediate file path length in the XAML markup compiler."
+    },
+    {
+      "issue": "MSB4276 WorkloadAutoImportPropsLocator SDK directory missing",
+      "workaround": "Transient; build succeeded on retry."
+    }
+  ]
+}

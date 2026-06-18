@@ -1,0 +1,18 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Add MediaPlayerElement layout pattern (#media-player-layout) in MIGRATION-PATTERNS.md + auto-detect in Initialize script — fixes Grid Auto-row starvation that squeezed the player in scenarios 3/4/7 (22-point loss)",
+    "Add Windows.Web.Http implicit-using conflict detection in Initialize-UwpMigration.ps1 — auto-injects <Using Remove='System.Net.Http' /> to prevent CS0104 HttpClient ambiguity build failures",
+    "Extend #threading section in MIGRATION-PATTERNS.md with caller-side await-removal guidance — TryEnqueue returns bool not Task, preventing CS4008/CS0029 revisit cycles"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1"
+  ],
+  "deferred_to_human": [
+    "Tier 0: Benchmark output directory path exceeds 200 chars, triggering WMC9999 XAML compiler errors — consider shortening the harness working directory",
+    "Tier 0: Sub-agent delegation failed 4 times for the full migration scope — harness/agent framework may need better sub-agent context budgets or task decomposition"
+  ]
+}
