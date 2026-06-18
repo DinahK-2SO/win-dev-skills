@@ -88,6 +88,30 @@ All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
 | `Windows.UI.Text` | `Microsoft.UI.Text` |
 | `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` |
 
+> **What the bootstrap automates:** `Initialize-UwpMigration.ps1` mass-rewrites
+> `Windows.UI.Xaml.*`, `Windows.UI.Colors`, `Windows.UI.Input`,
+> `Windows.UI.Composition`, and `Windows.UI.Text` in **all** occurrences — both
+> `using` directives and inline fully-qualified references (e.g.
+> `Windows.UI.Colors.RoyalBlue` → `Microsoft.UI.Colors.RoyalBlue`).
+>
+> **Not automated:** `Windows.UI.Core` → `Microsoft.UI.Dispatching` requires an
+> API-shape change (see [Threading](#threading) below), so the bootstrap injects
+> a `TODO[migrate-NNN]` instead of rewriting it.
+
+<a id="input-apis"></a>
+## Input API Changes
+
+WinUI 3 flattened several UWP input types. The most common break:
+
+| UWP | WinUI 3 | Notes |
+|-----|---------|-------|
+| `PointerPoint.PointerDevice.PointerDeviceType` | `PointerPoint.PointerDeviceType` | The intermediate `PointerDevice` property was removed; access `PointerDeviceType` directly on `PointerPoint`. |
+
+Any code that accesses `PointerPoint.PointerDevice` to read `PointerDeviceType`
+(common in drawing apps, ink handlers, and input samples that differentiate
+mouse vs. pen vs. touch) will get **CS1061** at build time. Replace
+`pt.PointerDevice.PointerDeviceType` with `pt.PointerDeviceType`.
+
 <a id="threading"></a>
 ## Threading: CoreDispatcher → DispatcherQueue
 

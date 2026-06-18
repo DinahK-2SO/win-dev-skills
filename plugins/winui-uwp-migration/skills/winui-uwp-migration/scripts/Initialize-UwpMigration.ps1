@@ -12,7 +12,7 @@ build cleanliness, and runtime smoke.
 Steps:
 1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
-3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
+3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml + Windows.UI.{Colors,Input,Composition,Text} across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
 4b/4c. Per-file triage against unsupported-api-inventory.json + inline TODO injection
        (`// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — anchor-only, never an API name)
@@ -117,6 +117,29 @@ foreach ($f in $nsFiles) {
     }
 }
 Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+
+# ─── 3-extra. Rewrite other Windows.UI.* namespaces the mapping table covers ──
+# These are NOT sub-namespaces of Windows.UI.Xaml, so the regex above missed them.
+# Order: longest prefix first to avoid substring collisions.
+$extraMappings = @(
+    @('Windows\.UI\.Composition', 'Microsoft.UI.Composition'),
+    @('Windows\.UI\.Colors',      'Microsoft.UI.Colors'),
+    @('Windows\.UI\.Input',       'Microsoft.UI.Input'),
+    @('Windows\.UI\.Text',        'Microsoft.UI.Text')
+)
+$extraChanged = 0
+foreach ($f in $nsFiles) {
+    $orig = [System.IO.File]::ReadAllText($f.FullName)
+    $new  = $orig
+    foreach ($pair in $extraMappings) {
+        $new = $new -replace $pair[0], $pair[1]
+    }
+    if ($new -ne $orig) {
+        [System.IO.File]::WriteAllText($f.FullName, $new)
+        $extraChanged++
+    }
+}
+Write-Host "    Rewrote Windows.UI.{Colors,Input,Composition,Text} in $extraChanged additional files"
 
 # ─── 3a. Patch csproj when source uses Windows.Web.Http ────────────────────────
 # .NET SDK projects with ImplicitUsings auto-import System.Net.Http, which
@@ -484,7 +507,7 @@ $labelOrder = @('migrate-as-is','migrate-with-adaptation','defer')
 Write-Host ""
 Write-Host "=== BOOTSTRAP COMPLETE ==="
 Write-Host "Source files copied   : $($copied.Count)"
-Write-Host "Namespace rewrites    : $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+Write-Host "Namespace rewrites    : $nsChanged of $($nsFiles.Count) .cs/.xaml files (Xaml), $extraChanged additional (Colors/Input/Composition/Text)"
 Write-Host "Neutralized classes   : $($neutralizedFiles.Count) file(s)"
 Write-Host "Triage breakdown      :"
 foreach ($lbl in $labelOrder) {

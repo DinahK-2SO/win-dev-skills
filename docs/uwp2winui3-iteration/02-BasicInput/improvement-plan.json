@@ -1,0 +1,28 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap only rewrites Windows.UI.Xaml → Microsoft.UI.Xaml, leaving Windows.UI.Colors, Windows.UI.Input, Windows.UI.Composition, and Windows.UI.Text untouched — both in using statements and inline fully-qualified references",
+      "evidence": "lessons.json errors_encountered[0]: ~30 CS0234 errors for 'Colors does not exist in namespace Windows.UI' across 1-InputEvents.xaml.cs, 4-XAMLManipulations.xaml.cs, 5-GestureRecognizer.xaml.cs. skill-coverage-gaps.json: namespace mapping table lists the correct mappings but bootstrap doesn't automate them.",
+      "root_cause": "Initialize-UwpMigration.ps1 step 3 only performs a single regex replacement (Windows.UI.Xaml → Microsoft.UI.Xaml). The other four Windows.UI.* → Microsoft.UI.* mappings in the namespace table are left to the agent, who assumes the bootstrap handled them.",
+      "tier": 1,
+      "change": "Extend Initialize-UwpMigration.ps1 step 3 to also mass-replace Windows.UI.Colors → Microsoft.UI.Colors, Windows.UI.Input → Microsoft.UI.Input, Windows.UI.Composition → Microsoft.UI.Composition, and Windows.UI.Text → Microsoft.UI.Text. Order replacements longest-prefix-first to avoid substring collisions. Add a note to MIGRATION-PATTERNS.md under the namespace mapping table clarifying which rewrites the bootstrap automates and which require manual adaptation (Windows.UI.Core → Microsoft.UI.Dispatching).",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Eliminates all CS0234 errors for Windows.UI.Colors/Input/Composition/Text on first build — both using-statement and inline fully-qualified references are rewritten mechanically.",
+      "falsifiable_check": "On re-run, zero CS0234 errors mentioning 'Colors does not exist in namespace Windows.UI' or similar for Input/Composition/Text. The first build attempt should have fewer errors."
+    },
+    {
+      "problem": "PointerPoint.PointerDevice property removed in WinUI 3 — no migration guidance or bootstrap detection",
+      "evidence": "skill-defects.json: CS1061 'PointerPoint does not contain a definition for PointerDevice' in 2-PointerPointProperties.xaml.cs. Agent discovered the fix independently. Zero matches for PointerDevice in any skill file.",
+      "root_cause": "WinUI 3 flattened the PointerPoint API: the intermediate PointerDevice object was removed and PointerDeviceType is now a direct property on PointerPoint. Neither unsupported-api-inventory.json nor MIGRATION-PATTERNS.md covers this.",
+      "tier": 1,
+      "change": "Add PointerPoint.PointerDevice to unsupported-api-inventory.json as an adaptable pattern (anchor: input-apis). Add a new 'Input API Changes' section to MIGRATION-PATTERNS.md with the anchor and the PointerPoint.PointerDevice → PointerPoint.PointerDeviceType mapping.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Bootstrap auto-injects a TODO[migrate-NNN] at each PointerPoint.PointerDevice usage, pointing to PATTERNS.md#input-apis. Agent resolves it via Get-MigrationPattern.ps1 instead of discovering the fix from build errors.",
+      "falsifiable_check": "On re-run, .bootstrap-meta.json should list the PointerPoint file as BATCH with a TODO injected. No CS1061 for PointerDevice after the agent processes the TODO."
+    }
+  ],
+  "deferred_to_human": []
+}

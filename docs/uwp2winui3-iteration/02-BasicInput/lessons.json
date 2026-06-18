@@ -1,0 +1,37 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap ran successfully, created MIGRATION-MAPPING.md with 7 rows, injected inline TODOs, set up project scaffold — enabled structured migration workflow." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Validator reported all PASS (residue grep, TODO markers, mapping integrity, manifest, build). Caught WARN for MIGRATION-DEFERRED.md consistency and smoke launch environment issue." },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "Agent used anchored pattern lookups to resolve TODO markers without loading the full MIGRATION-PATTERNS.md." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [
+    { "api": "Windows.UI.Colors (fully-qualified inline usage)", "why_tried": "UWP source uses Windows.UI.Colors.RoyalBlue, Windows.UI.Colors.LightGray etc. inline in code-behind for input event handlers and manipulation color feedback.", "root_cause": "Bootstrap rewrites 'using' statements but does not rewrite inline fully-qualified references like 'Windows.UI.Colors.RoyalBlue'. The namespace mapping table in MIGRATION-PATTERNS.md covers the mapping but doesn't warn about inline qualified references surviving the bootstrap.", "fix": "Agent replaced all Windows.UI.Colors with Microsoft.UI.Colors across multiple files in a single PowerShell batch." },
+    { "api": "PointerPoint.PointerDevice", "why_tried": "UWP PointerPoint has a .PointerDevice property (returns PointerDevice object) used to check PointerDeviceType. In WinUI 3, this property was removed — PointerDeviceType is accessed directly on PointerPoint.", "root_cause": "MIGRATION-PATTERNS.md has no entry for this API change. The bootstrap didn't inject a TODO for it.", "fix": "Agent changed pt.PointerDevice.PointerDeviceType to pt.PointerDeviceType." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "PointerPoint.PointerDeviceType", "special_handling": "In WinUI 3, PointerDeviceType is a direct property on PointerPoint, not accessed via the intermediate PointerDevice object as in UWP." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: The type or namespace name 'Colors' does not exist in the namespace 'Windows.UI'", "root_cause": "Bootstrap rewrites using statements but inline fully-qualified references like Windows.UI.Colors.RoyalBlue survive. Multiple files (1-InputEvents.xaml.cs, 4-XAMLManipulations.xaml.cs, 5-GestureRecognizer.xaml.cs) had these references.", "fix": "Batch PowerShell replace of Windows.UI.Colors with Microsoft.UI.Colors across all affected files." },
+    { "error": "CS1061: 'PointerPoint' does not contain a definition for 'PointerDevice'", "root_cause": "WinUI 3 removed PointerPoint.PointerDevice property; PointerDeviceType is now directly on PointerPoint. No skill guidance covers this change.", "fix": "Changed pt.PointerDevice.PointerDeviceType to pt.PointerDeviceType in 2-PointerPointProperties.xaml.cs." }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Build cycle after migrating all files (lines 992-1115 in build-events.jsonl)",
+      "symptom": "First build failed with ~30 CS0234 errors (Windows.UI.Colors) and 2 CS1061 errors (PointerPoint.PointerDevice) across multiple files.",
+      "turns_or_retries": "2 failed builds (lines 992, 994), then 1 successful build (line 1115). Agent fixed both issues in a single fix cycle (~60 event lines).",
+      "root_cause": "Bootstrap namespace rewrite only handles 'using' statements, not inline fully-qualified type references. PointerPoint API change not documented.",
+      "how_resolved": "Agent correctly identified both issues from error messages, batch-replaced Colors namespace and manually fixed PointerDevice property access.",
+      "preventable_by": "1) Bootstrap script should also rewrite inline fully-qualified namespace references (Windows.UI.Colors.X → Microsoft.UI.Colors.X). 2) Add PointerPoint.PointerDevice → PointerPoint.PointerDeviceType to MIGRATION-PATTERNS.md adaptable API list."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Smoke launch reported WARN — could not launch the app (environment/deploy issue, not a code defect)", "workaround": "Validator correctly classified this as non-fatal WARN rather than FAIL. The app was verified to build and run successfully via separate dotnet run." }
+  ]
+}

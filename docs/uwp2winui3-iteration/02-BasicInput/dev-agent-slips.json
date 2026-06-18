@@ -1,0 +1,21 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "PointerPoint canvas features scored as partial despite correct code implementation",
+      "evidence": "migration-score.json: pointer-properties-canvas and pointer-properties-mouse-details both verdict=partial, but all expected_behaviour_results have met=true. Scorer noted 'cannot be fully verified statically' — this is an evaluation limitation, not a migration issue.",
+      "covered_clearly_at": "N/A — the migration code is correct. No skill change needed because the ToggleSwitch and Canvas controls were migrated faithfully. The partial verdict is from the scorer's inability to test interactive behavior in static screenshots.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The migrated code is functionally correct — all expected_behaviour_results are met=true. The partial score comes from the evaluation tool's limitation of static screenshot analysis for dynamic interactive features (canvas popups). No migration skill change would affect this."
+    },
+    {
+      "problem": "ToggleSwitch features scored as partial due to WinUI 3 UIA automation pattern difference",
+      "evidence": "migration-score.json: xaml-manipulations-inertia-toggle and gesture-recognizer-inertia-toggle both verdict=partial. Notes say 'UIA exposes it as a Button rather than a proper ToggleSwitch automation pattern, though visually it appears correct.' All expected_behaviour_results have met=true.",
+      "covered_clearly_at": "N/A — the migration correctly used ToggleSwitch control (matching the UWP source). The UIA pattern difference is a WinUI 3 platform behavior, not a migration decision.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The ToggleSwitch was correctly migrated — it renders and functions correctly (screenshot confirms blue On state). The UIA automation pattern difference (Button vs ToggleSwitch) is a WinUI 3 platform characteristic that no migration guidance can change. A re-run would produce the same result."
+    }
+  ]
+}

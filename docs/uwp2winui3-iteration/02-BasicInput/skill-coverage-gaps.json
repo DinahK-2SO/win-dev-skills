@@ -1,0 +1,15 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Namespace mapping table doesn't warn that inline fully-qualified references (e.g. Windows.UI.Colors.RoyalBlue) survive the bootstrap's using-statement rewrite",
+      "evidence": "build-events.jsonl line 994: ~30 CS0234 errors for 'Colors does not exist in namespace Windows.UI' across 1-InputEvents.xaml.cs, 4-XAMLManipulations.xaml.cs, 5-GestureRecognizer.xaml.cs. All were inline fully-qualified uses like Windows.UI.Colors.RoyalBlue that the bootstrap's using-rewrite pass did not touch.",
+      "covered_at": "MIGRATION-PATTERNS.md line 87 — Namespace Mapping table row: '| `Windows.UI.Colors` | `Microsoft.UI.Colors` |'",
+      "why_missed": "under-emphasized — The namespace mapping table correctly lists the Colors mapping, but does not warn the dev-agent that fully-qualified inline references (as opposed to using statements) are NOT rewritten by the bootstrap. The agent assumed the bootstrap handled all namespace rewrites.",
+      "proposed_improvement": "Add a note under the Namespace Mapping table: '**Note:** The bootstrap rewrites `using` statements but NOT inline fully-qualified type references (e.g. `Windows.UI.Colors.RoyalBlue`). After the initial build, grep for remaining `Windows.UI.` references in code-behind files and fix them manually.' This sets the expectation that CS0234 errors for mapped namespaces are expected on first build.",
+      "generalizes": "Any UWP app that uses fully-qualified color/type references in code-behind (common in event handlers and animations) will produce the same CS0234 errors. Setting this expectation saves a build-fix cycle across all scenarios."
+    }
+  ]
+}

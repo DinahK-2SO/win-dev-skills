@@ -1,0 +1,17 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "PointerPoint.PointerDevice property removed in WinUI 3 — no migration guidance exists",
+      "evidence": "build-events.jsonl line 994: CS1061 'PointerPoint does not contain a definition for PointerDevice' in 2-PointerPointProperties.xaml.cs lines 128 and 211. Agent had to discover the fix independently (pt.PointerDevice.PointerDeviceType → pt.PointerDeviceType).",
+      "skill_search": "Grepped MIGRATION-PATTERNS.md and all skill files for 'PointerDevice', 'PointerDeviceType', 'pointer.device' — zero matches.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "WinUI 3 flattened the PointerPoint API: the intermediate PointerDevice object was removed and PointerDeviceType is now a direct property on PointerPoint. The skill has no entry for this API shape change, and the bootstrap's unsupported-api-inventory.json doesn't flag it as adaptable.",
+      "proposed_fix": "Add an entry to MIGRATION-PATTERNS.md under a new 'Input API changes' section (or append to the namespace mapping): '| `PointerPoint.PointerDevice.PointerDeviceType` | `PointerPoint.PointerDeviceType` | The intermediate `PointerDevice` property was removed; access `PointerDeviceType` directly. |'. Also add to unsupported-api-inventory.json as an adaptable pattern with anchor 'input-apis' so the bootstrap injects a TODO.",
+      "generalizes": "Any UWP app that uses PointerPoint.PointerDevice (input samples, drawing apps, ink apps, custom gesture handlers) will hit this same CS1061. This is a common UWP input API pattern used whenever code differentiates between mouse, pen, and touch input."
+    }
+  ]
+}

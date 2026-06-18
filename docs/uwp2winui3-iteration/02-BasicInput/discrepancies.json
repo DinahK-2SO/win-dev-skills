@@ -1,0 +1,23 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "score": 94,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Requirement 1", "status": "pass", "reason": "Script's wait-for failed on 'Basic Input sample' as AutomationId, but winapp search confirmed element exists (AutomationId='SampleTitle'); screenshot shows sidebar with all 5 scenarios and 'Basic Input sample' heading.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Requirement 2", "status": "pass", "reason": "", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Requirement 3", "status": "pass", "reason": "Script's wait-for 'mainCanvas' failed because Canvas is not an interactive UIA element. Navigation to Scenario 2 passed; screenshot 08 shows scenario loaded correctly; source 2-PointerPointProperties.xaml.cs line 33 confirms mainCanvas event handlers present.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Requirement 4", "status": "pass", "reason": "", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Requirement 5", "status": "pass", "reason": "", "suspected_skill_gap": "" },
+    { "id": 6, "text": "Requirement 6", "status": "pass", "reason": "", "suspected_skill_gap": "" },
+    { "id": 7, "text": "Requirement 7", "status": "pass", "reason": "MainWindow.xaml explicitly declares <MicaBackdrop/> and <TitleBar x:Name='AppTitleBar' Title='BasicInput'> (WinUI 3 TitleBar control); confirmed from source.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "pointer-properties-canvas", "uwp": "Canvas shows pointer popup on click with ID, X, Y, contact state", "winui": "Canvas area appears empty in static screenshot — popup only visible during active interaction. Code structure matches UWP source.", "screenshot_ref": "screenshots/winui3-pointer-properties-canvas.png" },
+    { "feature": "xaml-manipulations-inertia-toggle", "uwp": "ToggleSwitch control with standard UIA automation pattern", "winui": "ToggleSwitch renders correctly (blue On state visible) but UIA exposes it as Button type rather than ToggleSwitch automation pattern — WinUI 3 platform difference", "screenshot_ref": "screenshots/winui3-xaml-manipulations-inertia-toggle.png" },
+    { "feature": "gesture-recognizer-inertia-toggle", "uwp": "ToggleSwitch control with standard UIA automation pattern", "winui": "Same UIA exposure as Scenario 4 — ToggleSwitch exposed as Button in UIA. Visually correct.", "screenshot_ref": "screenshots/winui3-gesture-recognizer-inertia-toggle.png" }
+  ],
+  "missing_features": [],
+  "summary": "High-quality migration scoring 94/100. All 7 requirements pass. 4 features marked partial: 2 for PointerPoint canvas (static screenshot can't verify dynamic popup — code is correct), 2 for ToggleSwitch UIA automation pattern difference (WinUI 3 platform behavior, not migration defect). No features failed. Build errors (Windows.UI.Colors namespace, PointerPoint.PointerDevice API) were resolved in a single fix cycle."
+}
