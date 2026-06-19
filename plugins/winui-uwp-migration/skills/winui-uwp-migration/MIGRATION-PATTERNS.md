@@ -78,6 +78,29 @@ All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
 | `Windows.UI.Text` | `Microsoft.UI.Text` |
 | `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` |
 
+<a id="pointer-input"></a>
+## Pointer input: API shape changes after namespace rewrite
+
+After rewriting `Windows.UI.Input` → `Microsoft.UI.Input`, certain APIs have a **different shape** — the namespace is correct but the member access path changed.
+
+### `PointerPoint.PointerDevice` removed — use direct properties
+
+UWP's `Windows.UI.Input.PointerPoint` exposed device info via a sub-object:
+
+```csharp
+// UWP — won't compile in WinUI 3
+var deviceType = pointerPoint.PointerDevice.PointerDeviceType;
+```
+
+WinUI 3 flattened this — `PointerDeviceType` is a direct property on `PointerPoint`:
+
+```csharp
+// WinUI 3
+var deviceType = pointerPoint.PointerDeviceType;
+```
+
+The `Initialize-UwpMigration.ps1` bootstrap handles this rewrite mechanically. If you encounter it in code written post-bootstrap, apply the same flattening: delete the `.PointerDevice` segment from the chain.
+
 <a id="threading"></a>
 ## Threading: CoreDispatcher → DispatcherQueue
 

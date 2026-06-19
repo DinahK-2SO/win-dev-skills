@@ -1,0 +1,254 @@
+{
+  "scenario": "BasicInput",
+  "created_at": "2026-06-19T18:41:22Z",
+  "uwp_capture_status": "failed: App crashed at startup in Windows.UI.Xaml.dll (0xc000027b) — native XAML stowed exception on newer OS build. Rubric derived from source code only.",
+  "features": [
+    {
+      "id": "scenario-navigation",
+      "area": "Navigation",
+      "name": "Scenario list navigation",
+      "description": "The main page shows a SplitView with a left pane listing all 5 scenarios. Selecting a scenario loads its content in the right frame.",
+      "expected_behaviour": [
+        "A ListBox in the left pane displays 5 items: 'Input Events', 'PointerPoint Properties', 'Device Capabilities', 'XAML Manipulations', 'Gesture Recognizer'",
+        "Clicking a scenario item loads the corresponding page in the content frame on the right",
+        "The currently selected scenario is visually highlighted in the list"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "splitview-toggle",
+      "area": "Navigation",
+      "name": "Hamburger menu toggle",
+      "description": "A hamburger toggle button in the header opens/closes the SplitView pane containing the scenario list.",
+      "expected_behaviour": [
+        "A toggle button with the hamburger icon (&#xE700;) is visible in the top-left header area",
+        "Clicking the toggle button collapses or expands the left navigation pane",
+        "The pane starts in the open (IsPaneOpen=True) state"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "pointer-pressed-released",
+      "area": "Scenario 1 – Input Events",
+      "name": "Pointer Pressed / Released",
+      "description": "A bordered rectangle responds to pointer press and release events by changing background color and displaying status text.",
+      "expected_behaviour": [
+        "A 150x100 LightGray bordered rectangle is displayed with the label 'Pointer Pressed / Released'",
+        "Pressing (mouse down) on the rectangle changes its background to RoyalBlue and text to 'Pointer Pressed'",
+        "Releasing (mouse up) changes background back to LightGray and text to 'Pointer Released'"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "pointer-enter-exit",
+      "area": "Scenario 1 – Input Events",
+      "name": "Pointer Enter / Exit",
+      "description": "A bordered rectangle responds to pointer enter and exit events by changing background color and displaying status text.",
+      "expected_behaviour": [
+        "A 150x100 LightGray bordered rectangle is displayed with the label 'Pointer Enter / Exit'",
+        "Moving the pointer onto the rectangle changes its background to RoyalBlue and text to 'Pointer Entered'",
+        "Moving the pointer off the rectangle changes background back to LightGray and text to 'Pointer Exited'"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "tap-doubletap",
+      "area": "Scenario 1 – Input Events",
+      "name": "Tap / Double-Tap",
+      "description": "A bordered rectangle responds to tap and double-tap gestures with distinct visual feedback.",
+      "expected_behaviour": [
+        "A 150x100 LightGray bordered rectangle is displayed with the label 'Tap / Double-Tap'",
+        "A single tap changes background to DeepSkyBlue and text to 'Tapped'",
+        "A double-tap changes background to RoyalBlue and text to 'Double-Tapped'"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "righttap-hold",
+      "area": "Scenario 1 – Input Events",
+      "name": "Right-Tap / Press-and-Hold",
+      "description": "A bordered rectangle responds to holding and right-tap gestures with distinct visual feedback and state transitions.",
+      "expected_behaviour": [
+        "A 150x100 LightGray bordered rectangle is displayed with the label 'Right-Tap / Press-and-Hold'",
+        "Press-and-hold starts showing DeepSkyBlue background with text 'Holding'",
+        "Completing the hold changes text to 'Held' with LightGray background",
+        "Right-click (or hold-release) shows RoyalBlue background with text 'Right Tapped'"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "pointer-properties-canvas",
+      "area": "Scenario 2 – PointerPoint Properties",
+      "name": "Pointer properties display canvas",
+      "description": "A full-area canvas tracks pointer contacts and displays a floating popup with pointer ID, position, and contact state at the pointer location.",
+      "expected_behaviour": [
+        "An instruction text reads 'Touch or click the screen to see information about the current pointer(s)'",
+        "Clicking/touching the canvas creates a popup showing pointer ID, X, Y coordinates, and contact state",
+        "The popup follows the pointer position while the button/finger is held down",
+        "Releasing removes the popup from the canvas"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "pointer-device-specific-props",
+      "area": "Scenario 2 – PointerPoint Properties",
+      "name": "Device-specific pointer properties",
+      "description": "The pointer popup displays device-specific properties color-coded by input type: red for mouse, green for touch, yellow for pen.",
+      "expected_behaviour": [
+        "Mouse input shows button states (left, right, middle, X1, X2) and wheel delta in red text",
+        "Touch input shows contact rect dimensions (X, Y, Width, Height) in green text",
+        "Pen input shows barrel button, eraser, and pressure properties in yellow text"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "device-capabilities-keyboard",
+      "area": "Scenario 3 – Device Capabilities",
+      "name": "Keyboard capabilities display",
+      "description": "Displays whether a keyboard is present on the current device.",
+      "expected_behaviour": [
+        "A 'Keyboard Properties' header is shown",
+        "Text displays 'Keyboard present = 1' (or 0 if no keyboard)"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "device-capabilities-mouse",
+      "area": "Scenario 3 – Device Capabilities",
+      "name": "Mouse capabilities display",
+      "description": "Displays mouse capability properties including presence, button count, wheel support, and swap status.",
+      "expected_behaviour": [
+        "A 'Mouse Properties' header is shown",
+        "Text displays: Mouse present, Number of buttons, Vertical wheel present, Horizontal wheel present, and Buttons swapped values"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "device-capabilities-touch",
+      "area": "Scenario 3 – Device Capabilities",
+      "name": "Touch capabilities display",
+      "description": "Displays touch capability properties including presence and supported contact count.",
+      "expected_behaviour": [
+        "A 'Touch Properties' header is shown",
+        "Text displays: Touch present and Touch contacts supported values"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "xaml-manipulation-translate-rotate",
+      "area": "Scenario 4 – XAML Manipulations",
+      "name": "Rectangle drag and rotate",
+      "description": "A 200x200 LightGray rectangle can be dragged (translated) and rotated via direct manipulation events. It changes color during manipulation.",
+      "expected_behaviour": [
+        "A 200x200 LightGray rectangle is displayed on a Canvas",
+        "Dragging the rectangle moves it (translates on X and Y axes)",
+        "Multi-touch rotation rotates the rectangle",
+        "During manipulation the rectangle turns DeepSkyBlue; during inertia it turns RoyalBlue; when complete it returns to LightGray"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "xaml-manipulation-axis-lock",
+      "area": "Scenario 4 – XAML Manipulations",
+      "name": "Movement axis selector",
+      "description": "A ComboBox allows restricting manipulation movement to X only, Y only, or both axes.",
+      "expected_behaviour": [
+        "A ComboBox labeled 'Movement Axis' with options: 'X and Y', 'X only', 'Y only'",
+        "Default selection is 'X and Y'",
+        "Selecting 'X only' restricts dragging to horizontal movement only",
+        "Selecting 'Y only' restricts dragging to vertical movement only"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "xaml-manipulation-inertia",
+      "area": "Scenario 4 – XAML Manipulations",
+      "name": "Inertia toggle switch",
+      "description": "A ToggleSwitch enables or disables inertia (momentum) after releasing the manipulated rectangle.",
+      "expected_behaviour": [
+        "A ToggleSwitch labeled 'Inertia' is present and defaults to On",
+        "When On, releasing a flick causes the rectangle to continue moving with deceleration",
+        "When Off, the rectangle stops immediately when released"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "xaml-manipulation-reset",
+      "area": "Scenario 4 – XAML Manipulations",
+      "name": "Reset button",
+      "description": "A Reset button returns the rectangle to its original position and resets all manipulation options to defaults.",
+      "expected_behaviour": [
+        "A button labeled 'Reset' is visible",
+        "Clicking Reset returns the rectangle to its original position (no transform)",
+        "The Movement Axis combo resets to 'X and Y' and Inertia switch resets to On"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "gesture-recognizer-translate-rotate",
+      "area": "Scenario 5 – Gesture Recognizer",
+      "name": "GestureRecognizer-based drag and rotate",
+      "description": "A 200x200 rectangle is manipulated via the GestureRecognizer class (not XAML manipulation events). Behaviour mirrors Scenario 4 but uses a lower-level API.",
+      "expected_behaviour": [
+        "A 200x200 LightGray bordered rectangle is displayed on a Canvas",
+        "Dragging the rectangle moves it; multi-touch rotates it",
+        "During manipulation the rectangle turns DeepSkyBlue; during inertia it turns RoyalBlue; when complete it returns to LightGray"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "gesture-recognizer-axis-lock",
+      "area": "Scenario 5 – Gesture Recognizer",
+      "name": "GestureRecognizer movement axis selector",
+      "description": "A ComboBox allows restricting GestureRecognizer-based movement to X only, Y only, or both axes.",
+      "expected_behaviour": [
+        "A ComboBox labeled 'Movement Axis' with options: 'X and Y', 'X only', 'Y only'",
+        "Default selection is 'X and Y'",
+        "Selecting 'X only' restricts movement to horizontal; 'Y only' restricts to vertical"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "gesture-recognizer-inertia",
+      "area": "Scenario 5 – Gesture Recognizer",
+      "name": "GestureRecognizer inertia toggle",
+      "description": "A ToggleSwitch enables or disables inertia for the GestureRecognizer-based manipulation.",
+      "expected_behaviour": [
+        "A ToggleSwitch labeled 'Inertia' defaults to On",
+        "When On, flicking the rectangle causes momentum-based continued movement",
+        "When Off, movement stops immediately on release"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "gesture-recognizer-reset",
+      "area": "Scenario 5 – Gesture Recognizer",
+      "name": "GestureRecognizer reset button",
+      "description": "A Reset button returns the GestureRecognizer rectangle to its original state and resets options.",
+      "expected_behaviour": [
+        "A button labeled 'Reset' is visible",
+        "Clicking Reset returns the rectangle to original position and resets axis/inertia options to defaults"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

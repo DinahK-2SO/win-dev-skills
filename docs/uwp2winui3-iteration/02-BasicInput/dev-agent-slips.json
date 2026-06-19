@@ -1,0 +1,21 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Dev-agent initially wrote Windows.UI.Colors instead of Microsoft.UI.Colors in scenario code-behind files",
+      "evidence": "build-events.jsonl line ~974: agent message 'Build has errors. I need to fix Windows.UI.Colors → Microsoft.UI.Colors'; first build failure with CS0234 in 1-InputEvents.xaml.cs and 4-XAMLManipulations.xaml.cs",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md line 77, Namespace Mapping table: '| `Windows.UI.Colors` | `Microsoft.UI.Colors` |' — a dedicated row in the prominently-placed table at the top of the patterns file",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The namespace mapping table is the first substantive section (line 62-78) and explicitly lists Windows.UI.Colors → Microsoft.UI.Colors. The dev-agent simply forgot to apply this mapping during initial code generation but immediately recognized and fixed it on the first build error. A capable model on re-run would get this right."
+    },
+    {
+      "problem": "Dev-agent initially left Windows.UI.Input.PointerPoint type references in Scenario 2 while event args were already using Microsoft.UI.Input.PointerPoint",
+      "evidence": "First build failure: CS0029 errors 'Cannot implicitly convert type Microsoft.UI.Input.PointerPoint to Windows.UI.Input.PointerPoint' in 2-PointerPointProperties.xaml.cs",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md line 76, Namespace Mapping table: '| `Windows.UI.Input` | `Microsoft.UI.Input` |' — explicitly listed in the same prominent table",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The Windows.UI.Input → Microsoft.UI.Input mapping is clearly documented in the namespace table. The dev-agent mixed old and new namespaces during initial code writing but fixed it immediately on build feedback. No skill improvement needed."
+    }
+  ]
+}

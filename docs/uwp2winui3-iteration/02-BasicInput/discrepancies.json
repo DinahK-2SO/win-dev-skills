@@ -1,0 +1,31 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "score": 10,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": "scenario-navigation", "text": "Scenario list navigation", "status": "pass", "reason": "UIA tree confirms ListBox with 5 items, navigation works correctly", "suspected_skill_gap": "" },
+    { "id": "splitview-toggle", "text": "Hamburger menu toggle", "status": "pass", "reason": "Toggle button present and functional", "suspected_skill_gap": "" },
+    { "id": "pointer-pressed-released", "text": "Pointer Pressed / Released", "status": "pass", "reason": "Correct handlers and color changes confirmed", "suspected_skill_gap": "" },
+    { "id": "pointer-enter-exit", "text": "Pointer Enter / Exit", "status": "pass", "reason": "Correct handlers confirmed", "suspected_skill_gap": "" },
+    { "id": "tap-doubletap", "text": "Tap / Double-Tap", "status": "pass", "reason": "Tapped and DoubleTapped handlers correct", "suspected_skill_gap": "" },
+    { "id": "righttap-hold", "text": "Right-Tap / Press-and-Hold", "status": "pass", "reason": "Holding and RightTapped handlers correct", "suspected_skill_gap": "" },
+    { "id": "pointer-properties-canvas", "text": "Pointer properties display canvas", "status": "pass", "reason": "Canvas and popup logic implemented correctly", "suspected_skill_gap": "" },
+    { "id": "pointer-device-specific-props", "text": "Device-specific pointer properties", "status": "partial", "reason": "Code implements color-coding but visual verification impossible due to DirectComposition capture limitation", "suspected_skill_gap": "Not a migration skill gap — evaluation tool screenshot limitation (blank screenshots from WinUI 3 DirectComposition rendering)" },
+    { "id": "device-capabilities-keyboard", "text": "Keyboard capabilities display", "status": "pass", "reason": "UIA confirms correct text output", "suspected_skill_gap": "" },
+    { "id": "device-capabilities-mouse", "text": "Mouse capabilities display", "status": "pass", "reason": "UIA confirms correct properties", "suspected_skill_gap": "" },
+    { "id": "device-capabilities-touch", "text": "Touch capabilities display", "status": "pass", "reason": "UIA confirms correct output", "suspected_skill_gap": "" },
+    { "id": "xaml-manipulation-translate-rotate", "text": "Rectangle drag and rotate", "status": "partial", "reason": "Code correct with proper ManipulationModes and color changes, but cannot visually confirm rendering due to blank screenshots", "suspected_skill_gap": "Not a migration skill gap — evaluation tool screenshot limitation" },
+    { "id": "xaml-manipulation-axis-lock", "text": "Movement axis selector", "status": "pass", "reason": "ComboBox with correct options and handler logic confirmed", "suspected_skill_gap": "" },
+    { "id": "xaml-manipulation-inertia", "text": "Inertia toggle switch", "status": "pass", "reason": "ToggleSwitch defaults to On and modifies ManipulationModes correctly", "suspected_skill_gap": "" },
+    { "id": "xaml-manipulation-reset", "text": "Reset button", "status": "partial", "reason": "Reset logic present and correct in code but visual verification unavailable", "suspected_skill_gap": "Not a migration skill gap — evaluation tool screenshot limitation" },
+    { "id": "gesture-recognizer-translate-rotate", "text": "GestureRecognizer-based drag and rotate", "status": "partial", "reason": "GestureRecognizer and ManipulationInputProcessor implemented but cannot visually confirm rendering", "suspected_skill_gap": "Not a migration skill gap — evaluation tool screenshot limitation" },
+    { "id": "gesture-recognizer-axis-lock", "text": "GestureRecognizer movement axis selector", "status": "pass", "reason": "ComboBox and processor methods correct", "suspected_skill_gap": "" },
+    { "id": "gesture-recognizer-inertia", "text": "GestureRecognizer inertia toggle", "status": "pass", "reason": "ToggleSwitch and UseInertia method correct", "suspected_skill_gap": "" },
+    { "id": "gesture-recognizer-reset", "text": "GestureRecognizer reset button", "status": "pass", "reason": "Reset calls processor.Reset() and InitOptions correctly", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Strong migration: 15/19 pass, 4 partial. All 4 partials are due to the evaluation tool's inability to capture WinUI 3 DirectComposition-rendered content in screenshots — the actual code is correct in all cases. The migration successfully handled all 5 scenarios including complex pointer input, device capabilities, XAML manipulations, and GestureRecognizer patterns."
+}

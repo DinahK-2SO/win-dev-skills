@@ -1,0 +1,29 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "tools_helpful": [
+    { "tool": "winui-uwp-migration skill", "evidence": "Dev-agent loaded it on turn 0 and followed the scaffold + namespace rewrite workflow successfully, completing 5 scenarios with correct API mappings" },
+    { "tool": "dotnet new winui template", "evidence": "Scaffolded project cleanly on first try, providing correct csproj structure for WinUI 3" }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [
+    { "api": "PointerPoint.PointerDevice", "why_tried": "UWP PointerPoint has a PointerDevice property to get the device type; dev-agent initially copied that pattern after namespace rewrite", "root_cause": "In WinUI 3 (Microsoft.UI.Input.PointerPoint), the PointerDevice property was removed — PointerDeviceType is available directly on PointerPoint", "fix": "Replace `pointerPoint.PointerDevice.PointerDeviceType` with `pointerPoint.PointerDeviceType`" }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Microsoft.UI.Input.PointerPoint", "special_handling": "PointerDeviceType is a direct property, not accessed via .PointerDevice sub-object as in UWP's Windows.UI.Input.PointerPoint" },
+    { "api": "Microsoft.UI.Input.GestureRecognizer", "special_handling": "Namespace moved from Windows.UI.Input to Microsoft.UI.Input; ProcessMoveEvents/ProcessDownEvent/ProcessUpEvent accept Microsoft.UI.Input.PointerPoint (not Windows.UI.Input.PointerPoint)" }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: 'Colors' does not exist in namespace 'Windows.UI'", "root_cause": "Dev-agent initially wrote `Windows.UI.Colors` in Scenario 1 and Scenario 4 code-behind files instead of `Microsoft.UI.Colors`", "fix": "Changed `using Windows.UI` references to `using Microsoft.UI` and used `Microsoft.UI.Colors` directly" },
+    { "error": "CS0029: Cannot implicitly convert 'Microsoft.UI.Input.PointerPoint' to 'Windows.UI.Input.PointerPoint'", "root_cause": "Scenario 2 code still referenced `Windows.UI.Input.PointerPoint` type in local variables while event args provided `Microsoft.UI.Input.PointerPoint`", "fix": "Replaced all `Windows.UI.Input.PointerPoint` usages with `Microsoft.UI.Input.PointerPoint`" },
+    { "error": "CS1061: 'PointerPoint' does not contain definition for 'PointerDevice'", "root_cause": "WinUI 3's Microsoft.UI.Input.PointerPoint removed the PointerDevice sub-property; PointerDeviceType is now a direct property", "fix": "Changed `pointerPoint.PointerDevice.PointerDeviceType` to `pointerPoint.PointerDeviceType`" }
+  ],
+  "dev_agent_struggles": [
+    { "where": "First build attempt (turn ~12)", "symptom": "Build failed with CS0234 (Windows.UI.Colors) and CS0029 (PointerPoint type mismatch) across 4 files", "turns_or_retries": "1 retry build cycle", "root_cause": "Initial code generation used Windows.UI namespace for Colors and PointerPoint types despite skill listing the correct mappings", "how_resolved": "Agent recognized the pattern, rewrote all affected using directives and type references in one pass", "preventable_by": "Skill already covers this in namespace mapping table; dev-agent missed it on initial code generation (dev-agent-slip)" },
+    { "where": "Second build attempt (turn ~14)", "symptom": "CS1061: PointerPoint.PointerDevice not found; XamlCompiler WMC9999 object reference error", "turns_or_retries": "1 retry build cycle", "root_cause": "PointerPoint.PointerDevice property doesn't exist in WinUI 3; the property was flattened to PointerPoint.PointerDeviceType", "how_resolved": "Agent inspected the file, identified the API difference, replaced .PointerDevice.PointerDeviceType with .PointerDeviceType", "preventable_by": "Add PointerPoint.PointerDevice → PointerPoint.PointerDeviceType to MIGRATION-PATTERNS.md API differences section" }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

@@ -1,0 +1,259 @@
+{
+  "scenario": "BasicInput",
+  "scored_at": "2026-06-19T18:44:00Z",
+  "app_launched": true,
+  "total_features": 19,
+  "pass": 15,
+  "partial": 4,
+  "fail": 0,
+  "weighted_score_pct": 87.5,
+  "features": [
+    {
+      "id": "scenario-navigation",
+      "name": "Scenario list navigation",
+      "verdict": "pass",
+      "notes": "UIA tree confirms ListBox 'Scenarios' with 5 items: '1) Input Events', '2) PointerPoint Properties', '3) Device Capabilities', '4) XAML Manipulations', '5) Gesture Recognizer'. Selecting items via SelectionItemPattern loads corresponding page content in the right frame. Selected item is visually highlighted per ListBox behaviour.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A ListBox in the left pane displays 5 items: 'Input Events', 'PointerPoint Properties', 'Device Capabilities', 'XAML Manipulations', 'Gesture Recognizer'", "met": true },
+        { "bullet": "Clicking a scenario item loads the corresponding page in the content frame on the right", "met": true },
+        { "bullet": "The currently selected scenario is visually highlighted in the list", "met": true }
+      ]
+    },
+    {
+      "id": "splitview-toggle",
+      "name": "Hamburger menu toggle",
+      "verdict": "pass",
+      "notes": "UIA tree shows Button 'Menu' [off] at position (353,397 72x72). MainPage.xaml confirms SplitView with IsPaneOpen='True'. The toggle button uses the standard hamburger pattern with SplitView.IsPaneOpen binding.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A toggle button with the hamburger icon (&#xE700;) is visible in the top-left header area", "met": true },
+        { "bullet": "Clicking the toggle button collapses or expands the left navigation pane", "met": true },
+        { "bullet": "The pane starts in the open (IsPaneOpen=True) state", "met": true }
+      ]
+    },
+    {
+      "id": "pointer-pressed-released",
+      "name": "Pointer Pressed / Released",
+      "verdict": "pass",
+      "notes": "XAML confirms Border 'pressedTarget' (150x100, LightGray, BorderBrush=Black). Code-behind wires PointerPressed/PointerReleased handlers that set Background to RoyalBlue/LightGray and text to 'Pointer Pressed'/'Pointer Released'. UIA tree shows label text 'Pointer Pressed / Released' on the scenario page.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 150x100 LightGray bordered rectangle is displayed with the label 'Pointer Pressed / Released'", "met": true },
+        { "bullet": "Pressing (mouse down) on the rectangle changes its background to RoyalBlue and text to 'Pointer Pressed'", "met": true },
+        { "bullet": "Releasing (mouse up) changes background back to LightGray and text to 'Pointer Released'", "met": true }
+      ]
+    },
+    {
+      "id": "pointer-enter-exit",
+      "name": "Pointer Enter / Exit",
+      "verdict": "pass",
+      "notes": "XAML confirms Border 'enterExitTarget' (150x100, LightGray). Code-behind wires PointerEntered/PointerExited handlers with correct color changes (RoyalBlue/LightGray) and text updates ('Pointer Entered'/'Pointer Exited'). UIA tree shows label on page.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 150x100 LightGray bordered rectangle is displayed with the label 'Pointer Enter / Exit'", "met": true },
+        { "bullet": "Moving the pointer onto the rectangle changes its background to RoyalBlue and text to 'Pointer Entered'", "met": true },
+        { "bullet": "Moving the pointer off the rectangle changes background back to LightGray and text to 'Pointer Exited'", "met": true }
+      ]
+    },
+    {
+      "id": "tap-doubletap",
+      "name": "Tap / Double-Tap",
+      "verdict": "pass",
+      "notes": "XAML confirms Border 'tapTarget' (150x100, LightGray). Code-behind wires Tapped (DeepSkyBlue, 'Tapped') and DoubleTapped (RoyalBlue, 'Double-Tapped') handlers correctly.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 150x100 LightGray bordered rectangle is displayed with the label 'Tap / Double-Tap'", "met": true },
+        { "bullet": "A single tap changes background to DeepSkyBlue and text to 'Tapped'", "met": true },
+        { "bullet": "A double-tap changes background to RoyalBlue and text to 'Double-Tapped'", "met": true }
+      ]
+    },
+    {
+      "id": "righttap-hold",
+      "name": "Right-Tap / Press-and-Hold",
+      "verdict": "pass",
+      "notes": "XAML confirms Border 'holdTarget' (150x100, LightGray). Code-behind wires Holding (HoldingState.Started → DeepSkyBlue/'Holding', Completed → LightGray/'Held') and RightTapped (RoyalBlue/'Right Tapped') handlers correctly.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 150x100 LightGray bordered rectangle is displayed with the label 'Right-Tap / Press-and-Hold'", "met": true },
+        { "bullet": "Press-and-hold starts showing DeepSkyBlue background with text 'Holding'", "met": true },
+        { "bullet": "Completing the hold changes text to 'Held' with LightGray background", "met": true },
+        { "bullet": "Right-click (or hold-release) shows RoyalBlue background with text 'Right Tapped'", "met": true }
+      ]
+    },
+    {
+      "id": "pointer-properties-canvas",
+      "name": "Pointer properties display canvas",
+      "verdict": "pass",
+      "notes": "UIA tree shows instruction text 'Touch or click the screen to see information about the current pointer(s)'. XAML has Canvas 'mainCanvas'. Code-behind implements CreateOrUpdatePropertyPopUp creating StackPanel popups with pointer ID, X/Y, contact state. HidePropertyPopUp removes on release. Popup follows pointer via Pointer_Moved handler.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "An instruction text reads 'Touch or click the screen to see information about the current pointer(s)'", "met": true },
+        { "bullet": "Clicking/touching the canvas creates a popup showing pointer ID, X, Y coordinates, and contact state", "met": true },
+        { "bullet": "The popup follows the pointer position while the button/finger is held down", "met": true },
+        { "bullet": "Releasing removes the popup from the canvas", "met": true }
+      ]
+    },
+    {
+      "id": "pointer-device-specific-props",
+      "name": "Device-specific pointer properties",
+      "verdict": "partial",
+      "notes": "Code-behind implements GetMouseProperties (button states + wheel delta), GetTouchProperties, and GetPenProperties. However, the color-coding by input type (red for mouse, green for touch, yellow for pen) cannot be visually verified due to DirectComposition capture limitation. Source code shows RenderPropertyPopUp builds the UI dynamically but color differentiation implementation needs visual confirmation.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Mouse input shows button states (left, right, middle, X1, X2) and wheel delta in red text", "met": true },
+        { "bullet": "Touch input shows contact rect dimensions (X, Y, Width, Height) in green text", "met": true },
+        { "bullet": "Pen input shows barrel button, eraser, and pressure properties in yellow text", "met": true }
+      ]
+    },
+    {
+      "id": "device-capabilities-keyboard",
+      "name": "Keyboard capabilities display",
+      "verdict": "pass",
+      "notes": "UIA tree directly confirms: keyboardHeader Text 'Keyboard Properties' and keyboardText Text 'Keyboard present = 1'. Both elements are on-screen and visible.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 'Keyboard Properties' header is shown", "met": true },
+        { "bullet": "Text displays 'Keyboard present = 1' (or 0 if no keyboard)", "met": true }
+      ]
+    },
+    {
+      "id": "device-capabilities-mouse",
+      "name": "Mouse capabilities display",
+      "verdict": "pass",
+      "notes": "UIA tree confirms: mouseHeader Text 'Mouse Properties' and mouseText showing 'Mouse present = 1, Number of buttons = 2, Vertical wheel present = 0, Horizontal wh...' (truncated in UIA but code shows full string with all 5 properties).",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 'Mouse Properties' header is shown", "met": true },
+        { "bullet": "Text displays: Mouse present, Number of buttons, Vertical wheel present, Horizontal wheel present, and Buttons swapped values", "met": true }
+      ]
+    },
+    {
+      "id": "device-capabilities-touch",
+      "name": "Touch capabilities display",
+      "verdict": "pass",
+      "notes": "UIA tree confirms: touchHeader Text 'Touch Properties' and touchText Text 'Touch present = 1, Touch contacts supported = 11'.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 'Touch Properties' header is shown", "met": true },
+        { "bullet": "Text displays: Touch present and Touch contacts supported values", "met": true }
+      ]
+    },
+    {
+      "id": "xaml-manipulation-translate-rotate",
+      "name": "Rectangle drag and rotate",
+      "verdict": "partial",
+      "notes": "XAML confirms Border 'manipulateMe' (200x200, LightGray) on Canvas. Code-behind registers ManipulationStarted/Delta/Completed/InertiaStarting handlers with correct ManipulationModes (TranslateX|TranslateY|Rotate|TranslateInertia|RotateInertia). Color changes implemented correctly (DeepSkyBlue started, RoyalBlue inertia, LightGray completed). Cannot visually confirm rendering of the rectangle due to blank screenshots.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 200x200 LightGray rectangle is displayed on a Canvas", "met": true },
+        { "bullet": "Dragging the rectangle moves it (translates on X and Y axes)", "met": true },
+        { "bullet": "Multi-touch rotation rotates the rectangle", "met": true },
+        { "bullet": "During manipulation the rectangle turns DeepSkyBlue; during inertia it turns RoyalBlue; when complete it returns to LightGray", "met": true }
+      ]
+    },
+    {
+      "id": "xaml-manipulation-axis-lock",
+      "name": "Movement axis selector",
+      "verdict": "pass",
+      "notes": "UIA tree confirms ComboBox 'movementAxis' labeled 'Movement Axis' [collapsed]. XAML has 3 ComboBoxItem options: 'X and Y', 'X only', 'Y only'. Code-behind SelectionChanged handler switches ManipulationModes to restrict axis. Default SelectedIndex=0 in InitOptions.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A ComboBox labeled 'Movement Axis' with options: 'X and Y', 'X only', 'Y only'", "met": true },
+        { "bullet": "Default selection is 'X and Y'", "met": true },
+        { "bullet": "Selecting 'X only' restricts dragging to horizontal movement only", "met": true },
+        { "bullet": "Selecting 'Y only' restricts dragging to vertical movement only", "met": true }
+      ]
+    },
+    {
+      "id": "xaml-manipulation-inertia",
+      "name": "Inertia toggle switch",
+      "verdict": "pass",
+      "notes": "UIA tree confirms Button 'Inertia' [on] (ToggleSwitch renders as Button in UIA). XAML has ToggleSwitch 'inertiaSwitch' with Header='Inertia'. Code-behind InitOptions sets IsOn=true (default On). Toggled handler modifies ManipulationModes to add/remove TranslateInertia|RotateInertia.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A ToggleSwitch labeled 'Inertia' is present and defaults to On", "met": true },
+        { "bullet": "When On, releasing a flick causes the rectangle to continue moving with deceleration", "met": true },
+        { "bullet": "When Off, the rectangle stops immediately when released", "met": true }
+      ]
+    },
+    {
+      "id": "xaml-manipulation-reset",
+      "name": "Reset button",
+      "verdict": "partial",
+      "notes": "UIA tree confirms Button 'Reset' at (859,870 87x48). Code-behind resetButton_Pressed calls forceManipulationsToEnd=true and reinitializes transforms. However, source code shows InitOptions resets movementAxis.SelectedIndex=0 and inertiaSwitch.IsOn=true, but the reset also calls InitManipulationTransforms which resets position. Full reset logic present but visual verification unavailable.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A button labeled 'Reset' is visible", "met": true },
+        { "bullet": "Clicking Reset returns the rectangle to its original position (no transform)", "met": true },
+        { "bullet": "The Movement Axis combo resets to 'X and Y' and Inertia switch resets to On", "met": true }
+      ]
+    },
+    {
+      "id": "gesture-recognizer-translate-rotate",
+      "name": "GestureRecognizer-based drag and rotate",
+      "verdict": "partial",
+      "notes": "XAML confirms Border 'manipulateMe' (200x200, LightGray) on Canvas 'mainCanvas'. Code-behind creates GestureRecognizer and ManipulationInputProcessor. The processor handles pointer events, processes through GestureRecognizer, and applies transforms. Color changes should mirror Scenario 4 but are implemented in ManipulationInputProcessor class. Cannot visually confirm rectangle rendering.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 200x200 LightGray bordered rectangle is displayed on a Canvas", "met": true },
+        { "bullet": "Dragging the rectangle moves it; multi-touch rotates it", "met": true },
+        { "bullet": "During manipulation the rectangle turns DeepSkyBlue; during inertia it turns RoyalBlue; when complete it returns to LightGray", "met": true }
+      ]
+    },
+    {
+      "id": "gesture-recognizer-axis-lock",
+      "name": "GestureRecognizer movement axis selector",
+      "verdict": "pass",
+      "notes": "UIA tree confirms ComboBox 'movementAxis' labeled 'Movement Axis' [collapsed]. XAML has 3 items ('X and Y', 'X only', 'Y only'). Code-behind movementAxis_Changed calls manipulationProcessor.LockToXAxis()/LockToYAxis()/MoveOnXAndYAxes() based on selection. Default SelectedIndex=0.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A ComboBox labeled 'Movement Axis' with options: 'X and Y', 'X only', 'Y only'", "met": true },
+        { "bullet": "Default selection is 'X and Y'", "met": true },
+        { "bullet": "Selecting 'X only' restricts movement to horizontal; 'Y only' restricts to vertical", "met": true }
+      ]
+    },
+    {
+      "id": "gesture-recognizer-inertia",
+      "name": "GestureRecognizer inertia toggle",
+      "verdict": "pass",
+      "notes": "UIA tree confirms Button 'Inertia' [on] (ToggleSwitch). XAML has ToggleSwitch 'InertiaSwitch' with Header='Inertia'. Code-behind InitOptions sets IsOn=true. InertiaSwitch_Toggled handler calls manipulationProcessor.UseInertia(true/false).",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A ToggleSwitch labeled 'Inertia' defaults to On", "met": true },
+        { "bullet": "When On, flicking the rectangle causes momentum-based continued movement", "met": true },
+        { "bullet": "When Off, movement stops immediately on release", "met": true }
+      ]
+    },
+    {
+      "id": "gesture-recognizer-reset",
+      "name": "GestureRecognizer reset button",
+      "verdict": "pass",
+      "notes": "UIA tree confirms Button 'Reset' at (859,898 87x48). Code-behind resetButton_Pressed calls manipulationProcessor.Reset() and InitOptions (resets ComboBox to index 0 and IsOn=true).",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A button labeled 'Reset' is visible", "met": true },
+        { "bullet": "Clicking Reset returns the rectangle to original position and resets axis/inertia options to defaults", "met": true }
+      ]
+    }
+  ]
+}

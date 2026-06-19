@@ -1,0 +1,17 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "PointerPoint.PointerDevice property removed in WinUI 3 — replaced by direct PointerDeviceType property",
+      "evidence": "build-events.jsonl line ~1050: 'Microsoft.UI.Input.PointerPoint doesn't have PointerDevice - it has PointerDeviceType directly'; CS1061 error in 2-PointerPointProperties.xaml.cs causing second build failure",
+      "skill_search": "Grepped for 'PointerDevice' and 'PointerDeviceType' in winui-uwp-migration skill — no matches found",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "MIGRATION-PATTERNS.md lists the namespace move (Windows.UI.Input → Microsoft.UI.Input) but does not document that PointerPoint's API surface changed: the .PointerDevice sub-object was removed and .PointerDeviceType became a direct property on PointerPoint",
+      "proposed_fix": "Add a subsection under Namespace Mapping or a new 'API shape changes after namespace rewrite' section in MIGRATION-PATTERNS.md documenting: `pointerPoint.PointerDevice.PointerDeviceType` → `pointerPoint.PointerDeviceType` (WinUI 3 flattened this property). Also note that PointerPoint.Properties is now accessed differently.",
+      "generalizes": "Any UWP app using pointer input (common in drawing, gesture, and touch-heavy samples) will hit this. The PointerPoint API surface change affects all code that checks device type for input routing (mouse vs touch vs pen)."
+    }
+  ]
+}

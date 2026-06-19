@@ -1,0 +1,30 @@
+{
+  "scenario": "BasicInput",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "PointerPoint.PointerDevice.PointerDeviceType causes CS1061 after namespace rewrite because WinUI 3 flattened the property",
+      "evidence": "skill-defects.json item 1; lessons.json errors_encountered[2] CS1061; dev_agent_struggles[1] second build failure",
+      "root_cause": "WinUI 3's Microsoft.UI.Input.PointerPoint removed the .PointerDevice sub-object — .PointerDeviceType is now direct. The Initialize script did not rewrite this mechanical pattern and MIGRATION-PATTERNS.md did not document it.",
+      "tier": 1,
+      "change": "Add regex replacement '.PointerDevice.PointerDeviceType' → '.PointerDeviceType' to Initialize-UwpMigration.ps1 step 3 (runs at bootstrap, cannot be ignored)",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "The PointerDevice flattening happens mechanically at bootstrap; no CS1061 error on first build",
+      "falsifiable_check": "Re-run produces zero CS1061 errors mentioning 'PointerDevice' and requires one fewer build-fix cycle"
+    },
+    {
+      "problem": "Same as above — backup documentation for agent-written code post-bootstrap",
+      "evidence": "Same as item 1",
+      "root_cause": "If the agent writes new pointer-handling code (not copied from UWP source), it needs to know the WinUI 3 API shape",
+      "tier": 3,
+      "change": "Add 'Pointer input: API shape changes after namespace rewrite' section to MIGRATION-PATTERNS.md with anchor #pointer-input",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent generating new PointerPoint code uses .PointerDeviceType directly instead of .PointerDevice.PointerDeviceType",
+      "falsifiable_check": "No CS1061 for PointerDevice in any build cycle; agent uses correct pattern in new code"
+    }
+  ],
+  "deferred_to_human": [
+    "4 partial scores are caused by WinUI 3 DirectComposition blank-screenshot limitation in the eval tool (winui3-parity-check) — not addressable in the migration skill"
+  ]
+}

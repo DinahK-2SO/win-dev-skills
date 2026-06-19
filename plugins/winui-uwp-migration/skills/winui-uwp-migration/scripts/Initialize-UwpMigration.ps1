@@ -111,6 +111,9 @@ $nsChanged = 0
 foreach ($f in $nsFiles) {
     $orig = [System.IO.File]::ReadAllText($f.FullName)
     $new = $orig -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml'
+    # Flatten PointerPoint.PointerDevice.PointerDeviceType → PointerPoint.PointerDeviceType
+    # (WinUI 3 removed the PointerDevice sub-object; PointerDeviceType is a direct property)
+    $new = $new -replace '\.PointerDevice\.PointerDeviceType', '.PointerDeviceType'
     if ($new -ne $orig) {
         [System.IO.File]::WriteAllText($f.FullName, $new)
         $nsChanged++
