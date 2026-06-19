@@ -1,0 +1,15 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Agent copied StaticResource references from UWP source XAML without verifying the resource keys existed in the target app's resource scope",
+      "evidence": "build-events.jsonl: Agent faithfully copied Scenario1-7 XAML (preserving {StaticResource SampleHeaderTextStyle}) per SKILL.md 'Copy each *.xaml verbatim, then transform' instruction, but the transform step has no checkpoint for verifying resource key availability",
+      "covered_at": "SKILL.md 'Fidelity (highest priority)' section line 176-178: 'Do not regenerate XAML from scratch. Copy each *.xaml verbatim, then transform — controls, names, and event handlers must be preserved'",
+      "why_missed": "under-emphasized — the instruction to 'copy verbatim then transform' focuses on controls/names/event handlers but never mentions that StaticResource references to external dictionaries also need transformation (either inlining the style or adding the dictionary). The transform scope is implicitly limited to namespace changes and control swaps.",
+      "proposed_improvement": "Expand the 'Fidelity' section's 'Copy each *.xaml verbatim, then transform' bullet to add: '— and verify that all {StaticResource} / {ThemeResource} keys referenced in the copied XAML are defined somewhere in the target's resource chain (App.xaml MergedDictionaries, page-level resources, or inline). If keys come from an external shared dictionary, copy that dictionary into the project and register it in App.xaml.'",
+      "generalizes": "Every UWP→WinUI 3 migration copies XAML files. Any XAML referencing resources from outside its own file (shared dictionaries, theme overrides, library resources) will hit this gap if the transform step doesn't explicitly verify resource availability."
+    }
+  ]
+}

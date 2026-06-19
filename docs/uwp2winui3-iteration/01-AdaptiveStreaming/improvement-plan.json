@@ -1,0 +1,30 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Validator passes despite all scenario pages failing at runtime due to undefined StaticResource keys from external shared ResourceDictionaries",
+      "evidence": "migration-score.json: 17/18 features fail with 'XamlParseException on Frame.Navigate due to missing Styles.xaml'. Validate-UwpMigration.ps1 reports PASS because it only checks startup, not page navigation. lessons.json missing_tooling: 'StaticResource resolution validation would have caught the missing Styles.xaml'",
+      "root_cause": "No validation check exists for XAML resource-key resolution — {StaticResource}/{ThemeResource} references are resolved at page-parse time, not startup, so the smoke launch passes while pages silently fail",
+      "tier": 1,
+      "change": "Add check 7b to Validate-UwpMigration.ps1: scan all XAML for {StaticResource X}/{ThemeResource X} references, collect all x:Key definitions in the project's resource chain, FAIL if any referenced key is not defined (with guidance to copy the external ResourceDictionary and register in App.xaml)",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Validator FAILs when shared resource dictionaries are not included, forcing the agent to fix the gap before declaring done",
+      "falsifiable_check": "On re-run, Validate-UwpMigration.ps1 emits [FAIL] XAML resource keys when Styles.xaml is not included, and agent resolves it before declaring done; scenario-navigation requirement goes partial→pass and scenario content pages load"
+    },
+    {
+      "problem": "No skill guidance on what to do with external/shared ResourceDictionary files that UWP samples reference (SharedContent/xaml/Styles.xaml)",
+      "evidence": "skill-defects.json item 1: 'The skill has zero guidance on handling external/shared resource files'. lessons.json dev_agent_struggles: 'Agent read SharedContent/xaml directory, saw Styles.xaml...but never created corresponding styles in the WinUI 3 project'. skill-coverage-gaps.json: 'copy verbatim then transform' instruction doesn't mention StaticResource availability",
+      "root_cause": "SKILL.md has no step between bootstrap and file-by-file migration that handles resources from outside the -Source directory; the Fidelity section's transform scope is implicitly limited to namespace changes and control swaps",
+      "tier": 3,
+      "change": "Add Step 0b 'Resolve external shared resources' to SKILL.md with concrete instructions (scan for unresolved keys, locate defining dictionary, copy+namespace-rewrite, register in App.xaml MergedDictionaries). Augment Fidelity section's 'Copy verbatim then transform' bullet to explicitly include verifying resource key availability.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent knows to look for and include external ResourceDictionaries after bootstrap, before starting file-by-file migration. Even if agent skips the prose, the Tier 1 validator check catches the omission.",
+      "falsifiable_check": "On re-run, agent copies SharedContent/xaml/Styles.xaml (or equivalent) into the WinUI 3 project and registers it in App.xaml before starting Step 1; all 7 scenario pages render content"
+    }
+  ],
+  "deferred_to_human": [
+    "Tier 0 (harness): Consider adding a -SharedContent parameter to Initialize-UwpMigration.ps1 that auto-detects shared resource directories from the .sln project references and copies them during bootstrap. This would make the fix fully mechanical (Tier 1) rather than relying on agent judgement to find the right directory."
+  ]
+}

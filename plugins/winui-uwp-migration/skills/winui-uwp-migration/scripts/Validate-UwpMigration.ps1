@@ -501,6 +501,92 @@ if (-not $csproj) {
     }
 }
 
+# ─── 7b. XAML resource-key resolution ─────────────────────────────────────────
+# XAML {StaticResource} and {ThemeResource} references are resolved at page-
+# parse time (Frame.Navigate), not at startup. A missing key silently fails
+# navigation — the app launches fine but every page referencing an undefined
+# resource throws XamlParseException. This check collects all resource keys
+# defined in the app's resource chain and verifies that every referenced key
+# resolves. Catches the common case of forgetting to include external/shared
+# ResourceDictionary files (e.g. SharedContent/xaml/Styles.xaml in SDK samples).
+$xamlFiles = Get-ChildItem -Path $Target -Recurse -File -Filter '*.xaml' -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch $excludePattern }
+
+# Collect defined resource keys (x:Key attributes in ResourceDictionary scope)
+$definedKeys = New-Object System.Collections.Generic.HashSet[string]
+# Also collect theme resource keys from the WinUI 3 platform (common ones that
+# don't need local definition — e.g. SystemAccentColor, SystemControlForeground*)
+# We whitelist anything starting with "System" or ending with "ThemeResource" to
+# avoid false positives on platform-provided theme resources.
+$platformPrefixes = @('System', 'TextControl', 'AppBar', 'NavigationView', 'TreeView', 'ListView', 'ComboBox', 'Button', 'ToggleSwitch', 'Slider', 'ProgressBar', 'ProgressRing', 'ContentDialog', 'Flyout', 'MenuFlyout', 'ToolTip', 'AutoSuggestBox', 'CalendarView', 'DatePicker', 'TimePicker', 'Pivot', 'Hub', 'ScrollViewer', 'RichEditBox', 'TextBox', 'PasswordBox', 'CheckBox', 'RadioButton', 'HyperlinkButton', 'RepeatButton', 'GridView', 'FlipView', 'MediaTransport', 'CommandBar', 'InfoBar', 'TeachingTip', 'TabView', 'NumberBox', 'Expander', 'BreadcrumbBar', 'PipsPager', 'ColorPicker', 'PersonPicture', 'RatingControl', 'SplitButton', 'DropDownButton', 'ToggleSplitButton', 'MenuBar')
+
+foreach ($xf in $xamlFiles) {
+    $xContent = [System.IO.File]::ReadAllText($xf.FullName)
+    # Match x:Key="..." or x:Name="..." in resource contexts
+    foreach ($m in [regex]::Matches($xContent, 'x:Key="([^"]+)"')) {
+        [void]$definedKeys.Add($m.Groups[1].Value)
+    }
+}
+
+# Collect referenced resource keys ({StaticResource X} and {ThemeResource X})
+$referencedKeys = New-Object System.Collections.Generic.Dictionary[string,[System.Collections.Generic.List[string]]]
+foreach ($xf in $xamlFiles) {
+    $xContent = [System.IO.File]::ReadAllText($xf.FullName)
+    $rel = [System.IO.Path]::GetRelativePath($Target, $xf.FullName)
+    foreach ($m in [regex]::Matches($xContent, '\{(?:StaticResource|ThemeResource)\s+([^}]+)\}')) {
+        $key = $m.Groups[1].Value.Trim()
+        if (-not $referencedKeys.ContainsKey($key)) {
+            $referencedKeys[$key] = New-Object System.Collections.Generic.List[string]
+        }
+        if (-not $referencedKeys[$key].Contains($rel)) {
+            [void]$referencedKeys[$key].Add($rel)
+        }
+    }
+}
+
+# Filter: remove keys that are defined locally or are platform-provided
+$unresolvedKeys = New-Object System.Collections.Generic.List[object]
+foreach ($kvp in $referencedKeys.GetEnumerator()) {
+    $key = $kvp.Key
+    if ($definedKeys.Contains($key)) { continue }
+    # Platform theme resource heuristic: if key starts with a known platform prefix, skip
+    $isPlatform = $false
+    foreach ($prefix in $platformPrefixes) {
+        if ($key.StartsWith($prefix)) { $isPlatform = $true; break }
+    }
+    if ($isPlatform) { continue }
+    # Also skip keys that look like platform-defined colors/brushes (common suffixes)
+    if ($key -match '(Brush|Color|FontSize|FontFamily|Thickness|Margin|Padding|Height|Width|CornerRadius|Opacity)$' -and $key -match '^[A-Z]') {
+        # Likely a platform resource — only flag if it looks app-specific
+        # (contains "Sample", "App", "Custom", or other non-platform patterns)
+        if ($key -notmatch '(Sample|App|Custom|Local|My|Page|Scenario|Main|Content|Header|Description|Title|Subtitle|Body|Caption)') { continue }
+    }
+    [void]$unresolvedKeys.Add([PSCustomObject]@{ Key = $key; Files = $kvp.Value })
+}
+
+if ($unresolvedKeys.Count -eq 0) {
+    Write-Host "[PASS] XAML resource keys — all {StaticResource}/{ThemeResource} references resolve in the app's resource chain"
+} else {
+    Write-Host "[FAIL] XAML resource keys — $($unresolvedKeys.Count) referenced key(s) not defined anywhere in the app's XAML ResourceDictionaries:"
+    $diagBlock = New-Object System.Collections.Generic.List[string]
+    $shownN = 0
+    foreach ($u in $unresolvedKeys) {
+        $fileList = ($u.Files | Select-Object -First 3) -join ', '
+        if ($u.Files.Count -gt 3) { $fileList += " (+$($u.Files.Count - 3) more)" }
+        [void]$diagBlock.Add("  Key: $($u.Key)  Referenced in: $fileList")
+        if ($shownN -lt 10) {
+            Write-Host "       $($u.Key)  (in: $fileList)"
+            $shownN++
+        }
+    }
+    if ($unresolvedKeys.Count -gt 10) { Write-Host "       ($($unresolvedKeys.Count - 10) more — see .validator-diagnostics.txt)" }
+    Write-Host "       Fix: locate the ResourceDictionary that defines these keys (often a SharedContent/ or"
+    Write-Host "       Common/ folder outside the project). Copy it into the project and register it in App.xaml"
+    Write-Host "       under <ResourceDictionary.MergedDictionaries>. Or define the styles inline if simple."
+    Add-Diag 'XAML resource-key resolution' (($diagBlock) -join "`r`n")
+    $failures++
+}
+
 # ─── 7. Runtime smoke launch ──────────────────────────────────────────────────
 # A packaged WinUI 3 app can build cleanly and still crash on startup. A common
 # UWP→WinUI 3 culprit is the static-window init-order race (a Page reads

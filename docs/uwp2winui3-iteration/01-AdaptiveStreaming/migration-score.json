@@ -1,0 +1,246 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "scored_at": "2026-06-19T17:33:19Z",
+  "app_launched": true,
+  "total_features": 18,
+  "pass": 0,
+  "partial": 1,
+  "fail": 17,
+  "weighted_score_pct": 5.0,
+  "features": [
+    {
+      "id": "scenario-navigation",
+      "name": "Scenario list navigation",
+      "verdict": "partial",
+      "notes": "UIA tree confirms all 7 scenario titles are displayed in a ListBox (ListItems with correct names). First item is selected (IsSelected: True). However, no content page loads when a scenario is selected - the content area is completely empty (no buttons, text boxes, media players, or any other controls appear in the UIA tree beyond the list itself). Navigation display works but page loading is broken.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": "screenshots/winui3-scenario-navigation.png",
+      "expected_behaviour_results": [
+        { "bullet": "A list of 7 scenario titles is visible: Simplest Adaptive Streaming, Event Handlers, Network Request Modification, Adaptive Streaming Tuning, Metadata, Ad Insertion, Live Seekable Range", "met": true },
+        { "bullet": "Clicking a scenario title navigates to that scenario's page content", "met": false },
+        { "bullet": "The currently selected scenario is visually highlighted", "met": true }
+      ]
+    },
+    {
+      "id": "scenario1-load-button",
+      "name": "Load button triggers playback",
+      "verdict": "fail",
+      "notes": "No content page loads for Scenario 1. UIA tree search for 'Load' button returns 0 matches. The scenario content frame is empty - no buttons, no description text, no MediaPlayerElement visible.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 'Load' button is displayed at the top of the scenario page", "met": false },
+        { "bullet": "Clicking 'Load' causes the MediaPlayerElement to begin loading/playing content", "met": false },
+        { "bullet": "A description text block explains the implicit AdaptiveMediaSource creation", "met": false }
+      ]
+    },
+    {
+      "id": "media-player-element",
+      "name": "MediaPlayerElement with transport controls",
+      "verdict": "fail",
+      "notes": "No MediaPlayerElement is present anywhere in the UIA tree. The content area where it should appear is completely empty.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A media player area is visible occupying the main content region", "met": false },
+        { "bullet": "Transport controls are visible at the bottom of the player (play/pause, timeline, volume, fullscreen)", "met": false },
+        { "bullet": "Transport controls respond to user interaction", "met": false }
+      ]
+    },
+    {
+      "id": "content-selector-load-id",
+      "name": "Load by content ID",
+      "verdict": "fail",
+      "notes": "No ContentSelector controls (ComboBox, 'Load Id:' button) found in UIA tree. Scenario content pages do not load.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A ComboBox displays available content models from the Azure Media Services stub list", "met": false },
+        { "bullet": "A 'Load Id:' button is present next to the ComboBox", "met": false },
+        { "bullet": "Clicking 'Load Id:' loads the selected content into the media player", "met": false }
+      ]
+    },
+    {
+      "id": "content-selector-load-uri",
+      "name": "Load by custom URI",
+      "verdict": "fail",
+      "notes": "No TextBox or 'Load Uri:' button found in UIA tree. Content pages do not render.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A TextBox with URL input scope is available for entering a custom URI", "met": false },
+        { "bullet": "A 'Load Uri:' button is present next to the TextBox", "met": false },
+        { "bullet": "Clicking 'Load Uri:' loads the entered manifest URL into the media player", "met": false }
+      ]
+    },
+    {
+      "id": "content-selector-set-source",
+      "name": "Set Source button and AutoPlay checkbox",
+      "verdict": "fail",
+      "notes": "No 'Set Source' button or 'AutoPlay' checkbox found in UIA tree. Content pages do not render.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A 'Set Source' button is present (disabled until content is loaded)", "met": false },
+        { "bullet": "An 'AutoPlay' checkbox is present, unchecked by default", "met": false },
+        { "bullet": "Checking AutoPlay causes loaded content to begin playing automatically", "met": false }
+      ]
+    },
+    {
+      "id": "scenario2-bitrate-indicators",
+      "name": "Download and playback bitrate indicators",
+      "verdict": "fail",
+      "notes": "Scenario 2 content page does not load. No bitrate indicators visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A download icon (Download symbol) with a bar-level icon and bitrate text is shown", "met": false },
+        { "bullet": "A playback icon (Play symbol) with a bar-level icon and bitrate text is shown", "met": false },
+        { "bullet": "The bar icons update dynamically as the adaptive streaming engine changes bitrates", "met": false }
+      ]
+    },
+    {
+      "id": "scenario2-log-view",
+      "name": "Event log view",
+      "verdict": "fail",
+      "notes": "Scenario 2 content page does not load. No LogView panel visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A log panel is visible at the bottom of the scenario page", "met": false },
+        { "bullet": "Streaming events are logged in real time as playback progresses", "met": false },
+        { "bullet": "Events include adaptive source opened, download state changes, and bitrate switches", "met": false }
+      ]
+    },
+    {
+      "id": "scenario3-auth-method",
+      "name": "Authorization method radio buttons",
+      "verdict": "fail",
+      "notes": "Scenario 3 content page does not load. No radio buttons visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Four radio buttons are displayed: None, Authorization Header, Url Query Parameter, Application Downloaded", "met": false },
+        { "bullet": "Authorization Header is selected by default", "met": false },
+        { "bullet": "Selecting a different method changes how the key request is authenticated", "met": false }
+      ]
+    },
+    {
+      "id": "scenario3-hdcp-protection",
+      "name": "HDCP protection level controls",
+      "verdict": "fail",
+      "notes": "Scenario 3 content page does not load. No HDCP radio buttons visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Three radio buttons for HDCP: Off, On, On With Type Enforcement", "met": false },
+        { "bullet": "HDCP Off is selected by default", "met": false },
+        { "bullet": "Effective protection text and desired max bitrate text update when selection changes", "met": false }
+      ]
+    },
+    {
+      "id": "scenario4-bitrate-tuning",
+      "name": "Min/Initial/Max bitrate ComboBoxes",
+      "verdict": "fail",
+      "notes": "Scenario 4 content page does not load. No ComboBoxes visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Three ComboBoxes labeled 'Min Bitrate', 'Initial Bitrate', and 'Max Bitrate' are displayed", "met": false },
+        { "bullet": "ComboBoxes are populated with available bitrate values from the content", "met": false },
+        { "bullet": "Changing a selection constrains the adaptive streaming engine to respect the new limit", "met": false }
+      ]
+    },
+    {
+      "id": "scenario4-advanced-tuning",
+      "name": "Downgrade ratio and headroom ratio controls",
+      "verdict": "fail",
+      "notes": "Scenario 4 content page does not load. No TextBox/Set button pairs visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A TextBox and 'Set' button for 'Downgrade ratio' are displayed", "met": false },
+        { "bullet": "A TextBox and 'Set' button for 'Desired headroom ratio' are displayed", "met": false },
+        { "bullet": "Clicking 'Set' applies the entered numeric value to the adaptive media source", "met": false }
+      ]
+    },
+    {
+      "id": "scenario4-inbound-bitrate",
+      "name": "Inbound bits per second display",
+      "verdict": "fail",
+      "notes": "Scenario 4 content page does not load. No inbound bitrate display visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "An inbound bitrate icon and text display the measured network throughput", "met": false },
+        { "bullet": "The value updates dynamically during playback", "met": false }
+      ]
+    },
+    {
+      "id": "scenario5-metadata",
+      "name": "Timed metadata display",
+      "verdict": "fail",
+      "notes": "Scenario 5 content page does not load. No metadata controls or log view visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Content with timed metadata can be loaded via the ContentSelector", "met": false },
+        { "bullet": "Metadata events are logged in the LogView as they are encountered during playback", "met": false },
+        { "bullet": "The description explains HLS/DASH metadata sources", "met": false }
+      ]
+    },
+    {
+      "id": "scenario6-ad-insertion",
+      "name": "Ad insertion with progress reporting",
+      "verdict": "fail",
+      "notes": "Scenario 6 content page does not load. No ad insertion controls visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Loading content triggers a playlist with pre-roll ads, main content with mid-roll ads at 10%, and post-roll ads", "met": false },
+        { "bullet": "Playback progress events are logged in the LogView", "met": false },
+        { "bullet": "The MediaPlayerElement plays through the ad sequence and main content", "met": false }
+      ]
+    },
+    {
+      "id": "scenario7-seekable-window",
+      "name": "Live seekable range controls",
+      "verdict": "fail",
+      "notes": "Scenario 7 content page does not load. No seekable window controls visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "MaxSeekableWindowSize and MinLiveOffset are displayed as read-only text", "met": false },
+        { "bullet": "DesiredSeekableWindowSize has a TextBox and Set button to adjust the DVR window", "met": false },
+        { "bullet": "DesiredLiveOffset has a TextBox and Set button to adjust how far behind live edge to play", "met": false }
+      ]
+    },
+    {
+      "id": "scenario7-position-slider",
+      "name": "Position slider and time display",
+      "verdict": "fail",
+      "notes": "Scenario 7 content page does not load. No position slider or time labels visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "StartPosition, CurrentPosition, and EndPosition text labels display time values", "met": false },
+        { "bullet": "A horizontal slider allows seeking within the seekable range", "met": false },
+        { "bullet": "Position values update as playback progresses", "met": false }
+      ]
+    },
+    {
+      "id": "scenario7-seek-buttons",
+      "name": "Discrete seek and playback control buttons",
+      "verdict": "fail",
+      "notes": "Scenario 7 content page does not load. No seek buttons visible in UIA tree.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Seek buttons for fixed amounts (2s, 30s, 5m, 15m forward and back) are displayed", "met": false },
+        { "bullet": "GoToStart and GoToLive buttons are displayed", "met": false },
+        { "bullet": "Play and Pause buttons with symbol icons are present", "met": false },
+        { "bullet": "A 'Log Times' button logs the current time correlation to the LogView", "met": false }
+      ]
+    }
+  ]
+}

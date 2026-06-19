@@ -1,0 +1,27 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Shared/external XAML ResourceDictionaries (e.g. SharedContent/xaml/Styles.xaml) not migrated into WinUI 3 app, causing runtime XamlParseException on any page referencing those styles",
+      "evidence": "results.json: all 7 requirements fail with reason 'XamlParseException on Frame.Navigate due to missing Styles.xaml'. build-events.jsonl turns 28-35: agent reads SharedContent/xaml/Styles.xaml but never creates it in the output. App.xaml has empty ResourceDictionary.MergedDictionaries.",
+      "skill_search": "Grepped SKILL.md and MIGRATION-PATTERNS.md for: SharedContent, shared, resource dictionary, ResourceDictionary, merged dict, Styles.xaml, StaticResource, external resource, copy style, migrate style, include style, shared project, common files",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill has zero guidance on handling external/shared resource files that UWP samples depend on. Initialize-UwpMigration.ps1 only copies from the -Source directory and has no awareness of shared content folders. SKILL.md never mentions that UWP samples often reference resources from a sibling SharedContent project that must be included in the WinUI 3 app's App.xaml ResourceDictionary.",
+      "proposed_fix": "Add a section to SKILL.md (after Step 1, before Step 2) titled 'Handling shared/external resources'. Content: (1) After bootstrap, scan copied XAML for {StaticResource X} and {ThemeResource X} keys. (2) If any key is not defined within the project's own XAML files, check the hint path (SharedContent folder) for ResourceDictionary files defining those keys. (3) Copy the relevant .xaml file into the WinUI 3 project (e.g. as Styles/Styles.xaml). (4) Register it in App.xaml under ResourceDictionary.MergedDictionaries: <ResourceDictionary Source=\"Styles/Styles.xaml\" />. Also add a -SharedContent parameter to Initialize-UwpMigration.ps1 that auto-copies and registers shared XAML ResourceDictionaries.",
+      "generalizes": "Many UWP SDK samples (and real-world apps) depend on external ResourceDictionary files from shared projects or shared folders. Any multi-project UWP solution with a shared styles/templates project will hit this same gap. This affects all samples that use SharedContent/xaml/Styles.xaml (nearly every SDK sample with the multi-scenario pattern)."
+    },
+    {
+      "problem": "No guidance on ensuring StaticResource references resolve at runtime (build succeeds but XAML fails at navigation time)",
+      "evidence": "App builds with 0 errors, Validate-UwpMigration.ps1 reports PASS, but all scenario pages throw XamlParseException at runtime because {StaticResource SampleHeaderTextStyle} is undefined. The skill's Step 3 only covers build errors and startup crashes, not navigation-time XAML resolution failures.",
+      "skill_search": "Grepped for: StaticResource, runtime error, XamlParse, navigation, resolve, undefined resource",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "SKILL.md Step 3 says 'build → fix the first error → launch → repeat' but launch only means 'survives startup'. There's no guidance to actually navigate through the app's pages to verify content loads. XAML StaticResource resolution happens at parse time (when the page is navigated to), not at app startup, so a missing resource won't crash the app — it silently fails the specific page navigation.",
+      "proposed_fix": "Add to SKILL.md Step 3 (after the build loop paragraph): 'After the app launches successfully, verify that page navigation works. XAML {StaticResource} and {ThemeResource} references are resolved at page-parse time, not at startup — a missing resource key won't crash the app but will silently fail Frame.Navigate() for any page referencing it. If the source uses shared styles from an external ResourceDictionary, ensure those are registered in App.xaml before declaring launch success.'",
+      "generalizes": "Any UWP→WinUI 3 migration where pages reference resources defined outside their own file (merged dictionaries, theme resources, shared styles) will silently fail at navigation time rather than at build or startup. This is a general XAML platform behavior that affects all migrations with non-trivial resource structures."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "score": 21,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Scenario 1 - Simplest Adaptive Streaming with Load button and MediaPlayerElement", "status": "fail", "reason": "Scenario 1 frame is empty. XamlParseException on Frame.Navigate due to missing Styles.xaml (SampleHeaderTextStyle, ScenarioDescriptionTextStyle undefined).", "suspected_skill_gap": "Skill has no guidance on migrating external shared resource dictionaries (SharedContent/xaml/Styles.xaml) into the WinUI 3 app" },
+    { "id": 2, "text": "Scenario 2 - Event Handlers with bitrate indicators and LogView", "status": "fail", "reason": "Same root cause — Scenario 2 frame empty due to XamlParseException from missing Styles.xaml.", "suspected_skill_gap": "Same as Req 1 — missing shared resources" },
+    { "id": 3, "text": "Scenario 3 - Request Modification with auth and HDCP controls", "status": "fail", "reason": "Same root cause — XamlParseException from missing Styles.xaml.", "suspected_skill_gap": "Same as Req 1 — missing shared resources" },
+    { "id": 4, "text": "Scenario 4 - Adaptive Streaming Tuning with bitrate ComboBoxes", "status": "fail", "reason": "Same root cause — XamlParseException from missing Styles.xaml.", "suspected_skill_gap": "Same as Req 1 — missing shared resources" },
+    { "id": 5, "text": "Scenario 5 - Metadata with timed metadata events", "status": "fail", "reason": "Same root cause — XamlParseException from missing Styles.xaml.", "suspected_skill_gap": "Same as Req 1 — missing shared resources" },
+    { "id": 6, "text": "Scenario 6 - Ad Insertion with progress reporting", "status": "fail", "reason": "Same root cause — XamlParseException from missing Styles.xaml.", "suspected_skill_gap": "Same as Req 1 — missing shared resources" },
+    { "id": 7, "text": "Scenario 7 - Live Seekable Range with DVR controls", "status": "fail", "reason": "Same root cause — XamlParseException from missing Styles.xaml.", "suspected_skill_gap": "Same as Req 1 — missing shared resources" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Scenario navigation content area", "uwp": "Selecting a scenario navigates to a content page with controls (buttons, media player, etc.)", "winui": "Scenario list renders but content area is completely empty — white/blank after navigation", "screenshot_ref": "screenshots/winui3-scenario-navigation.png" }
+  ],
+  "missing_features": [
+    "All scenario page content (scenarios 1-7) due to runtime XamlParseException from undefined StaticResource keys",
+    "MediaPlayerElement (not visible in any scenario)",
+    "ContentSelector control (not reachable due to navigation failure)",
+    "LogView control (not reachable due to navigation failure)",
+    "All interactive controls (Load buttons, ComboBoxes, radio buttons, sliders, seek buttons)"
+  ],
+  "summary": "The app builds and launches showing a NavigationView with all 7 scenario titles listed. However, navigating to ANY scenario page throws XamlParseException because SharedContent/xaml/Styles.xaml (defining SampleHeaderTextStyle, ScenarioDescriptionTextStyle) was never migrated into the WinUI 3 app's ResourceDictionary. This single omission causes 100% scenario content failure. Score: 21/100 (only shell/navigation chrome earns points)."
+}

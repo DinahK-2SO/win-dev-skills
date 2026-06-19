@@ -60,6 +60,28 @@ Do:
 
 The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you exactly what it did, what artifacts now exist, and what to do next. Read that block; do not re-derive the same info by browsing the tree.
 
+### Step 0b — Resolve external shared resources
+
+Many UWP apps (especially SDK samples) reference styles, templates, or brushes from an **external** `ResourceDictionary` that lives outside the project folder — typically a `SharedContent/xaml/Styles.xaml` sibling or a shared project. These resources are referenced via `{StaticResource}` / `{ThemeResource}` in XAML but are not part of the `-Source` directory the bootstrap copies.
+
+After the bootstrap completes, check for unresolved resource references:
+
+1. **Scan** the copied XAML files for `{StaticResource X}` and `{ThemeResource X}` keys that are *not* defined anywhere in the target project's own XAML.
+2. **Locate** the defining `ResourceDictionary` — look in sibling directories (e.g. `SharedContent/`, `Common/`, a parallel project) or the `.sln`'s project references.
+3. **Copy** the relevant `.xaml` ResourceDictionary file into the WinUI 3 project (e.g. as `Styles/Styles.xaml`). Apply the same `Windows.UI.Xaml` → `Microsoft.UI.Xaml` namespace rewrite.
+4. **Register** it in `App.xaml` under `<ResourceDictionary.MergedDictionaries>`:
+   ```xml
+   <Application.Resources>
+       <ResourceDictionary>
+           <ResourceDictionary.MergedDictionaries>
+               <ResourceDictionary Source="Styles/Styles.xaml" />
+           </ResourceDictionary.MergedDictionaries>
+       </ResourceDictionary>
+   </Application.Resources>
+   ```
+
+**Why this matters:** XAML `{StaticResource}` references are resolved at page-parse time (when `Frame.Navigate` instantiates the page), *not* at app startup. A missing key won't crash the app — it silently fails `Frame.Navigate()` for every page that references it. The app appears to launch fine but all content pages are blank. `Validate-UwpMigration.ps1` now checks for this (XAML resource-key resolution check), so skipping this step will cause validation failure.
+
 ### Step 1 — Migrate, file by file
 
 Open `MIGRATION-MAPPING.md`. Every row already has a final Triage label (`migrate-as-is`, `migrate-with-adaptation`, `defer`). The bootstrap also injected `// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` (or `<!-- … -->` in XAML) above every line that needs adaptation, and recorded a per-file execution mode in `.bootstrap-meta.json`.
@@ -155,7 +177,8 @@ The validator covers:
 4. **`MIGRATION-DEFERRED.md` consistency** — every defer row in mapping has a matching row in the deferred file.
 5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability.
 6. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
-7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
+7. **XAML resource-key resolution** — every `{StaticResource X}` / `{ThemeResource X}` reference in XAML resolves to a key defined in the app's resource chain. Catches the common case of forgetting to include external shared ResourceDictionary files (see Step 0b).
+8. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
 
 The validator's stdout is intentionally terse: `[FAIL]` lines show only `file:line` (plus an error code where applicable). The full diagnostic text — code snippets, compiler error messages — is written to `.validator-diagnostics.txt` at the project root. **Open that file** to read the details before deciding the fix.
 
@@ -175,7 +198,7 @@ After PASS, do a final `winapp build` to confirm the build is still clean. Only 
 
 - Every page, UserControl, helper class, and XAML element in the source must appear in the target — unless explicitly deferred with a cited unsupported API.
 - Silent omission is a defect. If `MIGRATION-MAPPING.md` is missing a file you expected, the bootstrap input was wrong — fix the `-Source` path and re-run, do not patch by hand.
-- Do not regenerate XAML from scratch. Copy each `*.xaml` verbatim, then transform — controls, names, and event handlers must be preserved so the code-behind continues to compile.
+- Do not regenerate XAML from scratch. Copy each `*.xaml` verbatim, then transform — controls, names, and event handlers must be preserved so the code-behind continues to compile. After copying, verify that all `{StaticResource}` / `{ThemeResource}` keys referenced in the XAML are defined somewhere in the target's resource chain (App.xaml MergedDictionaries, page-level resources, or inline). If keys come from an external shared dictionary, copy that dictionary into the project and register it in App.xaml (see Step 0b).
 
 ### API-level
 

@@ -1,0 +1,29 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "winui-uwp-migration skill", "evidence": "Bootstrap ran successfully, namespace rewrites completed, MIGRATION-MAPPING.md seeded correctly with 121 rows" },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Reported PASS on residue grep, TODO markers, mapping integrity, build cleanliness, and runtime smoke launch" }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1", "problem": "Passed despite critical runtime failure — scenario page navigation crashes with XamlParseException due to missing StaticResource definitions, but the validator only checks app-survives-startup, not navigation functionality", "evidence": "Validator reports [PASS] on all 7 checks including smoke launch, yet all 7 scenario pages throw XamlParseException at runtime when navigated to" }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Only copies files from the -Source directory (the UWP project folder). Does not process external shared resource files (SharedContent/xaml/Styles.xaml) that the UWP sample depends on via project references", "suggested_tweak": "Add a -SharedContent parameter (or auto-detect from the .sln/.csproj project references) that copies and registers shared XAML resource dictionaries in App.xaml" }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [],
+  "errors_encountered": [
+    { "error": "CS1503: Argument 1: cannot convert from 'System.Net.Http.HttpMethod' to 'Windows.Web.Http.HttpMethod'", "root_cause": "Scenario3_RequestModification.cs uses Windows.Web.Http alongside System.Net.Http causing ambiguity after namespace migration", "fix": "Dev-agent resolved by disambiguating using statements and explicit type references" },
+    { "error": "Runtime XamlParseException on Frame.Navigate(typeof(Scenario1_SimplestAdaptiveStreaming))", "root_cause": "Scenario XAML pages reference {StaticResource SampleHeaderTextStyle} and {StaticResource ScenarioDescriptionTextStyle} which were defined in SharedContent/xaml/Styles.xaml but never included in the WinUI 3 app's resource dictionary", "fix": "Should have created a Styles.xaml in the WinUI 3 project and merged it into App.xaml's ResourceDictionary.MergedDictionaries" }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turns 28-35 (reading SharedContent)", "symptom": "Agent read SharedContent/xaml directory, saw Styles.xaml, App.xaml, MainPage.xaml, read Styles.xaml content in full, but never created corresponding styles in the WinUI 3 project", "turns_or_retries": "~7 turns exploring SharedContent files", "root_cause": "No skill guidance on what to do with external shared resource files — the agent treated them as reference material but didn't include them in the output", "how_resolved": "Not resolved — this is the root cause of the 21/100 score", "preventable_by": "Skill section: 'Handling external shared resources (SharedContent)' explaining that shared XAML ResourceDictionaries must be copied to the target and merged into App.xaml" },
+    { "where": "Build turns 85-93", "symptom": "CS1503 and CS0104 errors from HttpMethod type ambiguity between System.Net.Http and Windows.Web.Http", "turns_or_retries": "~8 turns (2 build attempts + code edits)", "root_cause": "Namespace migration left both System.Net.Http and Windows.Web.Http types in scope without disambiguation", "how_resolved": "Agent explicitly qualified type references and reorganized using statements", "preventable_by": "MIGRATION-PATTERNS.md section on Windows.Web.Http → System.Net.Http migration with disambiguation rules" }
+  ],
+  "missing_tooling": [
+    { "need": "StaticResource resolution validation — a check that all {StaticResource X} and {ThemeResource X} references in XAML can resolve against the app's resource dictionary chain", "would_have_saved": "Would have caught the missing Styles.xaml before the trial ended, preventing all 17 feature failures" }
+  ],
+  "env_issues": []
+}

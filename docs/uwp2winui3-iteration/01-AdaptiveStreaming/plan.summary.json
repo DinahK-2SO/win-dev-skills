@@ -1,0 +1,17 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Add XAML resource-key resolution check to Validate-UwpMigration.ps1 — FAILs when {StaticResource}/{ThemeResource} keys reference undefined resources, catching missing shared dictionaries before the agent declares done (Tier 1, un-ignorable)",
+    "Add Step 0b to SKILL.md — instructs agent to resolve external shared ResourceDictionaries (scan for unresolved keys, locate source, copy+rewrite, register in App.xaml MergedDictionaries) after bootstrap",
+    "Augment Fidelity section — 'copy verbatim then transform' now explicitly includes verifying that all resource key references resolve in the target's resource chain"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Tier 0: Add -SharedContent parameter to Initialize-UwpMigration.ps1 for automatic shared resource detection from .sln project references"
+  ]
+}
