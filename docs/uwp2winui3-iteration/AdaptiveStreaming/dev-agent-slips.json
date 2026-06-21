@@ -1,0 +1,14 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Missing image assets (microsoft-sdk.png, windows-sdk.png) referenced by MainPage.xaml but not present in migrated project's Assets directory",
+      "evidence": "MainPage.xaml references Assets/microsoft-sdk.png and Assets/windows-sdk.png. These files exist in the UWP build output (bin/x64/Debug/AppX/Assets/) but were not copied to the migrated project's Assets/ folder. The MIGRATION-MAPPING.md maps these from bin/ (build artifacts) as 'migrate-as-is: done' but they are not source files.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md § 'Package.appxmanifest — reconcile image references with the assets you actually have' covers image asset reconciliation clearly. The skill also says 'Do not regenerate XAML from scratch. Copy each *.xaml verbatim, then transform' — which implies preserving the referenced assets. The bootstrap mapped these build artifacts as source files, and the agent should have noticed the assets don't exist.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already covers asset reconciliation. The issue is that the bootstrap incorrectly mapped bin/ build output as source files. This is a bootstrap quirk for this specific UWP project layout, not a generalizable skill gap."
+    }
+  ]
+}

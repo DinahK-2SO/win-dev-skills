@@ -1,0 +1,20 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Shell conversion table says 'MainPage + ListView + Frame' but UWP SDK samples use ListBox, not ListView. Agent didn't match the pattern and preserved the broken SplitView+ListBox shell.",
+      "evidence": "migration-score.json: 9/12 features FAIL because SplitView pane doesn't render in WinUI 3. SKILL.md line 96 specifies 'ListView' but AdaptiveStreaming uses 'ListBox'. Agent fell through to fallback 'preserve structure' which produced a non-functional navigation pane.",
+      "root_cause": "Pattern match too narrow — 'ListView' excludes the 'ListBox' variant used by all UWP SDK samples.",
+      "tier": 3,
+      "change": "Broaden SKILL.md shell conversion table row from 'MainPage + ListView + Frame' to 'MainPage + ListView/ListBox + Frame'",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent matches the SDK-sample idiom pattern for any ListBox or ListView-based navigation and converts to NavigationView + Frame instead of preserving the broken SplitView.",
+      "falsifiable_check": "On re-run of AdaptiveStreaming (or any SDK sample with ListBox navigation), the app navigation pane renders and all scenarios are reachable → app-shell-navigation goes fail→pass, weighted score rises from 20% to 80%+"
+    }
+  ],
+  "deferred_to_human": [
+    "TIER 0: Validator (Validate-UwpMigration.ps1) could check that the navigation surface renders and all scenarios are reachable, not just that the process stays alive. This would catch shell rendering failures before the agent declares success. Out of scope for the migration skill."
+  ]
+}

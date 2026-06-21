@@ -1,0 +1,15 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Shell conversion table says 'MainPage + ListView + Frame (SDK-sample idiom)' but UWP SDK samples actually use ListBox, not ListView. The agent saw ListBox in the source, didn't match it to the table entry, and preserved the SplitView+ListBox structure which fails to render in WinUI 3.",
+      "evidence": "SKILL.md line 96 says 'MainPage + ListView + Frame (SDK-sample idiom) → NavigationView + Frame'. The UWP AdaptiveStreaming source MainPage.xaml uses <ListBox x:Name='ScenarioControl'> inside a <SplitView>. The agent preserved this pattern verbatim. The SplitView pane fails to render in WinUI 3, making all 7 scenarios unreachable (see screenshots/winui3-app-shell-navigation.png).",
+      "covered_at": "SKILL.md § 'Shell conversion' table, line 96",
+      "why_missed": "The table specifically says 'ListView' but the actual UWP SDK samples use 'ListBox'. The agent correctly noted the source doesn't use ListView and fell through to the fallback rule 'preserve its structure as faithfully as controls allow'. The pattern match is too narrow.",
+      "proposed_improvement": "Broaden the SDK-sample idiom row in the shell conversion table from 'MainPage + ListView + Frame' to 'MainPage + ListView/ListBox + Frame'. This makes the pattern match any UWP SDK sample's navigation shell regardless of whether it uses ListView or ListBox.",
+      "generalizes": "All UWP SDK samples use the same shell pattern with a ListBox (not ListView) for scenario navigation. This fix ensures every future SDK sample migration correctly converts the shell to NavigationView + Frame."
+    }
+  ]
+}

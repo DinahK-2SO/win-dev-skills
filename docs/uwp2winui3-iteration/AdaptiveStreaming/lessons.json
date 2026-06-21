@@ -1,0 +1,28 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap completed successfully, produced MIGRATION-MAPPING.md with all files mapped" },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Validator passed all checks — build clean, no TODO residue, manifest OK" }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    {
+      "where": "Shell conversion — MainPage SplitView + ListBox navigation",
+      "symptom": "The SplitView pane with ListBox scenario list does not render in WinUI 3, making all 7 scenarios unreachable. The hamburger toggle button exists but clicking it does nothing visible.",
+      "turns_or_retries": "0 — the agent did not detect the issue because the validator and smoke launch only check that the app starts, not that navigation works",
+      "root_cause": "The agent preserved the UWP SplitView + ListBox + RelativePanel shell structure instead of converting to NavigationView + Frame. The SKILL.md shell conversion table says 'MainPage + ListView + Frame → NavigationView + Frame' but the source uses ListBox (not ListView), so the agent treated it as a non-matching pattern and preserved it as-is. The SplitView pane rendering fails in WinUI 3 (likely due to missing referenced assets microsoft-sdk.png/windows-sdk.png in the pane or RelativePanel layout incompatibilities).",
+      "how_resolved": "Not resolved — the agent declared success after the validator passed",
+      "preventable_by": "Broaden the shell conversion table in SKILL.md to include ListBox alongside ListView as an SDK-sample idiom pattern. All UWP SDK samples use ListBox (not ListView) for the scenario list."
+    }
+  ],
+  "missing_tooling": [
+    { "need": "Validator check for navigation reachability — verify that the scenario list control renders and all scenarios are reachable", "would_have_saved": "The entire navigation failure went undetected because the validator only checks that the app starts, not that the navigation surface works" }
+  ],
+  "env_issues": []
+}

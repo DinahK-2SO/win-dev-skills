@@ -1,0 +1,176 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "scored_at": "2026-06-21T23:58:00+08:00",
+  "app_launched": true,
+  "total_features": 12,
+  "pass": 2,
+  "partial": 1,
+  "fail": 9,
+  "weighted_score_pct": 20.0,
+  "features": [
+    {
+      "id": "app-shell-navigation",
+      "name": "Scenario list with SplitView navigation",
+      "verdict": "fail",
+      "notes": "The SplitView pane with ListBox scenario list does not render. The hamburger button exists but clicking it does not open the pane. All 7 scenarios are unreachable via UI navigation. The UIA tree shows no ListBox or pane content. Missing assets (microsoft-sdk.png, windows-sdk.png) may contribute to pane layout failure.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": "screenshots/winui3-app-shell-navigation.png",
+      "expected_behaviour_results": [
+        { "bullet": "A left sidebar pane lists all 7 scenarios by title", "met": false },
+        { "bullet": "Clicking a scenario navigates the content frame to that scenario's page", "met": false },
+        { "bullet": "A hamburger button toggles the sidebar pane open/closed", "met": false },
+        { "bullet": "The header shows 'Universal Windows Platform sample' branding", "met": true }
+      ]
+    },
+    {
+      "id": "status-bar",
+      "name": "Status bar at bottom of content area",
+      "verdict": "fail",
+      "notes": "Status bar is not visible in the UI tree or screenshot. The StatusPanel may be collapsed because status text is empty on load, but the SplitView pane issue may also hide it.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": "screenshots/winui3-app-shell-navigation.png",
+      "expected_behaviour_results": [
+        { "bullet": "A 'Status:' label is visible at the bottom of the content area", "met": false },
+        { "bullet": "Status messages from scenario operations appear in the status block", "met": false },
+        { "bullet": "The status block is scrollable when content overflows", "met": false }
+      ]
+    },
+    {
+      "id": "scenario1-simplest-streaming",
+      "name": "Scenario 1: Simplest Adaptive Streaming",
+      "verdict": "pass",
+      "notes": "Scenario 1 renders correctly: Description text, Load button, and MediaPlayerElement with transport controls all visible. This is the default page shown on launch.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": "screenshots/winui3-app-shell-navigation.png",
+      "expected_behaviour_results": [
+        { "bullet": "Description text explains implicit AdaptiveMediaSource creation", "met": true },
+        { "bullet": "A 'Load' button is present and clickable", "met": true },
+        { "bullet": "A MediaPlayerElement with transport controls is visible", "met": true },
+        { "bullet": "Clicking Load sets the media source (player shows loading/playing state)", "met": true }
+      ]
+    },
+    {
+      "id": "scenario2-event-handlers",
+      "name": "Scenario 2: Event Handlers",
+      "verdict": "fail",
+      "notes": "Cannot navigate to this scenario because the SplitView pane with scenario list does not render. Feature is unreachable.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "ContentSelector control allows choosing streaming content", "met": false },
+        { "bullet": "Download and playback bitrate indicators are visible", "met": false },
+        { "bullet": "MediaPlayerElement with transport controls is present", "met": false },
+        { "bullet": "LogView control shows streaming event log entries", "met": false }
+      ]
+    },
+    {
+      "id": "scenario3-request-modification",
+      "name": "Scenario 3: Network Request Modification",
+      "verdict": "fail",
+      "notes": "Cannot navigate to this scenario — navigation pane broken.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Four authentication method radio buttons are present and selectable", "met": false },
+        { "bullet": "Three HDCP protection level radio buttons are present", "met": false },
+        { "bullet": "Effective protection text updates based on selection", "met": false },
+        { "bullet": "ContentSelector, MediaPlayerElement, and LogView are present", "met": false }
+      ]
+    },
+    {
+      "id": "scenario4-tuning",
+      "name": "Scenario 4: Adaptive Streaming Tuning",
+      "verdict": "fail",
+      "notes": "Cannot navigate to this scenario — navigation pane broken.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Three ComboBoxes for min, initial, and max bitrate are present", "met": false },
+        { "bullet": "Downgrade ratio TextBox with Set button is present", "met": false },
+        { "bullet": "Headroom ratio TextBox with Set button is present", "met": false },
+        { "bullet": "Bitrate icons and inbound bitrate display are visible", "met": false },
+        { "bullet": "ContentSelector, MediaPlayerElement, and LogView are present", "met": false }
+      ]
+    },
+    {
+      "id": "scenario5-metadata",
+      "name": "Scenario 5: Metadata",
+      "verdict": "fail",
+      "notes": "Cannot navigate to this scenario — navigation pane broken.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Description explains timed metadata from HLS/DASH", "met": false },
+        { "bullet": "ContentSelector, MediaPlayerElement, and LogView are present", "met": false },
+        { "bullet": "Metadata events appear in the log when streaming content is loaded", "met": false }
+      ]
+    },
+    {
+      "id": "scenario6-ad-insertion",
+      "name": "Scenario 6: Ad Insertion",
+      "verdict": "fail",
+      "notes": "Cannot navigate to this scenario — navigation pane broken.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Description explains ad insertion with pre-roll, mid-roll, and post-roll", "met": false },
+        { "bullet": "ContentSelector, MediaPlayerElement, and LogView are present", "met": false },
+        { "bullet": "Ad insertion and progress events appear in the log", "met": false }
+      ]
+    },
+    {
+      "id": "scenario7-live-seekable-range",
+      "name": "Scenario 7: Live Seekable Range",
+      "verdict": "fail",
+      "notes": "Cannot navigate to this scenario — navigation pane broken.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Seekable window controls grid shows Max/Desired/LiveOffset/Min fields", "met": false },
+        { "bullet": "Position tracking shows Start/Current/End positions with a Slider", "met": false },
+        { "bullet": "Discrete seek buttons are present", "met": false },
+        { "bullet": "GoToStart and GoToLive buttons are present", "met": false },
+        { "bullet": "ContentSelector, MediaPlayerElement, and LogView are present", "met": false }
+      ]
+    },
+    {
+      "id": "content-selector-control",
+      "name": "ContentSelector user control",
+      "verdict": "fail",
+      "notes": "Only appears in scenarios 2-7 which are all unreachable due to navigation pane failure. Cannot verify the control renders.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A dropdown or selection mechanism for predefined streaming content is visible", "met": false },
+        { "bullet": "Users can enter a custom URI", "met": false },
+        { "bullet": "The control triggers content loading in the parent scenario", "met": false }
+      ]
+    },
+    {
+      "id": "log-view-control",
+      "name": "LogView control for event logging",
+      "verdict": "partial",
+      "notes": "The LogView control code is present and compiles. However, cannot visually verify because it only appears in scenarios 2-7 which are unreachable. Marking partial because code exists but runtime verification is impossible.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Log entries appear as streaming events occur", "met": false },
+        { "bullet": "Log is scrollable when entries overflow", "met": false },
+        { "bullet": "Log entries contain relevant event information", "met": false }
+      ]
+    },
+    {
+      "id": "media-player-transport",
+      "name": "MediaPlayerElement with transport controls",
+      "verdict": "pass",
+      "notes": "MediaPlayerElement renders in Scenario 1 with transport controls (play, seek slider, volume, aspect ratio, cast). Transport controls are functional in the visible scenario.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": "screenshots/winui3-app-shell-navigation.png",
+      "expected_behaviour_results": [
+        { "bullet": "MediaPlayerElement renders in each scenario page", "met": true },
+        { "bullet": "Transport controls (play/pause, seek, volume) are visible when media is loaded", "met": true },
+        { "bullet": "The player fills available space", "met": true }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "score": 20.0,
+  "builds": true,
+  "runs": true,
+  "requirements": [],
+  "visual_discrepancies": [
+    {
+      "feature": "SplitView navigation pane",
+      "uwp": "SplitView pane with ListBox listing 7 scenarios is visible on the left, IsPaneOpen=True by default",
+      "winui": "SplitView pane does not render at all — no ListBox, no scenario list, no footer. Only the content frame showing Scenario 1 is visible.",
+      "screenshot_ref": "screenshots/winui3-app-shell-navigation.png"
+    }
+  ],
+  "missing_features": [
+    "Scenario navigation (SplitView pane with ListBox)",
+    "Scenarios 2-7 are unreachable",
+    "ContentSelector control (only in scenarios 2-7)",
+    "Status bar at bottom"
+  ],
+  "summary": "The app builds and launches, and Scenario 1 renders correctly with MediaPlayerElement. However, the SplitView navigation pane with the ListBox scenario list fails to render in WinUI 3, making all other scenarios (2-7) completely unreachable. The agent preserved the UWP SplitView+ListBox shell pattern instead of converting to NavigationView+Frame as the skill recommends for the SDK-sample idiom."
+}

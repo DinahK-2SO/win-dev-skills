@@ -93,7 +93,7 @@ Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 
 | Source shell pattern (UWP) | Suggested WinUI 3 target |
 |---|---|
-| `MainPage` + `ListView` + `Frame` (SDK-sample idiom) | `NavigationView` + `Frame` |
+| `MainPage` + `ListView`/`ListBox` + `Frame` (SDK-sample idiom) | `NavigationView` + `Frame` |
 | `Pivot` | `TabView` (top), or `Pivot` from WinUI Community Toolkit if behaviour parity matters |
 | `Hub` | `NavigationView` with grouped items, or hand-rolled `ScrollViewer` |
 | `TabView` (UWP) | `TabView` (WinUI 3) — namespace change only |

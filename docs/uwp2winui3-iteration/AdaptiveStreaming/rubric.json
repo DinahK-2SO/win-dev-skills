@@ -1,0 +1,171 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "created_at": "2026-06-21T23:50:00+08:00",
+  "uwp_capture_status": "failed: UWP app crashed at startup in Windows.UI.Xaml.dll (0xc000027b) — legacy XAML stowed exception on newer OS build",
+  "features": [
+    {
+      "id": "app-shell-navigation",
+      "area": "Navigation",
+      "name": "Scenario list with SplitView navigation",
+      "description": "The app displays a SplitView pane on the left with a ListBox listing all 7 scenarios. Clicking a scenario navigates the right-side Frame to the corresponding page. A hamburger toggle button opens/closes the pane.",
+      "expected_behaviour": [
+        "A left sidebar pane lists all 7 scenarios by title",
+        "Clicking a scenario navigates the content frame to that scenario's page",
+        "A hamburger button toggles the sidebar pane open/closed",
+        "The header shows 'Universal Windows Platform sample' branding"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "status-bar",
+      "area": "Navigation",
+      "name": "Status bar at bottom of content area",
+      "description": "A status bar at the bottom of the content area shows status messages from scenarios (e.g. 'Loaded' or error messages). It includes a 'Status:' label and a scrollable text block.",
+      "expected_behaviour": [
+        "A 'Status:' label is visible at the bottom of the content area",
+        "Status messages from scenario operations appear in the status block",
+        "The status block is scrollable when content overflows"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario1-simplest-streaming",
+      "area": "Scenarios",
+      "name": "Scenario 1: Simplest Adaptive Streaming",
+      "description": "A simple page with a description, a 'Load' button, and a MediaPlayerElement. Clicking Load sets the media source to an adaptive streaming URI.",
+      "expected_behaviour": [
+        "Description text explains implicit AdaptiveMediaSource creation",
+        "A 'Load' button is present and clickable",
+        "A MediaPlayerElement with transport controls is visible",
+        "Clicking Load sets the media source (player shows loading/playing state)"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "scenario2-event-handlers",
+      "area": "Scenarios",
+      "name": "Scenario 2: Event Handlers",
+      "description": "Demonstrates explicit AdaptiveMediaSource usage with event reporting. Shows download/playback bitrate icons and text, a ContentSelector control, MediaPlayerElement, and a LogView.",
+      "expected_behaviour": [
+        "ContentSelector control allows choosing streaming content",
+        "Download and playback bitrate indicators (SymbolIcon bars + text) are visible",
+        "MediaPlayerElement with transport controls is present",
+        "LogView control shows streaming event log entries"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario3-request-modification",
+      "area": "Scenarios",
+      "name": "Scenario 3: Network Request Modification",
+      "description": "Allows the user to select authentication methods (None, Authorization Header, URL Query Parameter, Application Downloaded) via radio buttons. Also includes HDCP protection level selection.",
+      "expected_behaviour": [
+        "Four authentication method radio buttons are present and selectable",
+        "Three HDCP protection level radio buttons are present",
+        "Effective protection text updates based on selection",
+        "ContentSelector, MediaPlayerElement, and LogView are present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario4-tuning",
+      "area": "Scenarios",
+      "name": "Scenario 4: Adaptive Streaming Tuning",
+      "description": "Provides tuning controls: min/initial/max bitrate ComboBoxes, downgrade ratio and headroom ratio TextBox+Button pairs. Shows bitrate indicators.",
+      "expected_behaviour": [
+        "Three ComboBoxes for min, initial, and max bitrate are present",
+        "Downgrade ratio TextBox with Set button is present",
+        "Headroom ratio TextBox with Set button is present",
+        "Bitrate icons and inbound bitrate display are visible",
+        "ContentSelector, MediaPlayerElement, and LogView are present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario5-metadata",
+      "area": "Scenarios",
+      "name": "Scenario 5: Metadata",
+      "description": "Shows consumption/creation of timed metadata from HLS/DASH streams. Has ContentSelector, MediaPlayerElement, and LogView.",
+      "expected_behaviour": [
+        "Description explains timed metadata from HLS/DASH",
+        "ContentSelector, MediaPlayerElement, and LogView are present",
+        "Metadata events appear in the log when streaming content is loaded"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario6-ad-insertion",
+      "area": "Scenarios",
+      "name": "Scenario 6: Ad Insertion",
+      "description": "Demonstrates ad insertion with pre-roll, mid-roll, and post-roll ads. Uses MediaPlaybackList with playback progress reporting via timed metadata.",
+      "expected_behaviour": [
+        "Description explains ad insertion with pre-roll, mid-roll, and post-roll",
+        "ContentSelector, MediaPlayerElement, and LogView are present",
+        "Ad insertion and progress events appear in the log"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario7-live-seekable-range",
+      "area": "Scenarios",
+      "name": "Scenario 7: Live Seekable Range",
+      "description": "Shows seekable range controls for live DVR content. Includes MaxSeekableWindowSize, DesiredSeekableWindowSize (with Set button), DesiredLiveOffset (with Set button), MinLiveOffset displays, position tracking, and discrete seek buttons.",
+      "expected_behaviour": [
+        "Seekable window controls grid shows Max/Desired/LiveOffset/Min fields",
+        "Position tracking shows Start/Current/End positions with a Slider",
+        "Discrete seek buttons (<<15m, <<5m, <<30s, <<2s, Play, Pause, 2s>>, etc.) are present",
+        "GoToStart and GoToLive buttons are present",
+        "ContentSelector, MediaPlayerElement, and LogView are present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "content-selector-control",
+      "area": "Controls",
+      "name": "ContentSelector user control",
+      "description": "A reusable UserControl that lets users pick from predefined adaptive streaming URIs or enter a custom URI. Appears in scenarios 2-7.",
+      "expected_behaviour": [
+        "A dropdown or selection mechanism for predefined streaming content is visible",
+        "Users can enter a custom URI",
+        "The control triggers content loading in the parent scenario"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "log-view-control",
+      "area": "Controls",
+      "name": "LogView control for event logging",
+      "description": "A reusable logging control that displays streaming events, errors, and diagnostic information. Appears in scenarios 2-7.",
+      "expected_behaviour": [
+        "Log entries appear as streaming events occur",
+        "Log is scrollable when entries overflow",
+        "Log entries contain relevant event information (timestamps, event types)"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "media-player-transport",
+      "area": "Media",
+      "name": "MediaPlayerElement with transport controls",
+      "description": "Every scenario includes a MediaPlayerElement with AreTransportControlsEnabled=True, providing play/pause, seek bar, volume, and fullscreen controls.",
+      "expected_behaviour": [
+        "MediaPlayerElement renders in each scenario page",
+        "Transport controls (play/pause, seek, volume) are visible when media is loaded",
+        "The player fills available space (HorizontalAlignment=Stretch, VerticalAlignment=Stretch)"
+      ],
+      "screenshot": null,
+      "weight": 2
+    }
+  ]
+}
