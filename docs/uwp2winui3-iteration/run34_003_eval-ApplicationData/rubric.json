@@ -1,0 +1,85 @@
+{
+  "scenario": "ApplicationData",
+  "created_at": "2026-06-22T00:15:14.9294261+08:00",
+  "uwp_capture_status": "failed: UWP app not launched (eval focuses on WinUI3 parity with source code)",
+  "features": [
+    {
+      "name": "NavigationView shell with scenario list",
+      "description": "App uses NavigationView with scenario items matching source SampleConfiguration.cs",
+      "screenshot": null,
+      "area": "Navigation",
+      "id": "nav-shell",
+      "expected_behaviour": [
+        "NavigationView is present with menu items",
+        "Clear and SetVersion scenarios are listed",
+        "Selecting an item navigates to the corresponding page"
+      ],
+      "weight": 2
+    },
+    {
+      "name": "Clear ApplicationData",
+      "description": "Clear button calls ApplicationData.Current.ClearAsync() and shows result",
+      "screenshot": null,
+      "area": "Scenario 6",
+      "id": "clear-scenario",
+      "expected_behaviour": [
+        "Clear button is present",
+        "Clicking Clear shows success message about data being cleared",
+        "Error case shows appropriate error message"
+      ],
+      "weight": 2
+    },
+    {
+      "name": "SetVersion with handlers",
+      "description": "Two buttons set version 0 or 1, with version handlers and output display",
+      "screenshot": null,
+      "area": "Scenario 7",
+      "id": "setversion-scenario",
+      "expected_behaviour": [
+        "Set version to 0 and Set version to 1 buttons present",
+        "Clicking either button updates version display",
+        "OnNavigatedTo shows current version"
+      ],
+      "weight": 2
+    },
+    {
+      "name": "App builds cleanly",
+      "description": "dotnet build succeeds with 0 errors and 0 warnings",
+      "screenshot": null,
+      "area": "Build",
+      "id": "app-builds",
+      "expected_behaviour": [
+        "Build succeeds with exit code 0",
+        "No compiler errors",
+        "No WUI analyzer warnings"
+      ],
+      "weight": 2
+    },
+    {
+      "name": "App launches and stays alive",
+      "description": "App process starts and remains running without crash",
+      "screenshot": null,
+      "area": "Runtime",
+      "id": "app-runs",
+      "expected_behaviour": [
+        "Process starts successfully",
+        "Window is visible with correct title",
+        "No crash within first 10 seconds"
+      ],
+      "weight": 2
+    },
+    {
+      "name": "Unsupported APIs correctly deferred",
+      "description": "Scenario5 (ms-appdata protocol) correctly deferred with documentation",
+      "screenshot": null,
+      "area": "Migration process",
+      "id": "deferred-handling",
+      "expected_behaviour": [
+        "Scenario5 excluded from build",
+        "MIGRATION-DEFERRED.md documents the reason",
+        "Scenario5 not in navigation"
+      ],
+      "weight": 1
+    }
+  ]
+}

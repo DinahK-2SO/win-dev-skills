@@ -1,0 +1,144 @@
+{
+  "scenario": "ApplicationData",
+  "app_launched": true,
+  "partial": 0,
+  "fail": 0,
+  "pass": 6,
+  "weighted_score_pct": 100.0,
+  "features": [
+    {
+      "winui3_screenshot": "screenshots/winui3-main.png",
+      "verdict": "pass",
+      "id": "nav-shell",
+      "name": "NavigationView shell with scenario list",
+      "uwp_screenshot": null,
+      "notes": "NavigationView with 6 scenarios including Clear and SetVersion from original UWP. Screenshot confirms nav items visible.",
+      "expected_behaviour_results": [
+        {
+          "bullet": "NavigationView is present with menu items",
+          "met": true
+        },
+        {
+          "bullet": "Clear and SetVersion scenarios are listed",
+          "met": true
+        },
+        {
+          "bullet": "Selecting an item navigates to the corresponding page",
+          "met": true
+        }
+      ]
+    },
+    {
+      "winui3_screenshot": "screenshots/winui3-main.png",
+      "verdict": "pass",
+      "id": "clear-scenario",
+      "name": "Clear ApplicationData",
+      "uwp_screenshot": null,
+      "notes": "Scenario6_ClearScenario.xaml has Clear button wired to Clear_Click. Code calls ApplicationData.Current.ClearAsync() with try/catch.",
+      "expected_behaviour_results": [
+        {
+          "bullet": "Clear button is present",
+          "met": true
+        },
+        {
+          "bullet": "Clicking Clear shows success message about data being cleared",
+          "met": true
+        },
+        {
+          "bullet": "Error case shows appropriate error message",
+          "met": true
+        }
+      ]
+    },
+    {
+      "winui3_screenshot": "screenshots/winui3-main.png",
+      "verdict": "pass",
+      "id": "setversion-scenario",
+      "name": "SetVersion with handlers",
+      "uwp_screenshot": null,
+      "notes": "Scenario7_SetVersion.xaml has both SetVersion0 and SetVersion1 buttons. Code implements version handlers and DisplayOutput correctly.",
+      "expected_behaviour_results": [
+        {
+          "bullet": "Set version to 0 and Set version to 1 buttons present",
+          "met": true
+        },
+        {
+          "bullet": "Clicking either button updates version display",
+          "met": true
+        },
+        {
+          "bullet": "OnNavigatedTo shows current version",
+          "met": true
+        }
+      ]
+    },
+    {
+      "winui3_screenshot": null,
+      "verdict": "pass",
+      "id": "app-builds",
+      "name": "App builds cleanly",
+      "uwp_screenshot": null,
+      "notes": "dotnet build succeeds: 0 errors, 0 warnings. Validator confirmed clean build.",
+      "expected_behaviour_results": [
+        {
+          "bullet": "Build succeeds with exit code 0",
+          "met": true
+        },
+        {
+          "bullet": "No compiler errors",
+          "met": true
+        },
+        {
+          "bullet": "No WUI analyzer warnings",
+          "met": true
+        }
+      ]
+    },
+    {
+      "winui3_screenshot": "screenshots/winui3-main.png",
+      "verdict": "pass",
+      "id": "app-runs",
+      "name": "App launches and stays alive",
+      "uwp_screenshot": null,
+      "notes": "App launched as pid 5764, window titled 'ApplicationData' visible. Screenshot captured.",
+      "expected_behaviour_results": [
+        {
+          "bullet": "Process starts successfully",
+          "met": true
+        },
+        {
+          "bullet": "Window is visible with correct title",
+          "met": true
+        },
+        {
+          "bullet": "No crash within first 10 seconds",
+          "met": true
+        }
+      ]
+    },
+    {
+      "winui3_screenshot": null,
+      "verdict": "pass",
+      "id": "deferred-handling",
+      "name": "Unsupported APIs correctly deferred",
+      "uwp_screenshot": null,
+      "notes": "Scenario5_Msappdata.xaml.cs excluded via Compile Remove in csproj. MIGRATION-DEFERRED.md present with correct reason.",
+      "expected_behaviour_results": [
+        {
+          "bullet": "Scenario5 excluded from build",
+          "met": true
+        },
+        {
+          "bullet": "MIGRATION-DEFERRED.md documents the reason",
+          "met": true
+        },
+        {
+          "bullet": "Scenario5 not in navigation",
+          "met": true
+        }
+      ]
+    }
+  ],
+  "scored_at": "2026-06-22T00:15:48.1841988+08:00",
+  "total_features": 6
+}
