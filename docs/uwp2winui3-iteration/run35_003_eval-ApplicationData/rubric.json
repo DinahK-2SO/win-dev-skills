@@ -1,0 +1,113 @@
+{
+  "scenario": "ApplicationData",
+  "created_at": "2026-06-22T01:55:00+08:00",
+  "uwp_capture_status": "failed: App crashed at startup in Windows.UI.Xaml.dll (0xc000027b): native XAML stowed exception (legacy projection incompatibility)",
+  "features": [
+    {
+      "id": "app-title",
+      "area": "Navigation",
+      "name": "Application title display",
+      "description": "The app displays 'ApplicationData' as the title/header text",
+      "expected_behaviour": [
+        "Title text 'ApplicationData' is visible at the top of the page"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-list",
+      "area": "Navigation",
+      "name": "Scenario list with Clear and SetVersion",
+      "description": "The app shows a navigation list with two scenarios: Clear and SetVersion",
+      "expected_behaviour": [
+        "A navigation list/panel shows at least two items",
+        "First item contains 'Clear'",
+        "Second item contains 'SetVersion'"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "scenario-navigation",
+      "area": "Navigation",
+      "name": "Selecting a scenario navigates to its page",
+      "description": "Clicking a scenario in the list navigates the content frame to that scenario's page",
+      "expected_behaviour": [
+        "Clicking 'Clear' shows the Clear scenario content",
+        "Clicking 'SetVersion' shows the SetVersion scenario content"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "clear-description",
+      "area": "Clear Scenario",
+      "name": "Clear scenario description text",
+      "description": "The Clear scenario page shows descriptive text about ClearAsync",
+      "expected_behaviour": [
+        "Text mentioning 'ClearAsync' is visible on the Clear scenario page"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "clear-button",
+      "area": "Clear Scenario",
+      "name": "Clear button present and functional",
+      "description": "A 'Clear' button exists and when clicked, clears ApplicationData and shows confirmation",
+      "expected_behaviour": [
+        "A button labeled 'Clear' (or similar) is visible",
+        "Clicking the button shows 'ApplicationData has been cleared' confirmation text"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "setversion-description",
+      "area": "SetVersion Scenario",
+      "name": "SetVersion scenario description text",
+      "description": "The SetVersion page shows descriptive text about versioning",
+      "expected_behaviour": [
+        "Text about versioning and application data format is visible"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "setversion-buttons",
+      "area": "SetVersion Scenario",
+      "name": "Set version 0 and Set version 1 buttons",
+      "description": "Two buttons allow setting the app data version to 0 or 1",
+      "expected_behaviour": [
+        "A button for setting version to 0 is visible",
+        "A button for setting version to 1 is visible"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "setversion-display",
+      "area": "SetVersion Scenario",
+      "name": "Version display updates after clicking version buttons",
+      "description": "After clicking a version button, the current version number is displayed",
+      "expected_behaviour": [
+        "Clicking 'Set version to 1' shows 'Version: 1'",
+        "Clicking 'Set version to 0' shows 'Version: 0'",
+        "On initial navigation, the current version is displayed"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "status-area",
+      "area": "Shell",
+      "name": "Status message area",
+      "description": "A status area at the bottom of the page can display messages via NotifyUser",
+      "expected_behaviour": [
+        "A status border/panel exists (may be collapsed when empty)"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

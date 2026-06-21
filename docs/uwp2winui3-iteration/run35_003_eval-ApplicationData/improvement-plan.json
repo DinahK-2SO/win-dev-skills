@@ -1,0 +1,18 @@
+{
+  "scenario": "ApplicationData",
+  "index": 3,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Storage section in MIGRATION-PATTERNS.md only lists LocalSettings and LocalFolder, omitting other ApplicationData members that work unchanged in packaged WinUI 3",
+      "evidence": "skill-coverage-gaps.json item 1; dev agent used ClearAsync/SetVersionAsync directly with no issues but the skill didn't confirm this was safe",
+      "root_cause": "Incomplete API surface documentation in the Storage anchor — only two of many ApplicationData members were listed",
+      "tier": 3,
+      "change": "Added a row for Clear/version/other members and a blockquote clarifying the full ApplicationData surface works in packaged apps",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Dev agents will know immediately that ClearAsync, SetVersionAsync, SetVersionDeferral, TemporaryFolder, etc. work unchanged — no time wasted searching for replacements",
+      "falsifiable_check": "On a re-run of ApplicationData or any other sample using ApplicationData.ClearAsync/SetVersionAsync, the dev agent should not attempt to replace these APIs"
+    }
+  ],
+  "deferred_to_human": []
+}

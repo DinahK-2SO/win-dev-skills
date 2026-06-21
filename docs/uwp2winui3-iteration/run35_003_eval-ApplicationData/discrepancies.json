@@ -1,0 +1,17 @@
+{
+  "scenario": "ApplicationData",
+  "index": 3,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "App title 'ApplicationData' displayed", "status": "pass", "reason": "Confirmed via UIA", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Scenario list with Clear and SetVersion", "status": "pass", "reason": "NavigationView shows both items", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Scenario navigation works", "status": "pass", "reason": "Clicking items loads correct pages", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Clear button clears ApplicationData", "status": "pass", "reason": "Button invocation returns correct message", "suspected_skill_gap": "" },
+    { "id": 4, "text": "SetVersion buttons toggle version", "status": "pass", "reason": "Version 0↔1 toggle works correctly", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "All 9 features pass. The migration is functionally complete. No visual comparison possible due to UWP app crash (0xc000027b), but UIA tree inspection and functional interaction testing confirm all features work correctly. The shell was converted from UWP SplitView+ListBox to WinUI 3 NavigationView+Frame, which is the expected idiom per SKILL.md."
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "ApplicationData",
+  "index": 3,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "MIGRATION-PATTERNS.md Storage section does not mention ApplicationData.ClearAsync() or SetVersionAsync() as APIs that work unchanged in packaged WinUI 3 apps",
+      "evidence": "Dev agent used these APIs directly and they worked, but the skill's Storage section (MIGRATION-PATTERNS.md line 408-416) only covers LocalSettings and LocalFolder, not ClearAsync/SetVersionAsync/SetVersionDeferral/SetVersionRequest",
+      "covered_at": "MIGRATION-PATTERNS.md#storage (lines 408-416)",
+      "why_missed": "under-emphasized — the table lists only LocalSettings and LocalFolder but omits other ApplicationData members that also work unchanged",
+      "proposed_improvement": "Add a note to the Storage section stating that all Windows.Storage.ApplicationData members (ClearAsync, SetVersionAsync, Version, LocalCacheFolder, TemporaryFolder, etc.) work unchanged in packaged WinUI 3 desktop apps — the entire ApplicationData API surface is available when the app has package identity",
+      "generalizes": "Many UWP samples use ApplicationData members beyond LocalSettings/LocalFolder. Clarifying that the full API surface works with package identity prevents dev agents from unnecessarily searching for replacements."
+    }
+  ]
+}

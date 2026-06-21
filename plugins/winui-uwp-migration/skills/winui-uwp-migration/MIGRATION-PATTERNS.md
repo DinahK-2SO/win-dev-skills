@@ -413,6 +413,9 @@ If you do custom text rendering with DirectWrite, switch to **DWriteCore** — t
 | Simple key/value settings | `ApplicationData.Current.LocalSettings` | JSON in `Environment.SpecialFolder.LocalApplicationData` |
 | Local files | `ApplicationData.Current.LocalFolder` | `Environment.GetFolderPath(SpecialFolder.LocalApplicationData)` |
 | Roaming settings | Deprecated — migrate to your own sync layer | N/A |
+| Clear / version / other members | `ApplicationData.Current.ClearAsync()`, `.SetVersionAsync()`, `.Version`, `.TemporaryFolder`, `.LocalCacheFolder` | Not available — use filesystem directly |
+
+> **Packaged apps get the full `ApplicationData` surface.** When the WinUI 3 app runs with package identity (the default `dotnet run` + MSIX layout), every member of `Windows.Storage.ApplicationData` — including `ClearAsync`, `SetVersionAsync`/`SetVersionRequest`/`SetVersionDeferral`, `LocalCacheFolder`, `TemporaryFolder`, and `Version` — works unchanged. No code changes beyond the namespace rewrite are needed; do not replace these APIs with filesystem equivalents.
 
 ## Test Projects
 

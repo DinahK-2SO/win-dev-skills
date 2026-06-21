@@ -1,0 +1,22 @@
+{
+  "scenario": "ApplicationData",
+  "index": 3,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap created MIGRATION-MAPPING.md with 4 rows, correctly identified all files for migrate-as-is" },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught nullable warnings initially, prompted agent to fix SampleConfiguration.cs; all checks passed on first run" }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Storage.ApplicationData.Current.ClearAsync()", "special_handling": "Works unchanged in packaged WinUI 3 desktop apps — no migration needed beyond namespace change" },
+    { "api": "Windows.Storage.ApplicationData.Current.SetVersionAsync()", "special_handling": "Works unchanged in packaged WinUI 3 desktop apps with SetVersionRequest/SetVersionDeferral — no migration needed" }
+  ],
+  "errors_encountered": [
+    { "error": "CS8618: Non-nullable property 'Title'/'ClassType' must contain a non-null value when exiting constructor", "root_cause": "Scaffold uses nullable-enable context; UWP Scenario class properties lacked nullable annotations", "fix": "Agent made properties nullable (string? Title, Type? ClassType)" }
+  ],
+  "dev_agent_struggles": [],
+  "missing_tooling": [],
+  "env_issues": []
+}

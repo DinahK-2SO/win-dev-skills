@@ -1,0 +1,118 @@
+{
+  "scenario": "ApplicationData",
+  "scored_at": "2026-06-22T01:58:00+08:00",
+  "app_launched": true,
+  "total_features": 9,
+  "pass": 9,
+  "partial": 0,
+  "fail": 0,
+  "weighted_score_pct": 100.0,
+  "features": [
+    {
+      "id": "app-title",
+      "name": "Application title display",
+      "verdict": "pass",
+      "notes": "UIA tree shows SampleTitle Text 'ApplicationData' visible at top. Confirmed via winapp ui inspect.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Title text 'ApplicationData' is visible at the top of the page", "met": true }
+      ]
+    },
+    {
+      "id": "scenario-list",
+      "name": "Scenario list with Clear and SetVersion",
+      "verdict": "pass",
+      "notes": "UIA tree shows NavigationView 'Scenarios' with MenuItemsHost containing 'itm-1clear' ListItem '1) Clear' and 'itm-2setversion' ListItem '2) SetVersion'.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A navigation list/panel shows at least two items", "met": true },
+        { "bullet": "First item contains 'Clear'", "met": true },
+        { "bullet": "Second item contains 'SetVersion'", "met": true }
+      ]
+    },
+    {
+      "id": "scenario-navigation",
+      "name": "Selecting a scenario navigates to its page",
+      "verdict": "pass",
+      "notes": "Clicking 'itm-2setversion' via SelectionItemPattern navigated to SetVersion page (confirmed by UIA tree showing SetVersion0/SetVersion1 buttons). Clicking 'itm-1clear' navigated back to Clear page.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Clicking 'Clear' shows the Clear scenario content", "met": true },
+        { "bullet": "Clicking 'SetVersion' shows the SetVersion scenario content", "met": true }
+      ]
+    },
+    {
+      "id": "clear-description",
+      "name": "Clear scenario description text",
+      "verdict": "pass",
+      "notes": "UIA tree shows Text element 'The ClearAsync method clears data from ApplicationData.' in Clear scenario content area.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Text mentioning 'ClearAsync' is visible on the Clear scenario page", "met": true }
+      ]
+    },
+    {
+      "id": "clear-button",
+      "name": "Clear button present and functional",
+      "verdict": "pass",
+      "notes": "Button 'Clear ApplicationData' found in UIA tree. Invoking it via InvokePattern returned OutputTextBlock value 'ApplicationData has been cleared.  Visit the other scenarios to see that their data has been cleared.'",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A button labeled 'Clear' (or similar) is visible", "met": true },
+        { "bullet": "Clicking the button shows 'ApplicationData has been cleared' confirmation text", "met": true }
+      ]
+    },
+    {
+      "id": "setversion-description",
+      "name": "SetVersion scenario description text",
+      "verdict": "pass",
+      "notes": "UIA tree shows Text 'Versioning enables you to change the application data format used in a future release...' on SetVersion page.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Text about versioning and application data format is visible", "met": true }
+      ]
+    },
+    {
+      "id": "setversion-buttons",
+      "name": "Set version 0 and Set version 1 buttons",
+      "verdict": "pass",
+      "notes": "UIA tree shows SetVersion0 Button 'Set application data version to 0' and SetVersion1 Button 'Set application data version to 1'.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A button for setting version to 0 is visible", "met": true },
+        { "bullet": "A button for setting version to 1 is visible", "met": true }
+      ]
+    },
+    {
+      "id": "setversion-display",
+      "name": "Version display updates after clicking version buttons",
+      "verdict": "pass",
+      "notes": "Invoked SetVersion1 → OutputTextBlock showed 'Version: 1'. Invoked SetVersion0 → showed 'Version: 0'. On initial navigation showed 'Version: 0'.",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "Clicking 'Set version to 1' shows 'Version: 1'", "met": true },
+        { "bullet": "Clicking 'Set version to 0' shows 'Version: 0'", "met": true },
+        { "bullet": "On initial navigation, the current version is displayed", "met": true }
+      ]
+    },
+    {
+      "id": "status-area",
+      "name": "Status message area",
+      "verdict": "pass",
+      "notes": "UIA tree shows StatusPanel StackPanel and StatusBorder with StatusBlock TextBlock. MainPage.xaml.cs implements NotifyUser/UpdateStatus. Panel collapsed when empty (correct behavior).",
+      "uwp_screenshot": null,
+      "winui3_screenshot": null,
+      "expected_behaviour_results": [
+        { "bullet": "A status border/panel exists (may be collapsed when empty)", "met": true }
+      ]
+    }
+  ]
+}
