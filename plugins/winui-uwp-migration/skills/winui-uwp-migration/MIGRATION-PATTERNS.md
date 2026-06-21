@@ -96,6 +96,27 @@ DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () => ProgressBar.Value
 
 Cache the queue off the UI thread via `DispatcherQueue.GetForCurrentThread()`. UWP's ASTA reentrancy protection is gone — watch for reentrancy in async code that pumps messages. See the official [threading guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/threading).
 
+### DispatcherQueue in UserControls accessed from background-thread callbacks
+
+When a `UserControl` (e.g. a logging panel) exposes a `Log()` method called from `MediaPlayer` or `AdaptiveMediaSource` event handlers (which fire on a threadpool thread), the pattern is:
+
+```csharp
+public void Log(string message)
+{
+    if (DispatcherQueue.HasThreadAccess)
+        LogFromUIThread(message);
+    else
+        DispatcherQueue.TryEnqueue(() => LogFromUIThread(message));
+}
+```
+
+`DispatcherQueue` (the property on `DependencyObject`) is only valid **after** the control is loaded into the visual tree. If `Log()` is called before the control is in the tree (e.g. during page construction), `DispatcherQueue` may be `null`. Guard with a null-check or cache the queue in `Loaded`:
+
+```csharp
+private Microsoft.UI.Dispatching.DispatcherQueue? _queue;
+private void OnLoaded(object sender, RoutedEventArgs e) => _queue = DispatcherQueue;
+```
+
 <a id="dialogs"></a>
 ## Dialogs: MessageDialog → ContentDialog
 
@@ -290,13 +311,30 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | Exception code | Meaning | Usual migration cause → where to look |
 |---|---|---|
 | `0x80004003` | `E_POINTER` | Static-window **init-order race** — a `Page` read `App.MainWindow` (or another static window reference) before `OnLaunched` assigned it. Keep `MainWindow`'s constructor inert and navigate after `Activate`. See [Initialization order](#windowing). |
-| `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
+| `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. See the **[0x8001010E debugging checklist](#rpc-wrong-thread-checklist)** below. |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
 | `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 
 The Step 4 validator runs this same check (`Validate-UwpMigration.ps1` Section 7) and **fails** when the app registers but dies at startup, surfacing the captured signature in `.validator-diagnostics.txt`.
+
+<a id="rpc-wrong-thread-checklist"></a>
+### 0x8001010E / RPC_E_WRONG_THREAD — Debugging Checklist
+
+When event 1026 says "The Application Object must initially be accessed from the multi-thread apartment" (or any `0x8001010E` at startup), systematically check these causes **in order** — they cover 90%+ of migrated-app startup crashes:
+
+1. **UserControls in non-root XAML namespaces** — If the project `<RootNamespace>` is e.g. `MyApp` but you have a `UserControl` with `x:Class="SDKTemplate.Logging.LogView"`, the WinUI 3 XAML type system may fail to resolve it at activation time. **Fix**: ensure every XAML `x:Class` is either in the project's `<RootNamespace>` or add an `<XamlNamespace>` mapping. The simplest fix is to keep the source namespace but verify the XAML compiler can see it — build with `/p:XamlVerbosity=diagnostic` and confirm every `x:Class` appears in the generated `XamlTypeInfo.g.cs`. If a UserControl type is missing from `XamlTypeInfo.g.cs`, the XAML parser will throw at runtime when it encounters that control in any page's XAML tree.
+
+2. **Static field initializers that create WinRT/COM objects** — Any `static` field like `static readonly Foo = new SomeWinRTType()` runs at type-load time (before the UI thread's apartment is configured). Move these to lazy properties or initialize them in `OnNavigatedTo` / `Loaded`. Common offenders: `MediaPlayer`, `HttpClient` (the WinRT version), `Clipboard`, `DataTransferManager`.
+
+3. **DependencyProperty.Register in a UserControl that isn't reachable from the initial XAML tree** — `DependencyProperty.Register` itself is safe, but if the owning type's static constructor also touches a thread-affine WinRT API, the combination causes `0x8001010E`. Audit the static constructor / static fields of the UserControl class.
+
+4. **Immediate navigation in MainWindow/MainPage constructor** — If `MainWindow()` or `MainPage()` navigates to a Page whose XAML references a UserControl from (1), the type resolution failure cascades into an apartment error. **Fix**: defer the first `Frame.Navigate(...)` call to the `Loaded` event of the hosting element, or at minimum after `Window.Activate()`.
+
+5. **UWP `Windows.ApplicationModel.DataTransfer.Clipboard` at startup** — Some UWP code imports and calls `Clipboard.SetContent(...)`. In WinUI 3 desktop, `Clipboard` requires package identity AND a foreground window. If any code path touches it before the window is visible, it throws `0x8001010E`. Guard clipboard calls with a null-check on the active window.
+
+**Quick isolation test**: Comment out the initial `Frame.Navigate(...)` call (so the app launches with an empty frame). If it survives, the crash is inside whatever Page/UserControl the navigation loads — narrow from there.
 
 <a id="lifecycle"></a>
 ## Application Lifecycle and Activation

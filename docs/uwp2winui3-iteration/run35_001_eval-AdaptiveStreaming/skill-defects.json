@@ -1,0 +1,10 @@
+{
+  "items": [
+    {
+      "id": "startup-crash-0x8001010E-guidance-too-vague",
+      "evidence": "Dev agent saw the crash, read the patterns doc guidance, but had no actionable next step to find the root cause",
+      "description": "MIGRATION-PATTERNS.md line 293 says 'construct on UI thread after Activate' for 0x8001010E but gives no specific diagnostic steps to identify which object/type is the offender. The dev agent couldn't action this guidance.",
+      "fix": "Add a concrete debugging checklist under the 0x8001010E row: check for static DependencyProperty.Register in UserControls with non-root x:Class namespaces, check for WinRT object creation in static field initializers, try removing UserControl references from initial XAML tree"
+    }
+  ]
+}

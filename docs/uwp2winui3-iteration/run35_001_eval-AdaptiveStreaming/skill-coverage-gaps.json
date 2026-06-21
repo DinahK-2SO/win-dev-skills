@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "id": "usercontrol-sub-namespace-xaml-init",
+      "evidence": "LogView UserControl has x:Class='SDKTemplate.Logging.LogView' but project RootNamespace is 'AdaptiveStreaming'. App crashes at startup.",
+      "description": "No guidance exists for migrating UserControls whose x:Class is in a namespace different from the project RootNamespace. In WinUI 3, this can cause XAML type resolution failures at runtime when the XamlTypeInfo generated code doesn't find the type.",
+      "fix": "Add a section to MIGRATION-PATTERNS.md about XAML UserControl namespace alignment and the typical startup crash it causes"
+    },
+    {
+      "id": "mediaplayer-usercontrol-shared-pattern",
+      "evidence": "The AdaptiveStreaming sample has Shared/Logging/LogView.xaml in SDKTemplate.Logging namespace; Controls/ContentSelector.xaml in SDKTemplate.Controls namespace. These must be discoverable by XamlTypeInfo at runtime.",
+      "description": "UWP SDK samples commonly have a 'Shared' folder with UserControls (LogView, ContentSelector) and helper classes that all live in the 'SDKTemplate' or 'SDKTemplate.*' namespaces. The migration needs specific guidance on how to handle these: either keep in SDKTemplate namespace (valid) but ensure the XAML metadata generation covers them, or refactor to root namespace.",
+      "fix": "Add guidance about ensuring all XAML UserControls in sub-namespaces are properly discoverable by the WinUI 3 XAML type system"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "improvements": [
+    {
+      "change": "Added detailed 5-point debugging checklist under new anchor #rpc-wrong-thread-checklist in MIGRATION-PATTERNS.md",
+      "generalizable": true,
+      "type": "skill-defect",
+      "id": "startup-crash-0x8001010E-guidance-too-vague",
+      "rationale": "Dev agent hit 0x8001010E and couldn't action the existing one-line guidance. Checklist gives concrete steps: check UserControl namespaces, static WinRT initializers, DependencyProperty side effects, deferred navigation, and Clipboard timing."
+    },
+    {
+      "change": "Checklist point 1 specifically addresses UserControls with x:Class in non-root namespaces and how to verify via XamlTypeInfo.g.cs",
+      "generalizable": true,
+      "type": "skill-coverage-gap",
+      "id": "usercontrol-sub-namespace-xaml-init",
+      "rationale": "UWP SDK samples use SDKTemplate.* namespaces for shared controls. After migration to a new RootNamespace, the XAML type system may not resolve them, causing 0x8001010E at runtime."
+    },
+    {
+      "change": "Added sub-section under Threading about DispatcherQueue null-safety in UserControls called from background threads",
+      "generalizable": true,
+      "type": "skill-coverage-gap",
+      "id": "dispatcherqueue-in-usercontrol-from-background",
+      "rationale": "MediaPlayer/AdaptiveMediaSource event handlers fire on threadpool threads. Controls like LogView need the HasThreadAccess + TryEnqueue pattern, but also need a null-guard if called before the control is in the visual tree."
+    }
+  ],
+  "applied": true,
+  "scenario": "AdaptiveStreaming"
+}

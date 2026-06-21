@@ -1,0 +1,14 @@
+{
+  "items": [
+    {
+      "id": "build-hung-polling",
+      "evidence": "Session log shows 3 consecutive read_powershell calls each waiting 120-180 seconds on shellId:5",
+      "description": "Dev agent ran dotnet build with piped output in async mode, which hung on CheckForDuplicateItems. Agent then polled read_powershell 3 times (360+ seconds each) before killing it. This is a tool usage issue - the skill already says to use sync mode with initial_wait:180."
+    },
+    {
+      "id": "exploring-other-runs",
+      "evidence": "Session log shows queries to run34 eval results and Get-AppxPackage searches in final turns",
+      "description": "After the crash, agent spent time exploring run34 results and checking other packages rather than systematically debugging the 0x8001010E crash."
+    }
+  ]
+}

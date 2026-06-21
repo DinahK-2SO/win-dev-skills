@@ -1,0 +1,40 @@
+{
+  "errors_encountered": [
+    {
+      "root_cause": "Shared/Logging UserControl and helper classes were copied but not properly included in the build (namespace mismatch or missing file references)",
+      "generalizable": true,
+      "fix": "Ensured all Shared/Logging/*.cs and Shared/Logging/LogView.xaml files were included in the project",
+      "error": "CS0234: The type or namespace name 'Logging' does not exist in the namespace 'SDKTemplate'"
+    },
+    {
+      "root_cause": "WinUI 3 startup crash. The app builds cleanly but crashes during activation. Likely caused by UserControl (LogView) with DependencyProperty.Register in a sub-namespace (SDKTemplate.Logging) combined with XAML type system initialization ordering, or the Clipboard import triggering COM activation. The exact frame could not be determined from event 1026 truncated output.",
+      "generalizable": true,
+      "fix": "NOT FIXED - agent ran out of context. Potential fixes: ensure no static WinRT object creation before UI thread is ready; verify XAML namespace mapping for UserControls in sub-namespaces; check if DependencyProperty registration in SDKTemplate.Logging.LogView conflicts with startup order.",
+      "error": "0x8001010E RPC_E_WRONG_THREAD - The Application Object must initially be accessed from the multi-thread apartment"
+    }
+  ],
+  "tools_that_failed": [
+    "dotnet build in async mode with filtered output - hung on CheckForDuplicateItems indefinitely",
+    "Test-AppLaunch.ps1 - correctly diagnosed the crash but agent couldn't use the diagnostic to fix it"
+  ],
+  "tools_that_worked": [
+    "dotnet new winui - scaffold worked correctly",
+    "Initialize-UwpMigration.ps1 bootstrap - copied files and created mapping correctly",
+    "DispatcherQueue.TryEnqueue conversion pattern - all 20 threading TODOs resolved correctly"
+  ],
+  "skill_gaps": [
+    "MIGRATION-PATTERNS.md startup-crashes section lacks specific actionable steps for 0x8001010E 'Application Object' variant",
+    "No guidance on UserControl DependencyProperty registration ordering issues when controls are in sub-namespaces different from the project root namespace",
+    "No guidance about XAML x:Class namespace needing to match XamlTypeInfo generation expectations in SDK-style projects",
+    "Threading section doesn't mention that MediaPlayer event handlers firing before DispatcherQueue is available on a Page can cause startup crashes"
+  ],
+  "run": "run35",
+  "dev_agent_struggles": [
+    "Build command hung indefinitely on CheckForDuplicateItems step - agent polled read_powershell repeatedly for 10+ minutes before killing",
+    "After build succeeded, app crashed with 0x8001010E (RPC_E_WRONG_THREAD) at startup - agent could not diagnose or fix",
+    "Agent spent time exploring other run results instead of debugging the crash",
+    "Initial build failed due to missing SDKTemplate.Logging namespace - needed to include Shared/Logging files",
+    "Agent had to fix 20+ threading TODOs (Dispatcher.RunAsync -> DispatcherQueue.TryEnqueue) but the threading conversion itself was correct"
+  ],
+  "scenario": "AdaptiveStreaming"
+}
