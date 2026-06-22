@@ -1,0 +1,33 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "dotnet build -p:Platform=$Platform", "evidence": "Agent iterated build->fix->build (11 dotnet build invocations) and reached BUILD SUCCEEDED; native dotnet build surfaced CS0118/CS0576/CS0103/CS0234 clearly (session-log turns 31-50)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1 namespace mass-rewrite", "limitation": "Only rewrites Windows.UI.Xaml -> Microsoft.UI.Xaml. It does NOT rewrite the other Windows.UI.* namespaces that also moved (Windows.UI.Colors/ColorHelper -> Microsoft.UI.*), so those surface as build errors the agent must hand-fix.", "suggested_tweak": "Extend step 3 to also rewrite the unambiguous tokens Windows.UI.Colors->Microsoft.UI.Colors and Windows.UI.ColorHelper->Microsoft.UI.ColorHelper (leaving the Windows.UI.Color struct untouched)." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.Devices.Sensors.Accelerometer (referenced unqualified as 'Accelerometer')", "why_tried": "Direct port of the UWP sample code that does `using Windows.Devices.Sensors;` then `Accelerometer.GetDefault()`.", "root_cause": "The WinUI 3 project's root namespace is 'Accelerometer' (App/MainWindow live in `namespace Accelerometer;`), which shadows the identically-named WinRT type, so the compiler resolves `Accelerometer` to the namespace -> CS0118 'is a namespace but is used like a type'.", "fix": "Alias the WinRT type to a DISTINCT name: `using AccelerometerSensor = Windows.Devices.Sensors.Accelerometer;` and reference AccelerometerSensor everywhere. Aliasing back to the same name (`using Accelerometer = ...`) fails with CS0576." },
+    { "api": "Windows.UI.Colors.Green / Colors.Red", "why_tried": "UWP sample sets brush colors with unqualified `Colors.Green` (via `using Windows.UI;`).", "root_cause": "In WinUI 3 the `Colors` and `ColorHelper` static classes moved to Microsoft.UI; only the `Color` struct remained at Windows.UI.Color. The agent tried `Colors`, then `Windows.UI.Colors` (both fail), before settling on `Windows.UI.Color.FromArgb(...)`.", "fix": "Use Microsoft.UI.Colors.Green (or `using Microsoft.UI;` + `Colors.Green`). The documented mapping exists but was missed; agent burned 2 build cycles and shipped a non-idiomatic FromArgb workaround." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.UI.Color vs Windows.UI.Colors", "special_handling": "WinUI 3 split: `Color` (struct) stays Windows.UI.Color; `Colors`/`ColorHelper` (static classes) move to Microsoft.UI. A blanket `using Windows.UI;`->`using Microsoft.UI;` rewrite is therefore UNSAFE." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0118: 'Accelerometer' is a namespace but is used like a type", "root_cause": "Project root namespace equals the WinRT type name it consumes.", "fix": "Type alias with a distinct name (AccelerometerSensor) or fully-qualify Windows.Devices.Sensors.Accelerometer." },
+    { "error": "CS0576: Namespace '<global namespace>' contains a definition conflicting with alias 'Accelerometer'", "root_cause": "Agent's first fix aliased the type to the SAME name as the colliding namespace (`using Accelerometer = ...`).", "fix": "Choose an alias name that does not collide with the project namespace (AccelerometerSensor)." },
+    { "error": "CS0103/CS0234: 'Colors' does not exist / does not exist in namespace 'Windows.UI'", "root_cause": "Colors static class moved to Microsoft.UI in WinUI 3.", "fix": "Microsoft.UI.Colors.<Name>." },
+    { "error": "Xaml Internal Error WMC9999: Object reference not set... + WMC1509 No LocalAssembly during MarkupCompilePass2", "root_cause": "Cascading symptom: the XAML markup compiler pass 2 cannot resolve project types because the C# code-behind failed to compile. Not a real XAML problem.", "fix": "Ignore WMC9999/WMC1509 and fix the underlying CS#### code-behind errors first; the XAML errors disappear once the project compiles." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "session-log turns 31-40 (Scenario*.xaml.cs, SampleConfiguration.cs)", "symptom": "CS0118 across 6+ files, then CS0576 after the first fix attempt", "turns_or_retries": "~5 build cycles", "root_cause": "Root-namespace == WinRT type name collision; first remedy used a same-name alias which re-collided.", "how_resolved": "Renamed the alias to AccelerometerSensor (distinct) across all files.", "preventable_by": "A prominent 'Common build errors' entry in MIGRATION-PATTERNS.md covering CS0118/CS0576 for project-name vs WinRT-type collisions, prescribing a distinct-name alias and explicitly warning against same-name aliasing." },
+    { "where": "session-log turns 44-48 (MainPage.xaml.cs)", "symptom": "CS0103 then CS0234 on `Colors`", "turns_or_retries": "2 build cycles", "root_cause": "Colors moved to Microsoft.UI; mapping was buried in a 13-row namespace table and not applied.", "how_resolved": "Replaced with Windows.UI.Color.FromArgb workaround (functional but non-idiomatic).", "preventable_by": "Sharpen the Colors row into a dedicated 'common build error' note covering the unqualified `Colors.X` form and the Color-struct-stays / Colors-class-moves split; and auto-rewrite the qualified token in Initialize-UwpMigration.ps1." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No accelerometer hardware on the build machine ('Standard accelerometer not found').", "workaround": "Both UWP golden and WinUI app show the not-found status; scoring treated it as a symmetric hardware gate, not a regression. Agent added a defensive no-sensor fallback message." }
+  ]
+}

@@ -1,6 +1,6 @@
 # UWP → WinUI 3 Replacement Patterns
 
-Reference for API replacements and patterns that the `Initialize-UwpMigration.ps1` bootstrap doesn't (and can't) handle automatically — the script only does the bulk `Windows.UI.Xaml → Microsoft.UI.Xaml` namespace rewrite. Everything below requires code-level adaptation: dialog shape changes, threading model, windowing, lifecycle, resources, controls, and storage. Use this file when fixing build errors or runtime issues during Step 4.
+Reference for API replacements and patterns that the `Initialize-UwpMigration.ps1` bootstrap doesn't (and can't) handle automatically — the script does the bulk `Windows.UI.Xaml → Microsoft.UI.Xaml` namespace rewrite (plus the moved `Windows.UI.Colors`/`ColorHelper` tokens). Everything below requires code-level adaptation: dialog shape changes, threading model, windowing, lifecycle, resources, controls, and storage. Use this file when fixing build errors or runtime issues during Step 4.
 
 ## Common build errors after the namespace rewrite
 
@@ -27,6 +27,27 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0118: 'X' is a namespace but is used like a type` (project name shadows a WinRT type)
+
+UWP SDK samples are conventionally named after the very WinRT feature/type they demonstrate (`Accelerometer`, `Compass`, `Gyrometer`, `Barometer`, `OrientationSensor`, `Inclinometer`, `LightSensor`, `Magnetometer`, `Pedometer`, `ProximitySensor`, `Geolocation`, …). The scaffolded WinUI 3 project then gets a **root namespace identical to a type the code consumes** (e.g. `namespace Accelerometer;` in `App`/`MainWindow` vs `Windows.Devices.Sensors.Accelerometer`). Any unqualified reference to that name now binds to the *namespace*, not the type:
+
+```
+error CS0118: 'Accelerometer' is a namespace but is used like a type
+```
+
+Fix by aliasing the WinRT type to a **distinct** name (do NOT reuse the colliding name), in every file that references it:
+
+```csharp
+using Windows.Devices.Sensors;
+using AccelerometerSensor = Windows.Devices.Sensors.Accelerometer;   // distinct alias
+...
+private AccelerometerSensor _accelerometer = AccelerometerSensor.GetDefault();
+```
+
+> **Do not** write `using Accelerometer = Windows.Devices.Sensors.Accelerometer;` — aliasing the type back to the *same* name as the project namespace fails with `CS0576: Namespace '<global namespace>' contains a definition conflicting with alias 'Accelerometer'`. The alias name must differ from the project namespace. Fully-qualifying every usage (`Windows.Devices.Sensors.Accelerometer`) is an equivalent fix.
+
+(If the build also emits `Xaml Internal Error WMC9999: Object reference not set...` and `WMC1509: No LocalAssembly ... during MarkupCompilePass2`, those are **cascading symptoms** of the C# code-behind failing to compile — fix the `CS####` errors above and the XAML errors disappear; do not chase them as real XAML problems.)
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -38,6 +59,18 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
+
+### `CS0103: The name 'Colors' does not exist` / `CS0234: 'Colors' does not exist in the namespace 'Windows.UI'`
+
+UWP code sets brush/foreground colors with the unqualified static class `Colors` (via `using Windows.UI;`), e.g. `new SolidColorBrush(Colors.Red)`. In WinUI 3 the **`Colors` and `ColorHelper` static classes moved to `Microsoft.UI`**, so both the unqualified `Colors.X` and the qualified `Windows.UI.Colors.X` fail. Fix:
+
+```csharp
+// UWP:   new SolidColorBrush(Colors.Red);   // using Windows.UI;
+// WinUI 3:
+new SolidColorBrush(Microsoft.UI.Colors.Red);   // or: using Microsoft.UI;  then  Colors.Red
+```
+
+> **Critical split — do NOT blanket-swap `using Windows.UI;` → `using Microsoft.UI;`.** Only the static helpers moved. The `Color` **struct** stayed at `Windows.UI.Color` (so `Windows.UI.Color.FromArgb(...)` is still valid), while `Colors`/`ColorHelper` are now `Microsoft.UI.Colors`/`Microsoft.UI.ColorHelper`. A file may need *both* `using Windows.UI;` (for `Color`) and `Microsoft.UI.Colors` (for named colors). `Initialize-UwpMigration.ps1` auto-rewrites the qualified `Windows.UI.Colors`/`Windows.UI.ColorHelper` tokens, but unqualified `Colors.X` usages must be fixed by hand as above.
 
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
@@ -74,7 +107,8 @@ All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
 | `Windows.UI.Xaml.Shapes` | `Microsoft.UI.Xaml.Shapes` |
 | `Windows.UI.Composition` | `Microsoft.UI.Composition` |
 | `Windows.UI.Input` | `Microsoft.UI.Input` |
-| `Windows.UI.Colors` | `Microsoft.UI.Colors` |
+| `Windows.UI.Colors` | `Microsoft.UI.Colors` (the `Color` **struct** stays at `Windows.UI.Color`) |
+| `Windows.UI.ColorHelper` | `Microsoft.UI.ColorHelper` |
 | `Windows.UI.Text` | `Microsoft.UI.Text` |
 | `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` |
 

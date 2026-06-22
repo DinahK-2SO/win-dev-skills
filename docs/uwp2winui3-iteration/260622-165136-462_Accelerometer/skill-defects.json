@@ -1,0 +1,17 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Build fails with CS0118 'X is a namespace but is used like a type' (then CS0576 'conflicting with alias' after a naive fix) whenever the WinUI 3 project's root namespace equals a WinRT type the app consumes.",
+      "evidence": "session-log.txt turn 31 build: 8x 'CS0118: Accelerometer is a namespace but is used like a type'; turn 32 fix used `using Accelerometer = Windows.Devices.Sensors.Accelerometer;`; turn 36 build: CS0576 'Namespace <global namespace> contains a definition conflicting with alias Accelerometer'. ~5 build cycles lost.",
+      "skill_search": "grep of SKILL.md, MIGRATION-PATTERNS.md, scripts for: CS0118, 'namespace but is used', CS0576, 'root namespace', RootNamespace, collision",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "UWP SDK samples name the project after the WinRT feature/type they demonstrate. The scaffolded WinUI 3 project therefore gets a root namespace identical to a `Windows.Devices.*` type the code references unqualified, so the compiler binds the bare identifier to the namespace, not the type. The skill's existing CS0104 'ambiguous reference' note covers Xaml type ambiguity only and does not address project-namespace vs WinRT-type shadowing.",
+      "proposed_fix": "Add a dedicated entry to the prominent 'Common build errors after the namespace rewrite' section of MIGRATION-PATTERNS.md: explain CS0118 (and the CS0576 follow-on), and prescribe the fix = alias the WinRT type to a DISTINCT name, e.g. `using AccelerometerSensor = Windows.Devices.Sensors.Accelerometer;` (or fully-qualify), with an explicit warning NOT to alias it back to the same name as the namespace.",
+      "generalizes": "REQUIRED: Recurs across every UWP sample whose project/app name matches a consumed WinRT type — the entire sensor family (Accelerometer, Compass, Gyrometer, Barometer, OrientationSensor, Inclinometer, LightSensor, Magnetometer, Pedometer, ProximitySensor, SimpleOrientationSensor) and any feature-named sample (e.g. Geolocation). The collision is structural, not data-specific."
+    }
+  ]
+}

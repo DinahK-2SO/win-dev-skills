@@ -1,0 +1,21 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Cascading XAML markup-compiler noise (WMC9999 'Object reference not set' + WMC1509 'No LocalAssembly during MarkupCompilePass2') appeared on every failed build, but did not actually mislead the agent — it correctly fixed the underlying CS#### code-behind errors and the XAML errors then vanished.",
+      "evidence": "session-log turns 31-46: WMC9999/WMC1509 appear alongside every CS#### error block and disappear once the C# compiles; the agent never chased them as a real XAML problem.",
+      "covered_clearly_at": "N/A — not a skill gap; these are well-known cascading symptoms and the agent already handled them correctly. Recorded only so it is not re-counted as a skill change. (A one-line note is being folded into the new 'Common build errors' content opportunistically, but no behavior change was required.)",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The agent already did the right thing (fix the CS errors first); a capable model on re-run behaves identically. No skill edit needed to change this outcome."
+    },
+    {
+      "problem": "Nullable-reference warnings (CS8618/CS8622) on sensor fields and event handlers remained in the final build.",
+      "evidence": "build-output.txt lines 8-27: multiple CS8618/CS8622 warnings; BUILD SUCCEEDED with 0 errors.",
+      "covered_clearly_at": "These are non-fatal warnings that do not affect the score (build succeeds, app runs, parity 100/100). Not a migration correctness issue and not scenario-general enough to warrant skill prose.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Warnings only; no effect on build/run/parity. A skill edit here would be noise."
+    }
+  ]
+}

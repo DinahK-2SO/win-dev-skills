@@ -1,0 +1,15 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Build fails on `Colors` (CS0103 'name Colors does not exist', then CS0234 'Colors does not exist in namespace Windows.UI'). The agent never applied the documented Microsoft.UI.Colors mapping and shipped a non-idiomatic `Windows.UI.Color.FromArgb(...)` workaround.",
+      "evidence": "session-log.txt turn 44 build: 2x 'CS0103: The name Colors does not exist'; turn 45 changed to `Windows.UI.Colors` (still wrong); turn 46 build: 2x 'CS0234: ... Colors does not exist in the namespace Windows.UI'; turn 47 switched to `Windows.UI.Color.FromArgb`. 2 build cycles lost.",
+      "covered_at": "MIGRATION-PATTERNS.md 'Namespace Mapping' table, row `| Windows.UI.Colors | Microsoft.UI.Colors |` (line 77).",
+      "why_missed": "buried — the mapping is one row in a 13-row namespace table titled 'All Windows.UI.Xaml.* namespaces move to Microsoft.UI.Xaml.*'. It is not listed among the prominent 'Common build errors after the namespace rewrite' entries, and it does not address the actual failure form: UWP code uses the *unqualified* `Colors.X` (via `using Windows.UI;`), and the critical gotcha that the `Color` STRUCT stays at `Windows.UI.Color` while only `Colors`/`ColorHelper` move to Microsoft.UI.",
+      "proposed_improvement": "Promote Colors into the 'Common build errors after the namespace rewrite' section: show the `Colors.Green` → `Microsoft.UI.Colors.Green` fix (or `using Microsoft.UI;`), and call out the split — `Color` (struct) = Windows.UI.Color, `Colors`/`ColorHelper` (static) = Microsoft.UI — so a blanket `using Windows.UI;`→`using Microsoft.UI;` is unsafe. Also extend Initialize-UwpMigration.ps1 to auto-rewrite the unambiguous qualified tokens `Windows.UI.Colors`/`Windows.UI.ColorHelper`.",
+      "generalizes": "REQUIRED: setting brush/foreground colors with `Colors.Red`/`Colors.Green` is ubiquitous across UWP samples; the Color-vs-Colors namespace split bites every migration that touches named colors."
+    }
+  ]
+}

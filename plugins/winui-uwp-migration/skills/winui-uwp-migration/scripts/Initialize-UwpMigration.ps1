@@ -12,7 +12,7 @@ build cleanliness, and runtime smoke.
 Steps:
 1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
-3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
+3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml (and the moved Windows.UI.Colors/ColorHelper → Microsoft.UI.*) across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
 4b/4c. Per-file triage against unsupported-api-inventory.json + inline TODO injection
        (`// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — anchor-only, never an API name)
@@ -102,7 +102,7 @@ if ($uwpCsprojs.Count -gt 0) {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
 }
 
-# ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────
+# ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml (+ Colors) ──
 $excludeDirs = @('bin', 'obj', '.uwp-source', '.vs', '.git', '.github', '.copilot')
 $excludePattern = '\\(' + ($excludeDirs -join '|') + ')\\'
 $nsFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.cs,*.xaml -ErrorAction SilentlyContinue |
@@ -111,12 +111,18 @@ $nsChanged = 0
 foreach ($f in $nsFiles) {
     $orig = [System.IO.File]::ReadAllText($f.FullName)
     $new = $orig -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml'
+    # The Colors / ColorHelper static classes also moved to Microsoft.UI in WinUI 3.
+    # These qualified tokens are unambiguous and safe to rewrite. NB: the Color STRUCT
+    # stayed at Windows.UI.Color, so the trailing 's'/'Helper' (and \b) is required to
+    # avoid touching `Windows.UI.Color` / `Windows.UI.Color.FromArgb`.
+    $new = $new -replace 'Windows\.UI\.ColorHelper\b', 'Microsoft.UI.ColorHelper'
+    $new = $new -replace 'Windows\.UI\.Colors\b', 'Microsoft.UI.Colors'
     if ($new -ne $orig) {
         [System.IO.File]::WriteAllText($f.FullName, $new)
         $nsChanged++
     }
 }
-Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+Write-Host "    Rewrote Windows.UI.Xaml/Colors/ColorHelper -> Microsoft.UI.* in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 
 # ─── 4a. Filter-prone class neutralization ────────────────────────────────────
 # Some SDK Samples boilerplate helpers contain UWP-specific patterns whose

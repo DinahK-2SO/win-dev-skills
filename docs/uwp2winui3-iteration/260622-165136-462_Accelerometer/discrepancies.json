@@ -1,0 +1,20 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Choose accelerometer (Scenario 1)", "status": "pass", "reason": "1/1 control covered; Standard ComboBox identical.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Data events (Scenario 2)", "status": "pass", "reason": "2/2 controls; Enable/Disable dead in both apps (no hardware).", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Shake events (Scenario 3)", "status": "pass", "reason": "2/2 controls; shake count + status match.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Polling (Scenario 4)", "status": "pass", "reason": "2/2 controls; No data + status match.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Orientation change (Scenario 5)", "status": "pass", "reason": "2/2 controls; Untransformed/Transformed + red status match.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Data events batching (Scenario 6)", "status": "pass", "reason": "2/2 controls; description + status match.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "App theme", "uwp": "rendered dark theme", "winui": "rendered light theme", "screenshot_ref": "parity/* (environment-driven, not scored)" }
+  ],
+  "missing_features": [],
+  "summary": "100/100, builds clean, runs. No parity defects. All friction was in the build-fix loop (namespace-collision CS0118/CS0576 and Colors CS0103/CS0234), which is where the generalizable skill improvements apply."
+}

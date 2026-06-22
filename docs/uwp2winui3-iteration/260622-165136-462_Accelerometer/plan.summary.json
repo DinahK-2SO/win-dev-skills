@@ -1,0 +1,15 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS: add CS0118 'namespace used like a type' build-error pattern (project name shadows a WinRT type) — fix via distinct-name alias, warn against same-name alias (CS0576); covers the whole sensor-sample family",
+    "MIGRATION-PATTERNS: promote Colors/ColorHelper namespace move to a prominent common-build-error with the unqualified Colors.X fix and the Color-struct-stays vs Colors-class-moves split",
+    "Initialize-UwpMigration.ps1: also auto-rewrite the unambiguous Windows.UI.Colors/ColorHelper tokens to Microsoft.UI.* (word-boundary anchored to leave the Windows.UI.Color struct intact)"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1"
+  ],
+  "deferred_to_human": []
+}

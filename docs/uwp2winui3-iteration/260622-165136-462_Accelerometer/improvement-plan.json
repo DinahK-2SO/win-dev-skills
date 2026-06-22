@@ -1,0 +1,28 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0118 'X is a namespace but is used like a type' (then CS0576 after a naive same-name alias) when the WinUI 3 project root namespace equals a WinRT type the app consumes. ~5 build cycles lost.",
+      "evidence": "skill-defects.json item 1; session-log.txt turn 31 (8x CS0118) and turn 36 (CS0576).",
+      "root_cause": "UWP samples name the project after the WinRT feature/type they demo, so the scaffolded root namespace shadows that type for unqualified references. Not covered by the skill (existing CS0104 note covers only Xaml type ambiguity).",
+      "tier": 3,
+      "change": "Added a dedicated 'CS0118: X is a namespace but is used like a type' entry to the prominent 'Common build errors after the namespace rewrite' section of MIGRATION-PATTERNS.md. Prescribes a DISTINCT-name type alias (e.g. `using AccelerometerSensor = Windows.Devices.Sensors.Accelerometer;`) or full qualification, explicitly warns that same-name aliasing causes CS0576, and notes the WMC9999/WMC1509 XAML errors are cascading symptoms of the C# failure.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On a re-run of any feature/sensor-named sample, the agent recognizes CS0118 immediately and applies a distinct alias in one pass instead of looping through CS0118->CS0576.",
+      "falsifiable_check": "Re-run: CS0118/CS0576 resolved in <=1 build cycle; final code uses a distinct-name alias or fully-qualified type (not a same-name alias, not a Color.FromArgb-style avoidance)."
+    },
+    {
+      "problem": "CS0103/CS0234 on `Colors` (e.g. `Colors.Green`). Agent missed the buried mapping, lost 2 build cycles, and shipped a non-idiomatic `Windows.UI.Color.FromArgb(...)` workaround.",
+      "evidence": "skill-coverage-gaps.json item 1; session-log.txt turns 44-47.",
+      "root_cause": "`Colors`/`ColorHelper` moved to Microsoft.UI while the `Color` struct stayed at Windows.UI.Color. The mapping existed only as one buried row in the namespace table, did not show the unqualified `Colors.X` form, and the bootstrap script never rewrote it.",
+      "tier": 1,
+      "change": "Tier 1: extended Initialize-UwpMigration.ps1 step 3 to also rewrite the unambiguous tokens `Windows.UI.Colors`->`Microsoft.UI.Colors` and `Windows.UI.ColorHelper`->`Microsoft.UI.ColorHelper` (word-boundary anchored so the `Windows.UI.Color` struct is untouched). Tier 3: added a prominent 'Common build errors' entry showing the unqualified `Colors.X` fix and the Color-struct-stays / Colors-class-moves split, and sharpened the namespace table row.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1 + skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Qualified Windows.UI.Colors usages are auto-fixed by the bootstrap; unqualified Colors.X usages are fixed by the agent in one pass using the new prominent guidance.",
+      "falsifiable_check": "Re-run: 0 CS0103/CS0234 'Colors' errors after bootstrap+first fix; final code uses Microsoft.UI.Colors (not a Windows.UI.Color.FromArgb workaround)."
+    }
+  ],
+  "deferred_to_human": []
+}
