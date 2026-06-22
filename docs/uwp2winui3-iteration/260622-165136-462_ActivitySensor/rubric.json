@@ -1,0 +1,58 @@
+{
+  "scenario": "ActivitySensor",
+  "created_at": "2026-06-22T18:48:03+08:00",
+  "uwp_capture_status": "partial: uwp-app-runner launched the original UWP app (ok:true, pid 24984, windowTitle 'Activity Sensor C# Sample') and it rendered correctly. A golden screenshot of the default scenario (1 - Current activity) was captured. Per-scenario UIA navigation/actuation of the live UWP app was NOT possible on this host: the UWP CoreWindow's UIA tree is not exposed through ApplicationFrameHost (winapp ui inspect returns a single empty Pane) and foreground activation is blocked (SetForegroundWindow fails), so synthetic clicks/keys do not reach the app. Baseline screenshots 02-04 therefore reuse the launch frame and no UWP behavioral baseline could be recorded.",
+  "features": [
+    {
+      "id": "current-activity",
+      "area": "Scenario 1",
+      "name": "Current activity",
+      "description": "Gets the default ActivitySensor and displays its current activity reading (Activity, Confidence, Timestamp). On a machine with no activity sensor the page shows 'No activity sensor found'.",
+      "expected_behaviour": [
+        "Scenario page exposes a 'Get Current Activity' button",
+        "Three labelled outputs are present: Activity, Confidence, Timestamp (default 'No data')",
+        "When no sensor is present a status of 'No activity sensor found' is shown"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Current_activity.png",
+      "weight": 2
+    },
+    {
+      "id": "activity-history",
+      "area": "Scenario 2",
+      "name": "Activity history",
+      "description": "Reads the device's recorded activity history over a time range and displays the resulting entries.",
+      "expected_behaviour": [
+        "Scenario page exposes a 'Get Activity History' button",
+        "Invoking the button produces a status/output response (history result or 'no history' message)"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "change-events",
+      "area": "Scenario 3",
+      "name": "Events (ReadingChanged)",
+      "description": "Subscribes/unsubscribes to the ActivitySensor ReadingChanged event. 'ReadingChanged On' enables the subscription; 'ReadingChanged Off' disables it. Off is disabled until On has been pressed.",
+      "expected_behaviour": [
+        "Scenario page exposes both 'ReadingChanged On' and 'ReadingChanged Off' buttons",
+        "'ReadingChanged Off' is initially disabled and only enables after 'ReadingChanged On'",
+        "Invoking 'ReadingChanged On' produces a visible status response"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "background-activity",
+      "area": "Scenario 4",
+      "name": "Background activity",
+      "description": "Registers/unregisters a background task for activity updates. 'Register Task' registers it; 'Unregister Task' is disabled until a task is registered.",
+      "expected_behaviour": [
+        "Scenario page exposes both 'Register Task' and 'Unregister Task' buttons",
+        "'Unregister Task' is initially disabled and only enables after 'Register Task'",
+        "Invoking 'Register Task' produces a visible status response"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

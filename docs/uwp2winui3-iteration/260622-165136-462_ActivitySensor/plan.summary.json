@@ -1,0 +1,17 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration: exclude bin/obj/.vs/.git and AssemblyInfo.cs from the source copy so stale UWP build output no longer leaks in (fixes CS0579 duplicate assembly attributes and bin\\AppX mapping noise)",
+    "MIGRATION-PATTERNS: add CS0118 'namespace used like a type' fix — set RootNamespace to SDKTemplate and dotnet clean — for samples named after the WinRT type they demo",
+    "MIGRATION-PATTERNS: expand Background Tasks with the WinUI 3 in-process failures — drop the OnBackgroundActivated override, remove the windows.backgroundTasks manifest extension, guard Register() with try/catch"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Optionally stop the mapping seed from emitting rows for excluded build-output paths (Tier-0/harness)."
+  ]
+}

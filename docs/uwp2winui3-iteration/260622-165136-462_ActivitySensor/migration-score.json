@@ -1,0 +1,50 @@
+{
+  "scenario": "ActivitySensor",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 4,
+  "features_pass": 4,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: uwp-app-runner launched the original UWP app (ok:true, pid 24984, windowTitle 'Activity Sensor C# Sample') and it rendered correctly; a golden screenshot of the default scenario was captured. Live per-scenario UIA navigation/actuation of the UWP app was unavailable on this host (CoreWindow UIA not exposed via ApplicationFrameHost; foreground activation blocked), so no UWP behavioral baseline was captured and baseline screenshots 02-04 reuse the launch frame.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Current activity",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Current_activity.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Current_activity.png",
+      "note": "Control coverage 1/1. 'Get Current Activity' button + Activity/Confidence/Timestamp outputs + 'No activity sensor found' status all present in WinUI UIA tree. Button actuation was a noop because the host has no activity sensor (hardware-gated) — the UWP app is identically limited (golden shows 'No data'). WinUI screenshot is swapchain-blank (capture artifact); UIA tree is authoritative."
+    },
+    {
+      "name": "Activity history",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_Activity_history.png",
+      "note": "Control coverage 1/1. 'Get Activity History' button present and produced a visible response when actuated (capture manifest: responded). No UWP golden for this scenario (UWP nav unavailable)."
+    },
+    {
+      "name": "Events",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/03_Events.png",
+      "note": "Control coverage 2/2. Both 'ReadingChanged On' (enabled) and 'ReadingChanged Off' (correctly disabled until On is pressed, isEnabled=false in UIA) present. 'ReadingChanged On' responded. Off being non-actuatable is the correct UWP state machine, not a dead control."
+    },
+    {
+      "name": "Background activity",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/04_Background_activity.png",
+      "note": "Control coverage 2/2. Both 'Register Task' (enabled) and 'Unregister Task' (correctly disabled until a task is registered, isEnabled=false in UIA) present. 'Register Task' responded. Unregister being non-actuatable is the correct UWP state machine, not a dead control."
+    }
+  ]
+}

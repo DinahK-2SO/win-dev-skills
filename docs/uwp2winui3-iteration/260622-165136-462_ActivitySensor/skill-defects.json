@@ -1,0 +1,27 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap copies stale UWP build output (obj/, bin/, Properties/AssemblyInfo.cs) into the migrated tree, causing CS0579 'Duplicate TargetFrameworkAttribute' and polluting MIGRATION-MAPPING.md with build-artifact rows.",
+      "evidence": "build-events turn 29: 'Tasks\\obj\\x64\\Release\\.NETCore,Version=v5.0.AssemblyAttributes.cs(4,12): error CS0579: Duplicate global::System.Runtime.Versioning.TargetFrameworkAttribute'; turn 31 Remove-Item of stale Tasks\\obj + Tasks\\Properties; validator turn 46 listed 208 rows incl. 'bin\\x64\\Debug\\AppX\\Assets\\*.png' stuck at Status=copied.",
+      "skill_search": "grep Initialize-UwpMigration.ps1 copy loop; grep MIGRATION-PATTERNS.md/SKILL.md for 'obj', 'AssemblyInfo', 'CS0579', 'DefaultItemExcludes' (0 hits)",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 copy step (line ~69) enumerates *.cs/*.xaml/etc. recursively with NO bin/obj exclusion, even though the later namespace-rewrite step (line ~106) already defines $excludeDirs = bin/obj/.uwp-source/.vs/.git. SDK-style projects auto-generate the assembly attributes the copied obj/Properties files also declare.",
+      "proposed_fix": "In the copy loop, skip any file whose path contains a \\bin\\, \\obj\\, \\.vs\\, \\.git\\ segment, and skip legacy Properties\\AssemblyInfo.cs. Reuse the same exclude filter the rewrite step already uses.",
+      "generalizes": "Almost every real UWP source tree carries committed/working bin+obj and a legacy Properties\\AssemblyInfo.cs, and many SDK samples have nested helper projects (e.g. a Tasks subfolder) whose nested obj is NOT covered by the default $(BaseIntermediateOutputPath) exclude. Excluding build output at copy time prevents CS0579 and mapping bloat on any scenario, not just this one."
+    },
+    {
+      "problem": "When the UWP project/folder name is identical to a WinRT type it demonstrates, RootNamespace shadows that type and every reference fails with CS0118 'X is a namespace but is used like a type'. The fix (neutral RootNamespace + dotnet clean) is undocumented, costing ~16 turns.",
+      "evidence": "build-events turns 30-45: repeated 'Scenario3_ChangeEvents.xaml.cs(32,17): error CS0118: ActivitySensor is a namespace but is used like a type'; survived an App/MainWindow namespace move (turn 32) AND a RootNamespace edit (turn 43) and only cleared after 'dotnet clean' (turn 45) regenerated XamlTypeInfo.g.cs (which still carried namespace ActivitySensor.ActivitySensor_XamlTypeInfo).",
+      "skill_search": "grep SKILL.md + MIGRATION-PATTERNS.md for 'RootNamespace', 'CS0118', 'collision', 'SDKTemplate', 'XamlTypeInfo', 'dotnet clean' — all 0 hits. 'Common build errors after the namespace rewrite' covers CS0104/CS0227/CS0246 but not CS0118.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The scaffold sets RootNamespace to the project/folder name; WinRT SDK samples are named after the API they demo (ActivitySensor, Accelerometer, Compass, BarcodeScanner...), so the project namespace collides with the WinRT type. The generated XamlTypeInfo.g.cs caches the old root namespace, so a RootNamespace change needs a clean rebuild to take effect.",
+      "proposed_fix": "Add a CS0118 subsection to 'Common build errors after the namespace rewrite': when the project name equals a WinRT type, set <RootNamespace>SDKTemplate</RootNamespace> (the namespace the samples' shared content already uses), keep App/MainWindow/scenario pages in namespace SDKTemplate, and run 'dotnet clean' before rebuilding so XamlTypeInfo.g.cs regenerates.",
+      "generalizes": "The whole WinUI/UWP SDK sample family — the most common UWP→WinUI 3 migration input — names projects after the demonstrated API, so this collision recurs across Accelerometer, Compass, Gyrometer, BarcodeScanner, Camera, etc. The 'dotnet clean after a namespace/RootNamespace change' rule applies to any XAML project."
+    }
+  ]
+}

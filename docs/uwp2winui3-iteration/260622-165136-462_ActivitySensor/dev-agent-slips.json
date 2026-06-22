@@ -1,0 +1,14 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "DataTemplate using x:Bind/x:DataType failed to resolve (WMC0909 'Cannot resolve DataType local:Scenario' / WMC1111) during the namespace rename; agent switched to classic {Binding Title}.",
+      "evidence": "build-events turn 36 'MainPage.xaml(33,30): XamlCompiler error WMC0909: Cannot resolve DataType local:Scenario'; fixed in one edit at turn 37.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md '### `x:Bind` and compiled bindings' (line ~576) — x:Bind is supported with the same syntax; type-resolution failures point at stale namespace prefixes in the XAML.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "x:Bind support is already documented, and resolving a DataTemplate binding (add x:DataType or fall back to {Binding}) is standard WinUI knowledge a capable model fixes in one turn — which is exactly what happened. The transient failure here was a side effect of the in-progress RootNamespace rename, not a skill gap."
+    }
+  ]
+}

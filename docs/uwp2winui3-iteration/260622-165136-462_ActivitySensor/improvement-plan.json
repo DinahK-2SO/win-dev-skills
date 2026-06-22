@@ -1,0 +1,40 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap copied stale UWP build output (obj/, bin/, nested Tasks/obj, Properties/AssemblyInfo.cs) into the migrated tree → CS0579 'Duplicate TargetFrameworkAttribute' and 208 MIGRATION-MAPPING rows of bin\\AppX build assets.",
+      "evidence": "lessons.json errors_encountered[0]; build-events turn 29 (CS0579) + turn 31 (manual Remove-Item); validator turn 46 mapping rows for bin\\x64\\Debug\\AppX\\Assets\\*.png.",
+      "root_cause": "Initialize-UwpMigration.ps1 copy loop enumerated *.cs/*.xaml recursively with no bin/obj exclusion, though the later namespace-rewrite step already defines an exclude list. Nested helper-project obj is not covered by SDK default item-excludes.",
+      "tier": 1,
+      "change": "Added a $copyExcludePattern guard to the copy Where-Object that skips \\bin\\,\\obj\\,\\.vs\\,\\.git\\,\\.uwp-source\\,\\.copilot\\,\\.github\\ path segments and any AssemblyInfo.cs.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Stale assembly-attribute files and bin/obj artifacts are never copied; CS0579 cannot occur and the mapping no longer lists build-output rows.",
+      "falsifiable_check": "Re-run the bootstrap on a UWP source containing obj/bin: no file under bin/ or obj/ appears in the target, MIGRATION-MAPPING.md has no bin\\AppX rows, and the first build emits 0 CS0579."
+    },
+    {
+      "problem": "Project/folder name identical to the demonstrated WinRT type (ActivitySensor) made RootNamespace shadow the type → CS0118 across all scenario files; fix (neutral RootNamespace + dotnet clean) was undocumented and cost ~16 turns.",
+      "evidence": "skill-defects.json item[1]; build-events turns 30-45; resolved only after RootNamespace->SDKTemplate (turn 43) + dotnet clean (turn 45).",
+      "root_cause": "Scaffold sets RootNamespace to the folder name; WinRT SDK samples are named after their API. Generated XamlTypeInfo.g.cs caches the old root namespace so the fix needs a clean rebuild.",
+      "tier": 3,
+      "change": "Added a 'CS0118: X is a namespace but is used like a type' subsection to 'Common build errors after the namespace rewrite' — set <RootNamespace>SDKTemplate</RootNamespace>, keep types in namespace SDKTemplate, update x:Class/xmlns:local, then dotnet clean.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent recognizes CS0118 immediately and applies the RootNamespace+clean fix in one pass instead of looping.",
+      "falsifiable_check": "On a re-run of any API-named sample (Accelerometer/Compass/etc.), CS0118 is resolved in a single edit cycle with a documented dotnet clean rather than multiple failed rebuilds."
+    },
+    {
+      "problem": "UWP in-process background-task migration produced CS0246/CS0115 (OnBackgroundActivated) and Appx registration failures (0x80080204/0x80073CF6) from the windows.backgroundTasks manifest extension; ~5 build/launch cycles.",
+      "evidence": "skill-coverage-gaps.json item[0]; build-events turns 30/36 (CS0246/CS0115), validator turn 48 + Test-AppLaunch turn 51 (manifest/registration errors).",
+      "root_cause": "Existing Background Tasks section did not name the two WinUI 3 failure modes (no OnBackgroundActivated override; manifest extension invalid) nor the try/catch guard.",
+      "tier": 3,
+      "change": "Expanded the Background Tasks section with three concrete removals/guards: delete the OnBackgroundActivated override, remove the windows.backgroundTasks <Extension>, wrap Register() in try/catch.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Background-task samples build and launch without the override/manifest dead-ends.",
+      "falsifiable_check": "On a re-run of a background-task sample, 0 CS0115/CS0246 from OnBackgroundActivated and Test-AppLaunch reports status=running on the first manifest pass."
+    }
+  ],
+  "deferred_to_human": [
+    "Validate-UwpMigration.ps1 flags MIGRATION-MAPPING rows stuck at Status=copied; the bootstrap copy-exclude fix removes the build-artifact rows, but the seed could also stop emitting mapping rows for any excluded paths (Tier-0/harness consideration, not auto-applied)."
+  ]
+}

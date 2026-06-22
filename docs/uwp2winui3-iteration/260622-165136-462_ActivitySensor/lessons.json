@@ -1,0 +1,38 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught residual MIGRATION-MAPPING rows stuck at Status=copied and ran the rebuild + smoke-launch gates (turns 46-55), driving the agent to a clean PASS." },
+    { "tool": "Test-AppLaunch.ps1", "evidence": "Surfaced the real Appx registration failure (0x80080204 / 0x80073CF6) from the background-task manifest extension at turns 51-54, telling the agent exactly why launch failed." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1", "problem": "Copy step pulled stale UWP build output (obj/, bin/, Tasks/obj, Tasks/Properties/AssemblyInfo.cs) into the target because it copies every *.cs recursively with no bin/obj exclusion.", "evidence": "turn 29 build: 'Tasks\\obj\\x64\\Release\\.NETCore,Version=v5.0.AssemblyAttributes.cs(4,12): error CS0579: Duplicate TargetFrameworkAttribute'; agent had to Remove-Item the stale folders at turn 31. Also produced 208 MIGRATION-MAPPING rows incl. bin\\x64\\Debug\\AppX\\Assets\\*.png." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Namespace-rewrite step excludes bin/obj/.uwp-source (line 106) but the earlier file-copy step (line 69) does not, so build artifacts leak into the migrated tree.", "suggested_tweak": "Apply the same exclude-dir filter to the copy loop; also skip legacy Properties/AssemblyInfo.cs (SDK-style projects auto-generate assembly attributes)." }
+  ],
+  "failed_apis": [
+    { "api": "Application.OnBackgroundActivated(BackgroundActivatedEventArgs)", "why_tried": "UWP App.xaml.cs dispatched in-process background tasks by overriding OnBackgroundActivated.", "root_cause": "Microsoft.UI.Xaml.Application has no OnBackgroundActivated to override and BackgroundActivatedEventArgs is not in scope in the WinUI 3 app model.", "fix": "Removed the override entirely (turn 37); in-process background activation is not part of the WinUI 3 Application lifecycle." },
+    { "api": "windows.backgroundTasks Extension (Package.appxmanifest)", "why_tried": "UWP manifest registered the in-process task via <Extension Category=\"windows.backgroundTasks\" EntryPoint=\"...\">.", "root_cause": "Without an ActivatableClassId/inProcessServer registration the appx manifest is invalid (0x80080204); with no EntryPoint the extension is rejected (0x80073CF6) — the package will not register or launch.", "fix": "Removed the windows.backgroundTasks extension from the manifest and wrapped BackgroundTaskBuilder.Register() in try/catch (turn 52)." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.ActivitySensor", "special_handling": "The sample project/folder is named 'ActivitySensor', identical to the WinRT type it demos, so RootNamespace=ActivitySensor shadowed the type → CS0118. Required <RootNamespace>SDKTemplate</RootNamespace> + moving App/MainWindow to namespace SDKTemplate + dotnet clean to regenerate XamlTypeInfo.g.cs." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0579: Duplicate 'global::System.Runtime.Versioning.TargetFrameworkAttribute' (Tasks\\obj\\...\\.NETCore,Version=v5.0.AssemblyAttributes.cs)", "root_cause": "Bootstrap copied the UWP project's stale obj/ and Properties/AssemblyInfo.cs; the auto-generated SDK assembly attributes then collide with the copied ones.", "fix": "Deleted the stale Tasks\\obj and Tasks\\Properties folders (turn 31)." },
+    { "error": "CS0118: 'ActivitySensor' is a namespace but is used like a type", "root_cause": "Project RootNamespace equals the WinRT type name ActivitySensor; references to the type bind to the project namespace instead.", "fix": "Set <RootNamespace>SDKTemplate</RootNamespace>, moved App/MainWindow/scenario pages to namespace SDKTemplate, then dotnet clean + rebuild to regenerate XamlTypeInfo.g.cs (turns 43-45)." },
+    { "error": "CS0246 'BackgroundActivatedEventArgs' not found / CS0115 OnBackgroundActivated no suitable method to override", "root_cause": "WinUI 3 Application has no in-process background-activation override.", "fix": "Removed the OnBackgroundActivated override (turn 37)." },
+    { "error": "WMC0909 'Cannot resolve DataType local:Scenario' / WMC1111 DataTemplate with x:Bind needs x:DataType", "root_cause": "DataTemplate used x:Bind with x:DataType pointing at local:Scenario, which failed to resolve under the renamed namespace.", "fix": "Switched the DataTemplate to classic {Binding Title} (turn 37)." },
+    { "error": "Appx register failed 0x80080204 / 0x80073CF6 at smoke launch", "root_cause": "windows.backgroundTasks manifest extension with an in-process EntryPoint is invalid in the WinUI 3 packaging model.", "fix": "Removed the extension from Package.appxmanifest; registration moved to runtime BackgroundTaskBuilder in try/catch (turns 52-54)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "turns 29-45 (namespace collision)", "symptom": "Repeated CS0118 'ActivitySensor is a namespace but is used like a type'; survived an App/MainWindow namespace move AND a RootNamespace edit and only cleared after dotnet clean.", "turns_or_retries": "~6 builds across 16 turns", "root_cause": "Project named after the WinRT type it demonstrates; stale XamlTypeInfo.g.cs kept the old namespace after the RootNamespace edit.", "how_resolved": "RootNamespace -> SDKTemplate + dotnet clean to regenerate XamlTypeInfo.g.cs.", "preventable_by": "A documented CS0118 build-error pattern telling the agent (a) rename RootNamespace to the neutral SDKTemplate namespace when the project name collides with a WinRT type and (b) dotnet clean afterwards." },
+    { "where": "turn 29-31 (stale build output)", "symptom": "CS0579 duplicate assembly attribute from a copied obj/ folder.", "turns_or_retries": "2 turns + a manual Remove-Item", "root_cause": "Initialize copy step copied UWP bin/obj/Properties artifacts.", "preventable_by": "Excluding bin/obj/Properties\\AssemblyInfo.cs in the bootstrap copy loop (Tier-1)." },
+    { "where": "turns 36-54 (background task)", "symptom": "Sequential CS0246/CS0115 build errors then two Appx registration failures at launch.", "turns_or_retries": "~5 build/launch cycles", "root_cause": "WinUI 3 has no OnBackgroundActivated override and rejects the windows.backgroundTasks manifest extension used by UWP in-process tasks.", "how_resolved": "Removed the override and the manifest extension; wrapped Register() in try/catch.", "preventable_by": "Expanding the Background Tasks pattern to spell out: remove OnBackgroundActivated, remove the windows.backgroundTasks manifest extension, guard Register() with try/catch." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "winapp smoke-launch could not register the package while the manifest carried the windows.backgroundTasks extension.", "workaround": "Removed the extension; subsequent launch reported status=running." }
+  ]
+}

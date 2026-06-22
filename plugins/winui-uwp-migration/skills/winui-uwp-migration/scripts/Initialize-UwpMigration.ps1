@@ -66,13 +66,26 @@ $patterns = @(
 
 $copied = New-Object System.Collections.Generic.List[string]
 
+# Never copy build output or tooling dirs. Copying the UWP project's obj/bin (or a nested
+# helper project's obj, which the SDK default item-excludes do NOT cover) drags stale
+# generated files into the target — e.g. obj\...\.NETCore,Version=vX.AssemblyAttributes.cs
+# and Properties\AssemblyInfo.cs — which collide with the SDK-generated assembly attributes
+# and fail the build with CS0579 'Duplicate TargetFrameworkAttribute'. It also pulls bin\AppX
+# build assets into MIGRATION-MAPPING.md as noise rows.
+$copyExcludePattern = '\\(bin|obj|\.vs|\.git|\.uwp-source|\.copilot|\.github)\\'
+
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
-    $name = $_.Name.ToLowerInvariant()
-    $match = $false
-    foreach ($ext in $patterns) {
-        if ($name.EndsWith($ext)) { $match = $true; break }
+    if ($_.FullName -match $copyExcludePattern -or $_.Name -ieq 'AssemblyInfo.cs') {
+        $false
     }
-    $match
+    else {
+        $name = $_.Name.ToLowerInvariant()
+        $match = $false
+        foreach ($ext in $patterns) {
+            if ($name.EndsWith($ext)) { $match = $true; break }
+        }
+        $match
+    }
 } | ForEach-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     $dst = Join-Path $Target $rel

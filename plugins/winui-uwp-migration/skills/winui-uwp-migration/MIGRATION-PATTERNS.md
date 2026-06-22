@@ -39,6 +39,25 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
 
+### `CS0118: 'X' is a namespace but is used like a type`
+
+WinUI/UWP SDK samples are conventionally named after the API they demonstrate (e.g. `ActivitySensor`, `Accelerometer`, `Compass`, `BarcodeScanner`). The scaffold sets `<RootNamespace>` to the project/folder name, so the project namespace becomes **identical to a WinRT type** (`Windows.Devices.Sensors.ActivitySensor`). Any `new ActivitySensor(...)` or `ActivitySensor x;` then binds to the *namespace*, not the type, and the build fails with `CS0118`.
+
+Fix — set a neutral root namespace (these samples already use `SDKTemplate` for their shared content) and keep `App`/`MainWindow`/scenario pages in it:
+
+```xml
+<!-- in the .csproj -->
+<RootNamespace>SDKTemplate</RootNamespace>
+```
+
+```csharp
+namespace SDKTemplate;   // App.xaml.cs, MainWindow.xaml.cs, every Scenario*.xaml.cs
+```
+
+Also update the matching `x:Class` / `xmlns:local="using:SDKTemplate"` in the `.xaml` files.
+
+> **Then `dotnet clean` before rebuilding.** The generated `XamlTypeInfo.g.cs` caches the old root namespace, so a `RootNamespace` change does **not** take effect on an incremental build — `CS0118` keeps reappearing until the stale generated file is regenerated. `dotnet clean` (or deleting `obj/`) forces it.
+
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
 Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding files in `MIGRATION-MAPPING.md` get `Triage label = defer`; cite the specific API in `MIGRATION-DEFERRED.md`.
@@ -321,6 +340,12 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 ## Background Tasks
 
 `IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK [`BackgroundTaskBuilder`](https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.windows.applicationmodel.background.backgroundtaskbuilder) (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler. See the [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy).
+
+When migrating a UWP **in-process** background-task sample, three UWP constructs do not carry over and will break the build or the app launch — remove them:
+
+1. **Delete the `App.OnBackgroundActivated` override.** `Microsoft.UI.Xaml.Application` has no such method, so the UWP override fails with `CS0115` ("no suitable method found to override") and `BackgroundActivatedEventArgs` is not in scope (`CS0246`). There is no in-process background-activation entry point in the WinUI 3 `Application` lifecycle.
+2. **Remove the `windows.backgroundTasks` `<Extension>` from `Package.appxmanifest`.** An in-process `EntryPoint="..."` there makes the package fail to register/launch (`0x80080204` "manifest is invalid … not allowed to have EntryPoint without ActivatableClassId", or `0x80073CF6` "extension is missing an EntryPoint"). Register the task at runtime via `BackgroundTaskBuilder` instead.
+3. **Guard `BackgroundTaskBuilder.Register()` with `try/catch`** (see *Defensive UI for device-dependent features* in SKILL.md) — registration can throw when the trigger/sensor is unavailable, and an unhandled exception would crash the page.
 
 <a id="notifications"></a>
 ## Notifications

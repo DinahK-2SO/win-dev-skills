@@ -1,0 +1,16 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Current activity (Get Current Activity button + Activity/Confidence/Timestamp + 'No activity sensor found')", "status": "pass", "reason": "Control coverage 1/1; hardware-gated noop matches the UWP original.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Activity history (Get Activity History button produces a response)", "status": "pass", "reason": "Button present and responded.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Events (ReadingChanged On/Off; Off disabled until On)", "status": "pass", "reason": "Both buttons present; correct enable/disable state machine.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Background activity (Register/Unregister Task; Unregister disabled until registered)", "status": "pass", "reason": "Both buttons present; Register responded.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "All 4 features pass with 100% control coverage. No parity defects. The value of this trial is in the build-time struggles (namespace collision, stale build-output copy, background-task lifecycle/manifest) — none lowered the score but all are generalizable migration-skill improvements."
+}
