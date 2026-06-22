@@ -86,6 +86,90 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
 
 Write-Host "    Copied $($copied.Count) source files"
 
+# ─── 1b. Harvest linked shared-content sources (<Compile Include> + <Link>) ─────
+# UWP SDK samples (and many real apps) pull source in from OUTSIDE the project
+# folder via `<Compile Include="$(SharedContentDir)\...">` + `<Link>relative\path</Link>`.
+# Section 1 only copies files physically under -Source, so these linked files are
+# missed; SDK-style default globbing in the WinUI 3 csproj won't pick them up
+# either (they aren't on disk in the project cone). The result is CS0234/CS0246
+# "type/namespace could not be found" for every helper that lived in shared content.
+# Materialize each linked item at its <Link> path so default globbing compiles it.
+# Defensive: any failure here is non-fatal — the original behaviour is preserved.
+$harvested = New-Object System.Collections.Generic.List[string]
+try {
+    $harvestCsproj = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($harvestCsproj) {
+        $csprojDir  = [System.IO.Path]::GetDirectoryName($harvestCsproj.FullName)
+        $csprojText = [System.IO.File]::ReadAllText($harvestCsproj.FullName)
+
+        # Simple <Name>value</Name> property map (skip values that themselves contain markup).
+        $propMap = @{}
+        foreach ($pm in [regex]::Matches($csprojText, '<([A-Za-z_][\w]*)>([^<]*)</\1>')) {
+            $propMap[$pm.Groups[1].Value] = $pm.Groups[2].Value
+        }
+
+        function Expand-MsbExpr([string]$value) {
+            if (-not $value) { return $value }
+            for ($i = 0; $i -lt 8 -and $value -match '\$\(') {
+                # $(MSBuildThisFileDirectory) → csproj directory (with trailing slash)
+                $value = $value -replace '\$\(MSBuildThisFileDirectory\)', ([regex]::Escape("$csprojDir\") -replace '\\\\','\')
+                $value = $value.Replace('$(MSBuildThisFileDirectory)', "$csprojDir\")
+                # $([MSBuild]::GetDirectoryNameOfFileAbove(<start>, <file>)) → nearest ancestor dir containing <file>
+                $value = [regex]::Replace($value, '\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(([^,]+),\s*([^\)]+)\)\)', {
+                    param($m)
+                    $start = (Expand-MsbExpr ($m.Groups[1].Value.Trim())).Trim('"',"'")
+                    $file  = $m.Groups[2].Value.Trim().Trim('"',"'")
+                    $dir   = $start
+                    while ($dir -and (Test-Path -LiteralPath $dir)) {
+                        if (Test-Path -LiteralPath (Join-Path $dir $file)) { return $dir }
+                        $parent = [System.IO.Path]::GetDirectoryName($dir.TrimEnd('\'))
+                        if ($parent -eq $dir) { break }
+                        $dir = $parent
+                    }
+                    return ''
+                })
+                # $(OtherProperty) → from the property map
+                $value = [regex]::Replace($value, '\$\(([A-Za-z_][\w]*)\)', {
+                    param($m)
+                    $n = $m.Groups[1].Value
+                    if ($propMap.ContainsKey($n)) { return $propMap[$n] } else { return '' }
+                })
+                $i++
+            }
+            return $value
+        }
+
+        # Only items carrying a <Link> are out-of-cone shared sources; local includes have none.
+        $itemRe = '<(Compile|Page|Content|None|EmbeddedResource|ApplicationDefinition)\s+Include="([^"]+)"[^>]*>(.*?)</\1>'
+        foreach ($im in [regex]::Matches($csprojText, $itemRe, [System.Text.RegularExpressions.RegexOptions]::Singleline)) {
+            $linkM = [regex]::Match($im.Groups[3].Value, '<Link>([^<]+)</Link>')
+            if (-not $linkM.Success) { continue }
+            $linkRel = $linkM.Groups[1].Value.Trim()
+            $incRaw  = $im.Groups[2].Value.Trim()
+            $incPath = Expand-MsbExpr $incRaw
+            if (-not $incPath) { continue }
+            if (-not [System.IO.Path]::IsPathRooted($incPath)) {
+                $incPath = [System.IO.Path]::GetFullPath((Join-Path $csprojDir $incPath))
+            }
+            if (-not (Test-Path -LiteralPath $incPath)) { continue }
+            $dst = Join-Path $Target $linkRel
+            # Skip if the scaffold (or section 1) already provides this file — never
+            # clobber the WinUI 3 shell (App.xaml/App.xaml.cs/MainWindow) with UWP content.
+            if (Test-Path -LiteralPath $dst) { continue }
+            $dstDir = [System.IO.Path]::GetDirectoryName($dst)
+            if (-not (Test-Path -LiteralPath $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
+            Copy-Item -LiteralPath $incPath -Destination $dst -Force
+            [void]$copied.Add($linkRel)
+            [void]$harvested.Add($linkRel)
+        }
+    }
+} catch {
+    Write-Warning "    Linked shared-content harvest skipped: $($_.Exception.Message)"
+}
+if ($harvested.Count -gt 0) {
+    Write-Host "    Harvested $($harvested.Count) linked shared-content source file(s) into the project cone"
+}
+
 # ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
 $uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
 $refDir = Join-Path $Target '.uwp-source'
@@ -452,6 +536,7 @@ $labelOrder = @('migrate-as-is','migrate-with-adaptation','defer')
 Write-Host ""
 Write-Host "=== BOOTSTRAP COMPLETE ==="
 Write-Host "Source files copied   : $($copied.Count)"
+Write-Host "Linked shared sources : $($harvested.Count) harvested into project cone"
 Write-Host "Namespace rewrites    : $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 Write-Host "Neutralized classes   : $($neutralizedFiles.Count) file(s)"
 Write-Host "Triage breakdown      :"

@@ -1,0 +1,24 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 7,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 7,
+  "uwp_capture_status": "ok: original UWP app launched (Release, SDK 10.0.26100.0, pid 15300, window 'AdaptiveStreaming sample'); launch frame captured. Per-scenario nav during golden capture could not actuate the UWP CoreWindow's inner list (hosted by ApplicationFrameHost; UIA tree unreachable via title-invoke), so non-initial golden frames default to the Scenario 1 state. Does not affect the score: the WinUI candidate does not build, so there is nothing to compare.",
+  "winui_buildable": false,
+  "winui_runnable": false,
+  "winui_build_error": "dotnet build exit code 1 — CS0234 missing 'SDKTemplate.Logging'; CS0246 missing LogView/MediaPlayerLogger/MediaSourceLogger/MediaPlaybackItemLogger/AdaptiveMediaSourceLogger; CS0104 ambiguous HttpClient/HttpRequestMessage/HttpResponseMessage (System.Net.Http vs Windows.Web.Http); CS0535 AddAuthorizationHeaderFilter does not implement IHttpFilter.SendRequestAsync",
+  "parity_result": null,
+  "behavioral_regressions": 0,
+  "features": [
+    { "name": "Simplest Adaptive Streaming", "verdict": "fail", "uwp_responded": true, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/01_Simplest_Adaptive_Streaming.png", "winui_screenshot": null, "note": "Migrated app does not build; scenario cannot render or be exercised." },
+    { "name": "Event Handlers", "verdict": "fail", "uwp_responded": true, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/02_Event_Handlers.png", "winui_screenshot": null, "note": "Migrated app does not build; logger types missing in Scenario2." },
+    { "name": "Network Request Modification", "verdict": "fail", "uwp_responded": true, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/03_Network_Request_Modification.png", "winui_screenshot": null, "note": "Migrated app does not build; IHttpFilter not implemented, Http types ambiguous." },
+    { "name": "Adaptive Streaming Tuning", "verdict": "fail", "uwp_responded": true, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/04_Adaptive_Streaming_Tuning.png", "winui_screenshot": null, "note": "Migrated app does not build; logger types missing in Scenario4." },
+    { "name": "Metadata", "verdict": "fail", "uwp_responded": true, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/05_Metadata.png", "winui_screenshot": null, "note": "Migrated app does not build; logger types missing in Scenario5." },
+    { "name": "Ad Insertion", "verdict": "fail", "uwp_responded": true, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/06_Ad_Insertion.png", "winui_screenshot": null, "note": "Migrated app does not build; logger types missing in Scenario6." },
+    { "name": "Live Seekable Range", "verdict": "fail", "uwp_responded": true, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/07_Live_Seekable_Range.png", "winui_screenshot": null, "note": "Migrated app does not build; 15 transport actions cannot be exercised; MediaPlayerLogger missing in Scenario7." }
+  ]
+}

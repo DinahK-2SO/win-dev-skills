@@ -1,0 +1,38 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Linked shared-content sources ($(SharedContentDir) + <Link> <Compile> items) are never materialized into the WinUI 3 project, so every type defined in shared content is unresolved (CS0234/CS0246) and the whole app fails to build.",
+      "evidence": "migration-score.json winui_build_error CS0234 'SDKTemplate.Logging' / CS0246 LogView+logger types; UWP csproj has 15 <Compile Include=\"$(SharedContentDir)\\cs\\Logging\\...\"> + <Link> items.",
+      "root_cause": "Initialize-UwpMigration.ps1 copies only files under -Source; SDK-style default globbing can't see out-of-cone linked sources, and the skill never told the agent to materialize them.",
+      "tier": 1,
+      "change": "Added bootstrap section 1b: parse the UWP .csproj for <Compile/Page/Content/None/EmbeddedResource Include> items carrying a <Link>, expand the MSBuild expression ($(MSBuildThisFileDirectory), [MSBuild]::GetDirectoryNameOfFileAbove, $(prop)), and copy each into the project cone at its link path — skipping any path the scaffold already provides (protects App.xaml/App.xaml.cs/MainWindow). Harvested files are added to the copied set so they get namespace-rewrite + triage + TODO seeding. Reported in the BOOTSTRAP COMPLETE summary.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared helper classes (e.g. SDKTemplate.Logging) compile; CS0234/CS0246 for shared types disappear.",
+      "falsifiable_check": "On re-run, bootstrap prints 'Linked shared sources : N harvested'; dotnet build no longer reports CS0234 'SDKTemplate.Logging' or CS0246 for LogView/*Logger; Shared\\Logging\\*.cs exist under the target."
+    },
+    {
+      "problem": "Windows.Web.Http vs System.Net.Http ambiguity (CS0104) plus the IHttpFilter.SendRequestAsync consequence (CS0535) were undocumented.",
+      "evidence": "migration-score.json: CS0104 ambiguous HttpClient/HttpRequestMessage/HttpResponseMessage; CS0535 AddAuthorizationHeaderFilter does not implement IHttpFilter.SendRequestAsync.",
+      "root_cause": "On WinUI 3 both HTTP stacks are in scope; the skill's only CS0104 guidance covered XAML namespaces. Switching to System.Net.Http types to resolve CS0104 breaks IHttpFilter (defined against Windows.Web.Http) → CS0535.",
+      "tier": 3,
+      "change": "Added a 'CS0104 HttpClient/HttpRequestMessage/HttpResponseMessage ambiguous' subsection under Common build errors: pick one stack per file, keep Windows.Web.Http (qualify or alias) for IHttpFilter/HttpBaseProtocolFilter/AdaptiveMediaSource code, with a callout that CS0535 on IHttpFilter.SendRequestAsync is the downstream symptom and the member types must stay on Windows.Web.Http.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent resolves the ambiguity by qualifying to Windows.Web.Http and keeps IHttpFilter signatures intact.",
+      "falsifiable_check": "On re-run of a Windows.Web.Http sample, no CS0104 on HttpClient/HttpRequestMessage/HttpResponseMessage and no CS0535 on IHttpFilter.SendRequestAsync."
+    },
+    {
+      "problem": "csproj guidance under-emphasized linked shared sources, risking either ignoring them or re-adding <Compile Include> on top of the default glob (duplicate-item errors).",
+      "evidence": "MIGRATION-PATTERNS.md > Project File Updates listed <Compile Include> only as 'drop'.",
+      "root_cause": "Under-emphasis: no distinction between UWP-only csproj markers (drop) and linked shared source content (must be materialized).",
+      "tier": 3,
+      "change": "Added a callout in Project File Updates that <Link>ed shared sources are auto-harvested into the cone by the bootstrap and must NOT be re-added as <Compile Include> on top of the default glob.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent does not paste <Compile Include> back in (avoids duplicate-item errors) and trusts the harvested files.",
+      "falsifiable_check": "On re-run, no MSB3105/duplicate-item build errors from re-added <Compile Include> lines; agent relies on harvested shared sources."
+    }
+  ],
+  "deferred_to_human": []
+}

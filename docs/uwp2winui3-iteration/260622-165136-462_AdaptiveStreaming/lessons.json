@@ -1,0 +1,37 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied 251 in-cone source files, did the Windows.UI.Xaml->Microsoft.UI.Xaml rewrite, and seeded MIGRATION-MAPPING.md + TODO[migrate-NNN] markers (session-log.txt mapping table and TODO grep)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1", "problem": "Only copies files physically under -Source; it ignored the sample's linked shared sources referenced via <Compile Include=\"$(SharedContentDir)\\...\"> + <Link>, so the entire SDKTemplate.Logging helper set (LogView, MediaPlayerLogger, MediaSourceLogger, MediaPlaybackItemLogger, AdaptiveMediaSourceLogger, extensions) never entered the project.", "evidence": "UWP csproj has 15 <Compile Include=\"$(SharedContentDir)\\cs\\Logging\\...\"> items; migration-score.json winui_build_error: CS0234 missing 'SDKTemplate.Logging', CS0246 missing those logger types." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "No handling of MSBuild $(SharedContentDir) / GetDirectoryNameOfFileAbove linked-include sources that live outside the project directory.", "suggested_tweak": "Parse the UWP .csproj for <Compile/Page/...Include> items carrying a <Link>, expand the MSBuild expression, and copy each into the project cone at its link path (skip if a scaffold file already exists)." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.Web.Http.HttpClient / HttpRequestMessage / HttpResponseMessage", "why_tried": "Scenario3 RequestModification and other scenarios use Windows.Web.Http for adaptive-source request modification.", "root_cause": "Under WinUI 3, System.Net.Http is also in scope so these type names are ambiguous (CS0104); the skill's CS0104 guidance only covered XAML LaunchActivatedEventArgs.", "fix": "Fully qualify or alias to Windows.Web.Http for files that touch IHttpFilter/HttpBaseProtocolFilter/AdaptiveMediaSource." },
+    { "api": "Windows.Web.Http.Filters.IHttpFilter.SendRequestAsync", "why_tried": "AddAuthorizationHeaderFilter implements IHttpFilter for PlayReady key requests.", "root_cause": "CS0535 — the implementation's SendRequestAsync signature drifted off Windows.Web.Http types (downstream of the CS0104 ambiguity 'fix').", "fix": "Keep all IHttpFilter member types in Windows.Web.Http; return IAsyncOperationWithProgress<HttpResponseMessage, HttpProgress>." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md > Project File Updates", "wrong": "Lumps all explicit <Compile Include> items as 'drop / do not copy', with no guidance that <Link>ed shared sources outside the project cone must still be materialized somewhere.", "correct": "Linked shared sources must be brought into the project cone (now auto-harvested by the bootstrap); they are not the same as the UWP-only csproj markers you drop." },
+    { "where": "MIGRATION-PATTERNS.md > Common build errors (CS0104)", "wrong": "CS0104 section only addressed Windows.UI.Xaml vs Microsoft.UI.Xaml type clashes.", "correct": "The most common CS0104 in networking samples is Windows.Web.Http vs System.Net.Http (HttpClient/HttpRequestMessage/HttpResponseMessage)." }
+  ],
+  "special_apis": [
+    { "api": "$(SharedContentDir) linked <Compile> items (UWP SDK-sample shared content)", "special_handling": "Resolve the MSBuild expression and copy each <Link> item into the project cone so default globbing compiles it." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: namespace 'Logging' does not exist in 'SDKTemplate'", "root_cause": "SharedContent\\cs\\Logging\\*.cs were referenced via <Compile Include=\"$(SharedContentDir)...\"><Link> and never copied into the project; SDK-style globbing can't see files outside the project directory.", "fix": "Bootstrap now harvests linked shared sources into the project cone." },
+    { "error": "CS0246: type 'LogView'/'MediaPlayerLogger'/'MediaSourceLogger'/'MediaPlaybackItemLogger'/'AdaptiveMediaSourceLogger' could not be found", "root_cause": "Same missing shared-content harvest.", "fix": "Same — harvest the linked Logging helper set." },
+    { "error": "CS0104: 'HttpClient'/'HttpRequestMessage'/'HttpResponseMessage' ambiguous (System.Net.Http vs Windows.Web.Http)", "root_cause": "Both HTTP stacks in scope on WinUI 3; skill lacked the pattern.", "fix": "Added CS0104 Windows.Web.Http pattern (qualify/alias to Windows.Web.Http for IHttpFilter/AdaptiveMediaSource code)." },
+    { "error": "CS0535: AddAuthorizationHeaderFilter does not implement IHttpFilter.SendRequestAsync", "root_cause": "Filter signature moved off Windows.Web.Http types while resolving CS0104.", "fix": "Documented: keep all IHttpFilter member types on Windows.Web.Http." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Whole build (final state)", "symptom": "App does not compile; every SDKTemplate.Logging type and every logger class unresolved across Scenario2-7 and ContentSelector/PlayReadyHelper.", "turns_or_retries": "Build never reached green; score 0/7.", "root_cause": "Bootstrap did not harvest linked shared-content sources, and the skill never told the agent that $(SharedContentDir) <Link> files must be materialized. The agent even mapped obj\\x64\\Debug\\Shared\\Logging\\*.g.cs (stale generated copies) instead of the real source.", "how_resolved": "Not resolved in-trial.", "preventable_by": "Tier-1 bootstrap harvest of <Link>ed shared sources (implemented) + csproj-section note." }
+  ],
+  "missing_tooling": [
+    { "need": "Automatic materialization of MSBuild-linked shared-content source files into the project cone.", "would_have_saved": "The entire build — 7/7 features failed solely because the shared logging assembly was absent." }
+  ],
+  "env_issues": []
+}

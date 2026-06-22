@@ -1,0 +1,27 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Linked shared-content sources (referenced in the UWP .csproj via <Compile Include=\"$(SharedContentDir)\\...\"> + <Link>) are never materialized into the WinUI 3 project, so every type defined in shared content is unresolved (CS0234/CS0246).",
+      "evidence": "migration-score.json winui_build_error: CS0234 missing 'SDKTemplate.Logging'; CS0246 missing LogView/MediaPlayerLogger/MediaSourceLogger/MediaPlaybackItemLogger/AdaptiveMediaSourceLogger. UWP csproj has 15 <Compile Include=\"$(SharedContentDir)\\cs\\Logging\\...\"> items with <Link> mappings.",
+      "skill_search": "grepped Initialize-UwpMigration.ps1 and MIGRATION-PATTERNS.md for SharedContent / Compile Include / <Link> / EnableDefaultCompileItems",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 copies only files under -Source; SDK-style default globbing in the scaffold csproj only sees files physically inside the project cone. Linked sources living in a sibling SharedContent folder are therefore dropped, and the skill never tells the agent to materialize them.",
+      "proposed_fix": "Add a bootstrap step (section 1b) that parses the UWP .csproj for <Compile/Page/Content/None/EmbeddedResource Include> items carrying a <Link>, expands the MSBuild expression (incl. $(SharedContentDir) / GetDirectoryNameOfFileAbove), and copies each into the project cone at its link path (skipping any file the scaffold already provides). Add a note in MIGRATION-PATTERNS.md > Project File Updates.",
+      "generalizes": "Every official Windows-universal UWP SDK sample (and many real apps) shares code via $(SharedContentDir) linked <Compile> items; without harvesting, any sample whose helpers live in shared content fails to build identically."
+    },
+    {
+      "problem": "Windows.Web.Http vs System.Net.Http ambiguity (CS0104) and the IHttpFilter.SendRequestAsync consequence (CS0535) are undocumented; the existing CS0104 guidance only covers XAML namespace clashes.",
+      "evidence": "migration-score.json: CS0104 ambiguous HttpClient/HttpRequestMessage/HttpResponseMessage (System.Net.Http vs Windows.Web.Http); CS0535 AddAuthorizationHeaderFilter does not implement IHttpFilter.SendRequestAsync.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md for HttpClient / Windows.Web.Http / System.Net.Http / IHttpFilter — only a CS0104 LaunchActivatedEventArgs (XAML) section existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "WinUI 3 / modern .NET has System.Net.Http in scope alongside Windows.Web.Http, so the shared type names are ambiguous; resolving it by switching to System.Net.Http types breaks IHttpFilter (whose members are defined against Windows.Web.Http), producing CS0535.",
+      "proposed_fix": "Add a CS0104 'HttpClient/HttpRequestMessage/HttpResponseMessage ambiguous' subsection under Common build errors: pick one stack per file, keep Windows.Web.Http (qualify or alias) for IHttpFilter/HttpBaseProtocolFilter/AdaptiveMediaSource code, and note the CS0535 IHttpFilter signature requirement.",
+      "generalizes": "Any UWP app doing networking uses Windows.Web.Http; this exact CS0104/CS0535 pair recurs in every networking/media-streaming migration."
+    }
+  ]
+}

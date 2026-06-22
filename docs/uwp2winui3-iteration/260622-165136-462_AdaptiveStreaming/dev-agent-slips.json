@@ -1,0 +1,14 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Migration was declared without the mandatory Validate-UwpMigration.ps1 gate passing — the app did not build, which the validator's Section 6 build healthcheck would have flagged.",
+      "evidence": "migration-score.json winui_buildable=false while the trial ended; build never reached green.",
+      "covered_clearly_at": "SKILL.md > Step 4 — Validate (mandatory before declaring done): '🛑 You are NOT done until Validate-UwpMigration.ps1 reports PASS' and Section 6 'dotnet build healthcheck — clean build'.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already prominently and repeatedly mandates the validate gate and a clean build before declaring done; a capable model on re-run that runs the gate would not have shipped a non-building app. The underlying missing-types cause is fixed by the bootstrap harvest; the failure to run the gate is a pure process slip, not a skill deficiency."
+    }
+  ]
+}

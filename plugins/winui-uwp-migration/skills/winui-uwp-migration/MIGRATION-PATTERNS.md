@@ -27,6 +27,22 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0104: 'HttpClient' / 'HttpRequestMessage' / 'HttpResponseMessage' is an ambiguous reference`
+
+UWP networking code uses `Windows.Web.Http` (`using Windows.Web.Http;`). Under WinUI 3 / modern .NET, `System.Net.Http` is also in scope (it ships in the BCL and is commonly pulled in by `ImplicitUsings` or an existing `using System.Net.Http;`), so `HttpClient`, `HttpRequestMessage`, `HttpResponseMessage`, `HttpMethod`, and `HttpProgress` become ambiguous (CS0104). This is **not** UWP-only API — both stacks are fully supported on WinUI 3 — so do **not** defer the file.
+
+Pick **one** HTTP stack per file and make it unambiguous:
+
+- **Keep `Windows.Web.Http`** when the code implements `IHttpFilter`, uses `HttpBaseProtocolFilter`, `IHttpContent`, `HttpProgress`, or feeds an `AdaptiveMediaSource` / `MediaSource` (these APIs are defined only against `Windows.Web.Http`). Resolve the ambiguity by fully qualifying the conflicting types, e.g. `Windows.Web.Http.HttpRequestMessage`, or add an alias at the top of the file:
+  ```csharp
+  using HttpClient = Windows.Web.Http.HttpClient;
+  using HttpRequestMessage = Windows.Web.Http.HttpRequestMessage;
+  using HttpResponseMessage = Windows.Web.Http.HttpResponseMessage;
+  ```
+- **Keep `System.Net.Http`** only for plain REST calls with no Windows-runtime HTTP types involved.
+
+> **`CS0535: '<Filter>' does not implement 'IHttpFilter.SendRequestAsync'` is the downstream symptom of getting this wrong.** `IHttpFilter.SendRequestAsync` must return `IAsyncOperationWithProgress<Windows.Web.Http.HttpResponseMessage, Windows.Web.Http.HttpProgress>` and take a `Windows.Web.Http.HttpRequestMessage`. If you "fixed" the CS0104 by switching the signature to `System.Net.Http` types, the interface no longer matches. Keep every type on the `IHttpFilter` implementation in `Windows.Web.Http` (qualify, don't substitute).
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -422,6 +438,8 @@ public void Control_DefaultState_IsValid()
   - Third-party libraries the UWP project pulled in (`CommunityToolkit.*`, `Microsoft.Extensions.*`, `Newtonsoft.Json`, etc.). Pick the latest stable release; UWP-pinned versions are usually too old.
 
 Do **not** copy the UWP `.csproj` over the scaffold's. The two formats are incompatible — the UWP csproj carries `<TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>`, `<OutputType>AppContainerExe</OutputType>`, explicit `<Compile Include="...">` items, and `Microsoft.Common.props` imports, none of which build under WinAppSDK.
+
+> **Linked shared sources are already harvested for you.** UWP SDK samples pull source in from a sibling shared folder via `<Compile Include="$(SharedContentDir)\...">` + `<Link>relative\path</Link>` (e.g. a `Logging/` helper folder, shared `MainPage.xaml.cs`). `Initialize-UwpMigration.ps1` materializes every such `<Link>` item into the project cone at its link path, so SDK-style default globbing compiles it — that is why those files already exist under the target without you copying them. Do **not** re-add `<Compile Include>` lines for them in the WinUI 3 `.csproj`: the scaffold globs `**/*.cs`/`**/*.xaml` by default, and an explicit include on top of the glob causes duplicate-item build errors. If a `SDKTemplate.*` type still reports CS0234/CS0246 "could not be found", confirm the file was harvested (check the bootstrap's `Linked shared sources` count) rather than pasting a `<Compile Include>` back in.
 
 ### Package.appxmanifest — reconcile image references with the assets you actually have
 

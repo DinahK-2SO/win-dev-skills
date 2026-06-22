@@ -1,0 +1,21 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "score": 0,
+  "builds": false,
+  "runs": false,
+  "requirements": [
+    { "id": 1, "text": "Simplest Adaptive Streaming", "status": "fail", "reason": "App does not build; scenario cannot render.", "suspected_skill_gap": "Bootstrap did not harvest linked SharedContent sources; LogView/logger types missing." },
+    { "id": 2, "text": "Event Handlers", "status": "fail", "reason": "MediaPlayerLogger/MediaSourceLogger/MediaPlaybackItemLogger missing.", "suspected_skill_gap": "Linked shared-content harvest gap." },
+    { "id": 3, "text": "Network Request Modification", "status": "fail", "reason": "IHttpFilter.SendRequestAsync not implemented; HttpRequestMessage/HttpResponseMessage ambiguous.", "suspected_skill_gap": "No CS0104 Windows.Web.Http vs System.Net.Http pattern; CS0535 IHttpFilter consequence undocumented." },
+    { "id": 4, "text": "Adaptive Streaming Tuning", "status": "fail", "reason": "Logger types missing in Scenario4.", "suspected_skill_gap": "Linked shared-content harvest gap." },
+    { "id": 5, "text": "Metadata", "status": "fail", "reason": "Logger types missing; HttpClient ambiguous.", "suspected_skill_gap": "Harvest gap + Http ambiguity pattern." },
+    { "id": 6, "text": "Ad Insertion", "status": "fail", "reason": "Logger types missing; HttpClient ambiguous.", "suspected_skill_gap": "Harvest gap + Http ambiguity pattern." },
+    { "id": 7, "text": "Live Seekable Range", "status": "fail", "reason": "MediaPlayerLogger missing in Scenario7.", "suspected_skill_gap": "Linked shared-content harvest gap." }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [
+    "All 7 scenarios — app does not build, no WinUI capture possible."
+  ],
+  "summary": "WinUI 3 candidate fails to compile. Two generalizable causes: (1) linked SharedContent sources ($(SharedContentDir) + <Link>) were never materialized so the SDKTemplate.Logging helper set is absent (CS0234/CS0246); (2) Windows.Web.Http vs System.Net.Http ambiguity (CS0104) and the IHttpFilter CS0535 consequence were undocumented. Both fixed in the migration skill."
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: harvest linked shared-content sources ($(SharedContentDir) + <Link> <Compile> items) into the project cone so SDK globbing compiles them — fixes CS0234/CS0246 for shared helpers (e.g. SDKTemplate.Logging) that recur in every UWP SDK sample.",
+    "MIGRATION-PATTERNS.md: add CS0104 Windows.Web.Http vs System.Net.Http pattern (qualify/alias to Windows.Web.Http for IHttpFilter/AdaptiveMediaSource code) and document the CS0535 IHttpFilter.SendRequestAsync consequence — recurs in every networking migration.",
+    "MIGRATION-PATTERNS.md: clarify that <Link>ed shared sources are auto-harvested and must not be re-added as <Compile Include> on top of the default glob (avoids duplicate-item errors)."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

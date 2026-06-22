@@ -1,0 +1,15 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The Project File Updates section names explicit <Compile Include> items only as something to DROP, which can mislead an agent into thinking all such items (including linked shared sources) are irrelevant rather than something that must still be materialized.",
+      "evidence": "MIGRATION-PATTERNS.md > Project File Updates previously said the UWP csproj's 'explicit <Compile Include=...> items ... none of which build under WinAppSDK' with no exception for <Link>ed out-of-cone sources.",
+      "covered_at": "MIGRATION-PATTERNS.md > Project File Updates > 'Do not copy the UWP .csproj over the scaffold's.'",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add an explicit callout that <Link>ed shared sources ARE materialized (now auto-harvested by the bootstrap) and must NOT be re-added as <Compile Include> on top of the default glob (duplicate-item errors). Sharpen the distinction between 'drop UWP-only csproj markers' and 'keep shared source content'.",
+      "generalizes": "Any sample using shared content; clarifying prevents both the missing-types failure and a duplicate-item failure from over-correcting."
+    }
+  ]
+}
