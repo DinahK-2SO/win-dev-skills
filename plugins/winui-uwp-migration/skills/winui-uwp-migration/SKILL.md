@@ -153,7 +153,7 @@ The validator covers:
 2. **TODO marker residue** — every `TODO[migrate-NNN]` from the bootstrap is resolved.
 3. **`MIGRATION-MAPPING.md` integrity** — `.bootstrap-meta.json` present + parses; row count matches the seeded count; every row has a resolved Triage label; no row stuck at `Status = copied`.
 4. **`MIGRATION-DEFERRED.md` consistency** — every defer row in mapping has a matching row in the deferred file.
-5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability.
+5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability; no UWP-only `<Extensions>` (e.g. `windows.dialProtocol`) that block registration.
 6. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
 7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
 

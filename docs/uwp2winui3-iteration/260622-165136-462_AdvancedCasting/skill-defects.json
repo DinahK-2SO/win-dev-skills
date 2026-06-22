@@ -1,0 +1,17 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The migrated WinUI 3 app builds cleanly but cannot register/launch because the UWP <uap:Extension Category=\"windows.dialProtocol\"> block was carried into Package.appxmanifest. winapp run and dotnet run both fail with AppxManifest.xml(30,10) 0x80070032 / 0x80073CF6.",
+      "evidence": "Generated app/AdvancedCasting/Package.appxmanifest lines 40-44; score notes migration-score.json (winui_launchable:false, winui_launch_error) and discrepancies.json (severity:blocking).",
+      "skill_search": "grepped winui-uwp-migration for 'Extension', 'dialProtocol', 'appxmanifest', 'Capabilit'",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md:440 — 'When you merge any other content from the UWP manifest into the scaffold's (capabilities, file-type associations, <uap:Extension>, <Application Id>, etc.), do not overwrite the Logo ...' — lists <uap:Extension> as merge-safe with no warning that UWP-only extension categories are unsupported and block registration.",
+      "root_cause": "The skill tells the agent to carry over UWP <uap:Extension> entries but never warns that several UWP extension categories depend on the UWP AppContainer/activation model and are not registrable by the Windows App SDK packaging stack, causing a hard 0x80073CF6 launch failure. The validator also never inspects <Extensions>, so it false-PASSes.",
+      "proposed_fix": "(1) Add a caveat in the MIGRATION-PATTERNS.md manifest checklist: do NOT blindly copy the UWP <Extensions> block; remove UWP-only categories (windows.dialProtocol, windows.dialReceiver, windows.backgroundTasks, windows.appService, etc.) that the packaged WinUI 3 stack can't register; re-implement the feature with Win32/WinRT if needed. (2) Add a manifest <Extensions> scan to Validate-UwpMigration.ps1 that FAILs on a denylist of UWP-only extension categories, citing the fix.",
+      "generalizes": "UWP samples and real apps very commonly declare manifest app-extensions tied to the UWP activation model. Carrying them verbatim is a recurring, build-clean-but-won't-launch failure across many UWP→WinUI 3 migrations, not specific to DIAL."
+    }
+  ]
+}

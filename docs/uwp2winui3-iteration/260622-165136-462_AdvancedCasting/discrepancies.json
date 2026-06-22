@@ -1,0 +1,26 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "score": 0,
+  "builds": true,
+  "runs": false,
+  "requirements": [
+    {
+      "id": 0,
+      "text": "DIAL Receiver Windows Universal Application",
+      "status": "fail",
+      "reason": "WinUI 3 app unreachable — package registration fails on windows.dialProtocol manifest extension (0x80073CF6); no scenario could be exercised.",
+      "suspected_skill_gap": "MIGRATION-PATTERNS.md tells the agent to merge UWP <uap:Extension> entries with no warning that UWP-only extension categories block registration; Validate-UwpMigration.ps1 never inspects <Extensions> so it false-PASSed."
+    }
+  ],
+  "visual_discrepancies": [
+    {
+      "feature": "DIAL Receiver Windows Universal Application",
+      "uwp": "ScreenCasting C# Sample window renders with status text blocks.",
+      "winui": "App never launched — no screenshot captured.",
+      "screenshot_ref": "parity/baseline/screenshots/01_DIAL_Receiver_Windows_Universal_Application.png"
+    }
+  ],
+  "missing_features": ["entire app unreachable due to package registration failure"],
+  "summary": "Build clean, launch blocked by a carried-over UWP windows.dialProtocol manifest extension. Single, generalizable manifest-extension defect."
+}

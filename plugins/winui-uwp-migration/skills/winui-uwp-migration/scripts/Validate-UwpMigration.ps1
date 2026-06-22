@@ -364,8 +364,35 @@ if (Test-Path -LiteralPath $manifestPath) {
         Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
         $manifestFailures++
     }
+    #   4) No UWP-only <Extensions> categories that the packaged WinUI 3 /
+    #      Windows App SDK registrar cannot deploy. UWP samples often declare
+    #      activation-model extensions (windows.dialProtocol/dialReceiver,
+    #      windows.backgroundTasks, windows.appService, …) that depend on the
+    #      UWP AppContainer/activation host. Carried verbatim into a packaged
+    #      desktop manifest they build cleanly but fail registration at launch
+    #      with 0x80073CF6 / AppxManifest 0x80070032 "request is not supported".
+    #      Real-world impact: run9 AdvancedCasting built with 0 errors and passed
+    #      the three checks above, but kept <uap:Extension Category=
+    #      "windows.dialProtocol"> and never launched (score 0).
+    $unsupportedExtensions = @(
+        'windows.dialProtocol', 'windows.dialReceiver', 'windows.backgroundTasks',
+        'windows.appService', 'windows.updateTask', 'windows.lockScreenCall',
+        'windows.preInstalledConfigTask', 'windows.personalAssistantLaunch'
+    )
+    $extMatches = [regex]::Matches($manifestText, 'Category\s*=\s*"([^"]+)"')
+    $declaredCats = @($extMatches | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique)
+    $badCats = @($declaredCats | Where-Object { $unsupportedExtensions -contains $_ })
+    if ($badCats.Count -gt 0) {
+        Write-Host "[FAIL] Package.appxmanifest declares UWP-only <Extensions> the packaged WinUI 3 stack cannot register:"
+        $badCats | ForEach-Object { Write-Host "         <Extension Category=`"$_`">" }
+        Write-Host "       These build cleanly but fail launch with 0x80073CF6 (registration: 'request is not supported')."
+        Write-Host "       Fix: remove the unsupported <uap:Extension> entries from <Extensions> (delete the whole"
+        Write-Host "       <Extensions> block if it has no supported entries left). Re-implement the feature with"
+        Write-Host "       Win32/WinRT APIs if it is still needed. See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
+        $manifestFailures++
+    }
     if ($manifestFailures -eq 0) {
-        Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared"
+        Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability + no unsupported <Extensions>"
     } else {
         $failures += $manifestFailures
     }

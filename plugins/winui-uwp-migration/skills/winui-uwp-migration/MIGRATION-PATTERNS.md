@@ -437,7 +437,7 @@ AppxManifest.xml(...): error 0x80070002: ... splash screen image [Splash-sdk.png
 
 You have two options. Pick one **before** the first `winapp run`:
 
-- **Preferred — keep the scaffold's manifest image references** (`Assets\SplashScreen.scale-200.png`, etc.). When you merge any other content from the UWP manifest into the scaffold's (capabilities, file-type associations, `<uap:Extension>`, `<Application Id>`, etc.), do **not** overwrite the `Logo`, `<uap:SplashScreen Image>`, `Square150x150Logo`, `Square44x44Logo`, or `Wide310x150Logo` attribute values. The scaffold's defaults already match the files in its `Assets/` folder.
+- **Preferred — keep the scaffold's manifest image references** (`Assets\SplashScreen.scale-200.png`, etc.). When you merge any other content from the UWP manifest into the scaffold's (capabilities, file-type associations, `<uap:Extension>`, `<Application Id>`, etc.), do **not** overwrite the `Logo`, `<uap:SplashScreen Image>`, `Square150x150Logo`, `Square44x44Logo`, or `Wide310x150Logo` attribute values. The scaffold's defaults already match the files in its `Assets/` folder. (And before copying any `<uap:Extension>` entries, see "Drop UWP-only manifest extensions" below — several categories block registration.)
 
 - **Alternative — keep the UWP sample's branded assets.** Copy every file the UWP manifest references from `.uwp-source/Assets/` (or `.uwp-source/<SampleName>/Assets/`) into the new project's `Assets/` folder, preserving the exact filename (including the `-sdk` suffix and any scale qualifiers). Verify by re-reading each `Image=`/`Logo>` value in the manifest and confirming `Test-Path "Assets\<that filename>"` for every one of them. Don't rename files to look prettier — the manifest reference is the source of truth.
 
@@ -488,6 +488,12 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
    Packaged WinUI 3 desktop apps run outside the UWP AppContainer sandbox and must declare this. Keep any UWP `<Capability>` entries you actually use (e.g. `<DeviceCapability Name="webcam" />`) but add the `runFullTrust` line above no matter what.
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
+
+5. **Drop UWP-only `<Extensions>` categories** — these build cleanly but block launch. Many UWP manifests declare app-extensions tied to the UWP AppContainer/activation host (e.g. `windows.dialProtocol`, `windows.dialReceiver`, `windows.backgroundTasks`, `windows.appService`, `windows.updateTask`, `windows.lockScreenCall`). The packaged WinUI 3 / Windows App SDK registrar **cannot deploy** these, so the app builds with 0 errors but fails the first `winapp run` / `dotnet run` with:
+   ```
+   AppxManifest.xml(...): error 0x80070032: ... windows.dialProtocol extension: The request is not supported. (0x80073CF6)
+   ```
+   Do **not** copy the UWP `<Extensions>` block over wholesale. Keep only extensions known to work in packaged desktop apps (e.g. `windows.protocol`, `windows.fileTypeAssociation`); **remove** the UWP-only ones above. If the removed extension provided real behaviour (a DIAL receiver, a background task), re-implement it with Win32/WinRT APIs from your app code — there is no packaged-WinUI3 manifest equivalent. `Validate-UwpMigration.ps1` flags these categories so you catch them before launch.
 
 ### WUI analyzer warnings (UWP API residue)
 

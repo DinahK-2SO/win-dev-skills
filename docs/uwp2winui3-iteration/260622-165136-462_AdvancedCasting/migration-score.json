@@ -1,0 +1,25 @@
+{
+  "scenario": "AdvancedCasting",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 1,
+  "uwp_capture_status": "ok (uwp-app-runner verify-stage raced ahead of slow .NET Native startup and reported ok:false; the app DID launch and was captured live by window title 'ScreenCasting C# Sample')",
+  "winui_launchable": false,
+  "winui_launch_error": "Package could not be registered: AppxManifest.xml(30,10) error 0x80070032 — windows.dialProtocol extension 'The request is not supported.' (0x80073CF6). Both 'winapp run' and 'dotnet run' fail; app builds with 0 errors but never launches.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "DIAL Receiver Windows Universal Application",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_DIAL_Receiver_Windows_Universal_Application.png",
+      "winui_screenshot": null,
+      "note": "WinUI 3 app unreachable — package registration fails on windows.dialProtocol extension; no screenshot/UIA captured. UWP golden rendered fine."
+    }
+  ]
+}

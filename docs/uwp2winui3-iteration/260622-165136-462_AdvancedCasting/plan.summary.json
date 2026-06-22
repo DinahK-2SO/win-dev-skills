@@ -1,0 +1,15 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: FAIL when Package.appxmanifest declares UWP-only <Extensions> categories (windows.dialProtocol/dialReceiver/backgroundTasks/appService/etc.) the WinAppSDK registrar can't deploy — catches build-clean-but-won't-launch 0x80073CF6 before declaring done.",
+    "MIGRATION-PATTERNS.md + SKILL.md: add manifest-checklist guidance to drop UWP-only <Extensions> (don't copy them verbatim) and re-implement the feature with Win32/WinRT, fixing prose that previously implied all <uap:Extension> entries were merge-safe."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": []
+}

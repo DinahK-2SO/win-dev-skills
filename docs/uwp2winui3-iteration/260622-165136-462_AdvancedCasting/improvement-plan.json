@@ -1,0 +1,28 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 app builds clean but cannot register/launch because the UWP <uap:Extension Category=\"windows.dialProtocol\"> was carried into Package.appxmanifest (0x80073CF6). Validate-UwpMigration PASSed the manifest.",
+      "evidence": "score notes migration-score.json winui_launchable:false; generated app/AdvancedCasting/Package.appxmanifest lines 40-44; Validate-UwpMigration.ps1 5b checked only TargetDeviceFamily/rescap/runFullTrust.",
+      "root_cause": "Skill prose (MIGRATION-PATTERNS.md:440) listed <uap:Extension> as merge-safe with no caveat, and the validator never inspected <Extensions>, so a UWP-only activation-model extension that the WinAppSDK registrar can't deploy slipped through clean build + green validator.",
+      "tier": 1,
+      "change": "Add an <Extensions> denylist scan to Validate-UwpMigration.ps1 section 5b: it FAILs when Package.appxmanifest declares UWP-only extension categories (windows.dialProtocol, windows.dialReceiver, windows.backgroundTasks, windows.appService, windows.updateTask, windows.lockScreenCall, windows.preInstalledConfigTask, windows.personalAssistantLaunch), listing the offending categories and the fix.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The validator (the agent's last gate) now FAILs the build healthcheck for this class instead of false-PASSing, forcing the agent to remove the unsupported extension before declaring done.",
+      "falsifiable_check": "On re-run, Validate-UwpMigration.ps1 emits '[FAIL] Package.appxmanifest declares UWP-only <Extensions>' for the AdvancedCasting manifest (verified against the real manifest); after the agent removes the extension the app registers and requirement #0 goes fail->pass."
+    },
+    {
+      "problem": "Skill guidance actively encouraged copying UWP <uap:Extension> entries and gave no warning that some categories block registration.",
+      "evidence": "MIGRATION-PATTERNS.md:440 'merge ... <uap:Extension> ...' with no caveat; SKILL.md:156 manifest checklist omitted extensions.",
+      "root_cause": "Documentation gap: no statement that UWP-only manifest extensions are unsupported in packaged WinUI 3.",
+      "tier": 3,
+      "change": "Add manifest-checklist item 5 'Drop UWP-only <Extensions> categories' to MIGRATION-PATTERNS.md (with the 0x80073CF6 symptom, the denylist, supported-vs-unsupported guidance, and 're-implement with Win32/WinRT'); add a forward-reference at line 440; extend SKILL.md:156 manifest bullet to mention 'no UWP-only <Extensions>'.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent removes UWP-only extensions during the manifest merge rather than carrying them verbatim.",
+      "falsifiable_check": "On re-run the generated Package.appxmanifest contains no denylisted <Extension Category> and the app launches."
+    }
+  ],
+  "deferred_to_human": []
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Validate-UwpMigration.ps1's manifest healthcheck (section 5b) reports PASS based only on TargetDeviceFamily/rescap/runFullTrust, giving a false sense that the manifest is launch-ready when an unsupported <Extensions> entry will block registration.",
+      "evidence": "Validate-UwpMigration.ps1 lines 331-371 check only those three things and print '[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared'; the AdvancedCasting manifest passed yet failed to launch (migration-score.json winui_launchable:false).",
+      "covered_at": "Validate-UwpMigration.ps1 section '5b. Package.appxmanifest WinUI 3 packaging requirements' (lines 331-371) and MIGRATION-PATTERNS.md 'Manifest migration checklist (Windows.Desktop + runFullTrust)' (lines 458-490).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Extend the EXISTING section 5b manifest check (and the matching checklist prose) to also assert the manifest carries no UWP-only <Extensions> categories, so the existing '[PASS] manifest' signal genuinely means launch-ready rather than only covering the three capability checks.",
+      "generalizes": "The validator is the agent's last gate before declaring done; broadening its single manifest check to the most common registration-blocking class makes every migration's PASS signal trustworthy."
+    }
+  ]
+}

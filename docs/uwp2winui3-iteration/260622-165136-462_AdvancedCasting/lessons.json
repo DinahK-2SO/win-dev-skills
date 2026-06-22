@@ -1,0 +1,30 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Migration agent ended by running Validate-UwpMigration.ps1 (session-log.txt:204); it reported the manifest as PASS (Windows.Desktop + rescap + runFullTrust all present)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1", "problem": "Its Package.appxmanifest healthcheck (section 5b) only verifies TargetDeviceFamily/rescap/runFullTrust. It does NOT inspect <Extensions>, so it returned PASS on a manifest that carried a UWP-only windows.dialProtocol extension which makes package registration fail at launch with 0x80073CF6.", "evidence": "Generated app/AdvancedCasting/Package.appxmanifest lines 40-44 keep <uap:Extension Category=\"windows.dialProtocol\">; score notes migration-score.json winui_launchable:false, error AppxManifest.xml(30,10) 0x80070032 / 0x80073CF6." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "No detection of UWP-only manifest extension categories that the packaged WinUI 3 / Windows App SDK stack cannot register.", "suggested_tweak": "Add a manifest scan that FAILs (or WARNs) when <Extensions> contains UWP-activation-model categories (windows.dialProtocol, windows.dialReceiver, windows.backgroundTasks, windows.appService, etc.)." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md:440", "wrong": "Lists `<uap:Extension>` among the UWP-manifest content to 'merge into the scaffold's' with no caveat, implying all extensions are safe to carry over.", "correct": "Many UWP `<Extensions>` categories rely on the UWP AppContainer/activation model and are not supported by packaged WinUI 3; copying them verbatim causes 0x80073CF6 registration failures. Only carry over extensions known to work in packaged desktop apps; drop UWP-only ones." }
+  ],
+  "special_apis": [
+    { "api": "windows.dialProtocol manifest extension (DIAL receiver)", "special_handling": "Not registrable by the Windows App SDK packaging stack; must be removed from Package.appxmanifest. The receiver functionality has no packaged-WinUI3 manifest equivalent and must be re-implemented with Win32/WinRT APIs if needed." }
+  ],
+  "errors_encountered": [
+    { "error": "Package could not be registered: AppxManifest.xml(30,10) error 0x80070032 — windows.dialProtocol extension 'The request is not supported.' (0x80073CF6). Build succeeds (0 errors) but both 'winapp run' and 'dotnet run' fail to launch.", "root_cause": "The dev-agent merged the UWP <uap:Extension Category=\"windows.dialProtocol\"> block into the WinUI 3 manifest (following MIGRATION-PATTERNS.md:440 which lists <uap:Extension> as merge-safe). The packaged WinUI 3 stack cannot register this UWP-only extension.", "fix": "Remove the unsupported <uap:Extension> entry (the whole <Extensions> block here) from Package.appxmanifest; keep only runFullTrust + supported capabilities/extensions." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Manifest migration / launch validation", "symptom": "App built with 0 errors and Validate-UwpMigration PASSed, but the app never launched (registration failure discovered only at scoring).", "turns_or_retries": "n/a — failure was silent; agent never attempted a launch", "root_cause": "Neither the skill prose nor the validator flags UWP-only manifest extensions; the validator's manifest check gave a false-PASS.", "how_resolved": "Not resolved during migration; surfaced by the scoring task.", "preventable_by": "Add an unsupported-extension check to Validate-UwpMigration.ps1 and a caveat in MIGRATION-PATTERNS.md so UWP-only <Extensions> are dropped before the first launch." }
+  ],
+  "missing_tooling": [
+    { "need": "A manifest-extension allowlist/denylist check in Validate-UwpMigration.ps1.", "would_have_saved": "The blocking 0x80073CF6 launch failure that zeroed the score." }
+  ],
+  "env_issues": []
+}
