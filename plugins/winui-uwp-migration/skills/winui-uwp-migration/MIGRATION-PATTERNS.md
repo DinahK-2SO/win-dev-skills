@@ -27,6 +27,19 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+**The Xaml namespaces are not the only collision axis.** The other one that recurs in any UWP app doing HTTP is **`System.Net.Http` (the .NET BCL) vs `Windows.Web.Http` (the WinRT stack)**. A WinUI 3 desktop project references `System.Net.Http` by default, while UWP code typically has `using Windows.Web.Http;`. Both namespaces define `HttpClient`, `HttpMethod`, `HttpRequestMessage`, `HttpResponseMessage`, and `HttpCompletionOption`, so any unqualified use becomes `CS0104`. **Keep `Windows.Web.Http`** when the code relies on its `IHttpFilter` / `HttpBaseProtocolFilter` surface (request interception, custom filters, per-request headers) — `System.Net.Http` has no equivalent. Resolve by removing or aliasing the `System.Net.Http` `using`, or fully-qualifying the WinRT types.
+
+### `CS0103: 'Colors' (or other name) does not exist in the current context`
+
+The bootstrap's mass namespace rewrite only maps the **`Windows.UI.Xaml.*`** family. The **sibling non-Xaml `Windows.UI.*` namespaces are left untouched**, so an unqualified simple name that resolved through one of them in UWP now has no valid `using` and fails as `CS0103`. Remap these by hand:
+
+| UWP simple name(s) | Lived in (UWP) | Add this `using` (WinUI 3) |
+|---|---|---|
+| `Colors`, `ColorHelper` | `Windows.UI` | `using Microsoft.UI;` |
+| `FontWeights`, `FontStyle` | `Windows.UI.Text` | `using Microsoft.UI.Text;` |
+
+⚠️ This is a **per-type split, not a whole-namespace rewrite**: the `Color` *struct* stays `Windows.UI.Color`, while only the `Colors` / `ColorHelper` static classes move to `Microsoft.UI`. So do not blindly swap `using Windows.UI;` → `using Microsoft.UI;` if the file also names the `Color` struct — add the new `using` and keep the struct qualified (`Windows.UI.Color`) where needed. (`CoreDispatcherPriority` also surfaces as `CS0103`; that one is a threading migration — see [Threading](#threading), not just a `using` swap.)
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:

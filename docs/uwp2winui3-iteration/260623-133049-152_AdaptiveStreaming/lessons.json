@@ -1,0 +1,30 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap scaffolded the WinUI3 shell and mass-rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml across copied .cs/.xaml; root-namespace guard ran. Migration proceeded file-by-file from MIGRATION-MAPPING.md." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "The mass namespace rewrite only handles the Windows.UI.Xaml.* family (script line 113: $orig -replace 'Windows\\.UI\\.Xaml','Microsoft.UI.Xaml'). Sibling non-Xaml Windows.UI.* namespaces (Windows.UI for Colors/ColorHelper, Windows.UI.Text for FontWeights, Windows.UI.Core dispatcher) are left untouched, so simple-name references like Colors.Red surface as CS0103 later.", "suggested_tweak": "Document the remaining non-Xaml Windows.UI.* remap as a build-error remedy (cannot be a blind script rewrite because the Windows.UI namespace splits type-by-type: the Color struct stays Windows.UI.Color while Colors/ColorHelper move to Microsoft.UI)." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.Web.Http.HttpMethod / HttpCompletionOption", "why_tried": "AdaptiveStreaming Scenario3 modifies network requests using the WinRT Windows.Web.Http stack (IHttpFilter / HttpBaseProtocolFilter).", "root_cause": "WinUI3 desktop projects reference the .NET BCL System.Net.Http by default; the UWP source uses Windows.Web.Http. Both namespaces define HttpMethod, HttpClient, HttpResponseMessage, HttpRequestMessage and HttpCompletionOption, so unqualified use becomes CS0104 ambiguous.", "fix": "Keep the Windows.Web.Http stack (its IHttpFilter surface has no System.Net.Http equivalent) and resolve the collision by removing/aliasing the conflicting System.Net.Http using or fully-qualifying the WinRT types." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.UI.Colors", "special_handling": "Colors static class moves to Microsoft.UI.Colors, but the Color struct itself stays Windows.UI.Color — a per-type split, so it cannot be a whole-namespace using rewrite." }
+  ],
+  "errors_encountered": [
+    { "error": "LogView.xaml.cs(112): CS0103 'Colors' does not exist in the current context", "root_cause": "Code used the unqualified Colors static class; the bootstrap rewrite only touches Windows.UI.Xaml.*, so the file lost no Xaml using but never gained 'using Microsoft.UI;' for the Colors class.", "fix": "Add 'using Microsoft.UI;' (or qualify Microsoft.UI.Colors.Red)." },
+    { "error": "Scenario3_RequestModification.xaml.cs(323/326): CS0104 'HttpMethod' / 'HttpCompletionOption' is an ambiguous reference (System.Net.Http vs Windows.Web.Http)", "root_cause": "Both the BCL and WinRT HTTP stacks are in scope; the UWP sample uses Windows.Web.Http.", "fix": "Remove or alias the System.Net.Http using and keep the Windows.Web.Http types, or fully qualify them." },
+    { "error": "Scenario5_Metadata.xaml.cs(554/582): CS0103 'CoreDispatcherPriority' does not exist", "root_cause": "Dispatcher.RunAsync(CoreDispatcherPriority.Normal, ...) was left un-migrated in Scenario5 even though MIGRATION-PATTERNS.md#threading prescribes DispatcherQueue.TryEnqueue. Most other files were migrated; Scenario5 was missed before the budget ran out.", "fix": "Apply the #threading pattern: DispatcherQueue.TryEnqueue(() => ...)." },
+    { "error": "Scenario5_Metadata.xaml.cs(560): CS0165 use of unassigned local 'currentPosition'", "root_cause": "Ordinary uninitialized-local coding mistake introduced during edit; unrelated to any UWP API.", "fix": "Initialize currentPosition before use." },
+    { "error": "Microsoft.UI.Xaml.Markup.Compiler WMC9999 XAML Internal Error (NullReferenceException)", "root_cause": "Downstream cascade: the XAML pre-compile (_OnXamlPreCompileError) crashes when the partial-class code-behind does not compile (the CS0103/CS0104 errors above). Distinct from the namespace-collision WMC9999 that the bootstrap root-namespace guard already prevents.", "fix": "Resolve the C# compile errors first; the WMC9999 clears once code-behind compiles." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Step 3/4 build loop", "symptom": "Session ended with the build still running and 7 unresolved compile errors; the agent never reached a clean build or Validate-UwpMigration.ps1.", "turns_or_retries": "final build (_OnXamlPreCompileError) still running after 600s when the log ends", "root_cause": "A partial migration was declared/timed-out with build errors outstanding; threading/Colors/Http adaptations were applied to most files but missed in Scenario5/LogView/Scenario3.", "how_resolved": "not resolved — ran out of budget", "preventable_by": "Faster inline resolution of the common build-error families (CS0104 Http ambiguity, CS0103 non-Xaml Windows.UI simple names) via a 'Common build errors' entry the agent hits directly, so each error is a one-line lookup-and-fix instead of an open-ended investigation." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

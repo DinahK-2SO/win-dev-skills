@@ -1,0 +1,32 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0103 'Colors' does not exist after the namespace rewrite — and the general class of non-Xaml Windows.UI.* simple names (Colors, ColorHelper, FontWeights, FontStyle) the bootstrap does not remap.",
+      "evidence": "migration-score.json candidate_build_errors[0]; source uses new SolidColorBrush(Colors.Red) (session-log.txt L3095/L8105). Initialize-UwpMigration.ps1 L113 rewrites only Windows.UI.Xaml.",
+      "root_cause": "Bootstrap mass-rewrite is scoped to the Windows.UI.Xaml.* family; sibling non-Xaml Windows.UI.* namespaces are untouched, and 'Common build errors' had no CS0103 entry.",
+      "tier": 3,
+      "change": "Added a 'CS0103: Colors (or other name) does not exist' entry to the Common build errors section of MIGRATION-PATTERNS.md, with a remap table (Windows.UI -> Microsoft.UI for Colors/ColorHelper; Windows.UI.Text -> Microsoft.UI.Text for FontWeights/FontStyle) and a per-type-split warning that the Color struct stays Windows.UI.Color.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent fixing a CS0103 on Colors/FontWeights finds a one-line lookup-and-fix in the section it already consults, instead of an open-ended investigation.",
+      "falsifiable_check": "On a re-run, LogView CS0103 'Colors' no longer appears and Validate-UwpMigration build healthcheck reports 0 CS0103 for non-Xaml Windows.UI names.",
+      "justification_tier3": "Cannot be a Tier-1 script rewrite: the Windows.UI namespace splits type-by-type (Color struct stays Windows.UI.Color while Colors/ColorHelper move to Microsoft.UI), so a blind whole-using rewrite would break the struct. The decision is per-symbol judgement, which belongs in the build-error guidance the agent reads."
+    },
+    {
+      "problem": "CS0104 'HttpMethod' / 'HttpCompletionOption' ambiguous between System.Net.Http and Windows.Web.Http (Scenario3).",
+      "evidence": "migration-score.json candidate_build_errors[1] and [2]; source uses 'using Windows.Web.Http;' + Filters (session-log.txt L467-468) and HttpCompletionOption.ResponseHeadersRead (L7712).",
+      "root_cause": "The existing CS0104 guidance is framed only around the Windows.UI.Xaml <-> Microsoft.UI.Xaml collision; the System.Net.Http <-> Windows.Web.Http axis is never named.",
+      "tier": 3,
+      "change": "Broadened the existing CS0104 section in MIGRATION-PATTERNS.md to name the System.Net.Http vs Windows.Web.Http axis: lists the colliding type names and prescribes keeping Windows.Web.Http for its IHttpFilter/HttpBaseProtocolFilter surface while dropping/aliasing the System.Net.Http using.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent resolves the Http CS0104 the same way it already resolves the Xaml CS0104, choosing the correct (WinRT) stack instead of guessing or swapping to System.Net.Http and losing the filter API.",
+      "falsifiable_check": "On a re-run, Scenario3 CS0104 on HttpMethod/HttpCompletionOption no longer appears and the request-modification (IHttpFilter) scenario compiles.",
+      "justification_tier3": "Both namespaces are legitimately referenced by a WinUI3 desktop project; resolving the collision requires a per-file using/alias decision (keep the WinRT stack), which a script cannot make safely. Extending the existing build-error section is the right tier."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-1 option (not auto-applied): Initialize-UwpMigration.ps1 could emit a post-rewrite warning listing files that still reference non-Xaml Windows.UI.* simple names (Colors/FontWeights) or both Http stacks, so the agent gets an explicit punch-list. Not applied here to keep the change minimal and avoid false positives from the per-type Color/Colors split."
+  ]
+}

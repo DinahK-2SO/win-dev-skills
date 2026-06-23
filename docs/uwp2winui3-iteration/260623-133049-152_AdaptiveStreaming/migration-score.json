@@ -1,0 +1,87 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 7,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 7,
+  "uwp_capture_status": "ok (app launched, Release, pid 29944, windowTitle 'AdaptiveStreaming sample'); visual golden captured for scenario 1. NOTE: title-driven scenario navigation and per-control actuation were not possible because the UWP CoreWindow's UIA tree is not exposed to winapp (inspect returns a single Pane), so scenarios 2-7 reuse the scenario-1 frame and no behavioral baseline was obtained. This is a capture-instrument limitation, not a migration defect.",
+  "parity_result": null,
+  "behavioral_regressions": 0,
+  "candidate_build_status": "FAILED (dotnet build -c Debug exit code 1, 7 errors)",
+  "candidate_build_errors": [
+    "LogView.xaml.cs(112,59): CS0103 'Colors' does not exist in the current context",
+    "Scenario3_RequestModification.xaml.cs(323,69): CS0104 'HttpMethod' ambiguous (System.Net.Http vs Windows.Web.Http)",
+    "Scenario3_RequestModification.xaml.cs(326,30): CS0104 'HttpCompletionOption' ambiguous",
+    "Scenario5_Metadata.xaml.cs(554,52): CS0103 'CoreDispatcherPriority' does not exist",
+    "Scenario5_Metadata.xaml.cs(582,56): CS0103 'CoreDispatcherPriority' does not exist",
+    "Scenario5_Metadata.xaml.cs(560,56): CS0165 use of unassigned local 'currentPosition'",
+    "Microsoft.UI.Xaml.Markup.Compiler: WMC9999 Xaml Internal Error - Object reference not set to an instance of an object"
+  ],
+  "features": [
+    {
+      "name": "Simplest Adaptive Streaming",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Simplest_Adaptive_Streaming.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (7 compile errors incl. XAML WMC9999); app cannot launch, so this feature is absent in the candidate."
+    },
+    {
+      "name": "Event Handlers",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Event_Handlers.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (7 compile errors incl. XAML WMC9999); app cannot launch, so this feature is absent in the candidate."
+    },
+    {
+      "name": "Network Request Modification",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Network_Request_Modification.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (7 compile errors incl. XAML WMC9999); app cannot launch, so this feature is absent in the candidate."
+    },
+    {
+      "name": "Adaptive Streaming Tuning",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Adaptive_Streaming_Tuning.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (7 compile errors incl. XAML WMC9999); app cannot launch, so this feature is absent in the candidate."
+    },
+    {
+      "name": "Metadata",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/05_Metadata.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (7 compile errors incl. XAML WMC9999); app cannot launch, so this feature is absent in the candidate."
+    },
+    {
+      "name": "Ad Insertion",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/06_Ad_Insertion.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (7 compile errors incl. XAML WMC9999); app cannot launch, so this feature is absent in the candidate."
+    },
+    {
+      "name": "Live Seekable Range",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/07_Live_Seekable_Range.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (7 compile errors incl. XAML WMC9999); app cannot launch, so this feature is absent in the candidate."
+    }
+  ]
+}

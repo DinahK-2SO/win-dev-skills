@@ -1,0 +1,15 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: add CS0103 'Colors does not exist' build-error entry — bootstrap rewrites only Windows.UI.Xaml.*, so non-Xaml Windows.UI.* siblings (Colors/ColorHelper -> Microsoft.UI, FontWeights/FontStyle -> Microsoft.UI.Text) must be remapped by hand; warn the Color struct stays Windows.UI.Color (per-type split).",
+    "MIGRATION-PATTERNS.md: broaden the CS0104 ambiguous-reference section to name the System.Net.Http vs Windows.Web.Http collision (HttpClient/HttpMethod/HttpRequestMessage/HttpResponseMessage/HttpCompletionOption) — keep Windows.Web.Http for its IHttpFilter surface, drop/alias the System.Net.Http using."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Tier-1: Initialize-UwpMigration.ps1 could warn about files still referencing non-Xaml Windows.UI.* simple names or both Http stacks (not applied — kept minimal to avoid Color/Colors per-type false positives)."
+  ]
+}

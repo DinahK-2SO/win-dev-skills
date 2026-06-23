@@ -1,0 +1,17 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0103 'Colors' does not exist in the current context (LogView.xaml.cs:112) — and the same class of failure for any unqualified member of the non-Xaml Windows.UI.* sibling namespaces (Colors, ColorHelper in Windows.UI; FontWeights, FontStyle in Windows.UI.Text).",
+      "evidence": "migration-score.json candidate_build_errors[0]; source uses 'new SolidColorBrush(Colors.Red)' (session-log.txt L3095/L8105) and 'Windows.UI.Colors.Green' (L2527).",
+      "skill_search": "grepped MIGRATION-PATTERNS.md for 'Colors', 'CS0103', 'Windows.UI' and SKILL.md; grepped Initialize-UwpMigration.ps1 for the rewrite scope.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap mass-rewrite only maps the Windows.UI.Xaml.* family (Initialize-UwpMigration.ps1 line 113: $orig -replace 'Windows\\.UI\\.Xaml','Microsoft.UI.Xaml'). The sibling non-Xaml Windows.UI.* namespaces are not remapped, so simple-name references such as Colors.Red are left without a valid using and fail as CS0103. The 'Common build errors' section of MIGRATION-PATTERNS.md — the place an agent fixing a build looks — has entries for CS0104, CS0227 and CS0246 but NONE for CS0103. The Namespace Mapping table does list 'Windows.UI.Colors -> Microsoft.UI.Colors' but only as a passive reference row, not as a build-error remedy, and it omits the critical per-type caveat.",
+      "proposed_fix": "Add a 'CS0103: <name> does not exist after the namespace rewrite' entry to the 'Common build errors' section of MIGRATION-PATTERNS.md, stating that the bootstrap only rewrites the Windows.UI.Xaml.* family and that the sibling non-Xaml Windows.UI.* namespaces must be remapped by hand: Windows.UI -> Microsoft.UI for Colors/ColorHelper, Windows.UI.Text -> Microsoft.UI.Text for FontWeights/FontStyle. Call out the per-type split caveat: the Color struct stays Windows.UI.Color while only the Colors/ColorHelper static classes move to Microsoft.UI.",
+      "generalizes": "Colors, ColorHelper and FontWeights appear in a large fraction of UWP XAML samples (any brush/foreground/font styling in code-behind). Because the bootstrap deterministically rewrites only the Xaml family, this exact CS0103 recurs on essentially every UWP->WinUI3 migration that styles colors or fonts from code — it is not specific to AdaptiveStreaming."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS0103 'CoreDispatcherPriority' does not exist (Scenario5_Metadata.xaml.cs:554/582) — Dispatcher.RunAsync(CoreDispatcherPriority.Normal, ...) left un-migrated in one file.",
+      "evidence": "migration-score.json build errors #4/#5. The same Dispatcher.RunAsync(CoreDispatcherPriority...) pattern appears across many files in the log (session-log.txt L648, L1592, L7820, ...), and most were migrated — only Scenario5 was missed before the session ran out of budget.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md '<a id=\"threading\"></a> ## Threading: CoreDispatcher -> DispatcherQueue' — a dedicated, anchored section with before/after code (Dispatcher.RunAsync(CoreDispatcherPriority.Normal,...) -> DispatcherQueue.TryEnqueue(...)). SKILL.md Step 3 explicitly names this anchor ('an analyzer warning about CoreDispatcher -> Get-MigrationPattern.ps1 -Anchor threading').",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The threading migration is covered prominently with a dedicated anchor and a worked example, and the agent applied it correctly in the other files. The miss in Scenario5 is an incomplete-pass slip, not a knowledge gap; a re-run that completes the file-by-file loop (and runs Validate-UwpMigration.ps1, which greps for residue) would catch it without any skill edit."
+    },
+    {
+      "problem": "CS0165 use of unassigned local 'currentPosition' (Scenario5_Metadata.xaml.cs:560).",
+      "evidence": "migration-score.json candidate_build_errors[5].",
+      "covered_clearly_at": "N/A — this is a plain C# definite-assignment error introduced during editing, not a UWP->WinUI3 API concern. No migration-skill content covers (or should cover) ordinary uninitialized-local mistakes.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Generic coding slip with no UWP API involved; a capable model re-running would not reproduce it, and encoding 'initialize your locals' into the migration skill would be noise."
+    },
+    {
+      "problem": "Microsoft.UI.Xaml.Markup.Compiler WMC9999 XAML Internal Error (NullReferenceException).",
+      "evidence": "migration-score.json candidate_build_errors[6]; session-log.txt shows _OnXamlPreCompileError firing while the code-behind still had the CS0103/CS0104 errors above (L15050-L15188).",
+      "covered_clearly_at": "Initialize-UwpMigration.ps1 root-namespace collision guard (lines 121-178) plus the SKILL.md 'Namespace/type collision guard' callout already prevent the genuine WMC9999-from-namespace-collision case. The remaining WMC9999 here is a downstream cascade from un-compilable code-behind.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "This WMC9999 is a side effect of the other compile errors, not an independent defect; it disappears once the C# errors are fixed. The collision-driven WMC9999 (the one that needs guidance) is already handled by the bootstrap guard."
+    }
+  ]
+}

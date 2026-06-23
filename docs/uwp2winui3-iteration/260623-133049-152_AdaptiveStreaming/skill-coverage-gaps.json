@@ -1,0 +1,15 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "CS0104 'HttpMethod' / 'HttpCompletionOption' is an ambiguous reference between System.Net.Http and Windows.Web.Http (Scenario3_RequestModification.xaml.cs:323/326).",
+      "evidence": "migration-score.json candidate_build_errors[1] and [2]; source files use 'using Windows.Web.Http;' plus 'using Windows.Web.Http.Filters;' (session-log.txt L467-468, L1818-1820) and call HttpRequestMessage / HttpCompletionOption.ResponseHeadersRead (L7709/L7712).",
+      "covered_at": "MIGRATION-PATTERNS.md 'Common build errors' -> '### CS0104: \"LaunchActivatedEventArgs\" is an ambiguous reference', whose closing line generalizes 'The same pattern applies to any other type name that exists in both Windows.UI.Xaml.* and Microsoft.UI.Xaml.* namespaces'.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Broaden the existing CS0104 section so it is not framed as a Windows.UI.Xaml-only problem. Add a second, named collision axis: System.Net.Http (BCL, referenced by default in WinUI3 desktop) vs Windows.Web.Http (the WinRT stack UWP apps use). List the colliding type names (HttpClient, HttpMethod, HttpRequestMessage, HttpResponseMessage, HttpCompletionOption) and the resolution: keep Windows.Web.Http when the code relies on its IHttpFilter/HttpBaseProtocolFilter surface (which System.Net.Http has no equivalent for), and drop/alias the System.Net.Http using or fully-qualify the WinRT types.",
+      "generalizes": "The System.Net.Http vs Windows.Web.Http collision hits any UWP app that performs HTTP networking with the WinRT stack — a common pattern across SDK samples (request modification, custom filters, headers). The current CS0104 guidance only mentions the Xaml axis, so agents do not connect it to the Http collision."
+    }
+  ]
+}
