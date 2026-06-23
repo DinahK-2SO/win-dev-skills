@@ -1,0 +1,17 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration: exclude UWP build artifacts (bin/obj/.vs/Properties AssemblyInfo.cs) at the source-copy step so the SDK-style WinUI csproj no longer auto-globs stale generated .cs and fails with CS0579 duplicate-attribute errors.",
+    "MIGRATION-PATTERNS Background Tasks: add the keep-the-in-process-task path — do not add Application.OnBackgroundActivated (no such WinUI 3 override), and declare windows.activatableClass.inProcessServer at package-root <Extensions>, with a correct manifest snippet and the AppX errors it prevents."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Headless capture limitation blocking UWP behavioral baselines (eval-skill / harness scope).",
+    "MIGRATION-MAPPING.md seeded with build-output paths forces manual Status=copied flips (tooling scope)."
+  ]
+}

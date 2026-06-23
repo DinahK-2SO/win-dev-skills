@@ -322,6 +322,43 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 
 `IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK [`BackgroundTaskBuilder`](https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.windows.applicationmodel.background.backgroundtaskbuilder) (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler. See the [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy).
 
+If you keep the original **in-process** `IBackgroundTask` class as-is (common for a like-for-like sample port), two things differ from UWP and both surface only at build/launch time:
+
+- **There is no `Application.OnBackgroundActivated` override in WinUI 3.** Adding
+  `protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)` to
+  `App.xaml.cs` fails to compile (`CS0246: BackgroundActivatedEventArgs could not be
+  found` / no such override). Do **not** add it. The packaged class is COM-activated via
+  the manifest below; leave `App.xaml.cs` with just `OnLaunched`.
+- **The `windows.activatableClass.inProcessServer` extension is a package-level
+  extension, not an application-level one.** Put it under the **root `<Extensions>`**
+  element (sibling of `<Applications>`), never inside `<Application>`. Nesting it under
+  `<Application>` registers nothing (`error 0x80080204: ... not allowed to have
+  EntryPoint=... without ActivatableClassId in windows.activatableClass.inProcessServer`)
+  or fails schema validation (`'windows.activatableClass.inProcessServer' violates
+  enumeration constraint of 'windows.backgroundTasks ...'`). Correct shape:
+
+  ```xml
+  <Applications>
+    <Application Id="App" ...>
+      <Extensions>
+        <Extension Category="windows.backgroundTasks" EntryPoint="Tasks.MyBackgroundTask">
+          <BackgroundTasks><Task Type="general" /></BackgroundTasks>
+        </Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <!-- package-level: sibling of <Applications>, NOT inside <Application> -->
+  <Extensions>
+    <Extension Category="windows.activatableClass.inProcessServer">
+      <InProcessServer>
+        <Path>MyApp.exe</Path>
+        <ActivatableClass ActivatableClassId="Tasks.MyBackgroundTask" ThreadingModel="both" />
+      </InProcessServer>
+    </Extension>
+  </Extensions>
+  ```
+
 <a id="notifications"></a>
 ## Notifications
 

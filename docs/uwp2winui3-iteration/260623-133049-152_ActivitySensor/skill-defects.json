@@ -1,0 +1,17 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "UWP build artifacts copied into the WinUI 3 project break the build (CS0579 Duplicate 'TargetFrameworkAttribute', duplicate Assembly* attributes).",
+      "evidence": "session-log.txt turn 37: 'Tasks\\obj\\x64\\Release\\.NETCore,Version=v5.0.AssemblyAttributes.cs(4,12): error CS0579: Duplicate ... TargetFrameworkAttribute'. Turns 38-43 spent diagnosing/removing them and adding <Compile Remove> guards.",
+      "skill_search": "Grepped Initialize-UwpMigration.ps1 for the copy step; grepped skill for AssemblyInfo / obj\\ / bin\\ / Compile Remove / DefaultItemExcludes.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize-UwpMigration.ps1 step 1 copies every matching file recursively with no artifact exclusion: 'Get-ChildItem -Path $Source -Recurse -File ... | Where-Object { ...EndsWith($ext)... }'. The $excludeDirs=@('bin','obj',...) guard exists only later (step 3, the namespace-rewrite pass), so artifacts are still copied into the project.",
+      "root_cause": "A previously-built UWP source carries generated sources under obj/ and bin/ (e.g. .NETCore,Version=v5.0.AssemblyAttributes.cs) and a legacy Properties/AssemblyInfo.cs. The SDK-style WinUI 3 csproj auto-globs '**/*.cs', so any copied artifact is compiled and collides with the SDK-generated assembly attributes.",
+      "proposed_fix": "In Initialize-UwpMigration.ps1 step-1 copy filter, skip files whose relative path is under bin/obj/.vs/.git/.github/.copilot/.uwp-source, and skip *AssemblyInfo.cs, so stale generated sources never land in the project.",
+      "generalizes": "Almost every real UWP sample/app has been built at least once (has obj/ and bin/) and ships a Properties/AssemblyInfo.cs. Any such source migrated by this script hits CS0579 / duplicate-attribute failures regardless of scenario."
+    }
+  ]
+}

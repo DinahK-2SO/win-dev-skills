@@ -1,0 +1,31 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Initialize-UwpMigration copies UWP build artifacts (obj/, bin/, Properties/AssemblyInfo.cs) into the project; the SDK-style WinUI csproj auto-globs them and the build fails with CS0579 Duplicate 'TargetFrameworkAttribute'.",
+      "evidence": "session-log.txt turn 37 CS0579 from Tasks\\obj\\...\\.NETCore,Version=v5.0.AssemblyAttributes.cs; turns 38-43 manual cleanup.",
+      "root_cause": "Step-1 copy filter matches by extension only and recurses into obj/bin; the bin/obj exclusion only guards the later namespace-rewrite pass.",
+      "tier": 1,
+      "change": "Add an artifact-directory guard (bin/obj/.vs/.git/.github/.copilot/.uwp-source) and an *AssemblyInfo.cs guard to the step-1 copy Where-Object so stale generated sources are never copied.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Migrated projects no longer contain UWP build artifacts; no CS0579/duplicate-attribute failures; no manual <Compile Remove> work.",
+      "falsifiable_check": "On re-run, no .cs under bin/obj is present in the project and dotnet build does not emit CS0579; Validate-UwpMigration build PASS without artifact cleanup turns."
+    },
+    {
+      "problem": "Migrating a kept in-process IBackgroundTask to packaged WinUI 3 fails on OnBackgroundActivated (CS0246) and on inProcessServer manifest placement (AppX 0x80080204 / 0xC00CE169).",
+      "evidence": "session-log turns 48-57 (3 failed build/launch cycles).",
+      "root_cause": "Background Tasks pattern only points to BackgroundTaskBuilder/Task Scheduler and omits the keep-the-in-process-task path: OnBackgroundActivated does not exist on WinUI 3 App, and windows.activatableClass.inProcessServer is a package-level (not application-level) manifest extension.",
+      "tier": 3,
+      "change": "Extend MIGRATION-PATTERNS.md '## Background Tasks' with a concrete sub-block: do not add Application.OnBackgroundActivated; place windows.activatableClass.inProcessServer under the package-root <Extensions>; include the correct manifest snippet and the exact error strings it prevents.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Future migrations wire in-process background tasks correctly in one pass instead of 3 failed launch cycles.",
+      "falsifiable_check": "On a re-run of any background-task scenario, App.xaml.cs contains no OnBackgroundActivated, the manifest has package-level inProcessServer, and Test-AppLaunch reports status=running on the first attempt."
+    }
+  ],
+  "deferred_to_human": [
+    "Headless capture limitation: WinUI composition screenshots are blank and the UWP CoreWindow exposes no XAML UIA tree, blocking per-scenario UWP behavioral baselines. This is an eval-skill / harness concern (winui3-parity-check / uwp-app-runner), out of scope for the migration skill.",
+    "Validate-UwpMigration flags MIGRATION-MAPPING.md rows that include build-output paths (bin\\AppX\\Assets) as Status=copied, forcing a manual flip; consider seeding the mapping from source-only paths (harness/tooling scope)."
+  ]
+}

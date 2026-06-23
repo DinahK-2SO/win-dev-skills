@@ -1,0 +1,16 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Current activity — Get Current Activity fills Activity/Confidence/Timestamp", "status": "pass", "reason": "Control coverage 1/1; invoked OK, output changed.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Activity history — Get Activity History lists count + records", "status": "pass", "reason": "Control coverage 1/1; invoked OK, output changed.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Events — ReadingChanged On/Off (Off state-gated)", "status": "pass", "reason": "Control coverage 2/2; On invoked OK, Off correctly disabled until On succeeds.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Background activity — Register/Unregister task (Unregister state-gated)", "status": "pass", "reason": "Control coverage 2/2; Register invoked OK, Unregister correctly disabled until registered.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No functional parity defects. 4/4 scenarios PASS with full control coverage. Background-activity scenario works despite the migration agent spending ~9 turns wiring the in-process background task's manifest. Blank WinUI screenshots and missing UWP behavioral baseline are headless-capture limitations, not defects."
+}

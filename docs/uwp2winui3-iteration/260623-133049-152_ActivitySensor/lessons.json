@@ -1,0 +1,37 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Seeded the WinUI 3 scaffold, namespace-rewrote Windows.UI.Xaml->Microsoft.UI.Xaml, and produced MIGRATION-MAPPING.md (208 rows)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught residue=0, build PASS, smoke-launch PASS; also flagged 208 mapping rows still Status=copied so the agent flipped them (turns 58-60)." },
+    { "tool": "Test-AppLaunch.ps1", "evidence": "Surfaced the exact AppxManifest validation errors (0x80080204 / 0xC00CE169) that pinpointed the background-task manifest placement bug (turns 48,54,57)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1", "problem": "Copies every *.cs recursively from the UWP source including build artifacts under obj/ and bin/ and legacy Properties/AssemblyInfo.cs.", "evidence": "session-log turn 37: build failed CS0579 'Duplicate TargetFrameworkAttribute' from Tasks\\obj\\x64\\Release\\.NETCore,Version=v5.0.AssemblyAttributes.cs." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "No bin/obj/Properties exclusion at the copy step (the exclusion only applies later, to the namespace-rewrite pass).", "suggested_tweak": "Filter artifact dirs and AssemblyInfo.cs in the copy Where-Object so stale generated sources never land in the project." }
+  ],
+  "failed_apis": [
+    { "api": "Application.OnBackgroundActivated / BackgroundActivatedEventArgs", "why_tried": "Agent assumed UWP in-process background-task activation override exists on the WinUI 3 App class.", "root_cause": "WinUI 3 Microsoft.UI.Xaml.Application has no OnBackgroundActivated override and BackgroundActivatedEventArgs is not referenced.", "fix": "Removed the override; the packaged class is COM-activated via the manifest inProcessServer extension (turns 50-52)." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "windows.activatableClass.inProcessServer (Package.appxmanifest)", "special_handling": "Must be a PACKAGE-level extension (root <Extensions>, sibling of <Applications>), not nested under <Application>; otherwise AppX registration fails with 0x80080204 / schema enumeration error." },
+    { "api": "DataTemplate x:Bind/x:DataType referencing a project type (local:Scenario)", "special_handling": "MarkupCompilePass2 emitted WMC1509 'No LocalAssembly parameter' then WMC0909/WMC1111/WMC9999; agent worked around by switching the ListBox ItemTemplate to {Binding Title} (turn 46)." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0579 Duplicate 'TargetFrameworkAttribute' (Tasks\\obj\\...\\.NETCore,Version=v5.0.AssemblyAttributes.cs)", "root_cause": "Initialize-UwpMigration copied UWP build artifacts (obj/) and Properties/AssemblyInfo.cs; SDK-style csproj auto-globs them into the build.", "fix": "Deleted Tasks/obj, Tasks/Properties/AssemblyInfo.cs, bin ilc artifacts and added <Compile Remove> guards (turns 42-43)." },
+    { "error": "CS0246 'MainPage' could not be found in MainWindow.xaml.cs", "root_cause": "Scaffold MainWindow navigates to MainPage but the page kept the sample's SDKTemplate namespace; MainWindow lacked 'using SDKTemplate;'.", "fix": "Added 'using SDKTemplate;' to MainWindow.xaml.cs (turn 45)." },
+    { "error": "WMC0909/WMC1111 'Cannot resolve DataType local:Scenario' in MainPage.xaml DataTemplate", "root_cause": "x:Bind DataTemplate against a project type failed during MarkupCompilePass2 (WMC1509 no LocalAssembly).", "fix": "Switched DataTemplate to {Binding Title} (turn 46)." },
+    { "error": "AppX 0x80080204 — EntryPoint without ActivatableClassId; then 0xC00CE169 schema enumeration violation", "root_cause": "windows.activatableClass.inProcessServer placed inside <Application> instead of package root <Extensions>.", "fix": "Moved the inProcessServer extension to package-level <Extensions> (turns 49-55)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "turns 37-44", "symptom": "Two build cycles failed on stale UWP build-artifact .cs files compiled into the project (CS0579) plus residual scaffold/namespace errors.", "turns_or_retries": "~6 turns", "root_cause": "Initialize-UwpMigration copied obj/bin/Properties artifacts from the UWP source.", "how_resolved": "Manual delete + csproj <Compile Remove> exclusions.", "preventable_by": "Excluding bin/obj/.vs/Properties-AssemblyInfo at the Initialize-UwpMigration copy step (Tier 1 script)." },
+    { "where": "turns 48-57", "symptom": "Three failed build/launch cycles wiring the in-process background task (OnBackgroundActivated CS0246, then two AppX manifest validation failures).", "turns_or_retries": "~9 turns, 3 fails", "root_cause": "No skill guidance that WinUI 3 App lacks OnBackgroundActivated and that inProcessServer is a package-level manifest extension.", "how_resolved": "Removed the override and moved the inProcessServer extension to package root.", "preventable_by": "Concrete in-process-background-task subsection in MIGRATION-PATTERNS.md Background Tasks (Tier 3)." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Headless session: WinUI composition screenshots are blank and UWP CoreWindow exposes no XAML UIA tree, so per-scenario UWP behavioral baseline could not be captured.", "workaround": "Scoring relied on UIA tree dumps + control-coverage; not a migration defect (eval-side limitation, deferred to human)." }
+  ]
+}

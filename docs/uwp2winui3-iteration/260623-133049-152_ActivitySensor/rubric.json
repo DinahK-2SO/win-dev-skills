@@ -1,0 +1,38 @@
+{
+  "scenario": "ActivitySensor",
+  "featureName": "Activity sensor",
+  "source": "uwp-samples-standalone/Samples/ActivitySensor/cs",
+  "uwp_launchable": true,
+  "uwp_window_title": "Activity Sensor C# Sample",
+  "notes": "Rubric derived from the UWP source checklist and the live UWP launch (scenario-1 golden captured). Per-scenario UWP UIA actuation was not possible in this headless session (no interactive input desktop; UWP CoreWindow XAML UIA tree not exposed), so behavioral ground truth is taken from the source handlers.",
+  "features": [
+    {
+      "number": 1,
+      "title": "Current activity",
+      "controls": ["ScenarioGetCurrentActivityButton (Get Current Activity)"],
+      "expected": "Button reads the default ActivitySensor current reading and fills Activity / Confidence / Timestamp output fields (or a 'no sensor' status when hardware is absent).",
+      "outputs": ["Activity", "Confidence", "Timestamp", "StatusBlock"]
+    },
+    {
+      "number": 2,
+      "title": "Activity history",
+      "controls": ["ScenarioGetActivityHistoryButton (Get Activity History)"],
+      "expected": "Button queries activity history over a time range and lists count + per-record Activity/Confidence/Timestamp (or a status message).",
+      "outputs": ["Count", "Activity1..N", "Confidence1..N", "Timestamp1..N", "StatusBlock"]
+    },
+    {
+      "number": 3,
+      "title": "Events",
+      "controls": ["ScenarioEnableReadingChangedButton (ReadingChanged On)", "ScenarioDisableReadingChangedButton (ReadingChanged Off)"],
+      "expected": "ReadingChanged On subscribes to sensor ReadingChanged events and updates Activity/Confidence/Timestamp; Off unsubscribes. Off is disabled until On succeeds (state-gated), and On only succeeds when an activity sensor is present.",
+      "outputs": ["Activity", "Confidence", "ReadingTimestamp", "StatusBlock"]
+    },
+    {
+      "number": 4,
+      "title": "Background activity",
+      "controls": ["ScenarioRegisterTaskButton (Register Task)", "ScenarioUnregisterTaskButton (Unregister Task)"],
+      "expected": "Register Task registers a background task for activity reports; Unregister Task removes it. Unregister is disabled until a task is registered (state-gated).",
+      "outputs": ["TaskRegistration", "TaskStatus", "ReportCount", "LastActivity", "LastConfidence", "LastTimestamp", "StatusBlock"]
+    }
+  ]
+}

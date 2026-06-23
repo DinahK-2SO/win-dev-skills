@@ -1,0 +1,52 @@
+{
+  "scenario": "ActivitySensor",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 4,
+  "features_pass": 4,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (app launched Release/.NET Native, windowTitle 'Activity Sensor C# Sample', PID 11312; scenario-1 golden captured). Per-scenario UWP actuation NOT performed: headless session has no interactive input desktop (GetForegroundWindow=0; synthetic mouse/keyboard ignored) and the UWP CoreWindow exposed no XAML UIA children (bare Pane only), so winapp UIA navigation could not drive scenarios 2-4. UWP behavioral baseline therefore unavailable; behavioral regressions not penalized per winui3-parity-check rules.",
+  "winui_capture_status": "WinUI 3 app built (dotnet build, 0 errors) and launched via winapp run (PID 6088). Full UIA tree exposed; all 4 scenarios navigated and actuated. Window-render and screen screenshots are blank (WinUI composition surface + no foreground desktop), but UIA dumps confirm all controls render and respond.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_report": "parity/winui3/PARITY-REPORT.md",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Current activity",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Current_activity.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Current_activity.png",
+      "note": "Control coverage 1/1. 'Get Current Activity' invoked OK and changed output text (+2 tokens). UWP golden visual matches WinUI structure (nav + button + Activity/Confidence/Timestamp labels)."
+    },
+    {
+      "name": "Activity history",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Activity_history.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Activity_history.png",
+      "note": "Control coverage 1/1. 'Get Activity History' invoked OK and changed output text (+2 tokens). Navigation OK."
+    },
+    {
+      "name": "Events",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Events.png",
+      "note": "Control coverage 2/2. 'ReadingChanged On' invoked OK (+2 tokens). 'ReadingChanged Off' non-invocable = faithful state-gating (IsEnabled=false until On succeeds; no sensor hardware present), not a dead control."
+    },
+    {
+      "name": "Background activity",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Background_activity.png",
+      "winui_screenshot": "parity/winui3/screenshots/04_Background_activity.png",
+      "note": "Control coverage 2/2. 'Register Task' invoked OK (+2 tokens). 'Unregister Task' non-invocable = faithful state-gating (IsEnabled=false until a task is registered), not a dead control."
+    }
+  ]
+}

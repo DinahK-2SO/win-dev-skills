@@ -1,0 +1,15 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Migrating an in-process UWP background task to packaged WinUI 3 cost ~9 turns / 3 failed launches: Application.OnBackgroundActivated does not exist (CS0246) and windows.activatableClass.inProcessServer was placed inside <Application> instead of package root.",
+      "evidence": "session-log turns 50-52 (CS0246 BackgroundActivatedEventArgs), turn 48 (AppX 0x80080204 'EntryPoint without ActivatableClassId'), turn 54 (0xC00CE169 'windows.activatableClass.inProcessServer violates enumeration constraint'), resolved turn 55-57.",
+      "covered_at": "MIGRATION-PATTERNS.md, '## Background Tasks' (anchor background-tasks, was line 320-323).",
+      "why_missed": "under-emphasized — the section only says 'use BackgroundTaskBuilder or Task Scheduler' and gives no guidance for the common like-for-like case where the in-process IBackgroundTask class is kept; nothing about OnBackgroundActivated's absence or the manifest inProcessServer placement.",
+      "proposed_improvement": "Extend the existing Background Tasks section with a concrete sub-block for the keep-the-in-process-task path: (a) do NOT add Application.OnBackgroundActivated (no such override in WinUI 3), (b) declare windows.activatableClass.inProcessServer at package-level root <Extensions> (sibling of <Applications>), with a correct manifest snippet and the exact error strings it prevents.",
+      "generalizes": "Any UWP app with an in-process IBackgroundTask that is ported like-for-like to packaged WinUI 3 hits the same OnBackgroundActivated compile error and the same manifest-placement registration failures; the fix is identical regardless of the task's payload."
+    }
+  ]
+}

@@ -64,9 +64,21 @@ $patterns = @(
     '.png', '.jpg', '.jpeg', '.svg', '.ico', '.gif'
 )
 
+# Never copy build artifacts / IDE folders out of the UWP source. A previously-built
+# UWP project carries stale generated sources under obj/ and bin/ (e.g.
+# 'obj\...\.NETCore,Version=v5.0.AssemblyAttributes.cs') plus a legacy
+# 'Properties\AssemblyInfo.cs'. The SDK-style WinUI 3 csproj auto-globs '**/*.cs', so
+# copying these makes the build fail with CS0579 'Duplicate TargetFrameworkAttribute'
+# and duplicate Assembly* attributes. Filter them at the source so they never land.
+$artifactDirPattern = '(^|[\\/])(bin|obj|\.vs|\.git|\.github|\.copilot|\.uwp-source)([\\/])'
+$artifactFilePattern = '(^|[\\/])(AssemblyInfo|GlobalAssemblyInfo)\.cs$'
+
 $copied = New-Object System.Collections.Generic.List[string]
 
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
+    $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
+    if ($rel -match $artifactDirPattern) { return $false }
+    if ($rel -match $artifactFilePattern) { return $false }
     $name = $_.Name.ToLowerInvariant()
     $match = $false
     foreach ($ext in $patterns) {

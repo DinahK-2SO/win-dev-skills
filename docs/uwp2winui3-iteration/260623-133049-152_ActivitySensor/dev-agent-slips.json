@@ -1,0 +1,21 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS0246 'MainPage' could not be found in the scaffold's MainWindow.xaml.cs (RootFrame.Navigate(typeof(MainPage))).",
+      "evidence": "session-log turn 44 error, fixed in a single turn (45) by adding 'using SDKTemplate;'.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md namespace/rewrite guidance + Initialize-UwpMigration's documented root-namespace handling (the script intentionally keeps copied source in its original namespace and rewrites scaffold tokens).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A missing using-directive for the page's namespace is a trivial one-line CS0246 fix a capable model resolves immediately (it did, in one turn). The cross-namespace situation is an artifact of this sample's SDKTemplate namespace, not a general skill gap."
+    },
+    {
+      "problem": "DataTemplate using x:Bind/x:DataType='local:Scenario' failed XAML markup compile (WMC0909/WMC1111, preceded by WMC1509 'No LocalAssembly parameter').",
+      "evidence": "session-log turn 44 errors; resolved in a single turn (46) by switching the ListBox ItemTemplate to {Binding Title}.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md '### x:Bind and compiled bindings' (line ~576) states x:Bind is supported in WinUI 3 and how to diagnose XAML type-resolution failures.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Resolved in one turn with a standard {Binding} fallback; the underlying WMC1509 'No LocalAssembly' appears to be a transient markup-compiler pass artifact rather than a reproducible general pattern, so adding prescriptive advice risks steering future migrations toward an unnecessary x:Bind->Binding downgrade."
+    }
+  ]
+}
