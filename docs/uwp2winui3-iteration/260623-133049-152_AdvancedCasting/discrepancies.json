@@ -1,0 +1,22 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "score": 0,
+  "builds": true,
+  "runs": false,
+  "requirements": [
+    { "id": 1, "text": "1 - Media Element Casting 101", "status": "fail", "reason": "WinUI 3 app failed to launch (windows.dialProtocol extension registration unsupported) -> scenario unreachable.", "suspected_skill_gap": "Manifest checklist/tooling does not strip or flag UWP-only <Extensions> that block packaged WinUI 3 registration." },
+    { "id": 2, "text": "2 - Casting APIs and a Custom Cast Button", "status": "fail", "reason": "App unreachable (same registration failure).", "suspected_skill_gap": "Same decisive manifest defect." },
+    { "id": 3, "text": "3 - DIAL Sender Universal Windows app", "status": "fail", "reason": "App unreachable (same registration failure).", "suspected_skill_gap": "Same decisive manifest defect." },
+    { "id": 4, "text": "4 - DIAL Receiver Windows Universal app", "status": "fail", "reason": "App unreachable (same registration failure).", "suspected_skill_gap": "Same decisive manifest defect." },
+    { "id": 5, "text": "5 - Multi-View Media Application", "status": "fail", "reason": "App unreachable (same registration failure).", "suspected_skill_gap": "Same decisive manifest defect." },
+    { "id": 6, "text": "6 - Combine Casting Methods", "status": "fail", "reason": "App unreachable (same registration failure).", "suspected_skill_gap": "Same decisive manifest defect." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "All scenarios", "uwp": "UWP golden rendered scenario 1 live (MediaElement + transport).", "winui": "No capture — app never launched.", "screenshot_ref": "parity/baseline/screenshots/01_1_Media_Element_Casting_101.png (UWP); winui_screenshot=null" }
+  ],
+  "missing_features": [
+    "Entire app non-functional: package registration aborts on the windows.dialProtocol manifest extension."
+  ],
+  "summary": "Migrated WinUI 3 app builds clean and passes the validator but cannot register/launch because the migrated Package.appxmanifest carried over a UWP windows.dialProtocol <uap:Extension> that is not registrable for a packaged WinUI 3 desktop app. All 6 scenarios unreachable -> 0/100."
+}

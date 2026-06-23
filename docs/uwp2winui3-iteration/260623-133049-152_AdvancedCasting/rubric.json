@@ -1,0 +1,106 @@
+{
+  "scenario": "AdvancedCasting",
+  "feature": "ScreenCasting",
+  "groundTruth": "original UWP ScreenCasting C# Sample (Release build, launched live)",
+  "scoring": "score = round(100 * (pass + 0.5*partial) / features_total)",
+  "features": [
+    {
+      "number": 1,
+      "title": "1 - Media Element Casting 101",
+      "pageClass": "Scenario01",
+      "controls": [
+        {
+          "type": "MediaElement",
+          "label": "",
+          "name": "player"
+        }
+      ],
+      "mustPreserve": "scenario reachable, controls present (structural), and behavior matches UWP (casting/transport/DIAL)"
+    },
+    {
+      "number": 2,
+      "title": "2 - Casting APIs and a Custom Cast Button",
+      "pageClass": "Scenario02",
+      "controls": [
+        {
+          "type": "MediaElement",
+          "label": "",
+          "name": "player"
+        }
+      ],
+      "mustPreserve": "scenario reachable, controls present (structural), and behavior matches UWP (casting/transport/DIAL)"
+    },
+    {
+      "number": 3,
+      "title": "3 - DIAL Sender Universal Windows app",
+      "pageClass": "Scenario03",
+      "controls": [
+        {
+          "type": "MediaElement",
+          "label": "",
+          "name": "player"
+        },
+        {
+          "type": "TextBox",
+          "label": "DIAL Application Name:",
+          "name": ""
+        },
+        {
+          "type": "TextBox",
+          "label": "DIAL Launch Arguments:",
+          "name": ""
+        }
+      ],
+      "mustPreserve": "scenario reachable, controls present (structural), and behavior matches UWP (casting/transport/DIAL)"
+    },
+    {
+      "number": 4,
+      "title": "4 - DIAL Receiver Windows Universal app",
+      "pageClass": "Scenario04",
+      "controls": [
+        {
+          "type": "MediaElement",
+          "label": "",
+          "name": "player"
+        }
+      ],
+      "mustPreserve": "scenario reachable, controls present (structural), and behavior matches UWP (casting/transport/DIAL)"
+    },
+    {
+      "number": 5,
+      "title": "5 - Multi-View Media Application",
+      "pageClass": "Scenario05",
+      "controls": [
+        {
+          "type": "MediaElement",
+          "label": "",
+          "name": "player"
+        }
+      ],
+      "mustPreserve": "scenario reachable, controls present (structural), and behavior matches UWP (casting/transport/DIAL)"
+    },
+    {
+      "number": 6,
+      "title": "6 - Combine Casting Methods",
+      "pageClass": "Scenario06",
+      "controls": [
+        {
+          "type": "MediaElement",
+          "label": "",
+          "name": "player"
+        },
+        {
+          "type": "TextBox",
+          "label": "DIAL Application Name:",
+          "name": ""
+        },
+        {
+          "type": "TextBox",
+          "label": "DIAL Launch Arguments:",
+          "name": ""
+        }
+      ],
+      "mustPreserve": "scenario reachable, controls present (structural), and behavior matches UWP (casting/transport/DIAL)"
+    }
+  ]
+}

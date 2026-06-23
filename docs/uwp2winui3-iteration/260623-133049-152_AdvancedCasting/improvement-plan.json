@@ -1,0 +1,28 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated Package.appxmanifest carried over the UWP windows.dialProtocol <uap:Extension>, which cannot register for a packaged WinUI 3 desktop app; the package never registers and the app never launches (all 6 scenarios fail, score 0).",
+      "evidence": "migration-score.json winui_launch_status (AppxManifest.xml(35,10) 0x80070032 / windows.dialProtocol extension 'The request is not supported' 0x80073CF6); migrated manifest L27-29.",
+      "root_cause": "The manifest checklist treated <uap:Extension> as safe to copy; some UWP app-model extensions are not registrable under the packaged WinUI 3 desktop model and abort the whole package registration.",
+      "tier": 1,
+      "change": "Added a static manifest lint to Validate-UwpMigration.ps1 Section 5b that FAILs when Package.appxmanifest still declares a known-unregisterable UWP extension (windows.dialProtocol, windows.activatableClass.inProcessServer), with a fix pointing to remove the block. Paired with a MIGRATION-PATTERNS.md checklist item (Tier 3) instructing the agent to strip unsupported UWP <Extensions> and correcting the prior 'carry over <uap:Extension>' guidance.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1 ; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On re-run, the validator FAILs on a carried-over dialProtocol extension before the agent can declare done; the agent removes it and the app registers and launches.",
+      "falsifiable_check": "Validate-UwpMigration.ps1 prints '[FAIL] ... UWP-only extension windows.dialProtocol ...' for a manifest containing it; after removal the app registers (Test-AppLaunch status=running) and the 6 scenarios become reachable."
+    },
+    {
+      "problem": "The launch/validator tooling reported the package-registration failure as a benign environment WARN and returned overall PASS, so the agent shipped a non-launching app as 'done'.",
+      "evidence": "session-log.txt ~L9145: '[WARN] Smoke launch ... not a migration defect ... ==> Validate-UwpMigration: PASS'.",
+      "root_cause": "Test-AppLaunch.ps1's no-AUMID branch hard-coded 'no registration => environment problem' even when winapp's error string was a manifest-content registration failure (a real migration defect).",
+      "tier": 1,
+      "change": "Test-AppLaunch.ps1 now inspects the winapp error string in the no-AUMID branch: if it matches a manifest-registration signature (AppxManifest.xml( / 0x80073CF6 / 'extension ... is not supported' / 'registering the <x> extension'), it classifies the result as a defect (status='crashed', anchor='manifest') instead of 'unavailable'. Validate-UwpMigration.ps1 already maps 'crashed' -> [FAIL].",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+      "expected_effect": "A manifest-defect launch failure now FAILs the validator instead of WARN+PASS, so the agent cannot declare done on a non-registering app.",
+      "falsifiable_check": "Given a manifest-registration error, Test-AppLaunch.ps1 -Json returns status='crashed' (not 'unavailable'); Validate-UwpMigration.ps1 returns a FAIL instead of PASS."
+    }
+  ],
+  "deferred_to_human": []
+}

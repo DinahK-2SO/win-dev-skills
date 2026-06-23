@@ -1,0 +1,31 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Ran the full mechanical check suite; correctly PASSed image refs, Windows.Desktop target + rescap:runFullTrust, and a 0-WUI-warning build." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 / Test-AppLaunch.ps1 smoke launch", "problem": "Reported the decisive launch failure as a benign environment WARN and returned overall PASS, so the agent declared the migration done on an app that never launches.", "evidence": "session-log.txt ~L9145: '[WARN] Smoke launch ... not a migration defect ... ==> Validate-UwpMigration: PASS'; winapp run error 0x80073CF6 / AppxManifest.xml(35,10) windows.dialProtocol extension: The request is not supported." }
+  ],
+  "tool_limitations": [
+    { "tool": "Test-AppLaunch.ps1", "limitation": "The no-AUMID branch classifies ALL registration failures as 'unavailable' (Developer Mode off / missing framework / MAX_PATH), even when winapp's error string is a manifest-content registration failure (a real migration defect).", "suggested_tweak": "Detect manifest-registration HRESULTs (0x80073CF6 with AppxManifest.xml / 'extension ... is not supported') and classify them as a defect, not environment." },
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Section 5b lints TargetDeviceFamily/rescap/runFullTrust but never inspects carried-over <uap:Extension> blocks that can block package registration.", "suggested_tweak": "Add a static manifest lint that flags UWP-only extensions known to fail packaged WinUI 3 registration (windows.dialProtocol, ...)." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md > 'Package.appxmanifest — reconcile image references' (~L440)", "wrong": "Instructs the agent to merge UWP manifest content '(capabilities, file-type associations, <uap:Extension>, <Application Id>, etc.)' into the scaffold manifest, implying <uap:Extension> blocks should be carried over verbatim.", "correct": "UWP app-model <Extensions> (e.g. windows.dialProtocol) often cannot register under a packaged WinUI 3 desktop app and abort registration (whole app fails to launch). Carry over only extensions you know register; strip unsupported/unneeded ones." }
+  ],
+  "special_apis": [
+    { "api": "windows.dialProtocol manifest extension (<uap:Extension Category=\"windows.dialProtocol\">)", "special_handling": "Does not register for a packaged WinUI 3 desktop app on Win10/11 (0x80073CF6 / 0x80070032 'The request is not supported'); must be removed from Package.appxmanifest unless a supported equivalent is wired up. The C# DialProtocol APIs are separate and may still compile/run." }
+  ],
+  "errors_encountered": [
+    { "error": "AppxManifest.xml(35,10): error 0x80070032: Cannot register ... windows.dialProtocol extension: The request is not supported. (0x80073CF6)", "root_cause": "The migrated Package.appxmanifest carried over the original UWP <uap:Extension Category=\"windows.dialProtocol\"> block; that extension is not registrable for a packaged WinUI 3 desktop app, so the package never registers and the app never launches.", "fix": "Remove the windows.dialProtocol <uap:Extension> from the WinUI 3 Package.appxmanifest (keep capabilities/assets/runFullTrust)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Final validation / done-decision", "symptom": "Agent treated the package-registration failure as an environment problem and declared the migration complete; app scores 0 because it never launches.", "turns_or_retries": "1 (accepted the WARN immediately)", "root_cause": "Test-AppLaunch.ps1 told the agent the failure was 'not a migration defect' (no AUMID => env), and Validate returned PASS, so the agent had no signal that a real defect existed.", "how_resolved": "Not resolved in-trial — shipped broken.", "preventable_by": "Tooling that classifies manifest-registration failures as defects (Test-AppLaunch.ps1) + a static manifest lint flagging unregisterable UWP extensions (Validate-UwpMigration.ps1), plus a doc fix telling the agent to strip unsupported <Extensions>." }
+  ],
+  "missing_tooling": [
+    { "need": "A manifest lint for UWP-only <Extensions> that block packaged WinUI 3 registration", "would_have_saved": "The entire 0-score: the defect would have surfaced as a FAIL before the agent declared done." }
+  ],
+  "env_issues": []
+}

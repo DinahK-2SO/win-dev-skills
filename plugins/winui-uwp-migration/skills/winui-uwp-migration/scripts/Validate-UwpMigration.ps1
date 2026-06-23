@@ -364,6 +364,27 @@ if (Test-Path -LiteralPath $manifestPath) {
         Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
         $manifestFailures++
     }
+    # UWP app-model <Extensions> carried over from the source manifest can abort the
+    # WHOLE package registration on a packaged WinUI 3 desktop app — the app then never
+    # launches and every scenario is unreachable (e.g. run9 AdvancedCasting: the migrated
+    # manifest kept <uap:Extension Category="windows.dialProtocol"> and winapp run failed
+    # with 0x80073CF6 / "windows.dialProtocol extension: The request is not supported").
+    # These extensions are NOT registrable for a packaged Win32/desktop entrypoint and
+    # are almost never needed to demonstrate the sample's UI. Flag the known-fatal ones
+    # so they are stripped before the first launch instead of surfacing as a false PASS.
+    $fatalExtensions = @(
+        @{ name = 'windows.dialProtocol';      pattern = 'Category\s*=\s*"windows\.dialProtocol"' },
+        @{ name = 'windows.activatableClass.inProcessServer'; pattern = 'Category\s*=\s*"windows\.activatableClass\.inProcessServer"' }
+    )
+    foreach ($ext in $fatalExtensions) {
+        if ($manifestText -match $ext.pattern) {
+            Write-Host "[FAIL] Package.appxmanifest declares the UWP-only extension '$($ext.name)' which cannot register for a packaged WinUI 3 desktop app"
+            Write-Host "       Symptom: winapp run / dotnet run fail registration with 0x80073CF6 (e.g. 'The request is not supported') and the app never launches."
+            Write-Host "       Fix: remove the <uap:Extension Category=`"$($ext.name)`"> ... </uap:Extension> block from Package.appxmanifest (keep capabilities, assets, and runFullTrust)."
+            Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist' (strip unsupported UWP extensions)."
+            $manifestFailures++
+        }
+    }
     if ($manifestFailures -eq 0) {
         Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared"
     } else {

@@ -1,0 +1,27 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated Package.appxmanifest carried over the UWP <uap:Extension Category=\"windows.dialProtocol\"> block; that app-model extension cannot register for a packaged WinUI 3 desktop app, so the package never registers and the app never launches (score 0).",
+      "evidence": "score notes migration-score.json winui_launch_status: 'AppxManifest.xml(35,10) error 0x80070032 windows.dialProtocol extension ... 0x80073CF6'; migrated manifest .../000_AdvancedCasting/app/AdvancedCasting/Package.appxmanifest L27-29.",
+      "skill_search": "grepped winui-uwp-migration for 'Extension', 'dialProtocol', 'appxmanifest' across SKILL.md, MIGRATION-PATTERNS.md, scripts/*.ps1, unsupported-api-inventory.json.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md ~L440: 'When you merge any other content from the UWP manifest into the scaffold's (capabilities, file-type associations, <uap:Extension>, <Application Id>, etc.), do not overwrite the Logo...' — instructs carrying <uap:Extension> over with no warning that some extensions abort packaged registration.",
+      "root_cause": "The manifest checklist treats <uap:Extension> as safe to copy. UWP app-model extensions like windows.dialProtocol are not registrable for a packaged WinUI 3 desktop app and abort the whole package registration.",
+      "proposed_fix": "(1) MIGRATION-PATTERNS.md manifest checklist: add an explicit step to review UWP <Extensions> and strip ones that are unsupported/unneeded under packaged WinUI 3 desktop (windows.dialProtocol et al.), noting an unregisterable extension makes the whole app fail to launch. (2) Validate-UwpMigration.ps1 Section 5b: add a static lint that FAILs when the manifest still contains a known-unregisterable UWP extension.",
+      "generalizes": "UWP SDK samples routinely declare app-model <Extensions> (dialProtocol, share/protocol activation, background tasks, file associations). Any extension the packaged WinUI 3 model can't register aborts registration and zeroes the whole app — this recurs across any casting/share/protocol scenario, not just AdvancedCasting."
+    },
+    {
+      "problem": "The launch/validator tooling reported the package-registration failure as a benign environment WARN and returned overall PASS, so the agent declared the migration done on an app that never launches.",
+      "evidence": "session-log.txt ~L9145: '[WARN] Smoke launch ... Usually Developer Mode off, a missing framework dependency, cert issue, or MAX_PATH - not a migration defect. ==> Validate-UwpMigration: PASS'.",
+      "skill_search": "Read Test-AppLaunch.ps1 no-AUMID branch (L242-248) and Validate-UwpMigration.ps1 smoke-launch mapping (L603-625).",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Test-AppLaunch.ps1 L246: 'winapp run did not register the app (no AUMID, no PID) ... Usually Developer Mode off, a missing framework dependency, cert issue, or MAX_PATH - not a migration defect.' — hard-codes the env interpretation for ALL no-AUMID failures.",
+      "root_cause": "Test-AppLaunch.ps1 equates 'no AUMID => environment problem'. A manifest-content registration failure (0x80073CF6 with AppxManifest.xml line / 'extension ... is not supported') also yields no AUMID but is a real migration defect; the tool can't distinguish them, so the validator emits WARN + PASS.",
+      "proposed_fix": "In Test-AppLaunch.ps1's no-AUMID branch, inspect the winapp error string: if it matches a manifest-registration signature (AppxManifest.xml( / 0x80073CF6 / 'is not supported' naming an extension/capability), classify as a defect (status 'crashed' with a manifest-checklist hint+anchor) instead of 'unavailable'. Validate-UwpMigration.ps1 then FAILs as it already does for 'crashed'.",
+      "generalizes": "Any migrated manifest defect (bad extension, unsupported capability, malformed identity) surfaces as a registration failure with no AUMID. Without this distinction the validator silently PASSes broken-but-clean-building apps in every scenario — the highest-leverage, can't-be-ignored fix."
+    }
+  ]
+}

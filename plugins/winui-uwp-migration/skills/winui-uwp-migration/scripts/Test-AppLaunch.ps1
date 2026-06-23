@@ -240,7 +240,32 @@ if ($thePid) {
         $detail = $detail + "."
         Write-LaunchOut (New-LaunchResult $false 'crashed' $detail @{ layout = $Layout; aumid = $aumid; crash = [pscustomobject]$crash })
     } else {
-        # Never registered => deployment/environment problem, not a code defect. Inconclusive.
+        # Never registered. Distinguish a *manifest-content* registration failure (a real
+        # migration DEFECT) from a genuine deploy/environment problem. winapp surfaces the
+        # former as an AppxManifest.xml(line,col) registration error — typically 0x80073CF6
+        # with a message like "...extension: The request is not supported" or a rejected
+        # capability/identity. Those are caused by what the migration wrote into the
+        # manifest (e.g. a carried-over UWP <uap:Extension Category="windows.dialProtocol">)
+        # and the app will never launch until the manifest is fixed. Do NOT excuse them as
+        # an environment issue, or the validator will false-PASS a broken app.
+        $isManifestDefect = $runErr -and (
+            $runErr -match 'AppxManifest\.xml\(' -or
+            $runErr -match '0x80073CF6' -or
+            $runErr -match 'extension:\s*The request is not supported' -or
+            $runErr -match 'registering the\s+\S+\s+extension'
+        )
+        if ($isManifestDefect) {
+            $crash = [ordered]@{
+                code = '0x80073CF6'; module = 'AppxManifest.xml'; managedType = $null; message = $runErr
+                hint = "Package registration failed on the migrated Package.appxmanifest (not an environment issue). A carried-over UWP <uap:Extension> (e.g. windows.dialProtocol), an unsupported capability, or a bad identity is being rejected. Remove the offending element from the manifest; UWP app-model extensions are not registrable for a packaged WinUI 3 desktop app."
+                anchor = 'manifest'
+            }
+            $detail = "winapp run could not register the package due to a manifest-content error (migration defect)"
+            if ($runErr) { $detail = $detail + " - '" + $runErr + "'" }
+            $detail = $detail + "."
+            Write-LaunchOut (New-LaunchResult $false 'crashed' $detail @{ layout = $Layout; crash = [pscustomobject]$crash })
+        }
+        # Otherwise => deployment/environment problem, not a code defect. Inconclusive.
         $detail = "winapp run did not register the app (no AUMID, no PID)"
         if ($runErr) { $detail = $detail + " - '" + $runErr + "'" }
         $detail = $detail + ". Usually Developer Mode off, a missing framework dependency, cert issue, or MAX_PATH - not a migration defect."

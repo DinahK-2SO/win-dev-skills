@@ -1,0 +1,16 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: add static manifest lint that FAILs on UWP-only <Extensions> (windows.dialProtocol etc.) that cannot register for a packaged WinUI 3 desktop app and abort launch",
+    "Test-AppLaunch.ps1: classify manifest-registration failures (AppxManifest.xml / 0x80073CF6 / 'extension not supported') as a defect, not a benign environment WARN, so the validator no longer false-PASSes a non-registering app",
+    "MIGRATION-PATTERNS.md: correct the 'carry over <uap:Extension>' guidance and add a manifest-checklist step to strip unsupported UWP extensions before first launch (new #manifest anchor)"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

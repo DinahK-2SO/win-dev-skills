@@ -437,7 +437,7 @@ AppxManifest.xml(...): error 0x80070002: ... splash screen image [Splash-sdk.png
 
 You have two options. Pick one **before** the first `winapp run`:
 
-- **Preferred — keep the scaffold's manifest image references** (`Assets\SplashScreen.scale-200.png`, etc.). When you merge any other content from the UWP manifest into the scaffold's (capabilities, file-type associations, `<uap:Extension>`, `<Application Id>`, etc.), do **not** overwrite the `Logo`, `<uap:SplashScreen Image>`, `Square150x150Logo`, `Square44x44Logo`, or `Wide310x150Logo` attribute values. The scaffold's defaults already match the files in its `Assets/` folder.
+- **Preferred — keep the scaffold's manifest image references** (`Assets\SplashScreen.scale-200.png`, etc.). When you merge any other content from the UWP manifest into the scaffold's (capabilities, file-type associations, `<uap:Extension>`, `<Application Id>`, etc.), do **not** overwrite the `Logo`, `<uap:SplashScreen Image>`, `Square150x150Logo`, `Square44x44Logo`, or `Wide310x150Logo` attribute values. The scaffold's defaults already match the files in its `Assets/` folder. **Do not blindly carry over UWP app-model `<uap:Extension>` blocks** — some (e.g. `windows.dialProtocol`) are not registrable for a packaged WinUI 3 desktop app and will abort the *entire* package registration (see the "strip unsupported UWP extensions" item in the checklist below).
 
 - **Alternative — keep the UWP sample's branded assets.** Copy every file the UWP manifest references from `.uwp-source/Assets/` (or `.uwp-source/<SampleName>/Assets/`) into the new project's `Assets/` folder, preserving the exact filename (including the `-sdk` suffix and any scale qualifiers). Verify by re-reading each `Image=`/`Logo>` value in the manifest and confirming `Test-Path "Assets\<that filename>"` for every one of them. Don't rename files to look prettier — the manifest reference is the source of truth.
 
@@ -455,6 +455,7 @@ Either way, before the first `winapp run`, sanity-check every asset reference in
 }
 ```
 
+<a id="manifest"></a>
 ### Manifest migration checklist (Windows.Desktop + runFullTrust)
 
 The default UWP `Package.appxmanifest` declares itself as a Universal app, but a packaged WinUI 3 desktop app is a Win32 process with package identity — it needs a different shape. `winapp run` will register the AppX but **fail to deploy** with `0x80073CF6` or "requires runFullTrust capability" if any of the following are missing.
@@ -488,6 +489,22 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
    Packaged WinUI 3 desktop apps run outside the UWP AppContainer sandbox and must declare this. Keep any UWP `<Capability>` entries you actually use (e.g. `<DeviceCapability Name="webcam" />`) but add the `runFullTrust` line above no matter what.
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
+
+5. **Strip UWP-only `<Extensions>` that a packaged WinUI 3 desktop app cannot register.** UWP samples often declare app-model extensions under `<Application><Extensions>` that the packaged WinUI 3 (Win32 + package identity) model rejects at *registration* time — so `winapp run` / `dotnet run` fail before any window appears and the whole app is unreachable:
+
+   ```
+   AppxManifest.xml(..): error 0x80070032: Cannot register the <Identity> package because
+   the following error was encountered while registering the windows.dialProtocol
+   extension: The request is not supported. (0x80073CF6)
+   ```
+
+   Remove these blocks from `Package.appxmanifest` unless you are actually wiring up a supported equivalent — they are virtually never needed to demonstrate the sample's UI:
+
+   - `windows.dialProtocol` (DIAL receiver registration — the C# `Windows.Media.DialProtocol` *sender* APIs are unaffected and may still be migrated)
+   - any extension whose category names a UWP background/activation contract the desktop package doesn't host
+
+   This is a *whole-app-fatal* defect: an unregisterable extension means the package never registers, so a clean build and even a green WUI-analyzer run still produce a zero-coverage app. `Validate-UwpMigration.ps1` flags the known-fatal categories, and the smoke launch reports a manifest-registration failure as a **defect** (not an environment WARN) — fix the manifest before declaring done. Keep capabilities, assets, identity, and `runFullTrust`; only the unsupported `<uap:Extension>` blocks come out.
+
 
 ### WUI analyzer warnings (UWP API residue)
 

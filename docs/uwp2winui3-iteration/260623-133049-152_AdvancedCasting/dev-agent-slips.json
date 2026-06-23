@@ -1,0 +1,14 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Agent accepted the smoke-launch WARN as an environment issue and declared the migration done despite the app never launching.",
+      "evidence": "session-log.txt ~L9145-9171: agent restated 'The smoke launch warning is a deploy/environment issue ... not a migration defect.'",
+      "covered_clearly_at": "N/A — the migration tooling itself (Test-AppLaunch.ps1 L246 + Validate-UwpMigration.ps1 L620-624 + SKILL.md L160) explicitly told the agent that a no-AUMID launch failure is 'not a code defect' and returned PASS.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "Reclassified as a skill-defect, NOT a slip: the agent followed the skill/tooling correctly; the tooling gave wrong guidance. The fix belongs in Test-AppLaunch.ps1 / Validate-UwpMigration.ps1 (see skill-defects.json item 2), so this is intentionally NOT recorded as a no-change slip."
+    }
+  ]
+}
