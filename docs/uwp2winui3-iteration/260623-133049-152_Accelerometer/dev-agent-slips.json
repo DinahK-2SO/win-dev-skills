@@ -1,0 +1,14 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Agent never ran 'dotnet build' or Validate-UwpMigration.ps1; the session ended (TURN 26) still exploring source/assets, so no build/validate loop ever executed.",
+      "evidence": "session-log.txt contains no 'dotnet build', no 'winapp build', and no Validate-UwpMigration invocation; final turns (L2458-2648) are still 'view'/'glob' of source files and assets.",
+      "covered_clearly_at": "SKILL.md Step 3 'Build, fix what tooling missed' (tight build→fix→launch loop) and Step 4 '🛑 You are NOT done until Validate-UwpMigration.ps1 reports PASS.'",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "The skill already prominently and repeatedly mandates an early build loop and a final validator gate (dedicated 🛑 sections). A capable model on re-run that follows Step 3/4 would build early and hit the collision immediately; making the skill louder about an already-🛑-marked rule would just add noise. The build-breaking root cause is separately fixed as a skill-defect (bootstrap guard), which removes the collision regardless of when the agent first builds."
+    }
+  ]
+}

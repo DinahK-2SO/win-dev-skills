@@ -1,0 +1,18 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Project root namespace equals a WinRT type (project scaffolded under the sample's own API name), so every simple-name reference in the migrated source binds to the app's namespace instead of the type → CS0118 x9 + XAML WMC9999. Whole build fails; score 0/100.",
+      "evidence": "migration-score.json build_error: 9x CS0118 'Accelerometer' is a namespace but is used like a type + XamlCompiler WMC9999; session-log.txt L1290/1364/1394 (scaffold 'namespace Accelerometer' vs source 'namespace SDKTemplate'); csproj <RootNamespace>Accelerometer</RootNamespace>.",
+      "root_cause": "The bootstrap leaves the scaffold's default root namespace (== project name) in place. When that name equals a type the source references by simple name, C# resolves the simple name to the namespace, not the type.",
+      "tier": 1,
+      "change": "Added a namespace/type collision guard (section 3b) to Initialize-UwpMigration.ps1: if the scaffold root namespace appears as a bare identifier in the copied source, rename the scaffold root namespace to <Name>App — updating <RootNamespace>, scaffold-owned namespace declarations, x:Class, and xmlns:local. Copied source keeps its original namespace and is never modified. Summary block prints a 'Root namespace guard' line. Also added a SKILL.md Step 0 note so the agent keeps the renamed namespace.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1 ; skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Scaffolded projects whose name collides with a WinRT type are renamed at bootstrap, so simple-name type references resolve correctly and the project compiles.",
+      "falsifiable_check": "Re-run on a type-named sample (Accelerometer/Compass/Gyrometer/Barometer): bootstrap prints 'Root namespace guard: <Name> -> <Name>App'; csproj RootNamespace + scaffold x:Class use <Name>App; 'dotnet build' emits 0 CS0118 'is a namespace but is used like a type' and no WMC9999."
+    }
+  ],
+  "deferred_to_human": []
+}

@@ -118,6 +118,67 @@ foreach ($f in $nsFiles) {
 }
 Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 
+# ─── 3b. Guard against project-namespace <-> source-type collision ─────────────
+# The scaffold's root namespace defaults to the project name. UWP SDK samples are
+# routinely named after the very type they demonstrate (Accelerometer, Compass,
+# Gyrometer, Barometer, ProximitySensor, Battery, ...). When the project name
+# equals a type the migrated source references by SIMPLE name (e.g.
+# `Accelerometer.GetDefault()` under `using Windows.Devices.Sensors;`), each such
+# reference binds to the app's OWN namespace instead of the WinRT type — yielding
+# CS0118 "is a namespace but is used like a type" on every line, plus a XAML
+# WMC9999 internal compiler crash. Rename the scaffold's root namespace to a
+# collision-free token so simple names resolve to the type again. Only
+# scaffold-owned tokens are rewritten; copied source keeps its original namespace
+# (its references already compiled under that namespace, so it cannot self-collide).
+$nsRenamed = $null
+$targetCsproj = Get-ChildItem -Path $Target -Filter '*.csproj' -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch $excludePattern } | Select-Object -First 1
+$rootNs = $null
+$csprojText = $null
+if ($targetCsproj) {
+    $csprojText = [System.IO.File]::ReadAllText($targetCsproj.FullName)
+    $rm = [regex]::Match($csprojText, '<RootNamespace>\s*([^<]+?)\s*</RootNamespace>')
+    if ($rm.Success) { $rootNs = $rm.Groups[1].Value.Trim() }
+    else { $rootNs = [System.IO.Path]::GetFileNameWithoutExtension($targetCsproj.Name) }
+}
+if ($rootNs -and $rootNs -match '^[A-Za-z_][A-Za-z0-9_]*$') {
+    $copiedFull = @{}
+    foreach ($rel in $copied) { $copiedFull[(Join-Path $Target $rel)] = $true }
+    $bare = '(?<![\w.])' + [regex]::Escape($rootNs) + '(?![\w])'
+    $collision = $false
+    foreach ($rel in $copied) {
+        if ($rel -notmatch '\.(cs|xaml)$') { continue }
+        $full = Join-Path $Target $rel
+        if (-not (Test-Path -LiteralPath $full)) { continue }
+        $txt = [System.IO.File]::ReadAllText($full)
+        $txt = [regex]::Replace($txt, '(?m)(^\s*namespace\s+)[\w.]+', '${1}')  # blank the source's own namespace name only
+        if ([regex]::IsMatch($txt, $bare)) { $collision = $true; break }
+    }
+    if ($collision) {
+        $newNs = $rootNs + 'App'
+        if ($targetCsproj) {
+            if ($csprojText -match '<RootNamespace>') {
+                $csprojText = [regex]::Replace($csprojText, '(<RootNamespace>\s*)[^<]+?(\s*</RootNamespace>)', "`${1}$newNs`${2}")
+            } else {
+                $csprojText = [regex]::Replace($csprojText, '(<PropertyGroup>)', "`$1`r`n    <RootNamespace>$newNs</RootNamespace>", 1)
+            }
+            [System.IO.File]::WriteAllText($targetCsproj.FullName, $csprojText)
+        }
+        $scaffoldFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.cs,*.xaml -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch $excludePattern -and -not $copiedFull.ContainsKey($_.FullName) }
+        foreach ($f in $scaffoldFiles) {
+            $t = [System.IO.File]::ReadAllText($f.FullName)
+            $o = $t
+            $t = [regex]::Replace($t, '(?m)(^\s*namespace\s+)' + [regex]::Escape($rootNs) + '\b', "`${1}$newNs")
+            $t = [regex]::Replace($t, '(x:Class\s*=\s*")' + [regex]::Escape($rootNs) + '\.', "`${1}$newNs.")
+            $t = [regex]::Replace($t, '(using:)' + [regex]::Escape($rootNs) + '(?=["\.])', "`${1}$newNs")
+            if ($t -ne $o) { [System.IO.File]::WriteAllText($f.FullName, $t) }
+        }
+        $nsRenamed = "$rootNs -> $newNs"
+        Write-Host "    Namespace collision guard: renamed scaffold root namespace $rootNs -> $newNs (collides with a type referenced in the source)"
+    }
+}
+
 # ─── 4a. Filter-prone class neutralization ────────────────────────────────────
 # Some SDK Samples boilerplate helpers contain UWP-specific patterns whose
 # WinUI 3 equivalents require low-level Win32 keyboard interop. The model
@@ -454,6 +515,7 @@ Write-Host "=== BOOTSTRAP COMPLETE ==="
 Write-Host "Source files copied   : $($copied.Count)"
 Write-Host "Namespace rewrites    : $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 Write-Host "Neutralized classes   : $($neutralizedFiles.Count) file(s)"
+if ($nsRenamed) { Write-Host "Root namespace guard  : $nsRenamed (avoided project-name/WinRT-type CS0118 collision)" }
 Write-Host "Triage breakdown      :"
 foreach ($lbl in $labelOrder) {
     if ($counts.ContainsKey($lbl)) {

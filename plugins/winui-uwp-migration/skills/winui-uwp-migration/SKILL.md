@@ -60,6 +60,8 @@ Do:
 
 The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you exactly what it did, what artifacts now exist, and what to do next. Read that block; do not re-derive the same info by browsing the tree.
 
+> **Namespace/type collision guard.** UWP SDK samples are routinely named after the very type they demonstrate (`Accelerometer`, `Compass`, `Gyrometer`, `Barometer`, `ProximitySensor`, `Battery`, …). When `dotnet new winui -n <Name>` uses such a name, the project's root namespace equals that type, so every simple-name reference in the source (e.g. `Accelerometer.GetDefault()` under `using Windows.Devices.Sensors;`) binds to your *own* namespace instead of the WinRT type — producing `CS0118 'X' is a namespace but is used like a type` on every line plus a XAML `WMC9999` internal compiler crash. The bootstrap detects this and renames the scaffold's root namespace to a collision-free token (`<Name>App`), updating `<RootNamespace>`, the scaffold `App`/`MainWindow`/`MainPage` `namespace` declarations, their `x:Class`, and `xmlns:local`. If the `Root namespace guard` line appears in the summary, **keep that renamed namespace** for any new scaffold files you add — do not rename it back to the colliding type name, and do not move the copied source onto it.
+
 ### Step 1 — Migrate, file by file
 
 Open `MIGRATION-MAPPING.md`. Every row already has a final Triage label (`migrate-as-is`, `migrate-with-adaptation`, `defer`). The bootstrap also injected `// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` (or `<!-- … -->` in XAML) above every line that needs adaptation, and recorded a per-file execution mode in `.bootstrap-meta.json`.

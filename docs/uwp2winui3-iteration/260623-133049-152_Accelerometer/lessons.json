@@ -1,0 +1,31 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied 218 source files, rewrote Windows.UI.Xaml->Microsoft.UI.Xaml in 7/13 files, seeded mapping + TODOs (session-log.txt L213-242)." }
+  ],
+  "tools_problematic": [
+    { "tool": "dotnet new winui -n <ProjectName>", "problem": "Scaffolding with the sample's own name (Accelerometer) made the project root namespace equal a WinRT type, which broke the whole build.", "evidence": "csproj <RootNamespace>Accelerometer</RootNamespace>; scaffold App/MainWindow/MainPage use 'namespace Accelerometer' while source uses 'namespace SDKTemplate' (session-log.txt L1290,1364,1394)." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Did not detect/repair the project-namespace vs WinRT-type collision introduced by the scaffold name.", "suggested_tweak": "Add a bootstrap guard that renames the scaffold root namespace to a collision-free token when it equals a type referenced in the source." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.Devices.Sensors.Accelerometer", "why_tried": "Core API of the sample, referenced by simple name in every scenario page.", "root_cause": "Project root namespace 'Accelerometer' shadowed the WinRT type, so simple-name references bound to the namespace.", "fix": "Rename the project root namespace away from the type name (e.g. AccelerometerApp) so the simple name resolves to Windows.Devices.Sensors.Accelerometer." }
+  ],
+  "doc_errors": [],
+  "special_apis": [],
+  "errors_encountered": [
+    { "error": "CS0118 'Accelerometer' is a namespace but is used like a type (x9, Scenario1-5 .xaml.cs)", "root_cause": "RootNamespace == project name 'Accelerometer' collides with Windows.Devices.Sensors.Accelerometer.", "fix": "Bootstrap now renames the scaffold root namespace to <Name>App when it collides with a source-referenced type." },
+    { "error": "XamlCompiler WMC9999 internal error (NullReferenceException) in MarkupCompilePass2", "root_cause": "Downstream symptom of the same namespace/type collision during XAML codegen.", "fix": "Resolved by removing the namespace/type collision at bootstrap." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Whole trial (TURN 2..26)", "symptom": "Agent migrated file-by-file but never ran 'dotnet build' or Validate-UwpMigration.ps1; session ended at TURN 26 still viewing source/assets.", "turns_or_retries": "~24 productive turns, 0 builds", "root_cause": "Slow per-file exploration consumed the turn budget before the build/validate loop; the latent namespace collision was never surfaced because no build ran.", "how_resolved": "Not resolved in-trial (score 0).", "preventable_by": "Bootstrap-time prevention of the collision (tooling, can't be skipped) so the very first build the next run does is not poisoned by CS0118; SKILL.md already mandates an early build loop (Step 3/4)." }
+  ],
+  "missing_tooling": [
+    { "need": "Namespace/type collision guard at scaffold/bootstrap time.", "would_have_saved": "All 9 CS0118 errors + the WMC9999 XAML crash; the build would have had a chance to succeed." }
+  ],
+  "env_issues": [
+    { "issue": "No physical accelerometer on host.", "workaround": "Hardware-gated; UWP golden shows 'No data'. Not a migration defect (score notes)." }
+  ]
+}

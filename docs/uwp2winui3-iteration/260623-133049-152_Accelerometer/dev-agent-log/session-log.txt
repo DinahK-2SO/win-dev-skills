@@ -1,0 +1,2648 @@
+
+=== TURN 0 ===
+
+--- TOOL: report_intent ---
+{"intent":"Exploring UWP source code"}
+
+--- TOOL: skill ---
+{"skill":"winui-uwp-migration"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+Skill "winui-uwp-migration" loaded successfully. Follow the instructions in the skill context.
+
+=== TURN 1 ===
+Following the skill's mandatory Step 0 — running bootstrap first before any source analysis.
+
+--- TOOL: report_intent ---
+{"intent":"Bootstrapping WinUI3 project"}
+
+--- TOOL: powershell ---
+{"command":"dotnet new winui -n Accelerometer --output \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\"","description":"Scaffold WinUI 3 project in target directory","initial_wait":60,"mode":"sync"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+The template "WinUI Blank App" was created successfully.Processing post-creation actions...
+Adding a package reference Microsoft.WindowsAppSDK to project file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj:
+Accelerometer
+Accelerometer
+Accelerometer
+Accelerometer
+(0.1s)
+(0.1s)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+info : Adding PackageReference for package 'Microsoft.WindowsAppSDK' into project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj'.
+info :   GET https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windowsappsdk/index.json
+info :   OK https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windowsappsdk/index.json 183ms
+info : Restoring packages for C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj...
+info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.19.23.48.43/vulnerability.base.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.19.23.48.43/2026.06.22.11.48.51/vulnerability.update.json
+info : Package 'Microsoft.WindowsAppSDK' is compatible with all the specified frameworks in project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj'.
+info : PackageReference for package 'Microsoft.WindowsAppSDK' version '2.2.0' updated in file 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj'.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\obj\Accelerometer.csproj.nuget.g.props.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\obj\Accelerometer.csproj.nuget.g.targets.
+info : Writing assets file to disk. Path: C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\obj\project.assets.json
+log  : Restored C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj (in 903 ms).
+Successfully added a reference to the project file.Adding a package reference Microsoft.Windows.SDK.BuildTools to project file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj:
+Accelerometer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+info : Adding PackageReference for package 'Microsoft.Windows.SDK.BuildTools' into project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj'.
+info :   GET https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools/index.json
+info :   OK https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools/index.json 195ms
+info : Restoring packages for C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj...
+info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.19.23.48.43/vulnerability.base.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.19.23.48.43/2026.06.22.11.48.51/vulnerability.update.json
+info : Package 'Microsoft.Windows.SDK.BuildTools' is compatible with all the specified frameworks in project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj'.
+info : PackageReference for package 'Microsoft.Windows.SDK.BuildTools' version '10.0.28000.1839' updated in file 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj'.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\obj\Accelerometer.csproj.nuget.g.props.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\obj\Accelerometer.csproj.nuget.g.targets.
+info : Writing assets file to disk. Path: C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\obj\project.assets.json
+log  : Restored C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj (in 302 ms).
+Successfully added a reference to the project file.Adding a package reference Microsoft.Windows.SDK.BuildTools.WinApp to project file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj:
+Accelerometer
+
+
+
+
+
+
+info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+info : Adding PackageReference for package 'Microsoft.Windows.SDK.BuildTools.WinApp' into project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj'.
+info :   GET https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools.winapp/index.json
+info :   OK https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools.winapp/index.json 175ms
+info : Restoring packages for C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Acceler
+rometer.csproj...
+info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.19.23.48.43/vulnerability.base.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.19.23.48.43/2026.06.22.11.48.51/vulnerability.update.jso
+on
+info : Package 'Microsoft.Windows.SDK.BuildTools.WinApp' is compatible with all the specified frameworks in project 'C:\
+\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj'.
+info : PackageReference for package 'Microsoft.Windows.SDK.BuildTools.WinApp' version '0.3.2' updated in file 'C:\ado\wi
+in-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj'.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\obj\Ac
+ccelerometer.csproj.nuget.g.props.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\obj\Ac
+ccelerometer.csproj.nuget.g.targets.
+info : Writing assets file to disk. Path: C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer
+r\app\obj\project.assets.json
+log  : Restored C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj 
+ (in 294 ms).
+Successfully added a reference to the project file.
+
+Restoring C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Accelerometer.csproj:      
+csproj
+(0.1s)
+(0.1s)
+(0.1s)
+Restore succeeded.
+
+
+An update for template package 'Microsoft.WindowsAppSDK.WinUI.CSharp.Templates@0.0.5-alpha' is available.
+To update the package use:
+   dotnet new install Microsoft.WindowsAppSDK.WinUI.CSharp.Templates@0.0.6-alpha
+<exited with exit code 0>
+
+=== TURN 2 ===
+Scaffold succeeded. Now running the bootstrap script:
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Initialize-UwpMigration.ps1\" `\n    -Source \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Accelerometer\\cs\" `\n    -Target \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\"","description":"Run UWP migration bootstrap script","initial_wait":60,"mode":"sync"}
+--- RESULT ---
+==> Initialize-UwpMigration
+    Source : C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs
+    Target : C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app
+    Copied 218 source files
+    Preserved Accelerometer.csproj at .uwp-source/ (reference only — do not edit, do not include in build)
+    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in 7 of 13 .cs/.xaml files
+
+=== BOOTSTRAP COMPLETE ===
+Source files copied   : 218
+Namespace rewrites    : 7 of 13 .cs/.xaml files
+Neutralized classes   : 0 file(s)
+Triage breakdown      :
+  migrate-as-is              205
+  migrate-with-adaptation    5
+  defer                      8
+Inline TODOs injected : 16
+  SEQUENTIAL files    : 5
+  BATCH files         : 0
+Artifacts:
+  MIGRATION-MAPPING.md       (triage labels per file)
+  MIGRATION-DEFERRED.md      (pre-seeded; anchors only)
+  .bootstrap-meta.json       (per-file mode, schema v2)
+  .uwp-source/               (original UWP .csproj for reference)
+Next:
+  1. Open a TODO-bearing source file (search for TODO[migrate- )
+  2. Read its mode in .bootstrap-meta.json (perFileMode[<path>])
+  3. Resolve each TODO via: scripts/Get-MigrationPattern.ps1 -Anchor <id>
+  4. BATCH = fix all TODOs in file then build; SEQUENTIAL = fix one then build
+  5. End by running scripts/Validate-UwpMigration.ps1 -Target <target>
+==========================
+<exited with exit code 0>
+
+=== TURN 3 ===
+
+--- TOOL: powershell ---
+{"command":"Test-Path \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\MIGRATION-MAPPING.md\"","description":"Self-check: verify MIGRATION-MAPPING.md exists","mode":"sync"}
+--- RESULT ---
+True
+<exited with exit code 0>
+
+=== TURN 4 ===
+Self-check returns `True`. Now reading the mapping to understand what needs migration:
+
+--- TOOL: report_intent ---
+{"intent":"Reviewing migration mapping"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\MIGRATION-MAPPING.md"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\.bootstrap-meta.json"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+File too large to read at once (28.9 KB). Consider using the grep tool to search within the file, or view with view_range to read specific sections.
+--- RESULT ---
+1. {
+2.   "version": 2,
+3.   "timestamp": "2026-06-23T13:32:02.9429314+08:00",
+4.   "sourcePath": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Accelerometer\\cs",
+5.   "seededRowCount": 218,
+6.   "todoCount": 16,
+7.   "sensitiveFileCount": 5,
+8.   "deferredCount": 8,
+9.   "perFileMode": {
+10.     "Scenario1_DataEvents.xaml.cs": "SEQUENTIAL",
+11.     "Scenario2_ShakeEvents.xaml.cs": "SEQUENTIAL",
+12.     "Scenario3_Polling.xaml.cs": "SEQUENTIAL",
+13.     "Scenario4_OrientationChanged.xaml.cs": "SEQUENTIAL",
+14.     "Scenario5_DataEventsBatching.xaml.cs": "SEQUENTIAL"
+15.   },
+16.   "neutralizedClasses": []
+17. }
+18. 
+
+=== TURN 5 ===
+
+--- TOOL: grep ---
+{"output_mode":"content","paths":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\MIGRATION-MAPPING.md","pattern":"migrate-with-adaptation|defer"}
+--- RESULT ---
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| bin\x64\Release\ilc\Data.g.cs | bin\x64\Release\ilc\Data.g.cs | defer | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| bin\x64\Release\ilc\Helpers.g.cs | bin\x64\Release\ilc\Helpers.g.cs | defer | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| bin\x64\Release\ilc\ImplTypes.g.cs | bin\x64\Release\ilc\ImplTypes.g.cs | defer | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| bin\x64\Release\ilc\SafeTypes.g.cs | bin\x64\Release\ilc\SafeTypes.g.cs | defer | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| obj\x64\Release\ilc\intermediate\Accelerometer.McgInterop\Data.g.cs | obj\x64\Release\ilc\intermediate\Accelerometer.McgInterop\Data.g.cs | defer | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| obj\x64\Release\ilc\intermediate\Accelerometer.McgInterop\Helpers.g.cs | obj\x64\Release\ilc\intermediate\Accelerometer.McgInterop\Helpers.g.cs | defer | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| obj\x64\Release\ilc\intermediate\Accelerometer.McgInterop\ImplTypes.g.cs | obj\x64\Release\ilc\intermediate\Accelerometer.McgInterop\ImplTypes.g.cs | defer | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| obj\x64\Release\ilc\intermediate\Accelerometer.McgInterop\SafeTypes.g.cs | obj\x64\Release\ilc\intermediate\Accelerometer.McgInterop\SafeTypes.g.cs | defer | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| Scenario1_DataEvents.xaml.cs | Scenario1_DataEvents.xaml.cs | migrate-with-adaptation | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| Scenario2_ShakeEvents.xaml.cs | Scenario2_ShakeEvents.xaml.cs | migrate-with-adaptation | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| Scenario3_Polling.xaml.cs | Scenario3_Polling.xaml.cs | migrate-with-adaptation | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| Scenario4_OrientationChanged.xaml.cs | Scenario4_OrientationChanged.xaml.cs | migrate-with-adaptation | copied |
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MIGRATION-MAPPING.md:| Scenario5_DataEventsBatching.xaml.cs | Scenario5_DataEventsBatching.xaml.cs | migrate-with-adaptation | copied |
+
+=== TURN 6 ===
+Let me examine the scenario files with TODOs:
+
+--- TOOL: grep ---
+{"-n":true,"glob":"*.cs\"","output_mode":"content","paths":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app","pattern":"TODO\\[migrate-"}
+--- RESULT ---
+No matches found.
+
+=== TURN 7 ===
+
+--- TOOL: grep ---
+{"-n":true,"output_mode":"content","paths":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app","pattern":"TODO\\[migrate-"}
+--- RESULT ---
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario1_DataEvents.xaml.cs:88:            // TODO[migrate-001]: see PATTERNS.md#threading
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario1_DataEvents.xaml.cs:103:            // TODO[migrate-002]: see PATTERNS.md#windowing
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario1_DataEvents.xaml.cs:116:            // TODO[migrate-003]: see PATTERNS.md#windowing
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario2_ShakeEvents.xaml.cs:89:            // TODO[migrate-004]: see PATTERNS.md#threading
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario2_ShakeEvents.xaml.cs:102:            // TODO[migrate-005]: see PATTERNS.md#windowing
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario2_ShakeEvents.xaml.cs:114:            // TODO[migrate-006]: see PATTERNS.md#windowing
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario3_Polling.xaml.cs:114:            // TODO[migrate-007]: see PATTERNS.md#windowing
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario3_Polling.xaml.cs:127:            // TODO[migrate-008]: see PATTERNS.md#windowing
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario4_OrientationChanged.xaml.cs:59:            // TODO[migrate-009]: see PATTERNS.md#getforcurrentview
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario4_OrientationChanged.xaml.cs:104:            // TODO[migrate-010]: see PATTERNS.md#windowing
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario4_OrientationChanged.xaml.cs:123:            // TODO[migrate-011]: see PATTERNS.md#threading
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario4_OrientationChanged.xaml.cs:141:            // TODO[migrate-012]: see PATTERNS.md#threading
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario4_OrientationChanged.xaml.cs:180:            // TODO[migrate-013]: see PATTERNS.md#windowing
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario5_DataEventsBatching.xaml.cs:99:            // TODO[migrate-014]: see PATTERNS.md#threading
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario5_DataEventsBatching.xaml.cs:116:            // TODO[migrate-015]: see PATTERNS.md#windowing
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\Scenario5_DataEventsBatching.xaml.cs:129:            // TODO[migrate-016]: see PATTERNS.md#windowing
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Initialize-UwpMigration.ps1:18:       (`// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — anchor-only, never an API name)
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Initialize-UwpMigration.ps1:228:#   * C# (.cs):   `// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` inserted on a
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Initialize-UwpMigration.ps1:234:#   * XAML:       `<!-- TODO[migrate-NNN]: see PATTERNS.md#<anchor> -->`
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Initialize-UwpMigration.ps1:351:                "$indent<!-- TODO[migrate-$seqStr]: see PATTERNS.md#$($inj.Anchor) -->"
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Initialize-UwpMigration.ps1:353:                "$indent// TODO[migrate-$seqStr]: see PATTERNS.md#$($inj.Anchor)"
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Initialize-UwpMigration.ps1:475:Write-Host "  1. Open a TODO-bearing source file (search for TODO[migrate- )"
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\SKILL.md:28:- `scripts/Get-MigrationPattern.ps1` — fetches a single anchored section from `MIGRATION-PATTERNS.md`. Used to resolve each `TODO[migrate-NNN]`. **Prefer this over opening MIGRATION-PATTERNS.md directly** — the full patterns file is API-name-dense and loading it floods your context.
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\SKILL.md:65:Open `MIGRATION-MAPPING.md`. Every row already has a final Triage label (`migrate-as-is`, `migrate-with-adaptation`, `defer`). The bootstrap also injected `// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` (or `<!-- … -->` in XAML) above every line that needs adaptation, and recorded a per-file execution mode in `.bootstrap-meta.json`.
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\SKILL.md:69:- **`BATCH`** — fix every `TODO[migrate-NNN]` in the file in one pass, then build once. This is the default for files that touch only safe APIs.
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\SKILL.md:70:- **`SEQUENTIAL`** — fix one `TODO[migrate-NNN]` at a time, build immediately after each, then move to the next. The bootstrap marks a file SEQUENTIAL when it touches a namespace family whose API names trigger the model provider's output-safety filter; pacing the edits keeps each turn small.
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\SKILL.md:144:🛑 **You are NOT done until `Validate-UwpMigration.ps1` reports PASS.** Skipping this is the single most common failure pattern: agents finish transforming most files, see no obvious errors in their last few edits, and declare success — while leaving entire pages still on UWP namespaces, or rows stuck at `Status = copied`, or unresolved `TODO[migrate-NNN]` markers in source. The validator runs every mechanical check in one shot:
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\SKILL.md:153:2. **TODO marker residue** — every `TODO[migrate-NNN]` from the bootstrap is resolved.
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\SKILL.md:193:- Use anchor references instead. The bootstrap already inserts `// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — when you fix a TODO, **delete the TODO line entirely** in the same edit. Do not leave a "for posterity" comment naming the original API.
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Validate-UwpMigration.ps1:18:2. TODO[migrate-NNN] residue — every injected marker must be resolved
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Validate-UwpMigration.ps1:139:# ─── 2. TODO[migrate-NNN] residue ──────────────────────────────────────────────
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Validate-UwpMigration.ps1:140:# Initialize-UwpMigration.ps1 injects `TODO[migrate-NNN]: see PATTERNS.md#<anchor>`
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Validate-UwpMigration.ps1:158:    Write-Host "[PASS] No TODO[migrate-] markers remain in source"
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Validate-UwpMigration.ps1:160:    Write-Host "[FAIL] $($todoHits.Count) TODO[migrate-] marker(s) still in source (resolve each one via 'Get-MigrationPattern.ps1 -Anchor <id>'):"
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Validate-UwpMigration.ps1:171:            [void]$diagBlock.Add("  L$($h.Line)  TODO[migrate-$($h.Tag)]")
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\.github\skills\winui-uwp-migration\scripts\Validate-UwpMigration.ps1:174:    Add-Diag 'TODO[migrate-] residue' (($diagBlock) -join "`r`n")
+
+=== TURN 8 ===
+Fetching the needed migration patterns (threading, windowing, getforcurrentview) in parallel:
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Get-MigrationPattern.ps1\" -Anchor threading","description":"Get threading migration pattern","mode":"sync"}
+--- RESULT ---
+<a id="threading"></a>
+## Threading: CoreDispatcher → DispatcherQueueUWP (replace this):```csharp
+await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => StatusText.Text = "Done");
+```WinUI 3:```csharp
+DispatcherQueue.TryEnqueue(() => StatusText.Text = "Done");
+DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () => ProgressBar.Value = 100);
+```Cache the queue off the UI thread via `DispatcherQueue.GetForCurrentThread()`. UWP's ASTA reentrancy protection is gone — watch for reentrancy in async code that pumps messages. See the official [threading guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/threading).
+<exited with exit code 0>
+
+=== TURN 9 ===
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Get-MigrationPattern.ps1\" -Anchor windowing","description":"Get windowing migration pattern","mode":"sync"}
+--- RESULT ---
+<a id="windowing"></a>
+## Windowing: Window.Current / ApplicationView / CoreWindow → AppWindow`Window.Current`, `ApplicationView`, and `CoreWindow` are gone. Track the main window yourself and use `Microsoft.UI.Windowing.AppWindow`. See the official [windowing guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/windowing).UWP (replace this):```csharp
+var win = Window.Current;
+ApplicationView.GetForCurrentView().TryResizeView(new Size(800, 600));
+```WinUI 3 — expose `MainWindow` from `App`:```csharp
+public partial class App : Application
+{
+    // With <Nullable>enable</Nullable>, declare as nullable since the assignment only happens during OnLaunched.
+    public static Window? MainWindow { get; private set; }    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    {
+        var window = new MainWindow();
+        MainWindow = window;
+        window.Activate();
+    }
+}
+```Consumers running after `OnLaunched` can safely null-forgive:```csharp
+var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow!);
+```Resize via `AppWindow`:```csharp
+var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+var appWindow = AppWindow.GetFromWindowId(windowId);
+appWindow.Resize(new SizeInt32(800, 600));
+```### Initialization order — keep MainWindow's constructor inert`App.MainWindow` (or any equivalent static window reference) is `null` for the entire duration of `new MainWindow()` — the right-hand side runs to completion BEFORE the assignment happens. Anything inside that constructor that reads the static — directly or transitively — sees `null` and throws `E_POINTER` (0x80004003) at startup. The build is clean; the analyzer is silent; only a runtime launch reveals it.APIs that commonly trip this race when called from a `Page` reached during `MainWindow` construction:- `WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow)`
+- `XamlRoot` / `Content.XamlRoot` access through a static-window helper
+- `PrintManagerInterop.GetForWindow(hwnd)` / `ShowPrintUIForWindowAsync(hwnd)`
+- `FileOpenPicker` / `FileSavePicker` / `FolderPicker` (require an HWND)
+- `ContentDialog.ShowAsync()` when the dialog's `XamlRoot` is sourced from a static
+- `AppWindow.GetFromWindowId(...)` chained through `App.MainWindow`
+- Any custom title bar / `SetTitleBar` helper that resolves the HWND staticallySafe pattern — assign before activate, defer first navigation:```csharp
+// App.xaml.cs
+protected override void OnLaunched(LaunchActivatedEventArgs args)
+{
+    var window = new MainWindow();
+    MainWindow = window;
+    window.Activate();
+}
+```
+
+The `MainWindow` constructor must do only `InitializeComponent` and inert setup — no navigation to a `Page` that reads `
+`App.MainWindow`. Defer the first navigation until after `Activate` completes, either from a `Loaded` handler hooked in `
+`InitializeComponent` or by exposing a `NavigateToInitialPage()` method and calling it from `App.OnLaunched` after the st
+tatic is assigned.
+
+```csharp
+// MainWindow.xaml.cs
+public MainWindow()
+{
+    InitializeComponent();
+    this.Activated += (_, _) =>
+    {
+        if (!_navigated)
+        {
+            _navigated = true;
+            RootFrame.Navigate(typeof(MainPage));
+        }
+    };
+}
+private bool _navigated;
+```
+
+Validator catches this race with a 10s smoke launch after the build healthcheck passes — see `Validate-UwpMigration.ps1`
+` Section 7.
+
+### AppWindow API replacements
+
+| UWP API | WinUI 3 API |
+|---------|-------------|
+| `ApplicationView.TryResizeView` | `AppWindow.Resize` |
+| `AppWindow.TryCreateAsync` | `AppWindow.Create` |
+| `AppWindow.TryShowAsync` | `AppWindow.Show` |
+| `AppWindow.TryConsolidateAsync` | `AppWindow.Destroy` |
+| `AppWindow.RequestMoveXxx` | `AppWindow.Move` |
+| `AppWindow.RequestPresentation` | `AppWindow.SetPresenter` |
+| `CoreApplicationViewTitleBar` | `AppWindowTitleBar` |
+| `CoreApplicationView.TitleBar.ExtendViewIntoTitleBar` | `AppWindow.TitleBar.ExtendsContentIntoTitleBar` |
+<exited with exit code 0>
+
+=== TURN 10 ===
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Get-MigrationPattern.ps1\" -Anchor getforcurrentview","description":"Get getforcurrentview migration pattern","mode":"sync"}
+--- RESULT ---
+<a id="getforcurrentview"></a>
+## GetForCurrentView() ReplacementsNone of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is no implicit per-view singleton.| UWP API | WinUI 3 Replacement |
+|---------|---------------------|
+| `ApplicationView.GetForCurrentView()` | `AppWindow.GetFromWindowId(windowId)` |
+| `UIViewSettings.GetForCurrentView()` | `AppWindow` properties (size, presenter) |
+| `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
+| `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
+| `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+<exited with exit code 0>
+
+=== TURN 11 ===
+Now let me read all the scenario files to understand the full context:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\Scenario1_DataEvents.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\Scenario2_ShakeEvents.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\Scenario3_Polling.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\Scenario4_OrientationChanged.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\Scenario5_DataEventsBatching.xaml.cs"}
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using Windows.Devices.Sensors;
+14. using Windows.UI.Core;
+15. using Microsoft.UI.Xaml;
+16. using Microsoft.UI.Xaml.Controls;
+17. using Microsoft.UI.Xaml.Navigation;
+18. 
+19. namespace SDKTemplate
+20. {
+21.     public sealed partial class Scenario1_DataEvents : Page
+22.     {
+23.         // A pointer back to the main page.  This is needed if you want to call methods in MainPage such
+24.         // as NotifyUser()
+25.         MainPage rootPage = MainPage.Current;
+26. 
+27.         private Accelerometer _accelerometer;
+28. 
+29.         public Scenario1_DataEvents()
+30.         {
+31.             this.InitializeComponent();
+32.         }
+33. 
+34.         protected override void OnNavigatedTo(NavigationEventArgs e)
+35.         {
+36.             _accelerometer = Accelerometer.GetDefault(rootPage.AccelerometerReadingType);
+37.             if (_accelerometer != null)
+38.             {
+39.                 rootPage.NotifyUser(rootPage.AccelerometerReadingType + " accelerometer ready", NotifyType.StatusMessage);
+40.                 ScenarioEnableButton.IsEnabled = true;
+41.             }
+42.             else
+43.             {
+44.                 rootPage.NotifyUser(rootPage.AccelerometerReadingType + " accelerometer not found", NotifyType.ErrorMessage);
+45.             }
+46.         }
+47. 
+48.         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+49.         {
+50.             if (ScenarioDisableButton.IsEnabled)
+51.             {
+52.                 ScenarioDisable();
+53.             }
+54.         }
+55. 
+56.         /// <summary>
+57.         /// This is the event handler for VisibilityChanged events. You would register for these notifications
+58.         /// if handling sensor data when the app is not visible could cause unintended actions in the app.
+59.         /// </summary>
+60.         /// <param name="sender"></param>
+61.         /// <param name="e">
+62.         /// Event data that can be examined for the current visibility state.
+63.         /// </param>
+64.         private void VisibilityChanged(object sender, VisibilityChangedEventArgs e)
+65.         {
+66.             if (ScenarioDisableButton.IsEnabled)
+67.             {
+68.                 if (e.Visible)
+69.                 {
+70.                     // Re-enable sensor input (no need to restore the desired reportInterval... it is restored for us upon app resume)
+71.                     _accelerometer.ReadingChanged += ReadingChanged;
+72.                 }
+73.                 else
+74.                 {
+75.                     // Disable sensor input (no need to restore the default reportInterval... resources will be released upon app suspension)
+76.                     _accelerometer.ReadingChanged -= ReadingChanged;
+77.                 }
+78.             }
+79.         }
+80. 
+81.         /// <summary>
+82.         /// This is the event handler for ReadingChanged events.
+83.         /// </summary>
+84.         /// <param name="sender"></param>
+85.         /// <param name="e"></param>
+86.         async private void ReadingChanged(object sender, AccelerometerReadingChangedEventArgs e)
+87.         {
+88.             // TODO[migrate-001]: see PATTERNS.md#threading
+89.             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+90.             {
+91.                 MainPage.SetReadingText(ScenarioOutput, e.Reading);
+92.             });
+93.         }
+94. 
+95.         /// <summary>
+96.         /// This is the click handler for the 'Enable' button.
+97.         /// </summary>
+98.         private void ScenarioEnable()
+99.         {
+100.             // Select a report interval that is both suitable for the purposes of the app and supported by the sensor.
+101.             _accelerometer.ReportInterval = Math.Max(_accelerometer.MinimumReportInterval, 16);
+102. 
+103.             // TODO[migrate-002]: see PATTERNS.md#windowing
+104.             Window.Current.VisibilityChanged += VisibilityChanged;
+105.             _accelerometer.ReadingChanged += ReadingChanged;
+106. 
+107.             ScenarioEnableButton.IsEnabled = false;
+108.             ScenarioDisableButton.IsEnabled = true;
+109.         }
+110. 
+111.         /// <summary>
+112.         /// This is the click handler for the 'Disable' button.
+113.         /// </summary>
+114.         private void ScenarioDisable()
+115.         {
+116.             // TODO[migrate-003]: see PATTERNS.md#windowing
+117.             Window.Current.VisibilityChanged -= VisibilityChanged;
+118.             _accelerometer.ReadingChanged -= ReadingChanged;
+119. 
+120.             // Restore the default report interval to release resources while the sensor is not in use
+121.             _accelerometer.ReportInterval = 0;
+122. 
+123.             ScenarioEnableButton.IsEnabled = true;
+124.             ScenarioDisableButton.IsEnabled = false;
+125.         }
+126.     }
+127. }
+128. 
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using Windows.Devices.Sensors;
+14. using Windows.UI.Core;
+15. using Microsoft.UI.Xaml;
+16. using Microsoft.UI.Xaml.Controls;
+17. using Microsoft.UI.Xaml.Navigation;
+18. 
+19. namespace SDKTemplate
+20. {
+21.     public sealed partial class Scenario3_Polling : Page
+22.     {
+23.         // A pointer back to the main page.  This is needed if you want to call methods in MainPage such
+24.         // as NotifyUser()
+25.         MainPage rootPage = MainPage.Current;
+26. 
+27.         private Accelerometer _accelerometer;
+28.         private uint _desiredReportInterval;
+29.         private DispatcherTimer _dispatcherTimer;
+30. 
+31.         public Scenario3_Polling()
+32.         {
+33.             this.InitializeComponent();
+34.         }
+35. 
+36.         protected override void OnNavigatedTo(NavigationEventArgs e)
+37.         {
+38.             _accelerometer = Accelerometer.GetDefault(rootPage.AccelerometerReadingType);
+39.             if (_accelerometer != null)
+40.             {
+41.                 // Select a report interval that is both suitable for the purposes of the app and supported by the sensor.
+42.                 // This value will be used later to activate the sensor.
+43.                 _desiredReportInterval = Math.Max(_accelerometer.MinimumReportInterval, 16);
+44. 
+45.                 // Set up a DispatchTimer
+46.                 _dispatcherTimer = new DispatcherTimer();
+47.                 _dispatcherTimer.Tick += DisplayCurrentReading;
+48.                 _dispatcherTimer.Interval = TimeSpan.FromMilliseconds(_desiredReportInterval);
+49. 
+50.                 rootPage.NotifyUser(rootPage.AccelerometerReadingType + " accelerometer ready", NotifyType.StatusMessage);
+51.                 ScenarioEnableButton.IsEnabled = true;
+52.             }
+53.             else
+54.             {
+55.                 rootPage.NotifyUser(rootPage.AccelerometerReadingType + " accelerometer not found", NotifyType.ErrorMessage);
+56.             }
+57.         }
+58. 
+59.         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+60.         {
+61.             if (ScenarioDisableButton.IsEnabled)
+62.             {
+63.                 ScenarioDisable();
+64.             }
+65.         }
+66. 
+67.         /// <summary>
+68.         /// This is the event handler for VisibilityChanged events. You would register for these notifications
+69.         /// if handling sensor data when the app is not visible could cause unintended actions in the app.
+70.         /// </summary>
+71.         /// <param name="sender"></param>
+72.         /// <param name="e">
+73.         /// Event data that can be examined for the current visibility state.
+74.         /// </param>
+75.         private void VisibilityChanged(object sender, VisibilityChangedEventArgs e)
+76.         {
+77.             if (ScenarioDisableButton.IsEnabled)
+78.             {
+79.                 if (e.Visible)
+80.                 {
+81.                     // Re-enable sensor input (no need to restore the desired reportInterval... it is restored for us upon app resume)
+82.                     _dispatcherTimer.Start();
+83.                 }
+84.                 else
+85.                 {
+86.                     // Disable sensor input (no need to restore the default reportInterval... resources will be released upon app suspension)
+87.                     _dispatcherTimer.Stop();
+88.                 }
+89.             }
+90.         }
+91. 
+92.         /// <summary>
+93.         /// This is the dispatcher callback.
+94.         /// </summary>
+95.         /// <param name="sender"></param>
+96.         /// <param name="args"></param>
+97.         private void DisplayCurrentReading(object sender, object args)
+98.         {
+99.             AccelerometerReading reading = _accelerometer.GetCurrentReading();
+100.             if (reading != null)
+101.             {
+102.                 MainPage.SetReadingText(ScenarioOutput, reading);
+103.             }
+104.         }
+105. 
+106.         /// <summary>
+107.         /// This is the click handler for the 'Enable' button.
+108.         /// </summary>
+109.         private void ScenarioEnable()
+110.         {
+111.             // Set the report interval to enable the sensor for polling
+112.             _accelerometer.ReportInterval = _desiredReportInterval;
+113. 
+114.             // TODO[migrate-007]: see PATTERNS.md#windowing
+115.             Window.Current.VisibilityChanged += VisibilityChanged;
+116.             _dispatcherTimer.Start();
+117. 
+118.             ScenarioEnableButton.IsEnabled = false;
+119.             ScenarioDisableButton.IsEnabled = true;
+120.         }
+121. 
+122.         /// <summary>
+123.         /// This is the click handler for the 'Disable' button.
+124.         /// </summary>
+125.         private void ScenarioDisable()
+126.         {
+127.             // TODO[migrate-008]: see PATTERNS.md#windowing
+128.             Window.Current.VisibilityChanged -= VisibilityChanged;
+129. 
+130.             // Stop the dispatcher
+131.             _dispatcherTimer.Stop();
+132. 
+133.             // Restore the default report interval to release resources while the sensor is not in use
+134.             _accelerometer.ReportInterval = 0;
+135. 
+136.             ScenarioEnableButton.IsEnabled = true;
+137.             ScenarioDisableButton.IsEnabled = false;
+138.         }
+139.     }
+140. }
+141. 
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using Windows.Devices.Sensors;
+14. using Windows.UI.Core;
+15. using Microsoft.UI.Xaml;
+16. using Microsoft.UI.Xaml.Controls;
+17. using Microsoft.UI.Xaml.Navigation;
+18. 
+19. namespace SDKTemplate
+20. {
+21.     public sealed partial class Scenario2_ShakeEvents : Page
+22.     {
+23.         private Accelerometer _accelerometer;
+24.         private ushort _shakeCount = 0;
+25. 
+26.         // A pointer back to the main page.  This is needed if you want to call methods in MainPage such
+27.         // as NotifyUser()
+28.         MainPage rootPage = MainPage.Current;
+29. 
+30.         public Scenario2_ShakeEvents()
+31.         {
+32.             this.InitializeComponent();
+33.         }
+34. 
+35.         protected override void OnNavigatedTo(NavigationEventArgs e)
+36.         {
+37.             _accelerometer = Accelerometer.GetDefault(rootPage.AccelerometerReadingType);
+38.             if (_accelerometer != null)
+39.             {
+40.                 rootPage.NotifyUser(rootPage.AccelerometerReadingType + " accelerometer ready", NotifyType.StatusMessage);
+41.                 ScenarioEnableButton.IsEnabled = true;
+42.             }
+43.             else
+44.             {
+45.                 rootPage.NotifyUser(rootPage.AccelerometerReadingType + " accelerometer not found", NotifyType.ErrorMessage);
+46.             }
+47.         }
+48. 
+49.         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+50.         {
+51.             if (ScenarioDisableButton.IsEnabled)
+52.             {
+53.                 ScenarioDisable();
+54.             }
+55.         }
+56. 
+57.         /// <summary>
+58.         /// This is the event handler for VisibilityChanged events. You would register for these notifications
+59.         /// if handling sensor data when the app is not visible could cause unintended actions in the app.
+60.         /// </summary>
+61.         /// <param name="sender"></param>
+62.         /// <param name="e">
+63.         /// Event data that can be examined for the current visibility state.
+64.         /// </param>
+65.         private void VisibilityChanged(object sender, VisibilityChangedEventArgs e)
+66.         {
+67.             if (ScenarioDisableButton.IsEnabled)
+68.             {
+69.                 if (e.Visible)
+70.                 {
+71.                     // Re-enable sensor input
+72.                     _accelerometer.Shaken += Shaken;
+73.                 }
+74.                 else
+75.                 {
+76.                     // Disable sensor input
+77.                     _accelerometer.Shaken -= Shaken;
+78.                 }
+79.             }
+80.         }
+81. 
+82.         /// <summary>
+83.         /// This is the event handler for Shaken events.
+84.         /// </summary>
+85.         /// <param name="sender"></param>
+86.         /// <param name="e"></param>
+87.         async private void Shaken(object sender, AccelerometerShakenEventArgs e)
+88.         {
+89.             // TODO[migrate-004]: see PATTERNS.md#threading
+90.             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+91.             {
+92.                 _shakeCount++;
+93.                 ScenarioOutputText.Text = _shakeCount.ToString();
+94.             });
+95.         }
+96. 
+97.         /// <summary>
+98.         /// This is the click handler for the 'Enable' button.
+99.         /// </summary>
+100.         private void ScenarioEnable()
+101.         {
+102.             // TODO[migrate-005]: see PATTERNS.md#windowing
+103.             Window.Current.VisibilityChanged += VisibilityChanged;
+104.             _accelerometer.Shaken += Shaken;
+105.             ScenarioEnableButton.IsEnabled = false;
+106.             ScenarioDisableButton.IsEnabled = true;
+107.         }
+108. 
+109.         /// <summary>
+110.         /// This is the click handler for the 'Disable' button.
+111.         /// </summary>
+112.         private void ScenarioDisable()
+113.         {
+114.             // TODO[migrate-006]: see PATTERNS.md#windowing
+115.             Window.Current.VisibilityChanged -= VisibilityChanged;
+116.             _accelerometer.Shaken -= Shaken;
+117.             ScenarioEnableButton.IsEnabled = true;
+118.             ScenarioDisableButton.IsEnabled = false;
+119.         }
+120.     }
+121. }
+122. 
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using Windows.Devices.Sensors;
+14. using Windows.Graphics.Display;
+15. using Windows.UI.Core;
+16. using Microsoft.UI.Xaml;
+17. using Microsoft.UI.Xaml.Controls;
+18. using Microsoft.UI.Xaml.Navigation;
+19. 
+20. namespace SDKTemplate
+21. {
+22.     /// <summary>
+23.     /// An empty page that can be used on its own or navigated to within a Frame.
+24.     /// </summary>
+25.     public sealed partial class Scenario4_OrientationChanged : Page
+26.     {
+27.         // A pointer back to the main page.  This is needed if you want to call methods in MainPage such
+28.         // as NotifyUser()
+29.         MainPage rootPage = MainPage.Current;
+30. 
+31.         Accelerometer accelerometerOriginal;
+32.         Accelerometer accelerometerReadingTransform;
+33.         DisplayInformation displayInformation;
+34. 
+35.         public Scenario4_OrientationChanged()
+36.         {
+37.             this.InitializeComponent();
+38.         }
+39. 
+40.         protected override void OnNavigatedTo(NavigationEventArgs e)
+41.         {
+42.             // Get two instances of the accelerometer:
+43.             // One that returns the raw accelerometer data
+44.             accelerometerOriginal = Accelerometer.GetDefault(rootPage.AccelerometerReadingType);
+45.             // Other on which the 'ReadingTransform' is updated so that data returned aligns with the request transformation.
+46.             accelerometerReadingTransform = Accelerometer.GetDefault(rootPage.AccelerometerReadingType);
+47. 
+48.             if (accelerometerOriginal == null || accelerometerReadingTransform == null)
+49.             {
+50.                 rootPage.NotifyUser(rootPage.AccelerometerReadingType + " accelerometer not found", NotifyType.ErrorMessage);
+51.             }
+52.             else
+53.             {
+54.                 rootPage.NotifyUser(rootPage.AccelerometerReadingType + " accelerometer ready", NotifyType.StatusMessage);
+55.                 ScenarioEnableButton.IsEnabled = true;
+56.             }
+57. 
+58.             // Register for orientation change
+59.             // TODO[migrate-009]: see PATTERNS.md#getforcurrentview
+60.             displayInformation = DisplayInformation.GetForCurrentView();
+61.             displayInformation.OrientationChanged += displayInformation_OrientationChanged;
+62.         }
+63. 
+64.         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+65.         {
+66.             if (ScenarioDisableButton.IsEnabled)
+67.             {
+68.                 ScenarioDisable();
+69.             }
+70. 
+71.             displayInformation.OrientationChanged -= displayInformation_OrientationChanged;
+72.         }
+73. 
+74. 
+75.         /// <summary>
+76.         /// Invoked when there is a change in the display orientation.
+77.         /// </summary>
+78.         /// <param name="sender">
+79.         /// DisplayInformation object from which the new Orientation can be determined
+80.         /// </param>
+81.         /// <param name="e"></param>
+82.         void displayInformation_OrientationChanged(DisplayInformation sender, object args)
+83.         {
+84.             if (null != accelerometerReadingTransform)
+85.             {
+86.                 accelerometerReadingTransform.ReadingTransform = sender.CurrentOrientation;
+87.             }
+88.         }
+89. 
+90.         /// <summary>
+91.         /// This is the click handler for the 'Enable' button.
+92.         /// </summary>
+93.         void ScenarioEnable()
+94.         {
+95.             // Establish the report interval
+96.             accelerometerOriginal.ReportInterval = accelerometerOriginal.MinimumReportInterval;
+97.             accelerometerReadingTransform.ReportInterval = accelerometerReadingTransform.MinimumReportInterval;
+98. 
+99.             // Establish the ReadingTransform to align with the current display orientation, so 
+100.             // that the accelerometer data from 'accelerometerReadingTransform' will align with the 
+101.             // current display orientation
+102.             accelerometerReadingTransform.ReadingTransform = displayInformation.CurrentOrientation;
+103. 
+104.             // TODO[migrate-010]: see PATTERNS.md#windowing
+105.             Window.Current.VisibilityChanged += Current_VisibilityChanged;
+106.             accelerometerOriginal.ReadingChanged += _accelerometerOriginal_ReadingChanged;
+107.             accelerometerReadingTransform.ReadingChanged += _accelerometerReadingTransform_ReadingChanged;
+108. 
+109.             ScenarioEnableButton.IsEnabled = false;
+110.             ScenarioDisableButton.IsEnabled = true;
+111.         }
+112. 
+113.         /// <summary>
+114.         /// This is the event handler for ReadingChanged event of the 'accelerometerOriginal' and should 
+115.         /// notify of the accelerometer reading changes.
+116.         /// </summary>
+117.         /// <param name="sender"></param>
+118.         /// <param name="args">
+119.         /// Event data represents the accelerometer reading in its original reference frame.
+120.         /// </param>
+121.         async void _accelerometerOriginal_ReadingChanged(Accelerometer sender, AccelerometerReadingChangedEventArgs args)
+122.         {
+123.             // TODO[migrate-011]: see PATTERNS.md#threading
+124.             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+125.             {
+126.                 MainPage.SetReadingText(ScenarioOutputOriginal, args.Reading);
+127.             });
+128.         }
+129.         
+130. 
+131.         /// <summary>
+132.         /// This is the event handler for ReadingChanged event of the 'accelerometerReadingTransform' and should 
+133.         /// notify of the accelerometer reading changes.
+134.         /// </summary>
+135.         /// <param name="sender"></param>
+136.         /// <param name="args">
+137.         /// Event data represents the accelerometer reading in its original reference frame.
+138.         /// </param>
+139.         async void _accelerometerReadingTransform_ReadingChanged(Accelerometer sender, AccelerometerReadingChangedEventArgs args)
+140.         {
+141.             // TODO[migrate-012]: see PATTERNS.md#threading
+142.             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+143.             {
+144.                 MainPage.SetReadingText(ScenarioOutputReadingTransform, args.Reading);
+145.             });
+146.         }
+147. 
+148.         /// <summary>
+149.         /// This is the event handler for VisibilityChanged events. You would register for these notifications
+150.         /// if handling sensor data when the app is not visible could cause unintended actions in the app.
+151.         /// </summary>
+152.         /// <param name="sender"></param>
+153.         /// <param name="e">
+154.         /// Event data that can be examined for the current visibility state.
+155.         /// </param>
+156.         void Current_VisibilityChanged(object sender, VisibilityChangedEventArgs e)
+157.         {
+158.             if (ScenarioDisableButton.IsEnabled)
+159.             {
+160.                 if (e.Visible)
+161.                 {
+162.                     // Re-enable sensor input (no need to restore the desired reportInterval... it is restored for us upon app resume)
+163.                     accelerometerOriginal.ReadingChanged += _accelerometerOriginal_ReadingChanged;
+164.                     accelerometerReadingTransform.ReadingChanged += _accelerometerReadingTransform_ReadingChanged;
+165.                 }
+166.                 else
+167.                 {
+168.                     // Disable sensor input (no need to restore the default reportInterval... resources will be released upon app suspension)
+169.                     accelerometerOriginal.ReadingChanged -= _accelerometerOriginal_ReadingChanged;
+170.                     accelerometerReadingTransform.ReadingChanged -= _accelerometerReadingTransform_ReadingChanged;
+171.                 }
+172.             }
+173.         }
+174. 
+175.         /// <summary>
+176.         /// This is the click handler for the 'Disable' button.
+177.         /// </summary>
+178.         void ScenarioDisable()
+179.         {
+180.             // TODO[migrate-013]: see PATTERNS.md#windowing
+181.             Window.Current.VisibilityChanged -= Current_VisibilityChanged;
+182.             accelerometerOriginal.ReadingChanged -= _accelerometerOriginal_ReadingChanged;
+183.             accelerometerReadingTransform.ReadingChanged -= _accelerometerReadingTransform_ReadingChanged;
+184. 
+185.             // Restore the default report interval to release resources while the sensor is not in use
+186.             accelerometerOriginal.ReportInterval = 0;
+187.             accelerometerReadingTransform.ReportInterval = 0;
+188. 
+189.             ScenarioEnableButton.IsEnabled = true;
+190.             ScenarioDisableButton.IsEnabled = false;
+191.         }
+192.     }
+193. }
+194. 
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using Windows.Devices.Sensors;
+14. using Windows.UI.Core;
+15. using Microsoft.UI.Xaml;
+16. using Microsoft.UI.Xaml.Controls;
+17. using Microsoft.UI.Xaml.Navigation;
+18. 
+19. namespace SDKTemplate
+20. {
+21.     public sealed partial class Scenario5_DataEventsBatching : Page
+22.     {
+23.         // A pointer back to the main page.  This is needed if you want to call methods in MainPage such
+24.         // as NotifyUser()
+25.         MainPage rootPage = MainPage.Current;
+26. 
+27.         private Accelerometer accelerometer;
+28.         private uint desiredReportInterval;
+29.         private uint desiredReportLatency;
+30. 
+31. 
+32.         public Scenario5_DataEventsBatching()
+33.         {
+34.             this.InitializeComponent();
+35.         }
+36. 
+37.         protected override void OnNavigatedTo(NavigationEventArgs e)
+38.         {
+39.             accelerometer = Accelerometer.GetDefault(rootPage.AccelerometerReadingType);
+40.             if (accelerometer != null)
+41.             {
+42.                 // Select a report interval that is both suitable for the purposes of the app and supported by the sensor.
+43.                 // This value will be used later to activate the sensor.
+44.                 desiredReportInterval = Math.Max(accelerometer.MinimumReportInterval, 16);
+45. 
+46.                 // MaxBatchSize will be 0 if the accelerometer does not support batching.
+47.                 uint maxLatency = accelerometer.MaxBatchSize * desiredReportInterval;
+48.                 desiredReportLatency = Math.Min(maxLatency, 10000);
+49. 
+50.                 rootPage.NotifyUser(rootPage.AccelerometerReadingType + " accelerometer ready", NotifyType.StatusMessage);
+51.                 ScenarioEnableButton.IsEnabled = true;
+52.             }
+53.             else
+54.             {
+55.                 rootPage.NotifyUser(rootPage.AccelerometerReadingType + " accelerometer not found", NotifyType.ErrorMessage);
+56.             }
+57.         }
+58. 
+59.         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+60.         {
+61.             if (ScenarioDisableButton.IsEnabled)
+62.             {
+63.                 ScenarioDisable();
+64.             }
+65.         }
+66. 
+67.         /// <summary>
+68.         /// This is the event handler for VisibilityChanged events. You would register for these notifications
+69.         /// if handling sensor data when the app is not visible could cause unintended actions in the app.
+70.         /// </summary>
+71.         /// <param name="sender"></param>
+72.         /// <param name="e">
+73.         /// Event data that can be examined for the current visibility state.
+74.         /// </param>
+75.         private void VisibilityChanged(object sender, VisibilityChangedEventArgs e)
+76.         {
+77.             if (ScenarioDisableButton.IsEnabled)
+78.             {
+79.                 if (e.Visible)
+80.                 {
+81.                     // Re-enable sensor input (no need to restore the desired reportInterval... it is restored for us upon app resume)
+82.                     accelerometer.ReadingChanged += ReadingChanged;
+83.                 }
+84.                 else
+85.                 {
+86.                     // Disable sensor input (no need to restore the default reportInterval... resources will be released upon app suspension)
+87.                     accelerometer.ReadingChanged -= ReadingChanged;
+88.                 }
+89.             }
+90.         }
+91. 
+92.         /// <summary>
+93.         /// This is the event handler for ReadingChanged events.
+94.         /// </summary>
+95.         /// <param name="sender"></param>
+96.         /// <param name="e"></param>
+97.         async private void ReadingChanged(object sender, AccelerometerReadingChangedEventArgs e)
+98.         {
+99.             // TODO[migrate-014]: see PATTERNS.md#threading
+100.             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+101.             {
+102.                 MainPage.SetReadingText(ScenarioOutput, e.Reading);
+103.             });
+104.         }
+105. 
+106.         /// <summary>
+107.         /// This is the click handler for the 'Enable' button.
+108.         /// </summary>
+109.         private void ScenarioEnable()
+110.         {
+111.             // Establish the report interval
+112.             accelerometer.ReportInterval = desiredReportInterval;
+113. 
+114.             // Establish the report latency. This is a no-op if the accelerometer does not support batching
+115.             accelerometer.ReportLatency = desiredReportLatency;
+116.             // TODO[migrate-015]: see PATTERNS.md#windowing
+117.             Window.Current.VisibilityChanged += VisibilityChanged;
+118.             accelerometer.ReadingChanged += ReadingChanged;
+119. 
+120.             ScenarioEnableButton.IsEnabled = false;
+121.             ScenarioDisableButton.IsEnabled = true;
+122.         }
+123. 
+124.         /// <summary>
+125.         /// This is the click handler for the 'Disable' button.
+126.         /// </summary>
+127.         private void ScenarioDisable()
+128.         {
+129.             // TODO[migrate-016]: see PATTERNS.md#windowing
+130.             Window.Current.VisibilityChanged -= VisibilityChanged;
+131.             accelerometer.ReadingChanged -= ReadingChanged;
+132. 
+133.             // Restore the default report interval to release resources while the sensor is not in use
+134.             accelerometer.ReportInterval = 0;
+135. 
+136.             ScenarioEnableButton.IsEnabled = true;
+137.             ScenarioDisableButton.IsEnabled = false;
+138.         }
+139.     }
+140. }
+141. 
+
+=== TURN 12 ===
+Let me check the unsupported API inventory and App.xaml.cs to plan remaining changes:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\.github\\skills\\winui-uwp-migration\\scripts\\unsupported-api-inventory.json"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\App.xaml.cs"}
+--- RESULT ---
+1. {
+2.   "_comment": "Used by Initialize-UwpMigration.ps1 to compute per-file Triage labels, inject inline TODO comments, and classify per-file BATCH vs SEQUENTIAL execution mode; used by Validate-UwpMigration.ps1's residue grep. Schema: 'unsupported' = no WinUI 3 desktop equivalent (any hit -> defer). 'adaptable' = API exists with different shape; each entry has 'anchor' (PATTERNS.md section ID for inline TODO routing) and 'tier' (safe | sensitive — sensitive marks the file SEQUENTIAL to slow down agent edits and dodge model-output content-filter density). 'sensitivePresence' = namespace-level patterns that ONLY mark the containing file SEQUENTIAL; they do NOT inject TODOs (avoids TODO-density explosion in media/sensor files where almost every line touches the family). 'residueOnly' = artifacts that should never appear post-bootstrap; checked by validator.",
+3.   "unsupported": [
+4.     { "pattern": "Windows\\.UI\\.Core\\.CoreWindow|\\bCoreWindow\\b",     "name": "CoreWindow",                            "reason": "No WinUI 3 desktop equivalent; use AppWindow + HWND APIs" },
+5.     { "pattern": "<InkCanvas\\b|new\\s+InkCanvas\\b|\\bInkCanvas\\b",     "name": "InkCanvas",                             "reason": "No WinUI 3 desktop equivalent" },
+6.     { "pattern": "Windows\\.Phone\\.",                                    "name": "Windows.Phone.*",                       "reason": "Phone-only API surface" },
+7.     { "pattern": "Windows\\.ApplicationModel\\.Calls\\.",                 "name": "Windows.ApplicationModel.Calls.*",      "reason": "Phone-only API surface" },
+8.     { "pattern": "Windows\\.Gaming\\.Input\\.",                           "name": "Windows.Gaming.Input.* (gamepad VK paths)", "reason": "Gamepad virtual-key paths not in WinAppSDK" },
+9.     { "pattern": "Windows\\.System\\.Profile\\.AnalyticsInfo",            "name": "AnalyticsInfo",                         "reason": "Device-family branching for Xbox/HoloLens has no desktop analog" },
+10.     { "pattern": "\\bRoamingSettings\\b|RoamingFolder",                   "name": "RoamingSettings / RoamingFolder",       "reason": "Roaming app data removed in WinAppSDK" },
+11.     { "pattern": "<CaptureElement\\b|\\bCaptureElement\\b",               "name": "<CaptureElement>",                      "reason": "No XAML preview element; preview via image streams from the media-capture family" }
+12.   ],
+13.   "adaptable": [
+14.     { "pattern": "Windows\\.UI\\.Popups\\.MessageDialog|\\bMessageDialog\\b",  "name": "MessageDialog",              "anchor": "dialogs",          "tier": "safe" },
+15.     { "pattern": "\\bCoreDispatcher\\b|Dispatcher\\.RunAsync",                 "name": "CoreDispatcher",             "anchor": "threading",        "tier": "safe" },
+16.     { "pattern": "\\bGetForCurrentView\\s*\\(",                                "name": "GetForCurrentView()",        "anchor": "getforcurrentview","tier": "safe" },
+17.     { "pattern": "<MediaElement\\b|\\bMediaElement\\b",                        "name": "MediaElement",               "anchor": "controls",         "tier": "safe" },
+18.     { "pattern": "\\bWindow\\.Current\\b",                                     "name": "Window.Current",             "anchor": "windowing",        "tier": "safe" },
+19.     { "pattern": "Windows\\.UI\\.ViewManagement\\.ApplicationView|\\bApplicationView\\b", "name": "ApplicationView", "anchor": "windowing",        "tier": "safe" },
+20.     { "pattern": "\\bIBackgroundTask\\b|BackgroundTaskBuilder",                "name": "IBackgroundTask",            "anchor": "background-tasks", "tier": "safe" },
+21.     { "pattern": "\\bWebAuthenticationBroker\\b",                              "name": "WebAuthenticationBroker",    "anchor": "controls",         "tier": "safe" },
+22.     { "pattern": "\\bToastNotificationManager\\b",                             "name": "ToastNotificationManager",   "anchor": "notifications",    "tier": "safe" },
+23.     { "pattern": "\\bPushNotificationChannelManager\\b",                       "name": "PushNotificationChannelManager", "anchor": "notifications","tier": "safe" },
+24.     { "pattern": "FileOpenPicker|FileSavePicker|FolderPicker",                 "name": "File/Folder Picker",         "anchor": "pickers",          "tier": "safe" }
+25.   ],
+26.   "sensitivePresence": [
+27.     { "pattern": "Windows\\.Media\\.Capture",       "name": "media-capture family",          "anchor": "capture" },
+28.     { "pattern": "Windows\\.Media\\.SpeechRecognition", "name": "speech-recognition family", "anchor": "speech" },
+29.     { "pattern": "Windows\\.Media\\.SpeechSynthesis",   "name": "speech-synthesis family",   "anchor": "speech" },
+30.     { "pattern": "Windows\\.Media\\.Audio",         "name": "audio family",                  "anchor": "audio" },
+31.     { "pattern": "Windows\\.Devices\\.Sensors",     "name": "sensors family",                "anchor": "sensors" },
+32.     { "pattern": "Windows\\.Devices\\.Geolocation", "name": "geolocation family",            "anchor": "sensors" },
+33.     { "pattern": "Windows\\.Devices\\.Bluetooth",   "name": "bluetooth family",              "anchor": "sensors" },
+34.     { "pattern": "Windows\\.Devices\\.PointOfService", "name": "point-of-service family",    "anchor": "sensors" },
+35.     { "pattern": "Windows\\.Networking\\.Proximity","name": "proximity family",              "anchor": "sensors" }
+36.   ],
+37.   "residueOnly": [
+38.     { "pattern": "using\\s+Windows\\.UI\\.Xaml",                               "name": "using Windows.UI.Xaml",      "reason": "Should have been rewritten by Initialize-UwpMigration.ps1" },
+39.     { "pattern": "Windows\\.UI\\.Xaml\\.(Controls|Data|Documents|Input|Markup|Media|Navigation|Shapes|Automation|Hosting)", "name": "Windows.UI.Xaml.* (fully-qualified)", "reason": "Should have been rewritten by Initialize-UwpMigration.ps1" },
+40.     { "pattern": "xmlns:[a-zA-Z]+=\"using:Windows\\.UI\\.Xaml",                "name": "xmlns: using:Windows.UI.Xaml",   "reason": "XAML xmlns clause should have been rewritten" },
+41.     { "pattern": "Microsoft\\.NETCore\\.UniversalWindowsPlatform",             "name": "Microsoft.NETCore.UniversalWindowsPlatform PackageReference", "reason": "UWP-only NuGet — drop and use Microsoft.WindowsAppSDK" },
+42.     { "pattern": "<TargetPlatformIdentifier>\\s*UAP",                          "name": "<TargetPlatformIdentifier>UAP", "reason": "UWP csproj marker — should not appear in WinAppSDK project" },
+43.     { "pattern": "<OutputType>\\s*AppContainerExe",                            "name": "<OutputType>AppContainerExe",   "reason": "UWP csproj marker — should not appear in WinAppSDK project" }
+44.   ]
+45. }
+46. 
+--- RESULT ---
+1. ﻿using Windows.ApplicationModel;
+2. using Windows.ApplicationModel.Activation;
+3. using Windows.Foundation;
+4. using Windows.Foundation.Collections;
+5. using Microsoft.UI.Xaml;
+6. using Microsoft.UI.Xaml.Controls;
+7. using Microsoft.UI.Xaml.Controls.Primitives;
+8. using Microsoft.UI.Xaml.Data;
+9. using Microsoft.UI.Xaml.Input;
+10. using Microsoft.UI.Xaml.Media;
+11. using Microsoft.UI.Xaml.Navigation;
+12. using Microsoft.UI.Xaml.Shapes;
+13. 
+14. // To learn more about WinUI, the WinUI project structure,
+15. // and more about our project templates, see: http://aka.ms/winui-project-info.
+16. 
+17. namespace Accelerometer;
+18. 
+19. /// <summary>
+20. /// Provides application-specific behavior to supplement the default Application class.
+21. /// </summary>
+22. public partial class App : Application
+23. {
+24.     private Window? _window;
+25.     
+26.     /// <summary>
+27.     /// Initializes the singleton application object.  This is the first line of authored code
+28.     /// executed, and as such is the logical equivalent of main() or WinMain().
+29.     /// </summary>
+30.     public App()
+31.     {
+32.         InitializeComponent();
+33.     }
+34. 
+35.     /// <summary>
+36.     /// Invoked when the application is launched.
+37.     /// </summary>
+38.     /// <param name="args">Details about the launch request and process.</param>
+39.     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+40.     {
+41.         _window = new MainWindow();
+42.         _window.Activate();
+43.     }
+44. }
+45. 
+
+=== TURN 13 ===
+Let me look at the key remaining files — MainPage and the project structure:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\MainPage.xaml.cs"}
+--- RESULT ---
+.bootstrap-meta.json
+.git
+.github
+.gitignore
+.uwp-source
+AGENTS.md
+Accelerometer.csproj
+App.xaml
+App.xaml.cs
+Assets
+MIGRATION-DEFERRED.md
+MIGRATION-MAPPING.md
+MainPage.xaml
+MainPage.xaml.cs
+MainWindow.xaml
+MainWindow.xaml.cs
+Package.appxmanifest
+Properties
+SampleConfiguration.cs
+Scenario0_Choose.xaml.cs
+Scenario1_DataEvents.xaml.cs
+Scenario2_ShakeEvents.xaml.cs
+Scenario3_Polling.xaml.cs
+Scenario4_OrientationChanged.xaml.cs
+Scenario5_DataEventsBatching.xaml.cs
+app.manifest
+bin
+nuget.config
+obj
+--- RESULT ---
+1. using Microsoft.UI.Xaml.Controls;
+2. 
+3. // To learn more about WinUI, the WinUI project structure,
+4. // and more about our project templates, see: http://aka.ms/winui-project-info.
+5. 
+6. namespace Accelerometer;
+7. 
+8. /// <summary>
+9. /// The main content page displayed inside the application window.
+10. /// Add your UI logic, event handlers, and data binding here.
+11. /// </summary>
+12. public sealed partial class MainPage : Page
+13. {
+14.     public MainPage()
+15.     {
+16.         InitializeComponent();
+17. 
+18.         // TODO: Add your initialization logic here.
+19.     }
+20. }
+21. 
+
+=== TURN 14 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Accelerometer\\cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\MainWindow.xaml.cs"}
+--- RESULT ---
+1. using Microsoft.UI.Xaml;
+2. 
+3. // To learn more about WinUI, the WinUI project structure,
+4. // and more about our project templates, see: http://aka.ms/winui-project-info.
+5. 
+6. namespace Accelerometer;
+7. 
+8. /// <summary>
+9. /// The application window. This hosts a Frame that displays pages. Add your
+10. /// UI and logic to MainPage.xaml / MainPage.xaml.cs instead of here so you
+11. /// can use Page features such as navigation events and the Loaded lifecycle.
+12. /// </summary>
+13. public sealed partial class MainWindow : Window
+14. {
+15.     public MainWindow()
+16.     {
+17.         InitializeComponent();
+18. 
+19.         ExtendsContentIntoTitleBar = true;
+20.         SetTitleBar(AppTitleBar);
+21. 
+22.         AppWindow.SetIcon("Assets/AppIcon.ico");
+23. 
+24.         // Navigate the root frame to the main page on startup.
+25.         RootFrame.Navigate(typeof(MainPage));
+26.     }
+27. }
+28. 
+--- RESULT ---
+Accelerometer.csproj
+Accelerometer.sln
+AppPackages
+Package.appxmanifest
+SampleConfiguration.cs
+Scenario0_Choose.xaml.cs
+Scenario1_DataEvents.xaml.cs
+Scenario2_ShakeEvents.xaml.cs
+Scenario3_Polling.xaml.cs
+Scenario4_OrientationChanged.xaml.cs
+Scenario5_DataEventsBatching.xaml.cs
+bin
+obj
+
+=== TURN 15 ===
+Let me look at the SharedContent folder for the UWP MainPage and SampleConfiguration:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\SampleConfiguration.cs"}
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using System.Collections.Generic;
+14. using Windows.Devices.Sensors;
+15. using Microsoft.UI.Xaml.Controls;
+16. 
+17. namespace SDKTemplate
+18. {
+19.     public partial class MainPage : Page
+20.     {
+21.         public const string FEATURE_NAME = "Accelerometer C# Sample";
+22. 
+23.         List<Scenario> scenarios = new List<Scenario>
+24.         {
+25.             new Scenario() { Title = "Choose accelerometer", ClassType = typeof(Scenario0_Choose) },
+26.             new Scenario() { Title = "Data events", ClassType = typeof(Scenario1_DataEvents) },
+27.             new Scenario() { Title = "Shake events", ClassType = typeof(Scenario2_ShakeEvents) },
+28.             new Scenario() { Title = "Polling", ClassType = typeof(Scenario3_Polling) },
+29.             new Scenario() { Title = "Orientation change", ClassType = typeof(Scenario4_OrientationChanged) },
+30.             new Scenario() { Title = "Data events batching", ClassType = typeof(Scenario5_DataEventsBatching)}
+31.         };
+32. 
+33.         public static void SetReadingText(TextBlock textBlock, AccelerometerReading reading)
+34.         {
+35.             textBlock.Text = string.Format("X: {0,5:0.00}, Y: {1,5:0.00}, Z: {2,5:0.00}",
+36.                 reading.AccelerationX, reading.AccelerationY, reading.AccelerationZ);
+37.         }
+38. 
+39.         public AccelerometerReadingType AccelerometerReadingType { get; set; } = AccelerometerReadingType.Standard;
+40.     }
+41. 
+42.     public class Scenario
+43.     {
+44.         public string Title { get; set; }
+45.         public Type ClassType { get; set; }
+46.     }
+47. }
+48. 
+--- RESULT ---
+Templates
+cpp
+cppwinrt
+cs
+media
+vb
+xaml
+
+=== TURN 16 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\cs"}
+--- RESULT ---
+App.xaml.cs
+AssemblyInfo.cs
+Default.rd.xml
+DeviceHelpers.cs
+DispatcherTaskExtensions.cs
+FrameRenderer.cs
+Library.rd.xml
+Logging
+MainPage.xaml
+MainPage.xaml.cs
+
+=== TURN 17 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\cs\\MainPage.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\cs\\MainPage.xaml"}
+--- RESULT ---
+1. ﻿<!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the MIT License (MIT).
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Page
+14.     x:Class="SDKTemplate.MainPage"
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+17.     xmlns:local="using:SDKTemplate"
+18.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+19.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+20.     mc:Ignorable="d">
+21. 
+22.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+23.         <Grid.RowDefinitions>
+24.             <RowDefinition Height="Auto"/>
+25.             <RowDefinition Height="*"/>
+26.         </Grid.RowDefinitions>
+27.         <SplitView x:Name="Splitter" IsPaneOpen="True" Grid.Row="1" DisplayMode="Inline">
+28.             <SplitView.Pane>
+29.                 <RelativePanel Margin="10,0,0,0">
+30.                     <TextBlock x:Name="SampleTitle" Text="Sample Title Here" Style="{StaticResource SampleHeaderTextStyle}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+31.                     <!-- Provide an AutomationProperties.Name for a list to a screen reader. A shipping app would localize this. -->
+32.                     <ListBox x:Name="ScenarioControl" SelectionChanged="ScenarioControl_SelectionChanged" AutomationProperties.Name="Scenarios"
+33.                  SelectionMode="Single" HorizontalAlignment="Left" Background="Transparent" BorderThickness="0"
+34.                  VerticalAlignment="Top" RelativePanel.Below="SampleTitle" Margin="0,10,0,0" RelativePanel.Above="FooterPanel">
+35.                         <ListBox.ItemTemplate>
+36.                             <DataTemplate x:DataType="local:Scenario">
+37.                                 <TextBlock Text="{x:Bind Title}"/>
+38.                             </DataTemplate>
+39.                         </ListBox.ItemTemplate>
+40.                     </ListBox>
+41.                     <StackPanel x:Name="FooterPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True">
+42.                         <Image Source="Assets/microsoft-sdk.png" AutomationProperties.Name="Microsoft Logo" Stretch="None" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+43.                         <TextBlock x:Name="Copyright" Text="&#xA9; Microsoft Corporation. All rights reserved." Style="{StaticResource CopyrightTextStyle}"
+44.                                    RelativePanel.Above="LinksPanel" Margin="10,10,0,0"
+45.                                    TextWrapping="Wrap"/>
+46.                         <StackPanel x:Name="LinksPanel" Orientation="Horizontal" Margin="10,10,0,10">
+47.                             <HyperlinkButton Content="Trademarks" Tag="http://go.microsoft.com/fwlink/?LinkID=623755"
+48.                         Click="Footer_Click" FontSize="12" Style="{StaticResource HyperlinkStyle}" />
+49.                             <TextBlock Text="|"  Style="{StaticResource SeparatorStyle}" VerticalAlignment="Center" />
+50.                             <HyperlinkButton x:Name="PrivacyLink" Content="Privacy" Tag="http://privacy.microsoft.com" Click="Footer_Click" FontSize="12" Style="{StaticResource HyperlinkStyle}"/>
+51.                         </StackPanel>
+52.                     </StackPanel>
+53.                 </RelativePanel>
+54.             </SplitView.Pane>
+55.             <RelativePanel>
+56.                 <Frame x:Name="ScenarioFrame" Margin="5" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True"/>
+57.                 <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
+58.                     <TextBlock x:Name="StatusLabel" Margin="10,0,0,10" TextWrapping="Wrap" Text="Status:" />
+59.                     <Border x:Name="StatusBorder" Margin="0,0,0,0">
+60.                         <ScrollViewer VerticalScrollMode="Auto"  VerticalScrollBarVisibility="Auto" MaxHeight="200">
+61.                             <!-- Use LiveSetting to enable screen readers to announce the status update. -->
+62.                             <TextBlock x:Name="StatusBlock" FontWeight="Bold" AutomationProperties.LiveSetting="Assertive"
+63.                                    MaxWidth="{Binding ElementName=Splitter, Path=ActualWidth}" Margin="10,10,10,20" TextWrapping="Wrap"  />
+64.                         </ScrollViewer>
+65.                     </Border>
+66.                 </StackPanel>
+67.             </RelativePanel>
+68.         </SplitView>
+69.         <StackPanel x:Name="HeaderPanel" Orientation="Horizontal">
+70.             <Border Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" Grid.Row="0">
+71.                 <ToggleButton Style="{StaticResource SymbolButton}" Click="Button_Click" VerticalAlignment="Top" Foreground="{ThemeResource ApplicationForegroundThemeBrush}">
+72.                     <ToggleButton.Content>
+73.                         <FontIcon x:Name="Hamburger" FontFamily="Segoe MDL2 Assets" Glyph="&#xE700;" Margin="0,10,0,0"/>
+74.                     </ToggleButton.Content>
+75.                 </ToggleButton>
+76.             </Border>
+77.             <!-- Use AutomationProperties.AccessibilityView to let a screen reader know that the image is purely decorative.
+78.                  (If the Image conveyed useful information we'd not use AccessibilityView, but instead provide a localized 
+79.                  name for the Image to convey its purpose.) -->
+80.             <Image x:Name="WindowsLogo" Stretch="None" Source="Assets/windows-sdk.png" Margin="0,15,0,0" AutomationProperties.AccessibilityView="Raw" />
+81.             <TextBlock x:Name="Header" Text="Universal Windows Platform sample" Style="{StaticResource TagLineTextStyle}" Margin="0,15,0,0" />
+82.         </StackPanel>
+83.     </Grid>
+84. </Page>
+85. 
+--- RESULT ---
+1. ﻿//*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using System.Collections.Generic;
+14. using Windows.UI.Core;
+15. using Windows.UI.Xaml;
+16. using Windows.UI.Xaml.Automation.Peers;
+17. using Windows.UI.Xaml.Controls;
+18. using Windows.UI.Xaml.Data;
+19. using Windows.UI.Xaml.Media;
+20. using Windows.UI.Xaml.Navigation;
+21. 
+22. // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
+23. 
+24. namespace SDKTemplate
+25. {
+26.     /// <summary>
+27.     /// An empty page that can be used on its own or navigated to within a Frame.
+28.     /// </summary>
+29.     public sealed partial class MainPage : Page
+30.     {
+31.         public static MainPage Current;
+32. 
+33.         public MainPage()
+34.         {
+35.             this.InitializeComponent();
+36. 
+37.             // This is a static public property that allows downstream pages to get a handle to the MainPage instance
+38.             // in order to call methods that are in this class.
+39.             Current = this;
+40.             SampleTitle.Text = FEATURE_NAME;
+41.         }
+42. 
+43.         protected override void OnNavigatedTo(NavigationEventArgs e)
+44.         {
+45.             // Populate the scenario list from the SampleConfiguration.cs file
+46.             var itemCollection = new List<Scenario>();
+47.             int i = 1;
+48.             foreach (Scenario s in scenarios)
+49.             {
+50.                 itemCollection.Add(new Scenario { Title = $"{i++}) {s.Title}", ClassType = s.ClassType });
+51.             }
+52.             ScenarioControl.ItemsSource = itemCollection;
+53. 
+54.             if (Window.Current.Bounds.Width < 640)
+55.             {
+56.                 ScenarioControl.SelectedIndex = -1;
+57.             }
+58.             else
+59.             {
+60.                 ScenarioControl.SelectedIndex = 0;
+61.             }
+62.         }
+63. 
+64.         /// <summary>
+65.         /// Called whenever the user changes selection in the scenarios list.  This method will navigate to the respective
+66.         /// sample scenario page.
+67.         /// </summary>
+68.         /// <param name="sender"></param>
+69.         /// <param name="e"></param>
+70.         private void ScenarioControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+71.         {
+72.             // Clear the status block when navigating scenarios.
+73.             NotifyUser(String.Empty, NotifyType.StatusMessage);
+74. 
+75.             ListBox scenarioListBox = sender as ListBox;
+76.             Scenario s = scenarioListBox.SelectedItem as Scenario;
+77.             if (s != null)
+78.             {
+79.                 ScenarioFrame.Navigate(s.ClassType);
+80.                 if (Window.Current.Bounds.Width < 640)
+81.                 {
+82.                     Splitter.IsPaneOpen = false;
+83.                 }
+84.             }
+85.         }
+86. 
+87.         public List<Scenario> Scenarios
+88.         {
+89.             get { return this.scenarios; }
+90.         }
+91. 
+92.         /// <summary>
+93.         /// Display a message to the user.
+94.         /// This method may be called from any thread.
+95.         /// </summary>
+96.         /// <param name="strMessage"></param>
+97.         /// <param name="type"></param>
+98.         public void NotifyUser(string strMessage, NotifyType type)
+99.         {
+100.             // If called from the UI thread, then update immediately.
+101.             // Otherwise, schedule a task on the UI thread to perform the update.
+102.             if (Dispatcher.HasThreadAccess)
+103.             {
+104.                 UpdateStatus(strMessage, type);
+105.             }
+106.             else
+107.             {
+108.                 var task = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => UpdateStatus(strMessage, type));
+109.             }
+110.         }
+111. 
+112.         private void UpdateStatus(string strMessage, NotifyType type)
+113.         {
+114.             switch (type)
+115.             {
+116.                 case NotifyType.StatusMessage:
+117.                     StatusBorder.Background = new SolidColorBrush(Windows.UI.Colors.Green);
+118.                     break;
+119.                 case NotifyType.ErrorMessage:
+120.                     StatusBorder.Background = new SolidColorBrush(Windows.UI.Colors.Red);
+121.                     break;
+122.             }
+123. 
+124.             StatusBlock.Text = strMessage;
+125. 
+126.             // Collapse the StatusBlock if it has no text to conserve real estate.
+127.             StatusBorder.Visibility = (StatusBlock.Text != String.Empty) ? Visibility.Visible : Visibility.Collapsed;
+128.             if (StatusBlock.Text != String.Empty)
+129.             {
+130.                 StatusBorder.Visibility = Visibility.Visible;
+131.                 StatusPanel.Visibility = Visibility.Visible;
+132.             }
+133.             else
+134.             {
+135.                 StatusBorder.Visibility = Visibility.Collapsed;
+136.                 StatusPanel.Visibility = Visibility.Collapsed;
+137.             }
+138. 
+139. 			// Raise an event if necessary to enable a screen reader to announce the status update.
+140. 			var peer = FrameworkElementAutomationPeer.FromElement(StatusBlock);
+141. 			if (peer != null)
+142. 			{
+143. 				peer.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
+144. 			}
+145. 		}
+146. 
+147.         async void Footer_Click(object sender, RoutedEventArgs e)
+148.         {
+149.             await Windows.System.Launcher.LaunchUriAsync(new Uri(((HyperlinkButton)sender).Tag.ToString()));
+150.         }
+151. 
+152.         private void Button_Click(object sender, RoutedEventArgs e)
+153.         {
+154.             Splitter.IsPaneOpen = !Splitter.IsPaneOpen;
+155.         }
+156.     }
+157.     public enum NotifyType
+158.     {
+159.         StatusMessage,
+160.         ErrorMessage
+161.     };
+162. }
+163. 
+
+=== TURN 18 ===
+Let me look at more key files:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\App.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\MainWindow.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\MainPage.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\Scenario0_Choose.xaml.cs"}
+--- RESULT ---
+1. <?xml version="1.0" encoding="utf-8"?>
+2. <Application
+3.     x:Class="Accelerometer.App"
+4.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+5.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+6.     xmlns:local="using:Accelerometer">
+7.     <Application.Resources>
+8.         <ResourceDictionary>
+9.             <ResourceDictionary.MergedDictionaries>
+10.                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+11.                 <!-- Other merged dictionaries here -->
+12.             </ResourceDictionary.MergedDictionaries>
+13.             <!-- Other app resources here -->
+14.         </ResourceDictionary>
+15.     </Application.Resources>
+16. </Application>
+17. 
+--- RESULT ---
+1. <?xml version="1.0" encoding="utf-8" ?>
+2. <Window
+3.     x:Class="Accelerometer.MainWindow"
+4.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+5.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+6.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+7.     xmlns:local="using:Accelerometer"
+8.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+9.     Title="Accelerometer"
+10.     mc:Ignorable="d">
+11.     <Window.SystemBackdrop>
+12.         <MicaBackdrop />
+13.     </Window.SystemBackdrop>
+14. 
+15.     <Grid>
+16.         <Grid.RowDefinitions>
+17.             <RowDefinition Height="Auto" />
+18.             <RowDefinition Height="*" />
+19.         </Grid.RowDefinitions>
+20. 
+21.         <TitleBar x:Name="AppTitleBar" Title="Accelerometer">
+22.             <TitleBar.IconSource>
+23.                 <ImageIconSource ImageSource="Assets/AppIcon.ico" />
+24.             </TitleBar.IconSource>
+25.         </TitleBar>
+26. 
+27.         <!--
+28.             The Frame hosts pages for your application content. Add your UI to
+29.             MainPage.xaml rather than here so you can use Page features such as
+30.             navigation events and the Loaded lifecycle.
+31.         -->
+32.         <Frame x:Name="RootFrame" Grid.Row="1" />
+33.     </Grid>
+34. </Window>
+35. 
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using System.Collections.Generic;
+14. using System.Threading.Tasks;
+15. using Windows.Devices.Sensors;
+16. using Windows.Foundation;
+17. using Windows.UI.Core;
+18. using Microsoft.UI.Xaml;
+19. using Microsoft.UI.Xaml.Controls;
+20. using Microsoft.UI.Xaml.Navigation;
+21. 
+22. namespace SDKTemplate
+23. {
+24.     public sealed partial class Scenario0_Choose : Page
+25.     {
+26.         MainPage rootPage = MainPage.Current;
+27. 
+28.         public Scenario0_Choose()
+29.         {
+30.             this.InitializeComponent();
+31.             var readingTypes = new List<AccelerometerReadingType>()
+32.             {
+33.                 AccelerometerReadingType.Standard,
+34.                 AccelerometerReadingType.Linear,
+35.                 AccelerometerReadingType.Gravity,
+36.             };
+37.             ReadingTypeComboBox.ItemsSource = readingTypes;
+38.             ReadingTypeComboBox.SelectedIndex = readingTypes.IndexOf(rootPage.AccelerometerReadingType);
+39.         }
+40. 
+41.         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+42.         {
+43.             rootPage.AccelerometerReadingType = (AccelerometerReadingType)ReadingTypeComboBox.SelectedValue;
+44.         }
+45.     }
+46. }
+47. 
+--- RESULT ---
+1. <?xml version="1.0" encoding="utf-8" ?>
+2. <Page
+3.     x:Class="Accelerometer.MainPage"
+4.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+5.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+6.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+7.     xmlns:local="using:Accelerometer"
+8.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+9.     mc:Ignorable="d">
+10. 
+11.     <!--
+12.         This is the main content area of your application.
+13.         Add your UI elements here — for example, controls, layouts, and data-bound views.
+14.         Use 'dotnet new winui-page' to create additional pages and navigate to them via
+15.         the Frame in MainWindow (RootFrame).
+16.     -->
+17.     <Grid />
+18. </Page>
+19. 
+
+=== TURN 19 ===
+Let me check XAML files for scenarios and SharedContent XAML resources:
+
+--- TOOL: glob ---
+{"paths":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app","pattern":"**/*.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\xaml"}
+--- RESULT ---
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MainPage.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\MainWindow.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run1\000_Accelerometer\app\App.xaml
+--- RESULT ---
+App.xaml
+MainPage.xaml
+Styles.xaml
+
+=== TURN 20 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\xaml\\App.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\xaml\\Styles.xaml"}
+--- RESULT ---
+File too large to read at once (38.6 KB). Consider using the grep tool to search within the file, or view with view_range to read specific sections.
+--- RESULT ---
+1. ﻿<!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the MIT License (MIT).
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Application
+14.     x:Class="SDKTemplate.App"
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+17.     xmlns:local="using:SDKTemplate"
+18.     RequestedTheme="Dark">
+19. 
+20.     <Application.Resources>
+21.         <!-- Application-specific resources -->
+22.         <ResourceDictionary>
+23.             <ResourceDictionary.MergedDictionaries>
+24. 
+25.                 <!-- 
+26.                     Styles that define common aspects of the platform look and feel
+27.                     Required by Visual Studio project and item templates
+28.                  -->
+29.                 <ResourceDictionary Source="/Styles/Styles.xaml"/>
+30.             </ResourceDictionary.MergedDictionaries>
+31.         </ResourceDictionary>
+32.     </Application.Resources>
+33. 
+34. </Application>
+35. 
+
+=== TURN 21 ===
+
+--- TOOL: glob ---
+{"paths":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Accelerometer","pattern":"**/*.xaml"}
+--- RESULT ---
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\shared\Scenario5_DataEventsBatching.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\shared\Scenario4_OrientationChanged.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\shared\Scenario3_Polling.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\shared\Scenario2_ShakeEvents.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\shared\Scenario1_DataEvents.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\shared\Scenario0_Choose.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Debug\Scenario0_Choose.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Debug\MainPage.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Debug\Scenario3_Polling.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Debug\Scenario2_ShakeEvents.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Debug\Scenario1_DataEvents.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Debug\Scenario4_OrientationChanged.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Debug\Scenario5_DataEventsBatching.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Release\Styles\Styles.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Release\Scenario5_DataEventsBatching.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Release\Scenario4_OrientationChanged.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Release\Scenario3_Polling.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Release\Scenario2_ShakeEvents.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Release\Scenario1_DataEvents.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Release\Scenario0_Choose.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Release\MainPage.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Debug\Styles\Styles.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Debug\App.xaml
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\Accelerometer\cs\obj\x64\Release\App.xaml
+
+=== TURN 22 ===
+The XAML files are in the `shared` folder. Let me read all of them:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Accelerometer\\shared\\Scenario0_Choose.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Accelerometer\\shared\\Scenario1_DataEvents.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Accelerometer\\shared\\Scenario2_ShakeEvents.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Accelerometer\\shared\\Scenario3_Polling.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Accelerometer\\shared\\Scenario4_OrientationChanged.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Accelerometer\\shared\\Scenario5_DataEventsBatching.xaml"}
+--- RESULT ---
+1. ﻿<!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the MIT License (MIT).
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Page
+14.     x:Class="SDKTemplate.Scenario2_ShakeEvents"
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+17.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+18.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+19.     mc:Ignorable="d">
+20. 
+21.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="12,10,12,12">
+22.         <StackPanel>
+23.             <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
+24.             <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text="Shake events"/>
+25.             <TextBlock TextWrapping="Wrap">
+26.                 Registers an event listener for accelerometer shake events and displays the cumulative count of shake events.
+27.                 Note that not all accelerometers report shake events.
+28.             </TextBlock>
+29.             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+30.                 <Button x:Name="ScenarioEnableButton" Content="Enable" Margin="0,0,10,0" Click="{x:Bind ScenarioEnable}" IsEnabled="False"/>
+31.                 <Button x:Name="ScenarioDisableButton" Content="Disable" Margin="0,0,10,0" Click="{x:Bind ScenarioDisable}" IsEnabled="False"/>
+32.             </StackPanel>
+33.             <TextBlock Margin="0,10,0,0">Shake count: <Run x:Name="ScenarioOutputText" Text="0"/></TextBlock>
+34.         </StackPanel>
+35.     </Grid>
+36. </Page>
+37. 
+--- RESULT ---
+1. ﻿<!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the MIT License (MIT).
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Page 
+14.     x:Class="SDKTemplate.Scenario1_DataEvents" 
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+17.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+18.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+19.     mc:Ignorable="d">
+20.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="12,10,12,12">
+21.         <StackPanel>
+22.             <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
+23.             <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text="Data events"/>
+24.             <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" Text="Registers an event listener for accelerometer data and displays the X, Y and Z acceleration values as they are reported."/>
+25.             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+26.                 <Button x:Name="ScenarioEnableButton" Content="Enable" Margin="0,0,10,0" Click="{x:Bind ScenarioEnable}" IsEnabled="False"/>
+27.                 <Button x:Name="ScenarioDisableButton" Content="Disable" Margin="0,0,10,0" Click="{x:Bind ScenarioDisable}" IsEnabled="False"/>
+28.             </StackPanel>
+29.             <TextBlock x:Name="ScenarioOutput" TextWrapping="Wrap" Margin="0,10,0,0">No data</TextBlock>
+30.         </StackPanel>
+31.     </Grid>
+32. </Page>
+--- RESULT ---
+1. ﻿<!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the MIT License (MIT).
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Page 
+14.     x:Class="SDKTemplate.Scenario0_Choose" 
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+17.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+18.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+19.     mc:Ignorable="d">
+20.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="12,10,12,12">
+21.         <StackPanel>
+22.             <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
+23.             <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text="Choose accelerometer"/>
+24.             <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">Choose the accelerometer to be used by the other scenarios.</TextBlock>
+25.             <ComboBox x:Name="ReadingTypeComboBox" Margin="0,10,0,0"/>
+26.         </StackPanel>
+27. 
+28.     </Grid>
+29. </Page>
+--- RESULT ---
+1. ﻿<!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the MIT License (MIT).
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Page
+14.     x:Class="SDKTemplate.Scenario3_Polling"
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+17.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+18.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+19.     mc:Ignorable="d">
+20. 
+21.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="12,10,12,12">
+22.         <StackPanel>
+23.             <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
+24.             <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text="Polling"/>
+25.             <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" Text="Polls for accelerometer data and displays the X, Y and Z acceleration values at a set interval."/>
+26.             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+27.                 <Button x:Name="ScenarioEnableButton" Content="Enable" Margin="0,0,10,0" Click="{x:Bind ScenarioEnable}" IsEnabled="False"/>
+28.                 <Button x:Name="ScenarioDisableButton" Content="Disable" Margin="0,0,10,0" Click="{x:Bind ScenarioDisable}" IsEnabled="False"/>
+29.             </StackPanel>
+30.             <TextBlock x:Name="ScenarioOutput" TextWrapping="Wrap" Margin="0,10,0,0">No data</TextBlock>
+31.         </StackPanel>
+32.     </Grid>
+33. </Page>
+--- RESULT ---
+1. ﻿<Page
+2.     x:Class="SDKTemplate.Scenario5_DataEventsBatching"
+3.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+4.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+5.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+6.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+7.     mc:Ignorable="d">
+8. 
+9.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="12,10,12,12">
+10.         <StackPanel>
+11.             <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
+12.             <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text="Orientation change"/>
+13.             <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" Text="Registers an event listener for accelerometer data (with a report latency specified) and displays the X, Y and Z acceleration values as they are reported."/>
+14.             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+15.                 <Button x:Name="ScenarioEnableButton" Content="Enable" Margin="0,0,10,0" Click="{x:Bind ScenarioEnable}" IsEnabled="False"/>
+16.                 <Button x:Name="ScenarioDisableButton" Content="Disable" Margin="0,0,10,0" Click="{x:Bind ScenarioDisable}" IsEnabled="False"/>
+17.             </StackPanel>
+18.             <TextBlock x:Name="ScenarioOutput" TextWrapping="Wrap" Margin="0,10,0,0">No data</TextBlock>
+19.         </StackPanel>
+20.     </Grid>
+21. </Page>
+22. 
+--- RESULT ---
+1. ﻿<!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the MIT License (MIT).
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Page
+14.     x:Class="SDKTemplate.Scenario4_OrientationChanged"
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+17.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+18.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+19.     mc:Ignorable="d">
+20. 
+21.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="12,10,12,12">
+22.         <StackPanel>
+23.             <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
+24.             <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" Text="Orientation change"/>
+25.             <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" Text="Registers for OrientationChanged event of the DisplayInformation class to illustrate the usage of the 'ReadingTransform' Property. Displays accelerometer readings with and without the transformation."/>
+26.             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+27.                 <Button x:Name="ScenarioEnableButton" Content="Enable" Margin="0,0,10,0" Click="{x:Bind ScenarioEnable}" IsEnabled="False"/>
+28.                 <Button x:Name="ScenarioDisableButton" Content="Disable" Margin="0,0,10,0" Click="{x:Bind ScenarioDisable}" IsEnabled="False"/>
+29.             </StackPanel>
+30.             <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" Text="Untransformed:"/>
+31.             <TextBlock x:Name="ScenarioOutputOriginal" TextWrapping="Wrap" Margin="0,10,0,0">No data</TextBlock>
+32.             <TextBlock TextWrapping="Wrap" Margin="0,10,0,0" Text="Transformed to DisplayOrientation:"/>
+33.             <TextBlock x:Name="ScenarioOutputReadingTransform" TextWrapping="Wrap" Margin="0,10,0,0">No data</TextBlock>
+34.         </StackPanel>
+35.     </Grid>
+36. </Page>
+37. 
+
+=== TURN 23 ===
+Let me look at the Styles.xaml and SharedContent App.xaml.cs:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\xaml\\Styles.xaml","view_range":[1,100]}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\cs\\App.xaml.cs"}
+--- RESULT ---
+1. <!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the MIT License (MIT).
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <ResourceDictionary
+14.     x:Class="SDKTemplate.Styles"
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+17.     xmlns:local="using:SDKTemplate">
+18. 
+19.     <Style x:Key="SymbolButton" TargetType="ToggleButton">
+20.         <Setter Property="FontSize" Value="16" />
+21.         <Setter Property="FontFamily" Value="{StaticResource SymbolThemeFontFamily}" />
+22.         <Setter Property="MinHeight" Value="48" />
+23.         <Setter Property="MinWidth" Value="48" />
+24.         <Setter Property="Margin" Value="0,4,0,0" />
+25.         <Setter Property="Padding" Value="0" />
+26.         <Setter Property="HorizontalAlignment" Value="Left" />
+27.         <Setter Property="VerticalAlignment" Value="Top" />
+28.         <Setter Property="HorizontalContentAlignment" Value="Center" />
+29.         <Setter Property="VerticalContentAlignment" Value="Center" />
+30.         <Setter Property="Background" Value="Transparent" />
+31.         <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
+32.         <Setter Property="Content" Value="&#xE700;" />
+33.         <Setter Property="AutomationProperties.Name" Value="Menu" />
+34.         <Setter Property="UseSystemFocusVisuals" Value="True" />
+35.         <Setter Property="Template">
+36.             <Setter.Value>
+37.                 <ControlTemplate TargetType="ToggleButton">
+38.                     <Grid x:Name="LayoutRoot"
+39.                           Background="{TemplateBinding Background}">
+40.                         <VisualStateManager.VisualStateGroups>
+41.                             <VisualStateGroup x:Name="CommonStates">
+42.                                 <VisualState x:Name="Normal" />
+43.                                 <VisualState x:Name="PointerOver">
+44.                                     <Storyboard>
+45.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(Grid.Background)">
+46.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightListLowBrush}"/>
+47.                                         </ObjectAnimationUsingKeyFrames>
+48.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+49.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightAltBaseHighBrush}"/>
+50.                                         </ObjectAnimationUsingKeyFrames>
+51.                                     </Storyboard>
+52.                                 </VisualState>
+53.                                 <VisualState x:Name="Pressed">
+54.                                     <Storyboard>
+55.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(Grid.Background)">
+56.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightListMediumBrush}"/>
+57.                                         </ObjectAnimationUsingKeyFrames>
+58.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+59.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightAltBaseHighBrush}"/>
+60.                                         </ObjectAnimationUsingKeyFrames>
+61.                                     </Storyboard>
+62.                                 </VisualState>
+63.                                 <VisualState x:Name="Disabled">
+64.                                     <Storyboard>
+65.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(TextBlock.Foreground)">
+66.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlDisabledBaseLowBrush}"/>
+67.                                         </ObjectAnimationUsingKeyFrames>
+68.                                     </Storyboard>
+69.                                 </VisualState>
+70.                                 <VisualState x:Name="Checked"/>
+71.                                 <VisualState x:Name="CheckedPointerOver">
+72.                                     <Storyboard>
+73.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(Grid.Background)">
+74.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightListLowBrush}"/>
+75.                                         </ObjectAnimationUsingKeyFrames>
+76.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+77.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightAltBaseHighBrush}"/>
+78.                                         </ObjectAnimationUsingKeyFrames>
+79.                                     </Storyboard>
+80.                                 </VisualState>
+81.                                 <VisualState x:Name="CheckedPressed">
+82.                                     <Storyboard>
+83.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LayoutRoot" Storyboard.TargetProperty="(Grid.Background)">
+84.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightListMediumBrush}"/>
+85.                                         </ObjectAnimationUsingKeyFrames>
+86.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+87.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightAltBaseHighBrush}"/>
+88.                                         </ObjectAnimationUsingKeyFrames>
+89.                                     </Storyboard>
+90.                                 </VisualState>
+91.                                 <VisualState x:Name="CheckedDisabled">
+92.                                     <Storyboard>
+93.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(TextBlock.Foreground)">
+94.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlDisabledBaseLowBrush}"/>
+95.                                         </ObjectAnimationUsingKeyFrames>
+96.                                     </Storyboard>
+97.                                 </VisualState>
+98.                             </VisualStateGroup>
+99.                         </VisualStateManager.VisualStateGroups>
+100.                         <ContentPresenter x:Name="ContentPresenter"
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using Windows.ApplicationModel.Activation;
+14. using Windows.UI.Xaml;
+15. using Windows.UI.Xaml.Controls;
+16. using Windows.UI.Xaml.Navigation;
+17. 
+18. // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=402347&clcid=0x409
+19. 
+20. namespace SDKTemplate
+21. {
+22.     /// <summary>
+23.     /// Provides application-specific behavior to supplement the default Application class.
+24.     /// </summary>
+25.     sealed partial class App : Application
+26.     {
+27.         /// <summary>
+28.         /// Initializes the singleton application object.  This is the first line of authored code
+29.         /// executed, and as such is the logical equivalent of main() or WinMain().
+30.         /// </summary>
+31.         public App()
+32.         {
+33.             this.InitializeComponent();
+34.             this.Construct();
+35.         }
+36. 
+37.         /// <summary>
+38.         /// Invoked when the application is launched normally by the end user.  Other entry points
+39.         /// will be used such as when the application is launched to open a specific file.
+40.         /// </summary>
+41.         /// <param name="e">Details about the launch request and process.</param>
+42.         protected override void OnLaunched(LaunchActivatedEventArgs e)
+43.         {
+44. 
+45. #if DEBUG
+46.             if (System.Diagnostics.Debugger.IsAttached)
+47.             {
+48.                 this.DebugSettings.EnableFrameRateCounter = false;
+49.             }
+50. #endif
+51. 
+52.             Frame rootFrame = Window.Current.Content as Frame;
+53. 
+54.             // Do not repeat app initialization when the Window already has content,
+55.             // just ensure that the window is active
+56.             if (rootFrame == null)
+57.             {
+58.                 // Create a Frame to act as the navigation context and navigate to the first page
+59.                 rootFrame = new Frame();
+60.                 // Set the default language
+61.                 rootFrame.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
+62. 
+63.                 rootFrame.NavigationFailed += OnNavigationFailed;
+64. 
+65.                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
+66.                 {
+67.                     //TODO: Load state from previously suspended application
+68.                 }
+69. 
+70.                 // Place the frame in the current Window
+71.                 Window.Current.Content = rootFrame;
+72.             }
+73. 
+74.             if (rootFrame.Content == null)
+75.             {
+76.                 // When the navigation stack isn't restored navigate to the first page,
+77.                 // configuring the new page by passing required information as a navigation
+78.                 // parameter
+79.                 rootFrame.Navigate(typeof(MainPage), e.Arguments);
+80.             }
+81. 
+82.             // Ensure the current window is active
+83.             Window.Current.Activate();
+84. 
+85.             // Some samples want access to the LaunchActivatedEventArgs.
+86.             LaunchCompleted(e);
+87.         }
+88. 
+89.         private Frame CreateRootFrame()
+90.         {
+91.             Frame rootFrame = Window.Current.Content as Frame;
+92. 
+93.             // Do not repeat app initialization when the Window already has content,
+94.             // just ensure that the window is active
+95.             if (rootFrame == null)
+96.             {
+97.                 // Create a Frame to act as the navigation context and navigate to the first page
+98.                 rootFrame = new Frame();
+99. 
+100.                 // Set the default language
+101.                 rootFrame.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
+102.                 rootFrame.NavigationFailed += OnNavigationFailed;
+103. 
+104.                 // Place the frame in the current Window
+105.                 Window.Current.Content = rootFrame;
+106.             }
+107. 
+108.             return rootFrame;
+109.         }
+110. 
+111.         /// <summary>
+112.         /// Invoked when Navigation to a certain page fails
+113.         /// </summary>
+114.         /// <param name="sender">The Frame which failed navigation</param>
+115.         /// <param name="e">Details about the navigation failure</param>
+116.         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+117.         {
+118.             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+119.         }
+120. 
+121.         // Add any application constructor code in here.
+122.         partial void Construct();
+123. 
+124.         // Add any OnLaunched customization here.
+125.         partial void LaunchCompleted(LaunchActivatedEventArgs e);
+126.     }
+127. }
+128. 
+
+=== TURN 24 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\xaml\\Styles.xaml","view_range":[100,250]}
+--- RESULT ---
+100.                         <ContentPresenter x:Name="ContentPresenter"
+101.                                           Content="{TemplateBinding Content}"
+102.                                           Margin="{TemplateBinding Padding}"
+103.                                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+104.                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+105.                                           AutomationProperties.AccessibilityView="Raw" />
+106.                     </Grid>
+107.                 </ControlTemplate>
+108.             </Setter.Value>
+109.         </Setter>
+110.     </Style>
+111. 
+112.     <Style x:Key="BasicTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+113.         <Setter Property="Margin" Value="0,0,0,12"/>
+114.     </Style>
+115. 
+116.     <Style x:Key="TagLineTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+117.     </Style>
+118. 
+119.     <Style x:Key="SampleHeaderTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TitleTextBlockStyle}">
+120.         <Setter Property="FontSize" Value="28"/>
+121.     </Style>
+122. 
+123.     <Style x:Key="ListItemTextStyle" TargetType="TextBlock" BasedOn="{StaticResource SubtitleTextBlockStyle}">
+124.         <Setter Property="FontSize" Value="18"/>
+125.         <Setter Property="Margin" Value="10,0,0,0"/>
+126.         <Setter Property="Foreground" Value="{StaticResource SystemControlForegroundBaseHighBrush}"/>
+127.     </Style>
+128. 
+129.     <Style x:Key="CopyrightTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+130.         <Setter Property="FontWeight" Value="Normal"/>
+131.     </Style>
+132. 
+133.     <Style x:Key="ScenarioHeaderTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TitleTextBlockStyle}">
+134.     </Style>
+135. 
+136.     <Style x:Key="ScenarioDescriptionTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+137.     </Style>
+138. 
+139.     <Style x:Key="BaseMessageStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+140.         <Setter Property="Margin" Value="0,0,0,5"/>
+141.     </Style>
+142. 
+143.     <Style x:Key="SeparatorStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+144.         <Setter Property="FontSize" Value="9"/>
+145.         <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+146.     </Style>
+147. 
+148.     <Style x:Key="HyperlinkStyle" TargetType="HyperlinkButton">
+149.         <Setter Property="Padding" Value="1"/>
+150.         <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+151.         <Setter Property="FontSize" Value="12"/>
+152.     </Style>
+153. 
+154.     <Style x:Key="NavMenuItemContainerStyle" TargetType="ListViewItem">
+155.         <Setter Property="MinWidth" Value="{StaticResource SplitViewCompactPaneThemeLength}"/>
+156.         <Setter Property="MinHeight" Value="48"/>
+157.         <Setter Property="Padding" Value="0"/>
+158.         <Setter Property="UseSystemFocusVisuals" Value="False" />
+159.         <Setter Property="Template">
+160.             <Setter.Value>
+161.                 <ControlTemplate TargetType="ListViewItem">
+162.                     <Grid x:Name="ContentBorder"
+163.                           HorizontalAlignment="Stretch"
+164.                         Control.IsTemplateFocusTarget="True"
+165.                         Background="{TemplateBinding Background}"
+166.                         BorderBrush="{TemplateBinding BorderBrush}"
+167.                         BorderThickness="{TemplateBinding BorderThickness}"
+168.                         RenderTransformOrigin="0.5,0.5">
+169.                         <Grid.RenderTransform>
+170.                             <ScaleTransform x:Name="ContentBorderScale" />
+171.                         </Grid.RenderTransform>
+172.                         <VisualStateManager.VisualStateGroups>
+173.                             <VisualStateGroup x:Name="CommonStates">
+174.                                 <VisualState x:Name="Normal">
+175.                                     <Storyboard>
+176.                                         <PointerUpThemeAnimation Storyboard.TargetName="ContentPresenter" />
+177.                                     </Storyboard>
+178.                                 </VisualState>
+179.                                 <VisualState x:Name="PointerOver">
+180.                                     <Storyboard>
+181.                                         <DoubleAnimation Storyboard.TargetName="BorderBackground"
+182.                                                          Storyboard.TargetProperty="Opacity"
+183.                                                          Duration="0"
+184.                                                          To="1"/>
+185.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BorderBackground" Storyboard.TargetProperty="Fill">
+186.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightListLowBrush}" />
+187.                                         </ObjectAnimationUsingKeyFrames>
+188.                                         <PointerUpThemeAnimation Storyboard.TargetName="ContentPresenter" />
+189.                                     </Storyboard>
+190.                                 </VisualState>
+191.                                 <VisualState x:Name="Pressed">
+192.                                     <Storyboard>
+193.                                         <DoubleAnimation Storyboard.TargetName="BorderBackground"
+194.                                                          Storyboard.TargetProperty="Opacity"
+195.                                                          Duration="0"
+196.                                                          To="1"/>
+197.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BorderBackground" Storyboard.TargetProperty="Fill">
+198.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightListMediumBrush}" />
+199.                                         </ObjectAnimationUsingKeyFrames>
+200.                                         <PointerDownThemeAnimation TargetName="ContentPresenter" />
+201.                                     </Storyboard>
+202.                                 </VisualState>
+203.                                 <VisualState x:Name="Selected">
+204.                                     <Storyboard>
+205.                                         <DoubleAnimation Storyboard.TargetName="BorderBackground"
+206.                                                          Storyboard.TargetProperty="Opacity"
+207.                                                          Duration="0"
+208.                                                          To="1"/>
+209.                                         <DoubleAnimation Storyboard.TargetName="SelectedPipe"
+210.                                                          Storyboard.TargetProperty="Opacity"
+211.                                                          Duration="0"
+212.                                                          To="1"/>
+213.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BorderBackground" Storyboard.TargetProperty="Fill">
+214.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="Transparent" />
+215.                                         </ObjectAnimationUsingKeyFrames>
+216.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+217.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlForegroundAccentBrush}" />
+218.                                         </ObjectAnimationUsingKeyFrames>
+219.                                         <PointerUpThemeAnimation Storyboard.TargetName="ContentPresenter" />
+220.                                     </Storyboard>
+221.                                 </VisualState>
+222.                                 <VisualState x:Name="PointerOverSelected">
+223.                                     <Storyboard>
+224.                                         <DoubleAnimation Storyboard.TargetName="BorderBackground"
+225.                                                          Storyboard.TargetProperty="Opacity"
+226.                                                          Duration="0"
+227.                                                          To="1"/>
+228.                                         <DoubleAnimation Storyboard.TargetName="SelectedPipe"
+229.                                                          Storyboard.TargetProperty="Opacity"
+230.                                                          Duration="0"
+231.                                                          To="1"/>
+232.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BorderBackground" Storyboard.TargetProperty="Fill">
+233.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlHighlightListLowBrush}" />
+234.                                         </ObjectAnimationUsingKeyFrames>
+235.                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+236.                                             <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlForegroundAccentBrush}" />
+237.                                         </ObjectAnimationUsingKeyFrames>
+238.                                         <PointerUpThemeAnimation Storyboard.TargetName="ContentPresenter" />
+239.                                     </Storyboard>
+240.                                 </VisualState>
+241.                                 <VisualState x:Name="PressedSelected">
+242.                                     <Storyboard>
+243.                                         <DoubleAnimation Storyboard.TargetName="BorderBackground"
+244.                                                          Storyboard.TargetProperty="Opacity"
+245.                                                          Duration="0"
+246.                                                          To="1"/>
+247.                                         <DoubleAnimation Storyboard.TargetName="SelectedPipe"
+248.                                                          Storyboard.TargetProperty="Opacity"
+249.                                                          Duration="0"
+250.                                                          To="1"/>
+
+=== TURN 25 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run1\\000_Accelerometer\\app\\Assets"}
+
+--- TOOL: glob ---
+{"paths":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent","pattern":"**/*.png"}
+--- RESULT ---
+AppIcon.ico
+LockScreenLogo.scale-200.png
+SplashScreen.scale-200.png
+Square150x150Logo.scale-200.png
+Square44x44Logo.scale-200.png
+Square44x44Logo.targetsize-24_altform-unplated.png
+Square44x44Logo.targetsize-48_altform-lightunplated.png
+StoreLogo.png
+Wide310x150Logo.scale-200.png
+--- RESULT ---
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\placeholder-sdk.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\microsoft-sdk.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\badge-logo.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\Square310x310Logo.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\splash-sdk.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\smalltile-sdk.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\windows-sdk.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\tile-sdk.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\storelogo-sdk.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\squaretile-sdk.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\placeholder.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\Samples\HeroImage.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\Samples\mobius.png
+C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\SharedContent\media\Samples\coffee-logo.png
+
+=== TURN 26 ===

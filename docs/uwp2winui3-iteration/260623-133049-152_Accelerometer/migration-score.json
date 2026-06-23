@@ -1,0 +1,71 @@
+{
+  "scenario": "Accelerometer",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 6,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 6,
+  "uwp_capture_status": "ok",
+  "parity_result": null,
+  "behavioral_regressions": 0,
+  "build_status": "failed",
+  "build_error": "dotnet build failed: 9x CS0118 'Accelerometer' is a namespace but is used like a type (Scenario1-5 .xaml.cs) + XamlCompiler WMC9999 internal error. Migrated app does not compile; cannot launch or capture WinUI 3 candidate.",
+  "note": "Original UWP app launched and captured successfully (6 scenarios). Migrated WinUI 3 app does not build (dotnet build: 9 errors), so it cannot run and no parity capture was possible. All features scored FAIL; score 0.",
+  "features": [
+    {
+      "name": "Choose accelerometer",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Choose_accelerometer.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app fails to build (CS0118 / Xaml WMC9999); scenario could not be launched or captured. UWP golden captured; no hardware accelerometer so UWP data controls report 'No data' (hardware-gated, not a defect)."
+    },
+    {
+      "name": "Data events",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Data_events.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app fails to build (CS0118 / Xaml WMC9999); scenario could not be launched or captured. UWP golden captured; no hardware accelerometer so UWP data controls report 'No data' (hardware-gated, not a defect)."
+    },
+    {
+      "name": "Shake events",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Shake_events.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app fails to build (CS0118 / Xaml WMC9999); scenario could not be launched or captured. UWP golden captured; no hardware accelerometer so UWP data controls report 'No data' (hardware-gated, not a defect)."
+    },
+    {
+      "name": "Polling",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Polling.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app fails to build (CS0118 / Xaml WMC9999); scenario could not be launched or captured. UWP golden captured; no hardware accelerometer so UWP data controls report 'No data' (hardware-gated, not a defect)."
+    },
+    {
+      "name": "Orientation change",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/05_Orientation_change.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app fails to build (CS0118 / Xaml WMC9999); scenario could not be launched or captured. UWP golden captured; no hardware accelerometer so UWP data controls report 'No data' (hardware-gated, not a defect)."
+    },
+    {
+      "name": "Data events batching",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/06_Data_events_batching.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app fails to build (CS0118 / Xaml WMC9999); scenario could not be launched or captured. UWP golden captured; no hardware accelerometer so UWP data controls report 'No data' (hardware-gated, not a defect)."
+    }
+  ]
+}

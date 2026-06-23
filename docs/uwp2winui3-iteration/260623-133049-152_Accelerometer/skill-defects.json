@@ -1,0 +1,17 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Project root namespace equals a WinRT type (project named after the sample's API), so every simple-name reference in the migrated source binds to the app's namespace instead of the type → CS0118 x9 + XAML WMC9999. Whole build fails; 0/100.",
+      "evidence": "migration-score.json build_error: \"9x CS0118 'Accelerometer' is a namespace but is used like a type ... + XamlCompiler WMC9999\"; session-log.txt L1290/1364/1394 scaffold files use 'namespace Accelerometer' while source uses 'namespace SDKTemplate'; csproj <RootNamespace>Accelerometer</RootNamespace>.",
+      "skill_search": "grepped Initialize-UwpMigration.ps1 and SKILL.md for RootNamespace / namespace collision / CS0118 — only the Windows.UI.Xaml->Microsoft.UI.Xaml rewrite (section 3) existed; nothing handled project-name/type collision.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap leaves the scaffold's default root namespace (== project name) untouched; when that name equals a type the source references by simple name, C# resolves the simple name to the namespace.",
+      "proposed_fix": "Add a bootstrap guard (Initialize-UwpMigration.ps1) that detects when the scaffold root namespace is referenced as a bare identifier in the copied source and renames the scaffold root namespace to a collision-free token (<Name>App): update <RootNamespace>, scaffold namespace decls, x:Class, xmlns:local. Document in SKILL.md.",
+      "generalizes": "UWP SDK samples are routinely named after the API they demonstrate (Accelerometer, Compass, Gyrometer, Barometer, ProximitySensor, Battery, Altimeter, ...). Any such sample scaffolded under its own name reproduces this exact CS0118/WMC9999 collision."
+    }
+  ]
+}
