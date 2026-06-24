@@ -1,0 +1,29 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bulk Windows.UI.Xaml -> Microsoft.UI.Xaml rewrite and scaffold succeeded; build ultimately SUCCEEDED with all 7 scenarios migrated (migration-score 100/7-of-7-pass)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Only rewrites the Windows.UI.Xaml namespace prefix. It does NOT rewrite the sibling Windows.UI.* (non-Xaml) namespaces (Windows.UI.Colors, Windows.UI.Text, Windows.UI.Core dispatcher), so types used unqualified (e.g. Colors) break with CS0103 until a using Microsoft.UI; is added.", "suggested_tweak": "Document the Windows.UI -> Microsoft.UI (non-Xaml) move as a named common build error, not only as a row in a large namespace table." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Web.Http.HttpClient / HttpRequestMessage / HttpResponseMessage / IHttpFilter", "special_handling": "Must stay on the Windows.Web.Http (WinRT) types after migration. IHttpFilter.SendRequestAsync has the signature IAsyncOperationWithProgress<HttpResponseMessage, HttpProgress> SendRequestAsync(HttpRequestMessage) where all types are Windows.Web.Http. Do NOT port to System.Net.Http: AdaptiveMediaSource request modification (auth headers, query params, HDCP) is built on Windows.Web.Http.Filters.IHttpFilter." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0104: 'HttpClient' / 'HttpRequestMessage' / 'HttpResponseMessage' is an ambiguous reference between 'System.Net.Http.*' and 'Windows.Web.Http.*' (multiple files: ContentSelector, AdaptiveMediaSourceHttpFilterLogger, Scenario2-7)", "root_cause": "The WinUI 3 scaffold enables <ImplicitUsings>enable</ImplicitUsings>, which adds a global 'using System.Net.Http;'. UWP networking code uses Windows.Web.Http types, so any file that also brings System.Net.Http into scope (implicit global + an explicit using) sees two HttpClient/HttpRequestMessage/HttpResponseMessage types.", "fix": "Keep the Windows.Web.Http using and remove the conflicting System.Net.Http using in those files (or add a using-alias, e.g. using HttpClient = Windows.Web.Http.HttpClient;). A file-level using wins over the ImplicitUsings global, so an explicit 'using Windows.Web.Http;' plus dropping the System.Net.Http using resolves it." },
+    { "error": "CS0535: 'AdaptiveMediaSourceHttpFilterLogger' / 'AddAuthorizationHeaderFilter' does not implement interface member 'IHttpFilter.SendRequestAsync(HttpRequestMessage)'", "root_cause": "Downstream of the CS0104 ambiguity: with System.Net.Http in scope, the HttpRequestMessage/HttpResponseMessage in the method signature bound to the System.Net.Http types, so the SendRequestAsync override no longer matched the Windows.Web.Http IHttpFilter contract.", "fix": "Resolve the Http namespace ambiguity (above) so the method signature uses Windows.Web.Http.HttpRequestMessage / HttpResponseMessage; the interface member then matches." },
+    { "error": "CS0103: The name 'Colors' does not exist in the current context (LogView.xaml.cs)", "root_cause": "UWP exposes Colors via Windows.UI.Colors and the code used it unqualified. The Initialize rewrite only remaps Windows.UI.Xaml, not Windows.UI, so after migration no namespace brought 'Colors' into scope.", "fix": "Add 'using Microsoft.UI;' (the WinUI 3 home of Colors / ColorHelper). Same applies to other unqualified Windows.UI.* helpers (Colors, ColorHelper, FontWeights via Microsoft.UI.Text)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Networking files across ContentSelector + Scenario2-7 + AdaptiveMediaSourceHttpFilterLogger", "symptom": "Repeated CS0104 ambiguity and cascading CS0535 interface-not-implemented across many files", "turns_or_retries": "multiple build iterations touching ~8 files", "root_cause": "ImplicitUsings global System.Net.Http colliding with the UWP Windows.Web.Http types the AdaptiveMediaSource/IHttpFilter API requires", "how_resolved": "Removed System.Net.Http usings / kept Windows.Web.Http in the affected files", "preventable_by": "A named 'Windows.Web.Http vs System.Net.Http ambiguity' entry in MIGRATION-PATTERNS 'Common build errors' telling the agent to keep Windows.Web.Http for IHttpFilter/AdaptiveMediaSource code and drop the System.Net.Http using." },
+    { "where": "LogView.xaml.cs", "symptom": "CS0103 'Colors' does not exist", "turns_or_retries": "1-2", "root_cause": "Windows.UI (non-Xaml) namespace not rewritten by the script; type used unqualified", "how_resolved": "Added using Microsoft.UI;", "preventable_by": "Calling out the Windows.UI -> Microsoft.UI (non-Xaml) move and the 'add using Microsoft.UI;' fix as a named common build error." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 screenshots captured blank (DirectX swapchain not capturable headlessly) and original UWP could not be driven per-scenario", "workaround": "Scorer fell back to UIA tree + direct control actuation; not a migration concern." }
+  ]
+}

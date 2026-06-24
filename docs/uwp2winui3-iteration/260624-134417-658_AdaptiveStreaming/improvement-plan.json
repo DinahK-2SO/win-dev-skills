@@ -1,0 +1,32 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0104 ambiguity between System.Net.Http and Windows.Web.Http (HttpClient/HttpRequestMessage/HttpResponseMessage), cascading into CS0535 'IHttpFilter.SendRequestAsync not implemented'; cost multiple build iterations across ~8 files.",
+      "evidence": "lessons.json errors_encountered[0..1]; session-log.txt CS0104/CS0535 lines; csproj <ImplicitUsings>enable</ImplicitUsings>.",
+      "root_cause": "Scaffold ImplicitUsings injects a global 'using System.Net.Http;' that collides with the Windows.Web.Http types that AdaptiveMediaSource/IHttpFilter request-modification code requires.",
+      "tier": 3,
+      "change": "Added a named 'CS0104 HttpClient/HttpRequestMessage/HttpResponseMessage ambiguous (+ CS0535 IHttpFilter)' subsection to the 'Common build errors after the namespace rewrite' section of MIGRATION-PATTERNS.md: states the ImplicitUsings cause, tells the agent to keep Windows.Web.Http and drop/alias System.Net.Http, and shows the IHttpFilter.SendRequestAsync WinRT signature.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent keeps Windows.Web.Http on first pass and resolves the ambiguity without iterating across files.",
+      "falsifiable_check": "On a re-run of any Windows.Web.Http/IHttpFilter UWP app, the build log shows zero CS0104 'ambiguous reference between System.Net.Http and Windows.Web.Http' and zero CS0535 IHttpFilter errors.",
+      "devils_advocate": "Why Tier 3 not Tier 1 (script)? A script could auto-strip 'using System.Net.Http;' but that is risky — some files legitimately need System.Net.Http; blanket removal would break them. The correct choice (keep WinRT vs keep System.Net) is semantic and file-specific, so guidance the agent applies per-file is the right tier. Not redundant: only the LaunchActivatedEventArgs CS0104 case existed before."
+    },
+    {
+      "problem": "CS0103 'Colors' does not exist after the namespace rewrite.",
+      "evidence": "lessons.json errors_encountered[2]; session-log.txt LogView.xaml.cs(101,59) CS0103; fixed file added 'using Microsoft.UI;'.",
+      "root_cause": "Initialize-UwpMigration.ps1 rewrites only the Windows.UI.Xaml prefix, leaving sibling Windows.UI.* (non-Xaml) types (Colors/ColorHelper/FontWeights) used unqualified out of scope.",
+      "tier": 3,
+      "change": "Added a named 'CS0103: Colors/ColorHelper/FontWeights not found' entry with the 'using Microsoft.UI;' / 'using Microsoft.UI.Text;' fix, and added one clause under the Namespace Mapping table clarifying the bulk rewrite only touches Windows.UI.Xaml.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent adds the right using on first encounter instead of treating CS0103 as a missing type.",
+      "falsifiable_check": "On a re-run, CS0103 for Colors/ColorHelper/FontWeights is resolved by adding a using rather than retrying, and does not recur after that file.",
+      "devils_advocate": "Why not extend the script to rewrite Windows.UI -> Microsoft.UI? A naive prefix rewrite is unsafe: Windows.UI also hosts types whose WinUI 3 home differs (Windows.UI.Core -> Microsoft.UI.Dispatching, not Microsoft.UI.Core), so a blanket rewrite would mis-map. Documenting the targeted usings is the safe tier. The mapping row already existed but was buried; this sharpens it (coverage-gap)."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/eval: MediaPlayerElement does not project its AutomationProperties.AutomationId, blank headless WinUI screenshots, and HTML-escaped/duplicate-name control matching are measurement artifacts in the parity/scoring instruments, not migration-skill issues — out of scope for the migration skill."
+  ]
+}

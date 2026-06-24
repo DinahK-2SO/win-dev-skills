@@ -1,0 +1,101 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "created_at": "2026-06-25T00:40:19+08:00",
+  "uwp_capture_status": "partial: the original UWP app launched successfully via uwp-app-runner (ok:true, windowTitle 'AdaptiveStreaming sample', pid 17368) and its default landing scenario (1) was screenshotted, but per-scenario navigation/actuation of the ORIGINAL UWP could not be performed. winapp's UI Automation walker sees only a top-level Pane for this UWP CoreWindow (the XAML automation tree is not projected; search returns 0 controls), and this is a non-interactive desktop session (CopyFromScreen fails with 'handle is invalid' and no window can take foreground), so synthetic mouse input via SendInput cannot drive it either. Therefore only the default scenario has a faithful UWP golden frame; scenarios 2-7 could not be reached in the live UWP.",
+  "features": [
+    {
+      "id": "scenario-1-simplest",
+      "area": "AdaptiveStreaming scenarios",
+      "name": "Simplest Adaptive Streaming",
+      "description": "A MediaPlayerElement plus a Load button. Loading a manifest URI implicitly creates an AdaptiveMediaSource via MediaSource.CreateFromUri and begins playback.",
+      "expected_behaviour": [
+        "A MediaPlayerElement (with transport controls) is shown",
+        "A 'Load' button is present and, when clicked, sets the player source",
+        "Description text describing implicit AdaptiveMediaSource creation is visible"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Simplest_Adaptive_Streaming.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario-2-event-handlers",
+      "area": "AdaptiveStreaming scenarios",
+      "name": "Event Handlers",
+      "description": "Explicit AdaptiveMediaSource creation with all adaptive-streaming and playback-pipeline events logged. Load Id/Load Uri inputs, Set Source, AutoPlay, and a logging list box.",
+      "expected_behaviour": [
+        "MediaPlayerElement with transport controls is present",
+        "Load Id / Load Uri / Set Source controls and AutoPlay checkbox are present",
+        "A logging list box exists to receive pipeline events",
+        "Bitrate readout text elements (download/playback) are present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-3-network-request-modification",
+      "area": "AdaptiveStreaming scenarios",
+      "name": "Network Request Modification",
+      "description": "Radio buttons select how outbound adaptive requests are modified (None, Authorization Header, Url Query Parameter, Application Downloaded) and HDCP policy (Off, On, On With Type Enforcement).",
+      "expected_behaviour": [
+        "Seven radio buttons are present (4 request-modification modes + 3 HDCP modes)",
+        "Selecting a radio button changes the active mode",
+        "MediaPlayerElement and Load/Set Source controls are present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-4-tuning",
+      "area": "AdaptiveStreaming scenarios",
+      "name": "Adaptive Streaming Tuning",
+      "description": "Combo boxes for desired min/initial/max bitrate, plus text boxes with Set buttons for downgrade-trigger and headroom-trigger ratios.",
+      "expected_behaviour": [
+        "Three bitrate ComboBoxes are present",
+        "Two ratio TextBoxes each with an adjacent 'Set' button are present and editable",
+        "Clicking a 'Set' button applies the typed ratio",
+        "MediaPlayerElement and Load/Set Source controls are present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-5-metadata",
+      "area": "AdaptiveStreaming scenarios",
+      "name": "Metadata",
+      "description": "Demonstrates consuming/creating timed metadata (ID3, m3u8 comments, emsg). Load inputs, Set Source, AutoPlay, logging list box.",
+      "expected_behaviour": [
+        "MediaPlayerElement with transport controls is present",
+        "Load Id / Load Uri / Set Source / AutoPlay controls are present",
+        "A logging list box exists to receive timed-metadata events"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-6-ad-insertion",
+      "area": "AdaptiveStreaming scenarios",
+      "name": "Ad Insertion",
+      "description": "Pre/mid/post-roll ad insertion with playback-progress reporting via custom TimedMetadataTracks.",
+      "expected_behaviour": [
+        "MediaPlayerElement with transport controls is present",
+        "Load Id / Load Uri / Set Source / AutoPlay controls are present",
+        "A logging list box exists to receive playback-progress events"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-7-live-seekable-range",
+      "area": "AdaptiveStreaming scenarios",
+      "name": "Live Seekable Range",
+      "description": "Live playback controls: desired seekable-window size and live offset (text + Set), a position slider, Log Times, GoToStart/GoToLive, Play/Pause, and eight relative-seek buttons (<<15m, <<5m, <<30s, <<2s, 2s>>, 30s>>, 5m>>, 15m>>).",
+      "expected_behaviour": [
+        "MediaPlayerElement and Load/Set Source controls are present",
+        "DesiredSeekableWindowSize and DesiredLiveOffset text boxes each with a Set button are present",
+        "Eight relative-seek buttons (<<15m .. 15m>>) are present",
+        "Play, Pause, GoToStart, GoToLive, Log Times buttons and a position slider are present"
+      ],
+      "screenshot": null,
+      "weight": 2
+    }
+  ]
+}

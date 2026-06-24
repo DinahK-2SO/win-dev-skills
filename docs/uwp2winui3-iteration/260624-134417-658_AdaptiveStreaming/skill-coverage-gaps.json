@@ -1,0 +1,15 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "CS0103 'The name Colors does not exist in the current context' after the namespace rewrite. The Windows.UI (non-Xaml) namespaces are not rewritten by the bootstrap, so types used unqualified (Colors, ColorHelper, FontWeights) fall out of scope.",
+      "evidence": "session-log.txt: \"LogView.xaml.cs(101,59): error CS0103: The name 'Colors' does not exist in the current context\"; fixed file now carries 'using Microsoft.UI;'.",
+      "covered_at": "MIGRATION-PATTERNS.md 'Namespace Mapping' table, row '| Windows.UI.Colors | Microsoft.UI.Colors |' (also Windows.UI.Text, Windows.UI.Core rows).",
+      "why_missed": "buried — it is one row in a 13-row namespace table and is framed as a fully-qualified namespace swap. It does not flag that (a) the Initialize script rewrites only Windows.UI.Xaml and leaves Windows.UI untouched, nor (b) that unqualified usage (Colors.Red, ColorHelper.FromArgb) surfaces as CS0103 and needs an added 'using Microsoft.UI;'.",
+      "proposed_improvement": "In the 'Common build errors' section add a short named 'CS0103: Colors / ColorHelper / FontWeights not found' entry, and add one sentence under the Namespace Mapping table noting the bulk rewrite only touches Windows.UI.Xaml — the sibling Windows.UI.* types (Colors->Microsoft.UI, Text->Microsoft.UI.Text) must be fixed by adding the corresponding using.",
+      "generalizes": "Color/text helpers from Windows.UI are used unqualified in most UWP XAML code-behind; every migration whose bootstrap rewrites only the Xaml prefix hits the same CS0103 family, so sharpening this is broadly reusable."
+    }
+  ]
+}

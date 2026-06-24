@@ -1,0 +1,49 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "generated_at": "2026-06-25T00:40:19+08:00",
+  "summary": "No migration defects (missing controls, dead controls, wrong output) were found. Every control enumerated for all 7 scenarios is present in the migrated WinUI 3 app's UIA tree and the spot-checked controls are wired and respond. The Compare-Parity structural score of 50/100 is depressed entirely by measurement artifacts (documented below), not by gaps in the migration.",
+  "migration_defects": [],
+  "measurement_artifacts": [
+    {
+      "type": "false-negative-structural",
+      "control": "MediaPlayerElement (mediaPlayerElement)",
+      "scenarios": [1, 2, 3, 4, 5, 6, 7],
+      "detail": "The WinUI 3 MediaPlayerElement does not project its AutomationProperties.AutomationId through its automation peer (a documented WinUI 3 limitation called out by the winui3-parity-check skill: wrap in Grid/Border to expose it). Compare-Parity therefore reports 'MediaPlayerElement not found' for 6 of 7 scenarios. The element IS present on every page — its transport controls (Seek slider, Play, Mute, Aspect Ratio, Cast, Time elapsed/remaining) appear in the UIA tree. Because scenarios 2, 5 and 6 have the MediaPlayerElement as their ONLY enumerated control, this single false-negative drops them to 0/1 = FAIL even though the pages are fully migrated."
+    },
+    {
+      "type": "false-negative-structural",
+      "control": "Relative-seek buttons <<15m, <<5m, <<30s, <<2s, 2s>>, 30s>>, 5m>>, 15m>>",
+      "scenarios": [7],
+      "detail": "The baseline checklist stores these button names HTML-escaped (e.g. '&lt;&lt;15m'), while the live WinUI button Name property is the unescaped '<<15m'. The string comparison therefore fails to match, marking 8 present buttons as 'missing' and downgrading scenario 7 to PARTIAL (10/19). All eight buttons are in fact present in the WinUI UIA tree with the unescaped names."
+    },
+    {
+      "type": "false-negative-behavioral",
+      "control": "Two 'Set' buttons per page (scenarios 4 and 7)",
+      "scenarios": [4, 7],
+      "detail": "Capture-AppScenarios actuates action controls by their text name. Each tuning/live page has TWO buttons literally named 'Set', so text-based winapp ui invoke 'Set' is ambiguous and reports [FAIL]/0 live. Direct invocation by AutomationId confirms they are wired: 'DesiredSeekableWindowSizeButton' invoked via InvokePattern successfully, and scenario 4's BitrateDowngradeTriggerRatioText accepted set-value '0.7' and read it back."
+    },
+    {
+      "type": "environment-limitation",
+      "control": "UWP golden behavioral/visual baseline (scenarios 2-7)",
+      "scenarios": [2, 3, 4, 5, 6, 7],
+      "detail": "The original UWP app launched (uwp-app-runner ok:true) and its default scenario was screenshotted, but per-scenario navigation/actuation of the UWP was impossible: winapp's UIA walker sees only a top-level Pane for the UWP CoreWindow (search returns 0 controls), and the session is non-interactive (GDI CopyFromScreen fails 'handle is invalid'; no window can take foreground; SendInput mouse clicks do not register). Consequently the UWP capture-manifest shows navOk:false for every scenario and no UWP control responded, so a dead-control-vs-UWP behavioral comparison was not possible (controls are 'flagged for manual review' rather than failed per the parity skill)."
+    },
+    {
+      "type": "environment-limitation",
+      "control": "WinUI 3 screenshots (all scenarios)",
+      "scenarios": [1, 2, 3, 4, 5, 6, 7],
+      "detail": "Every WinUI 3 capture is a blank white frame (identical 11273-byte PNGs, including the structurally-passing scenario 1). WinUI 3 renders its content via a DirectX swapchain that PrintWindow does not capture in this non-interactive/non-foreground session, so the visual comparison could not be performed from screenshots. The fully-populated UIA trees (e.g. 58 elements for scenario 2) confirm the content is actually rendered; the blankness is a capture limitation, not an empty page."
+    }
+  ],
+  "functional_notes": [
+    {
+      "scenario": 7,
+      "control": "PlayButton (media transport)",
+      "note": "winapp ui invoke 'PlayButton' reports the element is display-only (no invoke pattern). This is expected with no media source loaded; the transport play button is disabled until media is set. Not a regression."
+    },
+    {
+      "scenario": "all",
+      "note": "Actual media playback/decoding could not be exercised in this headless environment (no display surface, no network media decode), so playback-time behaviours (event log population, bitrate readouts, ad insertion, live seeking) were verified structurally and by control wiring, not by observing live media output."
+    }
+  ]
+}

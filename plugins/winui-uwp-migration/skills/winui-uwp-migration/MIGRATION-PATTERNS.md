@@ -27,6 +27,33 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0104: 'HttpClient' / 'HttpRequestMessage' / 'HttpResponseMessage' is an ambiguous reference` (and the `CS0535 IHttpFilter` it cascades into)
+
+The WinUI 3 scaffold sets `<ImplicitUsings>enable</ImplicitUsings>`, which adds a **global** `using System.Net.Http;`. UWP networking code (and anything built on `AdaptiveMediaSource`, `IHttpFilter`, request-modification filters, OAuth headers, HDCP) uses the **WinRT** `Windows.Web.Http` types, so `HttpClient`, `HttpRequestMessage`, and `HttpResponseMessage` now resolve to **two** namespaces at once.
+
+Keep the **`Windows.Web.Http`** family — do **not** "modernize" these to `System.Net.Http`. The two are not interchangeable: `IHttpFilter.SendRequestAsync` is `IAsyncOperationWithProgress<HttpResponseMessage, HttpProgress> SendRequestAsync(HttpRequestMessage)` where every type is `Windows.Web.Http`, and `AdaptiveMediaSource.DownloadRequested`/`Headers` only accept the WinRT types. If you swap in `System.Net.Http` the interface no longer matches and you get `CS0535: '...' does not implement interface member 'IHttpFilter.SendRequestAsync(HttpRequestMessage)'`.
+
+Fix by keeping the WinRT using and removing the conflicting one (a file-level `using` wins over the `ImplicitUsings` global):
+
+```csharp
+using Windows.Web.Http;            // keep — required by IHttpFilter / AdaptiveMediaSource
+using Windows.Web.Http.Filters;
+// using System.Net.Http;          ← delete this conflicting using
+
+// Or, if the file genuinely needs both, alias the WinRT types:
+// using HttpClient = Windows.Web.Http.HttpClient;
+// using HttpRequestMessage = Windows.Web.Http.HttpRequestMessage;
+```
+
+### `CS0103: The name 'Colors' (or 'ColorHelper' / 'FontWeights') does not exist in the current context`
+
+The bulk rewrite only remaps the `Windows.UI.Xaml` prefix — it leaves the **sibling `Windows.UI.*` (non-Xaml)** namespaces alone (see the Namespace Mapping table below). UWP code-behind commonly uses `Colors.Red`, `ColorHelper.FromArgb`, `FontWeights.Bold` **unqualified**, relying on `Windows.UI`, so after migration nothing brings them into scope. Add the WinUI 3 namespace as a `using`:
+
+```csharp
+using Microsoft.UI;        // Colors, ColorHelper  (was Windows.UI)
+using Microsoft.UI.Text;   // FontWeights          (was Windows.UI.Text)
+```
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -61,7 +88,11 @@ See the official [What's supported](https://learn.microsoft.com/windows/apps/win
 
 ## Namespace Mapping
 
-All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
+All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`. Note that the
+`Initialize-UwpMigration.ps1` bulk rewrite only touches the `Windows.UI.Xaml` prefix — the
+sibling **`Windows.UI.*` (non-Xaml)** rows below (`Colors`, `Text`, `Core` dispatcher) are
+**not** rewritten, so types used unqualified surface as `CS0103` until you add the matching
+`using` (see the CS0103 entry above):
 
 | UWP | WinUI 3 |
 |-----|---------|

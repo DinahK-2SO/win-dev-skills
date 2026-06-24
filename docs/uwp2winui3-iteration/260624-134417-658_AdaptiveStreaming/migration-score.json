@@ -1,0 +1,79 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 7,
+  "features_pass": 7,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: original UWP launched (uwp-app-runner ok:true, windowTitle 'AdaptiveStreaming sample', pid 17368) and its default scenario was screenshotted, but per-scenario UWP navigation/actuation was impossible (UWP CoreWindow XAML UIA tree not projected to winapp -- only a top-level Pane, search returns 0 controls; non-interactive desktop so SendInput navigation also fails). Only scenario 1 has a faithful UWP golden frame.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_gate_score": 50,
+  "behavioral_regressions": 0,
+  "scoring_basis": "Verdicts are based on the WinUI 3 UIA trees (fully populated and reliable) plus direct control actuation, overriding the Compare-Parity structural gate where it produced documented false-negatives. The gate's 50/100 is depressed by (a) the WinUI MediaPlayerElement not projecting its AutomationId (affects all 7 scenarios; fails 2/5/6 whose only enumerated control is the MediaPlayerElement), (b) HTML-escaped seek-button names in the checklist not matching the live '<<15m' names (scenario 7), and (c) ambiguous text-invoke of duplicate 'Set' buttons (scenarios 4/7). Reading the UIA dumps shows every enumerated control is present, and direct invoke/set-value confirmed sampled controls (GoToStart, DesiredSeekableWindowSizeButton, bitrate ratio TextBox) are wired and respond. No missing controls, dead controls, or wrong outputs were found. WinUI screenshots are blank (DirectX swapchain not capturable headlessly) and the original UWP could not be driven per-scenario, so live media-playback behavior was not visually compared; it was verified structurally and by control wiring.",
+  "features": [
+    {
+      "name": "Simplest Adaptive Streaming",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Simplest_Adaptive_Streaming.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Simplest_Adaptive_Streaming.png",
+      "note": "MediaPlayerElement + Load button present; Load responded in the WinUI capture (+1 token). Parity gate PASS 2/2. Only scenario with a faithful UWP golden frame. WinUI screenshot is blank due to the swapchain capture limitation."
+    },
+    {
+      "name": "Event Handlers",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_Event_Handlers.png",
+      "note": "Fully migrated: MediaPlayerElement (transport controls present), Load Id/Load Uri/Set Source, AutoPlay, bitrate readout text, and LoggingListBox all in the UIA tree. Gate FAIL 0/1 is solely the MediaPlayerElement AutomationId false-negative (its only enumerated control). No action controls to actuate (media-event-driven)."
+    },
+    {
+      "name": "Network Request Modification",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/03_Network_Request_Modification.png",
+      "note": "All 7 radio buttons present; the 3 HDCP radios responded in the WinUI capture. Gate PASS 7/8 (only missing item is the MediaPlayerElement false-negative)."
+    },
+    {
+      "name": "Adaptive Streaming Tuning",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/04_Adaptive_Streaming_Tuning.png",
+      "note": "Three bitrate ComboBoxes, two ratio TextBoxes and their two 'Set' buttons all present. Gate PASS 7/8. The capture's 0/2 live is ambiguous text-invoke of two buttons both named 'Set'; direct set-value '0.7' on BitrateDowngradeTriggerRatioText succeeded and read back, confirming wiring."
+    },
+    {
+      "name": "Metadata",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/05_Metadata.png",
+      "note": "Fully migrated: MediaPlayerElement, Load/Set Source, AutoPlay, LoggingListBox all present. Gate FAIL 0/1 is solely the MediaPlayerElement AutomationId false-negative (its only enumerated control)."
+    },
+    {
+      "name": "Ad Insertion",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/06_Ad_Insertion.png",
+      "note": "Fully migrated: MediaPlayerElement, Load/Set Source, AutoPlay, LoggingListBox all present. Gate FAIL 0/1 is solely the MediaPlayerElement AutomationId false-negative (its only enumerated control)."
+    },
+    {
+      "name": "Live Seekable Range",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/07_Live_Seekable_Range.png",
+      "note": "All 19 controls present: MediaPlayerElement, DesiredSeekableWindowSize/DesiredLiveOffset text + Set buttons, PositionSlider, Log Times, GoToStart/GoToLive, Play/Pause, and all eight relative-seek buttons (<<15m..15m>>). Gate PARTIAL 10/19 is the MediaPlayerElement false-negative plus the HTML-escaped seek-button name mismatch. Direct invoke of GoToStart and DesiredSeekableWindowSizeButton via InvokePattern succeeded; PlayButton is display-only without loaded media (expected)."
+    }
+  ]
+}

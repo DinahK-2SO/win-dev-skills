@@ -1,0 +1,17 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0104 ambiguous reference for HttpClient/HttpRequestMessage/HttpResponseMessage between System.Net.Http and Windows.Web.Http, cascading into CS0535 'IHttpFilter.SendRequestAsync not implemented'. Cost multiple build iterations across ~8 files.",
+      "evidence": "session-log.txt build errors: \"CS0104: 'HttpClient' is an ambiguous reference between 'System.Net.Http.HttpClient' and 'Windows.Web.Http.HttpClient'\" and \"CS0535: 'AdaptiveMediaSourceHttpFilterLogger' does not implement interface member 'IHttpFilter.SendRequestAsync(HttpRequestMessage)'\"; csproj has <ImplicitUsings>enable</ImplicitUsings>.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md + SKILL.md + scripts for 'Windows.Web.Http', 'System.Net.Http', 'IHttpFilter', 'ambiguous', 'CS0104'. Only hit: CS0104 entry for LaunchActivatedEventArgs and a Validate-UwpMigration comment about LaunchActivatedEventArgs ambiguity. No mention of the Http family.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The WinUI 3 scaffold enables ImplicitUsings (global 'using System.Net.Http;'). UWP networking code uses Windows.Web.Http types, and the AdaptiveMediaSource/IHttpFilter request-modification API only works with Windows.Web.Http types, so the two namespaces collide.",
+      "proposed_fix": "Add a named 'Windows.Web.Http vs System.Net.Http (CS0104/CS0535)' subsection to the 'Common build errors after the namespace rewrite' section of MIGRATION-PATTERNS.md: explain the ImplicitUsings cause, instruct to keep Windows.Web.Http (drop the System.Net.Http using or alias it), and note IHttpFilter.SendRequestAsync is IAsyncOperationWithProgress<HttpResponseMessage, HttpProgress>(HttpRequestMessage) with all Windows.Web.Http types.",
+      "generalizes": "Windows.Web.Http + IHttpFilter is the standard UWP mechanism for HTTP/streaming request modification (auth headers, query params, caching, AdaptiveMediaSource). ImplicitUsings is enabled by every WinUI 3 .NET scaffold, so this exact CS0104/CS0535 collision recurs in any UWP app that does HTTP via Windows.Web.Http."
+    }
+  ]
+}
