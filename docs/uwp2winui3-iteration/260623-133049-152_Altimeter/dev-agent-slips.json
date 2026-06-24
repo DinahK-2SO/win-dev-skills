@@ -1,0 +1,14 @@
+{
+  "scenario": "Altimeter",
+  "index": 11,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Transient build error CS0103: 'App' does not exist in the current context (x5) after the scaffold root namespace was renamed to AltimeterApp.",
+      "evidence": "session-log.txt: 5x 'error CS0103: The name \\'App\\' does not exist in the current context'; later 'Build succeeded'. Final code qualifies AltimeterApp.App.MainWindow.",
+      "covered_clearly_at": "SKILL.md L63 'Namespace/type collision guard' — explicitly states the scaffold root namespace is renamed to '<Name>App' and to keep that renamed namespace for new scaffold files.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already prominently documents the renamed namespace; the agent recovered to a clean build within the same session. A capable re-run qualifies the App reference correctly without any skill edit."
+    }
+  ]
+}

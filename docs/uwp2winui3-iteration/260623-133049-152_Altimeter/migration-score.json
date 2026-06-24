@@ -1,0 +1,35 @@
+{
+  "scenario": "Altimeter",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 2,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 2,
+  "uwp_capture_status": "ok (with caveats): uwp-app-runner returned ok:true (pid 15860, windowTitle 'Altimeter C# Sample', SDK 10.0.26100.0, Release). The initial Data Events frame was captured as ground truth and the app rendered correctly. The UWP CoreWindow UIA subtree is not externally traversable (winapp inspect returns only a top-level Pane), so title-driven nav to scenario 2 and per-control actuation could not be driven via UI Automation; the Polling golden still shows Data Events and the __aNN frames are duplicates. Sensor is hardware-gated ('No altimeter found'), but UWP still renders all scenario controls.",
+  "winui_capture_status": "All winapp screenshots of the WinUI 3 window are blank white and could not be visually confirmed (PrintWindow does not capture WinUI 3 DirectComposition swapchains; GDI full-screen capture unavailable in this non-interactive session). Verdicts are based on the reliable UIA structural+behavioral evidence (ui/*.json, capture-manifest.json).",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_report": "parity/winui3/PARITY-REPORT.md",
+  "behavioral_regressions": 3,
+  "notes": "The migrated app builds, launches, and has a correct shell automation tree (scenario nav list with verbatim titles, status region). But it replaces BOTH scenarios' controls with a single global fallback ('This sample requires an altimeter device that is not available on this machine.'). Every scenario's defining controls (Enable, Disable, Get Data) and the altitude output are absent from the WinUI UIA tree, while the UWP original renders them regardless of sensor presence. Compare-Parity scored Data Events 2/2 PASS, but that is a FALSE POSITIVE caused by the labels 'Enable'/'Disable' matching the 'IsEnabled' UIA property substring; the buttons do not exist. Honest verdict: both scenarios fail.",
+  "features": [
+    {
+      "name": "Data Events",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Data_Events.png",
+      "note": "UWP shows Enable + Disable buttons and 'Altitude change(m):' output. WinUI shows only the global 'requires an altimeter device' fallback — no Enable/Disable buttons exist in the UIA tree. Compare-Parity's 2/2 coverage is a false positive (label 'Enable'/'Disable' matched 'IsEnabled' property substrings). All actions failed to invoke (responded:false)."
+    },
+    {
+      "name": "Polling",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Polling.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Polling.png",
+      "note": "UWP exposes the 'Get Data' button. WinUI shows only the global fallback; Compare-Parity coverage 0/1 (FAIL) — the Get Data button is absent. Action failed to invoke (responded:false). Note: the UWP Polling golden actually still shows the Data Events page because CoreWindow UIA nav could not be driven, but the source and the rendered UWP frame confirm the Get Data control exists in the original."
+    }
+  ]
+}

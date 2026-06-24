@@ -1,0 +1,80 @@
+{
+  "scenario": "Altimeter",
+  "created_at": "2026-06-24T09:05:00+08:00",
+  "uwp_capture_status": "partial: UWP launched (ok:true) and rendered correctly; initial Data Events frame captured as ground truth. The UWP CoreWindow's UIA subtree is not externally traversable (winapp inspect returns only a top-level Pane with no children), so title-driven navigation to scenario 2 and per-control actuation could not be driven via UI Automation. The Polling golden therefore still shows the Data Events page, and the __aNN after-click frames are duplicates. The sensor is also hardware-gated (status reads 'No altimeter found').",
+  "features": [
+    {
+      "id": "scenario-navigation",
+      "area": "Shell",
+      "name": "Scenario navigation list",
+      "description": "Left-hand list lets the user switch between the two scenarios. Items are titled '1) Data Events' and '2) Polling'.",
+      "expected_behaviour": [
+        "A selectable list shows '1) Data Events' and '2) Polling'",
+        "Selecting an item navigates the content pane to that scenario"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "weight": 1
+    },
+    {
+      "id": "data-events-enable",
+      "area": "Scenario 1 - Data Events",
+      "name": "Enable button (register altimeter reading-changed handler)",
+      "description": "The Enable button is present and enabled by default. Clicking it acquires the default Altimeter and subscribes to ReadingChanged, then disables Enable and enables Disable.",
+      "expected_behaviour": [
+        "An 'Enable' button is visible and enabled on the Data Events page",
+        "A 'Disable' button is visible (disabled until Enable is clicked)",
+        "Clicking Enable wires up the altimeter event handler (or reports 'No altimeter found' when no sensor)"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "weight": 2
+    },
+    {
+      "id": "data-events-disable",
+      "area": "Scenario 1 - Data Events",
+      "name": "Disable button (unsubscribe)",
+      "description": "The Disable button stops the ReadingChanged subscription and re-enables Enable.",
+      "expected_behaviour": [
+        "A 'Disable' button is visible on the Data Events page",
+        "Clicking Disable unsubscribes and re-enables the Enable button"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "weight": 1
+    },
+    {
+      "id": "data-events-output",
+      "area": "Scenario 1 - Data Events",
+      "name": "Altitude change output",
+      "description": "A text block reads 'Altitude change(m):' with the live value (or 'No data' before any reading).",
+      "expected_behaviour": [
+        "An 'Altitude change(m):' label with a value field is visible",
+        "It updates as ReadingChanged events arrive"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "weight": 1
+    },
+    {
+      "id": "polling-getdata",
+      "area": "Scenario 2 - Polling",
+      "name": "Get Data button (one-shot reading)",
+      "description": "On the Polling page a 'Get Data' button reads the altimeter once and displays the current altitude change.",
+      "expected_behaviour": [
+        "A 'Get Data' button is visible on the Polling page",
+        "Clicking it reads the altimeter once and updates the altitude output (or reports 'No altimeter found')"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "status-bar",
+      "area": "Shell",
+      "name": "Status output region",
+      "description": "A status region at the bottom shows 'Status:' plus a colored message such as 'No altimeter found'.",
+      "expected_behaviour": [
+        "A 'Status:' region is visible",
+        "It reflects the current scenario state / error (e.g. 'No altimeter found')"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "weight": 1
+    }
+  ]
+}

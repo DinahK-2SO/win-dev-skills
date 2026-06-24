@@ -1,0 +1,15 @@
+{
+  "scenario": "Altimeter",
+  "index": 11,
+  "applied": true,
+  "bullets": [
+    "Fix Defensive-UI rule in SKILL.md: device fallback must be additive, never collapse/replace controls the original renders unconditionally (was telling agents to swap out main content, which hid every scenario control on device-less boxes).",
+    "Treat null GetDefault() as the normal no-device path: preserve the source's status/NotifyUser handling and keep all controls visible/interactive, per the Fidelity rule."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "winui3-parity-check (eval skill, not edited): Compare-Parity false-positive where control labels 'Enable'/'Disable' matched the 'IsEnabled' UIA property substring, masking the missing buttons."
+  ]
+}

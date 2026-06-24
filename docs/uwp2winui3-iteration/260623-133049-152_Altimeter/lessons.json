@@ -1,0 +1,42 @@
+{
+  "scenario": "Altimeter",
+  "index": 11,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 (root namespace guard)", "evidence": "session-log: scaffold renamed to AltimeterApp to avoid the Altimeter type/namespace collision (CS0118 class)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "SKILL.md > Critical Rules > 'Defensive UI for device-dependent features' (lines 198-204)",
+      "wrong": "Rule says to wrap device init in try/catch and 'swap the page's main content for the fallback' with the text 'This sample requires a <device-kind> device that is not available on this machine.' The migrated Scenario1_DataEvents.xaml.cs followed this verbatim (ShowFallback() collapses MainContent and shows FallbackText with that exact sentence), hiding the Enable/Disable/Get Data controls and the altitude output whenever GetDefault() returns null.",
+      "correct": "The original UWP sample keeps all scenario controls visible and reports device absence via the existing status line (rootPage.NotifyUser(\"No altimeter found\", ...)). The defensive fallback must be additive and must never collapse/replace controls the original renders unconditionally; a null GetDefault() is the normal no-device path, not a fatal error."
+    }
+  ],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Altimeter.GetDefault()", "special_handling": "Returns null when no sensor is present (validation env has none). UWP SDK sensor samples handle null by reporting via NotifyUser and KEEPING controls visible — they never hide UI. Migration must preserve that exact behavior." },
+    { "api": "Window.Current.VisibilityChanged", "special_handling": "Mapped to App.MainWindow.VisibilityChanged (WindowVisibilityChangedEventArgs) per the Windowing pattern; handled correctly by the dev-agent." }
+  ],
+  "errors_encountered": [
+    {
+      "error": "error CS0103: The name 'App' does not exist in the current context (5 occurrences)",
+      "root_cause": "After the root-namespace guard renamed the scaffold to AltimeterApp, code-behind referenced App.MainWindow without the renamed namespace qualifier.",
+      "fix": "Qualified as AltimeterApp.App.MainWindow; build succeeded on a later turn."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Scenario1_DataEvents.xaml.cs / Scenario2_Polling.xaml.cs device-init",
+      "symptom": "Added a global ShowFallback that collapses the entire scenario UI when the altimeter is absent, hiding every interactive control.",
+      "turns_or_retries": "single-pass (followed skill guidance directly)",
+      "root_cause": "SKILL.md 'Defensive UI' rule explicitly instructs swapping the page's main content for a fallback message; the agent applied it to the null-sensor path, which is the normal no-device case the original handles without hiding controls.",
+      "how_resolved": "Not resolved — shipped; scoring flagged both scenarios fail (all controls missing).",
+      "preventable_by": "Correcting the 'Defensive UI' rule so the fallback is additive (report via the original status line, keep controls visible) and never replaces controls the original renders unconditionally."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Validation environment has no altimeter (GetDefault() returns null); PrintWindow capture of WinUI 3 DirectComposition swapchains is blank.", "workaround": "Scoring relied on UIA structural/behavioral evidence rather than pixels." }
+  ]
+}

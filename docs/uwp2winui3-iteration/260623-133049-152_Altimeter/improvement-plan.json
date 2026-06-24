@@ -1,0 +1,20 @@
+{
+  "scenario": "Altimeter",
+  "index": 11,
+  "applied": true,
+  "items": [
+    {
+      "problem": "The skill's 'Defensive UI for device-dependent features' rule instructs agents to 'swap the page's main content for the fallback' when a device is absent. The migration agent followed it verbatim (FallbackText matches the skill's example sentence), collapsing all scenario controls (Enable/Disable/Get Data + altitude output) when GetDefault() returns null. Both scenarios scored fail; every interactive control is missing from the WinUI UIA tree.",
+      "evidence": "migration-score.json (features_fail:2, both 'fail', winui_responded:false); discrepancies.json id=global-fallback-overrides-scenarios; migrated Scenario1_DataEvents.xaml.cs ShowFallback() collapses MainContent; original UWP Scenario1_DataEvents.xaml.cs keeps controls and calls NotifyUser('No altimeter found').",
+      "root_cause": "The rule prescribes REPLACING the page's main content (contradicting the Fidelity rule) and is applied to the normal null-GetDefault() no-device path that UWP samples handle without hiding controls.",
+      "tier": 3,
+      "change": "Rewrote SKILL.md 'Defensive UI for device-dependent features' into two rules: (1) preserve the original's device-absent behaviour — a null GetDefault() is normal, report via the existing status/NotifyUser mechanism and NEVER hide/collapse/replace controls the original renders unconditionally; (2) add an ADDITIVE fallback only when init can throw or the page would otherwise be blank, surfaced via the status region or a TextBlock alongside the controls — never Visibility.Collapsed on main content. Added a falsifiable check requiring the same named controls in the WinUI UIA tree even with no device.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Migration agents reproduce the original's device-absent handling, leaving all scenario controls present and interactive on a device-less validation box across the whole sensor/hardware sample family.",
+      "falsifiable_check": "On a re-run, the WinUI UIA tree for each scenario contains the same named controls as the source (e.g. ScenarioEnableButton, ScenarioDisableButton, 'Get Data') even with no altimeter; requirements 1-4 go fail->pass and no global 'requires a ... device' message replaces the controls. Tier-3 chosen because the defect is incorrect instructional prose — only correcting the prose can un-say wrong guidance; no script emits this fallback, so a Tier 1/2 change cannot carry it."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-skill limitation (not edited): Compare-Parity counted 'Enable'/'Disable' as covered via substring match against the 'IsEnabled' UIA property, a false positive that masked the missing buttons. This belongs to winui3-parity-check (measurement instrument) and is out of scope here."
+  ]
+}

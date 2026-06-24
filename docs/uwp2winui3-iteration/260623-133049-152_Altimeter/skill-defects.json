@@ -1,0 +1,17 @@
+{
+  "scenario": "Altimeter",
+  "index": 11,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The defensive device-fallback hides every scenario control (Enable, Disable, Get Data, altitude output) when the hardware is absent, instead of keeping the controls and reporting absence via the status line. Both scenarios score fail; all controls missing from the WinUI UIA tree.",
+      "evidence": "migration-score.json (features_fail:2, both Data Events & Polling 'fail', winui_responded:false); discrepancies.json id=global-fallback-overrides-scenarios; migrated Scenario1_DataEvents.xaml.cs ShowFallback() collapses MainContent and sets FallbackText='This sample requires an altimeter device that is not available on this machine.'; original UWP Scenario1_DataEvents.xaml.cs (uwp-samples-standalone/Samples/Altimeter/cs) calls rootPage.NotifyUser('No altimeter found',...) and never hides controls.",
+      "skill_search": "Grepped winui-uwp-migration for: fallback, GetDefault, sensor, hardware, device, 'swap the page'. Hit: SKILL.md lines 198-204 'Defensive UI for device-dependent features'.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "SKILL.md L202: 'every device-dependent page must show a visible fallback when device acquisition or initialization throws. The fallback can be as simple as a centred TextBlock saying \"This sample requires a <device-kind> device that is not available on this machine.\" ... Wrap the init call in try/catch; on catch, swap the page's main content for the fallback (don't only log and return).'",
+      "root_cause": "The rule (a) prescribes REPLACING the page's main content, which deletes controls the original renders unconditionally — directly contradicting the Fidelity rule (controls/names/handlers must be preserved); and (b) is applied by agents to the normal null-GetDefault() no-device path, which UWP SDK samples handle by reporting via NotifyUser while keeping controls visible. The verbatim match between the migrated FallbackText and the skill's example sentence proves the agent followed the skill into failure.",
+      "proposed_fix": "Rewrite SKILL.md 'Defensive UI' rule: the fallback must be ADDITIVE and must NEVER collapse/replace controls the original renders unconditionally. Preserve the original's device-absent handling exactly (report via the existing status/NotifyUser mechanism, keep all controls visible/enabled). Treat a null GetDefault() as the normal no-device path, not a fatal error. Only add a separate fallback message (alongside, not replacing, the controls) for the case where init throws an unhandled exception that would otherwise leave a blank window. Cross-reference the Fidelity rule so the two no longer conflict.",
+      "generalizes": "Nearly every UWP SDK hardware/sensor sample (Accelerometer, Compass, Gyrometer, Barometer, Altimeter, Inclinometer, LightSensor, Magnetometer, ProximitySensor, geolocation, Bluetooth, camera, …) uses the same 'GetDefault() == null -> NotifyUser, keep controls' shape and is migrated on a validation box that lacks the device. The current rule makes the agent hide all controls on EVERY such sample, guaranteeing a parity failure. Fixing the rule fixes the whole family."
+    }
+  ]
+}
