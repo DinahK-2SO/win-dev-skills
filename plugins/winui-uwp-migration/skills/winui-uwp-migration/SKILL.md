@@ -131,7 +131,7 @@ A WinUI 3 app can build cleanly and still crash the instant it starts, so "it co
 
 When a **build** error points at a UWP API, fetch the relevant anchor and apply the pattern. For example, a CS0246 on `Window.Current` → `Get-MigrationPattern.ps1 -Anchor windowing`; an analyzer warning about `CoreDispatcher` → `Get-MigrationPattern.ps1 -Anchor threading`. Open `MIGRATION-PATTERNS.md` directly only as a last resort — one anchor at a time keeps each turn small.
 
-When the app **crashes at launch**, fix the frame the captured stack names — then build and launch again. Do **not** sprinkle `File.WriteAllText` traces through `Program.cs` / `App.xaml.cs` and re-run in a loop: blind tracing is the single biggest time sink in this phase, and the exception `Test-AppLaunch.ps1` already captured tells you where the throw is. (Note: a custom `Program.Main` for WinUI 3 **correctly** uses `[STAThread]` — that is not the bug.)
+When the app **crashes at launch**, fix the frame the captured stack names — then build and launch again. Do **not** sprinkle `File.WriteAllText` traces through `Program.cs` / `App.xaml.cs` and re-run in a loop: blind tracing is the single biggest time sink in this phase, and the exception `Test-AppLaunch.ps1` already captured tells you where the throw is. **The captured stack almost always ends at `Application.Start` ← `Program.Main`; that is the reporting frame, not the cause — never "fix" it by removing `[STAThread]`, switching to MTA, or adding `DISABLE_XAML_GENERATED_MAIN` + a hand-written `Program.cs` (the SDK auto-generates a correct `Main` into `App.g.i.cs`). See the [entry-point anti-pattern](./MIGRATION-PATTERNS.md#startup-crashes).**
 
 > **Build command discipline (avoid agent stalls):**
 >

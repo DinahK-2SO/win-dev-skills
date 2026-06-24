@@ -1,0 +1,23 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "On a startup crash whose captured stack bottoms out at Application.Start <- Program.Main (here COMException 0x8001010E, 'Application Object must initially be accessed from the multi-thread apartment'), the agent concluded the entry point/apartment was wrong, added DISABLE_XAML_GENERATED_MAIN + a hand-rolled Program.cs that drops [STAThread] and InitializeComWrappers(), and never recovered — leaving the app permanently broken.",
+      "evidence": "session-log L5200-5206 (crash at Application.Start with the SDK-generated [STAThread] Main, before any custom Program.cs existed); L7815 ('the [STAThread] is there, but still crashes. Let me try adding a custom Program.cs to override with MTA threading'); final Accelerometer.csproj defines DISABLE_XAML_GENERATED_MAIN and Program.cs Main lacks [STAThread] + InitializeComWrappers().",
+      "covered_at": "MIGRATION-PATTERNS.md#startup-crashes L297 ('Do not assume the entry point is the problem ... [STAThread] is required, not a bug ...') and SKILL.md L134 ('a custom Program.Main for WinUI 3 correctly uses [STAThread] — that is not the bug').",
+      "why_missed": "not prominent — it is a single trailing blockquote / parenthetical, while the 0x8001010E table row (L293) lists only 'UWP API in a static initializer' and never says the throw routinely surfaces *at* Application.Start without the entry point being the cause. The captured stack therefore pulled the agent straight to the entry point, against the buried warning.",
+      "proposed_improvement": "Promote the existing warning into a prominent, named ANTI-PATTERN in the startup-crashes section: state explicitly that a throw surfacing at Application.Start/Program.Main does NOT mean the entry point is wrong; forbid the specific edits (remove [STAThread], switch to MTA, add DISABLE_XAML_GENERATED_MAIN, hand-roll Program.cs); and add a one-liner that Program.Main is auto-generated into obj/.../App.g.i.cs so there is nothing to hunt for and nothing to write by hand. Enrich the 0x8001010E row to point at this anti-pattern.",
+      "generalizes": "Every WinUI 3 startup/activation crash produces a managed stack that ends at Application.Start <- Program.Main regardless of the true cause, so any migration agent is tempted to 'fix' the entry point. A prominent anti-pattern + the auto-generated-Main fact prevents this rabbit hole and the regression it causes across all scenarios."
+    },
+    {
+      "problem": "The agent spent ~250+ turns spelunking NuGet packages, .targets/.props and template .nupkg files to find where Program.Main is defined.",
+      "evidence": "session-log L5207-7815: repeated searches of obj/*.g.cs, ~/.nuget, C:/.tools/.nuget, dotnet templates for 'Program', 'STAThread', 'EntryPoint', 'Application.Start'; resolved only at L7755-7773 when App.g.i.cs's generated Main was finally located.",
+      "covered_at": "MIGRATION-PATTERNS.md#startup-crashes L269 mentions 'before your managed Main even runs' but never states where Main lives or that it is auto-generated.",
+      "why_missed": "under-emphasised — the skill never tells the agent that WinUI 3's Program.Main is auto-generated into obj/.../App.g.i.cs under '#if !DISABLE_XAML_GENERATED_MAIN', so the agent had no anchor and improvised a long search.",
+      "proposed_improvement": "Fold a single factual sentence into the same anti-pattern: 'WinUI 3 auto-generates Program.Main into obj/.../App.g.i.cs (gated by DISABLE_XAML_GENERATED_MAIN); you normally have no Program.cs — do not search for it or create one.'",
+      "generalizes": "Locating the generated entry point is a recurring confusion in any UWP→WinUI 3 conversion that hits a startup crash; one sentence removes the time sink universally."
+    }
+  ]
+}

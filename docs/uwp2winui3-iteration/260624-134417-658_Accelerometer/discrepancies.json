@@ -1,0 +1,22 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "score": 0,
+  "builds": true,
+  "runs": false,
+  "requirements": [
+    { "id": 1, "text": "Choose accelerometer (ComboBox ReadingTypeComboBox)", "status": "fail", "reason": "Startup crash before any window; control never rendered.", "suspected_skill_gap": "Startup-crash diagnosis anti-pattern not prominent enough; agent mangled entry point instead of fixing activation path." },
+    { "id": 2, "text": "Data events (Enable/Disable, X/Y/Z on ReadingChanged)", "status": "fail", "reason": "Unreachable — startup crash.", "suspected_skill_gap": "Same root crash." },
+    { "id": 3, "text": "Shake events (Enable/Disable, shake count)", "status": "fail", "reason": "Unreachable — startup crash.", "suspected_skill_gap": "Same root crash." },
+    { "id": 4, "text": "Polling (Enable/Disable, polled X/Y/Z on timer)", "status": "fail", "reason": "Unreachable — startup crash.", "suspected_skill_gap": "Same root crash." },
+    { "id": 5, "text": "Orientation change (Enable/Disable, orientation-adjusted X/Y/Z)", "status": "fail", "reason": "Unreachable — startup crash.", "suspected_skill_gap": "Same root crash." },
+    { "id": 6, "text": "Data events batching (Enable/Disable, batched X/Y/Z)", "status": "fail", "reason": "Unreachable — startup crash.", "suspected_skill_gap": "Same root crash." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Whole app", "uwp": "ListBox of 6 scenarios + per-scenario controls render", "winui": "No window ever shown (process dies at Application.Start).", "screenshot_ref": "parity/winui3 — no winui screenshot captured (winui_screenshot=null for all 6)" }
+  ],
+  "missing_features": [
+    "Choose accelerometer", "Data events", "Shake events", "Polling", "Orientation change", "Data events batching"
+  ],
+  "summary": "Migration builds clean but crashes at startup (0x8001010E at Application.Start). The agent misdiagnosed it as an entry-point/apartment bug, hand-rolled an MTA Program.cs with DISABLE_XAML_GENERATED_MAIN, and never recovered, so all 6 scenarios are unreachable (score 0)."
+}

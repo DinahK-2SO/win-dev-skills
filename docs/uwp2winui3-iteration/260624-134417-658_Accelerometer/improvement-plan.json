@@ -1,0 +1,30 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Startup crash whose captured stack ends at Application.Start <- Program.Main led the agent to mutate the entry point (DISABLE_XAML_GENERATED_MAIN + hand-rolled MTA Program.cs dropping [STAThread]/InitializeComWrappers), permanently breaking the app (score 0/6).",
+      "evidence": "session-log L5200-5206 (crash with correct generated [STAThread] Main), L7815 ('try adding a custom Program.cs to override with MTA threading'); final csproj DISABLE_XAML_GENERATED_MAIN + Program.cs Main lacking [STAThread]+InitializeComWrappers.",
+      "root_cause": "The skill's 'do not assume the entry point is the problem' note was a buried parenthetical, and the 0x8001010E table row pointed only to 'UWP API in a static initializer', so the Application.Start reporting frame misled the agent into the forbidden entry-point edits.",
+      "tier": 3,
+      "change": "Promote the buried entry-point note into a prominent '🚫 Anti-pattern' block in MIGRATION-PATTERNS.md#startup-crashes: a throw at Application.Start/Program.Main is the reporting frame, not the cause; forbid removing [STAThread]/switching to MTA/adding DISABLE_XAML_GENERATED_MAIN/hand-rolling Program.cs. Cross-link the 0x8001010E row and SKILL.md L134 to it.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md (+ skills/winui-uwp-migration/SKILL.md cross-ref)",
+      "expected_effect": "On a re-run hitting a startup crash, the agent fixes the activation path / package refs instead of editing the entry point, so it does not introduce the 0x8001010E regression.",
+      "falsifiable_check": "Re-run build-events show no DISABLE_XAML_GENERATED_MAIN added and no hand-written Program.cs created; Validate-UwpMigration Section 7 does not report a 0x8001010E 'multi-thread apartment' crash caused by an entry-point edit."
+    },
+    {
+      "problem": "Agent spent ~250+ turns hunting NuGet/targets/templates for where Program.Main is defined.",
+      "evidence": "session-log L5207-7815 repeated searches; resolved only at L7755-7773 when App.g.i.cs's generated Main was located.",
+      "root_cause": "The skill never states that WinUI 3 auto-generates Program.Main into obj/.../App.g.i.cs (gated by DISABLE_XAML_GENERATED_MAIN).",
+      "tier": 3,
+      "change": "Add a one-sentence fact to the same anti-pattern block: Program.Main is auto-generated into obj/<config>/.../App.g.i.cs under '#if !DISABLE_XAML_GENERATED_MAIN'; you normally have no Program.cs — don't search for it or create one.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent stops spelunking for the entry point, saving a large turn budget that previously starved the actual fix.",
+      "falsifiable_check": "Re-run build-events show no multi-turn search of ~/.nuget / .targets / templates for 'Program'/'STAThread'/'EntryPoint'."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier 0: the underlying Accelerometer crash reproduced inside native Application.Start even with the correct generated [STAThread] Main (session-log L5200-5206), consistent with a Windows App SDK package/runtime mismatch (csproj pins Microsoft.WindowsAppSDK 2.2.0 while microsoft.windowsappsdk.winui 2.2.1 was on the restore path). If the scaffold/preset pins these versions, align them — out of scope for an in-skill prose edit."
+  ]
+}

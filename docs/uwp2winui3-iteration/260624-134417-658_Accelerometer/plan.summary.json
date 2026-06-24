@@ -1,0 +1,17 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "winui-uwp-migration: add prominent '🚫 entry-point' anti-pattern to startup-crashes — a throw at Application.Start/Program.Main is the reporting frame, not the cause; forbid removing [STAThread], switching to MTA, or adding DISABLE_XAML_GENERATED_MAIN + a hand-rolled Program.cs (this exact mis-fix scored Accelerometer 0/6).",
+    "winui-uwp-migration: state that Program.Main is auto-generated into obj/.../App.g.i.cs (you normally have no Program.cs) so agents stop spelunking NuGet/targets/templates for the entry point.",
+    "winui-uwp-migration: cross-link the 0x8001010E row and SKILL.md launch guidance to the new anti-pattern."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Tier 0: align Windows App SDK package versions (Microsoft.WindowsAppSDK 2.2.0 vs microsoft.windowsappsdk.winui 2.2.1) in the scaffold/preset — the underlying Application.Start crash reproduced with the correct generated [STAThread] Main, consistent with a package/runtime mismatch."
+  ]
+}

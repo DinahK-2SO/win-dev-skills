@@ -1,0 +1,22 @@
+{
+  "scenario": "Accelerometer",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 6,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 6,
+  "uwp_capture_status": "ok-with-caveat: original UWP app launched (Release/.NET Native, pid 27992, window 'Accelerometer C# Sample') and initial golden frame captured, but title-driven per-scenario UIA navigation/actuation did not resolve the scenario ListBox items (UWP CoreWindow exposed only a Pane to UI Automation); per-scenario golden frames reflect the initial frame and UWP button responses were not behaviorally confirmed. Does not affect scoring — migration is unreachable for every scenario.",
+  "migration_build_status": "builds (0 errors, 30 warnings)",
+  "migration_launch_status": "crashed at startup: 0xe0434352 System.Runtime.InteropServices.COMException 'The application called an interface that was marshalled for a different thread.'",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    { "name": "Choose accelerometer", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/01_Choose_accelerometer.png", "winui_screenshot": null, "note": "WinUI app crashed before any window; ComboBox (ReadingTypeComboBox) never rendered. UWP control present in golden." },
+    { "name": "Data events", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/02_Data_events.png", "winui_screenshot": null, "note": "Enable/Disable buttons and X/Y/Z output unreachable (startup crash)." },
+    { "name": "Shake events", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/03_Shake_events.png", "winui_screenshot": null, "note": "Enable/Disable buttons and shake count unreachable (startup crash)." },
+    { "name": "Polling", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/04_Polling.png", "winui_screenshot": null, "note": "Enable/Disable buttons and polled X/Y/Z output unreachable (startup crash)." },
+    { "name": "Orientation change", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/05_Orientation_change.png", "winui_screenshot": null, "note": "Enable/Disable buttons and orientation-adjusted output unreachable (startup crash)." },
+    { "name": "Data events batching", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/06_Data_events_batching.png", "winui_screenshot": null, "note": "Enable/Disable buttons and batched output unreachable (startup crash)." }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1 (Section 7 smoke launch via Test-AppLaunch.ps1)", "evidence": "session-log L5998-6008: build passed (0 errors, 0 WUI warnings) but the validator FAILed on the runtime smoke launch and captured the real crash (0xe0434352 / COMException), correctly refusing to declare done." },
+    { "tool": "Test-AppLaunch.ps1 WER capture (events 1000 + 1026)", "evidence": "session-log L6043-6054: captured the managed exception type, message and stack (Application.Start <- Program.Main) so the throwing frame was visible without blind tracing." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "MIGRATION-PATTERNS.md startup-crashes table", "limitation": "The 0x8001010E row only lists 'UWP API touched from a static initializer/off the UI thread' and does not warn that the throw routinely surfaces *at* Application.Start/Program.Main without the entry point being the cause — so the captured stack actively misled the agent toward the entry point.", "suggested_tweak": "Add an explicit anti-pattern: a throw at Application.Start does NOT mean the generated [STAThread] Main is wrong; do not switch apartment / add DISABLE_XAML_GENERATED_MAIN." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Accelerometer ReadingChanged (UWP Dispatcher.RunAsync)", "special_handling": "Converted to DispatcherQueue.TryEnqueue with HasThreadAccess guard in NotifyUser — this part was handled correctly per the skill's threading anchor." }
+  ],
+  "errors_encountered": [
+    { "error": "System.Runtime.InteropServices.COMException (0x8001010E) 'The application called an interface that was marshalled for a different thread. The Application Object must initially be accessed from the multi-thread apartment.' at Microsoft.UI.Xaml.Application.Start <- Accelerometer.Program.Main", "root_cause": "Startup/activation crash inside native Application.Start. It reproduced even with the SDK-generated [STAThread] Main (session-log L5200-5206, BEFORE the agent added any custom Program.cs), so the entry point was NOT the cause — the true cause is a startup-activation/runtime issue (a thread-affined object reached during App/MainWindow construction, or a WindowsAppSDK package/runtime mismatch). The agent then mis-'fixed' the entry point and never recovered.", "fix": "Do not mutate the entry point. Keep the SDK-generated [STAThread] Main; investigate the activation path / App+MainWindow constructors and package references instead." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Startup-crash diagnosis, session-log L5207-7815 (~250+ turns)", "symptom": "After the validator captured the crash at Application.Start, the agent spent a very large number of turns hunting through NuGet packages, .targets, .props and template .nupkg files trying to find where Program.Main is generated, then concluded the threading apartment was wrong.", "turns_or_retries": "hundreds of turns spelunking obj/*.g.cs, ~/.nuget, .tools/.nuget, dotnet templates", "root_cause": "The agent did not know WinUI 3's Program.Main is auto-generated into obj/.../App.g.i.cs (gated by DISABLE_XAML_GENERATED_MAIN), and the skill's 'do not assume the entry point is the problem' guidance was only a buried parenthetical, so the captured Application.Start stack pulled it down a rabbit hole.", "how_resolved": "Never resolved; trial ended with the app still crashing.", "preventable_by": "A prominent anti-pattern in MIGRATION-PATTERNS.md#startup-crashes stating (a) Program.Main is auto-generated into App.g.i.cs — don't hunt for it or hand-roll one, and (b) a throw at Application.Start does not mean the entry point is wrong; never remove [STAThread], switch to MTA, or add DISABLE_XAML_GENERATED_MAIN to chase a startup crash." },
+    { "where": "Entry-point 'fix' regression, session-log L7815 + final Program.cs/csproj", "symptom": "Agent added <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants> and a hand-written Program.cs whose Main drops [STAThread] and WinRT.ComWrappersSupport.InitializeComWrappers().", "turns_or_retries": "1 decisive wrong edit, never reverted", "root_cause": "Misattributed the Application.Start crash to apartment state; deliberately switched to MTA. This is precisely the anti-pattern the skill warns against, but the warning was too weak to stop it.", "how_resolved": "Not resolved; this left the app permanently broken.", "preventable_by": "Same anti-pattern callout naming the exact forbidden edits ([STAThread] removal, MTA, DISABLE_XAML_GENERATED_MAIN, hand-rolled Program.cs)." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

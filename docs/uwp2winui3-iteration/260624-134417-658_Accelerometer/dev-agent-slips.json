@@ -1,0 +1,21 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "In MainPage.OnNavigatedTo the agent reads global::Accelerometer.App.MainWindow!.Bounds.Width, and MainWindow's constructor calls RootFrame.Navigate(typeof(MainPage)) before App assigns App.MainWindow in OnLaunched — a latent static-window init-order race (would throw E_POINTER if reached).",
+      "evidence": "MainWindow.xaml.cs L25 navigates in ctor; App.xaml.cs L22-24 assigns MainWindow after 'new MainWindow()' returns; MainPage.xaml.cs L33/L52 dereference App.MainWindow!. (Latent only — the app dies earlier at Application.Start, so this never executes.)",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md windowing section 'Initialization order — keep MainWindow's constructor inert' (App.MainWindow is null for the entire duration of new MainWindow(); assign before activate, defer first navigation) and the 0x80004003 row in #startup-crashes.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already covers this prominently and correctly with a dedicated 'keep the constructor inert / navigate after Activate' pattern; a capable model that followed it would not navigate in the ctor. It is also not the active failure here, so no skill edit is warranted."
+    },
+    {
+      "problem": "The agent did not revert its own regressive entry-point edit even after the validator kept FAILing with the same crash.",
+      "evidence": "Final Program.cs/csproj still carry DISABLE_XAML_GENERATED_MAIN + MTA Main at end of trial; session-log shows no revert.",
+      "covered_clearly_at": "SKILL.md L134 + MIGRATION-PATTERNS.md L297 both say the custom Main correctly uses [STAThread] and that deleting a hand-written entry point to let the SDK generate Main is the simplest path.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "Reverting an experimental edit that didn't help is generic engineering discipline already implied by the skill's guidance; the prose change for gap #1 reinforces it without needing a slip-specific rule."
+    }
+  ]
+}

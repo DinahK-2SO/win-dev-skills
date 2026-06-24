@@ -290,11 +290,19 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | Exception code | Meaning | Usual migration cause → where to look |
 |---|---|---|
 | `0x80004003` | `E_POINTER` | Static-window **init-order race** — a `Page` read `App.MainWindow` (or another static window reference) before `OnLaunched` assigned it. Keep `MainWindow`'s constructor inert and navigate after `Activate`. See [Initialization order](#windowing). |
-| `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
+| `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. **The managed stack for this code almost always bottoms out at `Application.Start` ← `Program.Main` — that is the *reporting* frame, not the cause. Do not "fix" the entry point (see the anti-pattern below).** |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
 | `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
 
-> Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
+> **🚫 Anti-pattern — never "fix" a startup crash by mutating the entry point.**
+> A startup/activation crash *always* surfaces with a managed stack ending at `Microsoft.UI.Xaml.Application.Start` ← `Program.Main` (the native activation throws there), **no matter what the real cause is**. This frame is a red herring: it does **not** mean the entry point, the apartment, or the threading model is wrong. When you see it, do **NOT**:
+> - remove or change `[STAThread]`, or switch the main thread to **MTA**;
+> - add `DISABLE_XAML_GENERATED_MAIN` and hand-write a `Program.cs`;
+> - delete `WinRT.ComWrappersSupport.InitializeComWrappers()` or the `DispatcherQueueSynchronizationContext` setup.
+>
+> All of those edits *introduce* a `0x8001010E` "the Application Object must initially be accessed from the multi-thread apartment" crash and leave the app permanently broken. The SDK-generated `Main` is already correct — `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` is the **required** WinUI 3 entry point.
+>
+> **You normally have no `Program.cs` at all.** WinUI 3 auto-generates `Program.Main` into `obj/<config>/.../App.g.i.cs` under `#if !DISABLE_XAML_GENERATED_MAIN` — do not go hunting for it in NuGet packages, `.targets`, or templates, and do not create your own. Instead, fix the frame the captured **event 1026** stack actually names (a thread-affined object built in a `static`/type initializer or in the `App`/`MainWindow` constructor), or suspect a Windows App SDK **package/version mismatch**. If you already added a hand-written entry point and the crash persists, the fix is to **delete it** (and the `DISABLE_XAML_GENERATED_MAIN` define) and let the SDK generate `Main`.
 
 The Step 4 validator runs this same check (`Validate-UwpMigration.ps1` Section 7) and **fails** when the app registers but dies at startup, surfacing the captured signature in `.validator-diagnostics.txt`.
 
