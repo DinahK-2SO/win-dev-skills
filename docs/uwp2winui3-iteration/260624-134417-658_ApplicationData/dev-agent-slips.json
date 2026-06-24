@@ -1,0 +1,14 @@
+{
+  "scenario": "ApplicationData",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS8618 non-nullable property warnings on Title/ClassType in SampleConfiguration.cs (build warnings, never errors).",
+      "evidence": "build-output.txt:8-11 — two CS8618 warnings; build still SUCCEEDED. Not on the rubric, no functional impact, score 100.",
+      "covered_clearly_at": "N/A — this is benign scaffold nullable-context noise, not a migration defect; the build and both features pass regardless.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Cosmetic nullable warning inherent to the SDK-sample SampleConfiguration pattern under nullable-enabled projects; does not affect build success or behavior, so no generalizable skill change is warranted."
+    }
+  ]
+}

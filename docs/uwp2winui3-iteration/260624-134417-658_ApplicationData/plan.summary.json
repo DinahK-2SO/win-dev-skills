@@ -1,0 +1,15 @@
+{
+  "scenario": "ApplicationData",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Document CS0118 'X is a namespace but is used like a type': project RootNamespace (== project name) shadows an identically-named Windows.* type; fix by fully-qualifying the WinRT type. Recurs for any sample named after the API it demos.",
+    "Document the WMC1509/WMC0909/WMC1111/WMC9999 XAML cascade caused by a C# compile error: fix the C# error and clean stale obj/x64 first instead of editing correct XAML; cross-referenced from the x:Bind section."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Scaffold could set a RootNamespace distinct from the project name to prevent the CS0118 collision class at the source (harness/scaffold change, out of scope for the migration skill)."
+  ]
+}

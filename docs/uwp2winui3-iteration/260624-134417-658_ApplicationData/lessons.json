@@ -1,0 +1,40 @@
+{
+  "scenario": "ApplicationData",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "winapp build / dotnet build", "evidence": "Build at TURN ~28 surfaced the exact compiler/XAML errors (CS0118, WMC0909/WMC1111/WMC1509) that pinpointed the namespace collision; final build succeeded with only CS8618 nullable warnings (build-output.txt)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Storage.ApplicationData / SetVersionAsync / SetVersionRequest / SetVersionDeferral", "special_handling": "These WinRT storage APIs work unchanged under WinUI 3, but because the project was named 'ApplicationData' the unqualified reference 'ApplicationData.Current' bound to the project's own root namespace, not the Windows.Storage type. Had to fully-qualify as Windows.Storage.ApplicationData." }
+  ],
+  "errors_encountered": [
+    {
+      "error": "CS0118: 'ApplicationData' is a namespace but is used like a type (Scenario7_SetVersion.xaml.cs)",
+      "root_cause": "The WinUI 3 scaffold's default RootNamespace equals the project name 'ApplicationData' (the project is named after the UWP sample, which is itself named after the Windows.Storage.ApplicationData API it demonstrates). That project-level namespace shadowed the identically-named Windows.Storage type, so 'using Windows.Storage;' + unqualified 'ApplicationData appData = ApplicationData.Current;' resolved 'ApplicationData' to the namespace.",
+      "fix": "Fully-qualify every collision: 'Windows.Storage.ApplicationData appData = Windows.Storage.ApplicationData.Current;', and qualify SetVersionRequest/SetVersionDeferral too; drop the now-redundant 'using Windows.Storage;'."
+    },
+    {
+      "error": "XamlCompiler WMC0909 'Cannot resolve DataType local:Scenario', WMC1111 'DataTemplates containing x:Bind need a DataType', WMC1509 'No LocalAssembly parameter given during MarkupCompilePass2', WMC9999 internal error (MainPage.xaml)",
+      "root_cause": "Cascade, NOT a real XAML defect. Because the C# code-behind failed to compile (CS0118 above), MarkupCompilePass2 ran without a LocalAssembly (WMC1509), so it could not resolve project-local types referenced by x:Bind/x:DataType and emitted spurious WMC0909/WMC1111/WMC9999. Stale obj/x64 artifacts from an earlier build compounded it.",
+      "fix": "Fix the underlying C# compile error first, remove stale obj/x64 + bin/x64/Debug, then rebuild. The XAML errors disappear with no XAML change."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "TURN 28-30, Scenario7_SetVersion.xaml.cs + MainPage.xaml",
+      "symptom": "Build failed with 4 errors; agent stated 'Two issues to fix: (1) namespace conflict in Scenario7, (2) XAML type resolution' — treating the XAML WMC errors as an independent second problem.",
+      "turns_or_retries": "~2 build cycles (one failing build, fix, clean obj, rebuild)",
+      "root_cause": "The skill documents CS0104 ambiguous-reference and XLS0414/MC3074 stale-prefix XAML errors, but neither the CS0118 project-name/type collision nor the 'C# compile error cascades into spurious WMC0909/WMC1111' relationship is documented, so the agent had to infer both from scratch.",
+      "how_resolved": "Agent fully-qualified the Windows.Storage types and cleaned stale obj/x64 before rebuilding; build then succeeded.",
+      "preventable_by": "Add a CS0118 entry to MIGRATION-PATTERNS 'Common build errors after the namespace rewrite', and a note that a C# compile error produces a misleading WMC1509/WMC0909/WMC1111 XAML cascade (fix the C# error first)."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Stale obj/x64 + bin/x64/Debug from an earlier (UWP-style) build aggravated the XAML markup-compile cascade.", "workaround": "Remove obj/x64 and bin/x64/Debug, then rebuild." }
+  ]
+}

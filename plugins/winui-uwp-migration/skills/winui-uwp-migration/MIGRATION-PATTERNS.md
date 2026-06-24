@@ -27,6 +27,36 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0118: 'X' is a namespace but is used like a type`
+
+UWP SDK samples are conventionally named after the WinRT API they demonstrate (`ApplicationData`, `DataTransfer`, `FileAccess`, `Appointments`, `Compositor`, …). The WinUI 3 scaffold sets the project's **`RootNamespace` to the project name**, which is that same identifier — so the project now owns a namespace whose name **collides with the `Windows.*` runtime type** the sample uses. An unqualified reference like `ApplicationData.Current` then binds to *your project's namespace*, not the type:
+
+```csharp
+using Windows.Storage;
+ApplicationData appData = ApplicationData.Current;   // CS0118: 'ApplicationData' is a namespace…
+```
+
+Fix by **fully qualifying the WinRT type** (and dropping the now-redundant `using`):
+
+```csharp
+Windows.Storage.ApplicationData appData = Windows.Storage.ApplicationData.Current;
+// …and qualify any other colliding members the file uses, e.g.
+// Windows.Storage.SetVersionRequest, Windows.Storage.SetVersionDeferral
+```
+
+Alternatively, give the project a distinct `RootNamespace` in the `.csproj` so it no longer shadows the type. Fully-qualifying at the use site is the most local, lowest-risk fix and is preferred. This collision is common precisely because the sample's name *is* the API name — watch for it whenever the project name matches a `Windows.*` type.
+
+### `WMC0909` / `WMC1111` / `WMC1509` / `WMC9999` — phantom XAML errors caused by a C# compile error
+
+A failed **C#** compile cascades into misleading XAML markup-compiler errors. When code-behind doesn't compile, `MarkupCompilePass2` runs with **no `LocalAssembly`** (`WMC1509: No LocalAssembly parameter given`) and can no longer resolve project-local types referenced by `x:Bind` / `x:DataType`, so it emits `WMC0909 Cannot resolve DataType local:…`, `WMC1111 DataTemplates containing x:Bind need a DataType`, and even `WMC9999` internal errors — **for XAML that is actually correct**.
+
+Do **not** start editing the XAML or adding `x:DataType` attributes. Instead:
+
+1. Find and fix the real **C# compile error** in the same build (e.g. a `CS0118` above) first.
+2. Delete stale `obj\x64` and `bin\x64\Debug` (leftover build artifacts compound the cascade), then rebuild.
+
+Once the code-behind compiles, the `WMC*` errors disappear with no XAML change.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -575,7 +605,7 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 ### `x:Bind` and compiled bindings
 
-`x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+`x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML. But if it emits `WMC0909 Cannot resolve DataType` / `WMC1111` / `WMC1509` for XAML that looks correct, the cause is usually a **C# compile error**, not the XAML — see [phantom XAML errors caused by a C# compile error](#wmc0909--wmc1111--wmc1509--wmc9999--phantom-xaml-errors-caused-by-a-c-compile-error).
 
 ### Page root element
 

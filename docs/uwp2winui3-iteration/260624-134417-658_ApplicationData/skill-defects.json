@@ -1,0 +1,27 @@
+{
+  "scenario": "ApplicationData",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0118: 'ApplicationData' is a namespace but is used like a type — the project's own root namespace (== project name) shadows an identically-named Windows.* runtime type that the ported sample references unqualified.",
+      "evidence": "session-log.txt:2412 'error CS0118: ApplicationData is a namespace but is used like a type'; fix at TURN 29 fully-qualified to Windows.Storage.ApplicationData.",
+      "skill_search": "Grepped winui-uwp-migration for 'CS0118', 'namespace but is used', 'RootNamespace', 'project name', 'collision', 'shadow' — no hits. The 'Common build errors after the namespace rewrite' section covers CS0104/CS0227/CS0246 only.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "UWP SDK samples are conventionally named after the WinRT API they demonstrate (ApplicationData, DataTransfer, AppointmentsProvider, Compositor, …). The WinUI 3 scaffold sets RootNamespace = project name = that same identifier, which then shadows the like-named Windows.* type. Unqualified references such as 'ApplicationData.Current' bind to the project namespace, not the type.",
+      "proposed_fix": "Add a CS0118 entry to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' (alongside CS0104): explain the project-name-vs-Windows-type collision and give the remedy — fully-qualify the WinRT type (Windows.Storage.ApplicationData.Current) and drop the now-redundant 'using', or set a distinct RootNamespace.",
+      "generalizes": "Recurs for every UWP SDK sample whose project name matches a Windows.* type it uses — a large class (ApplicationData, DataTransfer, FileAccess, Appointments, Compositor, etc.). Same 'fully-qualify' remedy family as the existing CS0104 guidance."
+    },
+    {
+      "problem": "A C# compile error cascades into misleading XAML markup-compiler errors (WMC1509 'No LocalAssembly parameter', WMC0909 'Cannot resolve DataType local:X', WMC1111 'DataTemplates need x:DataType', WMC9999 internal error), tricking the agent into 'fixing' the XAML.",
+      "evidence": "session-log.txt:2413-2416 emitted WMC1509/WMC0909/WMC1111/WMC9999 for MainPage.xaml in the SAME build as the CS0118; at TURN 29 the agent called it 'Two issues' but the XAML errors vanished once the C# error was fixed and stale obj cleaned (TURN 30 rebuild succeeded).",
+      "skill_search": "Grepped for 'WMC0909', 'WMC1509', 'LocalAssembly', 'cascade', 'x:DataType', 'stale', 'obj'. The x:Bind section only documents XLS0414/MC3074 stale-namespace-prefix errors; the compile-error→XAML cascade is absent.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "When code-behind fails to compile, MarkupCompilePass2 has no LocalAssembly to resolve project-local types referenced by x:Bind/x:DataType, so it emits spurious WMC0909/WMC1111/WMC9999. The XAML is fine; the C# error is the only real fault. Stale obj/x64 from a prior build compounds it.",
+      "proposed_fix": "Add a short note to MIGRATION-PATTERNS.md (build-errors and/or x:Bind section): if a build emits WMC1509 + WMC0909/WMC1111/WMC9999, fix the C# compile error first and clean stale obj/x64, then rebuild — do not edit the XAML.",
+      "generalizes": "Any WinUI 3 project using x:Bind/x:DataType (the standard SDK-sample MainPage pattern) shows this cascade whenever any code-behind fails to compile. Prevents agents wasting turns chasing phantom XAML errors across all scenarios."
+    }
+  ]
+}

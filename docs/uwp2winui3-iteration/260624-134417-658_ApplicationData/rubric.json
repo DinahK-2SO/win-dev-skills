@@ -1,0 +1,40 @@
+{
+  "scenario": "ApplicationData",
+  "features": [
+    {
+      "name": "Clear",
+      "class": "Scenario6_ClearScenario",
+      "controls": [
+        {
+          "name": "Clear",
+          "type": "Button",
+          "label": "Clear",
+          "expected": "ClearAsync(); OutputTextBlock = 'ApplicationData has been cleared.  Visit the other scenarios to see that their data has been cleared.'",
+          "output": "OutputTextBlock"
+        }
+      ]
+    },
+    {
+      "name": "SetVersion",
+      "class": "Scenario7_SetVersion",
+      "controls": [
+        {
+          "name": "SetVersion0",
+          "type": "Button",
+          "label": "Set version to 0",
+          "expected": "SetVersionAsync(0); OutputTextBlock = 'Version: 0'",
+          "output": "OutputTextBlock"
+        },
+        {
+          "name": "SetVersion1",
+          "type": "Button",
+          "label": "Set version to 1",
+          "expected": "SetVersionAsync(1); OutputTextBlock = 'Version: 1'",
+          "output": "OutputTextBlock"
+        }
+      ],
+      "notes": "OnNavigatedTo shows 'Version: 0'; setting the version to its current value is a legitimate no-op."
+    }
+  ],
+  "scoring": "round(100 * (pass + 0.5*partial) / features_total)"
+}
