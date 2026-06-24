@@ -1,0 +1,14 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: exclude bin/obj/.vs/.uwp-source/.git from the source-file copy so stale UWP build artifacts (e.g. nested obj *.AssemblyInfo.cs / .NETCore AssemblyAttributes.cs) are never dragged in and globbed, eliminating CS0579 duplicate-attribute build failures.",
+    "MIGRATION-PATTERNS.md: document the CS0579 'Duplicate ...Attribute' build error (nested-obj globbing root cause, delete stray obj/bin, DefaultItemExcludes=**/obj/**;**/bin/**, remove carried-over Properties\\AssemblyInfo.cs) so the agent diagnoses it in one step."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

@@ -64,9 +64,20 @@ $patterns = @(
     '.png', '.jpg', '.jpeg', '.svg', '.ico', '.gif'
 )
 
+# Never copy build/output/tooling directories from the UWP source. Stale UWP-era
+# build artifacts (e.g. obj\**\*.AssemblyInfo.cs, .NETCore,Version=v5.0.AssemblyAttributes.cs)
+# end with .cs and would otherwise be dragged in and globbed into the new project's
+# compile, producing CS0579 "Duplicate ...Attribute" errors that are confusing to
+# diagnose. This matters most for UWP apps with a nested component/background-task
+# subfolder, whose obj\ is NOT covered by the SDK's default project-root exclusion.
+$copyExcludeDirs = @('bin', 'obj', '.uwp-source', '.vs', '.git', '.github', '.copilot')
+$copyExcludePattern = '(^|\\)(' + ($copyExcludeDirs -join '|') + ')(\\|$)'
+
 $copied = New-Object System.Collections.Generic.List[string]
 
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
+    $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
+    if ($rel -match $copyExcludePattern) { return $false }
     $name = $_.Name.ToLowerInvariant()
     $match = $false
     foreach ($ext in $patterns) {

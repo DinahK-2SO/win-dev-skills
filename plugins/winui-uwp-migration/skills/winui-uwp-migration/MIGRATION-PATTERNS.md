@@ -35,6 +35,18 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 ```
 
+### `CS0579: Duplicate '...Attribute' attribute`
+
+The build emits one or more `CS0579: Duplicate 'System.Reflection.Assembly*Attribute'` (or `Duplicate 'TargetFrameworkAttribute'`) errors pointing at files under an `obj\` or `bin\` directory — frequently a *nested* one such as `<Component>\obj\...\*.AssemblyInfo.cs` or a UWP-era `.NETCore,Version=v5.0.AssemblyAttributes.cs`. Root cause: stale UWP build artifacts were left inside the source tree and the SDK's default compile glob (`**/*.cs`) compiled them alongside the assembly-info the SDK auto-generates, producing duplicate attributes. The SDK only auto-excludes the project's *own* root `obj`/`bin`, not nested ones from a component/background-task subfolder.
+
+`Initialize-UwpMigration.ps1` already skips `obj`/`bin` when copying, so a fresh migration should not hit this. If you do (e.g. a hand-copied tree or a regenerated nested `obj`), delete the stray `obj`/`bin` directories rather than patching the symptom, and as a durable guard add a nested-exclude to the `<PropertyGroup>`:
+
+```xml
+<DefaultItemExcludes>$(DefaultItemExcludes);**/obj/**;**/bin/**</DefaultItemExcludes>
+```
+
+Do **not** keep a UWP `Properties\AssemblyInfo.cs` either — its `[assembly: AssemblyVersion]`/`AssemblyCompany` attributes collide with the SDK's generated ones (same error). Delete it (the SDK generates assembly info by default).
+
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).

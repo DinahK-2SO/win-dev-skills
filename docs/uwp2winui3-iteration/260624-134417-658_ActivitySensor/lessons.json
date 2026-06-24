@@ -1,0 +1,30 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Preserved UWP .csproj at .uwp-source/ and mass-rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml namespaces; the dev-agent built on top of the scaffold without re-deriving namespace mappings." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Final run reported '[PASS] dotnet build succeeded (0 warning(s), 0 WUI analyzer warning(s))', giving the agent a clear done-signal." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1", "problem": "Step 1 (source-file copy) copies every *.cs recursively with no obj/bin exclusion, so stale UWP build artifacts are dragged into the new project.", "evidence": "Copied tree contained app\\ActivitySensor\\Tasks\\obj\\x64\\Release\\.NETCore,Version=v5.0.AssemblyAttributes.cs (a UWP/.NETCore 5.0 artifact that the net10.0 build never generates) which then got globbed into the compile." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Its obj/bin exclusion existed only in the namespace-rewrite step (excludeDirs), not in the file-copy step.", "suggested_tweak": "Apply the same bin/obj/.vs/.uwp-source/.git exclusion to the copy loop so stale artifacts never enter the target." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "ActivitySensorTrigger / BackgroundTaskBuilder", "special_handling": "Background-task registration was wired with the WinAppSDK BackgroundTaskBuilder per MIGRATION-PATTERNS 'Background Tasks'; runtime outcome is gated by background-access + sensor policy on a sensorless machine, so it is not verifiable in the harness (flagged manual review, not a defect)." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0579: Duplicate 'System.Runtime.Versioning.TargetFrameworkAttribute' attribute (Tasks\\obj\\x64\\Release\\.NETCore,Version=v5.0.AssemblyAttributes.cs)", "root_cause": "Stale UWP-era obj artifacts under the nested Tasks subfolder were copied into the project and compiled by the SDK default glob; the SDK only auto-excludes the project's own root obj/bin, not nested ones.", "fix": "Exclude bin/obj from the source copy (durable). Dev-agent's reactive fix was <Compile Remove=\"Tasks\\obj\\**\"/> which is scenario-specific." },
+    { "error": "CS0579: Duplicate 'System.Reflection.AssemblyCompanyAttribute'/'AssemblyVersionAttribute' etc. (obj\\...\\ActivitySensor.AssemblyInfo.cs)", "root_cause": "Same nested stale-obj globbing produced a second set of assembly attributes colliding with the SDK auto-generated AssemblyInfo.", "fix": "Same as above; alternatively DefaultItemExcludes=**/obj/**;**/bin/** and delete any carried-over Properties\\AssemblyInfo.cs." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Build phase", "symptom": "Two consecutive failed builds (4 errors+1 warning, then 6 errors), all CS0579 duplicate-attribute, before success.", "turns_or_retries": "2 failed build iterations", "root_cause": "Stale nested obj/bin (.cs) artifacts copied from the UWP source and compiled by default globbing.", "how_resolved": "Added a scenario-specific <Compile Remove=\"Tasks\\obj\\**\"/> ItemGroup to the csproj.", "preventable_by": "Initialize-UwpMigration.ps1 excluding bin/obj/.vs/.git from the file-copy step (Tier-1 tooling), so the artifacts never reach the project." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Sensorless CI machine: ActivitySensor.GetDefaultAsync() returns null, so all 4 scenarios show the no-sensor message and Background 'Register Task' cannot be confirmed.", "workaround": "Faithful to UWP behavior; scoring treats it as expected, not a defect." }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Two consecutive build failures with CS0579 'Duplicate ...Attribute' errors (TargetFrameworkAttribute, AssemblyCompanyAttribute, AssemblyVersionAttribute, AssemblyConfigurationAttribute, AssemblyFileVersionAttribute, AssemblyProductAttribute, AssemblyTitleAttribute).",
+      "evidence": "session-log.txt: 'Build failed with 4 error(s)' then 'Build failed with 6 error(s)'; error paths app\\ActivitySensor\\Tasks\\obj\\x64\\Release\\.NETCore,Version=v5.0.AssemblyAttributes.cs and obj\\...\\ActivitySensor.AssemblyInfo.cs.",
+      "skill_search": "Grepped winui-uwp-migration for CS0579, AssemblyInfo, DefaultItemExcludes, GenerateAssemblyInfo, EnableDefaultCompileItems, 'Compile Remove', stale, nested project — no hits in SKILL.md or MIGRATION-PATTERNS.md; Initialize-UwpMigration.ps1 copy step had no obj/bin guard.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 step 1 copies every *.cs recursively from the UWP source with no bin/obj exclusion (that exclusion existed only in the later namespace-rewrite step). Stale UWP-era build artifacts — including obj\\**\\*.AssemblyInfo.cs and .NETCore,Version=v5.0.AssemblyAttributes.cs under a nested component/background-task subfolder — were copied into the project and compiled by the SDK default glob. The SDK only auto-excludes the project's OWN root obj/bin, not nested ones, so duplicate assembly attributes resulted.",
+      "proposed_fix": "Apply the same bin/obj/.vs/.uwp-source/.git exclusion used by the namespace-rewrite step to the file-copy loop in Initialize-UwpMigration.ps1 (Tier-1), and document the CS0579 cause/fix (delete stray nested obj/bin; DefaultItemExcludes=**/obj/**;**/bin/**; remove carried-over Properties\\AssemblyInfo.cs) in MIGRATION-PATTERNS.md.",
+      "generalizes": "Many UWP apps ship with checked-in or freshly-built obj/bin, and apps with a background task / Windows Runtime Component keep it in a NESTED subfolder whose obj is not covered by the SDK's default root-only exclusion. Any such app migrated by copying source files will hit CS0579 unless the copy excludes build dirs. This is a structural, scenario-independent defect in the migration tooling."
+    }
+  ]
+}

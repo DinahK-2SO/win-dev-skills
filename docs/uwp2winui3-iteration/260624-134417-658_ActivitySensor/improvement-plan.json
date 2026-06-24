@@ -1,0 +1,28 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0579 'Duplicate ...Attribute' build failures caused by stale UWP obj/bin .cs artifacts (nested under a background-task subfolder) being copied into the project and compiled by the SDK default glob.",
+      "evidence": "session-log.txt: two failed builds (CS0579 x multiple) referencing Tasks\\obj\\...\\.NETCore,Version=v5.0.AssemblyAttributes.cs and obj\\...\\ActivitySensor.AssemblyInfo.cs; lessons.json errors_encountered + dev_agent_struggles.",
+      "root_cause": "Initialize-UwpMigration.ps1 step 1 (source-file copy) lacked the bin/obj/.vs/.uwp-source/.git exclusion that the later namespace-rewrite step already uses, so stale build artifacts entered the target tree; the SDK only auto-excludes the project's own root obj/bin, not nested ones.",
+      "tier": 1,
+      "change": "Add an exclusion (bin, obj, .uwp-source, .vs, .git, .github, .copilot) to the file-copy Where-Object in Initialize-UwpMigration.ps1 so stale build artifacts are never copied into the migrated project.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Stale obj/bin .cs files never reach the project; the SDK default glob no longer compiles duplicate assembly attributes; no CS0579 and no reactive <Compile Remove> needed.",
+      "falsifiable_check": "On a re-run of any UWP source containing obj/bin (especially a nested background-task subfolder), the initial dotnet build produces 0 CS0579 errors and the migrated tree contains no copied files under any obj\\ or bin\\ path."
+    },
+    {
+      "problem": "When stale obj/bin still arrives by some other path (hand-copied tree, regenerated nested obj, or a carried-over Properties\\AssemblyInfo.cs), the agent has no documented diagnosis for the resulting CS0579.",
+      "evidence": "Grep of SKILL.md / MIGRATION-PATTERNS.md found no CS0579 / AssemblyInfo / DefaultItemExcludes guidance; dev-agent spent 2 build iterations rediscovering it and applied a scenario-specific fix.",
+      "root_cause": "No documented build-error entry for duplicate assembly attributes / nested obj globbing.",
+      "tier": 3,
+      "change": "Add a 'CS0579: Duplicate ...Attribute' entry to the 'Common build errors' section of MIGRATION-PATTERNS.md: explain the nested-obj root cause, prefer deleting stray obj/bin, give the DefaultItemExcludes=**/obj/**;**/bin/** guard, and note removing a carried-over UWP Properties\\AssemblyInfo.cs.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "If CS0579 ever surfaces, the agent diagnoses and fixes it in one step instead of iterating, and avoids a hardcoded per-folder <Compile Remove>.",
+      "falsifiable_check": "On a re-run that hits CS0579, the agent cites the new pattern and resolves it in a single edit (no repeated failed builds)."
+    }
+  ],
+  "deferred_to_human": []
+}

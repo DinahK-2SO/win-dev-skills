@@ -1,0 +1,50 @@
+{
+  "scenario": "ActivitySensor",
+  "uwp_launchable": true,
+  "score": 88,
+  "features_total": 4,
+  "features_pass": 3,
+  "features_partial": 1,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: UWP launched (ok:true, pid 20056, window 'Activity Sensor C# Sample') and rendered correctly; golden home frame captured (Scenario 1 + full nav). Legacy CoreWindow exposes no UIA tree and mouse injection is unavailable in this non-interactive session, so per-scenario UWP navigation/actuation and a UWP behavioral baseline could not be produced.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Current activity",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Current_activity.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Current_activity.png",
+      "note": "Control present (1/1). 'Get Current Activity' invoked and updated output ('No activity sensor available on this device.'), faithful to UWP on a sensorless machine. WinUI bitmap is blank due to DComp capture limitation but UIA text matches UWP."
+    },
+    {
+      "name": "Activity history",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Activity_history.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Activity_history.png",
+      "note": "Control present (1/1). 'Get Activity History' invoked and updated output (Count/First*/Last*, no-sensor message). Faithful to UWP."
+    },
+    {
+      "name": "Events",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Events.png",
+      "note": "Both controls present (2/2). 'ReadingChanged On' responded with the no-sensor message; 'ReadingChanged Off' is disabled by design until On is pressed (source-confirmed), so its non-invoke is correct, not a dead control."
+    },
+    {
+      "name": "Background activity",
+      "verdict": "partial",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Background_activity.png",
+      "winui_screenshot": "parity/winui3/screenshots/04_Background_activity.png",
+      "note": "Both controls present (2/2) and fully wired. 'Unregister Task' is disabled by design until registered (correct). 'Register Task' invoked but produced no verifiable visible response within the capture window (async + background-access/sensor policy gating on a sensorless machine); no UWP behavioral golden exists to confirm expected behavior, so flagged for manual review -> partial, not fail."
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "app": "23608",
+  "capturedAt": "2026-06-24T23:01:17.4272541+08:00",
+  "checklist": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run3\\001_score-ActivitySensor\\notes\\parity\\baseline\\checklist.json",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Current activity",
+      "slug": "Current_activity",
+      "navOk": false,
+      "navMsg": "Γ¥î Selector matched 4 elements:\r   [0] ListItem \"1) Current activity\" (254,427 462x60)  -> itm-1currentactivit-bc7a\r   [1] Text \"1) Current activity\" (272,441 161x28)  -> lbl-1currentactivit-bc79\r",
+      "screenshot": "01_Current_activity.png",
+      "screenshotBytes": 11273,
+      "screenshotOk": true,
+      "ui": "01.json",
+      "uiOk": true,
+      "interactions": [
+        {
+          "action": "Get Current Activity",
+          "type": "Button",
+          "invokeOk": true,
+          "responded": true,
+          "newTokens": 4,
+          "screenshot": "01_Current_activity__a01_Get_Current_Activity.png",
+          "screenshotOk": true,
+          "outputText": "\\u00A9 Microsoft Corporation. All rights reserved.|\\u2014|1) Current activity|2) Activity history|3) Events|4) Background activity|Activity sensor|Activity Sensor Sample|Activity:|ActivitySensor|AppWindow Custom Title Bar|Close|Confidence:|Get Current Activity|Gets the default activity sensor and displays its current activity reading.|Maximize|Minimize|No activity sensor available on this device.|No activity sensor found|Non Client Input Sink Window|Scenarios|Status:|System|Timestamp:"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Activity history",
+      "slug": "Activity_history",
+      "navOk": true,
+      "navMsg": "",
+      "screenshot": "02_Activity_history.png",
+      "screenshotBytes": 11273,
+      "screenshotOk": true,
+      "ui": "02.json",
+      "uiOk": true,
+      "interactions": [
+        {
+          "action": "Get Activity History",
+          "type": "Button",
+          "invokeOk": true,
+          "responded": true,
+          "newTokens": 3,
+          "screenshot": "02_Activity_history__a01_Get_Activity_History.png",
+          "screenshotOk": true,
+          "outputText": "\\u00A9 Microsoft Corporation. All rights reserved.|1) Current activity|2) Activity history|3) Events|4) Background activity|Activity sensor|Activity Sensor Sample|ActivitySensor|AppWindow Custom Title Bar|Close|Count:|First Activity:|First Confidence:|First Timestamp:|Get Activity History|Gets the default activity sensor and displays its activity history.|Last Activity:|Last Confidence:|Last Timestamp:|Maximize|Minimize|No activity sensor available on this device.|No activity sensors found|No data|Non Client Input Sink Window|Scenarios|Status:|System"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Events",
+      "slug": "Events",
+      "navOk": true,
+      "navMsg": "",
+      "screenshot": "03_Events.png",
+      "screenshotBytes": 11273,
+      "screenshotOk": true,
+      "ui": "03.json",
+      "uiOk": true,
+      "interactions": [
+        {
+          "action": "ReadingChanged On",
+          "type": "Button",
+          "invokeOk": true,
+          "responded": true,
+          "newTokens": 3,
+          "screenshot": "03_Events__a01_ReadingChanged_On.png",
+          "screenshotOk": true,
+          "outputText": "\\u00A9 Microsoft Corporation. All rights reserved.|1) Current activity|2) Activity history|3) Events|4) Background activity|Activity sensor|Activity Sensor Sample|Activity:|ActivitySensor|AppWindow Custom Title Bar|Close|Confidence:|Maximize|Minimize|No activity sensor available on this device.|No activity sensor found on this device. This sample requires an activity sensor.|No data|Non Client Input Sink Window|Reading Timestamp:|ReadingChanged Off|ReadingChanged On|Scenarios|Status:|Subscribes to reading changed events and displays the updated reading.|System"
+        },
+        {
+          "action": "ReadingChanged Off",
+          "type": "Button",
+          "invokeOk": false,
+          "responded": false,
+          "newTokens": 0,
+          "screenshot": "03_Events__a02_ReadingChanged_Off.png",
+          "screenshotOk": true,
+          "outputText": "\\u00A9 Microsoft Corporation. All rights reserved.|1) Current activity|2) Activity history|3) Events|4) Background activity|Activity sensor|Activity Sensor Sample|Activity:|ActivitySensor|AppWindow Custom Title Bar|Close|Confidence:|Maximize|Minimize|No activity sensor available on this device.|No activity sensor found on this device. This sample requires an activity sensor.|No data|Non Client Input Sink Window|Reading Timestamp:|ReadingChanged Off|ReadingChanged On|Scenarios|Status:|Subscribes to reading changed events and displays the updated reading.|System"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Background activity",
+      "slug": "Background_activity",
+      "navOk": true,
+      "navMsg": "",
+      "screenshot": "04_Background_activity.png",
+      "screenshotBytes": 11273,
+      "screenshotOk": true,
+      "ui": "04.json",
+      "uiOk": true,
+      "interactions": [
+        {
+          "action": "Register Task",
+          "type": "Button",
+          "invokeOk": true,
+          "responded": false,
+          "newTokens": 0,
+          "screenshot": "04_Background_activity__a01_Register_Task.png",
+          "screenshotOk": false,
+          "outputText": ""
+        },
+        {
+          "action": "Unregister Task",
+          "type": "Button",
+          "invokeOk": false,
+          "responded": false,
+          "newTokens": 0,
+          "screenshot": "04_Background_activity__a02_Unregister_Task.png",
+          "screenshotOk": false,
+          "outputText": ""
+        }
+      ]
+    }
+  ]
+}

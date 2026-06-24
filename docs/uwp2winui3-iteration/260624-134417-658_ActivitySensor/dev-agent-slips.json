@@ -1,0 +1,21 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Background activity 'Register Task' produced no verifiable visible response after invocation (feature scored partial).",
+      "evidence": "migration-score.json feature 'Background activity' verdict=partial; discrepancies.json: handler fully wired with real BackgroundTaskBuilder + ActivitySensorTrigger + Register + UpdateUI.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md '## Background Tasks' (line ~321) prescribes the WinAppSDK BackgroundTaskBuilder model, which the agent followed correctly.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Not a slip in code — the handler is correct and matches the documented pattern. The non-response is an environment limitation (sensorless machine + background-access policy gating) with no UWP behavioral golden to compare against. No skill edit could make this verifiable, and the migration code is already faithful."
+    },
+    {
+      "problem": "Reactive csproj fix used a hardcoded <Compile Remove=\"Tasks\\obj\\**\"/> path.",
+      "evidence": "session-log.txt edit adding Compile/Content/EmbeddedResource/None Remove for 'Tasks\\obj\\**'.",
+      "covered_clearly_at": "n/a — this is the same root cause as the skill-defect item; the durable fix is the Initialize copy-exclusion, so no separate dev-agent guidance is warranted.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Subsumed by the skill-defect fix (excluding obj/bin at copy time eliminates the need for any reactive csproj patch). Listed here only to avoid double-counting the same problem."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "score": 88,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Current activity — Get Current Activity reads ActivitySensor.GetDefaultAsync() and fills Activity/Confidence/Timestamp; no-sensor message when absent", "status": "pass", "reason": "Control present, invoked, output updated faithfully.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Activity history — Get Activity History fills Count/First*/Last* or no-sensor message", "status": "pass", "reason": "Control present, invoked, output updated.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Events — ReadingChanged On subscribes; Off unsubscribes; Off disabled until On pressed", "status": "pass", "reason": "Both controls present; On responded; Off disabled by design (faithful).", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Background activity — Register Task builds ActivitySensorTrigger task and registers; Unregister removes; Unregister disabled until registered", "status": "partial", "reason": "Both controls present and fully wired (real BackgroundTaskBuilder + ActivitySensorTrigger). Register Task invoked but no verifiable visible response within capture window (async + background-access/sensor policy on a sensorless machine); no UWP behavioral golden exists. Flagged for manual review, not failed.", "suspected_skill_gap": "None — behavior is unverifiable in the harness, not a missing handler. Background Tasks pattern already documented." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "All scenarios", "uwp": "Full nav + scenario controls render in golden frames.", "winui": "WinUI 3 candidate screenshots are blank white client area (Win32 caption only).", "screenshot_ref": "parity/winui3/screenshots/*.png — capture artifact (PrintWindow/BitBlt vs DirectComposition), NOT a migration defect; UIA tree fully populated (38 elements) matching UWP text." }
+  ],
+  "missing_features": [],
+  "summary": "Faithful migration: 100% structural control coverage, text matches UWP. Only non-pass is Background activity Register Task, unverifiable on a sensorless machine with no UWP behavioral baseline. The one real engineering friction was CS0579 duplicate-attribute build failures caused by stale nested UWP obj/bin .cs artifacts being copied and globbed into the project."
+}

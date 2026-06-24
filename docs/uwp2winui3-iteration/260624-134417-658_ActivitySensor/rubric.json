@@ -1,0 +1,35 @@
+{
+  "scenario": "ActivitySensor",
+  "feature": "Activity sensor",
+  "source": "uwp-samples-standalone/Samples/ActivitySensor/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Current activity",
+      "controls": ["ScenarioGetCurrentActivityButton (Get Current Activity)"],
+      "actions": ["Get Current Activity"],
+      "expected": "Clicking 'Get Current Activity' reads ActivitySensor.GetDefaultAsync() and fills Activity/Confidence/Timestamp; with no sensor present it shows 'No activity sensor available on this device.'"
+    },
+    {
+      "number": 2,
+      "title": "Activity history",
+      "controls": ["ScenarioGetActivityHistoryButton (Get Activity History)"],
+      "actions": ["Get Activity History"],
+      "expected": "Clicking 'Get Activity History' queries history and fills Count/First*/Last*; with no sensor shows the no-sensor message / 'No data'."
+    },
+    {
+      "number": 3,
+      "title": "Events",
+      "controls": ["ScenarioEnableReadingChangedButton (ReadingChanged On)", "ScenarioDisableReadingChangedButton (ReadingChanged Off)"],
+      "actions": ["ReadingChanged On", "ReadingChanged Off"],
+      "expected": "'ReadingChanged On' subscribes to ReadingChanged; 'ReadingChanged Off' unsubscribes. By design 'Off' is DISABLED until 'On' is pressed (OnNavigatedTo disables it). With no sensor, 'On' reports the no-sensor message."
+    },
+    {
+      "number": 4,
+      "title": "Background activity",
+      "controls": ["ScenarioRegisterTaskButton (Register Task)", "ScenarioUnregisterTaskButton (Unregister Task)"],
+      "actions": ["Register Task", "Unregister Task"],
+      "expected": "'Register Task' builds an ActivitySensorTrigger background task and registers it (status -> 'Registered', toggles button enablement); 'Unregister Task' removes it. By design 'Unregister' is DISABLED until registered. Background-access + sensor policy gate the outcome."
+    }
+  ]
+}
