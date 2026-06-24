@@ -1,0 +1,38 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Marking the SDK `Scenario` model (Title/ClassType) as `required` to silence nullable warnings breaks the build with CS9035 — the XAML generator constructs `new Scenario()` in XamlTypeInfo.g.cs and can't satisfy required members.",
+      "evidence": "session-log Turns 38-42: add `required` -> `error CS9035: Required member 'Scenario.Title' must be set ... XamlTypeInfo.g.cs(335,59)` -> revert to default initializers -> build succeeds.",
+      "root_cause": "'Common build errors after the namespace rewrite' covered CS0104/CS0227/CS0246 but not the `required` vs XAML-source-generator (CS9035) collision on XAML-referenced model types.",
+      "tier": 3,
+      "change": "Added a `CS9035` subsection prescribing default initializers (or nullable) for any XAML-referenced model/DTO type, never `required`.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent silences nullable warnings on the shared `Scenario` class without introducing a CS9035 build break.",
+      "falsifiable_check": "On re-run, no `error CS9035` appears in the build log and the agent does not add `required` to the Scenario class."
+    },
+    {
+      "problem": "Startup crash 0xC000027B was a XAML-load failure (cross-panel RelativePanel.Below reference) but the skill's table mapped 0xC000027B only to 'defer the API', steering the agent away from the XAML.",
+      "evidence": "session-log Turns 48-52: smoke-launch FAIL 0xc000027b; event 1000 faulting module Microsoft.UI.Xaml.dll; agent moved SampleTitle into the RelativePanel -> validator PASS.",
+      "root_cause": "The 0xC000027B row under 'Diagnosing Startup Crashes' under-emphasized the most common cause (XAML parse/load failure) when the faulting module is the XAML DLL.",
+      "tier": 3,
+      "change": "Rewrote the 0xC000027B table row to say: check the faulting module first; if Microsoft.UI.Xaml.dll it's almost always a XAML parse/load failure (invalid RelativePanel target not a sibling in the same panel, missing resource key, broken MergedDictionary); only defer an API if a WinRT/projection DLL faults.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent inspects the XAML on a 0xC000027B crash from the XAML DLL instead of chasing a non-existent unsupported API.",
+      "falsifiable_check": "On re-run of a XAML-load startup crash, the agent's first diagnostic action targets the XAML (RelativePanel/resource) rather than deferring an API."
+    },
+    {
+      "problem": "Get-MigrationPattern.ps1 -Anchor manifest / appxmanifest failed ('Anchor not found') even though the validator points the agent at the manifest patterns by name.",
+      "evidence": "session-log Turns 45-46: two failed anchor lookups before the agent gave up and edited the manifest from the validator's inline hint.",
+      "root_cause": "The manifest patterns are H3 headings with no `<a id>`, so the anchor-fetch script can't resolve them.",
+      "tier": 2,
+      "change": "Added `<a id=\"manifest\"></a>` above the 'Package.appxmanifest — reconcile image references' H3 so `-Anchor manifest` returns both manifest subsections (image reconcile + Windows.Desktop/runFullTrust checklist).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents can fetch the manifest patterns by the obvious anchor name instead of failing lookups.",
+      "falsifiable_check": "`Get-MigrationPattern.ps1 -Anchor manifest` exits 0 and returns the manifest patterns (verified: exit 0)."
+    }
+  ],
+  "deferred_to_human": []
+}

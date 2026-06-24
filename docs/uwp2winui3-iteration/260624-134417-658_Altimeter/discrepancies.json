@@ -1,0 +1,14 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Data Events: Enable/Disable altimeter reading-changed listener; hardware-gated 'No altimeter found' + Disable disabled.", "status": "pass", "reason": "ScenarioEnableButton + ScenarioDisableButton present with matching AutomationIds; ScenarioOutput_M='No data', StatusBlock='No altimeter found' match UWP golden.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Polling: Get Data polls altimeter once; hardware-gated 'No altimeter found' + Get Data disabled.", "status": "pass", "reason": "ScenarioGetDataButton present (disabled, as in UWP with no device); default text matches UWP.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Parity gate PASS 100/100; WinUI 3 UIA tree fully reproduces the UWP control set, AutomationIds and hardware-gated state. No parity defects. The actionable evidence is in the build log (CS9035 required-member conflict; 0xC000027B XAML-load startup crash), not in the parity result."
+}

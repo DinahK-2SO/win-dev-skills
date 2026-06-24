@@ -1,0 +1,21 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Package.appxmanifest was carried over from the UWP sample verbatim, so it failed validation: 4 missing `-sdk` image assets, TargetDeviceFamily=Windows.Universal, missing rescap namespace, missing <rescap:Capability Name=\"runFullTrust\"/>.",
+      "evidence": "session-log Turn 44 validator output (4 FAILs) → Turn 47 agent rewrote manifest (Windows.Desktop, rescap+runFullTrust, scaffold assets) → Turn 48 PASS.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md > '### Package.appxmanifest — reconcile image references with the assets you actually have' and '### Manifest migration checklist (Windows.Desktop + runFullTrust)'; also enforced by Validate-UwpMigration.ps1 which printed the exact fixes.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill documents the manifest reconcile + Windows.Desktop/runFullTrust checklist prominently and the validator surfaces each item with an inline fix; a capable model re-run applies them directly. No skill change needed (a minor anchor-discoverability tweak is noted separately, not because the content is missing)."
+    },
+    {
+      "problem": "Polling scenario sensor button non-responsive / 'No altimeter found'.",
+      "evidence": "migration-score.json: both features pass; discrepancies.json measurement_caveats 'hardware-gated-controls' — host has no altimeter, identical state in UWP and WinUI.",
+      "covered_clearly_at": "Not a skill issue at all — hardware-gated behavior reproduced faithfully; no code path to change.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Environment (no sensor), not a migration defect; both apps behave identically. Nothing to fix."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Turn 44/48/52 — caught the manifest defects (missing assets, Windows.Universal target, missing rescap:runFullTrust) and the startup crash via smoke-launch, each with a concrete fix hint; drove the agent to a clean PASS." },
+    { "tool": "Test-AppLaunch.ps1 / Application event log (events 1000/1026)", "evidence": "Turn 49-50 — surfaced exception code 0xc000027b in Microsoft.UI.Xaml.dll, which pointed the agent at the XAML, not the entry point." }
+  ],
+  "tools_problematic": [
+    { "tool": "Get-MigrationPattern.ps1", "problem": "Anchor lookups failed for plausible names", "evidence": "Turn 45-46 — `-Anchor manifest` and `-Anchor appxmanifest` both returned `Anchor '#manifest' not found` / `'#appxmanifest' not found`; the real anchors are `#csproj` plus the un-id'd `### Package.appxmanifest …` / `### Manifest migration checklist` H3 headings, which have no `<a id>` so are not addressable by the lookup script." }
+  ],
+  "tool_limitations": [
+    { "tool": "Get-MigrationPattern.ps1", "limitation": "Only resolves explicit `<a id=...>` anchors; the manifest patterns the validator points users to (image reconcile, Windows.Desktop+runFullTrust checklist) are H3 headings with no anchor id, so the script can't fetch them.", "suggested_tweak": "Add an `<a id=\"manifest\">` (and alias to the checklist) so `-Anchor manifest` resolves, matching what the validator tells the agent to look up." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md > Diagnosing Startup Crashes > `0xC000027B` row", "wrong": "States 0xC000027B is 'Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it.' — steering the reader toward deferring an API.", "correct": "When the faulting module is Microsoft.UI.Xaml.dll, 0xC000027B is most often a XAML parse/load failure (invalid RelativePanel.Below/Above/RightOf/LeftOf target not in the same panel, missing StaticResource/ThemeResource key, or a broken MergedDictionary), not an unsupported API. Inspect the XAML before deferring anything." }
+  ],
+  "special_apis": [],
+  "errors_encountered": [
+    { "error": "CS9035: Required member 'Scenario.Title' / 'Scenario.ClassType' must be set in the object initializer (in generated XamlTypeInfo.g.cs)", "root_cause": "Agent marked the SDK-sample `Scenario` model class (SampleConfiguration.cs) properties as `required` to silence nullable warnings under <Nullable>enable</Nullable>. The XAML compiler's generated XamlTypeInfo.g.cs constructs `new Scenario()` with no initializer, which cannot satisfy `required` members.", "fix": "Drop `required`; give the XAML-referenced model properties default initializers (`public string Title { get; set; } = string.Empty;`, `public Type ClassType { get; set; } = typeof(object);`) or keep them nullable." },
+    { "error": "Startup crash 0xc000027b, faulting module Microsoft.UI.Xaml.dll", "root_cause": "MainPage.xaml placed `SampleTitle` (TextBlock) in a separate Grid-header StackPanel while the `ScenarioControl` ListBox in the RelativePanel still used `RelativePanel.Below=\"SampleTitle\"`. A RelativePanel alignment/position attribute may only target a sibling inside the SAME RelativePanel; a dangling name reference throws at XAML load, before the window shows.", "fix": "Move `SampleTitle` into the RelativePanel so the `RelativePanel.Below` target is a sibling within the panel (or remove the cross-panel RelativePanel reference)." },
+    { "error": "Validator FAIL: Package.appxmanifest 4 missing `-sdk` images, TargetDeviceFamily=Windows.Universal, missing rescap namespace + runFullTrust", "root_cause": "Agent carried the UWP sample manifest forward verbatim; UWP samples brand assets with a `-sdk` suffix and target Windows.Universal without runFullTrust.", "fix": "Repoint image refs to scaffold assets, set TargetDeviceFamily=Windows.Desktop, add rescap namespace + <rescap:Capability Name=\"runFullTrust\"/>. (Skill already documents this under the manifest H3s.)" }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turns 38-42 — SampleConfiguration.cs Scenario class", "symptom": "Build flipped from succeed (with nullable warnings) to FAIL CS9035 after adding `required`, then recovered.", "turns_or_retries": "2 build cycles", "root_cause": "No guidance that `required` collides with the XAML source generator's parameterless construction of model types referenced from XAML.", "how_resolved": "Replaced `required` with default-value initializers.", "preventable_by": "A 'Common build errors' pattern naming CS9035 on XAML-referenced model classes and prescribing default initializers instead of `required`." },
+    { "where": "Turns 48-52 — startup crash diagnosis", "symptom": "Clean build but app died at launch with 0xc000027b; the skill's 0xC000027B row pointed at 'defer the API', which did not apply.", "turns_or_retries": "~4 turns (event-log capture + XAML inspection + fix + re-validate)", "root_cause": "Startup-crash table maps 0xC000027B only to legacy-projection/defer-the-API, omitting the common XAML-load cause (here a cross-panel RelativePanel reference).", "how_resolved": "Read events 1000/1026, saw faulting module Microsoft.UI.Xaml.dll, inspected MainPage.xaml, moved SampleTitle into the RelativePanel.", "preventable_by": "Adding the XAML-load failure cause (invalid RelativePanel target / missing resource / broken MergedDictionary) to the 0xC000027B guidance." },
+    { "where": "Turns 45-46 — Get-MigrationPattern.ps1 anchor lookup", "symptom": "Two failed anchor lookups (`manifest`, `appxmanifest`) before the agent gave up and edited the manifest from the validator's inline hint.", "turns_or_retries": "2 failed lookups", "root_cause": "Manifest patterns are H3 headings with no `<a id>`, so the anchor script can't fetch them even though the validator names them.", "how_resolved": "Agent used the validator's inline fix text directly.", "preventable_by": "Add an `<a id=\"manifest\">` anchor over the manifest patterns so the script can resolve the name the validator already advertises." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No altimeter device on the host; sensor buttons disabled in both UWP and WinUI apps.", "workaround": "Both apps show 'No altimeter found' / 'No data'; parity confirmed structurally. Not a migration issue." }
+  ]
+}

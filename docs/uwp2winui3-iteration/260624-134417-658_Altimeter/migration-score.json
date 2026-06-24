@@ -1,0 +1,33 @@
+{
+  "scenario": "Altimeter",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (initial golden captured; live UWP CoreWindow exposes only a Pane via ApplicationFrameHost, so per-scenario nav/actuation could not be driven and no UWP behavioral signal was recorded)",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "notes": "Parity gate PASS 100/100. WinUI 3 UIA tree fully reproduces the UWP control set, AutomationIds, default text ('No data') and hardware-gated status ('No altimeter found'). No altimeter device on this machine, so sensor buttons are disabled/non-responsive in BOTH apps (correct parity, not dead controls). WinUI screenshots render near-blank white due to a WinUI 3 DirectComposition capture artifact; visual fidelity confirmed via the UIA tree instead.",
+  "features": [
+    {
+      "name": "Data Events",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Data_Events.png",
+      "note": "Coverage 2/2. ScenarioEnableButton + ScenarioDisableButton present with matching AutomationIds; ScenarioOutput_M='No data', StatusBlock='No altimeter found' match UWP golden. Hardware-gated (no altimeter), Disable disabled in both apps."
+    },
+    {
+      "name": "Polling",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Polling.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Polling.png",
+      "note": "Coverage 1/1. ScenarioGetDataButton present (disabled, as in UWP with no device); ScenarioOutput_M='No data', StatusBlock='No altimeter found' match UWP. Hardware-gated; no behavioral signal in either app. UWP golden 'Polling' frame is a duplicate of Data Events because ApplicationFrameHost UIA nav could not switch scenarios."
+    }
+  ]
+}

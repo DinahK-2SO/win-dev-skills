@@ -1,0 +1,15 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Startup crash `0xc000027b` (faulting module Microsoft.UI.Xaml.dll) was actually a XAML-load failure — `RelativePanel.Below=\"SampleTitle\"` referencing an element that lived in a different panel — but the skill's startup-crash table maps 0xC000027B only to 'legacy projection/activation incompatibility ... defer the API', steering the agent away from the XAML.",
+      "evidence": "session-log Turns 48-52: validator smoke-launch FAIL with 0xc000027b; event 1000 shows faulting module Microsoft.UI.Xaml.dll (Turn 50); agent inspected MainPage.xaml and moved SampleTitle into the RelativePanel (Turn 51) → validator PASS (Turn 52).",
+      "covered_at": "MIGRATION-PATTERNS.md > '## Diagnosing Startup Crashes' (<a id=\"startup-crashes\">) > 'Known native codes' table, `0xC000027B` row.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Sharpen the existing `0xC000027B` table row (and add one line of prose) so it states that when the faulting module is Microsoft.UI.Xaml.dll, 0xC000027B is most often a XAML parse/load failure — invalid RelativePanel.Below/Above/RightOf/LeftOf target that is not a sibling in the SAME RelativePanel, a missing StaticResource/ThemeResource key, or a broken MergedDictionary — and to inspect the XAML before deferring any API. Do not invent a new section; extend the row that already exists.",
+      "generalizes": "The UWP SDK-sample shell (MainPage.xaml) universally uses a RelativePanel with named Below/Above references; restructuring it during shell conversion easily creates a dangling cross-panel reference. XAML-load crashes (bad resource keys, broken merged dictionaries) are a broad class of WinUI 3 startup failures distinct from unsupported APIs, so the clarification helps every scenario that hits 0xC000027B."
+    }
+  ]
+}

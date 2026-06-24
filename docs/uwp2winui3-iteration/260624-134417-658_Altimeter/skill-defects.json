@@ -1,0 +1,17 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Marking the SDK-sample `Scenario` model class (SampleConfiguration.cs: `Title`, `ClassType`) as `required` to silence nullable warnings breaks the build with CS9035, because the XAML source generator emits `new Scenario()` (no initializer) in XamlTypeInfo.g.cs and cannot satisfy required members.",
+      "evidence": "build-events / session-log Turns 38-42: agent added `required` (Turn 39), build FAILED with `error CS9035: Required member 'Scenario.Title' must be set ... XamlTypeInfo.g.cs(335,59)` (Turn 40), agent reverted to default initializers (Turn 41) → build succeeded (Turn 42).",
+      "skill_search": "grepped winui-uwp-migration for 'required', 'CS9035', 'XamlTypeInfo', 'SampleConfiguration', 'Scenario', 'nullable' — only an unrelated MIGRATION-PATTERNS.md note on nullable MainWindow and a `[STAThread]`-is-required prose line.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill's 'Common build errors after the namespace rewrite' section covers CS0104/CS0227/CS0246 but not the CS9035 collision between C# `required` members and the XAML compiler's parameterless construction of XAML-referenced model types.",
+      "proposed_fix": "Add a CS9035 subsection under 'Common build errors after the namespace rewrite' in MIGRATION-PATTERNS.md: any model type referenced from XAML (e.g. the SDK `Scenario` class, x:Bind/DataTemplate data types) must NOT use `required`; give properties default initializers (`= string.Empty;`, `= typeof(object);`) or keep them nullable.",
+      "generalizes": "Every UWP SDK sample ships the same SampleConfiguration.cs `Scenario { Title, ClassType }` class consumed by the shell's ScenarioControl ListBox, and any migration that enables <Nullable>enable</Nullable> will hit nullable warnings on it and reach for `required`. The XAML-generator-vs-`required` conflict applies to all XAML-referenced model/DTO types across scenarios."
+    }
+  ]
+}

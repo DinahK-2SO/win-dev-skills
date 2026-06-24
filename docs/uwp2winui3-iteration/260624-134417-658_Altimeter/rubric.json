@@ -1,0 +1,25 @@
+{
+  "scenario": "Altimeter",
+  "source": "uwp-samples-standalone/Samples/Altimeter/cs",
+  "features": [
+    {
+      "number": 1,
+      "name": "Data Events",
+      "controls": [
+        { "name": "ScenarioEnableButton", "type": "Button", "label": "Enable" },
+        { "name": "ScenarioDisableButton", "type": "Button", "label": "Disable" }
+      ],
+      "outputs": [ "InputTextBlock", "ScenarioOutput_M", "StatusBlock" ],
+      "expected": "Registers an altimeter reading-changed event listener; Enable starts it, Disable stops it. Altitude change(m) updates as readings arrive. Hardware-gated: with no altimeter present the status reads 'No altimeter found' and Disable is disabled."
+    },
+    {
+      "number": 2,
+      "name": "Polling",
+      "controls": [
+        { "name": "ScenarioGetDataButton", "type": "Button", "label": "Get Data" }
+      ],
+      "outputs": [ "InputTextBlock", "ScenarioOutput_M", "StatusBlock" ],
+      "expected": "Polls the altimeter once via GetDefault/GetCurrentReading on Get Data and displays the altitude change. Hardware-gated: with no altimeter present the status reads 'No altimeter found' and Get Data is disabled."
+    }
+  ]
+}

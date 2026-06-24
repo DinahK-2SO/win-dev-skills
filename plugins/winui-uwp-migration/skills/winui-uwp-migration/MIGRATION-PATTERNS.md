@@ -39,6 +39,20 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
 
+### `CS9035: Required member '…' must be set` (in generated `XamlTypeInfo.g.cs`)
+
+A model/DTO type that is **referenced from XAML** (e.g. the SDK samples' `Scenario { Title, ClassType }` class in `SampleConfiguration.cs`, or any `x:DataType` used in a `DataTemplate`/`x:Bind`) is instantiated by the XAML compiler via a **parameterless `new T()`** in the generated `XamlTypeInfo.g.cs`. If you mark its properties `required` (a common reflex to silence `<Nullable>enable</Nullable>` warnings), that generated `new T()` cannot satisfy them and the build fails with `CS9035`.
+
+Do **not** use `required` on XAML-referenced types. Silence the nullable warnings with default initializers instead (or leave them nullable):
+
+```csharp
+public class Scenario
+{
+    public string Title { get; set; } = string.Empty;
+    public Type ClassType { get; set; } = typeof(object);
+}
+```
+
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
 Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding files in `MIGRATION-MAPPING.md` get `Triage label = defer`; cite the specific API in `MIGRATION-DEFERRED.md`.
@@ -292,7 +306,7 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | `0x80004003` | `E_POINTER` | Static-window **init-order race** — a `Page` read `App.MainWindow` (or another static window reference) before `OnLaunched` assigned it. Keep `MainWindow`'s constructor inert and navigate after `Activate`. See [Initialization order](#windowing). |
 | `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
-| `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
+| `0xC000027B` | Native stowed exception | **Check the faulting module first.** If it is `Microsoft.UI.Xaml.dll`, this is almost always a **XAML parse/load failure**, not an unsupported API — inspect the XAML before deferring anything. Common causes: a `RelativePanel.Below`/`Above`/`RightOf`/`LeftOf` (or `AlignXWith`) that names an element which is **not a sibling inside the same `RelativePanel`**; a missing `StaticResource`/`ThemeResource` key; or a broken `MergedDictionary`. Only if the faulting module is a WinRT/projection DLL (not the XAML DLL) treat it as a legacy projection/activation incompatibility and defer the unsupported API. |
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 
@@ -423,6 +437,7 @@ public void Control_DefaultState_IsValid()
 
 Do **not** copy the UWP `.csproj` over the scaffold's. The two formats are incompatible — the UWP csproj carries `<TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>`, `<OutputType>AppContainerExe</OutputType>`, explicit `<Compile Include="...">` items, and `Microsoft.Common.props` imports, none of which build under WinAppSDK.
 
+<a id="manifest"></a>
 ### Package.appxmanifest — reconcile image references with the assets you actually have
 
 The WinUI 3 scaffold ships with a default `Package.appxmanifest` that references assets the template provides under `Assets/` (`SplashScreen.scale-200.png`, `Square150x150Logo.scale-200.png`, `Square44x44Logo.scale-200.png`, `StoreLogo.png`, `Wide310x150Logo.scale-200.png`, `LockScreenLogo.scale-200.png`). The UWP SDK sample's manifest usually points at sample-branded assets with a `-sdk` suffix (`Splash-sdk.png`, `squareTile-sdk.png`, `SmallTile-sdk.png`, `StoreLogo-sdk.png`).

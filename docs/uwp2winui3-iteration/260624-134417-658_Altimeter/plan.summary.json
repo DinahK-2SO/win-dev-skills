@@ -1,0 +1,14 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS: add CS9035 build-error pattern — never mark XAML-referenced model types (e.g. the SDK Scenario class) `required`; use default initializers, because the XAML generator builds them with `new T()`.",
+    "MIGRATION-PATTERNS: sharpen the 0xC000027B startup-crash row — when the faulting module is Microsoft.UI.Xaml.dll it's a XAML parse/load failure (cross-panel RelativePanel target, missing resource key, broken MergedDictionary); inspect the XAML before deferring an API.",
+    "MIGRATION-PATTERNS: add `<a id=\"manifest\">` anchor so Get-MigrationPattern.ps1 -Anchor manifest resolves the manifest patterns the validator references by name."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}
