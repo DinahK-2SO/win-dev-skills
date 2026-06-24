@@ -201,6 +201,23 @@ Pages that depend on physical hardware (camera, microphone, location, sensors, B
 
 This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1` Section 7) will still pass the process-alive gate, but the benchmark's later screenshot-diff check will penalise the trial. A two-line fallback prevents a ~20-point score loss.
 
+### Window backdrop — keep it opaque unless the UWP used acrylic/mica
+
+The `dotnet new winui` scaffold drops a translucent system backdrop into the generated `MainWindow.xaml`:
+
+```xml
+<Window.SystemBackdrop>
+    <MicaBackdrop />
+</Window.SystemBackdrop>
+```
+
+UWP apps render on an **opaque** background; they did **not** use Mica/Acrylic unless they explicitly declared an `AcrylicBrush` / backdrop material. Leaving this scaffold default in place has two costs:
+
+1. **Lower visual fidelity** — the migrated window no longer matches the UWP golden's solid background.
+2. **Blank screenshots** — a window with a `SystemBackdrop` composites its XAML content through DWM. `PrintWindow` / BitBlt screen-capture of the top-level window then returns only the (transparent) backdrop layer — recorded as a **blank / solid-white frame** — *not* the XAML content. The app looks empty to any screenshot-based reviewer even though its UIA tree is fully populated: the classic **"compiles + launches + UIA present + renders nothing"** failure that structural coverage misses.
+
+**Rule:** unless the original UWP app explicitly used `AcrylicBrush` / a backdrop material, **delete the `<Window.SystemBackdrop>…</Window.SystemBackdrop>` element** the scaffold added, and give the root content an explicit **opaque** `Background` (e.g. `{ThemeResource ApplicationPageBackgroundThemeBrush}` on the page's root panel, or `{ThemeResource SolidBackgroundFillColorBaseBrush}` on the window's root `Grid`). This both matches the UWP appearance and makes the content capturable. `Validate-UwpMigration.ps1` emits a `[WARN]` when a window XAML keeps a `SystemBackdrop` the UWP source never used.
+
 ## Post-Migration
 
 ### Restore sandboxing (if needed)

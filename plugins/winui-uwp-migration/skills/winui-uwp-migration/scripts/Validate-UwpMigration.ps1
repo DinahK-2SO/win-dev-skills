@@ -373,6 +373,48 @@ if (Test-Path -LiteralPath $manifestPath) {
     Write-Host "[WARN] Package.appxmanifest not found at $manifestPath — skipping image-reference check"
 }
 
+# ─── 5c. Window backdrop / blank-render guard ─────────────────────────────────
+# The `dotnet new winui` scaffold drops `<Window.SystemBackdrop><MicaBackdrop/>`
+# into MainWindow.xaml. A window with a SystemBackdrop composites its XAML content
+# through DWM, so PrintWindow / BitBlt screen-capture of the top-level HWND returns
+# only the (transparent) backdrop layer — recorded as a blank/solid-white frame —
+# not the XAML content. The app then looks EMPTY to any screenshot-based reviewer
+# even though its UIA tree is fully populated ("compiles + launches + UIA present +
+# renders nothing"). UWP apps render on an opaque background and did NOT use
+# Mica/Acrylic unless they explicitly declared an AcrylicBrush. So if a scaffold
+# backdrop survives and the UWP source used no acrylic/mica, warn to delete it and
+# set an opaque Background. WARN (not FAIL): if the original genuinely used acrylic,
+# keeping a backdrop is faithful.
+$backdropXaml = @()
+foreach ($xf in Get-ChildItem -LiteralPath $Target -Recurse -Filter '*.xaml' -File -ErrorAction SilentlyContinue |
+                 Where-Object { $_.FullName -notmatch '\\(bin|obj|\.uwp-source|Generated Files)\\' }) {
+    $xt = Get-Content -LiteralPath $xf.FullName -Raw
+    if ($xt -match '<Window\b' -and $xt -match '(SystemBackdrop|MicaBackdrop|DesktopAcrylicBackdrop)') {
+        $backdropXaml += $xf.FullName
+    }
+}
+if ($backdropXaml.Count -eq 0) {
+    Write-Host "[PASS] No leftover scaffold SystemBackdrop in window XAML"
+} else {
+    # Did the original UWP actually use acrylic/mica? If so, keeping a backdrop is faithful.
+    $srcAcrylic = $false
+    $srcDir = Join-Path $Target '.uwp-source'
+    if (Test-Path -LiteralPath $srcDir) {
+        $srcAcrylic = [bool](Get-ChildItem -LiteralPath $srcDir -Recurse -Include '*.xaml','*.cs' -File -ErrorAction SilentlyContinue |
+                              Select-String -Pattern 'AcrylicBrush|BackgroundSource|MicaController|SystemBackdrop' -List -ErrorAction SilentlyContinue)
+    }
+    if ($srcAcrylic) {
+        Write-Host "[PASS] Window SystemBackdrop present and the UWP source used acrylic/mica — keeping it is faithful"
+    } else {
+        Write-Host "[WARN] Window XAML keeps the scaffold's translucent SystemBackdrop, but the UWP source never used acrylic/mica:"
+        foreach ($f in $backdropXaml) { Write-Host "       $(Split-Path -Leaf $f)" }
+        Write-Host "       A SystemBackdrop composites content through DWM, so screenshot/PrintWindow capture of the window"
+        Write-Host "       returns a BLANK/solid frame even though the UIA tree is populated, and it doesn't match the UWP's"
+        Write-Host "       opaque background. Fix: delete <Window.SystemBackdrop>...</Window.SystemBackdrop> and give the root"
+        Write-Host "       content an explicit opaque Background. See SKILL.md > 'Window backdrop — keep it opaque'."
+    }
+}
+
 # ─── 6. dotnet build healthcheck ──────────────────────────────────────────────
 # The validator must gate on a clean build, otherwise common namespace-rewrite
 # fallout (CS0104 LaunchActivatedEventArgs ambiguity, CS0246 scaffold-vs-UWP

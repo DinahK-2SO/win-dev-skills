@@ -1,0 +1,14 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "HyperlinkButton actions (Trademarks/Privacy) produced no in-app visual response.",
+      "evidence": "migration-score.json features[0] uwp_responded=false AND winui_responded=false; discrepancies.json info-severity 'action-no-response' note 'Not counted as a regression'.",
+      "covered_clearly_at": "N/A — not a defect: behaviour matches the UWP golden (both open external pages, neither changes the in-app view).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "There is no regression — the WinUI behaviour is identical to the UWP original, so nothing to fix in the skill."
+    }
+  ]
+}

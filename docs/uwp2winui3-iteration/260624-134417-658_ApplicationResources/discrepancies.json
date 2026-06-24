@@ -1,0 +1,26 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 1,
+  "score": 0,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    {
+      "id": 1,
+      "text": "Page renders visibly with the title, the scenario list, and the output/status region matching the UWP golden; controls present in UIA tree; actions behave as in UWP.",
+      "status": "fail",
+      "reason": "App builds, launches, and constructs a complete/correct UIA tree (Compare-Parity 4/4 structural), but the window renders VISUALLY BLANK — only caption buttons paint, client area is solid white. Confirmed by winapp screenshot (11KB) and PrintWindow PW_RENDERFULLCONTENT (5.7KB) vs UWP 145KB.",
+      "suspected_skill_gap": "The scaffold's <Window.SystemBackdrop><MicaBackdrop/> was kept. A SystemBackdrop composites content through DWM so screenshot/PrintWindow capture returns a blank frame; the UWP used an opaque background with no backdrop. The migration skill is silent on removing the scaffold backdrop / ensuring an opaque, capturable background."
+    }
+  ],
+  "visual_discrepancies": [
+    {
+      "feature": "ApplicationResources",
+      "uwp": "Full content: title, 13-item scenario ListBox (selected item 1), output paragraph, Microsoft logo, Trademarks/Privacy footer (145KB).",
+      "winui": "Solid white client area, only caption buttons (11KB winapp; 5.7KB PrintWindow blank).",
+      "screenshot_ref": "parity/winui3/screenshots/01_ApplicationResources.png; parity/winui3/screenshots/printwindow.png"
+    }
+  ],
+  "missing_features": [],
+  "summary": "Structurally perfect migration sunk by a single generalizable defect: the scaffold MicaBackdrop makes the window content non-capturable and diverges from the UWP's opaque background, producing a blank-render visual-parity fail."
+}

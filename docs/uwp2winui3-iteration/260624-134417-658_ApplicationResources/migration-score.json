@@ -1,0 +1,32 @@
+{
+  "scenario": "ApplicationResources",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 1,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "ApplicationResources",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_ApplicationResources.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_ApplicationResources.png",
+      "note": "Migrated app builds, launches, and constructs a complete, correct UIA tree (title, 13-item 'Scenarios' list, status/output region, all expected text), and Compare-Parity passes structurally 4/4. BUT the window renders VISUALLY BLANK: only the Win32 caption buttons paint; the client area is empty white. Verified by two independent capture methods — winapp screenshot (11KB solid color, x2) and PrintWindow PW_RENDERFULLCONTENT (5.7KB blank) — while the same tooling captured the UWP golden's full content at 145KB. Per the parity skill's 'Blank screenshot = fail' rule and because this instrument scores visual/behavioral fidelity, the structural pass is overridden to FAIL. The two HyperlinkButton actions (Trademarks/Privacy) do not respond in either app (they open external pages), so there is no behavioral regression to add."
+    }
+  ],
+  "notes": {
+    "uwp_pid": 24996,
+    "uwp_window_title": "Application Resources C# sample",
+    "winui_pid": 14556,
+    "winui_build": "dotnet build OK, 0 errors, 182 warnings (CA1416 platform-availability)",
+    "checklist_caveat": "Extract-UwpFeatureChecklist flattened the sample to 1 feature (no scenario list parsed from SampleConfiguration.cs); the live UWP shows a 13-item scenario ListBox. Scoring follows the single extracted feature.",
+    "structural_parity_score": 100,
+    "structural_overridden_reason": "blank visual render"
+  }
+}

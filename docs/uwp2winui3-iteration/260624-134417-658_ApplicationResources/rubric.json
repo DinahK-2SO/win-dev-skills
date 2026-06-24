@@ -1,0 +1,27 @@
+{
+  "scenario": "ApplicationResources",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\ApplicationResources\\cs",
+  "generated": "2026-06-25T05:39:42+08:00",
+  "note": "Extract-UwpFeatureChecklist flattened this sample to a single MainPage feature (no scenario list parsed from SampleConfiguration.cs). The live UWP app actually presents a 13-item scenario ListBox; the rubric below scores the single extracted feature, which is the MainPage shell hosting that list plus the shared status/output region.",
+  "features": [
+    {
+      "id": 1,
+      "name": "ApplicationResources",
+      "pageClass": "MainPage",
+      "weight": 1.0,
+      "controls": [
+        { "name": "ScenarioControl", "type": "ListBox", "required": true },
+        { "name": "Trademarks", "type": "HyperlinkButton", "required": true },
+        { "name": "PrivacyLink", "type": "HyperlinkButton", "required": true },
+        { "name": "WindowsLogo", "type": "Image", "required": true }
+      ],
+      "actions": [
+        { "target": "Trademarks", "type": "HyperlinkButton", "expected": "navigates to external trademarks page (no in-app visual response)" },
+        { "target": "Privacy", "type": "HyperlinkButton", "expected": "navigates to external privacy page (no in-app visual response)" }
+      ],
+      "outputs": [ "SampleTitle", "Copyright", "StatusLabel", "StatusBlock", "Header" ],
+      "passCriteria": "Page renders visibly with the title, the scenario list, and the output/status region matching the UWP golden; controls present in UIA tree; actions behave as in UWP.",
+      "failCriteria": "Blank/empty render, missing scenario list, or dropped controls."
+    }
+  ]
+}

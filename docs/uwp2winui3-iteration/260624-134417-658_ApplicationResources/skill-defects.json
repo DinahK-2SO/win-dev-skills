@@ -1,0 +1,17 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated window renders visually blank (solid white client area; only caption buttons paint) despite a complete UIA tree and a clean build. Dominant defect; drove score to 0.",
+      "evidence": "discrepancies.json (severity=critical, type=blank-render); migration-score.json features[0].verdict=fail, note 'renders VISUALLY BLANK'; MainWindow.xaml lines 11-13 <Window.SystemBackdrop><MicaBackdrop/>.",
+      "skill_search": "grep of SKILL.md, MIGRATION-PATTERNS.md, scripts for 'backdrop|Mica|SystemBackdrop|blank|Window.Content' — only hits: an acrylic API-mapping row (AcrylicBrush -> DesktopAcrylicController) and a device-init blank-window rule. Nothing about the scaffold's window SystemBackdrop or its capture/blank-render effect.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The `dotnet new winui` scaffold injects <Window.SystemBackdrop><MicaBackdrop/></Window.SystemBackdrop> into MainWindow.xaml. A window with a SystemBackdrop composites its XAML through DWM, so PrintWindow/BitBlt capture of the HWND returns only the transparent backdrop layer (recorded as a blank/solid frame), not the content. The UWP source rendered on an opaque background and used no acrylic/mica (0 hits under .uwp-source). The skill never tells the agent to remove this scaffold default or ensure an opaque, capturable background.",
+      "proposed_fix": "Add a SKILL.md fidelity rule ('Window backdrop — keep it opaque unless the UWP used acrylic/mica') that instructs deleting the scaffold <Window.SystemBackdrop> and setting an explicit opaque root Background, plus a Validate-UwpMigration.ps1 WARN that fires when a window XAML keeps a SystemBackdrop/MicaBackdrop and .uwp-source shows no acrylic/mica usage.",
+      "generalizes": "EVERY UWP->WinUI 3 migration starts from `dotnet new winui`, whose MainWindow.xaml ships the MicaBackdrop. UWP samples virtually never used Mica/Acrylic, so any migrated app that keeps the scaffold backdrop risks the same blank-capture + reduced-fidelity failure regardless of scenario. Removing it is a one-line, universally faithful fix."
+    }
+  ]
+}

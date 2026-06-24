@@ -1,0 +1,14 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "SKILL.md: add 'Window backdrop — keep it opaque unless the UWP used acrylic/mica' fidelity rule — the dotnet new winui scaffold's <Window.SystemBackdrop><MicaBackdrop/> composites XAML through DWM, so screenshot/PrintWindow capture returns a blank frame and the window diverges from the UWP's opaque background; instruct deleting it and setting an explicit opaque Background.",
+    "Validate-UwpMigration.ps1: add Section 5c that WARNs when a window XAML keeps a SystemBackdrop/MicaBackdrop while .uwp-source shows no acrylic/mica usage, so the blank-render-prone scaffold default is caught at the mandatory validate gate before the agent declares done."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": []
+}

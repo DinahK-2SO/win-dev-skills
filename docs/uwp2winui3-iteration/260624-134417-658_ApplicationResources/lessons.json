@@ -1,0 +1,28 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "dotnet new winui + Initialize-UwpMigration.ps1", "evidence": "Bootstrap scaffolded the WinUI 3 shell and mapping; build finished with 0 errors (migration-score.json notes.winui_build)." }
+  ],
+  "tools_problematic": [
+    { "tool": "dotnet new winui scaffold (MainWindow.xaml)", "problem": "Scaffold injects <Window.SystemBackdrop><MicaBackdrop/></Window.SystemBackdrop>; the agent kept it. A windowed SystemBackdrop composites XAML through DWM so screen-capture/PrintWindow of the HWND returns a blank/solid frame.", "evidence": "MainWindow.xaml lines 11-13; discrepancies.json 'blank-render' critical; winui screenshot 11KB solid vs UWP 145KB." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 runtime smoke launch (Section 7)", "limitation": "Only checks process-alive, not whether the window paints content; a blank-but-alive window passes.", "suggested_tweak": "Add a static guard that flags a leftover scaffold SystemBackdrop when the UWP source never used acrylic/mica." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Window.SystemBackdrop / MicaBackdrop", "special_handling": "Translucent backdrops make the window content non-capturable by PrintWindow/BitBlt and diverge from the UWP's opaque background; should be removed unless the UWP explicitly used AcrylicBrush." }
+  ],
+  "errors_encountered": [
+    { "error": "Migrated window renders visually blank (only caption buttons paint) while UIA tree is fully populated (53 elements, non-zero bounds).", "root_cause": "Scaffold's <Window.SystemBackdrop><MicaBackdrop/> composites content through DWM; screenshot tooling captures only the transparent backdrop layer as a solid/blank frame. The UWP original used an opaque background and no backdrop.", "fix": "Delete the scaffold <Window.SystemBackdrop> element and give the root content an explicit opaque Background so the app paints solid, capturable content matching the UWP." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainWindow.xaml shell", "symptom": "App builds, launches, full UIA tree, but client area paints solid white in every capture method.", "turns_or_retries": "Not detected by the agent at all — it declared done; the blank render only surfaced in the scoring/parity capture.", "root_cause": "Kept the scaffold MicaBackdrop the UWP never had; backdrop-composited content is not captured by PrintWindow/BitBlt.", "how_resolved": "Not resolved in-trial (scored fail=1, score=0).", "preventable_by": "A migration-skill rule + validator WARN to remove the scaffold SystemBackdrop and set an opaque background unless the UWP used acrylic/mica." }
+  ],
+  "missing_tooling": [
+    { "need": "A static signal that catches blank-render-prone scaffold defaults (SystemBackdrop) before scoring.", "would_have_saved": "The entire 0-score visual-parity failure on an otherwise correct migration." }
+  ],
+  "env_issues": []
+}

@@ -1,0 +1,28 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated window renders visually blank (solid-white client area) despite a complete UIA tree and clean build — the scaffold's <Window.SystemBackdrop><MicaBackdrop/> makes content non-capturable and unfaithful to the UWP's opaque background. Drove score to 0.",
+      "evidence": "discrepancies.json (severity=critical, type=blank-render); migration-score.json features[0].verdict=fail; MainWindow.xaml lines 11-13; .uwp-source has 0 acrylic/mica hits.",
+      "root_cause": "Every migration starts from `dotnet new winui`, whose MainWindow.xaml ships a MicaBackdrop. A SystemBackdrop composites XAML through DWM so PrintWindow/BitBlt capture returns a blank/solid frame. UWP samples almost never used Mica/Acrylic, so the scaffold default both reduces fidelity and breaks visual-parity capture.",
+      "tier": 1,
+      "change": "Added Section 5c to Validate-UwpMigration.ps1: scans window XAML for SystemBackdrop/MicaBackdrop/DesktopAcrylicBackdrop and emits [WARN] (with the fix) when the .uwp-source shows no acrylic/mica usage; [PASS] otherwise. WARN keeps it advisory because a genuinely-acrylic UWP source legitimately keeps a backdrop.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The mandatory validate gate surfaces the leftover backdrop before the agent declares done, prompting removal + an opaque background.",
+      "falsifiable_check": "On a re-run, Validate-UwpMigration.ps1 prints '[WARN] Window XAML keeps the scaffold's translucent SystemBackdrop...' for an app that still has MicaBackdrop with a non-acrylic source; after the agent removes it, the line becomes '[PASS] No leftover scaffold SystemBackdrop in window XAML' and the captured screenshot is non-blank (>~50KB), moving requirement #1 fail->pass."
+    },
+    {
+      "problem": "Same as above — the skill text gives no guidance on the scaffold backdrop or blank-render-from-capture failure mode.",
+      "evidence": "grep of SKILL.md/MIGRATION-PATTERNS.md/scripts: no SystemBackdrop/MicaBackdrop guidance; only an acrylic API-mapping row and a device-init blank-window rule.",
+      "root_cause": "Absent guidance — the agent had no instruction to remove the scaffold backdrop or ensure an opaque, capturable background.",
+      "tier": 3,
+      "change": "Added a 'Window backdrop — keep it opaque unless the UWP used acrylic/mica' rule under Critical Rules > Fidelity in SKILL.md, explaining the DWM-composite/blank-capture mechanism and instructing to delete <Window.SystemBackdrop> and set an explicit opaque Background. Cross-references the new validator WARN.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "The agent removes the scaffold backdrop during migration, producing a solid, capturable, UWP-faithful window.",
+      "falsifiable_check": "Re-run migrated MainWindow.xaml contains no <Window.SystemBackdrop> (unless the UWP used acrylic), and the visual-parity screenshot is non-blank."
+    }
+  ],
+  "deferred_to_human": []
+}
