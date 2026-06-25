@@ -1,0 +1,17 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "SKILL.md instructs the agent to compile with `winapp build`, but the installed winapp CLI has no `build` subcommand, so the command always fails (exit 1) and wastes a turn.",
+      "evidence": "session-log.txt TURN 30-31 (L3855-3886): `winapp build` -> \"'build' was not matched. Unrecognized command or argument 'build'\", BUILD_EXIT=1, followed by the winapp help listing (commands: init/restore/update/package/sign/cert/manifest/.../run/ui — no build).",
+      "skill_search": "grepped winui-uwp-migration for `winapp` and `dotnet build`",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "SKILL.md L126 `winapp build  # compile; never run the .exe directly`; L138 `Prefer winapp build to compile`; L170 `do a final winapp build to confirm the build is still clean`. (Validate-UwpMigration.ps1 header L13-14 also says \"the agent invokes ... `winapp build` then this script\".)",
+      "root_cause": "The skill names a winapp verb that does not exist in the shipped CLI; winapp provides `run` (launch a packaged app) but compilation is `dotnet build`.",
+      "proposed_fix": "Replace every `winapp build` instruction in SKILL.md with `dotnet build` (using an exit sentinel, e.g. `dotnet build -c Debug; \"BUILD_EXIT=$LASTEXITCODE\"`), and fix the stale `winapp build` reference in the Validate-UwpMigration.ps1 header comment.",
+      "generalizes": "The compile step is identical for every UWP→WinUI 3 migration. Any agent following this skill will run the non-existent `winapp build` and waste a turn (or, worse, mis-trust a real failure). Fixing the canonical build command helps every scenario."
+    }
+  ]
+}

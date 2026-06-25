@@ -1,0 +1,21 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Automated parity reported scenario-3 FAIL / scenario-2 5/6 due to the migrated NavigationView pane being collapsed by default and items carrying the source 'N) ' title prefix, so title-driven capture couldn't reach scenarios 2-4.",
+      "evidence": "score notes discrepancies.md: corrected to 4/4 pass after manual UIA navigation; migration-score.json score_basis confirms this was a capture/navigation artifact, not a missing control.",
+      "covered_clearly_at": "This is an EVALUATION (winui3-parity-check) capture limitation, not a migration-skill concern — preserving the original sample's '3) Receiving a file' labels and a collapsed pane is faithful behavior, not a defect.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Out of scope for the migration skill (eval-side capture artifact). All controls and handlers are present; final score is 100. No migration-skill edit would change this."
+    },
+    {
+      "problem": "FileOpenPicker still emits WUI1001 analyzer warning.",
+      "evidence": "build-output.txt L13-14: WUI1001 on Scenario1_LaunchFile.xaml.cs.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md #pickers (L272-279) clearly gives the InitializeWithWindow.Initialize pattern, which the agent applied correctly (Scenario1_LaunchFile.xaml.cs L94-95).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The fix was applied correctly; WUI1001 is the analyzer flagging the API surface regardless of correct HWND init. Not a defect, and the validator's WUI gate counts distinct unfixed residue, which here is benign."
+    }
+  ]
+}

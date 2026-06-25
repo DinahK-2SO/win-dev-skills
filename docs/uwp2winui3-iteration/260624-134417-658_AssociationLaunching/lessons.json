@@ -1,0 +1,32 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log L310-363: bootstrap scaffolded the WinUI 3 project, seeded MIGRATION-MAPPING.md TODO rows; agent worked the rows to completion." },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "session-log L1551 (-Anchor windowing) and L1858 (-Anchor pickers): fetched the exact patterns needed; pickers pattern (InitializeWithWindow.Initialize) was applied correctly in Scenario1_LaunchFile.xaml.cs." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log L3833-3847: ran all 10 checks incl. dotnet build + smoke launch and reported PASS." }
+  ],
+  "tools_problematic": [
+    { "tool": "winapp build", "problem": "Not a valid winapp CLI subcommand; the command errors with \"'build' was not matched\" and exits 1.", "evidence": "session-log L3855-3886: agent ran `winapp build` per SKILL.md guidance, got BUILD_EXIT=1 and the winapp help listing (no `build` command exists)." }
+  ],
+  "tool_limitations": [
+    { "tool": "winapp CLI", "limitation": "Provides `run` (launch packaged app) but no `build` verb; compilation must go through `dotnet build`.", "suggested_tweak": "SKILL.md should instruct `dotnet build` (with an exit sentinel) as the compile step, not `winapp build`." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "winui-uwp-migration/SKILL.md L126, L138, L170 (and Validate-UwpMigration.ps1 header L13-14)", "wrong": "Tells the agent to compile with `winapp build`.", "correct": "The installed winapp CLI has no `build` subcommand; the compile command is `dotnet build`. winapp is only used for `run`/launch." }
+  ],
+  "special_apis": [
+    { "api": "Windows.Storage.Pickers.FileOpenPicker", "special_handling": "WinUI 3 desktop pickers need an HWND: WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow) + WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd). Handled correctly by the agent via the `pickers` anchor; WUI1001 warning remains (analyzer flags the API surface regardless)." }
+  ],
+  "errors_encountered": [
+    { "error": "`winapp build` -> \"'build' was not matched. Unrecognized command or argument 'build'\", exit 1", "root_cause": "SKILL.md instructs `winapp build` but winapp CLI has no build verb.", "fix": "Use `dotnet build -c Debug; \"BUILD_EXIT=$LASTEXITCODE\"` instead." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "TURN 30-31 final build confirmation", "symptom": "`winapp build` rejected with CLI usage dump, exit 1", "turns_or_retries": "1 wasted turn, self-recovered", "root_cause": "SKILL.md's 'final winapp build' instruction names a non-existent winapp subcommand.", "how_resolved": "Agent noted winapp build isn't a command and relied on the validator's prior dotnet build.", "preventable_by": "Correcting SKILL.md to use `dotnet build` as the compile command everywhere it currently says `winapp build`." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 screenshots render blank under PrintWindow in the non-interactive scoring session (composition swapchain).", "workaround": "Eval-side only (parity verified from UIA tree); not a migration concern." }
+  ]
+}

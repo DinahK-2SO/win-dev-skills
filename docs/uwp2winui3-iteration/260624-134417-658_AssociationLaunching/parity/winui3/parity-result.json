@@ -1,0 +1,96 @@
+{
+  "featureName": "Association Launching C# Sample",
+  "parityScore": 75.0,
+  "counts": {
+    "fail": 1,
+    "pass": 3,
+    "partial": 0
+  },
+  "totalScenarios": 4,
+  "pass": false,
+  "thresholds": {
+    "strictPartial": false,
+    "pass": 0.8,
+    "partial": 0.4
+  },
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Launching a file",
+      "verdict": "pass",
+      "coverage": 1.0,
+      "controlsTotal": 6,
+      "controlsFound": 6,
+      "reachable": true,
+      "screenshotBytes": 11273,
+      "actionsTotal": 5,
+      "actionsInvoked": 5,
+      "actionsResponded": 3,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [],
+      "reason": "",
+      "screenshot": "01_Launching_a_file.png"
+    },
+    {
+      "number": 2,
+      "title": "Launching a URI",
+      "verdict": "pass",
+      "coverage": 0.833,
+      "controlsTotal": 6,
+      "controlsFound": 5,
+      "reachable": true,
+      "screenshotBytes": 120490,
+      "actionsTotal": 4,
+      "actionsInvoked": 4,
+      "actionsResponded": 2,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"http://www.bing.com\""
+      ],
+      "reason": "Missing 1/6 control(s): TextBox \"http://www.bing.com\"",
+      "screenshot": "02_Launching_a_URI.png"
+    },
+    {
+      "number": 3,
+      "title": "Receiving a file",
+      "verdict": "fail",
+      "coverage": 0.0,
+      "controlsTotal": 3,
+      "controlsFound": 0,
+      "reachable": true,
+      "screenshotBytes": 134185,
+      "actionsTotal": 3,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "Button \"Create test file\"",
+        "Button \"Create test file with no file extension\"",
+        "Button \"Remove test files\""
+      ],
+      "reason": "Missing 3/3 control(s): Button \"Create test file\"; Button \"Create test file with no file extension\"; Button \"Remove test files\"",
+      "screenshot": "03_Receiving_a_file.png"
+    },
+    {
+      "number": 4,
+      "title": "Receiving a URI",
+      "verdict": "pass",
+      "coverage": 1.0,
+      "controlsTotal": 0,
+      "controlsFound": 0,
+      "reachable": true,
+      "screenshotBytes": 134185,
+      "actionsTotal": 0,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [],
+      "reason": "",
+      "screenshot": "04_Receiving_a_URI.png"
+    }
+  ]
+}

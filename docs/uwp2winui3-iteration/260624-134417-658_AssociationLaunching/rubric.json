@@ -1,0 +1,35 @@
+{
+  "scenario": "AssociationLaunching",
+  "featureName": "Association Launching C# Sample",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Launching a file",
+      "controls": ["Launch default handler", "Launch Open With", "Pick and launch", "Launch with warning", "ViewPreference", "Launch with view preference"],
+      "outputs": ["StatusBorder", "StatusBlock"],
+      "passCriteria": "All 6 controls present and launch handlers wired."
+    },
+    {
+      "number": 2,
+      "title": "Launching a URI",
+      "controls": ["UriToLaunch", "Launch default handler", "Launch Open With", "Launch with warning", "ViewPreference", "Launch with view preference"],
+      "outputs": ["StatusBorder", "StatusBlock"],
+      "passCriteria": "All 6 controls present (incl. UriToLaunch TextBox) and handlers wired."
+    },
+    {
+      "number": 3,
+      "title": "Receiving a file",
+      "controls": ["Create test file", "Create test file with no file extension", "Remove test files"],
+      "outputs": ["StatusBorder", "StatusBlock"],
+      "passCriteria": "All 3 controls present and handlers wired."
+    },
+    {
+      "number": 4,
+      "title": "Receiving a URI",
+      "controls": [],
+      "outputs": ["StatusBorder", "StatusBlock"],
+      "passCriteria": "Display-only page reachable in navigation."
+    }
+  ],
+  "scoreFormula": "round(100 * (pass + 0.5*partial) / featuresTotal)"
+}

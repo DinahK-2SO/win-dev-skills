@@ -1,0 +1,21 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "SKILL.md instructs the agent to compile with `winapp build`, a command that does not exist in the shipped winapp CLI; the agent ran it and got 'build was not matched' (exit 1), wasting a turn.",
+      "evidence": "session-log.txt TURN 30-31 (L3855-3886): `winapp build` -> \"'build' was not matched\", BUILD_EXIT=1 + winapp help dump (verbs: init/restore/update/package/sign/cert/manifest/run/ui — no build). Confirmed by grepping SKILL.md L126/L138/L170.",
+      "root_cause": "The skill names a non-existent winapp verb; winapp is for `run`/launch, compilation is `dotnet build`.",
+      "tier": 3,
+      "change": "Replaced the `winapp build` compile instruction with `dotnet build` in all three SKILL.md locations (Step 3 build loop, the Build-command-discipline note, and the final post-validate confirmation), and corrected the stale `winapp build` references in the Validate-UwpMigration.ps1 header comment and MIGRATION-PATTERNS.md L509. A Tier 1/2 change is not applicable: the validator already runs `dotnet build` internally (check 6); the defect is purely the wrong command string the prose tells the agent to type, so the prose is the correct and minimal place to fix it.",
+      "file": "skills/winui-uwp-migration/SKILL.md, skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents compile with a real command; no wasted turn on an invalid `winapp build`, and no risk of mis-trusting its exit code.",
+      "falsifiable_check": "On a re-run, the build log shows `dotnet build` for the compile/confirm step and contains zero `'build' was not matched` / `winapp build` invocations."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-side: winui3-parity-check title-driven capture cannot reach scenarios whose nav items carry a 'N) ' prefix while the NavigationView pane is collapsed (scored 75 automated, corrected to 100 manually). Capture robustness is the meta-agent's instrument, out of scope for the migration skill.",
+    "Eval-side: WinUI 3 composition swapchain renders blank under PrintWindow in the non-interactive scoring session, blocking pixel-level visual fidelity checks."
+  ]
+}
