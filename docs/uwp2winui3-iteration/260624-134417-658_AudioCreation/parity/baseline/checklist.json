@@ -1,0 +1,602 @@
+{
+  "featureName": "AudioCreation",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\AudioCreation\\cs",
+  "generated": "2026-06-26T11:25:34.4048404+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "File Playback",
+      "class": "Scenario1_FilePlayback",
+      "slug": "File_Playback",
+      "screenshot": "01_File_Playback.png",
+      "controls": [
+        {
+          "name": "fileButton",
+          "type": "Button",
+          "label": "Load File",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "graphButton",
+          "type": "Button",
+          "label": "Start Graph",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "loopToggle",
+          "type": "ToggleSwitch",
+          "label": "Loop",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "playSpeedSlider",
+          "type": "Slider",
+          "label": "Playback Speed",
+          "events": [
+            "ValueChanged"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Load File",
+          "alt": "fileButton",
+          "type": "Button",
+          "label": "Load File",
+          "name": "fileButton",
+          "event": "Click"
+        },
+        {
+          "target": "Start Graph",
+          "alt": "graphButton",
+          "type": "Button",
+          "label": "Start Graph",
+          "name": "graphButton",
+          "event": "Click"
+        },
+        {
+          "target": "Loop",
+          "alt": "loopToggle",
+          "type": "ToggleSwitch",
+          "label": "Loop",
+          "name": "loopToggle",
+          "event": "Toggled"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "SampleHeader",
+            "type": "TextBlock"
+          },
+          {
+            "name": "SampleDescription",
+            "type": "TextBlock"
+          },
+          {
+            "name": "speaker",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Capture From Device",
+      "class": "Scenario2_DeviceCapture",
+      "slug": "Capture_From_Device",
+      "screenshot": "02_Capture_From_Device.png",
+      "controls": [
+        {
+          "name": "outputDevicesListBox",
+          "type": "ListBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "inputDevicesListBox",
+          "type": "ListBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "fileButton",
+          "type": "Button",
+          "label": "Pick Output File",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "recordStopButton",
+          "type": "Button",
+          "label": "Record",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "createGraphButton",
+          "type": "Button",
+          "label": "Create Graph",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Pick Output File",
+          "alt": "fileButton",
+          "type": "Button",
+          "label": "Pick Output File",
+          "name": "fileButton",
+          "event": "Click"
+        },
+        {
+          "target": "Record",
+          "alt": "recordStopButton",
+          "type": "Button",
+          "label": "Record",
+          "name": "recordStopButton",
+          "event": "Click"
+        },
+        {
+          "target": "Create Graph",
+          "alt": "createGraphButton",
+          "type": "Button",
+          "label": "Create Graph",
+          "name": "createGraphButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "outputDevice",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Using A FrameInput Node",
+      "class": "Scenario3_FrameInput",
+      "slug": "Using_A_FrameInput_Node",
+      "screenshot": "03_Using_A_FrameInput_Node.png",
+      "controls": [],
+      "actions": [],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Using A Submix Node",
+      "class": "Scenario4_Submix",
+      "slug": "Using_A_Submix_Node",
+      "screenshot": "04_Using_A_Submix_Node.png",
+      "controls": [
+        {
+          "name": "fileButton1",
+          "type": "Button",
+          "label": "Load File 1",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "fileButton2",
+          "type": "Button",
+          "label": "Load File 2",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "echoEffectToggle",
+          "type": "ToggleSwitch",
+          "label": "Echo",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "graphButton",
+          "type": "Button",
+          "label": "Start Graph",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Load File 1",
+          "alt": "fileButton1",
+          "type": "Button",
+          "label": "Load File 1",
+          "name": "fileButton1",
+          "event": "Click"
+        },
+        {
+          "target": "Load File 2",
+          "alt": "fileButton2",
+          "type": "Button",
+          "label": "Load File 2",
+          "name": "fileButton2",
+          "event": "Click"
+        },
+        {
+          "target": "Echo",
+          "alt": "echoEffectToggle",
+          "type": "ToggleSwitch",
+          "label": "Echo",
+          "name": "echoEffectToggle",
+          "event": "Toggled"
+        },
+        {
+          "target": "Start Graph",
+          "alt": "graphButton",
+          "type": "Button",
+          "label": "Start Graph",
+          "name": "graphButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "submixLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "speaker",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Inbox Effects",
+      "class": "Scenario5_InboxEffects",
+      "slug": "Inbox_Effects",
+      "screenshot": "05_Inbox_Effects.png",
+      "controls": [
+        {
+          "name": "fileButton",
+          "type": "Button",
+          "label": "Load File",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "graphButton",
+          "type": "Button",
+          "label": "Start Graph",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "echoEffectToggle",
+          "type": "ToggleSwitch",
+          "label": "ECHO EFFECT",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "echoSlider",
+          "type": "Slider",
+          "label": "",
+          "events": [
+            "ValueChanged"
+          ]
+        },
+        {
+          "name": "reverbEffectToggle",
+          "type": "ToggleSwitch",
+          "label": "REVERB EFFECT",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "decaySlider",
+          "type": "Slider",
+          "label": "",
+          "events": [
+            "ValueChanged"
+          ]
+        },
+        {
+          "name": "limiterEffectToggle",
+          "type": "ToggleSwitch",
+          "label": "LIMITER EFFECT",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "loudnessSlider",
+          "type": "Slider",
+          "label": "",
+          "events": [
+            "ValueChanged"
+          ]
+        },
+        {
+          "name": "eqToggle",
+          "type": "ToggleSwitch",
+          "label": "EQUALIZER EFFECT",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "eq1Slider",
+          "type": "Slider",
+          "label": "",
+          "events": [
+            "ValueChanged"
+          ]
+        },
+        {
+          "name": "eq2Slider",
+          "type": "Slider",
+          "label": "",
+          "events": [
+            "ValueChanged"
+          ]
+        },
+        {
+          "name": "eq3Slider",
+          "type": "Slider",
+          "label": "",
+          "events": [
+            "ValueChanged"
+          ]
+        },
+        {
+          "name": "eq4Slider",
+          "type": "Slider",
+          "label": "",
+          "events": [
+            "ValueChanged"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Load File",
+          "alt": "fileButton",
+          "type": "Button",
+          "label": "Load File",
+          "name": "fileButton",
+          "event": "Click"
+        },
+        {
+          "target": "Start Graph",
+          "alt": "graphButton",
+          "type": "Button",
+          "label": "Start Graph",
+          "name": "graphButton",
+          "event": "Click"
+        },
+        {
+          "target": "ECHO EFFECT",
+          "alt": "echoEffectToggle",
+          "type": "ToggleSwitch",
+          "label": "ECHO EFFECT",
+          "name": "echoEffectToggle",
+          "event": "Toggled"
+        },
+        {
+          "target": "REVERB EFFECT",
+          "alt": "reverbEffectToggle",
+          "type": "ToggleSwitch",
+          "label": "REVERB EFFECT",
+          "name": "reverbEffectToggle",
+          "event": "Toggled"
+        },
+        {
+          "target": "LIMITER EFFECT",
+          "alt": "limiterEffectToggle",
+          "type": "ToggleSwitch",
+          "label": "LIMITER EFFECT",
+          "name": "limiterEffectToggle",
+          "event": "Toggled"
+        },
+        {
+          "target": "EQUALIZER EFFECT",
+          "alt": "eqToggle",
+          "type": "ToggleSwitch",
+          "label": "EQUALIZER EFFECT",
+          "name": "eqToggle",
+          "event": "Toggled"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "speaker",
+            "type": "TextBlock"
+          },
+          {
+            "name": "echoLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "decayLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "loudnessLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "eq1SliderLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "eq2SliderLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "eq3SliderLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "eq4SliderLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Custom Effects",
+      "class": "Scenario6_CustomEffects",
+      "slug": "Custom_Effects",
+      "screenshot": "06_Custom_Effects.png",
+      "controls": [
+        {
+          "name": "fileButton",
+          "type": "Button",
+          "label": "Load File",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "graphButton",
+          "type": "Button",
+          "label": "Start Graph",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Load File",
+          "alt": "fileButton",
+          "type": "Button",
+          "label": "Load File",
+          "name": "fileButton",
+          "event": "Click"
+        },
+        {
+          "target": "Start Graph",
+          "alt": "graphButton",
+          "type": "Button",
+          "label": "Start Graph",
+          "name": "graphButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "speaker",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

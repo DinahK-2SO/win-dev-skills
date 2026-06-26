@@ -35,6 +35,31 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 ```
 
+### `CS0103: The name 'Colors' does not exist in the current context`
+
+WinUI 3 split the color types across **two** namespaces: the static palette `Colors` (and `ColorHelper`) moved to **`Microsoft.UI.Colors`**, but the `Color` struct it returns stays in **`Windows.UI`**. The namespace mass-rewrite only touches `Windows.UI.Xaml`, so any code-behind that uses the palette unqualified — e.g. `new SolidColorBrush(Colors.Red)` — still fails to compile if the file only has `using Windows.UI;`.
+
+Fix: add **`using Microsoft.UI;`** to every code-behind that references `Colors`, alongside the existing `using Windows.UI;` (you need *both* — one for the `Colors` palette, one for the `Color` struct):
+
+```csharp
+using Windows.UI;     // Color struct
+using Microsoft.UI;   // Colors palette, ColorHelper
+...
+speakerContainer.Background = new SolidColorBrush(Colors.Green);
+```
+
+This is a per-file edit, not a global rename — fully-qualifying as `Microsoft.UI.Colors.Green` works too but the `using` is cleaner across many usages. Unresolved `Colors` errors also cascade into spurious `CS1022` (end-of-file expected) and `WMC9999` XAML-compiler internal errors; those clear automatically once the `Colors` references resolve, so fix the `using` first and rebuild before chasing them.
+
+### `CS0579: Duplicate 'System.Reflection.Assembly*Attribute'`
+
+Classic (non-SDK-style) UWP projects ship a `Properties\AssemblyInfo.cs` containing `[assembly: AssemblyVersion]`, `[assembly: AssemblyCompany]`, `[assembly: ComVisible]`, etc. SDK-style WinUI projects **auto-generate** these same attributes, so a copied `AssemblyInfo.cs` produces a wall of duplicate-attribute errors.
+
+Fix (preferred): **delete the legacy `Properties\AssemblyInfo.cs`** from the migrated tree — its attributes belong in the `.csproj` (`<Version>`, `<Company>`, etc.) for SDK-style projects. `Initialize-UwpMigration.ps1` now skips `AssemblyInfo.cs` at copy time; remove any that pre-date that fix or were copied manually. Alternatively, if you must keep the file, suppress the auto-generated set:
+
+```xml
+<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+```
+
 ### Thousands of `CS0101` duplicate-type / `CS0227` / `CS0234` errors (often a build that hangs)
 
 If `dotnet build` floods with **tens of thousands** of `CS0101` ("already contains a definition for …"), `CS0227`, or `CS0234` errors — or the build appears to hang for minutes — the cause is almost always **stale UWP build output that was copied into the migrated tree**. A previously-built UWP project (especially a multi-project sample with sub-folders) leaves machine-generated sources under `bin/` and `obj/`, e.g. .NET-Native ILC files at `obj\<arch>\Release\ilc\**\*.g.cs` and `*.McgInterop\ImplTypes.g.cs`. The SDK-style WinUI `.csproj` globs `**/*.cs`, and MSBuild's default `bin`/`obj` exclusion only covers the **project-root** `bin`/`obj` — any **nested** sub-project `bin`/`obj` is still compiled, producing the duplicate types.
@@ -89,7 +114,7 @@ All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
 | `Windows.UI.Xaml.Shapes` | `Microsoft.UI.Xaml.Shapes` |
 | `Windows.UI.Composition` | `Microsoft.UI.Composition` |
 | `Windows.UI.Input` | `Microsoft.UI.Input` |
-| `Windows.UI.Colors` | `Microsoft.UI.Colors` |
+| `Windows.UI.Colors` | `Microsoft.UI.Colors` (add `using Microsoft.UI;` — keep `using Windows.UI;` too: the `Color` struct stays in `Windows.UI`. See [CS0103 'Colors'](#cs0103-the-name-colors-does-not-exist-in-the-current-context)) |
 | `Windows.UI.Text` | `Microsoft.UI.Text` |
 | `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` |
 

@@ -1,0 +1,50 @@
+{
+  "scenario": "AudioCreation",
+  "source": "uwp-samples-standalone/Samples/AudioCreation/cs",
+  "gradingModel": "round(100 * (pass + 0.5*partial) / features_total)",
+  "thresholds": { "pass": 0.8, "partial": 0.4 },
+  "features": [
+    {
+      "number": 1,
+      "title": "File Playback",
+      "controls": ["Load File button", "Output Device status", "Start Graph button", "Loop ToggleSwitch", "Playback Speed slider"],
+      "actions": ["Load File", "Start Graph", "Loop"],
+      "outputs": ["Status text"]
+    },
+    {
+      "number": 2,
+      "title": "Capture From Device",
+      "controls": ["Pick Output File button", "Record button", "Create Graph button", "Output File status", "Audio Device status"],
+      "actions": ["Pick Output File", "Record", "Create Graph"],
+      "outputs": ["Status text"]
+    },
+    {
+      "number": 3,
+      "title": "Using A FrameInput Node",
+      "controls": [],
+      "actions": [],
+      "outputs": ["Status / description (informational scenario)"]
+    },
+    {
+      "number": 4,
+      "title": "Using A Submix Node",
+      "controls": ["Load File 1 button", "Load File 2 button", "Echo ToggleSwitch", "Start Graph button"],
+      "actions": ["Load File 1", "Load File 2", "Echo", "Start Graph"],
+      "outputs": ["Status text"]
+    },
+    {
+      "number": 5,
+      "title": "Inbox Effects",
+      "controls": ["Load File button", "Start Graph button", "ECHO EFFECT toggle", "REVERB EFFECT toggle", "LIMITER EFFECT toggle", "EQUALIZER EFFECT toggle", "effect parameter sliders"],
+      "actions": ["Load File", "Start Graph", "ECHO EFFECT", "REVERB EFFECT", "LIMITER EFFECT", "EQUALIZER EFFECT"],
+      "outputs": ["Status text"]
+    },
+    {
+      "number": 6,
+      "title": "Custom Effects",
+      "controls": ["Load File button", "Start Graph button"],
+      "actions": ["Load File", "Start Graph"],
+      "outputs": ["Status text"]
+    }
+  ]
+}

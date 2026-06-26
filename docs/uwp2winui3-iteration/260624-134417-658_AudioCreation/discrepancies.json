@@ -1,0 +1,38 @@
+{
+  "scenario": "AudioCreation",
+  "summary": "Structural parity is complete (6/6 scenarios, 100% control coverage). No behavioral regression could be proven because (a) the scoring machine has no audio output device, hardware-gating every AudioGraph action in BOTH apps, and (b) the original UWP app exposes no actuable UIA tree (ApplicationFrameHost hosting), so there is no UWP behavioral baseline to diff against. WinUI screenshots render blank because this session has no interactive GDI desktop (CopyFromScreen -> 'handle is invalid'); content was therefore verified via the WinUI UIA trees, which contain every expected control per scenario.",
+  "discrepancies": [
+    {
+      "type": "capture-limitation",
+      "severity": "info",
+      "scope": "winui3 screenshots",
+      "detail": "All WinUI 3 screenshots are blank-white (00_launch and 01_File_Playback = 11273 bytes). winapp screenshot and GDI CopyFromScreen both fail to capture WinUI composed surfaces in this non-interactive session. The WinUI UIA tree IS fully populated (correct titles, descriptions, and all controls with real bounds), so this is an environment capture limitation, not a blank/broken page."
+    },
+    {
+      "type": "baseline-limitation",
+      "severity": "info",
+      "scope": "uwp golden",
+      "detail": "UWP per-scenario navigation/actuation failed: the CoreWindow is hosted by ApplicationFrameHost so winapp ui invoke/inspect only see the host pane. All UWP golden frames default to the initial 'File Playback' scenario and zero control responses were recorded. The UWP app DID launch and render (the captured default frame shows the real 6-scenario nav and File Playback page)."
+    },
+    {
+      "type": "behavioral-inconclusive",
+      "severity": "info",
+      "scope": "audio actions",
+      "detail": "Start Graph / Create Graph / Record / effect toggles produced no observable output in WinUI. The machine has no audio output device ('DeviceNotAvailable' shown in the UWP app), so these AudioGraph actions are hardware-gated in both apps. No UWP baseline response exists to flag them as regressions."
+    },
+    {
+      "type": "behavioral-verified",
+      "severity": "none",
+      "scope": "file pickers",
+      "detail": "WinUI file-open handlers are wired and live: 'Load File' produced a visible response (file-open dialog) in scenarios 1, 5, and 6, confirming the migrated FileOpenPicker handlers function."
+    }
+  ],
+  "perFeature": [
+    { "name": "File Playback",          "coverage": "4/4",   "winui_responded_actions": "Load File", "note": "All controls present; Load File live; Start Graph/Loop hardware-gated/inconclusive." },
+    { "name": "Capture From Device",    "coverage": "5/5",   "winui_responded_actions": "none",      "note": "All controls present; actions are device-capture/file-save, gated by no audio device; no UWP baseline to diff." },
+    { "name": "Using A FrameInput Node","coverage": "n/a",   "winui_responded_actions": "n/a",       "note": "Informational scenario with no interactive controls; reachable and rendered." },
+    { "name": "Using A Submix Node",    "coverage": "4/4",   "winui_responded_actions": "none",      "note": "All controls present; Load File/Echo/Start Graph gated by no audio device." },
+    { "name": "Inbox Effects",          "coverage": "13/13", "winui_responded_actions": "Load File", "note": "All 13 controls present incl. 4 effect toggles; Load File live; effect/graph actions hardware-gated." },
+    { "name": "Custom Effects",         "coverage": "2/2",   "winui_responded_actions": "Load File", "note": "All controls present; Load File live; Start Graph hardware-gated." }
+  ]
+}

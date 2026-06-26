@@ -1,0 +1,17 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "12x CS0579 'Duplicate System.Reflection.Assembly*Attribute' errors caused by the UWP project's Properties\\AssemblyInfo.cs being carried into the migrated tree, where the SDK-style WinUI csproj auto-generates the same attributes.",
+      "evidence": "session-log.txt ~line 6093 (CS0579 errors) and ~6185 (agent fix '<GenerateAssemblyInfo>false</GenerateAssemblyInfo>'; narrative: 'CustomEffect\\Properties\\AssemblyInfo.cs conflicts with the SDK-generated one').",
+      "skill_search": "grep 'AssemblyInfo', 'GenerateAssemblyInfo', 'CS0579' across the winui-uwp-migration skill",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Classic (non-SDK-style) UWP projects ship a Properties\\AssemblyInfo.cs with [assembly: AssemblyVersion], [assembly: ComVisible], etc. SDK-style projects auto-generate these, so the copied file produces duplicate-attribute errors. Neither Initialize-UwpMigration.ps1 nor the docs handle it.",
+      "proposed_fix": "Tier 1: exclude AssemblyInfo.cs in Initialize-UwpMigration.ps1's copy filter (mirror the bin/obj skip). Tier 3: add a 'Common build errors' entry for CS0579 with the delete-AssemblyInfo / GenerateAssemblyInfo=false fix.",
+      "generalizes": "Virtually every classic UWP project has Properties\\AssemblyInfo.cs, so this duplicate-attribute collision recurs on any UWP->WinUI 3 migration that copies source verbatim."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS0227 'Unsafe code may only appear if compiling with /unsafe' on AudioFrame/pixel-buffer code.",
+      "evidence": "session-log: agent added '<AllowUnsafeBlocks>true</AllowUnsafeBlocks>' to the csproj without a stuck loop.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md lines 30-36 — dedicated 'CS0227: Unsafe code may only appear if compiling with /unsafe' entry with the exact <AllowUnsafeBlocks>true</AllowUnsafeBlocks> fix.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already documents this error and its fix prominently in the build-errors section; the agent applied it correctly with no struggle. No skill change warranted."
+    }
+  ]
+}

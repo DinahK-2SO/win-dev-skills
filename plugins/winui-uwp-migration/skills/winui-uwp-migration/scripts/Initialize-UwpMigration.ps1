@@ -80,6 +80,9 @@ $copied = New-Object System.Collections.Generic.List[string]
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     if (('\' + $rel) -match $srcExcludePattern) { return $false }
+    # Skip legacy UWP AssemblyInfo.cs: SDK-style WinUI projects auto-generate the same
+    # assembly attributes, so carrying it over yields CS0579 duplicate-attribute errors.
+    if ($_.Name -ieq 'AssemblyInfo.cs') { return $false }
     $name = $_.Name.ToLowerInvariant()
     $match = $false
     foreach ($ext in $patterns) {

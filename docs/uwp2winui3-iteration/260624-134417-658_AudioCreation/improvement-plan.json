@@ -1,0 +1,38 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "47x CS0103 'The name Colors does not exist' across all code-behind files (+ cascading CS1022/WMC9999), costing 2+ failed build cycles.",
+      "evidence": "session-log.txt ~5486+ (CS0103 'Colors'), 5570 ('45 Error(s)'), 5745-5748 (agent diagnoses & adds 'using Microsoft.UI;'). Note: skill-coverage-gaps.json.",
+      "root_cause": "WinUI 3 moved the Colors static palette to Microsoft.UI.Colors while the Color struct stays in Windows.UI; the namespace mapping table (line 92) read as a pure rename and omitted the required 'using Microsoft.UI;' and the split.",
+      "tier": 3,
+      "change": "Added a 'Common build errors' entry for CS0103 'Colors' (require 'using Microsoft.UI;', keep 'using Windows.UI;', note CS1022/WMC9999 cascade) and annotated the mapping-table row to point at it. Tier 3 chosen over Tier 1 because injecting a 'using' into the right files is unsafe to automate (unqualified 'Colors.X' usage, comments/strings) whereas the agent reliably applies a documented fix.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent adds 'using Microsoft.UI;' on first build attempt instead of looping; CS0103 'Colors' count drops to 0.",
+      "falsifiable_check": "On a re-run, build log shows 0 CS0103 'Colors' errors and no repeated build cycles on color references."
+    },
+    {
+      "problem": "12x CS0579 duplicate assembly-attribute errors from the UWP Properties\\AssemblyInfo.cs colliding with SDK auto-generated attributes.",
+      "evidence": "session-log.txt ~6093 (CS0579), ~6185 (agent fix GenerateAssemblyInfo=false), narrative 'AssemblyInfo.cs conflicts with the SDK-generated one'. Note: skill-defects.json.",
+      "root_cause": "Classic UWP projects ship Properties\\AssemblyInfo.cs; SDK-style WinUI projects auto-generate the same attributes. The copy step carried the file over and the docs never mention it.",
+      "tier": 1,
+      "change": "Initialize-UwpMigration.ps1 copy filter now skips any file named AssemblyInfo.cs (mirrors the bin/obj exclusion). Tier 1 chosen so the collision is prevented before the agent ever builds; a Tier 3 note was added too for trees that already contain the file.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Migrated tree never contains a legacy AssemblyInfo.cs, so SDK auto-generation no longer duplicates attributes.",
+      "falsifiable_check": "On a re-run, no AssemblyInfo.cs under the migrated project (outside .uwp-source) and 0 CS0579 errors in the build log."
+    },
+    {
+      "problem": "Same CS0579 case, defense-in-depth for trees where AssemblyInfo.cs already exists or was copied manually.",
+      "evidence": "Same as item 2.",
+      "root_cause": "Same as item 2.",
+      "tier": 3,
+      "change": "Added a CS0579 'Common build errors' entry documenting delete-AssemblyInfo.cs (preferred) and the <GenerateAssemblyInfo>false</GenerateAssemblyInfo> fallback.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "If CS0579 still surfaces, the agent resolves it in one step from the documented fix.",
+      "falsifiable_check": "Build log shows CS0579 resolved without exploratory retries."
+    }
+  ],
+  "deferred_to_human": []
+}

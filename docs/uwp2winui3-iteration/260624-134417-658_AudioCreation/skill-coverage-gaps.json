@@ -1,0 +1,15 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "47x CS0103 'The name Colors does not exist in the current context' across all 7 scenario code-behind files, plus cascading CS1022/WMC9999, costing 2+ failed build cycles.",
+      "evidence": "session-log.txt ~line 5486+ (CS0103 'Colors'), 5570 ('45 Error(s)'), 5745 ('The Colors class needs using Microsoft.UI; in WinUI 3'), 5748 (fix adds 'using Microsoft.UI;').",
+      "covered_at": "MIGRATION-PATTERNS.md line 92 — Namespace Mapping table row '| Windows.UI.Colors | Microsoft.UI.Colors |'.",
+      "why_missed": "under-emphasized — the mapping table row implies a simple find/replace, but does not state that (a) the migrated code needs an explicit 'using Microsoft.UI;' and (b) the Color struct returned by Colors stays in Windows.UI, so both usings are required. Code that uses unqualified 'Colors.Red' with only 'using Windows.UI;' still fails to compile.",
+      "proposed_improvement": "Add a 'Common build errors' entry for CS0103 'Colors' naming the required 'using Microsoft.UI;' and the Color/Colors namespace split, and annotate the mapping-table row so it is not read as a pure text rewrite.",
+      "generalizes": "Any UWP code-behind that sets brush/stroke colors from C# (SolidColorBrush(Colors.X)) hits this; the Color/Colors namespace split is a fixed WinUI 3 behavior, not scenario-specific."
+    }
+  ]
+}
