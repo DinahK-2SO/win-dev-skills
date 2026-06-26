@@ -1,0 +1,31 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap produced MIGRATION-MAPPING.md (20 rows), .bootstrap-meta.json, injected TODO markers; agent migrated all files faithfully (session-log L202-340)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught real residue/Status=copied FAILs on first run (session-log L6108-6132); agent fixed and got PASS (L6222-6237)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Test-AppLaunch.ps1 / Validate-UwpMigration.ps1 Section 7 (runtime smoke)", "problem": "Process-alive-only smoke launch reported green ('[OK] status=running', '[PASS] Smoke launch — app stayed alive') while the default scenario page (Scenario1) was actually rendering blank.", "evidence": "session-log L6096 'Test-AppLaunch [OK] status=running'; L6234 '[PASS] Smoke launch'; L6237 'Validate-UwpMigration: PASS'. Scoring (migration-score.json) then found Scenario1 content frame empty — 0/5 controls in UIA tree." }
+  ],
+  "tool_limitations": [
+    { "tool": "Test-AppLaunch.ps1 / Validator Section 7", "limitation": "Verifies only that the process survives startup; it never navigates the shell, so a content Page whose ctor/Loaded throws (Frame.Navigate failure does NOT kill the process) passes the gate while the scenario is silently dead.", "suggested_tweak": "Document the blind spot and instruct the agent to (a) wire Frame.NavigationFailed during bring-up and (b) navigate every scenario to confirm the content frame is non-empty — not rely on 'the app launched'." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "MediaPlayer / MediaPlayerElement.SetMediaPlayer / MediaPlayer.PlaybackSession", "special_handling": "Scenario1's constructor/Loaded creates the MediaPlayer, accesses PlaybackSession.PlaybackRate, calls SetMediaPlayer, and loads an ms-appx asset playlist. Any throw there blanks the content frame without crashing the app. Such init-heavy pages need defensive guards + a visible fallback, exactly like hardware pages." }
+  ],
+  "errors_encountered": [
+    { "error": "Scenario1 content frame renders empty in WinUI 3; mediaPlayerElement, Audio Category combo, PlaylistView track list all absent from the UIA tree (0/5).", "root_cause": "The Scenario1 Page throws during construction/Loaded (MediaPlayer/PlaybackSession/asset-load/service-singleton init). Frame.Navigate marshals the exception out of the navigation call without terminating the process, so the content frame stays blank while the app stays alive. The migration's runtime check only verifies the process is alive, so the failure was never surfaced.", "fix": "Make navigated-page failures loud (Frame.NavigationFailed) and resilient (guard ctor/Loaded init with try/catch + visible fallback); verify each scenario actually renders, not just that the app launched." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Step 3/4 runtime verification", "symptom": "Agent declared done after Test-AppLaunch '[OK] status=running' and Validator PASS, but Scenario1 was blank.", "turns_or_retries": "Single pass — no struggle; the agent followed the skill exactly and still shipped a dead scenario.", "root_cause": "Skill's runtime verification (Test-AppLaunch / Validator §7) is process-alive-only and the skill never warns that Frame navigation to a content page can fail silently. The agent had no signal that a scenario was broken.", "how_resolved": "Not resolved in-trial — surfaced only by the independent scoring step.", "preventable_by": "Skill change: document silent navigation failures + instruct per-scenario render verification (skill-defect), and broaden the defensive-init/fallback rule beyond hardware pages to all init-heavy pages (skill-coverage-gap)." }
+  ],
+  "missing_tooling": [
+    { "need": "A self-check that navigates every migrated scenario and asserts the content frame is non-empty (vs. process-alive only).", "would_have_saved": "Would have flagged Scenario1 blank during bring-up instead of at independent scoring (a feature FAIL = ~50% of score here)." }
+  ],
+  "env_issues": [
+    { "issue": "Headless box renders the WinUI 3 swapchain as black via PrintWindow, so WinUI visuals can't be diffed; UIA tree is authoritative.", "workaround": "N/A for the migration skill (capture-side limitation of the eval). Reinforces why a non-visual per-scenario render check matters." }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "uwp_launchable": true,
+  "score": 50,
+  "features_total": 2,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 1,
+  "uwp_capture_status": "ok: UWP app launched in Release (pid 10212, window 'Background Media Playback C# Sample'); golden screenshots captured. Note: UWP CoreWindow exposes no UIA subtree to winapp, so per-control behavioral actuation of the original could not be recorded — the UWP visual golden is the ground-truth reference. Migrated WinUI 3 is graded from its UIA tree because this headless box renders the WinUI swapchain as black via PrintWindow.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 1,
+  "features": [
+    {
+      "name": "Background Media Playback",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Background_Media_Playback.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Background_Media_Playback.png",
+      "note": "Scenario content frame renders empty in WinUI 3: mediaPlayerElement, prevButton, playButton, nextButton, speedButton, track list and Audio Category combo are all absent from the UIA tree (structural coverage 0/5, 0/4 live actions). The UWP golden shows the full media player with transport controls and track list. Scenario1 page appears to throw during construction/Loaded (MediaPlayer access), so frame navigation yields an empty page. Genuine migration regression."
+    },
+    {
+      "name": "Settings",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Settings.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Settings.png",
+      "note": "Settings page reachable and renders its content ('Toast on App Events' and 'Use Custom Controls' toggles present). Source checklist lists 0 named controls for this scenario, so structural coverage is n/a; functionally the page works."
+    }
+  ]
+}

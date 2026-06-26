@@ -1,0 +1,15 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Scenario1 throws during construction/Loaded because of non-trivial init (creates a MediaPlayer, reads PlaybackSession.PlaybackRate, calls SetMediaPlayer, loads an ms-appx playlist asset, touches the PlaybackService singleton) and there is no defensive guard, so the failure blanks the content frame. The skill already has the right pattern — guard init and show a visible fallback — but it is scoped narrowly to physical-hardware pages, so the agent did not apply it to a media/init-heavy page.",
+      "evidence": "Scenario1.xaml.cs ctor calls PlaybackService.Instance.Player, new PlayerViewModel(Player, DispatcherQueue), Player.MediaPlayerRateChanged +=, UpdatePlaybackSpeed() -> Player.PlaybackSession.PlaybackRate; Scenario1_Loaded calls mediaPlayerElement.SetMediaPlayer(Player) and await MediaList.LoadFromApplicationUriAsync('ms-appx:///Assets/playlist.json'). migration-score.json verdict 'fail', 0/5 controls in UIA tree. None of this init is wrapped in try/catch with a fallback.",
+      "covered_at": "SKILL.md section 'Defensive UI for device-dependent features' (\"every device-dependent page must show a visible fallback when device acquisition or initialization throws... Wrap the init call in try/catch; on catch, swap the page's main content for the fallback\").",
+      "why_missed": "under-emphasized / scoped-too-narrowly — the rule's trigger list is 'camera, microphone, location, sensors, Bluetooth, NFC' (physical hardware). A media playback page is not obviously 'hardware', so the agent did not recognize it as in-scope, even though it has the identical failure mode (init throws -> blank frame indistinguishable from a crash -> score loss).",
+      "proposed_improvement": "Broaden the existing 'Defensive UI' section so its trigger is 'any page that does non-trivial initialization in its constructor or Loaded' — explicitly listing media players (MediaPlayer/MediaPlayerElement/PlaybackSession), asset/file loads (ms-appx:/// and StorageFile), service/singleton access, and ViewModel/DataContext wiring alongside hardware. Keep the same prescription (guard the init in try/catch; on catch swap in a visible fallback). Add a sentence noting the process-alive smoke launch will NOT catch this and cross-link the new 'silent navigation failures' anchor.",
+      "generalizes": "Init-heavy pages are common in UWP samples (media, file/picker demos, network/HTTP demos, settings that read storage, anything using a shared service). Widening the defensive-fallback rule from 'hardware' to 'any init-heavy ctor/Loaded' makes every such page degrade gracefully to a visible message instead of a blank frame, across many scenarios."
+    }
+  ]
+}

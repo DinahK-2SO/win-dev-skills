@@ -1,0 +1,19 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "ground_truth": "original UWP app launched (Release) on this machine; window title 'Background Media Playback C# Sample'",
+  "features": [
+    {
+      "name": "Background Media Playback",
+      "number": 1,
+      "expected_controls": ["mediaPlayerElement", "prevButton", "playButton", "nextButton", "speedButton"],
+      "expected_outputs": ["currentTrackTitle", "currentStateTextBlock", "StatusBlock"],
+      "pass_criteria": "MediaPlayerElement plus the four transport/speed controls render and respond"
+    },
+    {
+      "name": "Settings",
+      "number": 2,
+      "expected_controls": [],
+      "pass_criteria": "Settings page reachable and renders non-blank content"
+    }
+  ]
+}

@@ -129,6 +129,8 @@ winapp build                                                                # co
 
 A WinUI 3 app can build cleanly and still crash the instant it starts, so "it compiled" is not "it runs." `Test-AppLaunch.ps1` is your launch step *because* it answers both questions at once: it launches the built app and reports whether it stayed alive — and if it didn't, it captures the real reason from Windows Error Reporting (native exception **code** from event 1000 + managed .NET exception **type + stack** from event 1026) and points you at the matching cause in [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). Making this your normal launch command means a startup crash hands you its exception immediately — you never end up guessing.
 
+> **"Process alive" is not "every page works."** `Test-AppLaunch.ps1` (and Validator Section 7) only prove the **initial** surface survived startup. A content `Page` reached later via `Frame.Navigate` can throw in its constructor/`Loaded` **without crashing the process** — the content frame just goes blank while the app stays alive, so the smoke launch still reports green. After the app launches, **navigate to every migrated scenario / nav entry and confirm its content frame actually renders** (controls present, not an empty page); during bring-up, wire `Frame.NavigationFailed` on the shell content frame so a broken page is loud instead of silent. See [Silent navigation failures](./MIGRATION-PATTERNS.md#silent-navigation-failures).
+
 When a **build** error points at a UWP API, fetch the relevant anchor and apply the pattern. For example, a CS0246 on `Window.Current` → `Get-MigrationPattern.ps1 -Anchor windowing`; an analyzer warning about `CoreDispatcher` → `Get-MigrationPattern.ps1 -Anchor threading`. Open `MIGRATION-PATTERNS.md` directly only as a last resort — one anchor at a time keeps each turn small.
 
 When the app **crashes at launch**, fix the frame the captured stack names — then build and launch again. Do **not** sprinkle `File.WriteAllText` traces through `Program.cs` / `App.xaml.cs` and re-run in a loop: blind tracing is the single biggest time sink in this phase, and the exception `Test-AppLaunch.ps1` already captured tells you where the throw is. (Note: a custom `Program.Main` for WinUI 3 **correctly** uses `[STAThread]` — that is not the bug.)
@@ -155,7 +157,7 @@ The validator covers:
 4. **`MIGRATION-DEFERRED.md` consistency** — every defer row in mapping has a matching row in the deferred file.
 5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability.
 6. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
-7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
+7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL. **Note: this gate only proves the process stayed alive — it does NOT navigate the shell.** A scenario page that throws on `Frame.Navigate` leaves a blank content frame while the app keeps running, so this check passes green for it. Verify each scenario renders yourself — see [Silent navigation failures](./MIGRATION-PATTERNS.md#silent-navigation-failures).
 8. **Visible-text fidelity** — compares each non-deferred XAML against a snapshot of the user-visible/static text the bootstrap copied verbatim (control `Content`/`Text`, `Header`/`Title`, and descriptive `TextBlock`/`RichTextBlock` paragraphs). Reports a non-fatal **WARN** listing any label/caption/description that no longer appears in the migrated page — the signature of a page that was regenerated or paraphrased instead of edited in place. This does not fail the gate (legitimate text changes exist), but a WARN almost always means lost parity: restore the original wording verbatim unless you have a concrete reason it changed.
 
 The validator's stdout is intentionally terse: `[FAIL]` lines show only `file:line` (plus an error code where applicable). The full diagnostic text — code snippets, compiler error messages — is written to `.validator-diagnostics.txt` at the project root. **Open that file** to read the details before deciding the fix.
@@ -195,13 +197,36 @@ Do:
 - Use anchor references instead. The bootstrap already inserts `// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — when you fix a TODO, **delete the TODO line entirely** in the same edit. Do not leave a "for posterity" comment naming the original API.
 - If you genuinely need to leave a note for future readers, write `// See PATTERNS.md#<anchor>` and stop there.
 
-### Defensive UI for device-dependent features
+### Defensive UI for init-heavy and device-dependent pages
 
-Pages that depend on physical hardware (camera, microphone, location, sensors, Bluetooth, NFC, etc.) often run on machines that lack the device — including the validation environment. A page that silently fails its device-init leaves a blank window, which is **indistinguishable from a crash** to a screenshot-based reviewer and produces three byte-identical screenshots that fail blank-frame checks.
+A page can build cleanly, navigate without crashing the process, and still leave a **blank content
+frame** if its constructor or `Loaded` handler throws while doing real initialization work. Because
+`Frame.Navigate` does not terminate the app on a page-construction throw (see [Silent navigation
+failures](./MIGRATION-PATTERNS.md#silent-navigation-failures)), and the runtime smoke launch only
+checks the process is alive, this failure is **silent** — and a blank page is indistinguishable
+from a crash to a screenshot-based reviewer (three byte-identical screenshots that fail blank-frame
+checks).
 
-**Rule:** every device-dependent page must show a visible fallback when device acquisition or initialization throws. The fallback can be as simple as a centred `TextBlock` saying *"This sample requires a <device-kind> device that is not available on this machine."* plus the exception's `Message` underneath. Wrap the init call in `try/catch`; on catch, swap the page's main content for the fallback (don't only log and return).
+This applies to **any page that does non-trivial initialization in its constructor or `Loaded`**, not
+only hardware pages. Common triggers:
 
-This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1` Section 7) will still pass the process-alive gate, but the benchmark's later screenshot-diff check will penalise the trial. A two-line fallback prevents a ~20-point score loss.
+- **Physical hardware** — camera, microphone, location, sensors, Bluetooth, NFC (the device is often
+  absent, including in the validation environment).
+- **Media** — `new MediaPlayer()`, `MediaPlayerElement.SetMediaPlayer(...)`, reading
+  `PlaybackSession.*`, opening media sources.
+- **Asset / file loads** — `ms-appx:///` URIs, `StorageFile`/`ApplicationData` reads, JSON/playlist
+  loads from `Loaded`.
+- **Service singletons / DI / ViewModel + DataContext wiring** done in the page's ctor or `Loaded`.
+
+**Rule:** wrap the init in `try/catch`; on catch, **swap the page's main content for a visible
+fallback** (don't only log and return). The fallback can be as simple as a centred `TextBlock`
+saying *"This sample could not initialize on this machine."* plus the exception's `Message`
+underneath (for hardware, name the missing device kind).
+
+This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1`
+Section 7) still passes the process-alive gate, but the scenario silently renders blank and the
+benchmark's per-scenario / screenshot check penalises the trial. A few lines of guard prevent a
+large score loss.
 
 ## Post-Migration
 

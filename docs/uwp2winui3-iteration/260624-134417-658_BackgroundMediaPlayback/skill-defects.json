@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "A content Page reached via Frame.Navigate that throws in its constructor/Loaded does NOT crash the app — it leaves the content frame blank while the process stays alive. The skill's runtime verification (Test-AppLaunch.ps1 / Validate-UwpMigration.ps1 Section 7) only checks that the process survives startup, so it reports PASS while a whole scenario is silently dead. The agent followed the skill exactly, saw green, and shipped a blank primary scenario.",
+      "evidence": "session-log L6096 'Test-AppLaunch [OK ] status=running'; L6234 '[PASS] Smoke launch — app stayed alive'; L6237 'Validate-UwpMigration: PASS'. Independent score (migration-score.json) verdict 'fail' for Background Media Playback: 'Scenario content frame renders empty... mediaPlayerElement, ... track list and Audio Category combo are all absent from the UIA tree (structural coverage 0/5)'. discrepancies.json type 'missing-scenario-content'.",
+      "skill_search": "Grepped SKILL.md and MIGRATION-PATTERNS.md for 'NavigationFailed', 'Navigate', 'swallow', 'blank frame', 'render'. The only runtime-crash coverage is 'Diagnosing Startup Crashes' (PATTERNS #startup-crashes) and 'Initialization order — keep MainWindow's constructor inert' — both scoped to the MAIN window / app startup. Nothing covers a content Page that throws on Frame navigation after a successful startup. 'NavigationFailed' appears nowhere.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill treats 'survives startup / process is alive' as equivalent to 'the app works'. It documents startup crashes thoroughly but has no concept of a post-startup, per-page navigation failure that is non-fatal to the process. The process-alive smoke launch is therefore blind to dead secondary pages.",
+      "proposed_fix": "Add a new anchored subsection to MIGRATION-PATTERNS.md ('Silent navigation failures — page renders blank, app stays alive') explaining that Frame.Navigate to a content Page whose ctor/Loaded throws does not terminate the process; instruct the agent to (a) wire Frame.NavigationFailed on the shell content frame during bring-up so a broken page is loud, and (b) verify each scenario actually renders (navigate every nav entry, confirm the content frame is non-empty) rather than relying on the process-alive smoke launch. Add a one-line caveat to SKILL.md Step 3 and the Section 7 description noting the smoke launch only proves the initial surface survives.",
+      "generalizes": "Almost every UWP SDK sample is a MainPage/list (or NavigationView) + Frame shell that navigates to N content Pages, and any scenario page whose ctor/Loaded does real work (media, sensors, file/asset loads, service singletons, DataContext wiring) can throw on navigation without killing the process. A process-alive smoke check passes green for all of them. This blind spot recurs across the whole class of multi-scenario migrations, not just media."
+    }
+  ]
+}

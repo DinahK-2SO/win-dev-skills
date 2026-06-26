@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add MIGRATION-PATTERNS '#silent-navigation-failures': Frame.Navigate to a content page that throws in ctor/Loaded leaves a blank frame without crashing the process, so the process-alive smoke launch passes green — wire Frame.NavigationFailed and verify every scenario actually renders.",
+    "SKILL.md Step 3 + Section 7: note the smoke launch only proves the initial surface survived, not that every navigated page works; cross-link the silent-navigation-failures pattern.",
+    "Broaden SKILL.md 'Defensive UI' from hardware-only to any init-heavy ctor/Loaded (media, ms-appx asset/file loads, service singletons, ViewModel/DataContext wiring): guard init with try/catch + visible fallback so a failure degrades gracefully instead of blanking the frame."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Tier 1: make Test-AppLaunch.ps1 / Validator Section 7 optionally navigate each scenario via UIA and assert a non-empty content frame, rather than process-alive only."
+  ]
+}

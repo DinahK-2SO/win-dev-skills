@@ -313,6 +313,45 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 
 The Step 4 validator runs this same check (`Validate-UwpMigration.ps1` Section 7) and **fails** when the app registers but dies at startup, surfacing the captured signature in `.validator-diagnostics.txt`.
 
+<a id="silent-navigation-failures"></a>
+## Silent navigation failures — page renders blank, app stays alive
+
+Startup crashes are the *loud* failure mode. The *quiet* one bites multi-page apps (the typical SDK
+sample: a `MainPage` list or `NavigationView` + a content `Frame` that navigates to N scenario
+`Page`s). When you call `Frame.Navigate(typeof(SomePage))` and **`SomePage`'s constructor or
+`Loaded` handler throws**, the exception is marshalled out of the navigation call **without
+terminating the process** — the content frame simply stays blank (or on the previous page) while
+the app keeps running. The build is clean, the app launches, the start page works, and one scenario
+is silently dead.
+
+**This passes the smoke launch.** `Test-AppLaunch.ps1` and `Validate-UwpMigration.ps1` Section 7
+only verify the process is **alive** — they do not drive the shell, so they report green for a
+blank scenario. "It launched" therefore does **not** mean "every page works."
+
+Two defenses — apply both:
+
+1. **Make it loud during bring-up.** Wire `NavigationFailed` on the shell's content frame so a
+   page-construction throw surfaces instead of vanishing:
+
+   ```csharp
+   ScenarioFrame.NavigationFailed += (s, e) =>
+   {
+       System.Diagnostics.Debug.WriteLine($"Navigation to {e.SourcePageType} failed: {e.Exception}");
+       e.Handled = true; // or rethrow while debugging to get the full stack
+   };
+   ```
+
+2. **Verify each scenario actually renders.** After the app launches, navigate to **every** nav
+   entry and confirm its content frame is non-empty (the scenario's named controls appear), not
+   just that the app is still running. A scenario whose frame stays blank is a regression even
+   though the process is alive.
+
+The usual root cause is a content page doing **non-trivial initialization in its constructor or
+`Loaded`** — creating a `MediaPlayer` / calling `SetMediaPlayer` / reading `PlaybackSession.*`,
+loading an `ms-appx:///` asset, touching a service singleton, or wiring a ViewModel/`DataContext`.
+Guard that init so a failure degrades to a visible fallback instead of a blank frame — see
+**Defensive UI for init-heavy and device-dependent pages** in SKILL.md.
+
 <a id="lifecycle"></a>
 ## Application Lifecycle and Activation
 

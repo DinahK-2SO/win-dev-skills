@@ -1,0 +1,21 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "capture_environment": "headless session; WinUI 3 swapchain content captures as black via PrintWindow, so WinUI verdicts use the UIA tree. UWP golden screenshots are valid pixels.",
+  "discrepancies": [
+    {
+      "scenario": "Background Media Playback",
+      "verdict": "fail",
+      "type": "missing-scenario-content",
+      "detail": "Scenario1 content frame renders empty; mediaPlayerElement, prevButton, playButton, nextButton, speedButton, track list, and Audio Category combo are all absent from the UIA tree. UWP golden shows all of them. Likely Scenario1 page throws during construction/Loaded (MediaPlayer access), so frame navigation yields an empty page.",
+      "missing_controls": ["mediaPlayerElement", "prevButton", "playButton", "nextButton", "speedButton"],
+      "coverage": "0/5",
+      "live_actions": "0/4"
+    },
+    {
+      "scenario": "Settings",
+      "verdict": "pass",
+      "type": "none",
+      "detail": "Settings page reachable; 'Toast on App Events' and 'Use Custom Controls' toggles present. Source checklist lists 0 named controls."
+    }
+  ]
+}

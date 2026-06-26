@@ -1,0 +1,30 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "A content Page that throws in its ctor/Loaded during Frame.Navigate does not crash the process — the content frame goes blank while the app stays alive. The skill's runtime verification (Test-AppLaunch.ps1 / Validator Section 7) is process-alive-only, so it reports PASS while a scenario is silently dead. The agent saw green and shipped a blank primary scenario.",
+      "evidence": "session-log L6096 'Test-AppLaunch [OK ] status=running'; L6234 '[PASS] Smoke launch — app stayed alive'; L6237 'Validate-UwpMigration: PASS' — yet migration-score.json marks 'Background Media Playback' fail (0/5 controls in UIA tree); discrepancies.json type 'missing-scenario-content'. skill-defects.json item 1.",
+      "root_cause": "Skill equates 'process alive after startup' with 'app works'; it documents startup crashes thoroughly but has no concept of a non-fatal, post-startup per-page navigation failure. NavigationFailed appears nowhere in the skill.",
+      "tier": 3,
+      "change": "Added a new anchored MIGRATION-PATTERNS.md subsection '#silent-navigation-failures' explaining the failure mode and prescribing two defenses (wire Frame.NavigationFailed during bring-up; navigate every scenario and confirm its content frame is non-empty). Added a caveat to SKILL.md Step 3 and to the Section 7 description that the smoke launch only proves the initial surface survived, with cross-links to the new anchor.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "On a re-run, the agent verifies each scenario renders (and/or wires NavigationFailed), so a content page that throws on navigation is caught during bring-up instead of at independent scoring — and is then fixed, turning the scenario fail->pass.",
+      "falsifiable_check": "Re-run log shows the agent navigating each scenario / wiring NavigationFailed; the Background Media Playback scenario's content frame is non-empty in the UIA tree (controls present), moving migration-score.json verdict for that feature from 'fail' to 'pass' (or 'partial')."
+    },
+    {
+      "problem": "Scenario1 throws during ctor/Loaded (creates MediaPlayer, reads PlaybackSession.PlaybackRate, calls SetMediaPlayer, loads an ms-appx playlist asset, touches the PlaybackService singleton) with no defensive guard, blanking the content frame. The skill's defensive-fallback rule already exists but is scoped to physical-hardware pages only, so the agent did not apply it to a media/init-heavy page.",
+      "evidence": "Scenario1.xaml.cs ctor + Scenario1_Loaded (MediaPlayer/SetMediaPlayer/LoadFromApplicationUriAsync, none guarded); migration-score.json 'fail', 0/5 controls. SKILL.md 'Defensive UI for device-dependent features' trigger list was hardware-only. skill-coverage-gaps.json item 1.",
+      "root_cause": "The defensive-UI rule's trigger ('camera, microphone, location, sensors, Bluetooth, NFC') made a media page look out-of-scope, even though it has the identical failure mode (init throws -> blank frame -> score loss).",
+      "tier": 3,
+      "change": "Broadened the SKILL.md 'Defensive UI' section to 'init-heavy and device-dependent pages': trigger is now any non-trivial init in a page's ctor/Loaded, with media (MediaPlayer/SetMediaPlayer/PlaybackSession), asset/file loads (ms-appx:/// , StorageFile), service singletons, and ViewModel/DataContext wiring listed alongside hardware. Same prescription (try/catch + visible fallback). Added the note that the process-alive smoke launch won't catch it and cross-linked the silent-navigation-failures anchor.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Init-heavy pages (media, file, network, storage-backed settings) are guarded so a failure degrades to a visible fallback message instead of a blank frame.",
+      "falsifiable_check": "Re-run: Scenario1's media/asset init is wrapped in try/catch and, on failure, the page shows a visible fallback TextBlock rather than an empty frame; the scenario's UIA tree is non-empty (controls or fallback text present), not 3 byte-identical blank screenshots."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier 1: extend Test-AppLaunch.ps1 / Validate-UwpMigration.ps1 Section 7 to optionally drive the shell — navigate each nav entry via UIA (winapp) and assert the content frame is non-empty — instead of only checking process-alive. Not auto-applied here because robust per-scenario UIA driving is heavy/fragile and edges into the eval skills' UIA-driving responsibility; the harness owner should decide whether the migration smoke check should actuate navigation."
+  ]
+}
