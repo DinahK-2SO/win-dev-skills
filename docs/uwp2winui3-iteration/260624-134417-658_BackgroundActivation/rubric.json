@@ -1,0 +1,14 @@
+{
+  "scenario": "BackgroundActivation",
+  "feature": "Background Activation",
+  "source": "uwp-samples-standalone/Samples/BackgroundActivation/cs",
+  "scenarios": [
+    { "number": 1, "title": "Background Task", "controls": ["RegisterButton", "UnregisterButton"], "outputs": ["Status"], "expected": "Register enabled / Unregister disabled / Status 'Unregistered' by default; Register registers a TimeZoneChange SystemTrigger task." },
+    { "number": 2, "title": "Background Task with Condition", "controls": ["RegisterButton", "UnregisterButton"], "outputs": ["Status"], "expected": "Same Register/Unregister/Status pattern; task carries an InternetAvailable condition." },
+    { "number": 3, "title": "Servicing Complete Task", "controls": ["RegisterButton", "UnregisterButton"], "outputs": ["Status"], "expected": "Same Register/Unregister/Status pattern; ServicingComplete SystemTrigger." },
+    { "number": 4, "title": "Background Task with Time Trigger", "controls": ["RegisterButton", "UnregisterButton"], "outputs": ["Status"], "expected": "Same Register/Unregister/Status pattern; TimeTrigger." },
+    { "number": 5, "title": "Background Task with Application Trigger", "controls": ["RegisterButton", "UnregisterButton", "SignalButton"], "outputs": ["Status"], "expected": "Register/Unregister/Status plus an application-trigger signal action." },
+    { "number": 6, "title": "Grouped Background Task", "controls": ["RegisterButton", "UnregisterButton"], "outputs": ["Status"], "expected": "Same Register/Unregister/Status pattern; registered within a task group." }
+  ],
+  "gradingNotes": "Each scenario is a faithful copy of the SDK page template: a Description, Register/Unregister buttons, and a Status line. Structural parity is judged by presence of the nav item (verbatim title), the Register/Unregister buttons, and the Status output. Behavioral parity (Register -> Status 'Registered', Unregister re-enabled) is permission-gated (BackgroundExecutionManager.RequestAccessAsync) and therefore environment-dependent."
+}
