@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundSensors",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "First build of the migrated project failed with 6x 'error CS0579: Duplicate System.Reflection.Assembly*Attribute attribute' originating from obj\\...\\BackgroundSensors.AssemblyInfo.cs.",
+      "evidence": "build-output.txt / session-log.txt turns 39-43: 'Build failed with 6 error(s)' then fixed at turn 40 by adding <GenerateAssemblyInfo>false</GenerateAssemblyInfo>. Confirmed the copied legacy file BackgroundTask\\Properties\\AssemblyInfo.cs contains [assembly: AssemblyTitle/Company/Configuration/Product/...].",
+      "skill_search": "Grepped winui-uwp-migration for 'AssemblyInfo', 'GenerateAssemblyInfo', 'CS0579', 'Duplicate.*attribute' — no matches in SKILL.md, MIGRATION-PATTERNS.md, or any script.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 copies all *.cs from the UWP source, including the legacy Properties\\AssemblyInfo.cs that every classic UWP project carries. SDK-style WinUI csproj's auto-generate the same assembly attributes (GenerateAssemblyInfo defaults true), so they are defined twice. Multi-project samples bring one AssemblyInfo.cs per sub-project, multiplying the duplicates.",
+      "proposed_fix": "In Initialize-UwpMigration.ps1, skip copying Properties\\AssemblyInfo.cs during the source-copy step; document in MIGRATION-PATTERNS.md the CS0579 root cause and the <GenerateAssemblyInfo>false</GenerateAssemblyInfo> fallback for projects that must keep the legacy attributes.",
+      "generalizes": "EVERY classic UWP (.NET) project ships Properties\\AssemblyInfo.cs with assembly attributes, and EVERY SDK-style WinUI 3 target auto-generates the same attributes by default. Copying the legacy file therefore produces CS0579 on virtually every UWP->WinUI 3 migration, scaling with the number of sub-projects. Not scenario-specific."
+    }
+  ]
+}

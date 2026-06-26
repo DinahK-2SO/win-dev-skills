@@ -75,11 +75,24 @@ $patterns = @(
 $srcExcludeDirs = @('bin', 'obj', '.vs', '.git', '.github', '.copilot', 'packages', 'node_modules')
 $srcExcludePattern = '\\(' + ($srcExcludeDirs -join '|') + ')\\'
 
+# Never copy the legacy UWP `Properties\AssemblyInfo.cs`. Every classic UWP project ships
+# one with `[assembly: AssemblyTitle/Company/Configuration/Product/Version/...]` attributes.
+# SDK-style WinUI csproj's auto-generate those same attributes by default
+# (GenerateAssemblyInfo=true), so compiling the copied file produces a build-breaking
+# `error CS0579: Duplicate 'System.Reflection.Assembly*Attribute' attribute` for every
+# attribute — and multi-project samples (e.g. a background-task sub-project) bring one
+# AssemblyInfo.cs each, multiplying the duplicates. Dropping these obsolete files lets the
+# SDK own the assembly metadata. (If a project genuinely needs the legacy attributes, the
+# alternative is `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>` in the csproj — see
+# MIGRATION-PATTERNS.md > 'AssemblyInfo.cs — drop it or the build fails with CS0579'.)
+$srcExcludeFilePattern = '\\Properties\\AssemblyInfo\.cs$'
+
 $copied = New-Object System.Collections.Generic.List[string]
 
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     if (('\' + $rel) -match $srcExcludePattern) { return $false }
+    if (('\' + $rel) -match $srcExcludeFilePattern) { return $false }
     $name = $_.Name.ToLowerInvariant()
     $match = $false
     foreach ($ext in $patterns) {

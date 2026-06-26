@@ -477,6 +477,30 @@ public void Control_DefaultState_IsValid()
 
 Do **not** copy the UWP `.csproj` over the scaffold's. The two formats are incompatible — the UWP csproj carries `<TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>`, `<OutputType>AppContainerExe</OutputType>`, explicit `<Compile Include="...">` items, and `Microsoft.Common.props` imports, none of which build under WinAppSDK.
 
+### AssemblyInfo.cs — drop it or the build fails with CS0579
+
+Classic UWP projects keep assembly metadata in `Properties\AssemblyInfo.cs`:
+
+```csharp
+[assembly: AssemblyTitle("...")]
+[assembly: AssemblyCompany("...")]
+[assembly: AssemblyConfiguration("...")]
+[assembly: AssemblyProduct("...")]
+[assembly: AssemblyVersion("1.0.0.0")]
+```
+
+SDK-style WinUI 3 projects auto-generate those same attributes (`GenerateAssemblyInfo` defaults to `true`). If the legacy file is compiled alongside the generated one, the build fails with one error per attribute:
+
+```
+obj\...\<Project>.AssemblyInfo.cs(13,12): error CS0579: Duplicate 'System.Reflection.AssemblyCompanyAttribute' attribute
+```
+
+Multi-project samples (e.g. a background-task sub-project under `BackgroundTask\Properties\AssemblyInfo.cs`) ship one such file each, so every one multiplies the duplicates. `Initialize-UwpMigration.ps1` already **skips copying** `Properties\AssemblyInfo.cs`, so a clean migration never hits this. If you reintroduced one (or genuinely need the legacy attributes), either delete it again or set in the `<PropertyGroup>`:
+
+```xml
+<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+```
+
 ### Package.appxmanifest — reconcile image references with the assets you actually have
 
 The WinUI 3 scaffold ships with a default `Package.appxmanifest` that references assets the template provides under `Assets/` (`SplashScreen.scale-200.png`, `Square150x150Logo.scale-200.png`, `Square44x44Logo.scale-200.png`, `StoreLogo.png`, `Wide310x150Logo.scale-200.png`, `LockScreenLogo.scale-200.png`). The UWP SDK sample's manifest usually points at sample-branded assets with a `-sdk` suffix (`Splash-sdk.png`, `squareTile-sdk.png`, `SmallTile-sdk.png`, `StoreLogo-sdk.png`).

@@ -1,0 +1,13 @@
+{
+  "scenario": "BackgroundSensors",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Accelerometer DeviceUse scenario: Enable/Disable buttons, Sample count, Status", "status": "pass", "reason": "2/2 controls present; verbatim description, both buttons, 'Sample count: No data', 'No accelerometer found' status all render. Hardware-gated identically to UWP.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Full parity. No app-level discrepancies. The single non-parity observation (blank WinUI screenshot) is a known eval-side PrintWindow capture limitation, not a migration defect. The only migration-skill-relevant signal is a build cycle lost to CS0579 duplicate-AssemblyInfo, which is generalizable and now fixed in the skill."
+}

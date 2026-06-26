@@ -1,0 +1,22 @@
+{
+  "scenario": "BackgroundSensors",
+  "feature": "Background sensors",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\BackgroundSensors\\cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Accelerometer DeviceUse",
+      "description": "Launches a DeviceUse trigger background task to listen for accelerometer data. Displays the number of data samples received by the background task.",
+      "controls": [
+        { "name": "ScenarioEnableButton", "label": "Enable", "type": "Button", "expected": "Registers the accelerometer DeviceUse background task; disables Enable, enables Disable when a sensor is present." },
+        { "name": "ScenarioDisableButton", "label": "Disable", "type": "Button", "expected": "Unregisters the background task; re-enables Enable, disables Disable." }
+      ],
+      "outputs": [
+        { "name": "ScenarioOutput_SampleCount", "type": "TextBlock", "expected": "Shows 'Sample count: <n>' or 'No data'." },
+        { "name": "StatusBlock", "type": "TextBlock", "expected": "Status message, e.g. 'No accelerometer found' when no sensor hardware is present." }
+      ],
+      "hardwareGated": true,
+      "hardwareNote": "Requires a physical accelerometer. On hardware-less machines both UWP and WinUI display 'No accelerometer found' and the Enable/Disable actions produce no sample data."
+    }
+  ]
+}

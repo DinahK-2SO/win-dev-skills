@@ -1,0 +1,21 @@
+{
+  "scenario": "BackgroundSensors",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Nullable-reference warnings on background-task fields (Accelerometer, BackgroundTaskDeferral) because the scaffold enables <Nullable>enable</Nullable> while UWP fields are not null-annotated.",
+      "evidence": "session-log turns 41-42: agent declared the fields nullable (Accelerometer?, BackgroundTaskDeferral?) and switched to Deferral?.Complete(). These were warnings; the build already succeeded after the AssemblyInfo fix.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md line 166: 'With <Nullable>enable</Nullable>, declare as nullable since the assignment only happens during OnLaunched.'",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already states the exact pattern (nullable scaffold + declare fields nullable). The agent applied it correctly in-trial with no real struggle; warnings did not affect the build or score. A capable re-run handles this with no skill edit."
+    },
+    {
+      "problem": "CA1416 platform-compatibility warnings on WinRT APIs (DeviceUseTrigger, BackgroundTaskBuilder, Accelerometer, ApplicationData, Visibility, SolidColorBrush, etc.).",
+      "evidence": "build-output.txt: dozens of 'warning CA1416 ... only supported on Windows 10.0.x' lines; BUILD SUCCEEDED regardless.",
+      "covered_clearly_at": "N/A — warnings only, never gated the build, run, or parity score (score 100). No observable failure signal to act on.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "These are benign analyzer warnings emitted for any WinRT call on a multi-targeted reachable call site; they did not reduce the score or block the build. Adding blanket CA1416 suppression guidance risks hiding genuine platform issues and has no falsifiable benefit here. Out of scope for a skill change."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "scenario": "BackgroundSensors",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: stop copying legacy Properties\\AssemblyInfo.cs from the UWP source — its [assembly: ...] attributes collide with the SDK-style project's auto-generated ones and break the build with CS0579 on essentially every migration.",
+    "MIGRATION-PATTERNS.md: document the CS0579 duplicate-AssemblyInfo failure mode and the <GenerateAssemblyInfo>false> fallback for projects that must keep legacy assembly attributes."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Eval-side blank WinUI screenshot (PrintWindow) belongs to winui3-parity-check/uwp-app-runner — not changed here."
+  ]
+}

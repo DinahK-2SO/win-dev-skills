@@ -1,0 +1,30 @@
+{
+  "scenario": "BackgroundSensors",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "First build of the migrated project failed with 6x 'error CS0579: Duplicate System.Reflection.Assembly*Attribute attribute' because the legacy UWP Properties\\AssemblyInfo.cs was copied into an SDK-style project that auto-generates the same attributes.",
+      "evidence": "session-log.txt turns 39-43 (Build failed with 6 error(s); fixed turn 40 with <GenerateAssemblyInfo>false</GenerateAssemblyInfo>); copied BackgroundTask\\Properties\\AssemblyInfo.cs holds [assembly: AssemblyTitle/Company/Configuration/Product/...]. Grep of the skill for AssemblyInfo/GenerateAssemblyInfo/CS0579 = absent.",
+      "root_cause": "Initialize-UwpMigration.ps1 copies all *.cs including the legacy Properties\\AssemblyInfo.cs; SDK-style WinUI csproj GenerateAssemblyInfo default (true) generates the same attributes -> duplicate definitions, multiplied per sub-project.",
+      "tier": 1,
+      "change": "Add a copy-exclusion in Initialize-UwpMigration.ps1 so files matching '\\Properties\\AssemblyInfo.cs$' are not copied from the UWP source into the scaffold. Tier 1 (tooling) was chosen over a Tier 3 prose note alone because the agent cannot ignore a script that simply never creates the conflicting file; the duplicate is structurally prevented rather than relying on the agent to read a tip.",
+      "file": "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Migrated projects no longer contain a legacy AssemblyInfo.cs, so the SDK-generated assembly attributes are the only definitions and CS0579 never occurs.",
+      "falsifiable_check": "On a re-run, the first `dotnet build` of the migrated project produces zero CS0579 errors with no GenerateAssemblyInfo edit by the agent, and no Properties\\AssemblyInfo.cs exists under the target."
+    },
+    {
+      "problem": "The skill had no documentation of the CS0579/AssemblyInfo failure mode, so an agent that reintroduces the file (or needs the legacy attributes) has no guidance.",
+      "evidence": "Grep of SKILL.md + MIGRATION-PATTERNS.md for AssemblyInfo/GenerateAssemblyInfo/CS0579 = no matches.",
+      "root_cause": "Documentation gap accompanying the same root cause.",
+      "tier": 3,
+      "change": "Add a short 'AssemblyInfo.cs — drop it or the build fails with CS0579' subsection to MIGRATION-PATTERNS.md beside the csproj-merge guidance, explaining the duplicate-attribute cause, that the script now skips the file, and the <GenerateAssemblyInfo>false</GenerateAssemblyInfo> fallback. Tier 3 here only backstops the Tier 1 script fix (covers the manual-reintroduction case); it does not carry the fix alone.",
+      "file": "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "If CS0579 ever appears, the agent finds the root cause and both remedies in one place.",
+      "falsifiable_check": "Grepping MIGRATION-PATTERNS.md for 'CS0579' and 'GenerateAssemblyInfo' now returns the new subsection."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-side only: WinUI 3 client-area screenshots capture blank via PrintWindow in this environment; the parity check falls back to the UIA tree. This belongs to winui3-parity-check / uwp-app-runner (measurement instruments) and must NOT be changed by the migration skill."
+  ]
+}

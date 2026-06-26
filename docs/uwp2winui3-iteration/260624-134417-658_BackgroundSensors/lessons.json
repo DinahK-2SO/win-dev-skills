@@ -1,0 +1,28 @@
+{
+  "scenario": "BackgroundSensors",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Scaffolded the WinUI 3 target, mass-rewrote Windows.UI.Xaml->Microsoft.UI.Xaml and preserved the UWP csproj at .uwp-source/; migration reached full parity (score 100)." },
+    { "tool": "dotnet build -p:Platform=$Platform", "evidence": "Used as the validator loop; surfaced CS0579 and nullable warnings, then confirmed BUILD SUCCEEDED after fixes (session-log turns 39-43)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Copied the legacy UWP Properties\\AssemblyInfo.cs (and the background-task sub-project's AssemblyInfo.cs) into the SDK-style scaffold, which auto-generates the same assembly attributes -> CS0579 duplicate-attribute build break.", "suggested_tweak": "Exclude Properties\\AssemblyInfo.cs from the copy step (done); document the GenerateAssemblyInfo=false fallback." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "DeviceUseTrigger / BackgroundTaskBuilder / Accelerometer (Windows.Devices.Sensors)", "special_handling": "Run unchanged under WinAppSDK but are hardware-gated; on a machine with no accelerometer both UWP and WinUI show 'No accelerometer found' (matched behavior, not a defect). They also emit CA1416 platform-compat warnings (warnings only, build still succeeds)." }
+  ],
+  "errors_encountered": [
+    { "error": "error CS0579: Duplicate 'System.Reflection.Assembly*Attribute' attribute (x6) from obj\\...\\BackgroundSensors.AssemblyInfo.cs", "root_cause": "The migration copied the UWP Properties\\AssemblyInfo.cs (with [assembly: AssemblyTitle/Company/Configuration/Product/Version...]) into an SDK-style project whose GenerateAssemblyInfo default is true, so the same attributes are defined twice.", "fix": "Added <GenerateAssemblyInfo>false</GenerateAssemblyInfo> to the csproj (session-log turn 40). Generalizable fix applied to the skill: stop copying Properties\\AssemblyInfo.cs in Initialize-UwpMigration.ps1." },
+    { "error": "CS86xx nullable warnings on Scenario1_BackgroundTask fields (Accelerometer, BackgroundTaskDeferral)", "root_cause": "dotnet new winui scaffold enables <Nullable>enable</Nullable>; UWP source fields are not null-annotated.", "fix": "Declared the fields nullable (Accelerometer?, BackgroundTaskDeferral?) and used Deferral?.Complete() (turns 41-42). Already covered by MIGRATION-PATTERNS.md line 166." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "session-log turns 39-43 (first full build of the migrated project)", "symptom": "Build failed with 6x CS0579 duplicate-attribute errors", "turns_or_retries": "~1 diagnose + 1 fix build cycle", "root_cause": "Legacy UWP Properties\\AssemblyInfo.cs copied into an SDK-style project that auto-generates the same attributes.", "how_resolved": "Set <GenerateAssemblyInfo>false</GenerateAssemblyInfo> in the csproj.", "preventable_by": "Initialize-UwpMigration.ps1 skipping Properties\\AssemblyInfo.cs during the source copy (applied), so the duplicate never exists." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 client-area screenshot captured blank (PrintWindow limitation in this environment).", "workaround": "Eval relied on the UIA tree + post-click outputText, which confirmed full render. This is an eval-skill capture artifact, not a migration-skill defect — out of scope for migration changes." }
+  ]
+}

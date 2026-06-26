@@ -1,0 +1,29 @@
+{
+  "scenario": "BackgroundSensors",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 1,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "uwp_window_title": "Background Sensors C# Sample",
+  "uwp_pid": 18324,
+  "winui_pid": 22216,
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "notes": "Full parity. WinUI 3 client-area screenshots captured blank due to a known WinUI 3 desktop PrintWindow limitation; the UIA tree (parity/winui3/ui/01.json) and post-click outputText confirm the page renders identically to the UWP original. Both Enable/Disable are hardware-gated ('No accelerometer found') in BOTH apps, so non-response is matched behavior, not a dead control.",
+  "features": [
+    {
+      "name": "Accelerometer DeviceUse",
+      "verdict": "pass",
+      "coverage": "2/2",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "behavior": "hardware-gated identically in both apps (no accelerometer present; status 'No accelerometer found')",
+      "uwp_screenshot": "parity/baseline/screenshots/01_Accelerometer_DeviceUse.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Accelerometer_DeviceUse.png",
+      "note": "Structural coverage 2/2 (Enable, Disable). UIA tree confirms full visual content parity: title, verbatim description, both buttons, 'Sample count: No data', and 'No accelerometer found' status. WinUI screenshot blank is a PrintWindow capture artifact, not an empty page. Enable/Disable hardware-gated identically to UWP (responded=false in both) => not a dead control, no behavioral regression."
+    }
+  ]
+}
