@@ -1,0 +1,21 @@
+{
+  "scenario": "BasicSuspension",
+  "summary": "No migration defects found. The WinUI 3 app structurally reproduces the UWP MainPage in full (ListView with header + Items 1-4, plus add/reset CommandBar buttons), confirmed via the captured UIA tree. The only items below are measurement-environment limitations, not migration faults.",
+  "discrepancies": [
+    {
+      "feature": "BasicSuspension",
+      "type": "measurement-limitation",
+      "severity": "none",
+      "detail": "Original UWP app launched (uwp-app-runner ok:true, window 'Basic Suspension C# Sample') but reached only its splash screen ('Windows platform sample') and then crashed (WER MoAppCrash, P5 combase.dll, P8 0x80131500 managed exception) ~3-8s after launch, before MainPage's ListView rendered. The golden capture therefore shows the splash only; no live UWP feature visual or behavior could be captured to diff against."
+    },
+    {
+      "feature": "BasicSuspension",
+      "type": "measurement-limitation",
+      "severity": "none",
+      "detail": "WinUI 3 pixel screenshots come back blank in this environment: PrintWindow cannot capture WinUI 3 DirectComposition/SwapChain content, and there is no interactive desktop session for screen-pixel capture (CopyFromScreen / winapp --capture-screen both return blank). The UIA tree is authoritative and shows the full page rendered on-screen (isOffscreen=false, real coordinates): ListView 'list' (header 'Click on an item or click a button in the AppBar.') with ListViewItems Item 1-4, and AppBarButtons 'add' and 'reset' (all isInvokable=true)."
+    }
+  ],
+  "missingControls": [],
+  "deadControls": [],
+  "behavioralRegressions": []
+}

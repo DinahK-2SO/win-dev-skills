@@ -1,0 +1,17 @@
+{
+  "scenario": "BasicSuspension",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "UWP Application.Suspending/Resuming lifecycle events were carried into App.xaml.cs and failed to compile (CS1061 'App' does not contain a definition for 'Suspending').",
+      "evidence": "session-log.txt turn 16: 'App.xaml.cs(29,18): error CS1061 ... does not contain a definition for Suspending'; turns 17-22 the agent had to discover the Window.Closed replacement.",
+      "skill_search": "grepped winui-uwp-migration for 'Suspend|Resuming|Window.Closed|OnSuspending|lifecycle'",
+      "skill_state": "absent",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md#lifecycle section 'Application Lifecycle and Activation' covers only OnLaunched/OnActivated/AppInstance activation; suspend/resume is not mentioned anywhere in the skill.",
+      "root_cause": "Microsoft.UI.Xaml.Application has no Suspending/Resuming events (desktop apps are not OS-suspended), but the skill never states this nor gives the replacement, so the agent followed the UWP code into a build failure and improvised.",
+      "proposed_fix": "(1) MIGRATION-PATTERNS.md#lifecycle: add a 'Suspend / resume have no equivalent' subsection — Application.Suspending/Resuming and SuspendingEventArgs/SuspendingOperation are gone; save state on window.Closed, keep restore in OnLaunched, delete the OnSuspending handler. (2) scripts/unsupported-api-inventory.json: add an 'adaptable' entry for \\.Suspending\\b|SuspendingEventArgs|SuspendingOperation|\\.Resuming\\b -> anchor 'lifecycle' so Initialize-UwpMigration injects an inline TODO BEFORE the agent builds.",
+      "generalizes": "The Suspending+SuspensionManager wiring ships in EVERY UWP app generated from the standard Visual Studio template; nearly all stateful UWP apps hit this exact CS1061 during migration, so the fix recurs across scenarios."
+    }
+  ]
+}

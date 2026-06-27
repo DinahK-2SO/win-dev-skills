@@ -1,0 +1,33 @@
+{
+  "scenario": "BasicSuspension",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap did the bulk namespace rewrite, triage, and TODO seeding; MIGRATION-MAPPING had 9 rows all resolved." },
+    { "tool": "Get-MigrationPattern.ps1 -Anchor lifecycle", "evidence": "Turn 17 the agent fetched the lifecycle anchor to diagnose the Suspending compile error." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Turn 23 reported PASS (residue, build 0 WUI warnings, smoke launch alive pid 17892, visible-text fidelity)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Get-MigrationPattern.ps1 -Anchor lifecycle", "limitation": "The lifecycle anchor covered only activation (OnLaunched/OnActivated/AppInstance) and said nothing about suspend/resume, so it did not directly answer the Suspending compile error.", "suggested_tweak": "Add suspend/resume guidance to the lifecycle anchor." }
+  ],
+  "failed_apis": [
+    { "api": "Application.Suspending (+= OnSuspending)", "why_tried": "Carried over verbatim from the UWP App.xaml.cs SuspensionManager template.", "root_cause": "Microsoft.UI.Xaml.Application has no Suspending/Resuming events; desktop apps are not OS-suspended.", "fix": "Removed this.Suspending += OnSuspending and the OnSuspending handler; saved state via window.Closed += async (_,_) => await SuspensionManager.SaveAsync()." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#lifecycle", "wrong": "Section titled 'Application Lifecycle and Activation' covers only activation; omits suspend/resume entirely.", "correct": "Application.Suspending/Resuming do not exist in WinUI 3 desktop; save state on Window.Closed instead." }
+  ],
+  "special_apis": [
+    { "api": "SuspensionManager / Window.Closed", "special_handling": "UWP suspension save/restore maps to saving on Window.Closed and restoring in OnLaunched; there is no OS suspend event." }
+  ],
+  "errors_encountered": [
+    { "error": "CS1061 'App' does not contain a definition for 'Suspending'", "root_cause": "Microsoft.UI.Xaml.Application lacks the UWP Suspending event.", "fix": "Replace Suspending subscription with window.Closed save handler." },
+    { "error": "CS8803/CS0106/CS1022 (top-level statements / orphaned members) in App.xaml.cs", "root_cause": "Dev-agent's edit removed the OnSuspending wiring but left the old OnNavigationFailed + OnSuspending methods stranded after the class closing brace.", "fix": "Second edit deleted the orphaned methods so the file had a single well-formed class." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "App.xaml.cs lifecycle migration (turns 16-22)", "symptom": "Build failed on Suspending event (CS1061), then a follow-up edit left orphaned methods causing CS8803/CS0106/CS1022.", "turns_or_retries": "~3 build attempts across turns 16-22", "root_cause": "Skill lifecycle anchor never told the agent the UWP suspend/resume model is gone, so the agent had to discover and improvise the Window.Closed replacement at build-error time, and its large hand edit was error-prone.", "how_resolved": "Agent inferred Window.Closed as the save hook and cleaned up the stray methods on a third pass.", "preventable_by": "Add suspend/resume to the lifecycle anchor AND seed an inline TODO on Suspending/Resuming via unsupported-api-inventory.json so the agent is routed to the pattern before building." }
+  ],
+  "missing_tooling": [
+    { "need": "A pre-build signal flagging Application.Suspending/Resuming as having no WinUI 3 equivalent.", "would_have_saved": "The CS1061 build failure and the follow-on botched edit (turns 16-22)." }
+  ],
+  "env_issues": []
+}

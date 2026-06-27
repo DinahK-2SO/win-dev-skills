@@ -1,0 +1,14 @@
+{
+  "scenario": "BasicSuspension",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "After removing the Suspending wiring, the edit left the old OnNavigationFailed + OnSuspending methods stranded after the class closing brace, causing CS8803 (top-level statements must precede declarations), CS0106 ('private' not valid), and CS1022 (end-of-file expected).",
+      "evidence": "session-log.txt turn 19 build errors at App.xaml.cs(97/109/117/118); turn 20 view shows duplicated methods after the final '}'; turn 21-22 a follow-up edit deleted the orphans and the build succeeded.",
+      "covered_clearly_at": "SKILL.md lines 197-198: 'when you fix a TODO, delete the TODO line entirely in the same edit' and the general expectation that edits leave a well-formed file; this is generic C# editing hygiene, not a UWP API mapping.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Leaving stray methods after a class brace is a generic large-hand-edit mistake that a capable model self-corrects on the next build (as it did here on the very next turn); no UWP→WinUI knowledge was missing, so no skill edit would generalize."
+    }
+  ]
+}

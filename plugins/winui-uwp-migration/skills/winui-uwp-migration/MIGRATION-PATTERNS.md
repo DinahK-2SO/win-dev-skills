@@ -371,6 +371,18 @@ switch (args.Kind)
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
 
+**Suspend / resume have no equivalent.** `Application.Suspending` and `Application.Resuming` (and `SuspendingEventArgs` / `SuspendingOperation.GetDeferral()`) do **not** exist on `Microsoft.UI.Xaml.Application` — desktop apps are not OS-suspended, so `this.Suspending += OnSuspending;` fails to compile (`CS1061 'App' does not contain a definition for 'Suspending'`). This wiring is present in **every** UWP app generated from the standard Visual Studio template (it drives the `SuspensionManager` save/restore pattern), so expect it in `App.xaml.cs`. Migrate it as:
+
+- **Save-on-exit** (UWP `OnSuspending` → save state): subscribe to the main window's `Closed` event instead. `window.Closed += async (_, _) => await SuspensionManager.SaveAsync();`
+- **Restore-on-launch** (UWP `OnResuming` / restore): keep the existing restore logic in `OnLaunched` — it already runs at startup.
+- Remove the `this.Suspending += OnSuspending;` subscription and the `OnSuspending(object, SuspendingEventArgs)` handler entirely; do not leave a stub referencing `SuspendingEventArgs` (that type is also gone). Drop the `using Windows.ApplicationModel;` only if nothing else in the file needs it.
+
+```csharp
+// App() ctor — DELETE: this.Suspending += OnSuspending;
+// OnLaunched — wire save-on-close on the window you create:
+window.Closed += async (_, _) => await SuspensionManager.SaveAsync();
+```
+
 <a id="background-tasks"></a>
 ## Background Tasks
 

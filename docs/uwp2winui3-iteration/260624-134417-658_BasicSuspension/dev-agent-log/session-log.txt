@@ -1,0 +1,2718 @@
+
+=== TURN 0 ===
+
+--- TOOL: report_intent ---
+{"intent":"Exploring UWP source code"}
+
+--- TOOL: skill ---
+{"skill":"winui-uwp-migration"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+Skill "winui-uwp-migration" loaded successfully. Follow the instructions in the skill context.
+
+=== TURN 1 ===
+
+--- TOOL: report_intent ---
+{"intent":"Bootstrapping WinUI3 migration"}
+
+--- TOOL: powershell ---
+{"command":"cd C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app; dotnet new winui -n BasicSuspension; \"SCAFFOLD_EXIT=$LASTEXITCODE\"","description":"Scaffold WinUI 3 project","initial_wait":60,"mode":"sync"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+The template "WinUI Blank App" was created successfully.Processing post-creation actions...
+Adding a package reference Microsoft.WindowsAppSDK to project file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj:
+BasicSuspension
+(0.1s)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BasicSuspension
+(0.2s)
+BasicSuspension
+(0.1s)
+BasicSuspension
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                 ProcessFrameworkReferences (0.2s) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(0.2s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                    _GetRestoreProjectStyle (0.3s) 
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                        _GetRestoreSettings (0.3s) 
+(0.3s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                  AddPrunePackageReferences (0.0s) 
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                   GenerateRestoreGraphFile (0.2s) 
+(0.2s)
+(0.3s)
+(0.3s)
+(0.4s)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+info : Adding PackageReference for package 'Microsoft.WindowsAppSDK' into project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj'.
+info :   GET https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windowsappsdk/index.json
+info :   OK https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windowsappsdk/index.json 392ms
+info : Restoring packages for C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj...
+info :   GET https://api.nuget.org/v3/vulnerabilities/index.json
+info :   OK https://api.nuget.org/v3/vulnerabilities/index.json 26ms
+info :   GET https://api.nuget.org/v3-vulnerabilities/2026.06.26.23.58.15/vulnerability.base.json
+info :   GET https://api.nuget.org/v3-vulnerabilities/2026.06.26.23.58.15/2026.06.27.05.58.16/vulnerability.update.json
+info :   OK https://api.nuget.org/v3-vulnerabilities/2026.06.26.23.58.15/vulnerability.base.json 5ms
+info :   OK https://api.nuget.org/v3-vulnerabilities/2026.06.26.23.58.15/2026.06.27.05.58.16/vulnerability.update.json 9ms
+info : Package 'Microsoft.WindowsAppSDK' is compatible with all the specified frameworks in project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj'.
+info : PackageReference for package 'Microsoft.WindowsAppSDK' version '2.2.0' updated in file 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj'.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\obj\BasicSuspension.csproj.nuget.g.props.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\obj\BasicSuspension.csproj.nuget.g.targets.
+info : Writing assets file to disk. Path: C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\obj\project.assets.json
+log  : Restored C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj (in 2.1 sec).
+Successfully added a reference to the project file.Adding a package reference Microsoft.Windows.SDK.BuildTools to project file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj:
+BasicSuspension
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+info : Adding PackageReference for package 'Microsoft.Windows.SDK.BuildTools' into project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj'.
+info :   GET https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools/index.json
+info :   OK https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools/index.json 204ms
+info : Restoring packages for C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj...
+info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.26.23.58.15/vulnerability.base.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.26.23.58.15/2026.06.27.05.58.16/vulnerability.update.json
+info : Package 'Microsoft.Windows.SDK.BuildTools' is compatible with all the specified frameworks in project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj'.
+info : PackageReference for package 'Microsoft.Windows.SDK.BuildTools' version '10.0.28000.2270' updated in file 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj'.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\obj\BasicSuspension.csproj.nuget.g.props.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\obj\BasicSuspension.csproj.nuget.g.targets.
+info : Writing assets file to disk. Path: C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\obj\project.assets.json
+log  : Restored C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj (in 454 ms).
+Successfully added a reference to the project file.Adding a package reference Microsoft.Windows.SDK.BuildTools.WinApp to project file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj:
+BasicSuspension
+
+
+
+BasicSuspension
+BasicSuspension
+
+
+
+info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+info : Adding PackageReference for package 'Microsoft.Windows.SDK.BuildTools.WinApp' into project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj'.
+info :   GET https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools.winapp/index.json
+info :   OK https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools.winapp/index.json 227ms
+info : Restoring packages for C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\Basi
+icSuspension\BasicSuspension.csproj...
+info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.26.23.58.15/vulnerability.base.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.26.23.58.15/2026.06.27.05.58.16/vulnerability.update.jso
+on
+info : Package 'Microsoft.Windows.SDK.BuildTools.WinApp' is compatible with all the specified frameworks in project 'C:\
+\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.cspro
+oj'.
+info : PackageReference for package 'Microsoft.Windows.SDK.BuildTools.WinApp' version '0.4.0' updated in file 'C:\ado\wi
+in-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj'.   
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\Bas
+sicSuspension\obj\BasicSuspension.csproj.nuget.g.props.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\Bas
+sicSuspension\obj\BasicSuspension.csproj.nuget.g.targets.
+info : Writing assets file to disk. Path: C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspens
+sion\app\BasicSuspension\obj\project.assets.json
+log  : Restored C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Ba
+asicSuspension.csproj (in 460 ms).
+Successfully added a reference to the project file.
+
+Restoring C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSus
+spension.csproj:
+csproj
+(0.0s)
+(0.1s)
+(0.1s)
+(0.2s)
+(0.2s)
+(0.3s)
+Restore succeeded.
+
+
+An update for template package 'Microsoft.WindowsAppSDK.WinUI.CSharp.Templates@0.0.5-alpha' is available.
+To update the package use:
+   dotnet new install Microsoft.WindowsAppSDK.WinUI.CSharp.Templates@0.0.6-alpha
+
+SCAFFOLD_EXIT=0
+<exited with exit code 0>
+
+=== TURN 2 ===
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Initialize-UwpMigration.ps1\" -Source \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\BasicSuspension\\cs\" -Target \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\"; \"BOOTSTRAP_EXIT=$LASTEXITCODE\"","description":"Run UWP migration bootstrap script","initial_wait":60,"mode":"sync"}
+--- RESULT ---
+==> Initialize-UwpMigration
+    Source : C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\BasicSuspension\cs
+    Target : C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension
+    Copied 9 source files
+    Preserved BasicSuspension.csproj at .uwp-source/ (reference only — do not edit, do not include in build)
+    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in 5 of 10 .cs/.xaml files
+    Snapshotted visible text from 3 XAML file(s) -> .fidelity-snapshot.json
+    Neutralized class RootFrameNavigationHelper in Common\NavigationHelper.cs
+
+=== BOOTSTRAP COMPLETE ===
+Source files copied   : 9
+Namespace rewrites    : 5 of 10 .cs/.xaml files
+Neutralized classes   : 1 file(s)
+Triage breakdown      :
+  migrate-as-is              6
+  migrate-with-adaptation    3
+Inline TODOs injected : 6
+  SEQUENTIAL files    : 0
+  BATCH files         : 3
+Artifacts:
+  MIGRATION-MAPPING.md       (triage labels per file)
+  MIGRATION-DEFERRED.md      (pre-seeded; anchors only)
+  .bootstrap-meta.json       (per-file mode, schema v2)
+  .uwp-source/               (original UWP .csproj for reference)
+Next:
+  1. Open a TODO-bearing source file (search for TODO[migrate- )
+  2. Read its mode in .bootstrap-meta.json (perFileMode[<path>])
+  3. Resolve each TODO via: scripts/Get-MigrationPattern.ps1 -Anchor <id>
+  4. BATCH = fix all TODOs in file then build; SEQUENTIAL = fix one then build
+  5. End by running scripts/Validate-UwpMigration.ps1 -Target <target>
+==========================
+BOOTSTRAP_EXIT=0
+<exited with exit code 0>
+
+=== TURN 3 ===
+
+--- TOOL: powershell ---
+{"command":"Test-Path \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MIGRATION-MAPPING.md\"","description":"Self-check: verify bootstrap artifact exists","mode":"sync"}
+--- RESULT ---
+True
+<exited with exit code 0>
+
+=== TURN 4 ===
+Good, bootstrap passed. Now let me read the mapping and meta files.
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MIGRATION-MAPPING.md"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\.bootstrap-meta.json"}
+--- RESULT ---
+1. # Migration Mapping
+2. 
+3. Seeded by Initialize-UwpMigration.ps1. **Do not add or remove rows** during Steps 2-5;
+4. only refine the Triage label and flip the Status. Deferred rows must also appear
+5. in `MIGRATION-DEFERRED.md`.
+6. 
+7. | Source file | Target file | Triage label | Status |
+8. |---|---|---|---|
+9. | App.xaml | App.xaml | migrate-as-is | copied |
+10. | App.xaml.cs | App.xaml.cs | migrate-with-adaptation | copied |
+11. | Common\NavigationHelper.cs | Common\NavigationHelper.cs | migrate-as-is | copied |
+12. | Common\SuspensionManager.cs | Common\SuspensionManager.cs | migrate-as-is | copied |
+13. | MainPage.xaml | MainPage.xaml | migrate-as-is | copied |
+14. | MainPage.xaml.cs | MainPage.xaml.cs | migrate-with-adaptation | copied |
+15. | Package.appxmanifest | Package.appxmanifest | migrate-as-is | copied |
+16. | SubPage.xaml | SubPage.xaml | migrate-as-is | copied |
+17. | SubPage.xaml.cs | SubPage.xaml.cs | migrate-with-adaptation | copied |
+18. 
+--- RESULT ---
+1. {
+2.   "version": 2,
+3.   "timestamp": "2026-06-27T18:44:45.0045854+08:00",
+4.   "sourcePath": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\BasicSuspension\\cs",
+5.   "seededRowCount": 9,
+6.   "todoCount": 6,
+7.   "sensitiveFileCount": 0,
+8.   "deferredCount": 0,
+9.   "perFileMode": {
+10.     "App.xaml.cs": "BATCH",
+11.     "MainPage.xaml.cs": "BATCH",
+12.     "SubPage.xaml.cs": "BATCH"
+13.   },
+14.   "neutralizedClasses": [
+15.     "Common\\NavigationHelper.cs"
+16.   ]
+17. }
+18. 
+
+=== TURN 5 ===
+
+--- TOOL: report_intent ---
+{"intent":"Reading migrated source files"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\App.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MainPage.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\SubPage.xaml.cs"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+1. using SDKTemplate.Common;
+2. using System;
+3. using System.Collections.Generic;
+4. using Windows.ApplicationModel;
+5. using Windows.ApplicationModel.Activation;
+6. using Windows.Storage;
+7. using Microsoft.UI.Xaml;
+8. using Microsoft.UI.Xaml.Controls;
+9. using Microsoft.UI.Xaml.Navigation;
+10. 
+11. namespace SDKTemplate
+12. {
+13.     /// <summary>
+14.     /// Provides application-specific behavior to supplement the default Application class.
+15.     /// </summary>
+16.     sealed partial class App : Application
+17.     {
+18.         private const string sessionStateFilename = "_sessionState.xml";
+19.         private RootFrameNavigationHelper rootFrameNavigationHelper;
+20. 
+21.         /// <summary>
+22.         /// Initializes the singleton application object.  This is the first line of authored code
+23.         /// executed, and as such is the logical equivalent of main() or WinMain().
+24.         /// </summary>
+25.         public App()
+26.         {
+27.             this.InitializeComponent();
+28.             SuspensionManager.KnownTypes.AddRange(new[] { typeof(ItemList), typeof(Item) });
+29.             this.Suspending += OnSuspending;
+30.         }
+31. 
+32.         /// <summary>
+33.         /// Invoked when the application is launched normally by the end user.  Other entry points
+34.         /// will be used such as when the application is launched to open a specific file.
+35.         /// </summary>
+36.         /// <param name="e">Details about the launch request and process.</param>
+37.         protected override async void OnLaunched(LaunchActivatedEventArgs e)
+38.         {
+39.             // TODO[migrate-001]: see PATTERNS.md#windowing
+40.             Frame rootFrame = Window.Current.Content as Frame;
+41. 
+42.             // Do not repeat app initialization when the Window already has content,
+43.             // just ensure that the window is active
+44.             if (rootFrame == null)
+45.             {
+46.                 // Create a Frame to act as the navigation context and navigate to the first page
+47.                 rootFrame = new Frame();
+48.                 SuspensionManager.RegisterFrame(rootFrame, "AppFrame");
+49. 
+50.                 // Use the RootFrameNavigationHelper to respond to keyboard and mouse shortcuts.
+51.                 this.rootFrameNavigationHelper = new RootFrameNavigationHelper(rootFrame);
+52. 
+53.                 rootFrame.NavigationFailed += OnNavigationFailed;
+54. 
+55.                 // If this is not the first time the app is run, then restore from the previous session.
+56.                 StorageFile file;
+57.                 try
+58.                 {
+59.                     file = await ApplicationData.Current.LocalFolder.GetFileAsync(sessionStateFilename);
+60.                 }
+61.                 catch (Exception)
+62.                 {
+63.                     file = null;
+64.                 }
+65. 
+66.                 if (file != null)
+67.                 {
+68.                     //Load state from previously suspended application
+69.                     await SuspensionManager.RestoreAsync();
+70.                 }
+71. 
+72.                 // Place the frame in the current Window
+73.                 // TODO[migrate-002]: see PATTERNS.md#windowing
+74.                 Window.Current.Content = rootFrame;
+75.             }
+76. 
+77.             if (rootFrame.Content == null)
+78.             {
+79.                 // When the navigation stack isn't restored navigate to the first page,
+80.                 // configuring the new page by passing required information as a navigation
+81.                 // parameter
+82.                 rootFrame.Navigate(typeof(MainPage), e.Arguments);
+83.             }
+84.             // Ensure the current window is active
+85.             // TODO[migrate-003]: see PATTERNS.md#windowing
+86.             Window.Current.Activate();
+87.         }
+88. 
+89.         /// <summary>
+90.         /// Invoked when Navigation to a certain page fails
+91.         /// </summary>
+92.         /// <param name="sender">The Frame which failed navigation</param>
+93.         /// <param name="e">Details about the navigation failure</param>
+94.         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+95.         {
+96.             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+97.         }
+98. 
+99.         /// <summary>
+100.         /// Invoked when application execution is being suspended.  Application state is saved
+101.         /// without knowing whether the application will be terminated or resumed with the contents
+102.         /// of memory still intact.
+103.         /// </summary>
+104.         /// <param name="sender">The source of the suspend request.</param>
+105.         /// <param name="e">Details about the suspend request.</param>
+106.         private async void OnSuspending(object sender, SuspendingEventArgs e)
+107.         {
+108.             var deferral = e.SuspendingOperation.GetDeferral();
+109. 
+110.             // Save application state and stop any background activity.
+111.             await SuspensionManager.SaveAsync();
+112.             deferral.Complete();
+113.         }
+114.     }
+115. }
+116. 
+--- RESULT ---
+1. using SDKTemplate.Common;
+2. using System;
+3. using System.Collections.Generic;
+4. using System.Collections.ObjectModel;
+5. using Windows.UI.Core;
+6. using Microsoft.UI.Xaml;
+7. using Microsoft.UI.Xaml.Controls;
+8. using Microsoft.UI.Xaml.Navigation;
+9. 
+10. // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
+11. 
+12. namespace SDKTemplate
+13. {
+14.     /// <summary>
+15.     /// An empty page that can be used on its own or navigated to within a Frame.
+16.     /// </summary>
+17.     public sealed partial class MainPage : Page
+18.     {
+19.         private readonly NavigationHelper navigationHelper;
+20.         private ItemList defaultViewModel;
+21.         public string index = "index";
+22. 
+23.         public MainPage()
+24.         {
+25.             this.InitializeComponent();
+26. 
+27.             this.NavigationCacheMode = NavigationCacheMode.Required;
+28. 
+29.             this.navigationHelper = new NavigationHelper(this);
+30.             this.defaultViewModel = new ItemList();
+31. 
+32.             this.navigationHelper.LoadState += this.NavigationHelper_Load;
+33.             this.navigationHelper.SaveState += this.NavigationHelper_Save;
+34.         }
+35. 
+36.         /// <summary>
+37.         /// Gets the <see cref="NavigationHelper"/> associated with this <see cref="Page"/>.
+38.         /// </summary>
+39.         public NavigationHelper NavigationHelper
+40.         {
+41.             get { return this.navigationHelper; }
+42.         }
+43. 
+44.         /// <summary>
+45.         /// Gets the view model for this <see cref="Page"/>.
+46.         /// This can be changed to a strongly typed view model.
+47.         /// </summary>
+48.         public ItemList DefaultViewModel
+49.         {
+50.             get { return this.defaultViewModel; }
+51.         }
+52. 
+53.         ///<summary>
+54.         ///Invoked when an item within a section is clicked
+55.         ///Only the following types can be serialized by Frame.GetNavigationState: numbers, characters, strings, guids and boolean. 
+56.         ///A frame that needs to be serialized cannot pass other types as the navigation param in Frame.Navigate.
+57.         ///</summary>
+58.         private void ListView_ItemClick(object sender, ItemClickEventArgs e)
+59.         {
+60.             this.Frame.Navigate(typeof(SubPage), e.ClickedItem.ToString());
+61.         }
+62. 
+63.         ///<summary>
+64.         ///Adds an item to the list when the app bar button is clicked
+65.         ///</summary>
+66.         private void AddItem()
+67.         {
+68.             this.defaultViewModel.Add(new Item() { Name = "Item " + (this.defaultViewModel.Count + 1).ToString() });
+69.         }
+70. 
+71.         ///<summary>
+72.         /// Resets the item list to the default.
+73.         ///</summary>
+74.         private void ResetItems()
+75.         {
+76.             this.defaultViewModel = ItemList.CreateDefaultItemList();
+77.             list.ItemsSource = this.defaultViewModel;
+78.         }
+79. 
+80.         /// <summary>
+81.         /// Populates the page with content passed during navigation. Any saved state is also
+82.         /// provided when recreating a page from a prior session.
+83.         /// </summary>
+84.         /// <param name="sender">
+85.         /// The source of the event; typically <see cref="NavigationHelper"/>.
+86.         /// </param>
+87.         /// <param name="e">Event data that provides both the navigation parameter passed to
+88.         /// <see cref="Frame.Navigate(Type, Object)"/> when this page was initially requested and
+89.         /// a dictionary of state preserved by this page during an earlier
+90.         /// session. The state will be null the first time a page is visited.</param>
+91.         private void NavigationHelper_Load(object sender, LoadStateEventArgs e)
+92.         {
+93.             this.defaultViewModel = null;
+94.             if (SuspensionManager.SessionState.ContainsKey(index))
+95.             {
+96.                 this.defaultViewModel = SuspensionManager.SessionState[index] as ItemList;
+97.             }
+98. 
+99.             if (this.defaultViewModel == null)
+100.             {
+101.                 this.defaultViewModel = ItemList.CreateDefaultItemList();
+102.             }
+103. 
+104.             list.ItemsSource = this.defaultViewModel;
+105.         }
+106. 
+107.         /// <summary>
+108.         /// Preserves state associated with this page in case the application is suspended or the
+109.         /// page is discarded from the navigation cache. Values must conform to the serialization
+110.         /// requirements of <see cref="SuspensionManager.SessionState"/>.
+111.         /// </summary>
+112.         /// <param name="sender">The source of the event; typically <see cref="NavigationHelper"/>.</param>
+113.         /// <param name="e">Event data that provides an empty dictionary to be populated with
+114.         /// serializable state.</param>
+115.         private void NavigationHelper_Save(object sender, SaveStateEventArgs e)
+116.         {
+117.             SuspensionManager.SessionState[index] = defaultViewModel;
+118.         }
+119. 
+120.         #region NavigationHelper registration
+121. 
+122.         /// <summary>
+123.         /// The methods provided in this section are simply used to allow
+124.         /// NavigationHelper to respond to the page's navigation methods.
+125.         /// <para>
+126.         /// Page specific logic should be placed in event handlers for the  
+127.         /// <see cref="NavigationHelper.LoadState"/>
+128.         /// and <see cref="NavigationHelper.SaveState"/>.
+129.         /// The navigation parameter is available in the LoadState method 
+130.         /// in addition to page state preserved during an earlier session.
+131.         /// </para>
+132.         /// </summary>
+133.         /// <param name="e">Provides data for navigation methods and event
+134.         /// handlers that cannot cancel the navigation request.</param>
+135.         protected override void OnNavigatedTo(NavigationEventArgs e)
+136.         {
+137.             this.navigationHelper.OnNavigatedTo(e);
+138. 
+139.             // TODO[migrate-004]: see PATTERNS.md#getforcurrentview
+140.             SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility =
+141.                 this.Frame.CanGoBack ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed;
+142.         }
+143.         protected override void OnNavigatedFrom(NavigationEventArgs e)
+144.         {
+145.             this.navigationHelper.OnNavigatedFrom(e);
+146.         }
+147.         #endregion
+148.     }
+149. 
+150.     /// <summary>
+151.     /// observable collection that will contain the list of items. List items are added when page is loaded.
+152.     /// </summary>
+153.     public class ItemList : ObservableCollection<Item>
+154.     {
+155.         public ItemList()
+156.         {
+157.         }
+158. 
+159.         static public ItemList CreateDefaultItemList()
+160.         {
+161.             return new ItemList()
+162.             {
+163.                 new Item { Name = "Item 1" },
+164.                 new Item { Name = "Item 2" },
+165.                 new Item { Name = "Item 3" },
+166.                 new Item { Name = "Item 4" },
+167.             };
+168.         }
+169.     }
+170. 
+171.     /// <summary>
+172.     /// items that are in the observable collection (ItemList)
+173.     /// </summary>
+174.     public class Item
+175.     {
+176.         public string Name { get; set; }
+177.         public override string ToString()
+178.         {
+179.             return this.Name;
+180.         }
+181.     }
+182. }
+183. 
+--- RESULT ---
+1. using SDKTemplate.Common;
+2. using System;
+3. using System.Collections.Generic;
+4. using Microsoft.UI.Xaml.Controls;
+5. using Microsoft.UI.Xaml.Navigation;
+6. using Windows.UI.Core;
+7. 
+8. namespace SDKTemplate
+9. {
+10.     public sealed partial class SubPage : Page
+11.     {
+12.         private readonly NavigationHelper navigationHelper;
+13.         private int tapCount;
+14. 
+15.         public SubPage()
+16.         {
+17.             this.InitializeComponent();
+18.             this.navigationHelper = new NavigationHelper(this);
+19.             this.navigationHelper.LoadState += LoadState;
+20.             this.navigationHelper.SaveState += SaveState;
+21. 
+22.             // TODO[migrate-005]: see PATTERNS.md#getforcurrentview
+23.             SystemNavigationManager.GetForCurrentView().BackRequested += Navigation_BackRequested;
+24.         }
+25. 
+26.         #region NavigationHelper registration
+27. 
+28.         /// <summary>
+29.         /// The methods provided in this section are simply used to allow
+30.         /// NavigationHelper to respond to the page's navigation methods.
+31.         /// <para>
+32.         /// Page specific logic should be placed in event handlers for the  
+33.         /// <see cref="NavigationHelper.LoadState"/>
+34.         /// and <see cref="NavigationHelper.SaveState"/>.
+35.         /// The navigation parameter is available in the LoadState method 
+36.         /// in addition to page state preserved during an earlier session.
+37.         /// </para>
+38.         /// </summary>
+39.         /// <param name="e">Provides data for navigation methods and event
+40.         /// handlers that cannot cancel the navigation request.</param>
+41. 
+42.         protected override void OnNavigatedTo(NavigationEventArgs e)
+43.         {
+44.             this.TitleTextBlock.Text = e.Parameter.ToString();
+45. 
+46.             this.navigationHelper.OnNavigatedTo(e);
+47. 
+48.             // TODO[migrate-006]: see PATTERNS.md#getforcurrentview
+49.             SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility =
+50.                 this.Frame.CanGoBack ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed;
+51.         }
+52. 
+53.         protected override void OnNavigatedFrom(NavigationEventArgs e)
+54.         {
+55.             this.navigationHelper.OnNavigatedFrom(e);
+56.         }
+57. 
+58.         private void LoadState(object sender, LoadStateEventArgs e)
+59.         {
+60.             tapCount = 0;
+61.             if (e.PageState != null && e.PageState.ContainsKey("tapCount"))
+62.             {
+63.                 tapCount = (int)e.PageState["tapCount"];
+64.             }
+65.             TapCountRun.Text = tapCount.ToString();
+66.         }
+67. 
+68.         private void SaveState(object sender, SaveStateEventArgs e)
+69.         {
+70.             e.PageState["tapCount"] = tapCount;
+71.         }
+72.         #endregion
+73. 
+74.         /// <summary>
+75.         /// This method facilitates navigation when the back button is pressed.
+76.         /// </summary>
+77.         /// <param name="sender"></param>
+78.         /// <param name="e"></param>
+79.         private void Navigation_BackRequested(object sender, BackRequestedEventArgs e)
+80.         {
+81.             if (!e.Handled & this.Frame.CanGoBack)
+82.             {
+83.                 e.Handled = true;
+84.                 this.Frame.GoBack();
+85.             }
+86.         }
+87. 
+88.         private void Page_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+89.         {
+90.             tapCount++;
+91.             TapCountRun.Text = tapCount.ToString();
+92.         }
+93.     }
+94. }
+95. 
+
+=== TURN 6 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\App.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MainPage.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\SubPage.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\Common\\SuspensionManager.cs"}
+--- RESULT ---
+1. ﻿<Application
+2.     x:Class="SDKTemplate.App"
+3.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+4.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+5.     xmlns:local="using:SDKTemplate"
+6.     RequestedTheme="Light">
+7. 
+8. </Application>
+9. 
+--- RESULT ---
+1. ﻿<Page
+2.     x:Class="SDKTemplate.SubPage"
+3.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+4.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+5.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+6.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+7.     mc:Ignorable="d"
+8.     Tapped="Page_Tapped">
+9. 
+10.     <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="10">
+11.         <TextBlock x:Name="TitleTextBlock" Style="{ThemeResource TitleTextBlockStyle}" HorizontalAlignment="Center" />
+12.         <TextBlock Margin="0,10,0,10">
+13.             Number of taps on this page: <Run x:Name="TapCountRun"/>
+14.         </TextBlock>
+15.     </StackPanel>
+16. </Page>
+17. 
+--- RESULT ---
+1. ﻿<Page
+2.     x:Class="SDKTemplate.MainPage"
+3.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+4.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+5.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+6.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+7.     mc:Ignorable="d">
+8. 
+9.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+10.         <ListView x:Name="list" Header="Click on an item or click a button in the AppBar." EntranceNavigationTransitionInfo.IsTargetElement="True" IsItemClickEnabled="True" ItemClick="ListView_ItemClick">
+11.             <ListView.HeaderTemplate>
+12.                 <DataTemplate>
+13.                     <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Margin="12,4" Text="{Binding}" />
+14.                 </DataTemplate>
+15.             </ListView.HeaderTemplate>
+16.         </ListView>
+17.     </Grid>
+18. 
+19.     <Page.BottomAppBar>
+20.         <CommandBar>
+21.             <AppBarButton Label="add" Icon="Add" Click="{x:Bind AddItem}"/>
+22.             <AppBarButton Label="reset" Icon="Refresh" Click="{x:Bind ResetItems}"/>
+23.         </CommandBar>
+24.     </Page.BottomAppBar>
+25. </Page>
+26. 
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using System.Collections.Generic;
+14. using System.IO;
+15. using System.Linq;
+16. using System.Runtime.Serialization;
+17. using System.Text;
+18. using System.Threading.Tasks;
+19. using Windows.ApplicationModel;
+20. using Windows.Storage;
+21. using Windows.Storage.Streams;
+22. using Microsoft.UI.Xaml;
+23. using Microsoft.UI.Xaml.Controls;
+24. 
+25. namespace SDKTemplate.Common
+26. {
+27.     /// <summary>
+28.     /// SuspensionManager captures global session state to simplify process lifetime management
+29.     /// for an application.  Note that session state will be automatically cleared under a variety
+30.     /// of conditions and should only be used to store information that would be convenient to
+31.     /// carry across sessions, but that should be discarded when an application crashes or is
+32.     /// upgraded.
+33.     /// </summary>
+34.     internal sealed class SuspensionManager
+35.     {
+36.         private static Dictionary<string, object> _sessionState = new Dictionary<string, object>();
+37.         private static List<Type> _knownTypes = new List<Type>();
+38.         private const string sessionStateFilename = "_sessionState.xml";
+39. 
+40.         /// <summary>
+41.         /// Provides access to global session state for the current session.  This state is
+42.         /// serialized by <see cref="SaveAsync"/> and restored by
+43.         /// <see cref="RestoreAsync"/>, so values must be serializable by
+44.         /// <see cref="DataContractSerializer"/> and should be as compact as possible.  Strings
+45.         /// and other self-contained data types are strongly recommended.
+46.         /// </summary>
+47.         public static Dictionary<string, object> SessionState
+48.         {
+49.             get { return _sessionState; }
+50.         }
+51. 
+52.         /// <summary>
+53.         /// List of custom types provided to the <see cref="DataContractSerializer"/> when
+54.         /// reading and writing session state.  Initially empty, additional types may be
+55.         /// added to customize the serialization process.
+56.         /// </summary>
+57.         public static List<Type> KnownTypes
+58.         {
+59.             get { return _knownTypes; }
+60.         }
+61. 
+62.         /// <summary>
+63.         /// Save the current <see cref="SessionState"/>.  Any <see cref="Frame"/> instances
+64.         /// registered with <see cref="RegisterFrame"/> will also preserve their current
+65.         /// navigation stack, which in turn gives their active <see cref="Page"/> an opportunity
+66.         /// to save its state.
+67.         /// </summary>
+68.         /// <returns>An asynchronous task that reflects when session state has been saved.</returns>
+69.         public static async Task SaveAsync()
+70.         {
+71.             try
+72.             {
+73.                 // Save the navigation state for all registered frames
+74.                 foreach (var weakFrameReference in _registeredFrames)
+75.                 {
+76.                     Frame frame;
+77.                     if (weakFrameReference.TryGetTarget(out frame))
+78.                     {
+79.                         SaveFrameNavigationState(frame);
+80.                     }
+81.                 }
+82. 
+83.                 // Serialize the session state synchronously to avoid asynchronous access to shared
+84.                 // state
+85.                 MemoryStream sessionData = new MemoryStream();
+86.                 DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>), _knownTypes);
+87.                 serializer.WriteObject(sessionData, _sessionState);
+88. 
+89.                 // Get an output stream for the SessionState file and write the state asynchronously
+90.                 StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync(sessionStateFilename, CreationCollisionOption.ReplaceExisting);
+91.                 using (Stream fileStream = await file.OpenStreamForWriteAsync())
+92.                 {
+93.                     sessionData.Seek(0, SeekOrigin.Begin);
+94.                     await sessionData.CopyToAsync(fileStream);
+95.                 }
+96.             }
+97.             catch (Exception e)
+98.             {
+99.                 throw new SuspensionManagerException(e);
+100.             }
+101.         }
+102. 
+103.         /// <summary>
+104.         /// Restores previously saved <see cref="SessionState"/>.  Any <see cref="Frame"/> instances
+105.         /// registered with <see cref="RegisterFrame"/> will also restore their prior navigation
+106.         /// state, which in turn gives their active <see cref="Page"/> an opportunity restore its
+107.         /// state.
+108.         /// </summary>
+109.         /// <param name="sessionBaseKey">An optional key that identifies the type of session.
+110.         /// This can be used to distinguish between multiple application launch scenarios.</param>
+111.         /// <returns>An asynchronous task that reflects when session state has been read.  The
+112.         /// content of <see cref="SessionState"/> should not be relied upon until this task
+113.         /// completes.</returns>
+114.         public static async Task RestoreAsync(String sessionBaseKey = null)
+115.         {
+116.             _sessionState = new Dictionary<String, Object>();
+117. 
+118.             try
+119.             {
+120.                 // Get the input stream for the SessionState file
+121.                 StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(sessionStateFilename);
+122.                 using (IInputStream inStream = await file.OpenSequentialReadAsync())
+123.                 {
+124.                     // Deserialize the Session State
+125.                     DataContractSerializer serializer = new DataContractSerializer(typeof(Dictionary<string, object>), _knownTypes);
+126.                     _sessionState = (Dictionary<string, object>)serializer.ReadObject(inStream.AsStreamForRead());
+127.                 }
+128. 
+129.                 // Restore any registered frames to their saved state
+130.                 foreach (var weakFrameReference in _registeredFrames)
+131.                 {
+132.                     Frame frame;
+133.                     if (weakFrameReference.TryGetTarget(out frame) && (string)frame.GetValue(FrameSessionBaseKeyProperty) == sessionBaseKey)
+134.                     {
+135.                         frame.ClearValue(FrameSessionStateProperty);
+136.                         RestoreFrameNavigationState(frame);
+137.                     }
+138.                 }
+139.             }
+140.             catch (Exception e)
+141.             {
+142.                 throw new SuspensionManagerException(e);
+143.             }
+144.         }
+145. 
+146.         private static DependencyProperty FrameSessionStateKeyProperty =
+147.             DependencyProperty.RegisterAttached("_FrameSessionStateKey", typeof(String), typeof(SuspensionManager), null);
+148.         private static DependencyProperty FrameSessionBaseKeyProperty =
+149.             DependencyProperty.RegisterAttached("_FrameSessionBaseKeyParams", typeof(String), typeof(SuspensionManager), null);
+150.         private static DependencyProperty FrameSessionStateProperty =
+151.             DependencyProperty.RegisterAttached("_FrameSessionState", typeof(Dictionary<String, Object>), typeof(SuspensionManager), null);
+152.         private static List<WeakReference<Frame>> _registeredFrames = new List<WeakReference<Frame>>();
+153. 
+154.         /// <summary>
+155.         /// Registers a <see cref="Frame"/> instance to allow its navigation history to be saved to
+156.         /// and restored from <see cref="SessionState"/>.  Frames should be registered once
+157.         /// immediately after creation if they will participate in session state management.  Upon
+158.         /// registration if state has already been restored for the specified key
+159.         /// the navigation history will immediately be restored.  Subsequent invocations of
+160.         /// <see cref="RestoreAsync"/> will also restore navigation history.
+161.         /// </summary>
+162.         /// <param name="frame">An instance whose navigation history should be managed by
+163.         /// <see cref="SuspensionManager"/></param>
+164.         /// <param name="sessionStateKey">A unique key into <see cref="SessionState"/> used to
+165.         /// store navigation-related information.</param>
+166.         /// <param name="sessionBaseKey">An optional key that identifies the type of session.
+167.         /// This can be used to distinguish between multiple application launch scenarios.</param>
+168.         public static void RegisterFrame(Frame frame, String sessionStateKey, String sessionBaseKey = null)
+169.         {
+170.             if (frame.GetValue(FrameSessionStateKeyProperty) != null)
+171.             {
+172.                 throw new InvalidOperationException("Frames can only be registered to one session state key");
+173.             }
+174. 
+175.             if (frame.GetValue(FrameSessionStateProperty) != null)
+176.             {
+177.                 throw new InvalidOperationException("Frames must be either be registered before accessing frame session state, or not registered at all");
+178.             }
+179. 
+180.             if (!string.IsNullOrEmpty(sessionBaseKey))
+181.             {
+182.                 frame.SetValue(FrameSessionBaseKeyProperty, sessionBaseKey);
+183.                 sessionStateKey = sessionBaseKey + "_" + sessionStateKey;
+184.             }
+185. 
+186.             // Use a dependency property to associate the session key with a frame, and keep a list of frames whose
+187.             // navigation state should be managed
+188.             frame.SetValue(FrameSessionStateKeyProperty, sessionStateKey);
+189.             _registeredFrames.Add(new WeakReference<Frame>(frame));
+190. 
+191.             // Check to see if navigation state can be restored
+192.             RestoreFrameNavigationState(frame);
+193.         }
+194. 
+195.         /// <summary>
+196.         /// Disassociates a <see cref="Frame"/> previously registered by <see cref="RegisterFrame"/>
+197.         /// from <see cref="SessionState"/>.  Any navigation state previously captured will be
+198.         /// removed.
+199.         /// </summary>
+200.         /// <param name="frame">An instance whose navigation history should no longer be
+201.         /// managed.</param>
+202.         public static void UnregisterFrame(Frame frame)
+203.         {
+204.             // Remove session state and remove the frame from the list of frames whose navigation
+205.             // state will be saved (along with any weak references that are no longer reachable)
+206.             SessionState.Remove((String)frame.GetValue(FrameSessionStateKeyProperty));
+207.             _registeredFrames.RemoveAll((weakFrameReference) =>
+208.             {
+209.                 Frame testFrame;
+210.                 return !weakFrameReference.TryGetTarget(out testFrame) || testFrame == frame;
+211.             });
+212.         }
+213. 
+214.         /// <summary>
+215.         /// Provides storage for session state associated with the specified <see cref="Frame"/>.
+216.         /// Frames that have been previously registered with <see cref="RegisterFrame"/> have
+217.         /// their session state saved and restored automatically as a part of the global
+218.         /// <see cref="SessionState"/>.  Frames that are not registered have transient state
+219.         /// that can still be useful when restoring pages that have been discarded from the
+220.         /// navigation cache.
+221.         /// </summary>
+222.         /// <remarks>Apps may choose to rely on <see cref="NavigationHelper"/> to manage
+223.         /// page-specific state instead of working with frame session state directly.</remarks>
+224.         /// <param name="frame">The instance for which session state is desired.</param>
+225.         /// <returns>A collection of state subject to the same serialization mechanism as
+226.         /// <see cref="SessionState"/>.</returns>
+227.         public static Dictionary<String, Object> SessionStateForFrame(Frame frame)
+228.         {
+229.             var frameState = (Dictionary<String, Object>)frame.GetValue(FrameSessionStateProperty);
+230. 
+231.             if (frameState == null)
+232.             {
+233.                 var frameSessionKey = (String)frame.GetValue(FrameSessionStateKeyProperty);
+234.                 if (frameSessionKey != null)
+235.                 {
+236.                     // Registered frames reflect the corresponding session state
+237.                     if (!_sessionState.ContainsKey(frameSessionKey))
+238.                     {
+239.                         _sessionState[frameSessionKey] = new Dictionary<String, Object>();
+240.                     }
+241.                     frameState = (Dictionary<String, Object>)_sessionState[frameSessionKey];
+242.                 }
+243.                 else
+244.                 {
+245.                     // Frames that aren't registered have transient state
+246.                     frameState = new Dictionary<String, Object>();
+247.                 }
+248.                 frame.SetValue(FrameSessionStateProperty, frameState);
+249.             }
+250.             return frameState;
+251.         }
+252. 
+253.         private static void RestoreFrameNavigationState(Frame frame)
+254.         {
+255.             var frameState = SessionStateForFrame(frame);
+256.             if (frameState.ContainsKey("Navigation"))
+257.             {
+258.                 frame.SetNavigationState((String)frameState["Navigation"]);
+259.             }
+260.         }
+261. 
+262.         private static void SaveFrameNavigationState(Frame frame)
+263.         {
+264.             var frameState = SessionStateForFrame(frame);
+265.             frameState["Navigation"] = frame.GetNavigationState();
+266.         }
+267.     }
+268.     public class SuspensionManagerException : Exception
+269.     {
+270.         public SuspensionManagerException()
+271.         {
+272.         }
+273. 
+274.         public SuspensionManagerException(Exception e)
+275.             : base("SuspensionManager failed", e)
+276.         {
+277. 
+278.         }
+279.     }
+280. }
+281. 
+
+=== TURN 7 ===
+Now let me fetch the migration patterns for `windowing` and `getforcurrentview`, and also check the other remaining files.
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Get-MigrationPattern.ps1\" -Anchor windowing; \"---\"; & \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Get-MigrationPattern.ps1\" -Anchor getforcurrentview","description":"Get windowing and getforcurrentview migration patterns","initial_wait":30,"mode":"sync"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\Common\\NavigationHelper.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\Package.appxmanifest"}
+--- RESULT ---
+1. using System;
+2. using System.Collections.Generic;
+3. using System.Linq;
+4. using System.Text;
+5. using System.Threading.Tasks;
+6. using System.Windows.Input;
+7. using Windows.System;
+8. using Windows.UI.Core;
+9. using Microsoft.UI.Xaml;
+10. using Microsoft.UI.Xaml.Controls;
+11. using Microsoft.UI.Xaml.Navigation;
+12. 
+13. namespace SDKTemplate.Common
+14. {
+15.     /// <summary>
+16.     /// NavigationHelper aids in navigation between pages. It manages
+17.     /// the backstack and integrates SuspensionManager to handle process
+18.     /// lifetime management and state management when navigating between pages.
+19.     /// </summary>
+20.     /// <example>
+21.     /// To make use of NavigationHelper, follow these two steps or
+22.     /// start with a BasicPage or any other Page item template other than BlankPage.
+23.     /// 
+24.     /// 1) Create an instance of the NavigationHelper somewhere such as in the
+25.     ///     constructor for the page and register a callback for the LoadState and 
+26.     ///     SaveState events.
+27.     /// <code>
+28.     ///     public MyPage()
+29.     ///     {
+30.     ///         this.InitializeComponent();
+31.     ///         this.navigationHelper = new NavigationHelper(this);
+32.     ///         this.navigationHelper.LoadState += navigationHelper_LoadState;
+33.     ///         this.navigationHelper.SaveState += navigationHelper_SaveState;
+34.     ///     }
+35.     ///     
+36.     ///     private void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
+37.     ///     { }
+38.     ///     private void navigationHelper_SaveState(object sender, LoadStateEventArgs e)
+39.     ///     { }
+40.     /// </code>
+41.     /// 
+42.     /// 2) Register the page to call into the NavigationManager whenever the page participates 
+43.     ///     in navigation by overriding the <see cref="Microsoft.UI.Xaml.Controls.Page.OnNavigatedTo"/> 
+44.     ///     and <see cref="Microsoft.UI.Xaml.Controls.Page.OnNavigatedFrom"/> events.
+45.     /// <code>
+46.     ///     protected override void OnNavigatedTo(NavigationEventArgs e)
+47.     ///     {
+48.     ///         navigationHelper.OnNavigatedTo(e);
+49.     ///     }
+50.     ///     
+51.     ///     protected override void OnNavigatedFrom(NavigationEventArgs e)
+52.     ///     {
+53.     ///         navigationHelper.OnNavigatedFrom(e);
+54.     ///     }
+55.     /// </code>
+56.     /// </example>
+57.     [Windows.Foundation.Metadata.WebHostHidden]
+58.     public class NavigationHelper : DependencyObject
+59.     {
+60.         private Page Page { get; set; }
+61.         private Frame Frame { get { return this.Page.Frame; } }
+62. 
+63.         /// <summary>
+64.         /// Initializes a new instance of the <see cref="NavigationHelper"/> class.
+65.         /// </summary>
+66.         /// <param name="page">A reference to the current page used for navigation.
+67.         /// This reference allows for frame manipulation.</param>
+68.         public NavigationHelper(Page page)
+69.         {
+70.             this.Page = page;
+71.         }
+72. 
+73.         #region Process lifetime management
+74. 
+75.         private String _pageKey;
+76. 
+77.         /// <summary>
+78.         /// Handle this event to populate the page using content passed
+79.         /// during navigation as well as any state that was saved by
+80.         /// the SaveState event handler.
+81.         /// </summary>
+82.         public event LoadStateEventHandler LoadState;
+83.         /// <summary>
+84.         /// Handle this event to save state that can be used by
+85.         /// the LoadState event handler. Save the state in case
+86.         /// the application is suspended or the page is discarded
+87.         /// from the navigation cache.
+88.         /// </summary>
+89.         public event SaveStateEventHandler SaveState;
+90. 
+91.         /// <summary>
+92.         /// Invoked when this page is about to be displayed in a Frame.
+93.         /// This method calls <see cref="LoadState"/>, where all page specific
+94.         /// navigation and process lifetime management logic should be placed.
+95.         /// </summary>
+96.         /// <param name="e">Event data that describes how this page was reached.  The Parameter
+97.         /// property provides the group to be displayed.</param>
+98.         public void OnNavigatedTo(NavigationEventArgs e)
+99.         {
+100.             var frameState = SuspensionManager.SessionStateForFrame(this.Frame);
+101.             this._pageKey = "Page-" + this.Frame.BackStackDepth;
+102. 
+103.             if (e.NavigationMode == NavigationMode.New)
+104.             {
+105.                 // Clear existing state for forward navigation when adding a new page to the
+106.                 // navigation stack
+107.                 var nextPageKey = this._pageKey;
+108.                 int nextPageIndex = this.Frame.BackStackDepth;
+109.                 while (frameState.Remove(nextPageKey))
+110.                 {
+111.                     nextPageIndex++;
+112.                     nextPageKey = "Page-" + nextPageIndex;
+113.                 }
+114. 
+115.                 // Pass the navigation parameter to the new page
+116.                 if (this.LoadState != null)
+117.                 {
+118.                     this.LoadState(this, new LoadStateEventArgs(e.Parameter, null));
+119.                 }
+120.             }
+121.             else
+122.             {
+123.                 // Pass the navigation parameter and preserved page state to the page, using
+124.                 // the same strategy for loading suspended state and recreating pages discarded
+125.                 // from cache
+126.                 if (this.LoadState != null)
+127.                 {
+128.                     this.LoadState(this, new LoadStateEventArgs(e.Parameter, (Dictionary<String, Object>)frameState[this._pageKey]));
+129.                 }
+130.             }
+131.         }
+132. 
+133.         /// <summary>
+134.         /// Invoked when this page will no longer be displayed in a Frame.
+135.         /// This method calls <see cref="SaveState"/>, where all page specific
+136.         /// navigation and process lifetime management logic should be placed.
+137.         /// </summary>
+138.         /// <param name="e">Event data that describes how this page was reached.  The Parameter
+139.         /// property provides the group to be displayed.</param>
+140.         public void OnNavigatedFrom(NavigationEventArgs e)
+141.         {
+142.             var frameState = SuspensionManager.SessionStateForFrame(this.Frame);
+143.             var pageState = new Dictionary<String, Object>();
+144.             if (this.SaveState != null)
+145.             {
+146.                 this.SaveState(this, new SaveStateEventArgs(pageState));
+147.             }
+148.             frameState[_pageKey] = pageState;
+149.         }
+150. 
+151.         #endregion
+152.     }
+153. 
+154.     /// <summary>
+155.     /// RootFrameNavigationHelper registers for standard mouse and keyboard
+156.     /// shortcuts used to go back and forward. There should be only one
+157.     /// RootFrameNavigationHelper per view, and it should be associated with the
+158.     /// root frame.
+159.     /// </summary>
+160.     /// <example>
+161.     /// To make use of RootFrameNavigationHelper, create an instance of the
+162.     /// RootNavigationHelper such as in the constructor of your root page.
+163.     /// <code>
+164.     ///     public MyRootPage()
+165.     ///     {
+166.     ///         this.InitializeComponent();
+167.     ///         this.rootNavigationHelper = new RootNavigationHelper(MyFrame);
+168.     ///     }
+169.     /// </code>
+170.     /// </example>
+171.     [Windows.Foundation.Metadata.WebHostHidden]
+172.     public class RootFrameNavigationHelper
+173.     {
+174.         // No-op stub written by Initialize-UwpMigration.ps1.
+175.         //
+176.         // The original UWP implementation hooked accelerator-key activation for
+177.         // ALT+Left/Right and BrowserBack/Forward, and pointer events for mouse
+178.         // XButton1/XButton2. The WinUI 3 equivalent goes through low-level
+179.         // keyboard-state APIs that the model provider's content-safety filter
+180.         // rejects. Back-nav is not the demonstrated feature of any UWP SDK
+181.         // sample, so we leave the field bound but make activation a no-op.
+182.         // If you really need ALT+Left back-nav, add a single
+183.         //   <KeyboardAccelerator Key="Left" Modifiers="Menu"/>
+184.         // to the AppBarButton or NavigationViewItem that triggers GoBack.
+185.         public RootFrameNavigationHelper(params object[] args) { /* no-op; accepts any call shape */ }
+186.     }
+187. 
+188.     /// <summary>
+189.     /// Represents the method that will handle the <see cref="NavigationHelper.LoadState"/>event
+190.     /// </summary>
+191.     public delegate void LoadStateEventHandler(object sender, LoadStateEventArgs e);
+192.     /// <summary>
+193.     /// Represents the method that will handle the <see cref="NavigationHelper.SaveState"/>event
+194.     /// </summary>
+195.     public delegate void SaveStateEventHandler(object sender, SaveStateEventArgs e);
+196. 
+197.     /// <summary>
+198.     /// Class used to hold the event data required when a page attempts to load state.
+199.     /// </summary>
+200.     public class LoadStateEventArgs : EventArgs
+201.     {
+202.         /// <summary>
+203.         /// The parameter value passed to <see cref="Frame.Navigate(Type, Object)"/> 
+204.         /// when this page was initially requested.
+205.         /// </summary>
+206.         public Object NavigationParameter { get; private set; }
+207.         /// <summary>
+208.         /// A dictionary of state preserved by this page during an earlier
+209.         /// session.  This will be null the first time a page is visited.
+210.         /// </summary>
+211.         public Dictionary<string, Object> PageState { get; private set; }
+212. 
+213.         /// <summary>
+214.         /// Initializes a new instance of the <see cref="LoadStateEventArgs"/> class.
+215.         /// </summary>
+216.         /// <param name="navigationParameter">
+217.         /// The parameter value passed to <see cref="Frame.Navigate(Type, Object)"/> 
+218.         /// when this page was initially requested.
+219.         /// </param>
+220.         /// <param name="pageState">
+221.         /// A dictionary of state preserved by this page during an earlier
+222.         /// session.  This will be null the first time a page is visited.
+223.         /// </param>
+224.         public LoadStateEventArgs(Object navigationParameter, Dictionary<string, Object> pageState)
+225.             : base()
+226.         {
+227.             this.NavigationParameter = navigationParameter;
+228.             this.PageState = pageState;
+229.         }
+230.     }
+231.     /// <summary>
+232.     /// Class used to hold the event data required when a page attempts to save state.
+233.     /// </summary>
+234.     public class SaveStateEventArgs : EventArgs
+235.     {
+236.         /// <summary>
+237.         /// An empty dictionary to be populated with serializable state.
+238.         /// </summary>
+239.         public Dictionary<string, Object> PageState { get; private set; }
+240. 
+241.         /// <summary>
+242.         /// Initializes a new instance of the <see cref="SaveStateEventArgs"/> class.
+243.         /// </summary>
+244.         /// <param name="pageState">An empty dictionary to be populated with serializable state.</param>
+245.         public SaveStateEventArgs(Dictionary<string, Object> pageState)
+246.             : base()
+247.         {
+248.             this.PageState = pageState;
+249.         }
+250.     }
+251. }
+252. 
+--- RESULT ---
+1. <?xml version='1.0' encoding='utf-8'?>
+2. <Package
+3.     xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+4.     xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
+5.     xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+6.     IgnorableNamespaces="uap mp"
+7.     >
+8.   <Identity Name="Microsoft.SDKSamples.BasicSuspension.CS" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" Version="1.0.0.0"/>
+9.   <mp:PhoneIdentity PhoneProductId="83afeced-5d3f-4ec3-845e-1e23bae0545c" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+10.   <Properties>
+11.     <DisplayName>Basic Suspension C# Sample</DisplayName>
+12.     <PublisherDisplayName>Microsoft Corporation</PublisherDisplayName>
+13.     <Logo>Assets\StoreLogo-sdk.png</Logo>
+14.   </Properties>
+15.   <Dependencies>
+16.     <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.10240.0" MaxVersionTested="10.0.22621.0"/>
+17.   </Dependencies>
+18.   <Resources>
+19.     <Resource Language="x-generate"/>
+20.   </Resources>
+21.   <Applications>
+22.     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="BasicSuspension.App">
+23.       <uap:VisualElements
+24.           DisplayName="Basic Suspension C# Sample"
+25.           Square150x150Logo="Assets\squareTile-sdk.png"
+26.           Square44x44Logo="Assets\SmallTile-sdk.png"
+27.           Description="Basic Suspension C# Sample"
+28.           BackgroundColor="#00b2f0"
+29.           >
+30.         <uap:SplashScreen Image="Assets\Splash-sdk.png"/>
+31.         <uap:DefaultTile>
+32.           <uap:ShowNameOnTiles>
+33.             <uap:ShowOn Tile="square150x150Logo"/>
+34.           </uap:ShowNameOnTiles>
+35.         </uap:DefaultTile>
+36.       </uap:VisualElements>
+37.     </Application>
+38.   </Applications>
+39. </Package>
+40. 
+--- RESULT ---
+<a id="windowing"></a>
+## Windowing: Window.Current / ApplicationView / CoreWindow → AppWindow`Window.Current`, `ApplicationView`, and `CoreWindow` are gone. Track the main window yourself and use `Microsoft.UI.Windowing.AppWindow`. See the official [windowing guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/windowing).UWP (replace this):```csharp
+var win = Window.Current;
+ApplicationView.GetForCurrentView().TryResizeView(new Size(800, 600));
+```WinUI 3 — expose `MainWindow` from `App`:```csharp
+public partial class App : Application
+{
+    // With <Nullable>enable</Nullable>, declare as nullable since the assignment only happens during OnLaunched.
+    public static Window? MainWindow { get; private set; }    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    {
+        var window = new MainWindow();
+        MainWindow = window;
+        window.Activate();
+    }
+}
+```Consumers running after `OnLaunched` can safely null-forgive:```csharp
+var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow!);
+```
+
+Resize via `AppWindow`:```csharp
+var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+var appWindow = AppWindow.GetFromWindowId(windowId);
+appWindow.Resize(new SizeInt32(800, 600));
+```### Initialization order — keep MainWindow's constructor inert`App.MainWindow` (or any equivalent static window reference) is `null` for the entire duration of `new MainWindow()` — the right-hand side runs to completion BEFORE the assignment happens. Anything inside that constructor that reads the static — directly or transitively — sees `null` and throws `E_POINTER` (0x80004003) at startup. The build is clean; the analyzer is silent; only a runtime launch reveals it.APIs that commonly trip this race when called from a `Page` reached during `MainWindow` construction:- `WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow)`
+- `XamlRoot` / `Content.XamlRoot` access through a static-window helper
+- `PrintManagerInterop.GetForWindow(hwnd)` / `ShowPrintUIForWindowAsync(hwnd)`
+- `FileOpenPicker` / `FileSavePicker` / `FolderPicker` (require an HWND)
+- `ContentDialog.ShowAsync()` when the dialog's `XamlRoot` is sourced from a static
+- `AppWindow.GetFromWindowId(...)` chained through `App.MainWindow`
+- Any custom title bar / `SetTitleBar` helper that resolves the HWND staticallySafe pattern — assign before activate, defer first navigation:```csharp
+// App.xaml.cs
+protected override void OnLaunched(LaunchActivatedEventArgs args)
+{
+    var window = new MainWindow();
+    MainWindow = window;
+    window.Activate();
+}
+```
+
+The `MainWindow` constructor must do only `InitializeComponent` and inert setup — no navigation to a `Page` that reads `
+`App.MainWindow`. Defer the first navigation until after `Activate` completes, either from a `Loaded` handler hooked in `
+`InitializeComponent` or by exposing a `NavigateToInitialPage()` method and calling it from `App.OnLaunched` after the st
+tatic is assigned.
+
+```csharp
+// MainWindow.xaml.cs
+public MainWindow()
+{
+    InitializeComponent();
+    this.Activated += (_, _) =>
+    {
+        if (!_navigated)
+        {
+            _navigated = true;
+            RootFrame.Navigate(typeof(MainPage));
+        }
+    };
+}
+private bool _navigated;
+```
+
+Validator catches this race with a 10s smoke launch after the build healthcheck passes — see `Validate-UwpMigration.ps1`
+` Section 7.
+
+### AppWindow API replacements
+
+| UWP API | WinUI 3 API |
+|---------|-------------|
+| `ApplicationView.TryResizeView` | `AppWindow.Resize` |
+| `AppWindow.TryCreateAsync` | `AppWindow.Create` |
+| `AppWindow.TryShowAsync` | `AppWindow.Show` |
+| `AppWindow.TryConsolidateAsync` | `AppWindow.Destroy` |
+| `AppWindow.RequestMoveXxx` | `AppWindow.Move` |
+| `AppWindow.RequestPresentation` | `AppWindow.SetPresenter` |
+| `CoreApplicationViewTitleBar` | `AppWindowTitleBar` |
+| `CoreApplicationView.TitleBar.ExtendViewIntoTitleBar` | `AppWindow.TitleBar.ExtendsContentIntoTitleBar` |
+---
+<a id="getforcurrentview"></a>
+## GetForCurrentView() Replacements
+
+None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is no implicit per-view singleton.
+
+| UWP API | WinUI 3 Replacement |
+|---------|---------------------|
+| `ApplicationView.GetForCurrentView()` | `AppWindow.GetFromWindowId(windowId)` |
+| `UIViewSettings.GetForCurrentView()` | `AppWindow` properties (size, presenter) |
+| `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
+| `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
+| `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+<exited with exit code 0>
+
+=== TURN 8 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension"}
+--- RESULT ---
+.bootstrap-meta.json
+.fidelity-snapshot.json
+.github
+.gitignore
+.uwp-source
+AGENTS.md
+App.xaml
+App.xaml.cs
+Assets
+BasicSuspension.csproj
+Common
+MIGRATION-DEFERRED.md
+MIGRATION-MAPPING.md
+MainPage.xaml
+MainPage.xaml.cs
+MainWindow.xaml
+MainWindow.xaml.cs
+Package.appxmanifest
+Properties
+SubPage.xaml
+SubPage.xaml.cs
+app.manifest
+obj
+
+=== TURN 9 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MainWindow.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MainWindow.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\BasicSuspension.csproj"}
+--- RESULT ---
+1. <?xml version="1.0" encoding="utf-8" ?>
+2. <Window
+3.     x:Class="BasicSuspension.MainWindow"
+4.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+5.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+6.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+7.     xmlns:local="using:BasicSuspension"
+8.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+9.     Title="BasicSuspension"
+10.     mc:Ignorable="d">
+11.     <Window.SystemBackdrop>
+12.         <MicaBackdrop />
+13.     </Window.SystemBackdrop>
+14. 
+15.     <Grid>
+16.         <Grid.RowDefinitions>
+17.             <RowDefinition Height="Auto" />
+18.             <RowDefinition Height="*" />
+19.         </Grid.RowDefinitions>
+20. 
+21.         <TitleBar x:Name="AppTitleBar" Title="BasicSuspension">
+22.             <TitleBar.IconSource>
+23.                 <ImageIconSource ImageSource="Assets/AppIcon.ico" />
+24.             </TitleBar.IconSource>
+25.         </TitleBar>
+26. 
+27.         <!--
+28.             The Frame hosts pages for your application content. Add your UI to
+29.             MainPage.xaml rather than here so you can use Page features such as
+30.             navigation events and the Loaded lifecycle.
+31.         -->
+32.         <Frame x:Name="RootFrame" Grid.Row="1" />
+33.     </Grid>
+34. </Window>
+35. 
+--- RESULT ---
+1. using Microsoft.UI.Xaml;
+2. 
+3. // To learn more about WinUI, the WinUI project structure,
+4. // and more about our project templates, see: http://aka.ms/winui-project-info.
+5. 
+6. namespace BasicSuspension;
+7. 
+8. /// <summary>
+9. /// The application window. This hosts a Frame that displays pages. Add your
+10. /// UI and logic to MainPage.xaml / MainPage.xaml.cs instead of here so you
+11. /// can use Page features such as navigation events and the Loaded lifecycle.
+12. /// </summary>
+13. public sealed partial class MainWindow : Window
+14. {
+15.     public MainWindow()
+16.     {
+17.         InitializeComponent();
+18. 
+19.         ExtendsContentIntoTitleBar = true;
+20.         SetTitleBar(AppTitleBar);
+21. 
+22.         AppWindow.SetIcon("Assets/AppIcon.ico");
+23. 
+24.         // Navigate the root frame to the main page on startup.
+25.         RootFrame.Navigate(typeof(MainPage));
+26.     }
+27. }
+28. 
+--- RESULT ---
+1. <Project Sdk="Microsoft.NET.Sdk">
+2.   <PropertyGroup>
+3.     <OutputType>WinExe</OutputType>
+4.     <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+5.     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+6.     <RootNamespace>BasicSuspension</RootNamespace>
+7.     <ApplicationManifest>app.manifest</ApplicationManifest>
+8.     <Platforms>x86;x64;ARM64</Platforms>
+9.     <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToLowerInvariant())</RuntimeIdentifier>
+10.     <PublishProfile Condition="Exists('Properties\PublishProfiles\win-$(Platform).pubxml')">win-$(Platform).pubxml</PublishProfile>
+11.     <UseWinUI>true</UseWinUI>
+12.     <WinUISDKReferences>false</WinUISDKReferences>
+13.     <EnableMsixTooling>true</EnableMsixTooling>
+14.     <ImplicitUsings>enable</ImplicitUsings>
+15.     <Nullable>enable</Nullable>
+16.   </PropertyGroup>
+17. 
+18.   <ItemGroup>
+19.     <Content Include="Assets\SplashScreen.scale-200.png" />
+20.     <Content Include="Assets\LockScreenLogo.scale-200.png" />
+21.     <Content Include="Assets\Square150x150Logo.scale-200.png" />
+22.     <Content Include="Assets\Square44x44Logo.scale-200.png" />
+23.     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+24.     <Content Include="Assets\Square44x44Logo.targetsize-48_altform-lightunplated.png" />
+25.     <Content Include="Assets\StoreLogo.png" />
+26.     <Content Include="Assets\AppIcon.ico" />
+27.     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+28.   </ItemGroup>
+29. 
+30.   <ItemGroup>
+31.     <Manifest Include="$(ApplicationManifest)" />
+32.   </ItemGroup>
+33. 
+34.   <!--
+35.     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+36.     Tools extension to be activated for this project even if the Windows App SDK Nuget
+37.     package has not yet been restored.
+38.   -->
+39.   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+40.     <ProjectCapability Include="Msix" />
+41.   </ItemGroup>
+42. 
+43.   <!--
+44.     Microsoft.Windows.SDK.BuildTools.WinApp adds first-class support for
+45.     `dotnet run` on packaged WinUI apps: it hooks the .NET CLI Run target to
+46.     register a debug identity via the winapp CLI and launch the app with
+47.     package identity (AUMID).
+48.     Set <EnableWinAppRunSupport>false</EnableWinAppRunSupport> in a
+49.     <PropertyGroup> above to opt out.
+50.   -->
+51.   <ItemGroup>
+52.     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
+53.     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+54.     <PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinApp" Version="0.4.0" />
+55.   </ItemGroup>
+56. 
+57.   <!--
+58.     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
+59.     Explorer "Package and Publish" context menu entry to be enabled for this project even if
+60.     the Windows App SDK Nuget package has not yet been restored.
+61.   -->
+62.   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+63.     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+64.   </PropertyGroup>
+65. 
+66.   <!-- Publish Properties -->
+67.   <PropertyGroup>
+68.     <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+69.     <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+70.     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+71.     <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+72.   </PropertyGroup>
+73. </Project>
+
+=== TURN 10 ===
+Now I have everything I need. Let me apply all the changes:
+
+--- TOOL: report_intent ---
+{"intent":"Applying WinUI3 migration changes"}
+
+--- TOOL: edit ---
+{"new_str":"﻿<Application\n    x:Class=\"SDKTemplate.App\"\n    xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"\n    xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"\n    xmlns:local=\"using:SDKTemplate\"\n    RequestedTheme=\"Light\">\n\n    <Application.Resources>\n        <ResourceDictionary>\n            <ResourceDictionary.MergedDictionaries>\n                <XamlControlsResources xmlns=\"using:Microsoft.UI.Xaml.Controls\" />\n            </ResourceDictionary.MergedDictionaries>\n        </ResourceDictionary>\n    </Application.Resources>\n</Application>","old_str":"﻿<Application\n    x:Class=\"SDKTemplate.App\"\n    xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"\n    xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"\n    xmlns:local=\"using:SDKTemplate\"\n    RequestedTheme=\"Light\">\n\n</Application>","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\App.xaml"}
+
+--- TOOL: edit ---
+{"new_str":"using SDKTemplate.Common;\nusing System;\nusing Windows.ApplicationModel;\nusing Windows.Storage;\nusing Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;\n\nnamespace SDKTemplate\n{\n    /// <summary>\n    /// Provides application-specific behavior to supplement the default Application class.\n    /// </summary>\n    sealed partial class App : Application\n    {\n        private const string sessionStateFilename = \"_sessionState.xml\";\n        private RootFrameNavigationHelper rootFrameNavigationHelper;\n\n        public static Window? MainWindow { get; private set; }\n\n        /// <summary>\n        /// Initializes the singleton application object.  This is the first line of authored code\n        /// executed, and as such is the logical equivalent of main() or WinMain().\n        /// </summary>\n        public App()\n        {\n            this.InitializeComponent();\n            SuspensionManager.KnownTypes.AddRange(new[] { typeof(ItemList), typeof(Item) });\n            this.Suspending += OnSuspending;\n        }\n\n        /// <summary>\n        /// Invoked when the application is launched normally by the end user.  Other entry points\n        /// will be used such as when the application is launched to open a specific file.\n        /// </summary>\n        /// <param name=\"e\">Details about the launch request and process.</param>\n        protected override async void OnLaunched(LaunchActivatedEventArgs e)\n        {\n            var window = new global::BasicSuspension.MainWindow();\n            MainWindow = window;\n\n            Frame rootFrame = window.ContentFrame;\n            SuspensionManager.RegisterFrame(rootFrame, \"AppFrame\");\n\n            // Use the RootFrameNavigationHelper to respond to keyboard and mouse shortcuts.\n            this.rootFrameNavigationHelper = new RootFrameNavigationHelper(rootFrame);\n\n            rootFrame.NavigationFailed += OnNavigationFailed;\n\n            // If this is not the first time the app is run, then restore from the previous session.\n            StorageFile file;\n            try\n            {\n                file = await ApplicationData.Current.LocalFolder.GetFileAsync(sessionStateFilename);\n            }\n            catch (Exception)\n            {\n                file = null;\n            }\n\n            if (file != null)\n            {\n                //Load state from previously suspended application\n                await SuspensionManager.RestoreAsync();\n            }\n\n            if (rootFrame.Content == null)\n            {\n                // When the navigation stack isn't restored navigate to the first page,\n                // configuring the new page by passing required information as a navigation\n                // parameter\n                rootFrame.Navigate(typeof(MainPage));\n            }\n\n            window.Activate();\n        }","old_str":"using SDKTemplate.Common;\nusing System;\nusing System.Collections.Generic;\nusing Windows.ApplicationModel;\nusing Windows.ApplicationModel.Activation;\nusing Windows.Storage;\nusing Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;\n\nnamespace SDKTemplate\n{\n    /// <summary>\n    /// Provides application-specific behavior to supplement the default Application class.\n    /// </summary>\n    sealed partial class App : Application\n    {\n        private const string sessionStateFilename = \"_sessionState.xml\";\n        private RootFrameNavigationHelper rootFrameNavigationHelper;\n\n        /// <summary>\n        /// Initializes the singleton application object.  This is the first line of authored code\n        /// executed, and as such is the logical equivalent of main() or WinMain().\n        /// </summary>\n        public App()\n        {\n            this.InitializeComponent();\n            SuspensionManager.KnownTypes.AddRange(new[] { typeof(ItemList), typeof(Item) });\n            this.Suspending += OnSuspending;\n        }\n\n        /// <summary>\n        /// Invoked when the application is launched normally by the end user.  Other entry points\n        /// will be used such as when the application is launched to open a specific file.\n        /// </summary>\n        /// <param name=\"e\">Details about the launch request and process.</param>\n        protected override async void OnLaunched(LaunchActivatedEventArgs e)\n        {\n            // TODO[migrate-001]: see PATTERNS.md#windowing\n            Frame rootFrame = Window.Current.Content as Frame;\n\n            // Do not repeat app initialization when the Window already has content,\n            // just ensure that the window is active\n            if (rootFrame == null)\n            {\n                // Create a Frame to act as the navigation context and navigate to the first page\n                rootFrame = new Frame();\n                SuspensionManager.RegisterFrame(rootFrame, \"AppFrame\");\n\n                // Use the RootFrameNavigationHelper to respond to keyboard and mouse shortcuts.\n                this.rootFrameNavigationHelper = new RootFrameNavigationHelper(rootFrame);\n\n                rootFrame.NavigationFailed += OnNavigationFailed;\n\n                // If this is not the first time the app is run, then restore from the previous session.\n                StorageFile file;\n                try\n                {\n                    file = await ApplicationData.Current.LocalFolder.GetFileAsync(sessionStateFilename);\n                }\n                catch (Exception)\n                {\n                    file = null;\n                }\n\n                if (file != null)\n                {\n                    //Load state from previously suspended application\n                    await SuspensionManager.RestoreAsync();\n                }\n\n                // Place the frame in the current Window\n                // TODO[migrate-002]: see PATTERNS.md#windowing\n                Window.Current.Content = rootFrame;\n            }\n\n            if (rootFrame.Content == null)\n            {\n                // When the navigation stack isn't restored navigate to the first page,\n                // configuring the new page by passing required information as a navigation\n                // parameter\n                rootFrame.Navigate(typeof(MainPage), e.Arguments);\n            }\n            // Ensure the current window is active\n            // TODO[migrate-003]: see PATTERNS.md#windowing\n            Window.Current.Activate();\n        }","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\App.xaml.cs"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs updated with changes.
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml updated with changes.
+
+=== TURN 11 ===
+
+--- TOOL: edit ---
+{"new_str":"using Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Controls;\n\n// To learn more about WinUI, the WinUI project structure,\n// and more about our project templates, see: http://aka.ms/winui-project-info.\n\nnamespace BasicSuspension;\n\n/// <summary>\n/// The application window. This hosts a Frame that displays pages. Navigation\n/// is driven by App.xaml.cs after session state restoration.\n/// </summary>\npublic sealed partial class MainWindow : Window\n{\n    public MainWindow()\n    {\n        InitializeComponent();\n\n        ExtendsContentIntoTitleBar = true;\n        SetTitleBar(AppTitleBar);\n\n        AppWindow.SetIcon(\"Assets/AppIcon.ico\");\n    }\n\n    /// <summary>\n    /// Exposes the root navigation frame so App.xaml.cs can register it with\n    /// SuspensionManager and drive the initial navigation.\n    /// </summary>\n    public Frame ContentFrame => RootFrame;\n}","old_str":"using Microsoft.UI.Xaml;\n\n// To learn more about WinUI, the WinUI project structure,\n// and more about our project templates, see: http://aka.ms/winui-project-info.\n\nnamespace BasicSuspension;\n\n/// <summary>\n/// The application window. This hosts a Frame that displays pages. Add your\n/// UI and logic to MainPage.xaml / MainPage.xaml.cs instead of here so you\n/// can use Page features such as navigation events and the Loaded lifecycle.\n/// </summary>\npublic sealed partial class MainWindow : Window\n{\n    public MainWindow()\n    {\n        InitializeComponent();\n\n        ExtendsContentIntoTitleBar = true;\n        SetTitleBar(AppTitleBar);\n\n        AppWindow.SetIcon(\"Assets/AppIcon.ico\");\n\n        // Navigate the root frame to the main page on startup.\n        RootFrame.Navigate(typeof(MainPage));\n    }\n}","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MainWindow.xaml.cs"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\MainWindow.xaml.cs updated with changes.
+
+=== TURN 12 ===
+
+--- TOOL: edit ---
+{"new_str":"using SDKTemplate.Common;\nusing System;\nusing System.Collections.Generic;\nusing System.Collections.ObjectModel;\nusing Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;","old_str":"using SDKTemplate.Common;\nusing System;\nusing System.Collections.Generic;\nusing System.Collections.ObjectModel;\nusing Windows.UI.Core;\nusing Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MainPage.xaml.cs"}
+
+--- TOOL: edit ---
+{"new_str":"        protected override void OnNavigatedTo(NavigationEventArgs e)\n        {\n            this.navigationHelper.OnNavigatedTo(e);\n        }","old_str":"        protected override void OnNavigatedTo(NavigationEventArgs e)\n        {\n            this.navigationHelper.OnNavigatedTo(e);\n\n            // TODO[migrate-004]: see PATTERNS.md#getforcurrentview\n            SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility =\n                this.Frame.CanGoBack ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed;\n        }","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MainPage.xaml.cs"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\MainPage.xaml.cs updated with changes.
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\MainPage.xaml.cs updated with changes.
+
+=== TURN 13 ===
+Now fix SubPage.xaml (add back button) and SubPage.xaml.cs (remove SystemNavigationManager):
+
+--- TOOL: edit ---
+{"new_str":"﻿<Page\n    x:Class=\"SDKTemplate.SubPage\"\n    xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"\n    xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"\n    xmlns:d=\"http://schemas.microsoft.com/expression/blend/2008\"\n    xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"\n    mc:Ignorable=\"d\"\n    Tapped=\"Page_Tapped\">\n\n    <StackPanel Background=\"{ThemeResource ApplicationPageBackgroundThemeBrush}\" Padding=\"10\">\n        <Button x:Name=\"BackButton\" Content=\"Back\" Click=\"BackButton_Click\" Margin=\"0,0,0,10\" />\n        <TextBlock x:Name=\"TitleTextBlock\" Style=\"{ThemeResource TitleTextBlockStyle}\" HorizontalAlignment=\"Center\" />\n        <TextBlock Margin=\"0,10,0,10\">\n            Number of taps on this page: <Run x:Name=\"TapCountRun\"/>\n        </TextBlock>\n    </StackPanel>\n</Page>","old_str":"﻿<Page\n    x:Class=\"SDKTemplate.SubPage\"\n    xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"\n    xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"\n    xmlns:d=\"http://schemas.microsoft.com/expression/blend/2008\"\n    xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"\n    mc:Ignorable=\"d\"\n    Tapped=\"Page_Tapped\">\n\n    <StackPanel Background=\"{ThemeResource ApplicationPageBackgroundThemeBrush}\" Padding=\"10\">\n        <TextBlock x:Name=\"TitleTextBlock\" Style=\"{ThemeResource TitleTextBlockStyle}\" HorizontalAlignment=\"Center\" />\n        <TextBlock Margin=\"0,10,0,10\">\n            Number of taps on this page: <Run x:Name=\"TapCountRun\"/>\n        </TextBlock>\n    </StackPanel>\n</Page>","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\SubPage.xaml"}
+
+--- TOOL: edit ---
+{"new_str":"using SDKTemplate.Common;\nusing System;\nusing System.Collections.Generic;\nusing Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;\n\nnamespace SDKTemplate\n{\n    public sealed partial class SubPage : Page\n    {\n        private readonly NavigationHelper navigationHelper;\n        private int tapCount;\n\n        public SubPage()\n        {\n            this.InitializeComponent();\n            this.navigationHelper = new NavigationHelper(this);\n            this.navigationHelper.LoadState += LoadState;\n            this.navigationHelper.SaveState += SaveState;\n        }\n\n        #region NavigationHelper registration\n\n        /// <summary>\n        /// The methods provided in this section are simply used to allow\n        /// NavigationHelper to respond to the page's navigation methods.\n        /// <para>\n        /// Page specific logic should be placed in event handlers for the  \n        /// <see cref=\"NavigationHelper.LoadState\"/>\n        /// and <see cref=\"NavigationHelper.SaveState\"/>.\n        /// The navigation parameter is available in the LoadState method \n        /// in addition to page state preserved during an earlier session.\n        /// </para>\n        /// </summary>\n        /// <param name=\"e\">Provides data for navigation methods and event\n        /// handlers that cannot cancel the navigation request.</param>\n\n        protected override void OnNavigatedTo(NavigationEventArgs e)\n        {\n            this.TitleTextBlock.Text = e.Parameter.ToString();\n\n            this.navigationHelper.OnNavigatedTo(e);\n        }\n\n        protected override void OnNavigatedFrom(NavigationEventArgs e)\n        {\n            this.navigationHelper.OnNavigatedFrom(e);\n        }\n\n        private void LoadState(object sender, LoadStateEventArgs e)\n        {\n            tapCount = 0;\n            if (e.PageState != null && e.PageState.ContainsKey(\"tapCount\"))\n            {\n                tapCount = (int)e.PageState[\"tapCount\"];\n            }\n            TapCountRun.Text = tapCount.ToString();\n        }\n\n        private void SaveState(object sender, SaveStateEventArgs e)\n        {\n            e.PageState[\"tapCount\"] = tapCount;\n        }\n        #endregion\n\n        /// <summary>\n        /// Navigates back when the back button is pressed.\n        /// </summary>\n        private void BackButton_Click(object sender, RoutedEventArgs e)\n        {\n            if (this.Frame.CanGoBack)\n            {\n                this.Frame.GoBack();\n            }\n        }\n\n        private void Page_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)\n        {\n            tapCount++;\n            TapCountRun.Text = tapCount.ToString();\n        }\n    }\n}","old_str":"using SDKTemplate.Common;\nusing System;\nusing System.Collections.Generic;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;\nusing Windows.UI.Core;\n\nnamespace SDKTemplate\n{\n    public sealed partial class SubPage : Page\n    {\n        private readonly NavigationHelper navigationHelper;\n        private int tapCount;\n\n        public SubPage()\n        {\n            this.InitializeComponent();\n            this.navigationHelper = new NavigationHelper(this);\n            this.navigationHelper.LoadState += LoadState;\n            this.navigationHelper.SaveState += SaveState;\n\n            // TODO[migrate-005]: see PATTERNS.md#getforcurrentview\n            SystemNavigationManager.GetForCurrentView().BackRequested += Navigation_BackRequested;\n        }\n\n        #region NavigationHelper registration\n\n        /// <summary>\n        /// The methods provided in this section are simply used to allow\n        /// NavigationHelper to respond to the page's navigation methods.\n        /// <para>\n        /// Page specific logic should be placed in event handlers for the  \n        /// <see cref=\"NavigationHelper.LoadState\"/>\n        /// and <see cref=\"NavigationHelper.SaveState\"/>.\n        /// The navigation parameter is available in the LoadState method \n        /// in addition to page state preserved during an earlier session.\n        /// </para>\n        /// </summary>\n        /// <param name=\"e\">Provides data for navigation methods and event\n        /// handlers that cannot cancel the navigation request.</param>\n\n        protected override void OnNavigatedTo(NavigationEventArgs e)\n        {\n            this.TitleTextBlock.Text = e.Parameter.ToString();\n\n            this.navigationHelper.OnNavigatedTo(e);\n\n            // TODO[migrate-006]: see PATTERNS.md#getforcurrentview\n            SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility =\n                this.Frame.CanGoBack ? AppViewBackButtonVisibility.Visible : AppViewBackButtonVisibility.Collapsed;\n        }\n\n        protected override void OnNavigatedFrom(NavigationEventArgs e)\n        {\n            this.navigationHelper.OnNavigatedFrom(e);\n        }\n\n        private void LoadState(object sender, LoadStateEventArgs e)\n        {\n            tapCount = 0;\n            if (e.PageState != null && e.PageState.ContainsKey(\"tapCount\"))\n            {\n                tapCount = (int)e.PageState[\"tapCount\"];\n            }\n            TapCountRun.Text = tapCount.ToString();\n        }\n\n        private void SaveState(object sender, SaveStateEventArgs e)\n        {\n            e.PageState[\"tapCount\"] = tapCount;\n        }\n        #endregion\n\n        /// <summary>\n        /// This method facilitates navigation when the back button is pressed.\n        /// </summary>\n        /// <param name=\"sender\"></param>\n        /// <param name=\"e\"></param>\n        private void Navigation_BackRequested(object sender, BackRequestedEventArgs e)\n        {\n            if (!e.Handled & this.Frame.CanGoBack)\n            {\n                e.Handled = true;\n                this.Frame.GoBack();\n            }\n        }\n\n        private void Page_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)\n        {\n            tapCount++;\n            TapCountRun.Text = tapCount.ToString();\n        }\n    }\n}","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\SubPage.xaml.cs"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\SubPage.xaml.cs updated with changes.
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\SubPage.xaml updated with changes.
+
+=== TURN 14 ===
+Now fix Package.appxmanifest for WinUI 3 desktop:
+
+--- TOOL: edit ---
+{"new_str":"<?xml version='1.0' encoding='utf-8'?>\n<Package\n    xmlns=\"http://schemas.microsoft.com/appx/manifest/foundation/windows10\"\n    xmlns:uap=\"http://schemas.microsoft.com/appx/manifest/uap/windows10\"\n    xmlns:rescap=\"http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities\"\n    IgnorableNamespaces=\"uap rescap\">\n  <Identity Name=\"Microsoft.SDKSamples.BasicSuspension.CS\" Publisher=\"CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US\" Version=\"1.0.0.0\"/>\n  <Properties>\n    <DisplayName>Basic Suspension C# Sample</DisplayName>\n    <PublisherDisplayName>Microsoft Corporation</PublisherDisplayName>\n    <Logo>Assets\\StoreLogo.png</Logo>\n  </Properties>\n  <Dependencies>\n    <TargetDeviceFamily Name=\"Windows.Desktop\" MinVersion=\"10.0.17763.0\" MaxVersionTested=\"10.0.22621.0\"/>\n  </Dependencies>\n  <Resources>\n    <Resource Language=\"x-generate\"/>\n  </Resources>\n  <Applications>\n    <Application Id=\"App\" Executable=\"$targetnametoken$.exe\" EntryPoint=\"$targetentrypoint$\">\n      <uap:VisualElements\n          DisplayName=\"Basic Suspension C# Sample\"\n          Square150x150Logo=\"Assets\\Square150x150Logo.scale-200.png\"\n          Square44x44Logo=\"Assets\\Square44x44Logo.scale-200.png\"\n          Description=\"Basic Suspension C# Sample\"\n          BackgroundColor=\"transparent\">\n        <uap:DefaultTile Wide310x150Logo=\"Assets\\Wide310x150Logo.scale-200.png\">\n          <uap:ShowNameOnTiles>\n            <uap:ShowOn Tile=\"square150x150Logo\"/>\n          </uap:ShowNameOnTiles>\n        </uap:DefaultTile>\n        <uap:SplashScreen Image=\"Assets\\SplashScreen.scale-200.png\"/>\n      </uap:VisualElements>\n    </Application>\n  </Applications>\n  <Capabilities>\n    <rescap:Capability Name=\"runFullTrust\" />\n  </Capabilities>\n</Package>","old_str":"<?xml version='1.0' encoding='utf-8'?>\n<Package\n    xmlns=\"http://schemas.microsoft.com/appx/manifest/foundation/windows10\"\n    xmlns:mp=\"http://schemas.microsoft.com/appx/2014/phone/manifest\"\n    xmlns:uap=\"http://schemas.microsoft.com/appx/manifest/uap/windows10\"\n    IgnorableNamespaces=\"uap mp\"\n    >\n  <Identity Name=\"Microsoft.SDKSamples.BasicSuspension.CS\" Publisher=\"CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US\" Version=\"1.0.0.0\"/>\n  <mp:PhoneIdentity PhoneProductId=\"83afeced-5d3f-4ec3-845e-1e23bae0545c\" PhonePublisherId=\"00000000-0000-0000-0000-000000000000\"/>\n  <Properties>\n    <DisplayName>Basic Suspension C# Sample</DisplayName>\n    <PublisherDisplayName>Microsoft Corporation</PublisherDisplayName>\n    <Logo>Assets\\StoreLogo-sdk.png</Logo>\n  </Properties>\n  <Dependencies>\n    <TargetDeviceFamily Name=\"Windows.Universal\" MinVersion=\"10.0.10240.0\" MaxVersionTested=\"10.0.22621.0\"/>\n  </Dependencies>\n  <Resources>\n    <Resource Language=\"x-generate\"/>\n  </Resources>\n  <Applications>\n    <Application Id=\"App\" Executable=\"$targetnametoken$.exe\" EntryPoint=\"BasicSuspension.App\">\n      <uap:VisualElements\n          DisplayName=\"Basic Suspension C# Sample\"\n          Square150x150Logo=\"Assets\\squareTile-sdk.png\"\n          Square44x44Logo=\"Assets\\SmallTile-sdk.png\"\n          Description=\"Basic Suspension C# Sample\"\n          BackgroundColor=\"#00b2f0\"\n          >\n        <uap:SplashScreen Image=\"Assets\\Splash-sdk.png\"/>\n        <uap:DefaultTile>\n          <uap:ShowNameOnTiles>\n            <uap:ShowOn Tile=\"square150x150Logo\"/>\n          </uap:ShowNameOnTiles>\n        </uap:DefaultTile>\n      </uap:VisualElements>\n    </Application>\n  </Applications>\n</Package>","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\Package.appxmanifest"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Package.appxmanifest updated with changes.
+
+=== TURN 15 ===
+Now update MIGRATION-MAPPING.md to flip statuses to done:
+
+--- TOOL: edit ---
+{"new_str":"| App.xaml | App.xaml | migrate-as-is | done |\n| App.xaml.cs | App.xaml.cs | migrate-with-adaptation | done |\n| Common\\NavigationHelper.cs | Common\\NavigationHelper.cs | migrate-as-is | done |\n| Common\\SuspensionManager.cs | Common\\SuspensionManager.cs | migrate-as-is | done |\n| MainPage.xaml | MainPage.xaml | migrate-as-is | done |\n| MainPage.xaml.cs | MainPage.xaml.cs | migrate-with-adaptation | done |\n| Package.appxmanifest | Package.appxmanifest | migrate-as-is | done |\n| SubPage.xaml | SubPage.xaml | migrate-as-is | done |\n| SubPage.xaml.cs | SubPage.xaml.cs | migrate-with-adaptation | done |","old_str":"| App.xaml | App.xaml | migrate-as-is | copied |\n| App.xaml.cs | App.xaml.cs | migrate-with-adaptation | copied |\n| Common\\NavigationHelper.cs | Common\\NavigationHelper.cs | migrate-as-is | copied |\n| Common\\SuspensionManager.cs | Common\\SuspensionManager.cs | migrate-as-is | copied |\n| MainPage.xaml | MainPage.xaml | migrate-as-is | copied |\n| MainPage.xaml.cs | MainPage.xaml.cs | migrate-with-adaptation | copied |\n| Package.appxmanifest | Package.appxmanifest | migrate-as-is | copied |\n| SubPage.xaml | SubPage.xaml | migrate-as-is | copied |\n| SubPage.xaml.cs | SubPage.xaml.cs | migrate-with-adaptation | copied |","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MIGRATION-MAPPING.md"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\MIGRATION-MAPPING.md updated with changes.
+
+=== TURN 16 ===
+Now let's build to check for errors:
+
+--- TOOL: powershell ---
+{"command":"cd C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension; $arch = $env:PROCESSOR_ARCHITECTURE; $Platform = if ($arch -eq 'AMD64') { 'x64' } else { $arch }; dotnet build -c Debug -p:Platform=$Platform 2>&1; \"BUILD_EXIT=$LASTEXITCODE\"","description":"Build the WinUI 3 project","initial_wait":120,"mode":"sync"}
+--- RESULT ---
+csproj
+(0.1s)
+(0.1s)
+(0.2s)
+(0.2s)
+(0.3s)
+(0.3s)
+(0.4s)
+(0.4s)
+(0.5s)
+(0.5s)
+(0.6s)
+(0.6s)
+(0.7s)
+(0.7s)
+  csproj net10.0-windows10.0.26100.0 win-x64                                                                     (0.7s) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(0.8s)
+(0.8s)
+(0.9s)
+(0.9s)
+(1.0s)
+(1.0s)
+(1.1s)
+(1.1s)
+(1.2s)
+(1.2s)
+(1.3s)
+(1.3s)
+(1.4s)
+(1.4s)
+(1.5s)
+(1.5s)
+(1.5s)
+(1.6s)
+(1.6s)
+(1.7s)
+(1.7s)
+(1.8s)
+(1.8s)
+(1.9s)
+(1.9s)
+(2.0s)
+(2.0s)
+(2.1s)
+(2.1s)
+(2.2s)
+(2.2s)
+(2.3s)
+(2.3s)
+(2.3s)
+(2.4s)
+Restore complete (2.4s)
+  csproj net10.0-windows10.0.26100.0 win-x64                                                                     (2.4s) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+(2.4s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                 ProcessFrameworkReferences (0.0s) 
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                            PrepareForBuild (0.1s) 
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                       GenerateGlobalUsings (0.1s) 
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                       ResolvePackageAssets (0.2s) 
+(0.2s)
+(0.3s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                   ResolveRuntimePackAssets (0.3s) 
+(0.4s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                 ResolveTargetingPackAssets (0.5s) 
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                               ResolveOffByDefaultAnalyzers (0.5s) 
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                  ResolveAssemblyReferences (0.6s) 
+(0.6s)
+(0.7s)
+(0.7s)
+(0.8s)
+(0.8s)
+(0.9s)
+(0.9s)
+(1.0s)
+(1.0s)
+(1.0s)
+(1.1s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                       _ValidatePresenceOfAppxManifestItems (1.1s) 
+(1.2s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                         MarkupCompilePass1 (1.2s) 
+(1.3s)
+(1.3s)
+(1.4s)
+(1.4s)
+(1.5s)
+(1.5s)
+(1.6s)
+(1.6s)
+(1.7s)
+(1.7s)
+(1.8s)
+(1.8s)
+(1.9s)
+(1.9s)
+(1.9s)
+(2.0s)
+(2.0s)
+(2.1s)
+(2.1s)
+(2.2s)
+(2.2s)
+(2.3s)
+(2.3s)
+(2.4s)
+(2.4s)
+(2.5s)
+(2.5s)
+(2.6s)
+(2.6s)
+(2.7s)
+(2.7s)
+(2.8s)
+(2.8s)
+(2.9s)
+(2.9s)
+(3.0s)
+(3.0s)
+(3.1s)
+(3.1s)
+(3.2s)
+(3.2s)
+(3.3s)
+(3.3s)
+(3.3s)
+(3.4s)
+(3.4s)
+(3.5s)
+(3.5s)
+(3.6s)
+(3.6s)
+(3.7s)
+(3.7s)
+(3.8s)
+(3.8s)
+(3.9s)
+(3.9s)
+(4.0s)
+(4.0s)
+(4.1s)
+(4.1s)
+(4.1s)
+(4.2s)
+(4.2s)
+(4.3s)
+(4.3s)
+(4.4s)
+(4.4s)
+(4.5s)
+(4.5s)
+(4.6s)
+(4.6s)
+(4.7s)
+(4.7s)
+(4.8s)
+(4.8s)
+(4.9s)
+(4.9s)
+(5.0s)
+(5.0s)
+(5.0s)
+(5.1s)
+(5.1s)
+(5.2s)
+(5.2s)
+(5.3s)
+(5.3s)
+(5.4s)
+(5.4s)
+(5.5s)
+(5.5s)
+(5.6s)
+(5.6s)
+(5.7s)
+(5.7s)
+(5.8s)
+(5.8s)
+(5.8s)
+(5.9s)
+(5.9s)
+(6.0s)
+(6.0s)
+(6.1s)
+(6.1s)
+(6.2s)
+(6.2s)
+(6.3s)
+(6.3s)
+(6.4s)
+(6.4s)
+(6.5s)
+(6.5s)
+(6.6s)
+(6.6s)
+(6.7s)
+(6.7s)
+(6.7s)
+(6.8s)
+(6.8s)
+(6.9s)
+(6.9s)
+(7.0s)
+(7.0s)
+(7.1s)
+(7.1s)
+(7.2s)
+(7.2s)
+(7.3s)
+(7.3s)
+(7.4s)
+(7.4s)
+(7.4s)
+(7.5s)
+(7.5s)
+(7.6s)
+(7.6s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                        GenerateMSBuildEditorConfigFileCore (7.7s) 
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                             XamlPreCompile (7.7s) 
+(7.8s)
+(7.8s)
+(7.9s)
+(7.9s)
+(8.0s)
+(8.0s)
+(8.1s)
+(8.1s)
+(8.2s)
+(8.2s)
+(8.3s)
+(8.3s)
+(8.3s)
+(8.4s)
+(8.4s)
+(8.5s)
+(8.5s)
+(8.6s)
+(8.6s)
+(8.7s)
+(8.7s)
+(8.8s)
+(8.8s)
+(8.9s)
+(8.9s)
+(9.0s)
+(9.0s)
+(9.0s)
+(9.1s)
+(9.1s)
+(9.2s)
+(9.2s)
+(9.3s)
+(9.3s)
+(9.4s)
+(9.4s)
+(9.5s)
+(9.5s)
+(9.6s)
+(9.6s)
+(9.7s)
+(9.7s)
+(9.8s)
+(9.8s)
+(9.8s)
+(9.9s)
+(9.9s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                            XamlPreCompile (10.0s) 
+(10.0s)
+(10.1s)
+(10.1s)
+(10.2s)
+(10.2s)
+(10.3s)
+(10.3s)
+(10.4s)
+(10.4s)
+(10.5s)
+(10.5s)
+(10.5s)
+(10.6s)
+(10.6s)
+(10.7s)
+(10.7s)
+(10.8s)
+(10.8s)
+(10.9s)
+(10.9s)
+(11.0s)
+(11.0s)
+(11.1s)
+(11.1s)
+(11.1s)
+(11.2s)
+(11.2s)
+(11.3s)
+(11.3s)
+(11.4s)
+(11.4s)
+(11.5s)
+(11.5s)
+(11.6s)
+(11.6s)
+(11.7s)
+(11.7s)
+(11.8s)
+(11.8s)
+(11.9s)
+(11.9s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64                                    _OnXamlPreCompileError (11.9s) 
+(12.0s)
+(12.0s)
+(12.1s)
+(12.1s)
+(12.2s)
+(12.2s)
+(12.3s)
+(12.3s)
+(12.4s)
+(12.4s)
+(12.5s)
+(12.5s)
+(12.6s)
+(12.6s)
+(12.7s)
+(12.7s)
+(12.8s)
+(12.8s)
+(12.8s)
+(12.9s)
+(12.9s)
+(13.0s)
+(13.0s)
+(13.1s)
+(13.1s)
+(13.2s)
+(13.2s)
+(13.3s)
+(13.3s)
+(13.4s)
+(13.4s)
+(13.5s)
+(13.5s)
+(13.6s)
+(13.6s)
+(13.7s)
+(13.7s)
+(13.7s)
+(13.8s)
+(13.8s)
+(13.9s)
+(13.9s)
+(14.0s)
+(14.0s)
+(14.1s)
+(14.1s)
+(14.2s)
+(14.2s)
+(14.3s)
+(14.3s)
+(14.4s)
+(14.4s)
+(14.5s)
+(14.5s)
+(14.6s)
+(14.6s)
+(14.6s)
+(14.7s)
+(14.7s)
+(14.8s)
+(14.8s)
+(14.9s)
+(14.9s)
+(15.0s)
+(15.0s)
+(15.1s)
+(15.1s)
+(15.2s)
+(15.2s)
+(15.3s)
+(15.3s)
+(15.4s)
+(15.4s)
+(15.4s)
+(15.5s)
+(15.5s)
+(15.6s)
+  BasicSuspension net10.0-windows10.0.26100.0 win-x64 failed with 2 error(s) and 17 warning(s) (15.6s)
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\SuspensionManager.cs(114,71): warning CS8625: Cannot convert null literal to non-nullable reference type.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\SuspensionManager.cs(168,103): warning CS8625: Cannot convert null literal to non-nullable reference type.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(29,18): error CS1061: 'App' does not contain a definition for 'Suspending' and no accessible extension method 'Suspending' accepting a first argument of type 'App' could be found (are you missing a using directive or an assembly reference?)  
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(25,16): warning CS8618: Non-nullable field 'rootFrameNavigationHelper' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\NavigationHelper.cs(68,16): warning CS8618: Non-nullable field '_pageKey' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\NavigationHelper.cs(68,16): warning CS8618: Non-nullable event 'LoadState' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the event as nullable.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\NavigationHelper.cs(68,16): warning CS8618: Non-nullable event 'SaveState' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the event as nullable.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\MainPage.xaml.cs(171,23): warning CS8618: Non-nullable property 'Name' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\MainPage.xaml.cs(92,37): warning CS8625: Cannot convert null literal to non-nullable reference type.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\MainPage.xaml.cs(95,41): warning CS8601: Possible null reference assignment.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\NavigationHelper.cs(118,78): warning CS8625: Cannot convert null literal to non-nullable reference type.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\SuspensionManager.cs(77,61): warning CS8600: Converting null literal or possible null value to non-nullable type.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(58,24): warning CS8600: Converting null literal or possible null value to non-nullable type.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\SuspensionManager.cs(126,37): warning CS8600: Converting null literal or possible null value to non-nullable type.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\SuspensionManager.cs(126,37): warning CS8601: Possible null reference assignment.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\SuspensionManager.cs(133,61): warning CS8600: Converting null literal or possible null value to non-nullable type.
+    C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\Common\SuspensionManager.cs(210,61): warning CS8600: Converting null literal or possible null value to non-nullable type.
+    C:\.tools\.nuget\packages\microsoft.windowsappsdk.winui\2.2.1\buildTransitive\Microsoft.UI.Xaml.Markup.Compiler.interop.targets(847,9): XamlCompiler warning WMC1509: No LocalAssembly parameter given during MarkupCompilePass2 for the currently building project.  This will likely cause type resolution errors for any types from the current project.
+    C:\.tools\.nuget\packages\microsoft.windowsappsdk.winui\2.2.1\buildTransitive\Microsoft.UI.Xaml.Markup.Compiler.interop.targets(847,9): Xaml Internal Error error WMC9999: Object reference not set to an instance of an object.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Build failed with 2 error(s) and 17 warning(s) in 20.1s
+BUILD_EXIT=1
+<exited with exit code 1>
+
+=== TURN 17 ===
+Two errors to fix. Let me check the suspension migration pattern and then fix App.xaml.cs:
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Get-MigrationPattern.ps1\" -Anchor lifecycle","description":"Get lifecycle migration pattern","initial_wait":15,"mode":"sync"}
+--- RESULT ---
+<a id="lifecycle"></a>
+## Application Lifecycle and Activation`OnLaunched`, `OnActivated`, `OnFileActivated`, etc. are replaced by the unified `AppInstance` / `AppLifecycle` activation model. See the [app lifecycle guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/applifecycle).```csharp
+using Microsoft.Windows.AppLifecycle;var args = AppInstance.GetCurrent().GetActivatedEventArgs();
+switch (args.Kind)
+{
+    case ExtendedActivationKind.File: /* ... */ break;
+    case ExtendedActivationKind.Protocol: /* ... */ break;
+    case ExtendedActivationKind.AppNotification: /* toast click */ break;
+}
+```Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
+<exited with exit code 0>
+
+=== TURN 18 ===
+`Application.Suspending` doesn't exist in WinUI 3. I'll use `Window.Closed` for state saving instead:
+
+--- TOOL: edit ---
+{"new_str":"using SDKTemplate.Common;\nusing System;\nusing Windows.ApplicationModel;\nusing Windows.Storage;\nusing Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;\n\nnamespace SDKTemplate\n{\n    /// <summary>\n    /// Provides application-specific behavior to supplement the default Application class.\n    /// </summary>\n    sealed partial class App : Application\n    {\n        private const string sessionStateFilename = \"_sessionState.xml\";\n        private RootFrameNavigationHelper? rootFrameNavigationHelper;\n\n        public static Window? MainWindow { get; private set; }\n\n        /// <summary>\n        /// Initializes the singleton application object.  This is the first line of authored code\n        /// executed, and as such is the logical equivalent of main() or WinMain().\n        /// </summary>\n        public App()\n        {\n            this.InitializeComponent();\n            SuspensionManager.KnownTypes.AddRange(new[] { typeof(ItemList), typeof(Item) });\n        }\n\n        /// <summary>\n        /// Invoked when the application is launched normally by the end user.  Other entry points\n        /// will be used such as when the application is launched to open a specific file.\n        /// </summary>\n        /// <param name=\"e\">Details about the launch request and process.</param>\n        protected override async void OnLaunched(LaunchActivatedEventArgs e)\n        {\n            var window = new global::BasicSuspension.MainWindow();\n            MainWindow = window;\n\n            // Save application state when the window is closed (WinUI 3 desktop equivalent of suspension).\n            window.Closed += async (_, _) => await SuspensionManager.SaveAsync();\n\n            Frame rootFrame = window.ContentFrame;\n            SuspensionManager.RegisterFrame(rootFrame, \"AppFrame\");\n\n            // Use the RootFrameNavigationHelper to respond to keyboard and mouse shortcuts.\n            this.rootFrameNavigationHelper = new RootFrameNavigationHelper(rootFrame);\n\n            rootFrame.NavigationFailed += OnNavigationFailed;\n\n            // If this is not the first time the app is run, then restore from the previous session.\n            StorageFile? file;\n            try\n            {\n                file = await ApplicationData.Current.LocalFolder.GetFileAsync(sessionStateFilename);\n            }\n            catch (Exception)\n            {\n                file = null;\n            }\n\n            if (file != null)\n            {\n                //Load state from previously suspended application\n                await SuspensionManager.RestoreAsync();\n            }\n\n            if (rootFrame.Content == null)\n            {\n                // When the navigation stack isn't restored navigate to the first page,\n                // configuring the new page by passing required information as a navigation\n                // parameter\n                rootFrame.Navigate(typeof(MainPage));\n            }\n\n            window.Activate();\n        }\n\n        /// <summary>\n        /// Invoked when Navigation to a certain page fails\n        /// </summary>\n        /// <param name=\"sender\">The Frame which failed navigation</param>\n        /// <param name=\"e\">Details about the navigation failure</param>\n        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)\n        {\n            throw new Exception(\"Failed to load Page \" + e.SourcePageType.FullName);\n        }\n    }\n}","old_str":"using SDKTemplate.Common;\nusing System;\nusing Windows.ApplicationModel;\nusing Windows.Storage;\nusing Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;\n\nnamespace SDKTemplate\n{\n    /// <summary>\n    /// Provides application-specific behavior to supplement the default Application class.\n    /// </summary>\n    sealed partial class App : Application\n    {\n        private const string sessionStateFilename = \"_sessionState.xml\";\n        private RootFrameNavigationHelper rootFrameNavigationHelper;\n\n        public static Window? MainWindow { get; private set; }\n\n        /// <summary>\n        /// Initializes the singleton application object.  This is the first line of authored code\n        /// executed, and as such is the logical equivalent of main() or WinMain().\n        /// </summary>\n        public App()\n        {\n            this.InitializeComponent();\n            SuspensionManager.KnownTypes.AddRange(new[] { typeof(ItemList), typeof(Item) });\n            this.Suspending += OnSuspending;\n        }\n\n        /// <summary>\n        /// Invoked when the application is launched normally by the end user.  Other entry points\n        /// will be used such as when the application is launched to open a specific file.\n        /// </summary>\n        /// <param name=\"e\">Details about the launch request and process.</param>\n        protected override async void OnLaunched(LaunchActivatedEventArgs e)\n        {\n            var window = new global::BasicSuspension.MainWindow();\n            MainWindow = window;\n\n            Frame rootFrame = window.ContentFrame;\n            SuspensionManager.RegisterFrame(rootFrame, \"AppFrame\");\n\n            // Use the RootFrameNavigationHelper to respond to keyboard and mouse shortcuts.\n            this.rootFrameNavigationHelper = new RootFrameNavigationHelper(rootFrame);\n\n            rootFrame.NavigationFailed += OnNavigationFailed;\n\n            // If this is not the first time the app is run, then restore from the previous session.\n            StorageFile file;\n            try\n            {\n                file = await ApplicationData.Current.LocalFolder.GetFileAsync(sessionStateFilename);\n            }\n            catch (Exception)\n            {\n                file = null;\n            }\n\n            if (file != null)\n            {\n                //Load state from previously suspended application\n                await SuspensionManager.RestoreAsync();\n            }\n\n            if (rootFrame.Content == null)\n            {\n                // When the navigation stack isn't restored navigate to the first page,\n                // configuring the new page by passing required information as a navigation\n                // parameter\n                rootFrame.Navigate(typeof(MainPage));\n            }\n\n            window.Activate();\n        }","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\App.xaml.cs"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs updated with changes.
+
+=== TURN 19 ===
+
+--- TOOL: powershell ---
+{"command":"cd C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension; $arch = $env:PROCESSOR_ARCHITECTURE; $Platform = if ($arch -eq 'AMD64') { 'x64' } else { $arch }; dotnet build -c Debug -p:Platform=$Platform 2>&1 | Select-String -Pattern \"error|warning|Build|failed|succeeded\" ; \"BUILD_EXIT=$LASTEXITCODE\"","description":"Build again after fixing Suspending event","initial_wait":120,"mode":"sync"}
+--- RESULT ---
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(97,9)
+: error CS8803: Top-level statements must precede namespace and type declarations. [C:\ado\win-dev-skills-benchmark\age
+nt-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(109,9
+): error CS0106: The modifier 'private' is not valid for this item [C:\ado\win-dev-skills-benchmark\agent-benchmark\res
+ults\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(117,5
+): error CS1022: Type or namespace definition, or end-of-file expected [C:\ado\win-dev-skills-benchmark\agent-benchmark
+\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(118,1
+): error CS1022: Type or namespace definition, or end-of-file expected [C:\ado\win-dev-skills-benchmark\agent-benchmark
+\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+C:\.tools\.nuget\packages\microsoft.windowsappsdk.winui\2.2.1\buildTransitive\Microsoft.UI.Xaml.Markup.Compiler.interop
+.targets(847,9): XamlCompiler warning WMC1509: No LocalAssembly parameter given during MarkupCompilePass2 for the curre
+ntly building project.  This will likely cause type resolution errors for any types from the current project. [C:\ado\w
+in-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+C:\.tools\.nuget\packages\microsoft.windowsappsdk.winui\2.2.1\buildTransitive\Microsoft.UI.Xaml.Markup.Compiler.interop
+.targets(847,9): Xaml Internal Error error WMC9999: Object reference not set to an instance of an object. [C:\ado\win-d
+ev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+Build FAILED.
+C:\.tools\.nuget\packages\microsoft.windowsappsdk.winui\2.2.1\buildTransitive\Microsoft.UI.Xaml.Markup.Compiler.interop
+.targets(847,9): XamlCompiler warning WMC1509: No LocalAssembly parameter given during MarkupCompilePass2 for the curre
+ntly building project.  This will likely cause type resolution errors for any types from the current project. [C:\ado\w
+in-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(97,9)
+: error CS8803: Top-level statements must precede namespace and type declarations. [C:\ado\win-dev-skills-benchmark\age
+nt-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(109,9
+): error CS0106: The modifier 'private' is not valid for this item [C:\ado\win-dev-skills-benchmark\agent-benchmark\res
+ults\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(117,5
+): error CS1022: Type or namespace definition, or end-of-file expected [C:\ado\win-dev-skills-benchmark\agent-benchmark
+\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs(118,1
+): error CS1022: Type or namespace definition, or end-of-file expected [C:\ado\win-dev-skills-benchmark\agent-benchmark
+\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+C:\.tools\.nuget\packages\microsoft.windowsappsdk.winui\2.2.1\buildTransitive\Microsoft.UI.Xaml.Markup.Compiler.interop
+.targets(847,9): Xaml Internal Error error WMC9999: Object reference not set to an instance of an object. [C:\ado\win-d
+ev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\BasicSuspension.csproj]
+    1 Warning(s)
+    5 Error(s)
+BUILD_EXIT=1
+<exited with exit code 1>
+
+=== TURN 20 ===
+There's a file structure issue. Let me view the current App.xaml.cs:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\App.xaml.cs"}
+--- RESULT ---
+1. using SDKTemplate.Common;
+2. using System;
+3. using Windows.ApplicationModel;
+4. using Windows.Storage;
+5. using Microsoft.UI.Xaml;
+6. using Microsoft.UI.Xaml.Controls;
+7. using Microsoft.UI.Xaml.Navigation;
+8. 
+9. namespace SDKTemplate
+10. {
+11.     /// <summary>
+12.     /// Provides application-specific behavior to supplement the default Application class.
+13.     /// </summary>
+14.     sealed partial class App : Application
+15.     {
+16.         private const string sessionStateFilename = "_sessionState.xml";
+17.         private RootFrameNavigationHelper? rootFrameNavigationHelper;
+18. 
+19.         public static Window? MainWindow { get; private set; }
+20. 
+21.         /// <summary>
+22.         /// Initializes the singleton application object.  This is the first line of authored code
+23.         /// executed, and as such is the logical equivalent of main() or WinMain().
+24.         /// </summary>
+25.         public App()
+26.         {
+27.             this.InitializeComponent();
+28.             SuspensionManager.KnownTypes.AddRange(new[] { typeof(ItemList), typeof(Item) });
+29.         }
+30. 
+31.         /// <summary>
+32.         /// Invoked when the application is launched normally by the end user.  Other entry points
+33.         /// will be used such as when the application is launched to open a specific file.
+34.         /// </summary>
+35.         /// <param name="e">Details about the launch request and process.</param>
+36.         protected override async void OnLaunched(LaunchActivatedEventArgs e)
+37.         {
+38.             var window = new global::BasicSuspension.MainWindow();
+39.             MainWindow = window;
+40. 
+41.             // Save application state when the window is closed (WinUI 3 desktop equivalent of suspension).
+42.             window.Closed += async (_, _) => await SuspensionManager.SaveAsync();
+43. 
+44.             Frame rootFrame = window.ContentFrame;
+45.             SuspensionManager.RegisterFrame(rootFrame, "AppFrame");
+46. 
+47.             // Use the RootFrameNavigationHelper to respond to keyboard and mouse shortcuts.
+48.             this.rootFrameNavigationHelper = new RootFrameNavigationHelper(rootFrame);
+49. 
+50.             rootFrame.NavigationFailed += OnNavigationFailed;
+51. 
+52.             // If this is not the first time the app is run, then restore from the previous session.
+53.             StorageFile? file;
+54.             try
+55.             {
+56.                 file = await ApplicationData.Current.LocalFolder.GetFileAsync(sessionStateFilename);
+57.             }
+58.             catch (Exception)
+59.             {
+60.                 file = null;
+61.             }
+62. 
+63.             if (file != null)
+64.             {
+65.                 //Load state from previously suspended application
+66.                 await SuspensionManager.RestoreAsync();
+67.             }
+68. 
+69.             if (rootFrame.Content == null)
+70.             {
+71.                 // When the navigation stack isn't restored navigate to the first page,
+72.                 // configuring the new page by passing required information as a navigation
+73.                 // parameter
+74.                 rootFrame.Navigate(typeof(MainPage));
+75.             }
+76. 
+77.             window.Activate();
+78.         }
+79. 
+80.         /// <summary>
+81.         /// Invoked when Navigation to a certain page fails
+82.         /// </summary>
+83.         /// <param name="sender">The Frame which failed navigation</param>
+84.         /// <param name="e">Details about the navigation failure</param>
+85.         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+86.         {
+87.             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+88.         }
+89.     }
+90. }
+91. 
+92.         /// <summary>
+93.         /// Invoked when Navigation to a certain page fails
+94.         /// </summary>
+95.         /// <param name="sender">The Frame which failed navigation</param>
+96.         /// <param name="e">Details about the navigation failure</param>
+97.         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+98.         {
+99.             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+100.         }
+101. 
+102.         /// <summary>
+103.         /// Invoked when application execution is being suspended.  Application state is saved
+104.         /// without knowing whether the application will be terminated or resumed with the contents
+105.         /// of memory still intact.
+106.         /// </summary>
+107.         /// <param name="sender">The source of the suspend request.</param>
+108.         /// <param name="e">Details about the suspend request.</param>
+109.         private async void OnSuspending(object sender, SuspendingEventArgs e)
+110.         {
+111.             var deferral = e.SuspendingOperation.GetDeferral();
+112. 
+113.             // Save application state and stop any background activity.
+114.             await SuspensionManager.SaveAsync();
+115.             deferral.Complete();
+116.         }
+117.     }
+118. }
+119. 
+
+=== TURN 21 ===
+There's leftover code after the class closing brace. Let me fix it:
+
+--- TOOL: edit ---
+{"new_str":"    }\n}\n","old_str":"    }\n}\n\n        /// <summary>\n        /// Invoked when Navigation to a certain page fails\n        /// </summary>\n        /// <param name=\"sender\">The Frame which failed navigation</param>\n        /// <param name=\"e\">Details about the navigation failure</param>\n        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)\n        {\n            throw new Exception(\"Failed to load Page \" + e.SourcePageType.FullName);\n        }\n\n        /// <summary>\n        /// Invoked when application execution is being suspended.  Application state is saved\n        /// without knowing whether the application will be terminated or resumed with the contents\n        /// of memory still intact.\n        /// </summary>\n        /// <param name=\"sender\">The source of the suspend request.</param>\n        /// <param name=\"e\">Details about the suspend request.</param>\n        private async void OnSuspending(object sender, SuspendingEventArgs e)\n        {\n            var deferral = e.SuspendingOperation.GetDeferral();\n\n            // Save application state and stop any background activity.\n            await SuspensionManager.SaveAsync();\n            deferral.Complete();\n        }\n    }\n}\n","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\App.xaml.cs"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension\App.xaml.cs updated with changes.
+
+=== TURN 22 ===
+
+--- TOOL: powershell ---
+{"command":"cd C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension; $arch = $env:PROCESSOR_ARCHITECTURE; $Platform = if ($arch -eq 'AMD64') { 'x64' } else { $arch }; dotnet build -c Debug -p:Platform=$Platform 2>&1 | Select-String -Pattern \"error|Build|failed|succeeded\"; \"BUILD_EXIT=$LASTEXITCODE\"","description":"Build after fixing App.xaml.cs structure","initial_wait":120,"mode":"sync"}
+--- RESULT ---
+Build succeeded.
+    0 Error(s)
+BUILD_EXIT=0
+<exited with exit code 0>
+
+=== TURN 23 ===
+Build succeeded. Now run the validator:
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Validate-UwpMigration.ps1\" -Target \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\"","description":"Run migration validator","initial_wait":120,"mode":"sync"}
+--- RESULT ---
+==> Validate-UwpMigration
+    Target : C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run51\000_BasicSuspension\app\BasicSuspension[PASS] Residue grep — 0 UWP-only API references in non-deferred .cs/.xaml/.csproj
+[PASS] No TODO[migrate-] markers remain in source
+[PASS] MIGRATION-MAPPING.md row count = 9 (matches seed)
+[PASS] MIGRATION-MAPPING.md — all Triage labels resolved
+[PASS] MIGRATION-MAPPING.md — no rows stuck at Status=copied
+[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency
+[PASS] Package.appxmanifest — all 5 image reference(s) resolvable under Assets/
+[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared
+[INFO] Running dotnet build (x64 Debug, -t:Rebuild) against BasicSuspension.csproj (~30-60s)...
+[PASS] dotnet build succeeded (56 warning(s), 0 WUI analyzer warning(s))
+[INFO] Smoke-launching app via Test-AppLaunch.ps1 (~10s settle)...
+[PASS] Smoke launch — app stayed alive after launch (pid 17892)
+[PASS] Visible-text fidelity — snapshotted labels/descriptions all still present
+
+==> Validate-UwpMigration: PASS
+<exited with exit code 0>
+
+=== TURN 24 ===
+Validator PASS! Let me check the DEFERRED warning and do a final confirmation:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run51\\000_BasicSuspension\\app\\BasicSuspension\\MIGRATION-DEFERRED.md"}
+--- RESULT ---
+1. # Deferred Files
+2. 
+3. Files in this list have a triage label of `defer` in MIGRATION-MAPPING.md and were
+4. skipped by Initialize-UwpMigration.ps1's mechanical pass. Each row references one or
+5. more PATTERNS.md anchors that describe the WinUI 3 equivalent — refer to that section
+6. (via `Get-MigrationPattern.ps1 -Anchor <id>`) before deciding the final disposition.
+7. 
+8. | File | Anchors |
+9. |---|---|
+10. | (none) | — |
+11. 
+
+=== TURN 25 ===
+The WARN is a benign false-positive — the deferred file shows `(none)` which correctly matches having no deferred rows. The validator reported **PASS**.
+
+## Summary
+
+The UWP BasicSuspension sample has been migrated to WinUI 3. Here's what changed:
+
+| File | Change |
+|---|---|
+| `App.xaml.cs` | Replaced `Window.Current` windowing with `MainWindow` static pattern; replaced `Application.Suspending` (not in WinUI 3) with `Window.Closed` for state saving |
+| `App.xaml` | Added `XamlControlsResources` for WinUI 3 control rendering |
+| `MainWindow.xaml.cs` | Removed auto-navigation (now driven by `App`), exposed `ContentFrame` property |
+| `MainPage.xaml.cs` | Removed `SystemNavigationManager.GetForCurrentView()` (not available in WinUI 3 desktop) |
+| `SubPage.xaml` | Added Back button for navigation (replaces system back button) |
+| `SubPage.xaml.cs` | Removed `SystemNavigationManager` usage; wired back button click handler |
+| `Package.appxmanifest` | Changed target to `Windows.Desktop`, added `rescap:runFullTrust`, fixed image asset references |
+
+The app builds cleanly and survived the smoke launch test ✅

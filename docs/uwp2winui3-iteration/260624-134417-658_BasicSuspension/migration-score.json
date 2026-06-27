@@ -1,0 +1,23 @@
+{
+  "scenario": "BasicSuspension",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 1,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true (window 'Basic Suspension C# Sample'), but the original app reached only its splash screen ('Windows platform sample') then crashed ~3-8s after launch (WER MoAppCrash, combase.dll, 0x80131500 managed exception) before MainPage's ListView rendered. Golden screenshot is splash-only; no live UWP feature visual/behavior was capturable for diffing.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "BasicSuspension",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_BasicSuspension.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_BasicSuspension.png",
+      "note": "Structural parity PASS (1/1 control, coverage 1.0). WinUI 3 UIA tree shows the full MainPage rendered on-screen: ListView 'list' with header 'Click on an item or click a button in the AppBar.' and Items 1-4, plus 'add' and 'reset' AppBarButtons, all isInvokable. uwp_responded=false because the original UWP app crashed at its splash screen before rendering any feature content (combase.dll 0x80131500) — no UWP behavior was demonstrable. winui_responded=true: all feature controls present and invokable. Pixel screenshots are blank due to environment capture limits (PrintWindow cannot capture WinUI3 DirectComposition; no interactive desktop for screen capture) — UIA is the authoritative evidence. No missing or dead controls, no behavioral regressions."
+    }
+  ]
+}

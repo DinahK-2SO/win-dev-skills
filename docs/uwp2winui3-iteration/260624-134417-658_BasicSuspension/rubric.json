@@ -1,0 +1,22 @@
+{
+  "scenario": "BasicSuspension",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\BasicSuspension\\cs",
+  "features": [
+    {
+      "number": 1,
+      "name": "BasicSuspension",
+      "pageClass": "MainPage",
+      "description": "Single-page app demonstrating UWP suspend/resume state preservation. The page shows a ListView (header 'Click on an item or click a button in the AppBar.') populated with items, plus a bottom CommandBar with 'add' and 'reset' AppBarButtons. Clicking an item navigates to a SubPage; suspension state (selected item / list contents) is saved and restored via SuspensionManager.",
+      "requiredControls": [
+        { "name": "list", "type": "ListView", "label": "Click on an item or click a button in the AppBar." }
+      ],
+      "expectedActions": [
+        { "target": "add", "type": "AppBarButton", "effect": "adds an item to the list" },
+        { "target": "reset", "type": "AppBarButton", "effect": "resets the list to its default items" },
+        { "target": "list item", "type": "ListViewItem", "effect": "navigates to SubPage for the clicked item" }
+      ],
+      "passCriteria": "MainPage renders the ListView with its header text and items, and the add/reset CommandBar buttons are present and wired. Item click navigates to SubPage. Suspend/resume preserves state."
+    }
+  ],
+  "notes": "Checklist extracted from source lists 1 scenario / 1 control (the ListView) / 0 declared actions; the add/reset buttons live in the page BottomAppBar/CommandBar and are captured separately. The ListView is the structural gate control."
+}
