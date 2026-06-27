@@ -1,0 +1,27 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The sample's own root namespace 'SDKTemplate' is never reconciled to the WinUI scaffold's project namespace, producing a cascade of build errors (CS0246 'SDKTemplate could not be found', CS0103 'App does not exist', WMC0909/WMC1111 x:Bind DataType cannot resolve local:Scenario). The dev-agent fixed it by hand across 3 failed build rounds and 33 edits.",
+      "evidence": "session-log.txt build rounds at lines 2354 (CS0246), 2749-2751 (CS0103 App), 2357-2358/3224-3225 (WMC0909/WMC1111); 33 SDKTemplate occurrences edited across MainPage.xaml(.cs), SampleConfiguration.cs, Scenario1/2.xaml(.cs).",
+      "skill_search": "grep 'SDKTemplate', 'RootNamespace', 'x:Class', 'xmlns:local', 'namespace' in SKILL.md, MIGRATION-PATTERNS.md, scripts/*.ps1",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 rewrites only Windows.UI.Xaml->Microsoft.UI.Xaml. Every Windows Universal Sample declares 'namespace SDKTemplate' (in MainPage, SampleConfiguration, every ScenarioN file, plus x:Class and xmlns:local in XAML), while the WinUI scaffold's App/MainWindow live in the project-name namespace. Nothing mechanical or documented reconciles the two.",
+      "proposed_fix": "Add a reconciliation step to Initialize-UwpMigration.ps1: detect the scaffold root namespace (from the scaffold App.xaml.cs / .csproj RootNamespace / target leaf), and rewrite the standalone 'SDKTemplate' token to that namespace across all copied .cs/.xaml (namespace decls, using directives, x:Class, xmlns:local) before the agent builds. Also document the reconciliation + accuracy-fix the 'only does the Windows.UI.Xaml rewrite' wording.",
+      "generalizes": "The 'SDKTemplate' namespace is a universal convention across the entire microsoft/Windows-universal-samples corpus these scenarios are drawn from, so this exact mismatch and its CS0246/CS0103/WMC0909 cascade recur in essentially every sample-based UWP->WinUI 3 migration."
+    },
+    {
+      "problem": "When the project is named after a WinRT type it consumes (Barometer, Compass, Accelerometer, Gyrometer, ...), the project root namespace shadows that type, producing CS0118 'X is a namespace but is used like a type'.",
+      "evidence": "session-log.txt lines 2354-2355 'error CS0118: Barometer is a namespace but is used like a type'; fixed at turns 28-30 with 'using BarometerSensor = Windows.Devices.Sensors.Barometer;' alias.",
+      "skill_search": "grep 'CS0118', 'collision', 'collide', 'alias', 'is a namespace but is used' in SKILL.md, MIGRATION-PATTERNS.md, scripts/*.ps1",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Sensor/device SDK samples name the project after the device type. The WinUI scaffold uses the project name as the root namespace, which then shadows the same-named WinRT type (e.g. Windows.Devices.Sensors.Barometer).",
+      "proposed_fix": "Add a 'Common build errors after the namespace rewrite' entry to MIGRATION-PATTERNS.md documenting CS0118 and the fix: alias the WinRT type ('using BarometerSensor = Windows.Devices.Sensors.Barometer;') or fully-qualify it, and apply the alias to field types, GetDefault(), and TypedEventHandler<> generic arguments.",
+      "generalizes": "Many UWP device/sensor samples (Barometer, Compass, Accelerometer, Gyrometer, Magnetometer, Pedometer, OrientationSensor, LightSensor) share this project-name == WinRT-type pattern, so the CS0118 collision recurs across the whole sensor sample family."
+    }
+  ]
+}

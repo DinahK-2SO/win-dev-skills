@@ -13,6 +13,8 @@ Steps:
 1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
+3c. Reconcile the sample's `SDKTemplate` root namespace to the scaffold's project namespace
+    (renames namespace decls, usings, x:Class, and xmlns:local) so the project compiles as one
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
 4b/4c. Per-file triage against unsupported-api-inventory.json + inline TODO injection
        (`// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — anchor-only, never an API name)
@@ -169,6 +171,51 @@ foreach ($f in $nsFiles) {
 $snapPath = Join-Path $Target '.fidelity-snapshot.json'
 ($snapshot | ConvertTo-Json -Depth 5) | Set-Content -LiteralPath $snapPath -Encoding UTF8
 Write-Host "    Snapshotted visible text from $($snapshot.Keys.Count) XAML file(s) -> .fidelity-snapshot.json"
+
+
+# ─── 3c. Reconcile the sample root namespace to the scaffold namespace ─────────
+# Every microsoft/Windows-universal-samples project declares `namespace SDKTemplate`
+# (MainPage, SampleConfiguration, every ScenarioN.xaml.cs, plus `x:Class="SDKTemplate.*"`
+# and `xmlns:local="using:SDKTemplate"` in the .xaml). The WinUI scaffold's App/MainWindow,
+# however, live in the *project-name* root namespace. Left unreconciled, the mismatch
+# cascades into a hard-to-read pile of build errors that an agent then fixes by hand over
+# several build rounds: CS0246 ("'SDKTemplate' could not be found"), CS0103 ("the name
+# 'App' does not exist" — App is in the project namespace, the page is in SDKTemplate),
+# and XamlCompiler WMC0909/WMC1111 (x:Bind DataType `local:Scenario` resolves against the
+# wrong namespace). Rewrite the standalone `SDKTemplate` token to the scaffold's root
+# namespace across every copied .cs/.xaml so the project compiles as one namespace.
+$rootNs = $null
+$appCs = Get-ChildItem -Path $Target -Recurse -File -Filter 'App.xaml.cs' -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch $excludePattern } | Select-Object -First 1
+if ($appCs) {
+    $m = [regex]::Match([System.IO.File]::ReadAllText($appCs.FullName), 'namespace\s+([A-Za-z_][\w.]*)')
+    if ($m.Success) { $rootNs = $m.Groups[1].Value }
+}
+if (-not $rootNs) {
+    $csproj = Get-ChildItem -Path $Target -Recurse -File -Filter '*.csproj' -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch $excludePattern } | Select-Object -First 1
+    if ($csproj) {
+        $rm = [regex]::Match([System.IO.File]::ReadAllText($csproj.FullName), '<RootNamespace>\s*([^<]+?)\s*</RootNamespace>')
+        if ($rm.Success) { $rootNs = $rm.Groups[1].Value }
+        else { $rootNs = [System.IO.Path]::GetFileNameWithoutExtension($csproj.Name) }
+    }
+}
+if ($rootNs -and $rootNs -ne 'SDKTemplate') {
+    $nsReconciled = 0
+    foreach ($f in $nsFiles) {
+        $orig = [System.IO.File]::ReadAllText($f.FullName)
+        $new = [regex]::Replace($orig, '\bSDKTemplate\b', $rootNs)
+        if ($new -ne $orig) {
+            [System.IO.File]::WriteAllText($f.FullName, $new)
+            $nsReconciled++
+        }
+    }
+    if ($nsReconciled -gt 0) {
+        Write-Host "    Reconciled sample namespace 'SDKTemplate' -> '$rootNs' in $nsReconciled .cs/.xaml file(s)"
+    }
+} elseif (-not $rootNs) {
+    Write-Warning "    Could not determine the scaffold root namespace; if the sample uses 'namespace SDKTemplate', rename it to the project namespace by hand (see MIGRATION-PATTERNS.md)."
+}
 
 
 # ─── 4a. Filter-prone class neutralization ────────────────────────────────────

@@ -1,0 +1,30 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied all sources and did the Windows.UI.Xaml->Microsoft.UI.Xaml rewrite; the build reached a compiling state and final parity scored 100/100." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log line 3706 '[PASS] dotnet build succeeded (4 warning(s), 0 WUI analyzer warning(s))' gated completion." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "It rewrites only the Windows.UI.Xaml->Microsoft.UI.Xaml namespace, but leaves the sample's own root namespace 'SDKTemplate' untouched while the WinUI scaffold's App/MainWindow live in the project-name namespace. The resulting mismatch is not reconciled by any mechanical step, so the agent had to fix it by hand across many files and several build rounds.", "suggested_tweak": "Add a reconciliation step that rewrites the standalone 'SDKTemplate' namespace token to the scaffold's root namespace across all copied .cs/.xaml (namespace decls, using directives, x:Class, xmlns:local) before the agent builds." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Barometer", "special_handling": "The project/root namespace is named after the sensor (Barometer), so the WinRT type 'Barometer' is shadowed by the project namespace, producing CS0118 'Barometer is a namespace but is used like a type'. Fixed with 'using BarometerSensor = Windows.Devices.Sensors.Barometer;' alias." }
+  ],
+  "errors_encountered": [
+    { "error": "error CS0118: 'Barometer' is a namespace but is used like a type (Scenario1_DataEvents.xaml.cs, Scenario2_Polling.xaml.cs)", "root_cause": "Project root namespace == WinRT type name (Barometer). Common in sensor/device SDK samples whose project is named after the device type they consume.", "fix": "Add 'using BarometerSensor = Windows.Devices.Sensors.Barometer;' alias (or fully-qualify) and use the alias for the field type, GetDefault(), and TypedEventHandler<...> generic args." },
+    { "error": "error CS0246: The type or namespace name 'SDKTemplate' could not be found (MainWindow.xaml.cs)", "root_cause": "Sample files declare 'namespace SDKTemplate' while the scaffold's App/MainWindow are in the project-name namespace; references to SDKTemplate.* don't resolve.", "fix": "Reconcile all files to one namespace (rename SDKTemplate -> project root namespace across .cs and .xaml)." },
+    { "error": "error CS0103: The name 'App' does not exist in the current context (Scenario1_DataEvents.xaml.cs)", "root_cause": "Scenario pages were still in 'namespace SDKTemplate' but the scaffold's App class is in the project-name namespace, so 'App.MainWindow' could not be resolved.", "fix": "Move scenario pages into the project root namespace (same SDKTemplate reconciliation)." },
+    { "error": "XamlCompiler error WMC0909: Cannot resolve DataType local:Scenario / WMC1111: DataTemplates containing x:Bind need a DataType (MainPage.xaml)", "root_cause": "x:Class/xmlns:local in the copied XAML still pointed at 'SDKTemplate', so the x:Bind DataType 'local:Scenario' resolved against the wrong namespace.", "fix": "Update x:Class and xmlns:local='using:SDKTemplate' to the project root namespace in every copied .xaml at the same time as the .cs files." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "session-log.txt turns 26-45 (build rounds at lines 2412, 2799, 3280; success at 3679)", "symptom": "Three consecutive failed builds, each surfacing a new facet of the same namespace mismatch (CS0118, then CS0246/CS0103, then x:Bind WMC errors). 33 separate SDKTemplate edits.", "turns_or_retries": "~16 turns / 3 failed build rounds", "root_cause": "Two compounding, fully generalizable issues left unhandled by the bootstrap: (1) sample root namespace 'SDKTemplate' not reconciled to the scaffold's project namespace; (2) project name collides with the WinRT type it uses.", "how_resolved": "Agent hand-edited namespace decls, usings, x:Class and xmlns:local across MainPage, SampleConfiguration and both scenario files, and added a sensor-type alias.", "preventable_by": "(1) Initialize-UwpMigration.ps1 reconciling the SDKTemplate namespace to the scaffold root namespace automatically; (2) a documented MIGRATION-PATTERNS.md entry for the project-name vs WinRT-type CS0118 collision with the alias fix." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 screenshots captured blank (PrintWindow can't grab DirectComposition; GDI capture fails in non-interactive session).", "workaround": "Scoring confirmed fidelity via the live UIA tree instead. Eval-tool limitation, not a migration defect; out of scope for the migration skill." }
+  ]
+}

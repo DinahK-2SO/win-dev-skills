@@ -1,0 +1,14 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "warning CS8604: Possible null reference argument for parameter 'uriString' in Uri(string) (MainPage.xaml.cs:122).",
+      "evidence": "build-output.txt lines 8-9; non-fatal warning, build succeeded.",
+      "covered_clearly_at": "N/A — a benign nullable-reference warning, not a parity or build-blocking issue; carried over from the sample's footer-link code.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A single non-blocking nullable warning is not generalizable, did not affect score or build success, and a capable model would either ignore or null-guard it on a re-run. No skill change warranted."
+    }
+  ]
+}

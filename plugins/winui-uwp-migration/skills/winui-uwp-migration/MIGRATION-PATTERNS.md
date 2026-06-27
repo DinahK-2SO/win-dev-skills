@@ -1,6 +1,6 @@
 # UWP → WinUI 3 Replacement Patterns
 
-Reference for API replacements and patterns that the `Initialize-UwpMigration.ps1` bootstrap doesn't (and can't) handle automatically — the script only does the bulk `Windows.UI.Xaml → Microsoft.UI.Xaml` namespace rewrite. Everything below requires code-level adaptation: dialog shape changes, threading model, windowing, lifecycle, resources, controls, and storage. Use this file when fixing build errors or runtime issues during Step 4.
+Reference for API replacements and patterns that the `Initialize-UwpMigration.ps1` bootstrap doesn't (and can't) handle automatically — the script does the bulk `Windows.UI.Xaml → Microsoft.UI.Xaml` namespace rewrite and reconciles the sample's `SDKTemplate` root namespace to the scaffold's project namespace. Everything below requires code-level adaptation: dialog shape changes, threading model, windowing, lifecycle, resources, controls, and storage. Use this file when fixing build errors or runtime issues during Step 4.
 
 ## Common build errors after the namespace rewrite
 
@@ -26,6 +26,28 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 ```
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
+
+### `CS0118: 'X' is a namespace but is used like a type`
+
+Sensor/device SDK samples are usually named after the very WinRT type they consume (e.g. project `Barometer` uses `Windows.Devices.Sensors.Barometer`; the same happens for `Compass`, `Accelerometer`, `Gyrometer`, `Magnetometer`, `Pedometer`, `OrientationSensor`, `LightSensor`, …). The WinUI scaffold uses the **project name as the root namespace**, so that namespace **shadows** the same-named WinRT type — `Barometer.GetDefault()` now binds to the *namespace* `Barometer`, not the type, and you get `CS0118 'Barometer' is a namespace but is used like a type`.
+
+Fix by aliasing (cleanest — keeps the rest of the file unchanged) or fully qualifying the WinRT type, and apply it everywhere the type appears, including generic arguments:
+
+```csharp
+using BarometerSensor = Windows.Devices.Sensors.Barometer;
+// ...
+private BarometerSensor? sensor;
+sensor = BarometerSensor.GetDefault();
+sensor!.ReadingChanged += new TypedEventHandler<BarometerSensor, BarometerReadingChangedEventArgs>(ReadingChanged);
+```
+
+Do **not** rename the project/root namespace to dodge this — the alias is local and safe; renaming the namespace ripples through `x:Class`/`xmlns:local` and is unnecessary.
+
+### `CS0246 'SDKTemplate' could not be found` / `CS0103 'App' does not exist` / `WMC0909`–`WMC1111` x:Bind DataType — namespace mismatch
+
+Every Windows Universal Sample declares `namespace SDKTemplate` (in `MainPage`, `SampleConfiguration.cs`, every `ScenarioN.xaml.cs`, plus `x:Class="SDKTemplate.*"` and `xmlns:local="using:SDKTemplate"` in the `.xaml`), while the WinUI scaffold's `App`/`MainWindow` live in the **project-name** root namespace. If the two are not reconciled, the same mismatch surfaces as several different errors: `CS0246` (a scaffold file references `SDKTemplate`), `CS0103 'App'` (a page in `SDKTemplate` can't see `App` in the project namespace), and `WMC0909`/`WMC1111` (a DataTemplate `x:Bind` `DataType="local:Scenario"` resolves against the wrong namespace).
+
+`Initialize-UwpMigration.ps1` now reconciles this automatically (renames the `SDKTemplate` token to the scaffold root namespace across all copied `.cs`/`.xaml`). If you still hit any of these errors — e.g. the bootstrap couldn't determine the scaffold namespace, or the sample uses a non-`SDKTemplate` shared namespace — fix it in **one pass**: pick a single namespace (the project root namespace) and apply it to every `namespace` declaration, every `using`, every `x:Class`, and every `xmlns:local="using:…"` across both `.cs` and `.xaml` before rebuilding. Doing it piecemeal just re-triggers the next error in the cascade.
 
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 

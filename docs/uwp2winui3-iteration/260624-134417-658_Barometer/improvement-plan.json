@@ -1,0 +1,30 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Sample root namespace 'SDKTemplate' is never reconciled to the WinUI scaffold's project namespace, cascading into CS0246 / CS0103 / WMC0909 / WMC1111 build errors that the dev-agent fixed by hand over 3 failed build rounds and 33 edits.",
+      "evidence": "session-log.txt build rounds at lines 2412, 2799, 3280 (success 3679); errors at 2354 (CS0246), 2749-2751 (CS0103 App), 2357-2358/3224-3225 (WMC0909/WMC1111).",
+      "root_cause": "Initialize-UwpMigration.ps1 rewrote only Windows.UI.Xaml->Microsoft.UI.Xaml; the sample keeps 'namespace SDKTemplate' while the scaffold App/MainWindow are in the project-name namespace.",
+      "tier": 1,
+      "change": "Added step 3c to Initialize-UwpMigration.ps1: detect the scaffold root namespace (from App.xaml.cs, then .csproj RootNamespace/name) and rewrite the standalone 'SDKTemplate' token to it across all copied .cs/.xaml (namespace decls, usings, x:Class, xmlns:local) before the agent builds. Updated the script docstring and the MIGRATION-PATTERNS.md intro for accuracy, and documented the diagnosis/manual backstop.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "The migrated project compiles as a single namespace out of the bootstrap; the SDKTemplate-mismatch error cascade no longer appears, eliminating ~3 build rounds of thrash.",
+      "falsifiable_check": "On a re-run of any SDKTemplate-based sample: `Select-String -Pattern '\\bSDKTemplate\\b'` over the migrated tree returns 0 matches, and the first build shows no CS0246 'SDKTemplate', CS0103 'App', or WMC0909/WMC1111 errors."
+    },
+    {
+      "problem": "When the project is named after a WinRT type it consumes (Barometer, Compass, ...), the root namespace shadows that type, producing CS0118 'X is a namespace but is used like a type'.",
+      "evidence": "session-log.txt lines 2354-2355 (CS0118 'Barometer'); fixed at turns 28-30 with a 'using BarometerSensor = ...' alias.",
+      "root_cause": "Sensor/device samples name the project after the WinRT type; the scaffold uses the project name as the root namespace, shadowing the type.",
+      "tier": 3,
+      "change": "Added a 'CS0118: X is a namespace but is used like a type' entry to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' with the alias / fully-qualify fix (including TypedEventHandler<> generic args), and a note not to rename the project namespace to dodge it.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent recognizes the collision immediately and applies the alias in one step instead of trial-and-error.",
+      "falsifiable_check": "On a re-run of a sensor/device sample whose name matches its WinRT type, CS0118 is resolved in a single edit (alias added) with no repeated build attempts on the same error."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/eval limitations recorded for honesty only (NOT migration-skill issues): blank WinUI 3 screenshots from winapp PrintWindow/GDI capture, and the opaque UWP CoreWindow (ApplicationFrameHost) that blocks title-driven UWP automation. These belong to the evaluation tooling/environment and must not be 'fixed' in the migration skill."
+  ]
+}

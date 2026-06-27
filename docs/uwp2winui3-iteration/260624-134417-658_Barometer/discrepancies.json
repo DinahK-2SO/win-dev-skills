@@ -1,0 +1,14 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Data Events scenario (Enable/Disable, hPa output, status)", "status": "pass", "reason": "Full control coverage 2/2; description, 'hPa: No data', and 'No barometer found' status match UWP.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Polling scenario (Get Data, hPa output)", "status": "pass", "reason": "Full control coverage 1/1; description and output match UWP; WinUI nav works.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Faithful migration, 100/100, no defects. All recorded discrepancies are eval-tool/hardware limitations (blank WinUI screenshots, no barometer sensor, opaque UWP CoreWindow), not migration defects. Improvement opportunity is build-time thrash on namespace reconciliation and a project-name/WinRT-type collision."
+}
