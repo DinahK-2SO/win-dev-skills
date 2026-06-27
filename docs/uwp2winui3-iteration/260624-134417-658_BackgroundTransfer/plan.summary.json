@@ -1,0 +1,14 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: skip legacy AssemblyInfo.cs at copy time so SDK-auto-generated assembly attributes no longer collide (fixes CS0579 duplicate-attribute build failures that recur on every UWP sample).",
+    "MIGRATION-PATTERNS.md: add CS0579 'Duplicate ...Attribute' build-error first-aid entry (delete the legacy AssemblyInfo.cs; GenerateAssemblyInfo=false only when the file has attributes worth keeping) as a backstop."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

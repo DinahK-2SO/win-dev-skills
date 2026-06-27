@@ -75,12 +75,22 @@ $patterns = @(
 $srcExcludeDirs = @('bin', 'obj', '.vs', '.git', '.github', '.copilot', 'packages', 'node_modules')
 $srcExcludePattern = '\\(' + ($srcExcludeDirs -join '|') + ')\\'
 
+# Never copy a legacy AssemblyInfo.cs (typically Properties\AssemblyInfo.cs, and one per
+# sub-project in a multi-project sample). It carries [assembly: AssemblyTitle/Version/
+# Company/Product/...] attributes. SDK-style projects auto-generate those same attributes
+# (GenerateAssemblyInfo defaults to true), so copying the legacy file in collides with the
+# generated ones and the build fails with CS0579 "Duplicate '...Attribute' attribute".
+# The SDK regenerates equivalents, so skipping the file is the clean fix (mirrors the
+# bin/obj skip above that prevents CS0101 duplicate-type errors).
+$srcExcludeNames = @('assemblyinfo.cs')
+
 $copied = New-Object System.Collections.Generic.List[string]
 
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     if (('\' + $rel) -match $srcExcludePattern) { return $false }
     $name = $_.Name.ToLowerInvariant()
+    if ($srcExcludeNames -contains $name) { return $false }
     $match = $false
     foreach ($ext in $patterns) {
         if ($name.EndsWith($ext)) { $match = $true; break }

@@ -1,0 +1,21 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "A rebuild piped through `dotnet build ... | Where-Object { $_ -match 'error|warning...' }` appeared to hang ~8 minutes; the agent had to stop the shell and re-run unfiltered.",
+      "evidence": "session-log.txt lines 7016-7052 (shellId 15 'still running' polled repeatedly, then stop_powershell + re-run without filter at line 7052).",
+      "covered_clearly_at": "SKILL.md lines 141-142 — a dedicated callout: 'do not pipe dotnet build/run output through a filter like Where-Object { $_ -match \"error|warning|success|failed\" }... either (a) run sync, or (b) leave output unfiltered, or (c) append an exit sentinel'.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already warns about exactly this filtering pitfall and lists three correct alternatives prominently. A capable model on re-run that follows the existing callout (run unfiltered or place the sentinel outside the filter) avoids the hang with no skill change."
+    },
+    {
+      "problem": "CA1416 platform-compatibility warnings and CS8612/CS8625 nullability warnings throughout the migrated code (1090 warnings).",
+      "evidence": "build-output.txt (many CA1416 lines); session-log line 7264 '[PASS] dotnet build succeeded (1090 warning(s), 0 WUI analyzer warning(s))'.",
+      "covered_clearly_at": "Validate-UwpMigration.ps1 build healthcheck only gates on WUI analyzer warnings and build errors (line 437-468); non-WUI warnings are explicitly tolerated by design.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "These warnings are non-blocking and expected when WinRT APIs are called from a desktop TFM; the build and all 7 features passed. The validator intentionally does not fail on them, so no skill edit is warranted."
+    }
+  ]
+}

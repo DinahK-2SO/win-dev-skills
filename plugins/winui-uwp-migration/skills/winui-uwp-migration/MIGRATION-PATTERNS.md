@@ -50,6 +50,20 @@ Get-ChildItem -Path $Target -Recurse -Directory -Include bin,obj |
 
 Generated sources never belong in source control or the migrated tree — only `.xaml/.cs/.resw/.appxmanifest`/assets are real inputs.
 
+### `CS0579: Duplicate '…Attribute' attribute` (e.g. `AssemblyCompany`, `AssemblyVersion`, `AssemblyTitle`)
+
+If the build fails with a handful of `CS0579` errors naming `System.Reflection.Assembly*Attribute`, the cause is a **legacy `Properties\AssemblyInfo.cs`** that was copied from the UWP source. UWP projects (and *each* sub-project of a multi-project sample) ship an `AssemblyInfo.cs` carrying `[assembly: AssemblyTitle]`, `[assembly: AssemblyVersion]`, `[assembly: AssemblyCompany]`, etc. SDK-style projects **auto-generate those same attributes** (`GenerateAssemblyInfo` defaults to `true`), so the two definitions collide.
+
+Fix: **delete the legacy `AssemblyInfo.cs`** — the SDK regenerates equivalents, and the file holds no app logic (`Initialize-UwpMigration.ps1` now skips it at copy time, but remove any that pre-date the fix or were copied/authored by hand):
+
+```powershell
+Get-ChildItem -Path $Target -Recurse -File -Filter AssemblyInfo.cs |
+    Where-Object { $_.FullName -notmatch '\\(\.uwp-source)\\' } |
+    Remove-Item -Force
+```
+
+Only if the original `AssemblyInfo.cs` carried attributes you must keep (rare — e.g. `InternalsVisibleTo`) set `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>` instead and preserve the file; otherwise prefer deleting it.
+
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).

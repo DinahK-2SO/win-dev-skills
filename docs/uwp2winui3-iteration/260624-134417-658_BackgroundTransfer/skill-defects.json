@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "First build failed with 6x CS0579 'Duplicate AssemblyCompany/Configuration/FileVersion/Product/Title/Version attribute' errors.",
+      "evidence": "session-log.txt line 6850-6884 (Build failed with 6 error(s)); the duplicate source was Tasks\\Properties\\AssemblyInfo.cs (viewed at log lines 6977-7007).",
+      "skill_search": "grepped winui-uwp-migration for 'AssemblyInfo', 'GenerateAssemblyInfo', 'CS0579', 'Duplicate.*attribute' — zero hits in SKILL.md, MIGRATION-PATTERNS.md, and all scripts.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 copies every *.cs verbatim, including legacy Properties\\AssemblyInfo.cs which carries [assembly: AssemblyTitle/Version/...] attributes. SDK-style projects auto-generate the same attributes (GenerateAssemblyInfo defaults to true), so the two collide → CS0579.",
+      "proposed_fix": "Tier 1: have Initialize-UwpMigration.ps1 skip AssemblyInfo.cs files at copy time (same rationale as the existing bin/obj skip that prevents CS0101) — the SDK regenerates them. Tier 3 backstop: add a CS0579 entry to the MIGRATION-PATTERNS.md build-error first-aid section documenting the duplicate-AssemblyInfo cause and the delete-the-file / GenerateAssemblyInfo=false fix, for any AssemblyInfo.cs that pre-dates the script fix or was copied manually.",
+      "generalizes": "Essentially every legacy UWP project (and every sub-project of a multi-project UWP sample) ships a Properties\\AssemblyInfo.cs with assembly-level attributes. SDK-style WinUI 3 projects always auto-generate those attributes, so this exact CS0579 collision recurs on any UWP→WinUI 3 migration that copies source verbatim."
+    }
+  ]
+}

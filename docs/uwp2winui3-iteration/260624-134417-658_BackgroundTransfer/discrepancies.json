@@ -1,0 +1,31 @@
+{
+  "scenario": "BackgroundTransfer",
+  "discrepancies": [
+    {
+      "scenario": "Recoverable Errors",
+      "type": "false_negative_structural",
+      "control": "TextBox (PlaceholderText \"1234\")",
+      "severity": "none",
+      "detail": "Control lives inside ReauthorizeDialog ContentDialog (shown on URL expiry). Present in migrated Scenario6_RecoverableErrors.xaml. Absent from static UIA tree because the dialog is not shown at rest, identical to UWP. Not a defect."
+    },
+    {
+      "scenario": "Download Reordering",
+      "type": "false_negative_structural",
+      "control": "Button \"Make Current\"",
+      "severity": "none",
+      "detail": "Per-item button inside the pending-transfers ListView DataTemplate, wired Click=MakeCurrent_Click in migrated Scenario7_DownloadReordering.xaml. Not instantiated with an empty download collection, identical to UWP at rest. Not a defect."
+    },
+    {
+      "scenario": "(multiple)",
+      "type": "behavioral_gated",
+      "control": "download/upload start actions",
+      "severity": "none",
+      "detail": "noop on invoke because the sample server (http://localhost/BackgroundTransferSample) is not running and per-download controls need an active transfer. UWP behaves identically; UWP controls could not be actuated (CoreWindow UIA not enumerable), so no control is provably dead in WinUI vs UWP."
+    }
+  ],
+  "environment_limitations": [
+    "UWP CoreWindow UIA not enumerable: title-driven nav + per-control actuation of the original app impossible; UWP golden is the single initial frame captured 7x.",
+    "WinUI 3 DirectComposition not captured by PrintWindow and no interactive desktop for screen capture; WinUI fidelity verified via UIA tree (real control bounds, text, default values)."
+  ],
+  "genuine_defects": []
+}

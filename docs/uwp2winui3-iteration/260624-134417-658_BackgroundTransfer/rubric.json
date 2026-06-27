@@ -1,0 +1,28 @@
+{
+  "scenario": "BackgroundTransfer",
+  "feature": "BackgroundTransfer",
+  "uwp_ground_truth": {
+    "launched": true,
+    "windowTitle": "BackgroundTransfer C#",
+    "pid": 20512,
+    "configuration": "Release",
+    "sdk": "10.0.26100.0"
+  },
+  "grading_dimensions": ["structural_coverage", "visual_fidelity", "behavioral_fidelity"],
+  "verdict_rule": "pass = full structural coverage + faithful layout/defaults + no behavioral regression vs UWP; partial = recognizable but a real control/behavior gap; fail = dropped/blank/non-functional",
+  "scenarios": [
+    { "n": 1, "title": "File Download", "controls": 8, "actions": ["Start Download", "Start High Priority Download", "Pause All", "Resume All", "Cancel All"] },
+    { "n": 2, "title": "File Upload", "controls": 5, "actions": ["Start Upload", "Start Multipart Upload", "Cancel All"] },
+    { "n": 3, "title": "Completion Notifications", "controls": 4, "actions": ["Start three downloads and show toast on completion", "Start three downloads and update tile on completion"] },
+    { "n": 4, "title": "Completion Groups", "controls": 2, "actions": ["Start ten downloads in a completion group"] },
+    { "n": 5, "title": "Random Access Downloads", "controls": 8, "actions": ["Start", "Pause", "Resume", "Seek"] },
+    { "n": 6, "title": "Recoverable Errors", "controls": 5, "actions": ["Start"], "deferred_display": ["ReauthorizeDialog NumericPin TextBox (placeholder 1234)"] },
+    { "n": 7, "title": "Download Reordering", "controls": 4, "actions": ["Start Download", "Make Current"], "deferred_display": ["per-item 'Make Current' button in pending-transfers ListView DataTemplate"] }
+  ],
+  "caveats": {
+    "uwp_uia_enumerable": false,
+    "uwp_behavioral_baseline": false,
+    "winui_screenshot_capturable": false,
+    "winui_verified_via": "UIA tree (control bounds, text, default values)"
+  }
+}

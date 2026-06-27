@@ -1,0 +1,28 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Build failed with 6x CS0579 'Duplicate AssemblyCompany/Version/Title/... attribute' errors because the UWP source's legacy Properties\\AssemblyInfo.cs was copied into an SDK-style project that auto-generates the same assembly attributes.",
+      "evidence": "lessons.json errors_encountered[0]; skill-defects.json items[0]; session-log.txt lines 6850-6884 (build failed) and 6977-7007 (the offending Tasks\\Properties\\AssemblyInfo.cs).",
+      "root_cause": "Initialize-UwpMigration.ps1 copies every *.cs verbatim, including legacy AssemblyInfo.cs; SDK-style projects set GenerateAssemblyInfo=true by default, so the copied [assembly: ...] attributes duplicate the generated ones.",
+      "tier": 1,
+      "change": "Add a name-based copy exclusion so the bootstrap never copies AssemblyInfo.cs (mirrors the existing bin/obj directory skip that prevents CS0101). The SDK regenerates equivalent attributes.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Migrated trees no longer contain a legacy AssemblyInfo.cs, so the first dotnet build does not emit CS0579 duplicate-attribute errors — eliminating one whole build-failure round-trip.",
+      "falsifiable_check": "On a re-run of any UWP sample that has Properties\\AssemblyInfo.cs, the migrated project's first `dotnet build` produces 0 CS0579 errors and Test-Path on any copied AssemblyInfo.cs returns false."
+    },
+    {
+      "problem": "Same as above — backstop for AssemblyInfo.cs that pre-dates the script fix or is hand-copied/authored after bootstrap.",
+      "evidence": "skill-defects.json items[0] proposed_fix; grep of the skill confirmed CS0579/AssemblyInfo were entirely absent before this change.",
+      "root_cause": "Agents sometimes re-introduce or hand-copy AssemblyInfo.cs after the bootstrap step; without documented first-aid they waste a turn diagnosing CS0579.",
+      "tier": 3,
+      "change": "Add a 'CS0579: Duplicate ...Attribute' entry to the MIGRATION-PATTERNS.md build-error first-aid section, explaining the legacy-AssemblyInfo cause and the delete-the-file (preferred) / GenerateAssemblyInfo=false (rare) fix.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "When CS0579 still occurs (file slipped past the script), the agent immediately deletes the offending AssemblyInfo.cs instead of guessing.",
+      "falsifiable_check": "On a re-run that hits CS0579, the agent resolves it in a single delete step (grep for 'CS0579' in MIGRATION-PATTERNS.md returns the new section)."
+    }
+  ],
+  "deferred_to_human": []
+}

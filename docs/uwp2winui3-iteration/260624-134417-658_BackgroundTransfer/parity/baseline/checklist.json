@@ -1,0 +1,654 @@
+{
+  "featureName": "BackgroundTransfer",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\BackgroundTransfer\\cs",
+  "generated": "2026-06-27T09:41:44.5589297+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "File Download",
+      "class": "Scenario1_Download",
+      "slug": "File_Download",
+      "screenshot": "01_File_Download.png",
+      "controls": [
+        {
+          "name": "serverAddressField",
+          "type": "TextBox",
+          "label": "http://localhost/BackgroundTransferSample/download.aspx",
+          "events": []
+        },
+        {
+          "name": "fileNameField",
+          "type": "TextBox",
+          "label": "DownloadedFile.txt",
+          "events": []
+        },
+        {
+          "name": "StartDownloadButton",
+          "type": "Button",
+          "label": "Start Download",
+          "events": []
+        },
+        {
+          "name": "StartHighPriorityDownloadButton",
+          "type": "Button",
+          "label": "Start High Priority Download",
+          "events": []
+        },
+        {
+          "name": "PauseAllButton",
+          "type": "Button",
+          "label": "Pause All",
+          "events": []
+        },
+        {
+          "name": "ResumeAllButton",
+          "type": "Button",
+          "label": "Resume All",
+          "events": []
+        },
+        {
+          "name": "CancelAllButton",
+          "type": "Button",
+          "label": "Cancel All",
+          "events": []
+        },
+        {
+          "name": "outputField",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start Download",
+          "alt": "StartDownloadButton",
+          "type": "Button",
+          "label": "Start Download",
+          "name": "StartDownloadButton",
+          "event": ""
+        },
+        {
+          "target": "Start High Priority Download",
+          "alt": "StartHighPriorityDownloadButton",
+          "type": "Button",
+          "label": "Start High Priority Download",
+          "name": "StartHighPriorityDownloadButton",
+          "event": ""
+        },
+        {
+          "target": "Pause All",
+          "alt": "PauseAllButton",
+          "type": "Button",
+          "label": "Pause All",
+          "name": "PauseAllButton",
+          "event": ""
+        },
+        {
+          "target": "Resume All",
+          "alt": "ResumeAllButton",
+          "type": "Button",
+          "label": "Resume All",
+          "name": "ResumeAllButton",
+          "event": ""
+        },
+        {
+          "target": "Cancel All",
+          "alt": "CancelAllButton",
+          "type": "Button",
+          "label": "Cancel All",
+          "name": "CancelAllButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "serverAddressField",
+            "type": "TextBox"
+          },
+          {
+            "name": "fileNameField",
+            "type": "TextBox"
+          },
+          {
+            "name": "outputField",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "File Upload",
+      "class": "Scenario2_Upload",
+      "slug": "File_Upload",
+      "screenshot": "02_File_Upload.png",
+      "controls": [
+        {
+          "name": "serverAddressField",
+          "type": "TextBox",
+          "label": "http://localhost/BackgroundTransferSample/Upload.aspx",
+          "events": []
+        },
+        {
+          "name": "StartUploadButton",
+          "type": "Button",
+          "label": "Start Upload",
+          "events": []
+        },
+        {
+          "name": "StartMultipartUploadButton",
+          "type": "Button",
+          "label": "Start Multipart Upload",
+          "events": []
+        },
+        {
+          "name": "CancelAllButton",
+          "type": "Button",
+          "label": "Cancel All",
+          "events": []
+        },
+        {
+          "name": "outputField",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start Upload",
+          "alt": "StartUploadButton",
+          "type": "Button",
+          "label": "Start Upload",
+          "name": "StartUploadButton",
+          "event": ""
+        },
+        {
+          "target": "Start Multipart Upload",
+          "alt": "StartMultipartUploadButton",
+          "type": "Button",
+          "label": "Start Multipart Upload",
+          "name": "StartMultipartUploadButton",
+          "event": ""
+        },
+        {
+          "target": "Cancel All",
+          "alt": "CancelAllButton",
+          "type": "Button",
+          "label": "Cancel All",
+          "name": "CancelAllButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "serverAddressField",
+            "type": "TextBox"
+          },
+          {
+            "name": "outputField",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Completion Notifications",
+      "class": "Scenario3_Notifications",
+      "slug": "Completion_Notifications",
+      "screenshot": "03_Completion_Notifications.png",
+      "controls": [
+        {
+          "name": "serverAddressField",
+          "type": "TextBox",
+          "label": "http://localhost/BackgroundTransferSample/notifications.aspx",
+          "events": []
+        },
+        {
+          "name": "ToastNotificationButton",
+          "type": "Button",
+          "label": "Start three downloads and show toast on completion",
+          "events": []
+        },
+        {
+          "name": "TileNotificationButton",
+          "type": "Button",
+          "label": "Start three downloads and update tile on completion",
+          "events": []
+        },
+        {
+          "name": "outputField",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start three downloads and show toast on completion",
+          "alt": "ToastNotificationButton",
+          "type": "Button",
+          "label": "Start three downloads and show toast on completion",
+          "name": "ToastNotificationButton",
+          "event": ""
+        },
+        {
+          "target": "Start three downloads and update tile on completion",
+          "alt": "TileNotificationButton",
+          "type": "Button",
+          "label": "Start three downloads and update tile on completion",
+          "name": "TileNotificationButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "serverAddressField",
+            "type": "TextBox"
+          },
+          {
+            "name": "outputField",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Completion Groups",
+      "class": "Scenario4_CompletionGroups",
+      "slug": "Completion_Groups",
+      "screenshot": "04_Completion_Groups.png",
+      "controls": [
+        {
+          "name": "serverAddressField",
+          "type": "TextBox",
+          "label": "http://localhost/BackgroundTransferSample/bitmap.aspx",
+          "events": []
+        },
+        {
+          "name": "StartDownloadsButton",
+          "type": "Button",
+          "label": "Start ten downloads in a completion group",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start ten downloads in a completion group",
+          "alt": "StartDownloadsButton",
+          "type": "Button",
+          "label": "Start ten downloads in a completion group",
+          "name": "StartDownloadsButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "serverAddressField",
+            "type": "TextBox"
+          },
+          {
+            "name": "SubstatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Random Access Downloads",
+      "class": "Scenario5_RandomAccess",
+      "slug": "Random_Access_Downloads",
+      "screenshot": "05_Random_Access_Downloads.png",
+      "controls": [
+        {
+          "name": "serverAddressField",
+          "type": "TextBox",
+          "label": "http://localhost/BackgroundTransferSample/randomAccess.aspx",
+          "events": []
+        },
+        {
+          "name": "fileNameField",
+          "type": "TextBox",
+          "label": "RandomAccessFile.txt",
+          "events": []
+        },
+        {
+          "name": "startDownloadButton",
+          "type": "Button",
+          "label": "Start",
+          "events": []
+        },
+        {
+          "name": "pauseDownloadButton",
+          "type": "Button",
+          "label": "Pause",
+          "events": []
+        },
+        {
+          "name": "resumeDownloadButton",
+          "type": "Button",
+          "label": "Resume",
+          "events": []
+        },
+        {
+          "name": "seekSlider",
+          "type": "Slider",
+          "label": "Seek to position (MB)",
+          "events": []
+        },
+        {
+          "name": "seekDownloadButton",
+          "type": "Button",
+          "label": "Seek",
+          "events": []
+        },
+        {
+          "name": "currentPositionSlider",
+          "type": "Slider",
+          "label": "Current read position (MB)",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start",
+          "alt": "startDownloadButton",
+          "type": "Button",
+          "label": "Start",
+          "name": "startDownloadButton",
+          "event": ""
+        },
+        {
+          "target": "Pause",
+          "alt": "pauseDownloadButton",
+          "type": "Button",
+          "label": "Pause",
+          "name": "pauseDownloadButton",
+          "event": ""
+        },
+        {
+          "target": "Resume",
+          "alt": "resumeDownloadButton",
+          "type": "Button",
+          "label": "Resume",
+          "name": "resumeDownloadButton",
+          "event": ""
+        },
+        {
+          "target": "Seek",
+          "alt": "seekDownloadButton",
+          "type": "Button",
+          "label": "Seek",
+          "name": "seekDownloadButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "inputTextBlock1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "serverAddressField",
+            "type": "TextBox"
+          },
+          {
+            "name": "fileNameField",
+            "type": "TextBox"
+          },
+          {
+            "name": "DownloadedInfoText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "DownloadedStatusText",
+            "type": "Run"
+          },
+          {
+            "name": "DownloadedRangesText",
+            "type": "Run"
+          },
+          {
+            "name": "PreviousReadText",
+            "type": "Run"
+          },
+          {
+            "name": "CurrentReadText",
+            "type": "Run"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Recoverable Errors",
+      "class": "Scenario6_RecoverableErrors",
+      "slug": "Recoverable_Errors",
+      "screenshot": "06_Recoverable_Errors.png",
+      "controls": [
+        {
+          "name": "serverAddressField",
+          "type": "TextBox",
+          "label": "http://localhost/BackgroundTransferSample/recoverableErrors.aspx?shouldExpire=yes",
+          "events": []
+        },
+        {
+          "name": "fileNameField",
+          "type": "TextBox",
+          "label": "RecoverableErrorsFile.txt",
+          "events": []
+        },
+        {
+          "name": "configureRecoverableErrorsCheckBox",
+          "type": "CheckBox",
+          "label": "Recover from expired URL",
+          "events": []
+        },
+        {
+          "name": "startDownloadButton",
+          "type": "Button",
+          "label": "Start",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "TextBox",
+          "label": "1234",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start",
+          "alt": "startDownloadButton",
+          "type": "Button",
+          "label": "Start",
+          "name": "startDownloadButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "serverAddressField",
+            "type": "TextBox"
+          },
+          {
+            "name": "fileNameField",
+            "type": "TextBox"
+          },
+          {
+            "name": "DownloadedInfoText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "DownloadedStatusText",
+            "type": "Run"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Download Reordering",
+      "class": "Scenario7_DownloadReordering",
+      "slug": "Download_Reordering",
+      "screenshot": "07_Download_Reordering.png",
+      "controls": [
+        {
+          "name": "remoteAddressField",
+          "type": "TextBox",
+          "label": "http://localhost/BackgroundTransferSample/download.aspx",
+          "events": []
+        },
+        {
+          "name": "fileNameField",
+          "type": "TextBox",
+          "label": "DownloadReordering.txt",
+          "events": []
+        },
+        {
+          "name": "startDownloadButton",
+          "type": "Button",
+          "label": "Start Download",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Make Current",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start Download",
+          "alt": "startDownloadButton",
+          "type": "Button",
+          "label": "Start Download",
+          "name": "startDownloadButton",
+          "event": ""
+        },
+        {
+          "target": "Make Current",
+          "alt": "",
+          "type": "Button",
+          "label": "Make Current",
+          "name": "",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "remoteAddressField",
+            "type": "TextBox"
+          },
+          {
+            "name": "fileNameField",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

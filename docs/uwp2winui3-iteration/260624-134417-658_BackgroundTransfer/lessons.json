@@ -1,0 +1,28 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied all 7 scenario .xaml/.cs verbatim and mass-replaced Windows.UI.Xaml -> Microsoft.UI.Xaml; the agent only had to edit copies in place. Final build succeeded with 0 errors." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log line 7264/7448/7570: '[PASS] dotnet build succeeded (1090 warning(s), 0 WUI analyzer warning(s))' — gave the agent a clean go/no-go signal." }
+  ],
+  "tools_problematic": [
+    { "tool": "dotnet build output filter (Where-Object -match 'error|warning.*CS')", "problem": "Piping a long-running dotnet build through a Where-Object filter made the command appear to hang for 8+ minutes; the agent had to stop_powershell and re-run unfiltered.", "evidence": "session-log lines 7016-7052: shellId 15 'still running' repeated, then stopped and re-run without the filter." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Copies every *.cs verbatim, including legacy Properties\\AssemblyInfo.cs, which collides with the SDK-style project's auto-generated assembly attributes (GenerateAssemblyInfo=true by default).", "suggested_tweak": "Skip AssemblyInfo.cs files at copy time (same rationale as the existing bin/obj skip), since the SDK regenerates them." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [],
+  "errors_encountered": [
+    { "error": "CS0579: Duplicate 'System.Reflection.AssemblyCompanyAttribute' (and AssemblyConfiguration/FileVersion/Product/Title/Version) attribute — 6 errors, build failed", "root_cause": "The UWP source's Tasks\\Properties\\AssemblyInfo.cs (with [assembly: AssemblyTitle], [assembly: AssemblyVersion], etc.) was copied into the migrated tree. SDK-style projects auto-generate the same attributes (GenerateAssemblyInfo defaults to true), so both definitions collide.", "fix": "Agent added <GenerateAssemblyInfo>false</GenerateAssemblyInfo> to the csproj PropertyGroup. Cleaner/more general fix: don't copy legacy AssemblyInfo.cs at all (let the SDK generate it)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "First full build of the migrated project", "symptom": "Build failed with 6x CS0579 duplicate-attribute errors", "turns_or_retries": "1 diagnose + 1 csproj edit + 1 rebuild", "root_cause": "Legacy Properties\\AssemblyInfo.cs copied from UWP source duplicates SDK auto-generated assembly attributes", "how_resolved": "Set <GenerateAssemblyInfo>false</GenerateAssemblyInfo>", "preventable_by": "Initialize-UwpMigration.ps1 skipping AssemblyInfo.cs at copy time, plus a CS0579 entry in MIGRATION-PATTERNS.md build-error first-aid section." },
+    { "where": "Rebuild after the AssemblyInfo fix", "symptom": "dotnet build piped through a Where-Object match filter appeared to hang for ~8 minutes", "turns_or_retries": "~5 read_powershell polls then stop + re-run", "root_cause": "Streaming a long build through a line-filter delayed/blocked visible completion", "how_resolved": "Stopped the shell and re-ran dotnet build unfiltered", "preventable_by": "Guidance to run dotnet build unfiltered (or capture to a file then grep) rather than piping a live build through Where-Object." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Screenshots captured blank (PrintWindow cannot grab WinUI 3 DirectComposition; no interactive desktop) and the UWP CoreWindow UIA tree was not externally enumerable.", "workaround": "Fidelity verified via the WinUI 3 UIA tree instead. This is an eval-environment limitation, not a migration defect." }
+  ]
+}
