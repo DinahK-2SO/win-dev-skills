@@ -413,7 +413,7 @@ If you do custom text rendering with DirectWrite, switch to **DWriteCore** — t
 
 | UWP | WinUI 3 / WinAppSDK |
 |-----|---------------------|
-| `MediaElement` | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) |
+| `MediaElement` | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) — **not a 1:1 swap; code-behind APIs move to `.MediaPlayer`, see [MediaElement migration](#media-element)** |
 | `MediaPlayerElement` (Windows.UI.Xaml) | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) — namespace change only |
 | `MapControl` (Windows.UI.Xaml.Controls.Maps) | `MapControl` (Microsoft.UI.Xaml.Controls) — WinAppSDK 1.5+ |
 | `CameraCaptureUI` (Windows.Media.Capture) | `CameraCaptureUI` (Microsoft.Windows.Media.Capture) — WinAppSDK 1.7+ |
@@ -620,12 +620,39 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 | UWP element | WinUI 3 element | Notes |
 |---|---|---|
-| `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. |
+| `<MediaElement … />` | `<MediaPlayerElement … />` | XAML attributes `AreTransportControlsEnabled` / `AutoPlay` carry over, but the **code-behind is not 1:1** — see [MediaElement migration](#media-element). |
 | `<InkCanvas … />` | _(none — defer)_ | Not supported. |
 | `<Pivot>` / `<PivotItem>` | `<TabView>` / `<TabViewItem>`, or `<controls:Pivot>` from `CommunityToolkit.WinUI.UI.Controls` | Pick based on the source's intent (top-tab vs swipe pivot). |
 | `<Hub>` / `<HubSection>` | Hand-rolled `<NavigationView>` with section grouping, or `<ScrollViewer>` with stacked sections. | No drop-in equivalent. |
 | `<AppBarButton Icon="…">` system icons | Most identifiers carry over | A handful of glyphs were renamed; verify visually. |
 | `<CommandBar>` `LabelPosition` | unchanged | Behaviour parity. |
+
+<a id="media-element"></a>
+### `MediaElement` → `MediaPlayerElement`: the code-behind is **not** a 1:1 rename
+
+Swapping the XAML tag makes the project compile, but every **imperative media call in
+code-behind breaks**, because `MediaPlayerElement` is only a *view* over an underlying
+`Windows.Media.Playback.MediaPlayer`. Playback, source, and casting APIs live on
+`element.MediaPlayer`, not on the element. Redirect them in the **same pass** as the tag
+swap (don't wait for the build to fail on each one):
+
+| UWP `MediaElement` (code-behind) | WinUI 3 `MediaPlayerElement` |
+|---|---|
+| `media.SetSource(stream, contentType)` | `media.Source = MediaSource.CreateFromStream(stream, contentType)` |
+| `media.Source = new Uri(...)` | `media.Source = MediaSource.CreateFromUri(uri)` |
+| `media.Play()` / `media.Pause()` / `media.Stop()` | `media.MediaPlayer.Play()` / `.Pause()` / *(stop: `Pause()` + `PlaybackSession.Position = TimeSpan.Zero`)* |
+| `media.GetAsCastingSource()` | `media.MediaPlayer.GetAsCastingSource()` |
+| `media.Position` / `media.Volume` / `media.IsMuted` | `media.MediaPlayer.PlaybackSession.Position` / `media.MediaPlayer.Volume` / `media.MediaPlayer.IsMuted` |
+| `media.MediaEnded` / `media.MediaOpened` / `media.MediaFailed` | `media.MediaPlayer.MediaEnded` / `.MediaOpened` / `.MediaFailed` |
+
+Notes:
+- Add `using Windows.Media.Core;` (for `MediaSource`) and, when touching the player
+  directly, `using Windows.Media.Playback;`.
+- `AreTransportControlsEnabled` and `AutoPlay` stay as element XAML attributes.
+- `element.MediaPlayer` is created automatically once a `Source` is set; if you need it
+  before then, call `element.SetMediaPlayer(new MediaPlayer())`.
+- This applies to **any** media-playback or casting sample — apply it whenever the source
+  uses `MediaElement`.
 
 ### `x:Bind` and compiled bindings
 

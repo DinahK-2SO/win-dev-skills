@@ -1,0 +1,42 @@
+{
+  "scenario": "BasicMediaCasting",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 3,
+  "features_pass": 3,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: uwp-app-runner launched the original app (ok:true, PID 23300, window 'BasicMediaCasting C# Sample') and Scenario 1 was captured, but Scenarios 2-3 could not be navigated - the UWP CoreWindow (hosted by ApplicationFrameHost) exposes an empty UIA tree to winapp and this session has no interactive desktop (GetForegroundWindow()=0) for coordinate clicks. Golden frames 02/03 are duplicates of the landing frame; ground-truth control inventory taken from source XAML.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "notes": "No migration defects found. Build clean, app launches, navigation works (distinct UIA trees per scenario: 44/45/48 elements). All ground-truth UWP controls are present in the migrated app under matching names. WinUI screenshots render blank due to a WinUI 3 composition/PrintWindow capture limitation in this non-interactive session (not an app fault) - structural parity was verified via the UIA trees. Casting actions are hardware-gated and not actuatable on CI, so behavioral parity for casting is asserted structurally rather than by live actuation.",
+  "features": [
+    {
+      "name": "Basic Media Casting",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Basic_Media_Casting.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Basic_Media_Casting.png",
+      "note": "MediaPlayerElement transport controls (Cast to Device, Play, Mute, Aspect Ratio, Seek) + Load Video all present, matching UWP MediaElement with AreTransportControlsEnabled. Casting actuation hardware-gated."
+    },
+    {
+      "name": "Casting Using Casting Picker",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Casting_Using_Casting_Picker.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Casting_Using_Casting_Picker.png",
+      "note": "video, Load Video and Cast Button (castButton) present, matching the UWP CastingDevicePicker scenario. UWP golden 02 is a duplicate of the landing frame (nav unavailable); structural parity confirmed via UIA."
+    },
+    {
+      "name": "Casting Using Custom Picker",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Casting_Using_Custom_Picker.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Casting_Using_Custom_Picker.png",
+      "note": "video, Load Video, Start Device Watcher (watcherControlButton), casting devices list and progressText present. disconnectButton/progressRing/StatusBlock are collapsed/inactive by default in the UWP source too, so their absence from the idle tree is correct. UWP golden 03 is a duplicate of the landing frame (nav unavailable)."
+    }
+  ]
+}

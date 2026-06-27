@@ -1,0 +1,18 @@
+{
+  "scenario": "BasicMediaCasting",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "MediaElement -> MediaPlayerElement is documented as a 'minor rename', but the code-behind API surface (SetSource, Play/Pause, GetAsCastingSource, Position/Volume, media events) is not on MediaPlayerElement and must route through .MediaPlayer / MediaSource. Following the source 1:1 produced a build failure and a multi-turn fix.",
+      "evidence": "session-log.txt L3132-3134 (WMC0001 'Unknown type MediaElement' x3) and L3157-3195 (SetSource -> MediaSource.CreateFromStream; GetAsCastingSource() -> MediaPlayer.GetAsCastingSource()); generated Scenario2_CastingDevicePicker.xaml.cs L72,L102.",
+      "root_cause": "MediaPlayerElement is a view over an underlying MediaPlayer; the existing element-swap-table note ('Source and transport-control properties carry over with minor renames') is misleading and omits the delegation mapping.",
+      "tier": 3,
+      "change": "Corrected the misleading note in the element-swap table and the Controls-and-Features table row, and added a focused '#media-element' subsection with an explicit UWP-code-behind -> WinUI-code-behind mapping table (SetSource/Play/Pause/Stop/GetAsCastingSource/Position/Volume/events) plus required usings and the AreTransportControlsEnabled/AutoPlay carry-over note.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On a re-run, the agent redirects MediaElement imperative calls through .MediaPlayer / MediaSource in the same pass as the XAML tag swap, avoiding the WMC0001 build break and the subsequent code-behind rewrite turns.",
+      "falsifiable_check": "Re-run of any MediaElement-based UWP sample builds clean on the first full build (no WMC0001 / no 'MediaPlayerElement does not contain a definition for SetSource/GetAsCastingSource/Play' errors)."
+    }
+  ],
+  "deferred_to_human": []
+}

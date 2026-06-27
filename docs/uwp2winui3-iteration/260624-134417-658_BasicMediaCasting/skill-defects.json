@@ -1,0 +1,17 @@
+{
+  "scenario": "BasicMediaCasting",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "MediaElement -> MediaPlayerElement migration: the imperative code-behind API surface is not 1:1, and the skill's note is misleading. Build failed (WMC0001) and code-behind required rewrites: MediaElement.SetSource(stream,type) and MediaElement.GetAsCastingSource() do not exist on MediaPlayerElement.",
+      "evidence": "session-log.txt L3132-3134 (WMC0001 'Unknown type MediaElement' x3); L3157-3195 (SetSource -> MediaSource.CreateFromStream; GetAsCastingSource() -> MediaPlayer.GetAsCastingSource()); generated Scenario2_CastingDevicePicker.xaml.cs L72,102.",
+      "skill_search": "grepped winui-uwp-migration for 'MediaElement|MediaPlayerElement|GetAsCastingSource|SetSource|MediaPlayer'",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md element-swap table (~L623): '<MediaElement .../> | <MediaPlayerElement .../> | Source and transport-control properties carry over with minor renames.'",
+      "root_cause": "MediaPlayerElement is a view over an underlying MediaPlayer. It has no SetSource and no playback/casting methods; element.Source takes an IMediaPlaybackSource (MediaSource.CreateFromStream/CreateFromUri), and Play/Pause/GetAsCastingSource/PlaybackSession live on element.MediaPlayer. The 'minor renames' note hides all of this.",
+      "proposed_fix": "Correct the element-swap table note and add a focused subsection (anchor #media-element) documenting the code-behind delegation mapping: SetSource->Source=MediaSource.CreateFrom*, Play/Pause/Stop/GetAsCastingSource/position/volume->via .MediaPlayer; AreTransportControlsEnabled/AutoPlay stay on the element. Add a pointer from the Controls table row too.",
+      "generalizes": "Every UWP app that plays or casts media uses MediaElement with imperative SetSource/Play/Pause/GetAsCastingSource in code-behind. The same XAML-compiles-but-code-behind-breaks failure recurs in any media player, video sample, podcast, or casting scenario, independent of this specific sample."
+    }
+  ]
+}

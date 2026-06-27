@@ -1,0 +1,30 @@
+{
+  "scenario": "BasicMediaCasting",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log L208-238: bootstrapped scaffold + seeded MIGRATION-MAPPING.md TODO table; agent proceeded row-by-row without manual project setup." },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "session-log L1542-1551: agent pulled anchors pickers/threading/windowing/csproj on demand and applied them (e.g. InitializeWithWindow on FileOpenPicker)." },
+    { "tool": "Validate-UwpMigration.ps1 + Test-AppLaunch.ps1", "evidence": "session-log L4345-4362: final validator PASS with 0 warnings and a 10s smoke launch." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [
+    { "api": "MediaElement (XAML type) / MediaElement.SetSource / MediaElement.GetAsCastingSource", "why_tried": "agent copied the UWP source 1:1 first (the shared-content files used MediaElement + SetSource + GetAsCastingSource)", "root_cause": "MediaElement does not exist in WinUI 3; MediaPlayerElement is a thin view over an underlying MediaPlayer, so imperative playback/source/casting calls are NOT on the element", "fix": "XAML <MediaElement> -> <MediaPlayerElement>; code-behind video.SetSource(stream,type) -> video.Source = MediaSource.CreateFromStream(stream,type); video.GetAsCastingSource() -> video.MediaPlayer.GetAsCastingSource()" }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md element-swap table, row '<MediaElement .../>' (line ~623)", "wrong": "'Source and transport-control properties carry over with minor renames.'", "correct": "It is not a 1:1 rename. MediaPlayerElement exposes no SetSource and no playback/casting methods; those move to the underlying MediaPlayer (video.MediaPlayer.Play()/GetAsCastingSource()), and Source takes an IMediaPlaybackSource (MediaSource.CreateFromStream/CreateFromUri) rather than a stream/Uri via SetSource." }
+  ],
+  "special_apis": [
+    { "api": "MediaPlayerElement", "special_handling": "view-only control over a MediaPlayer; set element.Source = MediaSource.Create...; reach element.MediaPlayer for Play/Pause/GetAsCastingSource/PlaybackSession." },
+    { "api": "CastingDevicePicker.Show(Rect, Placement)", "special_handling": "anchored to a coordinate Rect computed via TransformToVisual(App.MainWindow.Content); covered generically by the existing 'apply InitializeWithWindow to other UI surfaces that target a window' guidance." }
+  ],
+  "errors_encountered": [
+    { "error": "XamlCompiler error WMC0001: Unknown type 'MediaElement' in XML namespace ... (x3 XAML files)", "root_cause": "UWP <MediaElement> copied verbatim into WinUI 3 XAML; the type was removed in WinUI 3", "fix": "replace with <MediaPlayerElement> in all three scenario XAML files (session-log L3132-3154)" },
+    { "error": "warning CS8618: Non-nullable property 'ClassType' must contain a non-null value (SampleConfiguration.cs)", "root_cause": "nullable reference types enabled by scaffold; sample-template POCO property not initialized", "fix": "agent applied nullable/required fix; final build 0 warnings (session-log L4321-4357)" }
+  ],
+  "dev_agent_struggles": [
+    { "where": "first full build of all three scenarios", "symptom": "build failed with 3x WMC0001 on <MediaElement>, then code-behind needed SetSource/GetAsCastingSource rewrites", "turns_or_retries": "~2 turns (TURN 38-39): one XAML pass + one code-behind pass after the failed build", "root_cause": "source copied 1:1; MediaElement->MediaPlayerElement is more than a tag rename and the skill's note framed it as 'minor renames'", "how_resolved": "swapped XAML type and redirected imperative media/casting calls through .MediaPlayer and MediaSource", "preventable_by": "MIGRATION-PATTERNS.md documenting the MediaElement->MediaPlayerElement code-behind delegation (SetSource/Play/GetAsCastingSource -> via .MediaPlayer/MediaSource) so the agent adapts code-behind in the same pass as the XAML swap" }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

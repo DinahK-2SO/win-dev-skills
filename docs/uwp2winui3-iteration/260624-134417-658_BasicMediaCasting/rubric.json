@@ -1,0 +1,55 @@
+{
+  "scenario": "BasicMediaCasting",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\BasicMediaCasting\\cs",
+  "features": [
+    {
+      "number": 1,
+      "title": "Basic Media Casting",
+      "description": "Built-in media casting via the MediaElement transport controls. User loads a video and clicks the cast button in the transport bar.",
+      "groundTruthControls": [
+        { "name": "video", "type": "MediaElement", "note": "AreTransportControlsEnabled=True; built-in Cast button lives in the transport bar" },
+        { "name": "loadButton", "type": "Button", "content": "Load Video" },
+        { "name": "StatusBlock", "type": "TextBlock", "note": "status output, Visibility=Collapsed by default" }
+      ],
+      "actions": [
+        { "control": "loadButton", "effect": "loads bear video into the MediaElement" },
+        { "control": "transport Cast button", "effect": "opens system cast UI (hardware-gated)" }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Casting Using Casting Picker",
+      "description": "Loads a video and uses CastingDevicePicker shown from a custom Cast button.",
+      "groundTruthControls": [
+        { "name": "video", "type": "MediaElement" },
+        { "name": "loadButton", "type": "Button", "content": "Load Video" },
+        { "name": "castButton", "type": "Button", "content": "Cast Button", "note": "shows CastingDevicePicker" },
+        { "name": "StatusBlock", "type": "TextBlock", "note": "Visibility=Collapsed by default" }
+      ],
+      "actions": [
+        { "control": "loadButton", "effect": "loads video" },
+        { "control": "castButton", "effect": "shows CastingDevicePicker flyout (hardware-gated)" }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Casting Using Custom Picker",
+      "description": "Custom device watcher enumerates casting devices into a ListBox; user selects a device to connect, with progress and disconnect.",
+      "groundTruthControls": [
+        { "name": "video", "type": "MediaElement" },
+        { "name": "loadButton", "type": "Button", "content": "Load Video" },
+        { "name": "watcherControlButton", "type": "Button", "content": "Start Device Watcher" },
+        { "name": "disconnectButton", "type": "Button", "content": "Disconnect", "note": "Visibility=Collapsed until connected" },
+        { "name": "castingDevicesList", "type": "ListBox", "note": "discovered devices" },
+        { "name": "progressRing", "type": "ProgressRing", "note": "IsActive=False by default" },
+        { "name": "progressText", "type": "TextBlock" },
+        { "name": "StatusBlock", "type": "TextBlock", "note": "Visibility=Collapsed by default" }
+      ],
+      "actions": [
+        { "control": "watcherControlButton", "effect": "starts/stops DeviceWatcher, populates castingDevicesList (hardware-gated)" },
+        { "control": "castingDevicesList", "effect": "selecting a device connects and casts (hardware-gated)" },
+        { "control": "disconnectButton", "effect": "disconnects the casting connection" }
+      ]
+    }
+  ]
+}

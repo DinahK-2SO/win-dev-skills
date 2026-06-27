@@ -1,0 +1,21 @@
+{
+  "scenario": "BasicMediaCasting",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Agent copied <MediaElement> verbatim into WinUI 3 XAML and hit WMC0001 instead of applying the documented type swap up-front.",
+      "evidence": "session-log.txt L2217/L2285/L2356 (MediaElement copied into XAML), L3132-3134 (WMC0001), L3138-3148 (swapped to MediaPlayerElement).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md Controls and Features table (~L416) and the element-swap table (~L623) both list MediaElement -> MediaPlayerElement; unsupported-api-inventory.json flags MediaElement (anchor 'controls').",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The XAML type swap itself is already documented prominently in two tables and the analyzer inventory. A capable agent that consults the controls mapping before/after the first build recovers in one turn (as it did). No skill edit needed for the bare type rename. The code-behind delegation, which is the genuinely under-documented part, is handled separately as a skill-defect."
+    },
+    {
+      "problem": "SampleConfiguration.cs nullable warning CS8618.",
+      "evidence": "session-log.txt L4321-4326 then L4357 (0 warnings after fix).",
+      "covered_clearly_at": "Generic nullable-reference-type handling is standard C#; not UWP->WinUI specific.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Trivial, self-resolved, not migration-specific or recurring as a skill concern."
+    }
+  ]
+}
