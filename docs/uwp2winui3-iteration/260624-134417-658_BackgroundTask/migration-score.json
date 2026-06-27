@@ -1,0 +1,69 @@
+{
+  "scenario": "BackgroundTask",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 6,
+  "features_pass": 6,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: uwp-app-runner ok:true (pid 29060, windowTitle 'Background Tasks C# Sample'); the app launched and rendered, and the Scenario-1 shell frame was captured as golden (parity/baseline/screenshots/01_Background_Task.png). Scenarios 2-6 could not be individually navigated and no control could be actuated: the .NET Native UWP CoreWindow exposes an empty UIA tree (winapp ui inspect returns only an empty Pane) and the session has no interactive desktop (GetForegroundWindow()=0, synthetic mouse input does not reach the app). No UWP behavioral baseline available.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "notes": "Scoring is structural: the migrated WinUI 3 app's UIA tree was inspected directly and every scenario + control from the UWP source is present and correct (the formal checklist had 0 controls because Extract-UwpFeatureChecklist matches XAML by class name but the shared pages are file-prefixed 'ScenarioN_<class>.xaml', so the structural gate was trivially satisfied; the real structural signal comes from the WinUI UIA dumps in parity/winui3/ui/). Behavioral actuation and visual screenshot comparison were blocked by environment limitations on BOTH apps (UWP: empty UIA tree + no input desktop; WinUI: InvokePattern REGDB_E_CLASSNOTREG + SendInput failure + blank swapchain capture) and are flagged for manual review, not failed, per the winui3-parity-check rule. No dead controls or missing scenarios were detected. WinUI screenshots referenced below capture blank in this headless session but the page is proven rendered by the populated UIA tree (correct bounds + text values).",
+  "features": [
+    {
+      "name": "Background Task",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Background_Task.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Background_Task.png",
+      "note": "Register + Unregister present (Register enabled, Unregister disabled), Status='Unregistered', Progress present — matches UWP golden. Actuation untestable in this env (flagged)."
+    },
+    {
+      "name": "Background Task with Condition",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_Background_Task_with_Condition.png",
+      "note": "Register + Unregister + Status/Progress present per WinUI UIA dump 02. UWP per-scenario golden unavailable (nav blocked). Actuation untestable (flagged)."
+    },
+    {
+      "name": "Servicing Complete Task",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/03_Servicing_Complete_Task.png",
+      "note": "Register + Unregister + Status/Progress present per WinUI UIA dump 03; distinct 'Servicing Complete' description. UWP golden unavailable. Actuation untestable (flagged)."
+    },
+    {
+      "name": "Background Task with Time Trigger",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/04_Background_Task_with_Time_Trigger.png",
+      "note": "Register + Unregister + Status/Progress present per WinUI UIA dump 04; distinct 'time trigger' description. UWP golden unavailable. Actuation untestable (flagged)."
+    },
+    {
+      "name": "Background Task with Application Trigger",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/05_Background_Task_with_Application_Trigger.png",
+      "note": "Register + Unregister + SIGNAL present per WinUI UIA dump 05 (Signal correctly distinguishes this scenario), plus Status/Progress/Result. UWP golden unavailable. Actuation untestable (flagged)."
+    },
+    {
+      "name": "Grouped Background Task",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/06_Grouped_Background_Task.png",
+      "note": "Register + Unregister + 'Unregister Ungrouped Tasks' present per WinUI UIA dump 06 (third button correctly distinguishes this scenario), plus Status/Progress/Result. UWP golden unavailable. Actuation untestable (flagged)."
+    }
+  ]
+}

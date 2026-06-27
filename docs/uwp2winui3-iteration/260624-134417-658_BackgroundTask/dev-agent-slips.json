@@ -1,0 +1,14 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Threading: Dispatcher.RunAsync(CoreDispatcherPriority...) → DispatcherQueue.TryEnqueue conversion across 6 scenario files.",
+      "evidence": "session-log summary turn 65 item 1 — converted cleanly with no retries.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'Threading' anchor (Get-MigrationPattern.ps1 -Anchor threading) and WUI0003 row in the analyzer table.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Not even a mistake — the agent applied the documented pattern correctly; no skill change warranted."
+    }
+  ]
+}

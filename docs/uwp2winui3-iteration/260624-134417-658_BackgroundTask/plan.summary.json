@@ -1,0 +1,18 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Replace non-existent `winapp build` with `dotnet build` across SKILL.md, validator header, and PATTERNS — the command was failing on every migration and wasting a turn.",
+    "Add MIGRATION-PATTERNS section for CS0579 duplicate-attribute errors: delete the copied UWP Properties/AssemblyInfo.cs, since SDK-style projects auto-generate those attributes.",
+    "Add manifest-checklist item for in-process windows.backgroundTasks/appService <Extension> entries that fail AppX deploy with 0x80080204: drop them for structural migrations or author the activatable-class registration."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": [
+    "Validator reports a genuine manifest-validation failure (0x80080204) as a non-fatal WARN; consider failing the gate on manifest defects vs true environment failures."
+  ]
+}

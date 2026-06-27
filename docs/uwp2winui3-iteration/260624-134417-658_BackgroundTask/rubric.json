@@ -1,0 +1,92 @@
+{
+  "scenario": "BackgroundTask",
+  "created_at": "2026-06-27T08:30:00+08:00",
+  "uwp_capture_status": "partial: original UWP app launched via uwp-app-runner (ok:true, pid 29060, windowTitle 'Background Tasks C# Sample') and rendered correctly; scenario-1 golden captured (01_Background_Task.png). Per-scenario navigation 2-6 and control actuation were not possible in this session: the .NET Native UWP CoreWindow exposes an empty UIA tree (winapp ui inspect returns only an empty Pane) and the session has no interactive desktop (GetForegroundWindow()=0, synthetic mouse input does not reach the app). Only the initial shell frame could be captured as golden.",
+  "features": [
+    {
+      "id": "nav-scenario-list",
+      "area": "Shell",
+      "name": "Scenario navigation list",
+      "description": "Left-rail list of the 6 background-task scenarios. Selecting an item shows that scenario's content on the right.",
+      "expected_behaviour": [
+        "List shows exactly 6 items: '1) Background Task', '2) Background Task with Condition', '3) Servicing Complete Task', '4) Background Task with Time Trigger', '5) Background Task with Application Trigger', '6) Grouped Background Task'",
+        "Selecting an item navigates the content pane to that scenario's page"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Background_Task.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario1-background-task",
+      "area": "Scenario 1",
+      "name": "Background Task (Time Zone Change)",
+      "description": "Registers a system-event background task for the Time Zone Change event. Register/Unregister buttons toggle registration; Status/Progress text reflect state.",
+      "expected_behaviour": [
+        "Register and Unregister buttons present; Register enabled, Unregister disabled when unregistered",
+        "Status text reads 'Unregistered' initially",
+        "Clicking Register registers the task and updates Status; Unregister reverses it"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Background_Task.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario2-background-task-with-condition",
+      "area": "Scenario 2",
+      "name": "Background Task with Condition",
+      "description": "Registers a background task that runs only when a system condition is met.",
+      "expected_behaviour": [
+        "Register and Unregister buttons present with the same toggle behaviour as Scenario 1",
+        "Status/Progress output text present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario3-servicing-complete-task",
+      "area": "Scenario 3",
+      "name": "Servicing Complete Task",
+      "description": "Registers a background task for the Servicing Complete event.",
+      "expected_behaviour": [
+        "Register and Unregister buttons present",
+        "Status/Progress output text present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario4-time-triggered-task",
+      "area": "Scenario 4",
+      "name": "Background Task with Time Trigger",
+      "description": "Registers a background task that fires on a time trigger.",
+      "expected_behaviour": [
+        "Register and Unregister buttons present",
+        "Status/Progress output text present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario5-application-trigger-task",
+      "area": "Scenario 5",
+      "name": "Background Task with Application Trigger",
+      "description": "Registers an application-trigger background task and can Signal it on demand.",
+      "expected_behaviour": [
+        "Register, Unregister AND Signal buttons present (Signal distinguishes this scenario)",
+        "Status/Progress/Result output text present"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "scenario6-grouped-background-task",
+      "area": "Scenario 6",
+      "name": "Grouped Background Task",
+      "description": "Registers a grouped background task; supports unregistering grouped and ungrouped tasks separately.",
+      "expected_behaviour": [
+        "Register, Unregister and 'Unregister Ungrouped Tasks' buttons present (the third button distinguishes this scenario)",
+        "Status/Progress/Result output text present"
+      ],
+      "screenshot": null,
+      "weight": 2
+    }
+  ]
+}

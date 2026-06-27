@@ -1,0 +1,19 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Scenario navigation list (6 items)", "status": "pass", "reason": "All 6 nav items present with verbatim titles.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Scenario 1 Background Task (Register/Unregister/Status)", "status": "pass", "reason": "Controls present; Status='Unregistered'. Actuation untestable (env).", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Scenario 2 Background Task with Condition", "status": "pass", "reason": "Register+Unregister+Status/Progress present per UIA dump.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Scenario 3 Servicing Complete Task", "status": "pass", "reason": "Controls + distinct description present.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Scenario 4 Time Trigger", "status": "pass", "reason": "Controls + distinct description present.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Scenario 5 Application Trigger (+Signal)", "status": "pass", "reason": "Register+Unregister+Signal present.", "suspected_skill_gap": "" },
+    { "id": 6, "text": "Scenario 6 Grouped (+Unregister Ungrouped)", "status": "pass", "reason": "Third button present.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Structurally perfect migration (100/100). No parity discrepancies. The three real findings are migration-process frictions caught in the build log: copied AssemblyInfo.cs (CS0579), background-task manifest Extension deploy failure (0x80080204), and the non-existent `winapp build` command — all fixed by the dev agent but each cost turns and each recurs across scenarios."
+}

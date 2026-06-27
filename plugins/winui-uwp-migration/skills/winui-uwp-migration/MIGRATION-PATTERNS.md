@@ -50,6 +50,20 @@ Get-ChildItem -Path $Target -Recurse -Directory -Include bin,obj |
 
 Generated sources never belong in source control or the migrated tree — only `.xaml/.cs/.resw/.appxmanifest`/assets are real inputs.
 
+### `CS0579: Duplicate '...Attribute' attribute` (copied `Properties/AssemblyInfo.cs`)
+
+If the build fails with a handful of `CS0579` errors naming `AssemblyCompanyAttribute`, `AssemblyConfigurationAttribute`, `AssemblyFileVersionAttribute`, `AssemblyProductAttribute`, `AssemblyTitleAttribute`, `AssemblyVersionAttribute`, etc. — all pointing at an auto-generated `obj\...\<Project>.AssemblyInfo.cs` — the cause is a **hand-written `Properties/AssemblyInfo.cs` copied verbatim from the UWP project**. Old-style UWP/.NET-Framework projects ship these assembly attributes in `Properties\AssemblyInfo.cs`, but SDK-style WinUI 3 projects set `GenerateAssemblyInfo=true` by default and emit the same attributes automatically, so the two collide. This recurs whenever a sub-project (e.g. a `Tasks\`, `Common\`, or runtime-component folder) carried its own `Properties\AssemblyInfo.cs`.
+
+Fix: **delete the copied `Properties/AssemblyInfo.cs` file(s)** — the SDK generates these for you. (Do not instead set `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>`; that just trades the error for missing metadata.) Find them with:
+
+```powershell
+Get-ChildItem -Path $Target -Recurse -Filter AssemblyInfo.cs |
+    Where-Object { $_.FullName -notmatch '\\(\.uwp-source|obj|bin)\\' } |
+    Remove-Item -Force
+```
+
+If you need to keep a real custom attribute that lived in the file (rare), move only that single attribute into any existing `.cs` file and delete the rest.
+
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
@@ -543,9 +557,19 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
 
+5. **In-process WinRT `<Extension>` entries (background tasks, app services) — drop or re-home them.** UWP manifests often declare `<Extension Category="windows.backgroundTasks" EntryPoint="Tasks.SomeTask">` (or `windows.appService`) that point at an **in-process WinRT activatable class**. Carrying these over verbatim makes AppX registration fail at deploy time with:
+
+   ```
+   error 0x80080204: App manifest validation error: ... it is not allowed to have
+   EntryPoint="Tasks.SomeTask" without ActivatableClassId in
+   windows.activatableClass.inProcessServer.
+   ```
+
+   A packaged WinUI 3 desktop app does not auto-generate the `<Extensions><InProcessServer><ActivatableClass .../>` registration that UWP's toolchain produced, so the `EntryPoint` resolves to nothing. For a structural/visual migration where the task body isn't exercised, **remove the offending `<Extension Category="windows.backgroundTasks|windows.appService" ...>` block** from `Package.appxmanifest` (the C# task class and its `Windows.ApplicationModel.Background` registration code still compile and run for in-process registration). Only if the background task must actually activate out-of-process do you need to author the matching `windows.activatableClass.inProcessServer`/WinRT-component registration — note that under `MIGRATION-DEFERRED.md` rather than leaving a manifest that won't deploy.
+
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The benchmark's `dotnet build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |

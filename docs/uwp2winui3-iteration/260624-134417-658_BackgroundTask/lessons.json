@@ -1,0 +1,35 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Turn 60/62 — single-shot validator surfaced manifest deploy failure (0x80080204) and confirmed PASS after fix; smoke launch went from WARN to PASS (pid 14104)." },
+    { "tool": "Get-MigrationPattern.ps1 (threading anchor)", "evidence": "Dispatcher.RunAsync→DispatcherQueue.TryEnqueue conversion applied cleanly across all 6 scenario files (summary turn 65)." }
+  ],
+  "tools_problematic": [
+    { "tool": "winapp build", "problem": "Command does not exist; the CLI returned `'build' was not matched. Unrecognized command or argument 'build'`.", "evidence": "Turn 63 — agent ran `winapp build` (as SKILL.md Step 3/Step 4 instruct) and it failed with exit 1; agent fell back to `dotnet build` in turn 64." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 smoke launch", "limitation": "Reported the manifest deploy failure only as a WARN ('environment/deploy issue, not a code defect') even though the root cause was a genuine manifest defect (background-task EntryPoint without ActivatableClassId).", "suggested_tweak": "N/A here — the manifest knowledge gap is better fixed in MIGRATION-PATTERNS than by changing the validator's WARN policy." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "SKILL.md Step 3 (line ~126), Step 3 build-discipline note (line ~140), Step 4 (line ~173); Validate-UwpMigration.ps1 header; MIGRATION-PATTERNS.md WUI section (line ~548)", "wrong": "Instructs the agent to run `winapp build` to compile.", "correct": "There is no `winapp build` subcommand; compile with `dotnet build`." }
+  ],
+  "special_apis": [
+    { "api": "Windows.ApplicationModel.Background manifest registration (windows.backgroundTasks <Extension>)", "special_handling": "In-process background-task EntryPoint in Package.appxmanifest fails AppX validation (0x80080204) without an ActivatableClassId/InProcessServer registration; remove the <Extension> block for structural migrations." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0579: Duplicate 'System.Reflection.AssemblyCompanyAttribute' (and Configuration/FileVersion/Product/Title/Version) attribute, pointing at obj\\...\\BackgroundTask.AssemblyInfo.cs", "root_cause": "A hand-written Properties/AssemblyInfo.cs copied from the UWP Tasks sub-project; SDK-style WinUI 3 projects auto-generate these same attributes (GenerateAssemblyInfo=true), so they collide.", "fix": "Blanked/deleted the copied Tasks/Properties/AssemblyInfo.cs (turn 58); build went 6 errors → 0 (turn 59)." },
+    { "error": "winapp run: 'Failed to register package ... App manifest validation error: Line 32 ... EntryPoint=\"Tasks.SampleBackgroundTask\" without ActivatableClassId in windows.activatableClass.inProcessServer (0x80080204)'", "root_cause": "UWP windows.backgroundTasks <Extension> entries pointing at in-process WinRT activatable classes were carried into the WinUI 3 packaged manifest, which does not auto-register them.", "fix": "Removed the <Extensions> background-task blocks from Package.appxmanifest (turn 61); smoke launch then PASSed." },
+    { "error": "winapp build: 'build' was not matched. Unrecognized command or argument 'build'.", "root_cause": "SKILL.md instructs `winapp build`, but the winapp CLI has no build verb.", "fix": "Fell back to `dotnet build -c Debug` (turn 64); succeeded." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Build loop, turns 56-59", "symptom": "Build failed with 6 CS0579 duplicate-attribute errors after copying the Tasks sub-project.", "turns_or_retries": "~3 turns (diagnose, view AssemblyInfo.cs, edit, rebuild)", "root_cause": "Copied UWP Properties/AssemblyInfo.cs collides with SDK auto-generated assembly attributes.", "how_resolved": "Deleted the file's attribute contents.", "preventable_by": "A MIGRATION-PATTERNS entry telling the agent to delete copied Properties/AssemblyInfo.cs (now added)." },
+    { "where": "Validator/manifest, turns 60-62", "symptom": "App would not register/launch (0x80080204 manifest validation).", "turns_or_retries": "~2 turns", "root_cause": "Background-task <Extension> EntryPoint without ActivatableClassId.", "how_resolved": "Removed the manifest extension blocks.", "preventable_by": "A manifest-checklist item on in-process WinRT <Extension> entries (now added)." },
+    { "where": "Final build confirmation, turn 63", "symptom": "`winapp build` errored ('build' not matched), one wasted turn.", "turns_or_retries": "1 turn", "root_cause": "Skill prescribes a non-existent command.", "how_resolved": "Used `dotnet build`.", "preventable_by": "Replacing all `winapp build` references with `dotnet build` (now done)." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "UWP/WinUI behavioral actuation and screenshot capture blocked (empty UIA tree on UWP CoreWindow, no interactive desktop, blank WinUI swapchain capture).", "workaround": "Scoring fell back to structural UIA-tree comparison; flagged for manual review. Eval-side only — not a migration defect." }
+  ]
+}

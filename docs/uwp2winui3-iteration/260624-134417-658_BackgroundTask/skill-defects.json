@@ -1,0 +1,37 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Skill instructs the agent to compile with `winapp build`, which is not a real CLI command.",
+      "evidence": "build session-log turn 63: `winapp build` → \"'build' was not matched. Unrecognized command or argument 'build'.\" exit 1; agent recovered with `dotnet build` in turn 64.",
+      "skill_search": "grep 'winapp build' across winui-uwp-migration",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "SKILL.md: 'winapp build  # compile; never run the .exe directly' (Step 3); 'Prefer `winapp build` to compile' (build-discipline note); 'After PASS, do a final `winapp build`' (Step 4); Validate-UwpMigration.ps1 header 'winapp build then this script'; MIGRATION-PATTERNS.md 'The benchmark's `winapp build` injects...'",
+      "root_cause": "The plugin moved to native `dotnet build`/`dotnet run` but several instruction sites still name the removed `winapp build` wrapper.",
+      "proposed_fix": "Replace every `winapp build` reference with `dotnet build` (run sync with an exit sentinel), and add a one-line note that no `winapp build` subcommand exists.",
+      "generalizes": "Every migration ends with a compile/confirm step; an instruction to run a non-existent command wastes a turn on each scenario regardless of the app."
+    },
+    {
+      "problem": "Copied UWP `Properties/AssemblyInfo.cs` causes CS0579 duplicate-attribute build failures; skill has no guidance for it.",
+      "evidence": "session-log turns 56-59: 6x `error CS0579: Duplicate 'System.Reflection.Assembly*Attribute'` at obj\\...\\BackgroundTask.AssemblyInfo.cs; fixed by blanking Tasks/Properties/AssemblyInfo.cs (build 6 errors → 0).",
+      "skill_search": "grep 'AssemblyInfo|CS0579|GenerateAssemblyInfo' across winui-uwp-migration → no hits",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Old-style UWP/.NET-Framework projects ship assembly attributes in Properties/AssemblyInfo.cs; SDK-style WinUI 3 projects set GenerateAssemblyInfo=true and emit the same attributes, so they collide when the file is copied.",
+      "proposed_fix": "Add a MIGRATION-PATTERNS.md section: on CS0579 duplicate AssemblyAttribute errors, delete the copied Properties/AssemblyInfo.cs (with a Get-ChildItem snippet); do not set GenerateAssemblyInfo=false.",
+      "generalizes": "Essentially every UWP project carries Properties/AssemblyInfo.cs, so this collision recurs whenever such files (including sub-project ones) are copied into the SDK-style tree."
+    },
+    {
+      "problem": "UWP `windows.backgroundTasks` (and `windows.appService`) <Extension> manifest entries with in-process EntryPoints break AppX deployment (0x80080204); skill's manifest checklist doesn't cover them.",
+      "evidence": "session-log turn 60: winapp run 'App manifest validation error ... EntryPoint=\"Tasks.SampleBackgroundTask\" without ActivatableClassId in windows.activatableClass.inProcessServer (0x80080204)'; fixed turn 61 by removing the <Extensions> blocks.",
+      "skill_search": "grep 'backgroundTasks|ActivatableClass|appService|0x80080204' across winui-uwp-migration → no hits; manifest checklist (Windows.Desktop + runFullTrust) stops at item 4 (EntryPoint placeholder).",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "A packaged WinUI 3 desktop app does not auto-generate the windows.activatableClass.inProcessServer/ActivatableClass registration UWP's toolchain produced, so an in-process background-task EntryPoint resolves to nothing and AppX validation rejects the manifest.",
+      "proposed_fix": "Add item 5 to the manifest checklist: drop in-process windows.backgroundTasks/windows.appService <Extension> blocks for structural migrations (the C# task class still compiles), or author the full activatable-class registration and otherwise defer.",
+      "generalizes": "In-process background tasks and app services are a common UWP manifest pattern across many SDK samples; any such app hits the same 0x80080204 deploy failure when its manifest is carried over verbatim."
+    }
+  ]
+}

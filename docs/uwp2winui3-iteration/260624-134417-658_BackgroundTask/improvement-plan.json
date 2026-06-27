@@ -1,0 +1,40 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Skill prescribes `winapp build`, a non-existent CLI command, wasting a turn every migration.",
+      "evidence": "session-log turn 63: `winapp build` → \"'build' was not matched\"; recovered with `dotnet build` turn 64. lessons.json doc_errors[0].",
+      "root_cause": "Plugin moved to native dotnet build/run but instruction sites still name the removed `winapp build` wrapper.",
+      "tier": 3,
+      "change": "Replaced all `winapp build` references with `dotnet build` (sync + exit sentinel) in SKILL.md (Steps 3, 4, build-discipline note), Validate-UwpMigration.ps1 header, and MIGRATION-PATTERNS.md WUI section; added an explicit 'there is no winapp build subcommand' note.",
+      "file": "skills/winui-uwp-migration/SKILL.md, skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent compiles with a real command on the first try; no wasted 'build not matched' turn.",
+      "falsifiable_check": "On re-run, no `'build' was not matched` line appears in the build log and the final compile uses `dotnet build`."
+    },
+    {
+      "problem": "Copied UWP Properties/AssemblyInfo.cs triggers CS0579 duplicate-attribute build failures.",
+      "evidence": "session-log turns 56-59: 6x CS0579 at obj\\...\\AssemblyInfo.cs; fixed by removing the copied file. lessons.json errors_encountered[0].",
+      "root_cause": "SDK-style WinUI 3 projects auto-generate assembly attributes (GenerateAssemblyInfo=true) that collide with a hand-written AssemblyInfo.cs carried over from UWP.",
+      "tier": 3,
+      "change": "Added a 'CS0579 Duplicate Attribute (copied Properties/AssemblyInfo.cs)' section to MIGRATION-PATTERNS.md with a delete-the-file Get-ChildItem snippet and a do-not-set-GenerateAssemblyInfo-false caveat.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent recognizes CS0579 immediately and deletes the copied file instead of diagnosing from scratch.",
+      "falsifiable_check": "On a scenario whose UWP source has Properties/AssemblyInfo.cs, no CS0579 errors survive to a failed build (file removed during migration)."
+    },
+    {
+      "problem": "In-process windows.backgroundTasks/windows.appService <Extension> manifest entries fail AppX deployment (0x80080204).",
+      "evidence": "session-log turn 60: 'EntryPoint=\"Tasks.SampleBackgroundTask\" without ActivatableClassId ... (0x80080204)'; fixed turn 61. lessons.json errors_encountered[1].",
+      "root_cause": "Packaged WinUI 3 desktop apps don't auto-generate the windows.activatableClass.inProcessServer/ActivatableClass registration UWP's toolchain produced, so an in-process EntryPoint resolves to nothing and the manifest is rejected.",
+      "tier": 3,
+      "change": "Added item 5 to the manifest checklist in MIGRATION-PATTERNS.md: drop in-process background-task/app-service <Extension> blocks for structural migrations (C# class still compiles), or author the full activatable-class registration and otherwise defer.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent removes/handles the offending <Extension> proactively; smoke launch passes without a manifest-validation detour.",
+      "falsifiable_check": "On a background-task/app-service scenario, the first winapp run does not emit a 0x80080204 manifest validation error."
+    }
+  ],
+  "deferred_to_human": [
+    "Validate-UwpMigration smoke launch reports a genuine manifest defect (0x80080204) as a non-fatal WARN labelled 'environment/deploy issue'. Consider distinguishing manifest-validation failures from true environment failures so they FAIL the gate — left for human review as it borders on changing the measurement policy."
+  ]
+}
