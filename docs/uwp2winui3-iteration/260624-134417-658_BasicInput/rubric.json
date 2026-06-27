@@ -1,0 +1,11 @@
+{
+  "feature": "Basic Input sample",
+  "scenarios": [
+    { "number": 1, "title": "Input Events", "controls": ["pressedTarget", "enterExitTarget", "tapTarget", "holdTarget"], "behavior": "pointer/tap event areas report status" },
+    { "number": 2, "title": "PointerPoint Properties", "controls": ["pointerCanvas", "instructionText"], "behavior": "pointer movement reports PointerPoint properties" },
+    { "number": 3, "title": "Device Capabilities", "controls": ["keyboardText", "mouseText", "touchText"], "behavior": "live device capability values populated at load" },
+    { "number": 4, "title": "XAML Manipulations", "controls": ["movementAxis", "inertiaSwitch", "resetButton", "manipulateMe"], "behavior": "drag/scale/rotate border; reset; inertia; axis filter" },
+    { "number": 5, "title": "Gesture Recognizer", "controls": ["movementAxis", "InertiaSwitch", "resetButton", "mainCanvas", "manipulateMe"], "behavior": "GestureRecognizer manipulation; reset; inertia; axis filter" }
+  ],
+  "verdict_scale": { "pass": "present + controls match source + controls respond", "partial": "present but a control missing or dead", "fail": "missing/blank/unreachable" }
+}

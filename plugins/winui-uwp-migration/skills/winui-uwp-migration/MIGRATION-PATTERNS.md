@@ -54,6 +54,18 @@ Generated sources never belong in source control or the migrated tree — only `
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
 
+### Pointer / gesture / `Colors` errors — non-Xaml input namespaces didn't migrate
+
+The bulk rewrite only touches `Windows.UI.Xaml.*`, so files that handle pointer, touch, or gesture input keep producing a recognizable cluster of errors. The root fix is almost always: in any pointer/gesture file use **`using Microsoft.UI.Input;`** and **delete** any stale `using Windows.UI.Input;` / `using Windows.Devices.Input;` — keeping both in scope is what creates the `CS0029`/`CS0019`/`CS1061` ambiguities.
+
+- **`CS0234: 'Colors' does not exist in 'Windows.UI'`** — the `Colors` palette moved to `Microsoft.UI.Colors`. Note the asymmetry: the `Colors` static class moves, but the `Windows.UI.Color` **struct** stays in `Windows.UI`. Use `new SolidColorBrush(Microsoft.UI.Colors.RoyalBlue)`.
+
+- **`CS0029: Cannot convert 'Microsoft.UI.Input.PointerPoint' to 'Windows.UI.Input.PointerPoint'`** — `PointerRoutedEventArgs.GetCurrentPoint()` / `GetIntermediatePoints()` now return `Microsoft.UI.Input.PointerPoint`. Replace `using Windows.UI.Input;` with `using Microsoft.UI.Input;` and re-type any `PointerPoint` / `PointerPointProperties` locals from that namespace.
+
+- **`CS1061: 'PointerPoint' does not contain a definition for 'PointerDevice'`** — the `PointerPoint.PointerDevice` property was removed. Read the device kind directly from **`PointerPoint.PointerDeviceType`**, and note the `PointerDeviceType` enum moved from `Windows.Devices.Input` to `Microsoft.UI.Input`.
+
+- **`CS0019: Operator '==' cannot be applied to operands of type 'HoldingState' and 'HoldingState'`** — two same-named enums are in scope. WinUI 3 `HoldingRoutedEventArgs.HoldingState` is `Microsoft.UI.Input.HoldingState`; drop the stale `Windows.UI.Input` using or fully-qualify (`Microsoft.UI.Input.HoldingState.Started`). `GestureRecognizer` and its `Manipulation*` args follow the same rule.
+
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
 Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding files in `MIGRATION-MAPPING.md` get `Triage label = defer`; cite the specific API in `MIGRATION-DEFERRED.md`.
@@ -89,7 +101,8 @@ All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
 | `Windows.UI.Xaml.Shapes` | `Microsoft.UI.Xaml.Shapes` |
 | `Windows.UI.Composition` | `Microsoft.UI.Composition` |
 | `Windows.UI.Input` | `Microsoft.UI.Input` |
-| `Windows.UI.Colors` | `Microsoft.UI.Colors` |
+| `Windows.Devices.Input` (`PointerDeviceType`) | `Microsoft.UI.Input` |
+| `Windows.UI.Colors` | `Microsoft.UI.Colors` (the `Windows.UI.Color` struct stays) |
 | `Windows.UI.Text` | `Microsoft.UI.Text` |
 | `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` |
 

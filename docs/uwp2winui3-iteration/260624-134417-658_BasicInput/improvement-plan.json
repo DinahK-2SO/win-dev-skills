@@ -1,0 +1,21 @@
+{
+  "scenario": "BasicInput",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Pointer/gesture/colors code does not compile after the bulk Windows.UI.Xaml rewrite: CS0234 'Colors' (x8), CS0029 PointerPoint conversion (x5), CS1061 PointerPoint.PointerDevice removed (x4), CS0019 HoldingState ambiguity (x2).",
+      "evidence": "results/run47/000_BasicInput/session-logs-dir/session-log.txt error counts; final source uses Microsoft.UI.Colors.*, using Microsoft.UI.Input;, currentPoint.PointerDeviceType, and Microsoft.UI.Input.HoldingState.Started.",
+      "root_cause": "Initialize-UwpMigration.ps1 only rewrites Windows.UI.Xaml.*; the non-Xaml input namespaces (Windows.UI.Input, Windows.Devices.Input, Windows.UI.Colors) and the PointerPoint shape change (PointerDevice removed) are undocumented, so the agent rediscovered each error by trial and error.",
+      "tier": 3,
+      "change": "Added a 'Pointer / gesture / Colors errors' subsection to the 'Common build errors after the namespace rewrite' section enumerating CS0234/CS0029/CS1061/CS0019 with the one-line fix for each, plus the root rule (use `using Microsoft.UI.Input;` and delete stale Windows.UI.Input/Windows.Devices.Input usings). Added a `Windows.Devices.Input (PointerDeviceType) -> Microsoft.UI.Input` row and clarified the Colors-class-vs-Color-struct asymmetry in the Namespace Mapping table.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On re-run of any pointer/touch/gesture sample, the agent resolves the whole cluster in a single pass instead of looping on ~19 build errors.",
+      "falsifiable_check": "Migration build log shows 0 occurrences of CS0234 'Colors', CS0029 PointerPoint, CS1061 PointerDevice, and CS0019 HoldingState errors (or they are fixed on first edit rather than across multiple rebuilds)."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier 1 option: extend Validate-UwpMigration.ps1 to flag residual `Windows.UI.Input` / `Windows.Devices.Input` usings and `.PointerDevice` member access in migrated .cs files, so the cluster is caught by tooling rather than relying on prose. Left for human review to avoid false positives.",
+    "Non-fatal nullable (CS86xx) warnings from the <Nullable>-enabled scaffold did not affect build/score; not actioned."
+  ]
+}

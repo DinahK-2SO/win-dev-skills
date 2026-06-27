@@ -1,0 +1,27 @@
+{
+  "scenario": "BasicInput",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Pointer/gesture code fails to compile after the namespace rewrite: PointerPoint.PointerDevice is gone (CS1061) and the PointerDeviceType enum moved from Windows.Devices.Input to Microsoft.UI.Input.",
+      "evidence": "build-output / session-log: 'error CS1061: PointerPoint does not contain a definition for PointerDevice' (x4); final source 2-PointerPointProperties.xaml.cs uses currentPoint.PointerDeviceType + PointerDeviceType.Mouse with `using Microsoft.UI.Input;`.",
+      "skill_search": "Grepped MIGRATION-PATTERNS.md + SKILL.md + scripts for 'PointerPoint', 'PointerDevice', 'Windows.Devices.Input'. Only a generic table row 'Windows.UI.Input -> Microsoft.UI.Input' exists.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill documents the Windows.UI.Input namespace move but not the PointerPoint shape change (PointerDevice property removed) nor the Windows.Devices.Input -> Microsoft.UI.Input move for PointerDeviceType. There is no pointer-input build-error entry.",
+      "proposed_fix": "Add a 'Pointer, gesture, and Colors input errors' subsection to MIGRATION-PATTERNS.md 'Common build errors' enumerating CS1061 PointerDevice removal + PointerDeviceType move, and add a Windows.Devices.Input -> Microsoft.UI.Input row to the namespace table.",
+      "generalizes": "Pointer/touch input (PointerPoint, PointerDeviceType, GestureRecognizer) appears in any UWP app handling pointer events — a very common feature area — so this build-error cluster recurs broadly."
+    },
+    {
+      "problem": "HoldingState comparison fails (CS0019) because two same-named enums (Windows.UI.Input.HoldingState vs Microsoft.UI.Input.HoldingState) are in scope after the rewrite.",
+      "evidence": "session-log: 'error CS0019: Operator == cannot be applied to operands of type HoldingState and HoldingState' (x2); fix in 1-InputEvents.xaml.cs uses `e.HoldingState == Microsoft.UI.Input.HoldingState.Started`.",
+      "skill_search": "Grepped for 'HoldingState' across the skill — no occurrence.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Skill has no guidance on the duplicate HoldingState enum / Holding event-args type change for WinUI 3 input.",
+      "proposed_fix": "Include the CS0019 HoldingState ambiguity in the same pointer/gesture build-errors subsection with the fix (drop Windows.UI.Input using / fully-qualify Microsoft.UI.Input.HoldingState).",
+      "generalizes": "Holding/right-tap gesture handling is standard pointer-input boilerplate; the same dual-enum ambiguity arises whenever a migrated file keeps a stale Windows.UI.Input using."
+    }
+  ]
+}

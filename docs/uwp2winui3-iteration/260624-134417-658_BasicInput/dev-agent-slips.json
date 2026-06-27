@@ -1,0 +1,14 @@
+{
+  "scenario": "BasicInput",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Many non-fatal nullable-reference warnings (CS8618/CS8600/CS8602/CS8604/CS8625) from porting un-annotated UWP fields/properties into a <Nullable>-enabled scaffold.",
+      "evidence": "build-output.txt: ~25 CS86xx warnings across SampleConfiguration.cs, 4/5-*.xaml.cs, MainPage.xaml.cs; 'BUILD SUCCEEDED'.",
+      "covered_clearly_at": "N/A — these are warnings, not failures. The build succeeded and the app scored 100; nullable hygiene is generic C# behavior the model handles on its own and does not block migration.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Warnings did not affect build, run, or score. Adding skill prose to chase non-fatal nullable warnings would bloat the skill with low-leverage noise; a capable re-run produces the same passing build. Not a generalizable migration defect."
+    }
+  ]
+}

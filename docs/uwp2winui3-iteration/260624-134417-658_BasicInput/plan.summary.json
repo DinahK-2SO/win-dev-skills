@@ -1,0 +1,15 @@
+{
+  "scenario": "BasicInput",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: add pointer/gesture/Colors build-error subsection (CS0234 Colors, CS0029 PointerPoint, CS1061 PointerDevice removal, CS0019 HoldingState) so migrated input code is fixed in one pass instead of looping on ~19 errors",
+    "MIGRATION-PATTERNS.md: add Windows.Devices.Input (PointerDeviceType) -> Microsoft.UI.Input namespace row and note Colors class moves while the Windows.UI.Color struct stays"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Tier 1: extend Validate-UwpMigration.ps1 to flag residual Windows.UI.Input/Windows.Devices.Input usings and .PointerDevice access"
+  ]
+}

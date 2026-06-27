@@ -1,0 +1,23 @@
+{
+  "scenario": "BasicInput",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "PointerRoutedEventArgs.GetCurrentPoint()/GetIntermediatePoints() return Microsoft.UI.Input.PointerPoint, but migrated code kept Windows.UI.Input-typed locals/usings, causing CS0029 conversion errors (x5).",
+      "evidence": "session-log: 'error CS0029: Cannot implicitly convert type Microsoft.UI.Input.PointerPoint to Windows.UI.Input.PointerPoint' (x5).",
+      "covered_at": "MIGRATION-PATTERNS.md line 91, Namespace Mapping table row '| Windows.UI.Input | Microsoft.UI.Input |'.",
+      "why_missed": "under-emphasized — a single generic table row doesn't surface the concrete pointer build error or the rule 'replace the using and re-type the PointerPoint locals', so the agent left mixed-namespace types and looped on CS0029.",
+      "proposed_improvement": "Reinforce the existing Windows.UI.Input table row with a concrete CS0029 PointerPoint entry in the 'Common build errors' section telling the agent to use `using Microsoft.UI.Input;` and re-type PointerPoint/PointerPointProperties locals (don't keep a stale Windows.UI.Input using).",
+      "generalizes": "Every migrated pointer handler calls GetCurrentPoint(); the namespace/type mismatch recurs whenever the stale UWP input using survives the rewrite."
+    },
+    {
+      "problem": "Windows.UI.Colors references fail with CS0234 (x8) because the Colors palette moved while the Windows.UI.Color struct did not.",
+      "evidence": "session-log: 'error CS0234: The type or namespace name Colors does not exist in the namespace Windows.UI' (x8); fixes use Microsoft.UI.Colors.<Name>.",
+      "covered_at": "MIGRATION-PATTERNS.md line 92, Namespace Mapping table row '| Windows.UI.Colors | Microsoft.UI.Colors |'.",
+      "why_missed": "buried — the row is correct but the agent repeatedly hit CS0234 because the easy-to-miss distinction (Colors class moves, Color struct stays) isn't spelled out as a build error.",
+      "proposed_improvement": "Add a one-line CS0234 'Colors' bullet to the pointer/gesture build-error subsection clarifying Colors -> Microsoft.UI.Colors while the Windows.UI.Color struct stays.",
+      "generalizes": "Color literals (Colors.X) appear in nearly every XAML-adjacent code-behind; the CS0234 surfaces broadly after the rewrite."
+    }
+  ]
+}

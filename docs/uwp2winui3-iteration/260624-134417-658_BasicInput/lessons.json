@@ -1,0 +1,33 @@
+{
+  "scenario": "BasicInput",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bulk Windows.UI.Xaml -> Microsoft.UI.Xaml rewrite + scaffold produced a building project; final build SUCCEEDED and scored 100." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Only rewrites Windows.UI.Xaml.* namespaces; non-Xaml input namespaces (Windows.UI.Input, Windows.Devices.Input, Windows.UI.Colors) are left untouched, so pointer/gesture/color code fails to compile until hand-edited.", "suggested_tweak": "Document the pointer/gesture/Colors error cluster prominently in MIGRATION-PATTERNS.md so the agent fixes it in one pass." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.UI.Input.PointerPoint", "why_tried": "Held the result of PointerRoutedEventArgs.GetCurrentPoint() in a Windows.UI.Input.PointerPoint variable.", "root_cause": "In WinUI 3 GetCurrentPoint()/GetIntermediatePoints() return Microsoft.UI.Input.PointerPoint; the UWP-namespaced type is incompatible.", "fix": "Use using Microsoft.UI.Input; and type locals as PointerPoint/PointerPointProperties from there." },
+    { "api": "PointerPoint.PointerDevice", "why_tried": "UWP code read currentPoint.PointerDevice.PointerDeviceType.", "root_cause": "PointerPoint.PointerDevice property was removed in WinUI 3.", "fix": "Read PointerPoint.PointerDeviceType directly; PointerDeviceType enum is in Microsoft.UI.Input, not Windows.Devices.Input." },
+    { "api": "Windows.UI.Input.HoldingState", "why_tried": "Compared HoldingRoutedEventArgs.HoldingState against HoldingState.Started.", "root_cause": "Both Windows.UI.Input.HoldingState and Microsoft.UI.Input.HoldingState were in scope (CS0019); WinUI 3 args use the Microsoft.UI.Input enum.", "fix": "Drop the Windows.UI.Input using / fully-qualify Microsoft.UI.Input.HoldingState." },
+    { "api": "Windows.UI.Colors", "why_tried": "Referenced Colors palette for SolidColorBrush.", "root_cause": "Colors static class moved to Microsoft.UI.Colors (the Windows.UI.Color struct stays in Windows.UI).", "fix": "Use Microsoft.UI.Colors.<Name>." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "PointerDeviceType", "special_handling": "Moved from Windows.Devices.Input to Microsoft.UI.Input in WinUI 3; reachable directly as PointerPoint.PointerDeviceType." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: The type or namespace name 'Colors' does not exist in the namespace 'Windows.UI' (x8)", "root_cause": "Colors palette moved to Microsoft.UI.Colors; bulk rewrite only touches Windows.UI.Xaml.", "fix": "Reference Microsoft.UI.Colors.<Name>." },
+    { "error": "CS0029: Cannot implicitly convert 'Microsoft.UI.Input.PointerPoint' to 'Windows.UI.Input.PointerPoint' (x5)", "root_cause": "GetCurrentPoint() returns Microsoft.UI.Input.PointerPoint but locals/usings still referenced Windows.UI.Input.", "fix": "using Microsoft.UI.Input; and type locals from that namespace." },
+    { "error": "CS1061: 'PointerPoint' does not contain a definition for 'PointerDevice' (x4)", "root_cause": "PointerPoint.PointerDevice removed in WinUI 3.", "fix": "Use PointerPoint.PointerDeviceType; PointerDeviceType enum in Microsoft.UI.Input." },
+    { "error": "CS0019: Operator '==' cannot be applied to operands of type 'HoldingState' and 'HoldingState' (x2)", "root_cause": "Two same-named HoldingState enums in scope; WinUI 3 event args use Microsoft.UI.Input.HoldingState.", "fix": "Remove stale Windows.UI.Input using / fully-qualify the Microsoft.UI.Input enum." },
+    { "error": "CS8618/CS8600/CS8602/CS8604/CS8625 nullable warnings (many, non-fatal)", "root_cause": "Scaffold .csproj enables <Nullable>; ported UWP fields/properties were not null-annotated.", "fix": "Left as warnings; build still succeeded. Low leverage." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Pointer/gesture input files (1-InputEvents, 2-PointerPointProperties, 4-XAMLManipulations, 5-GestureRecognizer)", "symptom": "Repeated rebuilds failing on a cluster of CS0234/CS0029/CS1061/CS0019 errors all rooted in Windows.UI.Input/Windows.Devices.Input/Windows.UI.Colors not being migrated.", "turns_or_retries": "~19 error lines across several build iterations", "root_cause": "The bulk namespace rewrite only handles Windows.UI.Xaml; the input/colors namespaces and the PointerPoint shape change (PointerDevice removed) are not covered anywhere prominent in the skill.", "how_resolved": "Switched to using Microsoft.UI.Input;, fully-qualified Microsoft.UI.Colors and Microsoft.UI.Input.HoldingState, and read PointerPoint.PointerDeviceType directly.", "preventable_by": "A dedicated, prominent 'Pointer/gesture/Colors input errors' subsection in MIGRATION-PATTERNS.md's 'Common build errors' section enumerating each error and its one-line fix, plus a Windows.Devices.Input -> Microsoft.UI.Input namespace-table row." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

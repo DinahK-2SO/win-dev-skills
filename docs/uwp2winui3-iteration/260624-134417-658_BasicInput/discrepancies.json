@@ -1,0 +1,17 @@
+{
+  "scenario": "BasicInput",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Input Events", "status": "pass", "reason": "All 4 pointer/tap target areas present and match UWP.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "PointerPoint Properties", "status": "pass", "reason": "Description + pointer canvas present; PointerPoint properties read.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Device Capabilities", "status": "pass", "reason": "Live keyboard/mouse/touch values populated at load.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "XAML Manipulations", "status": "pass", "reason": "ComboBox/ToggleSwitch/Button/draggable Border all present and respond.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Gesture Recognizer", "status": "pass", "reason": "GestureRecognizer manipulation + reset/inertia/axis present and responsive.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Functionally perfect migration (100, 5/5). The only evidence of friction is the build-time pointer/gesture/colors error cluster the dev-agent had to resolve by hand. Reported visual discrepancies are eval-instrument limitations (blank WinUI swapchain capture, UWP nav not walkable) — out of scope for the migration skill."
+}
