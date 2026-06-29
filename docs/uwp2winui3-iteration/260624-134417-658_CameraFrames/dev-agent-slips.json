@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraFrames",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "WinUI 3 PNG screenshots captured blank for the migrated app.",
+      "evidence": "score discrepancies.json id 'winui-screenshot-capture-blank'; UIA tree shows full laid-out content.",
+      "covered_clearly_at": "N/A — this is an eval-side / environment capture limitation (PrintWindow/BitBlt cannot grab the WinUI 3 swapchain), not a migration-skill concern.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Not caused by the migration; it is a host screenshot limitation handled by the eval (which fell back to the UIA tree). No migration-skill edit could change it, and it is out of scope (eval instrument)."
+    },
+    {
+      "problem": "Scenario 2 Start/Stop buttons could not be actuated (disabled).",
+      "evidence": "score discrepancies.json id 'scenario2-start-stop-disabled'; Button 'Start'/'Stop' enabled=false.",
+      "covered_clearly_at": "Matches UWP behaviour exactly (no camera/source group). The migration correctly reproduced the hardware-gated disabled state.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Not a defect at all — identical hardware gating to the UWP golden, 0 behavioral regressions. Nothing to fix in the skill."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "scenario": "CameraFrames",
+  "uwp_launchable": true,
+  "score": 75,
+  "features_total": 2,
+  "features_pass": 1,
+  "features_partial": 1,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: UWP app launched (ok:true, pid 30324, window 'Camera Frames C# Sample') and golden screenshot captured; UWP CoreWindow exposes only a single Pane to UI Automation (ApplicationFrameHost-hosted), so per-control actuation and title-nav could not be driven on the original app. No camera hardware present ('No source groups found').",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Shared mode access to color, depth and infrared frame sources",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Shared_mode_access_to_color_depth_and_infrared_frame_sources.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Shared_mode_access_to_color_depth_and_infrared_frame_sources.png",
+      "note": "Full structural + content parity confirmed via WinUI UIA tree (Description, 'Next Source Group' button, Color/Depth/Infrared labels, '[0] ... No source groups found.'), matching the UWP golden. 'Next Source Group' responded (+1 token) in WinUI; could not be actuated in the UWP (opaque CoreWindow). Coverage 1/1, actions 1/1 live. WinUI PNG is blank only due to a WinUI3 screenshot-capture limitation, not a blank page."
+    },
+    {
+      "name": "Find and display all media frame sources",
+      "verdict": "partial",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Find_and_display_all_media_frame_sources.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Find_and_display_all_media_frame_sources.png",
+      "note": "All 5 controls present in WinUI (3 ComboBoxes: Source Group/Frame Source/Media Format, plus Start/Stop) per the UIA tree. Compare-Parity scored coverage 2/5 because the 3 ComboBoxes lack AutomationProperties.AutomationId and could not be name-matched (genuine metadata gap). Start/Stop are disabled (no camera/source group) so could not be actuated - identical hardware-gating to the UWP, not a dead-control regression. Held at partial: honest, conservative, consistent with the parity gate."
+    }
+  ]
+}

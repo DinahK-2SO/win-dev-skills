@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraFrames",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated interactive controls (3 ComboBoxes in scenario 2) ship with empty UIA AutomationId/Name; in WinUI 3 x:Name is not projected as the AutomationId, so the controls are invisible to UI Automation, assistive tech, and name-based parity matching. Scenario 2 held at partial (coverage 2/5).",
+      "evidence": "score notes migration-score.json feature 'Find and display all media frame sources' verdict=partial ('3 ComboBoxes lack AutomationProperties.AutomationId and could not be name-matched'); discrepancies.json id 'scenario2-comboboxes-missing-automationid'; migration session-log.txt shows controls authored with x:Name (GroupComboBox/SourceComboBox/FormatComboBox) only.",
+      "skill_search": "grepped winui-uwp-migration for 'AutomationId|AutomationProperties|Automation' — ZERO hits in the migration skill (SKILL.md, MIGRATION-PATTERNS.md, scripts). Only the eval skill winui3-parity-check mentions it.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The migration skill never tells the agent that WinUI 3 (like UWP) does not expose x:Name as the UIA AutomationId, nor to add AutomationProperties.AutomationId to interactive controls. The agent preserved x:Name verbatim (correct) but that is insufficient for automation identity.",
+      "proposed_fix": "Add a PATTERNS.md section '#automation-id' explaining x:Name != AutomationId and instructing AutomationProperties.AutomationId (mirror x:Name) on every interactive control; add a WARN-only check (check 9) in Validate-UwpMigration.ps1 that flags named interactive controls missing AutomationProperties.AutomationId; reference it from SKILL.md Step 4.",
+      "generalizes": "Every UWP app has interactive controls and every WinUI 3 migration inherits the same x:Name!=AutomationId behaviour. Any scenario scored by name-based UI Automation parity (and real-world accessibility/coded-UI testing) is undercounted whenever AutomationId is absent — this is not specific to ComboBoxes or to CameraFrames."
+    }
+  ]
+}

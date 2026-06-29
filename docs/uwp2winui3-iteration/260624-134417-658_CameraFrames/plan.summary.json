@@ -1,0 +1,18 @@
+{
+  "scenario": "CameraFrames",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: add WARN-only 'UI Automation identity' check flagging named interactive controls (Button/ComboBox/TextBox/etc.) missing AutomationProperties.AutomationId, since WinUI 3 doesn't project x:Name as the UIA AutomationId",
+    "MIGRATION-PATTERNS.md: add '#automation-id' section explaining x:Name != AutomationId and instructing AutomationProperties.AutomationId on interactive controls (with before/after XAML)",
+    "SKILL.md: document the new validator check 9 and cross-link the AutomationId pattern in Step 4"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "WinUI 3 blank screenshot capture on this host is an eval/environment limitation, not a migration-skill issue"
+  ]
+}

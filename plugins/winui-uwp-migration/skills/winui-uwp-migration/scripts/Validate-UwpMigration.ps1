@@ -672,6 +672,57 @@ if (Test-Path -LiteralPath $snapPath) {
     }
 }
 
+# ─── 9. UI Automation identity — interactive controls need AutomationId (WARN-only) ─
+# In WinUI 3 (as in UWP) `x:Name` is NOT projected as the control's UIA AutomationId
+# the way it is in WPF — a named control still reports an empty AutomationId/Name to
+# UI Automation unless AutomationProperties.AutomationId (or .Name) is set explicitly.
+# That breaks accessibility, coded-UI/test automation, and any name-based parity
+# match. This is WARN-only (it never changes pixels, so it can't fail a build) but a
+# WARN almost always means lost test/accessibility identity worth fixing.
+$interactiveTypes = @(
+    'Button','AppBarButton','AppBarToggleButton','HyperlinkButton','ToggleButton',
+    'RepeatButton','DropDownButton','SplitButton','ComboBox','ListBox','ListView',
+    'GridView','TextBox','RichEditBox','PasswordBox','AutoSuggestBox','CheckBox',
+    'RadioButton','RadioButtons','ToggleSwitch','Slider','CalendarDatePicker',
+    'DatePicker','TimePicker','ColorPicker','RatingControl','NumberBox','SearchBox',
+    'ToggleMenuFlyoutItem','MenuFlyoutItem'
+)
+$typeAlt = ($interactiveTypes -join '|')
+$xamlFiles = @($files | Where-Object { $_.Extension -eq '.xaml' })
+$autoIdLost = New-Object System.Collections.Generic.List[object]
+foreach ($f in $xamlFiles) {
+    $rel = [System.IO.Path]::GetRelativePath($Target, $f.FullName)
+    $leaf = [System.IO.Path]::GetFileName($rel)
+    if ($deferredFiles.ContainsKey($rel) -or $deferredFiles.ContainsKey($leaf)) { continue }
+    $xtext = [System.IO.File]::ReadAllText($f.FullName)
+    $missingHere = @()
+    foreach ($m in [regex]::Matches($xtext, "<(?:[A-Za-z0-9]+:)?($typeAlt)\b[^>]*?>")) {
+        $tag = $m.Value
+        if ($tag -match '\bx:Name\s*=' -and
+            $tag -notmatch 'AutomationProperties\.AutomationId\s*=' -and
+            $tag -notmatch 'AutomationProperties\.Name\s*=') {
+            $nm = if ($tag -match 'x:Name\s*=\s*"([^"]+)"') { $matches[1] } else { '?' }
+            $missingHere += "$($m.Groups[1].Value) x:Name=$nm"
+        }
+    }
+    if ($missingHere.Count -gt 0) { [void]$autoIdLost.Add([PSCustomObject]@{ File = $rel; Controls = $missingHere }) }
+}
+if ($xamlFiles.Count -gt 0) {
+    if ($autoIdLost.Count -eq 0) {
+        Write-Host "[PASS] UI Automation identity — named interactive controls expose AutomationProperties.AutomationId"
+    } else {
+        $totalCtl = ($autoIdLost | ForEach-Object { $_.Controls.Count } | Measure-Object -Sum).Sum
+        Write-Host "[WARN] UI Automation identity — $totalCtl named interactive control(s) in $($autoIdLost.Count) page(s) have x:Name but no AutomationProperties.AutomationId; they report an empty AutomationId/Name to UI Automation (see PATTERNS.md#automation-id and .validator-diagnostics.txt):"
+        $diagBlock = New-Object System.Collections.Generic.List[string]
+        foreach ($e in ($autoIdLost | Select-Object -First 30)) {
+            Write-Host "       $($e.File): $($e.Controls.Count) control(s)"
+            [void]$diagBlock.Add("[$($e.File)]")
+            foreach ($c in $e.Controls) { [void]$diagBlock.Add("  NO AutomationId: $c") }
+        }
+        Add-Diag 'UI Automation identity (WARN)' (($diagBlock) -join "`r`n")
+    }
+}
+
 # ─── Summary ───────────────────────────────────────────────────────────────────
 # Always write the diagnostics file (even when empty) so its presence is
 # predictable. The agent can grep / open it on FAIL without guessing.

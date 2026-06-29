@@ -1,0 +1,35 @@
+{
+  "scenario": "CameraFrames",
+  "created_at": "2026-06-30T03:30:00+08:00",
+  "uwp_capture_status": "partial: original UWP app launched (ok:true) and golden screenshot captured; its CoreWindow exposes only a single Pane to UI Automation (hosted by ApplicationFrameHost), so title-driven navigation to scenario 2 and per-control actuation could not be performed on the original app. Visual golden reflects scenario 1 ('No source groups found' - no camera hardware on this machine).",
+  "features": [
+    {
+      "id": "scenario1-shared-mode",
+      "area": "Scenario 1",
+      "name": "Shared mode access to color, depth and infrared frame sources",
+      "description": "Displays color, depth and infrared frame sources simultaneously in shared mode, with a 'Next Source Group' button to cycle source groups and a status log.",
+      "expected_behaviour": [
+        "Page shows a Description block and a 'Next Source Group' button",
+        "Three labelled preview regions are present: Color frame source, Depth frame source, Infrared frame source",
+        "A status/log line reports source-group state (e.g. 'No source groups found.' when no camera is present)",
+        "Clicking 'Next Source Group' cycles the active source group (produces a visible response)"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Shared_mode_access_to_color_depth_and_infrared_frame_sources.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario2-find-display-sources",
+      "area": "Scenario 2",
+      "name": "Find and display all media frame sources",
+      "description": "Enumerates frame sources and initializes a selected source via a frame reader. Provides Source Group, Frame Source and Media Format selectors plus Start/Stop controls.",
+      "expected_behaviour": [
+        "Page shows a Description block",
+        "Three ComboBoxes are present: Source Group, Frame Source, Media Format",
+        "Start and Stop buttons are present",
+        "Start/Stop are disabled until a valid source group/source is selected (hardware-gated; both disabled when 'No source groups found')"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Find_and_display_all_media_frame_sources.png",
+      "weight": 2
+    }
+  ]
+}

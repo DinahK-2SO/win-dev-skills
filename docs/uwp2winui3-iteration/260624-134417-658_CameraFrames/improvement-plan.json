@@ -1,0 +1,30 @@
+{
+  "scenario": "CameraFrames",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated interactive controls expose empty UIA AutomationId/Name because WinUI 3 does not project x:Name as the AutomationId; scenario 2 held at partial (parity coverage 2/5). The migration skill had zero guidance on this (grep 'Automation*' = 0 hits).",
+      "evidence": "score notes migration-score.json (scenario 2 partial: '3 ComboBoxes lack AutomationProperties.AutomationId'); discrepancies.json 'scenario2-comboboxes-missing-automationid'; grep of winui-uwp-migration found no AutomationId mention.",
+      "root_cause": "Skill never tells the agent that x:Name != UIA AutomationId in WinUI 3, nor to add AutomationProperties.AutomationId to interactive controls.",
+      "tier": 1,
+      "change": "Added a WARN-only check (check 9, 'UI Automation identity') to Validate-UwpMigration.ps1 that scans non-deferred XAML for interactive controls (Button/ComboBox/TextBox/ToggleSwitch/list/picker types, etc.) carrying x:Name but no AutomationProperties.AutomationId/Name, and reports them with file + control names.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The validator surfaces missing automation identity that a build-only gate cannot see, prompting the agent to add AutomationId before declaring done.",
+      "falsifiable_check": "On re-run of a migration with named interactive controls, the validator prints '[WARN] UI Automation identity — N named interactive control(s) ... have x:Name but no AutomationProperties.AutomationId' until AutomationId is added; once added it prints '[PASS] UI Automation identity'. Scenario-2-style features move partial→pass as name-based parity coverage reaches full."
+    },
+    {
+      "problem": "No reusable instruction telling the agent how/why to add AutomationProperties.AutomationId during migration.",
+      "evidence": "Same as item 1; the Tier-1 WARN needs a documented fix to point at.",
+      "root_cause": "Missing prose pattern + cross-reference.",
+      "tier": 3,
+      "change": "Added MIGRATION-PATTERNS.md section '#automation-id' ('x:Name is not the UIA AutomationId — set AutomationProperties.AutomationId') with before/after XAML and the control list, plus a note about wrapper controls that swallow AutomationId; referenced it from SKILL.md Step 4 (new validator check 9). Tier-3 prose is justified because the Tier-1 WARN must point the agent to a concrete, general fix.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent learns the general rule and applies AutomationId during migration, not only when the validator complains.",
+      "falsifiable_check": "Get-MigrationPattern / grep of the migration skill now returns the AutomationId guidance; migrated XAML carries AutomationProperties.AutomationId on interactive controls."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0: WinUI 3 hardware-composition screenshots capture blank on this host (PrintWindow/BitBlt cannot grab the swapchain). This is an eval/host limitation, not a migration-skill issue; the parity-check already falls back to the UIA tree."
+  ]
+}

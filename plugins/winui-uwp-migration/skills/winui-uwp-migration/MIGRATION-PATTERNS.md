@@ -638,3 +638,23 @@ WinUI 3 `Page` is still a valid root and is the right target for content navigat
 ### XAML namespace mapping (recap)
 
 `Windows.UI.Xaml.*` → `Microsoft.UI.Xaml.*` for every namespace, both in `using:` xmlns clauses in XAML and in `using` directives in `.cs` files. See the [Namespace Mapping](#namespace-mapping) table at the top of this file.
+
+### `x:Name` is not the UIA AutomationId — set `AutomationProperties.AutomationId` {#automation-id}
+
+Unlike WPF, WinUI 3 (and UWP before it) does **not** project a control's `x:Name` as its UI Automation `AutomationId`. A `<ComboBox x:Name="SourceComboBox" />` still reports an **empty** AutomationId *and* empty Name to UI Automation. The control works and renders fine, but it is invisible to anything that locates controls by identity: assistive technologies (Narrator), coded-UI / WinAppDriver test automation, and name-based parity matching all fail to find it.
+
+Carry every interactive control's identity across by adding `AutomationProperties.AutomationId` (mirror the existing `x:Name`), and ideally `AutomationProperties.Name` for a human-readable label when the control has no visible text of its own:
+
+```xml
+<!-- Named but invisible to UI Automation -->
+<ComboBox x:Name="SourceComboBox" />
+
+<!-- Discoverable: AutomationId mirrors x:Name; Name carries the adjacent label -->
+<ComboBox x:Name="SourceComboBox"
+          AutomationProperties.AutomationId="SourceComboBox"
+          AutomationProperties.Name="Source Group" />
+```
+
+This is a metadata-only addition — it changes no pixels and no behaviour, so it never conflicts with the verbatim-fidelity rule; it only restores the accessibility/testability identity that UWP `x:Name`s never carried in the first place. Apply it to every interactive control (`Button`, `ComboBox`, `TextBox`, `CheckBox`, `RadioButton`, `ToggleSwitch`, `Slider`, list controls, pickers, etc.). The validator's UI-Automation-identity check (Step 4, check 9) WARNs for any named interactive control still missing it.
+
+> A handful of WinUI 3 controls swallow `AutomationProperties.AutomationId` on the element itself; if a control still reports an empty AutomationId after you set it, wrap it in a `<Grid>`/`<Border>` and set the AutomationId on the wrapper.

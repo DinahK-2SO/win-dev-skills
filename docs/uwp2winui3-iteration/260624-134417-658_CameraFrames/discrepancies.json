@@ -1,0 +1,16 @@
+{
+  "scenario": "CameraFrames",
+  "index": 1,
+  "score": 75,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Shared mode access to color, depth and infrared frame sources", "status": "pass", "reason": "Full structural + content parity via WinUI UIA tree; 'Next Source Group' responded.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Find and display all media frame sources", "status": "partial", "reason": "All 5 controls present, but 3 ComboBoxes lack AutomationProperties.AutomationId so Compare-Parity name-matched only 2/5; Start/Stop disabled (no camera, same as UWP).", "suspected_skill_gap": "Migration skill never instructs adding AutomationProperties.AutomationId; in WinUI 3 x:Name is not the UIA AutomationId, so named controls migrate with no automation identity." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Scenario 2 selectors", "uwp": "Source Group / Frame Source / Media Format ComboBoxes present", "winui": "Present and wired but empty AutomationId/Name in UIA tree", "screenshot_ref": "parity/winui3/ui/02.json" }
+  ],
+  "missing_features": [],
+  "summary": "Faithful migration; the only fixable shortfall is missing AutomationProperties.AutomationId on interactive controls, which undercounts structural parity (2/5) and held scenario 2 at partial."
+}

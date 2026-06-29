@@ -1,0 +1,27 @@
+{
+  "scenario": "CameraFrames",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 (bootstrap)", "evidence": "Migration log shows pages copied verbatim then namespace-rewritten; build came up clean with no CS errors in session-log.txt." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Used as the mandatory gate; build healthcheck + smoke launch passed, app launched (pid present) and both scenario pages rendered in the WinUI UIA tree." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Validated build + text fidelity but had no check for UI Automation identity, so the migrated interactive controls shipping with empty AutomationId went undetected.", "suggested_tweak": "Add a WARN check for named interactive controls lacking AutomationProperties.AutomationId." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "MediaCapture / MediaFrameSourceGroup", "special_handling": "Device-gated; with no camera the app correctly reports 'No source groups found' and leaves Start/Stop disabled — matches UWP behaviour, not a defect." }
+  ],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    { "where": "Scenario2 ComboBoxes (Source Group / Frame Source / Media Format)", "symptom": "Controls present and wired with x:Name but reported empty AutomationId/Name to UI Automation, so parity coverage scored 2/5 and scenario 2 was held at partial.", "turns_or_retries": "n/a (silent — never surfaced as an error to the agent)", "root_cause": "In WinUI 3, x:Name is not projected as the UIA AutomationId; the migration skill never instructs adding AutomationProperties.AutomationId, so named controls migrate with no automation identity.", "how_resolved": "Not resolved by the agent — undercounted in scoring.", "preventable_by": "Migration skill prose (PATTERNS.md) instructing AutomationProperties.AutomationId on interactive controls + a validator WARN that flags named interactive controls missing it." }
+  ],
+  "missing_tooling": [
+    { "need": "A validator signal that named interactive controls lack AutomationProperties.AutomationId.", "would_have_saved": "Scenario 2 partial→pass; the gap was invisible to a build-only gate." }
+  ],
+  "env_issues": [
+    { "issue": "WinUI 3 PNG screenshots captured blank (hardware-composition swapchain not grabbable via PrintWindow/BitBlt).", "workaround": "Eval used the UIA tree instead of pixels; this is an eval-side limitation, not a migration defect." }
+  ]
+}
