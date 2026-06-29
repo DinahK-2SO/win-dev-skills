@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "MainPage.OnNavigatedTo replaced UWP's Window.Current.Bounds.Width with Page.ActualWidth, which is 0 before the first layout pass, so the adaptive branch ('< 640') set ScenarioControl.SelectedIndex = -1 and ScenarioFrame.Navigate was never called. The migrated app opens to an empty content frame (blank window).",
+      "evidence": "Migrated MainPage.xaml.cs OnNavigatedTo: 'if (ActualWidth < 640) { ScenarioControl.SelectedIndex = -1; } else { ScenarioControl.SelectedIndex = 0; }'. Agent session-log.txt TURN 3 summary row: 'Window.Current -> ActualWidth'. parity/winui3/ui/01.json shows nav shell laid out but no ScenarioFrame content. migration-score.json feature 'Example Operations' verdict 'fail', winui_responded:false.",
+      "skill_search": "Grepped winui-uwp-migration for 'Window.Current', 'ActualWidth', 'Bounds', 'OnNavigatedTo'. MIGRATION-PATTERNS.md windowing anchor (line 150) covers Window.Current/ApplicationView/CoreWindow -> AppWindow and the static-window init race, but NOTHING about reading window SIZE (Bounds.Width/Height) or the ActualWidth==0-before-layout trap. unsupported-api-inventory.json classifies Window.Current as tier 'safe'.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The windowing guidance treats Window.Current purely as a window-handle/lifecycle concern. It omits the common UWP usage Window.Current.Bounds / CoreWindow.Bounds as a SIZE source. Agents therefore reach for the visually-nearest replacement (Page.ActualWidth), which is 0 until the first layout pass, silently breaking any size-conditioned logic that runs in a constructor or OnNavigatedTo.",
+      "proposed_fix": "Add a short subsection to the windowing anchor in MIGRATION-PATTERNS.md: 'Window size reads: Window.Current.Bounds / CoreWindow.Bounds'. State the rule: do NOT replace a window-size read with Page.ActualWidth/ActualHeight (0 before first layout, e.g. in a constructor or OnNavigatedTo). Use AppWindow.Size (valid immediately) for the live window size, or move the size-dependent logic into a Loaded/SizeChanged handler. Give the canonical OnNavigatedTo auto-select-scenario example fixed.",
+      "generalizes": "The MainPage + SplitView + ScenarioFrame + SampleConfiguration shell (with the >=640 auto-select-scenario-0 check in OnNavigatedTo) is the shared scaffold of the entire Windows-universal-samples family that this benchmark migrates. Any of those scenarios converted by replacing Window.Current.Bounds.Width with ActualWidth opens to an empty frame. More broadly, UWP responsive/adaptive code frequently reads Window.Current.Bounds, so the ActualWidth==0-pre-layout trap recurs across many apps."
+    }
+  ]
+}

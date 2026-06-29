@@ -190,6 +190,39 @@ var appWindow = AppWindow.GetFromWindowId(windowId);
 appWindow.Resize(new SizeInt32(800, 600));
 ```
 
+### Window *size* reads: `Window.Current.Bounds` / `CoreWindow.Bounds`
+
+UWP also uses `Window.Current.Bounds` / `CoreWindow.Bounds` as a **size source** — most
+often for adaptive logic (e.g. the Windows-universal-samples `MainPage.OnNavigatedTo`
+auto-selects scenario 0 only when the window is wide enough):
+
+```csharp
+// UWP
+if (Window.Current.Bounds.Width < 640) ScenarioControl.SelectedIndex = -1;
+else                                   ScenarioControl.SelectedIndex = 0;
+```
+
+**Do NOT replace a window-size read with `Page.ActualWidth` / `ActualHeight`.** A page's
+`ActualWidth`/`ActualHeight` is **`0` until the first layout pass**, so any size check that
+runs in a **constructor** or **`OnNavigatedTo`** sees `0` and silently takes the wrong
+branch. In this sample that left `SelectedIndex = -1`, so `ScenarioFrame.Navigate` was
+never called and the app launched to an **empty/blank content frame** — a clean build and
+a "process stayed alive" smoke launch both pass, only a render check reveals it.
+
+Use `AppWindow.Size` (valid immediately, in physical pixels), or defer the size-dependent
+logic to a `Loaded` / `SizeChanged` handler where `ActualWidth` is populated:
+
+```csharp
+// WinUI 3 — read the live window size up front
+var appWindow = App.MainWindow!.AppWindow;          // or GetFromWindowId(...) as above
+if (appWindow.Size.Width < 640) ScenarioControl.SelectedIndex = -1;
+else                            ScenarioControl.SelectedIndex = 0;
+```
+
+Rule of thumb: **window geometry → `AppWindow.Size`; element geometry after layout →
+`ActualWidth` from `Loaded`/`SizeChanged`. Never read `ActualWidth` in a constructor or
+`OnNavigatedTo`.**
+
 ### Initialization order — keep MainWindow's constructor inert
 
 `App.MainWindow` (or any equivalent static window reference) is `null` for the entire duration of `new MainWindow()` — the right-hand side runs to completion BEFORE the assignment happens. Anything inside that constructor that reads the static — directly or transitively — sees `null` and throws `E_POINTER` (0x80004003) at startup. The build is clean; the analyzer is silent; only a runtime launch reveals it.

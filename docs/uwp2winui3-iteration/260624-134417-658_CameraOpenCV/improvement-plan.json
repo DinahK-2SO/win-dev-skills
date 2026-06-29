@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "MainPage.OnNavigatedTo replaced Window.Current.Bounds.Width with Page.ActualWidth (== 0 before first layout), so the adaptive '< 640' branch ran, SelectedIndex stayed -1, ScenarioFrame.Navigate was never called, and the app launched to an empty/blank content frame.",
+      "evidence": "Migrated MainPage.xaml.cs ('if (ActualWidth < 640) ScenarioControl.SelectedIndex = -1; else = 0;'); agent session-log.txt TURN 3 row 'Window.Current -> ActualWidth'; parity/winui3/ui/01.json (nav shell laid out, no ScenarioFrame content); migration-score.json feature 'Example Operations' = fail, winui_responded:false.",
+      "root_cause": "The windowing migration anchor treats Window.Current only as a window-handle/lifecycle concern and never covers Window.Current.Bounds / CoreWindow.Bounds as a SIZE source, nor the trap that Page.ActualWidth/ActualHeight is 0 before the first layout pass (constructor / OnNavigatedTo).",
+      "tier": 3,
+      "change": "Added a 'Window *size* reads' subsection to the windowing anchor in MIGRATION-PATTERNS.md: states the rule (never replace a window-size read with Page.ActualWidth/ActualHeight, which is 0 pre-layout in a constructor/OnNavigatedTo), gives the broken vs. fixed OnNavigatedTo example, and prescribes AppWindow.Size or deferring to Loaded/SizeChanged.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On any sample using the shared MainPage/SplitView/ScenarioFrame shell (or any UWP adaptive code reading Window.Current.Bounds), the agent — routed to the 'windowing' anchor by the inline TODO that unsupported-api-inventory.json injects for every Window.Current hit — replaces the size read with AppWindow.Size instead of ActualWidth, so the initial scenario is selected and ScenarioFrame navigates.",
+      "falsifiable_check": "On a re-run, MainPage.OnNavigatedTo (or equivalent) uses AppWindow.Size (or a Loaded/SizeChanged handler) rather than Page.ActualWidth; the launched window renders the scenario page (ScenarioFrame non-empty in the UIA tree) and the 'Example Operations' feature goes fail -> pass."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-1: Validate-UwpMigration.ps1 / Test-AppLaunch.ps1 smoke-launch passes on process-liveness alone, so a blank/empty-render window yields a false PASS. A render/parity assertion would have caught this, but render/parity verification belongs to the eval skills (winui3-parity-check), not the migration skill — out of scope to add here.",
+    "Tier-1 (rejected, recorded for humans): a heuristic in Validate-UwpMigration.ps1 to flag ActualWidth/ActualHeight read inside a constructor or OnNavigatedTo was considered but not added — high false-positive risk on legitimate post-layout usage; the inventory already forces the agent through the windowing anchor, making the prose fix reliable."
+  ]
+}

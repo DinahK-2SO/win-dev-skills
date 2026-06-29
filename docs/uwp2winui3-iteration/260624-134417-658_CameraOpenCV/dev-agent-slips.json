@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "124 nullable-reference (CS86xx) build warnings remain (e.g. 'Scenario' Title/ClassType, static MainPage.Current). Cosmetic; did not affect the failing feature.",
+      "evidence": "build-output.txt: multiple CS8618/CS8602/CS8625 warnings; build still 'BUILD SUCCEEDED' with 0 WUI analyzer warnings.",
+      "covered_clearly_at": "Not a migration-skill concern — these are generic C# <Nullable>enable</Nullable> warnings on ported sample code, orthogonal to UWP->WinUI 3 API migration; they do not block build or render.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Warnings are non-blocking and scenario-incidental; a capable re-run could annotate nullability without any skill change, and they had zero bearing on the blank-render failure."
+    },
+    {
+      "problem": "First Validate-UwpMigration.ps1 call used a wrong relative path and no-opped (still exited 0).",
+      "evidence": "session-log.txt TURN 1: \"The term '..\\..\\..\\..\\..\\..\\.github\\skills\\...Validate-UwpMigration.ps1' is not recognized\"; VALIDATE_EXIT=0.",
+      "covered_clearly_at": "Generic path-resolution slip, not a migration-pattern concern; the agent self-corrected with an absolute path on the next turn.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Self-corrected immediately; no recurring skill gap. (The misleading exit-0-on-not-found is an eval/harness ergonomics issue, not migration-skill content.)"
+    }
+  ]
+}

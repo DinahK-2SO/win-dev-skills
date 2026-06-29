@@ -1,0 +1,32 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 1,
+  "score": 0,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    {
+      "id": 1,
+      "text": "Scenario 1 — Example Operations page renders non-blank; OperationComboBox present and switches processing; Preview/Output images present; CurrentOperationTextBlock and FPSMonitor present.",
+      "status": "fail",
+      "reason": "Migrated WinUI 3 window launches but renders blank; the entire Scenario 1 page (OperationComboBox, CurrentOperationTextBlock, PreviewImage, OutputImage, FPSMonitor) is absent from both the render and the UIA tree. Only the un-painted nav shell exists.",
+      "suspected_skill_gap": "MainPage.OnNavigatedTo replaced Window.Current.Bounds.Width with Page.ActualWidth (== 0 before first layout), so the adaptive branch skipped ScenarioControl.SelectedIndex = 0 and ScenarioFrame.Navigate was never called. The windowing migration anchor covers Window.Current generally but does not warn that window-size reads (Bounds) cannot be replaced with Page.ActualWidth."
+    }
+  ],
+  "visual_discrepancies": [
+    {
+      "feature": "Example Operations (scenario content)",
+      "uwp": "Full UI: 'Current: Blur', OperationComboBox, Preview/Output image grid.",
+      "winui": "Empty content frame; only the (unpainted) nav shell exists in the UIA tree.",
+      "screenshot_ref": "parity/winui3/screenshots/01_Example_Operations.png"
+    }
+  ],
+  "missing_features": [
+    "OperationComboBox (operation selector)",
+    "CurrentOperationTextBlock ('Current: Blur')",
+    "PreviewImage",
+    "OutputImage",
+    "FPSMonitor"
+  ],
+  "summary": "App builds and stays alive but opens to an empty scenario frame because the initial scenario was never selected/navigated. Root cause: Window.Current.Bounds.Width was replaced with Page.ActualWidth (0 pre-layout) in OnNavigatedTo, defeating the adaptive auto-select-scenario-0 logic shared by the Windows-universal-samples shell."
+}

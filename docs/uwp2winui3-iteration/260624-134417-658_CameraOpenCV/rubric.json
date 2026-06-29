@@ -1,0 +1,19 @@
+{
+  "scenario": "CameraOpenCV",
+  "featureName": "CameraOpenCV C# Sample",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Example Operations",
+      "controls": [
+        { "name": "OperationComboBox", "type": "ComboBox", "weight": "critical", "behavior": "Selecting an operation changes the OpenCV processing applied to the output frame." },
+        { "name": "CurrentOperationTextBlock", "type": "TextBlock", "weight": "major", "behavior": "Displays 'Current: <operation>'." },
+        { "name": "PreviewImage", "type": "Image", "weight": "major", "behavior": "Shows the live camera preview frame." },
+        { "name": "OutputImage", "type": "Image", "weight": "major", "behavior": "Shows the OpenCV-processed output frame." },
+        { "name": "FPSMonitor", "type": "TextBlock", "weight": "minor", "behavior": "Displays frames-per-second." }
+      ],
+      "outputs": [ "StatusBlock" ],
+      "passCriteria": "Scenario page renders (non-blank), operation ComboBox present and changes processing, Preview/Output images present (camera feed may be empty without hardware)."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "scenario": "CameraOpenCV",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 1,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_result_note": "Compare-Parity.ps1 auto-verdict was PASS (100/100), but it is a false pass: the checklist extractor found 0 controls so structural coverage was trivially satisfied and a 10,408-byte all-white PNG cleared the non-zero-bytes screenshot check. Overridden by direct visual + UIA evidence (blank render = fail).",
+  "behavioral_regressions": 1,
+  "features": [
+    {
+      "name": "Example Operations",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Example_Operations.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Example_Operations.png",
+      "note": "UWP renders the full scenario (Description, 'Current: Blur', operation ComboBox, Preview/Output image grid). The migrated WinUI 3 window renders completely blank white; the scenario page content (OperationComboBox, CurrentOperationTextBlock, PreviewImage, OutputImage, FPSMonitor) is absent from both the render and the UIA tree. Only the un-painted nav shell exists in the tree. Blank screenshot = fail."
+    }
+  ]
+}

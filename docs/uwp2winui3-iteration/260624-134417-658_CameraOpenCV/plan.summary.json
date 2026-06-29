@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md (windowing anchor): add 'Window size reads' subsection — never replace Window.Current.Bounds/CoreWindow.Bounds size reads with Page.ActualWidth (0 before first layout); use AppWindow.Size or defer to Loaded/SizeChanged. Prevents the shared sample shell from launching to an empty/blank ScenarioFrame."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Smoke-launch PASS is process-liveness only and false-passes a blank-render window; render/parity verification belongs to the eval skills (out of scope for the migration skill)."
+  ]
+}

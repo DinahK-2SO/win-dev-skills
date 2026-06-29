@@ -1,0 +1,31 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Seeded MIGRATION-MAPPING.md (3 rows) and a mechanical pass; validator later confirmed 0 residue and all rows resolved." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught residue/mapping/manifest issues and ran dotnet build (0 WUI analyzer warnings); gave the agent a single PASS/FAIL gate." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 (smoke launch via Test-AppLaunch.ps1)", "problem": "Reports '[PASS] Smoke launch — app stayed alive' purely from process liveness; a process that renders a blank/empty window passes. This gave the agent false confidence (it declared the migration complete) while the actual scenario content never rendered.", "evidence": "session-log.txt TURN 2: '[PASS] Smoke launch — app stayed alive after launch (pid 1976)' then TURN 3 agent: 'The migration is complete and the validator reports PASS'; score note: window renders blank, ScenarioFrame empty." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 visible-text fidelity check", "limitation": "Fidelity snapshot only captured MainWindow.xaml title ('CameraOpenCV'); it does not assert that a navigated content Page actually rendered, so an empty initial scenario frame is invisible to it.", "suggested_tweak": "HUMAN/eval-side: process-liveness is not a render check; render/parity verification belongs to the eval skills, not the migration skill." }
+  ],
+  "failed_apis": [
+    { "api": "Window.Current.Bounds.Width", "why_tried": "Original SDK-sample MainPage.OnNavigatedTo uses window width to decide whether to auto-select scenario 0 (>=640) or leave it unselected (<640).", "root_cause": "Agent replaced Window.Current.Bounds.Width with Page.ActualWidth. ActualWidth is 0 inside OnNavigatedTo (before the first layout pass), so the '<640' branch ran, SelectedIndex stayed -1, and ScenarioFrame.Navigate was never called.", "fix": "Read the live window size from AppWindow.Size (or defer the width-dependent logic to Loaded/SizeChanged), not Page.ActualWidth." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "OpenCVBridge (C++/CX WinRT component)", "special_handling": "Replaced with OpenCvSharp4 (pure managed) — agent handled this well." }
+  ],
+  "errors_encountered": [
+    { "error": "Migrated app launches and stays alive but the initial scenario page never renders (empty ScenarioFrame; window appears blank).", "root_cause": "Page.ActualWidth == 0 in OnNavigatedTo caused the adaptive branch to skip the initial ScenarioControl.SelectedIndex = 0, so no scenario was navigated.", "fix": "Use a window-size source that is valid before layout (AppWindow.Size) or move the size check into a Loaded/SizeChanged handler." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainPage.OnNavigatedTo width check", "symptom": "No struggle was visible — the agent never detected the empty render; it trusted the validator's smoke-launch PASS and declared success.", "turns_or_retries": "0 (silent failure)", "root_cause": "The only runtime signal available (process stayed alive) does not distinguish a rendered window from a blank one, and the Window.Current→ActualWidth substitution is silently wrong (0 before layout).", "how_resolved": "Not resolved in-trial; surfaced only by the independent parity/score step.", "preventable_by": "A MIGRATION-PATTERNS note in the windowing anchor warning that Window.Current.Bounds size reads must NOT be replaced with Page.ActualWidth (0 pre-layout); use AppWindow.Size or defer to Loaded/SizeChanged." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "First Validate-UwpMigration.ps1 invocation used a wrong relative script path and silently no-opped (VALIDATE_EXIT=0 despite 'not recognized').", "workaround": "Agent re-ran with an absolute path; minor, self-corrected." }
+  ]
+}
