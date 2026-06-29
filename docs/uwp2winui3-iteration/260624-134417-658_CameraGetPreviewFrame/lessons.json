@@ -1,0 +1,39 @@
+{
+  "scenario": "CameraGetPreviewFrame",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 inline TODO[migrate-NNN] anchors", "evidence": "session-log turns 24-34: scaffold pre-seeded TODO[migrate-005..008] routing to PATTERNS.md#getforcurrentview / #threading, which the agent resolved one by one (Dispatcher.RunAsync -> DispatcherQueue.TryEnqueue)." },
+    { "tool": "dotnet build -p:Platform=$arch loop", "evidence": "Agent rebuilt after each batch of fixes to surface the next error (CS0227, CS1061); build finally succeeded (build-output.txt: BUILD SUCCEEDED)." }
+  ],
+  "tools_problematic": [
+    { "tool": "unsupported-api-inventory.json triage", "problem": "Classified CaptureElement as 'unsupported' -> collapsed the whole camera-preview file to triage label 'defer'. The agent had to override the triage and migrate the preview anyway to reach parity.", "evidence": "inventory 'unsupported' list contained CaptureElement; agent replaced PreviewControl.Source=_mediaCapture with a GetPreviewFrameAsync DispatcherTimer loop (turns 33-35) instead of deferring." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration residue grep", "limitation": "Because CaptureElement was 'unsupported', a successfully-migrated camera preview would be flagged as un-deferred residue.", "suggested_tweak": "Reclassify CaptureElement as 'adaptable' with a camera-preview anchor so a migrated preview is expected, not flagged." }
+  ],
+  "failed_apis": [
+    { "api": "CaptureElement / PreviewControl.Source = _mediaCapture", "why_tried": "Direct UWP live-preview pattern carried over from the sample.", "root_cause": "No CaptureElement control exists in WinUI 3; MediaCapture.Source has no XAML host.", "fix": "Replaced with an <Image> + DispatcherTimer GetPreviewFrameAsync loop converting SoftwareBitmap to a SoftwareBitmapSource." },
+    { "api": "Application.Current.Suspending / .Resuming", "why_tried": "UWP sample released/re-acquired the camera on app suspend/resume.", "root_cause": "WinUI 3 desktop Application has no Suspending/Resuming events (CS1061).", "fix": "Removed the subscriptions and moved cleanup/init into Window.Activated (WindowActivationState.Deactivated)." },
+    { "api": "SystemMediaTransportControls.GetForCurrentView()", "why_tried": "UWP sample used SMTC SoundLevel==Muted as a 'app minimized' signal.", "root_cause": "No per-view SMTC singleton in WinUI 3 desktop.", "fix": "Replaced foreground/background detection with Window.Activated." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md '### CS0246 / CaptureElement could not be found'", "wrong": "States there is 'no compatible replacement' and the file 'should be marked defer'.", "correct": "Live camera preview IS migratable via a GetPreviewFrameAsync->Image frame loop or MediaPlayerElement+MediaFrameSource; deferring drops a working feature." },
+    { "where": "MIGRATION-PATTERNS.md '## Application Lifecycle and Activation'", "wrong": "Covers OnLaunched/OnActivated/OnFileActivated only; silent on Suspending/Resuming.", "correct": "Suspending/Resuming do not exist in WinUI 3 desktop and map to Window.Activated." }
+  ],
+  "special_apis": [
+    { "api": "MediaCapture.GetPreviewFrameAsync", "special_handling": "Used as the CaptureElement replacement; frame must be converted to Bgra8/Premultiplied SoftwareBitmap and pushed to an Image via SoftwareBitmapSource on the UI thread." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0227: Unsafe code may only appear if compiling with /unsafe", "root_cause": "Pixel-buffer access in the camera/effect code uses unsafe blocks; scaffold csproj omits AllowUnsafeBlocks.", "fix": "Added <AllowUnsafeBlocks>true</AllowUnsafeBlocks> (already documented in PATTERNS.md)." },
+    { "error": "CS1061: 'Application' does not contain a definition for 'Suspending' / 'Resuming'", "root_cause": "WinUI 3 Application has no suspend/resume lifecycle events.", "fix": "Removed subscriptions; replaced with Window.Activated." },
+    { "error": "CS0246 / WMC0001 CaptureElement could not be found", "root_cause": "Control absent in WinUI 3.", "fix": "Migrated preview to an Image frame loop instead of deferring." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Suspend/resume lifecycle (App constructor + MainPage)", "symptom": "Subscribed to Application.Current.Suspending/Resuming, hit CS1061, kept the UWP handlers for several turns before realizing they are UWP-only.", "turns_or_retries": "turns 30-38 (~8 turns of churn)", "root_cause": "Skill lifecycle section never states Suspending/Resuming are gone or what replaces them.", "how_resolved": "Removed the subscriptions and rewired teardown/init through Window.Activated.", "preventable_by": "A PATTERNS.md lifecycle subsection on Suspending/Resuming->Window.Activated plus an analyzer TODO so the file is flagged up front." },
+    { "where": "Camera preview (CaptureElement)", "symptom": "Had to decide whether to honor the 'defer' triage or migrate; chose to migrate with a bespoke frame loop.", "turns_or_retries": "turns 33-35", "root_cause": "Skill/inventory told it to defer CaptureElement, but parity requires a live preview.", "how_resolved": "Built a DispatcherTimer GetPreviewFrameAsync->Image loop.", "preventable_by": "Reclassify CaptureElement as adaptable and document the frame-loop replacement so the path is the default, not an override." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No camera on the build/scoring box; GetPreviewFrameButton stays disabled in both UWP and WinUI.", "workaround": "Hardware-gated control is dead in both apps, so it is not a regression (rubric notes this)." }
+  ]
+}

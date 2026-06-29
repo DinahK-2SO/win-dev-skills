@@ -35,6 +35,10 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 ```
 
+### `CS1061: 'Application' does not contain a definition for 'Suspending'` / `'Resuming'`
+
+UWP samples subscribe to `Application.Current.Suspending` / `.Resuming` (often in an `App.xaml.cs` or page constructor) to release/re-acquire hardware (camera, sensors, media) as the app moves between foreground and background. **WinUI 3 desktop has no `Suspending`/`Resuming` events** — a desktop process is not suspended the way a UWP app is, so the subscription fails to compile. Remove those subscriptions and move the same teardown/re-init logic into `Window.Activated`; see [Application Lifecycle](#lifecycle).
+
 ### Thousands of `CS0101` duplicate-type / `CS0227` / `CS0234` errors (often a build that hangs)
 
 If `dotnet build` floods with **tens of thousands** of `CS0101` ("already contains a definition for …"), `CS0227`, or `CS0234` errors — or the build appears to hang for minutes — the cause is almost always **stale UWP build output that was copied into the migrated tree**. A previously-built UWP project (especially a multi-project sample with sub-folders) leaves machine-generated sources under `bin/` and `obj/`, e.g. .NET-Native ILC files at `obj\<arch>\Release\ilc\**\*.g.cs` and `*.McgInterop\ImplTypes.g.cs`. The SDK-style WinUI `.csproj` globs `**/*.cs`, and MSBuild's default `bin`/`obj` exclusion only covers the **project-root** `bin`/`obj` — any **nested** sub-project `bin`/`obj` is still compiled, producing the duplicate types.
@@ -52,7 +56,7 @@ Generated sources never belong in source control or the migrated tree — only `
 
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
-`<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
+`<CaptureElement>` (the XAML host bound to `MediaCapture.Source`) has no drop-in WinUI 3 element, but **live camera preview is migratable — do not blanket-defer it.** See [Camera Preview](#capture) for the working replacement (render `GetPreviewFrameAsync` frames into an `<Image>` on a `DispatcherQueue` / `DispatcherTimer` loop, or feed a `MediaPlayerElement` from a `MediaFrameSource`). Only mark the file `defer` if the preview genuinely cannot be reconstructed any other way.
 
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
@@ -262,6 +266,7 @@ None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is 
 | `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+| `SystemMediaTransportControls.GetForCurrentView()` | No per-view SMTC; for the common "detect foreground/minimized to release hardware" use, hook `Window.Activated` instead (see [Lifecycle](#lifecycle)) |
 
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces
@@ -371,6 +376,27 @@ switch (args.Kind)
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
 
+### Suspend / Resume → `Window.Activated`
+
+UWP's `Application.Current.Suspending` and `.Resuming` events **do not exist** in WinUI 3 desktop (subscribing to them is `CS1061`). A desktop process keeps running in the background, so there is no suspend transition to hook. Samples use these events almost exclusively to **release a hardware resource when the app leaves the foreground and re-acquire it on return** (camera preview, sensors, audio capture). Map them to window activation instead:
+
+```csharp
+// UWP (remove these subscriptions):
+//   Application.Current.Suspending += OnSuspending;  // released the camera
+//   Application.Current.Resuming   += OnResuming;    // re-initialized it
+
+// WinUI 3 — hook the Window instead:
+App.MainWindow.Activated += async (s, e) =>
+{
+    if (e.WindowActivationState == WindowActivationState.Deactivated)
+        await CleanupCameraAsync();      // went to background
+    else if (!_isInitialized)
+        await InitializeCameraAsync();   // back in foreground
+};
+```
+
+There is no `SuspendingOperation` / deferral equivalent — await the teardown directly in the handler. For final teardown on exit, use `Window.Closed`. The same `Window.Activated` swap replaces UWP's other "am I in the foreground?" hooks, e.g. `SystemMediaTransportControls.GetForCurrentView()` + `SoundLevel == Muted`.
+
 <a id="background-tasks"></a>
 ## Background Tasks
 
@@ -407,6 +433,34 @@ var s = loader.GetString("Greeting");
 ## Text Rendering: DirectWrite → DWriteCore
 
 If you do custom text rendering with DirectWrite, switch to **DWriteCore** — the WinAppSDK implementation. APIs are largely parallel; see the [DWriteCore migration guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/dwritecore).
+
+<a id="capture"></a>
+## Camera Preview (CaptureElement replacement)
+
+`CaptureElement` + `MediaCapture.StartPreviewAsync()` is the standard UWP live-preview pattern. WinUI 3 has no `CaptureElement`, but the **preview itself migrates** — do not defer the feature. Two working approaches:
+
+1. **Frame loop into an `<Image>` (simplest, no extra packages).** Replace `<CaptureElement x:Name="PreviewControl"/>` with `<Image x:Name="PreviewControl"/>`, keep the `MediaCapture` init unchanged, then pull frames on a timer and push them to the `Image` on the UI thread:
+
+   ```csharp
+   var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(33) };
+   timer.Tick += async (_, _) =>
+   {
+       using var frame = await _mediaCapture.GetPreviewFrameAsync();
+       var source = new SoftwareBitmapSource();
+       await source.SetBitmapAsync(SoftwareBitmap.Convert(
+           frame.SoftwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied));
+       PreviewControl.Source = source;   // PreviewControl is now an <Image>
+   };
+   timer.Start();
+   ```
+
+2. **`MediaPlayerElement` fed by a `MediaFrameSource`** (`MediaSource.CreateFromMediaFrameSource`) — heavier; use when you also need playback transport controls.
+
+Recurring fix-ups across camera samples:
+- `CaptureElement.Source = _mediaCapture;` no longer compiles — start the frame loop above instead, and stop the timer / set `Source = null` in cleanup.
+- Marshal preview-thread updates onto the UI thread with `DispatcherQueue.TryEnqueue(...)`, not UWP's `Dispatcher.RunAsync` (see [Threading](#threading)).
+- Pixel-buffer access (effects, `GetPreviewFrameAsync` + `IMemoryBufferByteAccess`) needs `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>` (see the CS0227 build-error note above).
+- Foreground/background handling UWP did via `Suspending` or SMTC mute → use `Window.Activated` (see [Lifecycle](#lifecycle)).
 
 <a id="controls"></a>
 ## Controls and Features

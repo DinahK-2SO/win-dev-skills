@@ -1,0 +1,19 @@
+{
+  "scenario": "CameraGetPreviewFrame",
+  "source": "uwp-samples-standalone/Samples/CameraGetPreviewFrame/cs",
+  "features": [
+    {
+      "number": 1,
+      "title": "CameraGetPreviewFrame",
+      "controls": [
+        { "type": "Button",   "label": "GetPreviewFrameAsync", "expected": "Captures a preview frame from the running camera preview. Disabled until the camera preview is started; with no camera hardware it stays disabled." },
+        { "type": "CheckBox", "label": "Show frame",   "expected": "Toggles whether the captured preview frame is displayed in the image control." },
+        { "type": "CheckBox", "label": "Green effect", "expected": "Toggles a software green tint applied to the captured frame." },
+        { "type": "CheckBox", "label": "Save frame",   "expected": "Toggles whether the captured frame is saved to a file." }
+      ],
+      "actions": [
+        { "target": "GetPreviewFrameAsync", "type": "Button", "expectedResponse": "Updates the preview/frame image and FrameInfo text when a camera is present. Hardware-gated: with no camera the button is disabled and produces no response." }
+      ]
+    }
+  ]
+}

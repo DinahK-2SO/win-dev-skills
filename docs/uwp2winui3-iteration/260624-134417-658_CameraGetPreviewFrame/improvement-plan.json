@@ -1,0 +1,28 @@
+{
+  "scenario": "CameraGetPreviewFrame",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CaptureElement live preview steered to 'defer' despite a working WinUI 3 migration path; would drop the core feature of any camera sample.",
+      "evidence": "lessons.json failed_apis[CaptureElement]; session-log turns 33-35 (frame-loop replacement reached 4/4 parity); unsupported-api-inventory.json had CaptureElement under 'unsupported' -> file collapses to triage 'defer'.",
+      "root_cause": "Skill conflates the missing XAML control with a missing feature; inventory's 'unsupported' tag forces defer and the validator flags a migrated preview as residue.",
+      "tier": 1,
+      "change": "Move CaptureElement from 'unsupported' to 'adaptable' (anchor:capture, tier:sensitive) in unsupported-api-inventory.json; add a new MIGRATION-PATTERNS.md#capture section with the GetPreviewFrameAsync->Image frame-loop replacement; rewrite the CS0246/CaptureElement build-error note to route to #capture instead of saying 'defer / no replacement'.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json + skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Initialize-UwpMigration labels camera-preview files 'migrate-with-adaptation' and injects a TODO->#capture; the agent migrates preview by default instead of deferring; Validate no longer flags a migrated preview as residue.",
+      "falsifiable_check": "On a re-run of any camera-preview sample, the preview file's triage label is 'migrate-with-adaptation' (not 'defer'), a TODO[migrate-NNN]: see PATTERNS.md#capture is injected at the CaptureElement line, and the preview is migrated rather than appearing in MIGRATION-DEFERRED.md."
+    },
+    {
+      "problem": "Application.Suspending/Resuming subscriptions fail with CS1061 and the skill offered no replacement, costing ~8 turns of churn.",
+      "evidence": "lessons.json dev_agent_struggles[suspend/resume]; session-log error CS1061 + turns 30-38.",
+      "root_cause": "Lifecycle section covers activation only; Suspending/Resuming are removed in WinUI 3 desktop and their foreground/background resource handling must move to Window.Activated.",
+      "tier": 1,
+      "change": "Add '.Suspending +=' / '.Resuming +=' to unsupported-api-inventory.json 'adaptable' (anchor:lifecycle); add a 'Suspend/Resume -> Window.Activated' subsection to PATTERNS.md#lifecycle; add a CS1061 entry under 'Common build errors'; add a SystemMediaTransportControls.GetForCurrentView() row (foreground proxy -> Window.Activated) to the GetForCurrentView table.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json + skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Files subscribing to Suspending/Resuming get an inline TODO->#lifecycle and the agent immediately rewires to Window.Activated, avoiding the CS1061 churn.",
+      "falsifiable_check": "On a re-run of a Suspending/Resuming sample, a TODO[migrate-NNN]: see PATTERNS.md#lifecycle is injected at the subscription line and the build no longer surfaces CS1061 for Application.Suspending/Resuming."
+    }
+  ],
+  "deferred_to_human": []
+}

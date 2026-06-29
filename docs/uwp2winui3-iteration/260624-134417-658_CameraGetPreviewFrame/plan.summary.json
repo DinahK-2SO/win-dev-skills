@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraGetPreviewFrame",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Reclassify CaptureElement from unsupported(defer) to adaptable(#capture) and add a Camera Preview pattern, so live preview migrates via a GetPreviewFrameAsync->Image frame loop instead of being dropped",
+    "Document Suspending/Resuming removal: add #lifecycle 'Suspend/Resume -> Window.Activated', a CS1061 build-error note, an SMTC GetForCurrentView row, and an analyzer entry that flags .Suspending/.Resuming subscriptions"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json"
+  ],
+  "deferred_to_human": []
+}

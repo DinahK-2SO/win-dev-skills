@@ -1,0 +1,27 @@
+{
+  "scenario": "CameraGetPreviewFrame",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CaptureElement (live camera preview) was steered to 'defer' as if it had no migration path, even though a working WinUI 3 replacement exists.",
+      "evidence": "session-log turns 33-35: agent replaced PreviewControl.Source=_mediaCapture with a DispatcherTimer GetPreviewFrameAsync->Image loop and reached parity 4/4 (migration-score.json verdict:pass).",
+      "skill_search": "grep 'CaptureElement', 'MediaPlayerElement', 'GetPreviewFrameAsync' in winui-uwp-migration",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md: '`<CaptureElement>` is listed under Unsupported... should be marked Triage label = defer ... there is no compatible replacement (MediaPlayerElement covers playback only, not the live camera preview API surface).' AND unsupported-api-inventory.json listed CaptureElement under 'unsupported' (any hit collapses the file to triage label 'defer').",
+      "root_cause": "The skill treats the missing XAML *control* (CaptureElement) as a missing *feature* (live preview). Preview migrates via GetPreviewFrameAsync->Image frame loop or MediaPlayerElement+MediaFrameSource; the inventory's 'unsupported' tag forces the whole camera file to defer and the validator would flag a migrated preview as residue.",
+      "proposed_fix": "Rewrite the CS0246/CaptureElement note to point to a new MIGRATION-PATTERNS.md#capture section documenting the frame-loop replacement; add the #capture section; and move CaptureElement in unsupported-api-inventory.json from 'unsupported' to 'adaptable' (anchor:capture, tier:sensitive) so the file is migrated-with-adaptation, not deferred.",
+      "generalizes": "Every UWP camera SDK sample (CameraGetPreviewFrame, CameraStarterKit, CameraResolution, CameraFaceDetection, etc.) hosts the preview in CaptureElement. Blanket-deferring it drops the core feature of any camera scenario."
+    },
+    {
+      "problem": "Application.Suspending/Resuming subscriptions don't compile in WinUI 3 (CS1061) and the skill gives no replacement, so the agent churned ~8 turns.",
+      "evidence": "session-log: 'age.xaml.cs(83,33): error CS1061: Application does not contain a definition for Suspending'; turns 30-38 kept then removed the handlers, rewiring to Window.Activated.",
+      "skill_search": "grep 'Suspending', 'Resuming', 'lifecycle', 'Window.Activated' in winui-uwp-migration",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The 'Application Lifecycle and Activation' section covers OnLaunched/OnActivated/OnFileActivated but never states that Suspending/Resuming are removed in WinUI 3 desktop or how to replace the foreground/background resource handling they drive.",
+      "proposed_fix": "Add a 'Suspend / Resume -> Window.Activated' subsection to PATTERNS.md#lifecycle, add a CS1061 entry to 'Common build errors', and add an analyzer entry (.Suspending/.Resuming -> anchor lifecycle) to unsupported-api-inventory.json so the file is flagged with an inline TODO.",
+      "generalizes": "Most UWP samples that own a hardware/media resource (camera, sensors, audio, MediaPlayer) subscribe to Suspending/Resuming to release/re-acquire it; all of them hit CS1061 on migration."
+    }
+  ]
+}

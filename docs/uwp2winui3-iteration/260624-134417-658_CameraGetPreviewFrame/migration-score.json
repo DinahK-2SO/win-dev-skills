@@ -1,0 +1,25 @@
+{
+  "scenario": "CameraGetPreviewFrame",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 1,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (UWP built+launched in Release and golden captured; the original csproj referenced a 'WindowsMobile' Extension SDK not installed in any version on this box, so a vestigial, unused SDKReference was removed on a backed-up copy to let the runner build it. No mobile-only APIs are used by the sample, so this does not affect the ground truth. csproj restored afterward.)",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "winui_visual_capture": "blank-content-island: WinUI 3 XAML content (incl. TitleBar text) did not composite to a capturable surface in this non-interactive session; UIA confirms all controls present with valid geometry. Not a migration defect.",
+  "features": [
+    {
+      "name": "CameraGetPreviewFrame",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_CameraGetPreviewFrame.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_CameraGetPreviewFrame.png",
+      "coverage": "4/4",
+      "note": "All 4 UWP controls (GetPreviewFrameAsync button + Show frame / Green effect / Save frame checkboxes) are present in the WinUI 3 app with matching labels, layout order, and state. The button is disabled in BOTH apps because no camera is present, so its single action is dead in both (responded:false in both manifests) — hardware-gated, not a regression. Structural coverage 4/4 and behavioral parity hold. The WinUI screenshot is blank only due to a content-island capture limitation in this non-interactive session (title text also blank; CopyFromScreen returns invalid handle; Win32 caption chrome captures fine), so visual fidelity is inferred from UIA geometry, which matches the UWP arrangement."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraGetPreviewFrame",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "SystemMediaTransportControls.GetForCurrentView() (used as an 'app minimized' signal) had no entry in the GetForCurrentView replacement table, so the agent had to infer Window.Activated.",
+      "evidence": "session-log turn 31: agent replaced SystemMediaControls_PropertyChanged (SoundLevel==Muted) with Window_Activated; the migrate-005 TODO anchored to #getforcurrentview but that table omitted SMTC.",
+      "covered_at": "MIGRATION-PATTERNS.md '## GetForCurrentView() Replacements' table (lists ApplicationView, UIViewSettings, DisplayInformation, CoreApplication, SystemNavigationManager).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add a SystemMediaTransportControls.GetForCurrentView() row to the existing table pointing to Window.Activated / #lifecycle (folded into the lifecycle defect fix).",
+      "generalizes": "Camera/audio samples commonly use SMTC SoundLevel as a foreground proxy; a table row converts a guess into a lookup."
+    }
+  ]
+}

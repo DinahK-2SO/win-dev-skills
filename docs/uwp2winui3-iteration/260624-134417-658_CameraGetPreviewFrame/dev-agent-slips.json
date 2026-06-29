@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraGetPreviewFrame",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS0227 'Unsafe code may only appear if compiling with /unsafe' on the camera/effect pixel-buffer code.",
+      "evidence": "session-log turns 26-27: build failed with CS0227, agent immediately added <AllowUnsafeBlocks>true</AllowUnsafeBlocks> and moved on (single-iteration recovery).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md '### CS0227: Unsafe code may only appear if compiling with /unsafe' — a dedicated build-error heading naming pixel-buffer access and giving the exact <AllowUnsafeBlocks>true</AllowUnsafeBlocks> fix.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already documents this error and its exact fix under its own heading; the agent applied that fix in one turn. A re-run would do the same with no skill edit. (It could be elevated to a proactive analyzer signal, but the existing prose is clearly adequate — not worth bloating.)"
+    },
+    {
+      "problem": "Dispatcher.RunAsync(CoreDispatcherPriority...) calls didn't fit the WinUI threading model.",
+      "evidence": "session-log turns 31-34: agent resolved TODO[migrate-006/007/008] by replacing Dispatcher.RunAsync with DispatcherQueue.TryEnqueue.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md threading anchor (#threading) plus the scaffold's pre-injected TODO[migrate-NNN]: see PATTERNS.md#threading markers.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The scaffold pre-injected the exact anchor at each call site and the skill documents the replacement; the agent followed it successfully. No skill change needed."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraGetPreviewFrame",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "CameraGetPreviewFrame: GetPreviewFrameAsync button + Show frame / Green effect / Save frame checkboxes, with live camera preview", "status": "pass", "reason": "All 4 controls present with matching labels, layout order, and enabled/disabled state (4/4 coverage). Button disabled in both apps (no camera) — hardware-gated, not a regression.", "suspected_skill_gap": "none at the outcome level; the path there required overriding the skill's 'defer CaptureElement' guidance and self-discovering the Suspending/Resuming removal." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "WinUI 3 candidate screenshot", "uwp": "controls visible", "winui": "blank content-island (capture artifact in non-interactive session; UIA confirms all controls present)", "screenshot_ref": "001_score-CameraGetPreviewFrame/notes/screenshots" }
+  ],
+  "missing_features": [],
+  "summary": "Functionally a clean migration (100/100). The discrepancies are not in the output but in the path: the skill steered toward deferring CaptureElement (the agent overrode it and migrated preview successfully) and gave no guidance on Suspending/Resuming removal (the agent recovered after ~8 turns). Both are generalizable skill gaps worth closing so the next camera/lifecycle sample reaches parity faster and without overriding the skill."
+}
