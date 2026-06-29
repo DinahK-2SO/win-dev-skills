@@ -7,14 +7,14 @@
     { "pattern": "Windows\\.ApplicationModel\\.Calls\\.",                 "name": "Windows.ApplicationModel.Calls.*",      "reason": "Phone-only API surface" },
     { "pattern": "Windows\\.Gaming\\.Input\\.",                           "name": "Windows.Gaming.Input.* (gamepad VK paths)", "reason": "Gamepad virtual-key paths not in WinAppSDK" },
     { "pattern": "Windows\\.System\\.Profile\\.AnalyticsInfo",            "name": "AnalyticsInfo",                         "reason": "Device-family branching for Xbox/HoloLens has no desktop analog" },
-    { "pattern": "\\bRoamingSettings\\b|RoamingFolder",                   "name": "RoamingSettings / RoamingFolder",       "reason": "Roaming app data removed in WinAppSDK" },
-    { "pattern": "<CaptureElement\\b|\\bCaptureElement\\b",               "name": "<CaptureElement>",                      "reason": "No XAML preview element; preview via image streams from the media-capture family" }
+    { "pattern": "\\bRoamingSettings\\b|RoamingFolder",                   "name": "RoamingSettings / RoamingFolder",       "reason": "Roaming app data removed in WinAppSDK" }
   ],
   "adaptable": [
     { "pattern": "Windows\\.UI\\.Popups\\.MessageDialog|\\bMessageDialog\\b",  "name": "MessageDialog",              "anchor": "dialogs",          "tier": "safe" },
     { "pattern": "\\bCoreDispatcher\\b|Dispatcher\\.RunAsync",                 "name": "CoreDispatcher",             "anchor": "threading",        "tier": "safe" },
     { "pattern": "\\bGetForCurrentView\\s*\\(",                                "name": "GetForCurrentView()",        "anchor": "getforcurrentview","tier": "safe" },
     { "pattern": "<MediaElement\\b|\\bMediaElement\\b",                        "name": "MediaElement",               "anchor": "controls",         "tier": "safe" },
+    { "pattern": "<CaptureElement\\b|\\bCaptureElement\\b",                    "name": "CaptureElement",             "anchor": "capture",          "tier": "safe" },
     { "pattern": "\\bWindow\\.Current\\b",                                     "name": "Window.Current",             "anchor": "windowing",        "tier": "safe" },
     { "pattern": "Windows\\.UI\\.ViewManagement\\.ApplicationView|\\bApplicationView\\b", "name": "ApplicationView", "anchor": "windowing",        "tier": "safe" },
     { "pattern": "\\bIBackgroundTask\\b|BackgroundTaskBuilder",                "name": "IBackgroundTask",            "anchor": "background-tasks", "tier": "safe" },

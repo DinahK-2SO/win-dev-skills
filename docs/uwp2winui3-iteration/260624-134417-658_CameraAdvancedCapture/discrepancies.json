@@ -1,0 +1,30 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "discrepancies": [
+    {
+      "feature": "CameraAdvancedCapture",
+      "severity": "info",
+      "type": "capture-artifact",
+      "control": "(whole page)",
+      "detail": "The WinUI 3 candidate screenshot renders as a near-blank white frame (10 KB) whereas the UWP golden (25 KB) clearly shows the CycleModeButton ('Standard' + camera icon), PhotoButton, and the HDR Analyzer bar. This is NOT a missing-content defect: the WinUI UIA tree enumerates every control with correct bounds and text (CycleModeButton @1957,532 with ModeTextBlock='Standard'; PhotoButton @1957,772; 'HDR Analyzer:' label; HdrImpactBar ProgressBar; SceneTypeTextBlock). The blank capture is the known WinUI 3 swapchain/PrintWindow screenshot limitation, not a dropped or invisible control.",
+      "impact": "Visual fidelity could not be confirmed by pixel comparison; structural + UIA evidence confirms parity instead."
+    },
+    {
+      "feature": "CameraAdvancedCapture",
+      "severity": "none",
+      "type": "behavioral",
+      "control": "CycleModeButton, PhotoButton",
+      "detail": "Both buttons are disabled (IsEnabled=false) in BOTH the UWP golden and the WinUI candidate because no camera device initialized on this machine. No control responded in UWP, so there is no 'responds in UWP but dead in WinUI' regression. Checklist contained 0 actuatable actions; none were exercised in either capture.",
+      "impact": "No behavioral regression."
+    }
+  ],
+  "control_parity": {
+    "PreviewControl": "present (CaptureElement -> MediaPlayerElement)",
+    "CycleModeButton": "present, disabled (matches UWP)",
+    "ModeTextBlock": "present, text 'Standard' (matches UWP)",
+    "PhotoButton": "present, disabled (matches UWP)",
+    "HDR Analyzer label": "present",
+    "HdrImpactBar": "present (ProgressBar)",
+    "SceneTypeTextBlock": "present"
+  }
+}

@@ -52,7 +52,11 @@ Generated sources never belong in source control or the migrated tree — only `
 
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
-`<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
+`<CaptureElement>` does not exist in WinUI 3, but live camera preview **does** have a
+supported migration path — do **not** defer it. Swap the XAML element to
+`<MediaPlayerElement>` and drive it from the capture pipeline (see [Camera preview:
+CaptureElement → MediaPlayerElement](#capture)). Only fall back to `defer` if the source
+relies on `CaptureElement`-specific surfaces with no `MediaPlayerElement` analog.
 
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
@@ -73,6 +77,41 @@ Conditional support:
 - Visual Studio XAML Designer — no design surface for WinUI projects
 
 See the official [What's supported](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/what-is-supported) page.
+
+<a id="capture"></a>
+## Camera preview: CaptureElement → MediaPlayerElement
+
+UWP's `<CaptureElement>` (driven by `MediaCapture.StartPreviewAsync()`) has **no XAML
+equivalent in WinUI 3 desktop**, but live camera preview is fully migratable — do **not**
+defer it. Host a `MediaPlayerElement` and route the capture pipeline's frames into a
+`MediaPlayer`:
+
+XAML — swap the element only:
+
+```xml
+<!-- UWP -->            <CaptureElement x:Name="PreviewControl" Stretch="Uniform" />
+<!-- WinUI 3 -->        <MediaPlayerElement x:Name="PreviewControl" Stretch="Uniform" />
+```
+
+Code — connect `MediaCapture` to the element via a `MediaPlayer`:
+
+```csharp
+_mediaPlayer = new MediaPlayer();
+PreviewControl.SetMediaPlayer(_mediaPlayer);
+
+var frameSource = _mediaCapture.FrameSources.Values
+    .FirstOrDefault(s => s.Info.MediaStreamType == MediaStreamType.VideoPreview)
+    ?? _mediaCapture.FrameSources.Values.FirstOrDefault();
+if (frameSource != null)
+    _mediaPlayer.Source = MediaSource.CreateFromMediaFrameSource(frameSource);
+
+await _mediaCapture.StartPreviewAsync();
+```
+
+On teardown call `PreviewControl.SetMediaPlayer(null)` and stop/dispose the preview as
+before. `MediaCapture`, `MediaCaptureInitializationSettings`, `LowLagPhotoCapture`,
+advanced-capture, scene-analysis and the rest of the `Windows.Media.Capture` family carry
+over unchanged — only the **preview surface** (the `CaptureElement`) needs this swap.
 
 ## Namespace Mapping
 
@@ -621,6 +660,7 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 | UWP element | WinUI 3 element | Notes |
 |---|---|---|
 | `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. |
+| `<CaptureElement … />` | `<MediaPlayerElement … />` | Live camera preview — feed it from `MediaCapture` via `MediaSource.CreateFromMediaFrameSource`; see [#capture](#capture). |
 | `<InkCanvas … />` | _(none — defer)_ | Not supported. |
 | `<Pivot>` / `<PivotItem>` | `<TabView>` / `<TabViewItem>`, or `<controls:Pivot>` from `CommunityToolkit.WinUI.UI.Controls` | Pick based on the source's intent (top-tab vs swipe pivot). |
 | `<Hub>` / `<HubSection>` | Hand-rolled `<NavigationView>` with section grouping, or `<ScrollViewer>` with stacked sections. | No drop-in equivalent. |

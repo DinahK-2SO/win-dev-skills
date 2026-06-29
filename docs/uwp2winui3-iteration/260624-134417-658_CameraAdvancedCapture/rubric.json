@@ -1,0 +1,19 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "type": "single-page",
+  "source": "uwp-samples-standalone/Samples/CameraAdvancedCapture/cs",
+  "features": [
+    {
+      "name": "CameraAdvancedCapture",
+      "controls": [
+        { "id": "PreviewControl", "uwp": "CaptureElement", "winui": "MediaPlayerElement", "role": "camera preview surface" },
+        { "id": "CycleModeButton", "type": "Button", "role": "cycle advanced capture mode (initially disabled)", "child": "ModeTextBlock = 'Standard'" },
+        { "id": "PhotoButton", "type": "Button", "handler": "PhotoButton_Click", "role": "take photo (initially disabled)" },
+        { "id": "HdrImpactBar", "type": "ProgressBar", "role": "HDR analyzer impact bar" },
+        { "id": "SceneTypeTextBlock", "type": "TextBlock", "role": "HDR scene type output" }
+      ],
+      "static_labels": ["HDR Analyzer:"],
+      "expected_initial_state": "No camera device available -> preview blank, CycleModeButton and PhotoButton disabled, HDR bar empty. Identical between UWP and WinUI."
+    }
+  ]
+}

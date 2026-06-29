@@ -1,0 +1,31 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 pre-triage", "evidence": "Scaffolded the project and computed per-file Triage labels from unsupported-api-inventory.json; build ultimately SUCCEEDED (build-output.txt)." }
+  ],
+  "tools_problematic": [
+    { "tool": "unsupported-api-inventory.json triage", "problem": "Classifies CaptureElement as 'unsupported' (no migration path), which forces the entire camera page file to Triage label 'defer' — i.e. drop the app's core feature.", "evidence": "scripts/unsupported-api-inventory.json line 11 lists CaptureElement under 'unsupported'; Initialize-UwpMigration.ps1 line ~325-332 collapses any file with an unsupported hit to Label='defer'." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 residue grep", "limitation": "Treats CaptureElement as residue-equivalent unsupported API, reinforcing the defer path.", "suggested_tweak": "Reclassify CaptureElement as 'adaptable' with a capture anchor so the page is migrated, not deferred." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md line 53-55 (CS0246/WMC0001 CaptureElement)", "wrong": "States there is 'no compatible replacement' and explicitly warns NOT to use MediaPlayerElement ('MediaPlayerElement covers playback only, not the live camera preview API surface'), instructing the agent to defer the file.", "correct": "CaptureElement HAS a working WinUI 3 desktop migration path: host a MediaPlayerElement, connect a MediaPlayer via SetMediaPlayer, and feed the live preview with MediaSource.CreateFromMediaFrameSource(frameSource) then MediaCapture.StartPreviewAsync(). The dev-agent used exactly this and scored 100 with full parity (MainPage.xaml.cs lines 355-376)." }
+  ],
+  "special_apis": [
+    { "api": "CaptureElement (live camera preview)", "special_handling": "No <CaptureElement> in WinUI 3. Swap the XAML element to <MediaPlayerElement>; in code, route MediaCapture frames through a MediaPlayer: PreviewControl.SetMediaPlayer(new MediaPlayer()); mediaPlayer.Source = MediaSource.CreateFromMediaFrameSource(mediaCapture.FrameSources.Values.First()); await mediaCapture.StartPreviewAsync();" }
+  ],
+  "errors_encountered": [
+    { "error": "warning WUI0004: DisplayInformation.GetForCurrentView() is UWP-only", "root_cause": "UWP per-view singleton left in MainPage.xaml.cs(638).", "fix": "Covered by skill GetForCurrentView table (PATTERNS.md#getforcurrentview line 262); left as a non-blocking warning, build succeeded." },
+    { "error": "warning WUI0004: SystemMediaTransportControls.GetForCurrentView() is UWP-only", "root_cause": "UWP per-view singleton left in MainPage.xaml.cs(655).", "fix": "General GetForCurrentView guidance + WUI0004 row cover it; left as non-blocking warning, build succeeded." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "CaptureElement / live camera preview", "symptom": "Skill guidance told the agent to DEFER the core camera-preview feature ('no compatible replacement'); the agent had to disregard the skill and independently devise the MediaPlayerElement + MediaSource.CreateFromMediaFrameSource path.", "turns_or_retries": "n/a (agent succeeded by NOT following the skill)", "root_cause": "Skill classifies CaptureElement as unsupported/defer and explicitly forbids the working MediaPlayerElement replacement.", "how_resolved": "Agent built MediaCapture+MediaPlayer preview pipeline; build SUCCEEDED, parity score 100.", "preventable_by": "Reclassify CaptureElement as adaptable in unsupported-api-inventory.json + document the MediaPlayerElement live-preview pattern in MIGRATION-PATTERNS.md (with a #capture anchor) instead of telling the agent there is no path." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No camera device on the host", "workaround": "Both UWP and WinUI settle into the disabled/blank-preview state; parity verified structurally via UIA tree." }
+  ]
+}

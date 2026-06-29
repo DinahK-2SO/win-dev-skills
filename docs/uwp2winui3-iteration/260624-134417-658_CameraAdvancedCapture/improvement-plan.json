@@ -1,0 +1,18 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CaptureElement (live camera preview) is classified as an unsupported API with no migration path, forcing the camera page to be deferred; the skill also explicitly forbids the MediaPlayerElement replacement that actually works.",
+      "evidence": "scripts/unsupported-api-inventory.json L11 listed CaptureElement under 'unsupported'; MIGRATION-PATTERNS.md L53-55 said 'there is no compatible replacement (MediaPlayerElement covers playback only ...)'. Dev-agent disregarded the skill and shipped a working migration (score 100, full parity; MainPage.xaml.cs 355-376: SetMediaPlayer + MediaSource.CreateFromMediaFrameSource + StartPreviewAsync).",
+      "root_cause": "Skill data + prose mark CaptureElement unsupported, so Initialize-UwpMigration.ps1 (L325-332) collapses the camera page to Triage label 'defer', dropping the app's core feature; the prose actively steers the agent away from the correct MediaPlayerElement pattern.",
+      "tier": 1,
+      "change": "Moved CaptureElement from the 'unsupported' array to the 'adaptable' array in unsupported-api-inventory.json (anchor 'capture', tier 'safe') so the pre-triage emits an inline TODO routed to a pattern section instead of deferring the file. Backed it with prose: rewrote the wrong CS0246/WMC0001 note, added a new #capture section documenting MediaCapture+MediaPlayer+MediaPlayerElement live preview, and added a <CaptureElement> -> <MediaPlayerElement> element-swap row.",
+      "file": "scripts/unsupported-api-inventory.json + MIGRATION-PATTERNS.md",
+      "expected_effect": "On a camera-preview scenario, the migration agent migrates the preview page (CaptureElement -> MediaPlayerElement with MediaSource.CreateFromMediaFrameSource) instead of deferring it, preserving the app's core feature.",
+      "falsifiable_check": "Re-run a CaptureElement scenario: the camera page no longer gets Triage label 'defer' and does not appear in MIGRATION-DEFERRED.md; Validate/Initialize no longer flags CaptureElement as unsupported residue; the built app exposes a MediaPlayerElement preview and parity passes."
+    }
+  ],
+  "deferred_to_human": []
+}

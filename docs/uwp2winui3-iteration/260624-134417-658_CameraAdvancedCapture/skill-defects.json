@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The skill classifies CaptureElement (live camera preview) as an UNSUPPORTED API with no migration path and instructs the agent to defer the whole file; it also explicitly forbids the MediaPlayerElement replacement that actually works.",
+      "evidence": "scripts/unsupported-api-inventory.json line 11 lists CaptureElement under 'unsupported'; MIGRATION-PATTERNS.md line 53-55 states 'there is no compatible replacement (MediaPlayerElement covers playback only ...)' and says to enter the file in MIGRATION-DEFERRED.md. The dev-agent disregarded this and produced a working migration (results: score 100, full parity; MainPage.xaml.cs 355-376 uses MediaPlayerElement.SetMediaPlayer + MediaSource.CreateFromMediaFrameSource + MediaCapture.StartPreviewAsync).",
+      "skill_search": "grepped winui-uwp-migration for CaptureElement|MediaCapture|MediaPlayerElement|FrameSource",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md L55: 'Do not try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (MediaPlayerElement covers playback only, not the live camera preview API surface).' and inventory L11 placing <CaptureElement> in the 'unsupported' array.",
+      "root_cause": "The skill predates / overlooks the supported WinUI 3 desktop camera-preview pattern: route MediaCapture frames into a MediaPlayer hosted by a MediaPlayerElement via MediaSource.CreateFromMediaFrameSource. Because the inventory marks CaptureElement 'unsupported', Initialize-UwpMigration.ps1 (L325-332) forces the camera page to Triage label 'defer', dropping the app's core feature.",
+      "proposed_fix": "1) Move CaptureElement from 'unsupported' to 'adaptable' in unsupported-api-inventory.json with anchor 'capture', tier 'safe', so the page is migrated (TODO routed) instead of deferred. 2) Replace the wrong CS0246/WMC0001 note in MIGRATION-PATTERNS.md (L53-55) to point to a new #capture section documenting the MediaPlayerElement + MediaSource.CreateFromMediaFrameSource + StartPreviewAsync preview pattern. 3) Add a <CaptureElement> -> <MediaPlayerElement> row to the element-level swap table.",
+      "generalizes": "CaptureElement is the standard UWP control for ALL live camera-preview apps (capture, barcode/QR scan, document scan, video record). Every such UWP sample would otherwise have its core feature deferred. The MediaPlayerElement + MediaFrameSource replacement is the documented, reusable WinUI 3 desktop pattern."
+    }
+  ]
+}

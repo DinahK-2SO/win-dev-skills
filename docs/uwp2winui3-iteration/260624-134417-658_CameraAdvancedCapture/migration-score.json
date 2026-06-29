@@ -1,0 +1,25 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 1,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "uwp_window_title": "Camera Advanced Capture C# Sample",
+  "winui_launch_status": "ok (winapp run, pid 18868)",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "CameraAdvancedCapture",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_CameraAdvancedCapture.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_CameraAdvancedCapture.png",
+      "note": "Faithful near-verbatim port. Every UWP control is present in the WinUI live UIA tree with matching name/text/geometry: PreviewControl (CaptureElement -> MediaPlayerElement), CycleModeButton (+ ModeTextBlock 'Standard'), PhotoButton, 'HDR Analyzer:' label, HdrImpactBar (ProgressBar), SceneTypeTextBlock. Both apps settle into the same no-camera state: blank preview, both buttons disabled, HDR bar empty -> no control responded in UWP, so no behavioral regression. The WinUI candidate screenshot captured near-blank (WinUI 3 swapchain/PrintWindow capture limitation), but the UIA tree confirms full content is laid out and rendered; visual parity verified structurally rather than by pixels."
+    }
+  ]
+}

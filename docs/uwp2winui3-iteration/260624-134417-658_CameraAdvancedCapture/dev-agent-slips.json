@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Left UWP-only DisplayInformation.GetForCurrentView() in MainPage.xaml.cs(638) → warning WUI0004 (non-blocking).",
+      "evidence": "build-output.txt line 8 (WUI0004 at MainPage.xaml.cs(638,39)). Build still SUCCEEDED; score 100.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#getforcurrentview, L262: 'DisplayInformation.GetForCurrentView() -> XamlRoot.RasterizationScale or Win32 GetDpiForWindow'; plus WUI0004 row L554.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The replacement is listed by name in a dedicated, prominent table and the WUI0004 row points to it. A capable re-run would apply it; it is a non-blocking warning that did not affect the score."
+    },
+    {
+      "problem": "Left UWP-only SystemMediaTransportControls.GetForCurrentView() in MainPage.xaml.cs(655) → warning WUI0004 (non-blocking).",
+      "evidence": "build-output.txt line 9 (WUI0004 at MainPage.xaml.cs(655,40)). Build SUCCEEDED; score 100.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#getforcurrentview L256 ('None of the GetForCurrentView() patterns work in WinUI 3 desktop') + WUI0004 row L554 ('Drop ... or use HWND-based COM interop').",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The general GetForCurrentView rule and the WUI0004 diagnostic both prominently tell the agent these are UWP-only and how to handle them. Non-blocking warning; a re-run would address it without any skill edit."
+    }
+  ]
+}
