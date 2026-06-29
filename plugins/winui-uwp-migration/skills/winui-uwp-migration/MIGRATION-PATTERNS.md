@@ -376,6 +376,8 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 
 `IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK [`BackgroundTaskBuilder`](https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.windows.applicationmodel.background.backgroundtaskbuilder) (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler. See the [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy).
 
+**Build breaker — delete the `OnBackgroundActivated` override.** UWP samples with in-process background tasks declare `protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)` in `App.xaml.cs`. `Microsoft.UI.Xaml.Application` has **no** such method, so copying it verbatim yields `CS0115: 'App.OnBackgroundActivated': no suitable method found to override` and the app never builds. **Remove the override and the `IBackgroundTask` task classes entirely** — there is no in-process background-activation entry point in WinUI 3. Background scenarios are not demonstrated foreground features; migrate only the foreground watcher/publisher UI so the app builds and the live features work.
+
 <a id="notifications"></a>
 ## Notifications
 

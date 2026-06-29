@@ -1,0 +1,14 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "XAML WMC9999 internal compiler error under WindowsAppSDK 2.2.x",
+      "evidence": "migration-score.json build_error mentions WMC9999",
+      "covered_clearly_at": "n/a — co-occurred with CS0115; likely downstream of failed compile, not a separate skill miss",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "WMC9999 is a transient XAML-compiler crash that disappears once CS0115 is fixed and a clean rebuild runs; no general skill rule available"
+    }
+  ]
+}

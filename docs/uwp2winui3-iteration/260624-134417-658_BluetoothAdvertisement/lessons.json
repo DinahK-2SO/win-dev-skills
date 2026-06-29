@@ -1,0 +1,27 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "scaffolded WinUI Blank App + migration mapping ran cleanly (turns 2-3 builds=ok)" }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "did not pre-flag the copied App.OnBackgroundActivated override before dotnet build", "suggested_tweak": "add a static check that fails when App.xaml.cs still declares 'override void OnBackgroundActivated'" }
+  ],
+  "failed_apis": [
+    { "api": "Application.OnBackgroundActivated", "why_tried": "carried over from UWP App.xaml.cs in-process background-task entry point", "root_cause": "Microsoft.UI.Xaml.Application has no OnBackgroundActivated method to override", "fix": "remove the override and the in-process IBackgroundTask classes" }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "IBackgroundTask / OnBackgroundActivated", "special_handling": "no WinUI3 in-process background-activation equivalent; drop the override + task classes, keep only foreground scenarios" }
+  ],
+  "errors_encountered": [
+    { "error": "CS0115: App.OnBackgroundActivated no suitable method to override", "root_cause": "UWP override copied verbatim into WinUI3 App; base class lacks the method", "fix": "delete the OnBackgroundActivated override" },
+    { "error": "XAML WMC9999 internal compiler error (WindowsAppSDK 2.2.x)", "root_cause": "downstream XAML compile crash; build never reached runnable; co-occurred with CS0115", "fix": "fix CS0115; ensure clean rebuild" }
+  ],
+  "dev_agent_struggles": [
+    { "where": "App.xaml.cs background activation", "symptom": "kept UWP OnBackgroundActivated override -> CS0115 -> builds=false, timeout", "turns_or_retries": "trial timed out at turn 20", "root_cause": "Background Tasks section names BackgroundTaskBuilder but never says to remove the override", "how_resolved": "unresolved", "preventable_by": "Background Tasks section explicitly listing the OnBackgroundActivated override + IBackgroundTask classes as remove-on-sight build breakers" }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

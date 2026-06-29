@@ -1,0 +1,52 @@
+{
+  "features_pass": 0,
+  "uwp_capture_status": "ok",
+  "features": [
+    {
+      "uwp_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Foreground_watcher.png",
+      "name": "Foreground watcher",
+      "verdict": "fail",
+      "winui_screenshot": null,
+      "note": "UWP captured & controls responded; WinUI app does not build/launch",
+      "winui_responded": false
+    },
+    {
+      "uwp_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Foreground_publisher.png",
+      "name": "Foreground publisher",
+      "verdict": "fail",
+      "winui_screenshot": null,
+      "note": "WinUI build failed",
+      "winui_responded": false
+    },
+    {
+      "uwp_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Background_watcher.png",
+      "name": "Background watcher",
+      "verdict": "fail",
+      "winui_screenshot": null,
+      "note": "WinUI build failed",
+      "winui_responded": false
+    },
+    {
+      "uwp_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Background_publisher.png",
+      "name": "Background publisher",
+      "verdict": "fail",
+      "winui_screenshot": null,
+      "note": "WinUI build failed",
+      "winui_responded": false
+    }
+  ],
+  "uwp_launchable": true,
+  "build_error": "error CS0115: App.OnBackgroundActivated no suitable method to override; XAML WMC9999 internal error (WindowsAppSDK 2.2.1). Migrated WinUI3 app fails dotnet build; results.json: builds=false runs=false timeout=true.",
+  "scenario": "BluetoothAdvertisement",
+  "behavioral_regressions": 4,
+  "parity_result": "parity/winui3/parity-result.json",
+  "features_fail": 4,
+  "build_status": "failed",
+  "features_partial": 0,
+  "features_total": 4,
+  "score": 0
+}

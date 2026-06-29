@@ -1,0 +1,17 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "App.xaml.cs from UWP samples with in-process background tasks declares `protected override void OnBackgroundActivated(...)`; copied verbatim into WinUI3 App -> CS0115, build dead, 0/4 features.",
+      "evidence": "migration-score.json build_error 'CS0115: App.OnBackgroundActivated no suitable method to override'; session-log.txt:623 override copied into Microsoft.UI.Xaml.Application App",
+      "skill_search": "grep OnBackgroundActivated in SKILL.md, MIGRATION-PATTERNS.md, unsupported-api-inventory.json",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Background Tasks section names BackgroundTaskBuilder but never says Microsoft.UI.Xaml.Application has no OnBackgroundActivated to override and the override+IBackgroundTask classes must be removed",
+      "proposed_fix": "Add to MIGRATION-PATTERNS Background Tasks section: remove the OnBackgroundActivated override and IBackgroundTask classes (no in-process bg activation in WinUI3); keep only foreground scenarios. Add OnBackgroundActivated to unsupported-api-inventory.",
+      "generalizes": "Every UWP SDK sample using in-process background tasks (Bluetooth/Geolocation/DeviceLifecycle/etc.) carries this exact override; it always breaks the build until removed."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 1,
+  "score": 0,
+  "builds": false,
+  "runs": false,
+  "requirements": [
+    { "id": 1, "text": "Foreground watcher", "status": "fail", "reason": "WinUI build failed", "suspected_skill_gap": "build never succeeded; blocked by CS0115 in App.xaml.cs" },
+    { "id": 2, "text": "Foreground publisher", "status": "fail", "reason": "WinUI build failed", "suspected_skill_gap": "same build failure" },
+    { "id": 3, "text": "Background watcher", "status": "fail", "reason": "WinUI build failed", "suspected_skill_gap": "OnBackgroundActivated override not removed" },
+    { "id": 4, "text": "Background publisher", "status": "fail", "reason": "WinUI build failed", "suspected_skill_gap": "OnBackgroundActivated override not removed" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": ["all 4 — app does not build/launch"],
+  "summary": "CS0115 App.OnBackgroundActivated + XAML WMC9999; app never built. 0/4 vs UWP golden."
+}

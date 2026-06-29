@@ -1,0 +1,14 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS: flag App.OnBackgroundActivated override + IBackgroundTask classes as remove-on-sight CS0115 build breakers; migrate only foreground scenarios",
+    "unsupported-api-inventory: scan also matches OnBackgroundActivated so the override is flagged before build"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json"
+  ],
+  "deferred_to_human": ["WMC9999 XAML compiler crash under WindowsAppSDK 2.2.x — pin known-good SDK in scaffold if recurs"]
+}

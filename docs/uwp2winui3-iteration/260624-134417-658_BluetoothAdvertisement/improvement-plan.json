@@ -1,0 +1,28 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Copied UWP App.OnBackgroundActivated override -> CS0115, build dead, 0/4 features",
+      "evidence": "migration-score.json build_error CS0115; session-log.txt:623 override in Microsoft.UI.Xaml.Application App",
+      "root_cause": "Background Tasks section names BackgroundTaskBuilder but never says the override+IBackgroundTask classes must be removed (no in-process bg activation in WinUI3)",
+      "tier": 3,
+      "change": "Add an explicit 'delete the OnBackgroundActivated override + IBackgroundTask classes; migrate only foreground scenarios' build-breaker note to MIGRATION-PATTERNS Background Tasks section",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "agent removes the override -> build succeeds -> foreground watcher/publisher run",
+      "falsifiable_check": "no CS0115 OnBackgroundActivated; builds=true on re-run"
+    },
+    {
+      "problem": "Analyzer/inventory did not flag OnBackgroundActivated as a remove-on-sight pattern",
+      "evidence": "unsupported-api-inventory.json line 20 matched only IBackgroundTask/BackgroundTaskBuilder",
+      "root_cause": "scan pattern missed the override itself, the actual compile breaker",
+      "tier": 1,
+      "change": "Add OnBackgroundActivated to the background-tasks scan pattern so it routes the agent to the section",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+      "expected_effect": "App.xaml.cs override flagged before build",
+      "falsifiable_check": "inventory scan reports OnBackgroundActivated -> agent removes it pre-build"
+    }
+  ],
+  "deferred_to_human": ["WMC9999 XAML internal compiler crash under WindowsAppSDK 2.2.x — pin a known-good SDK version in scaffold if it recurs"]
+}
