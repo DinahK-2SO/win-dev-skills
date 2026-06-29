@@ -1,0 +1,23 @@
+{
+  "scenario": "BluetoothLE",
+  "index": 0,
+  "score": 0,
+  "builds": false,
+  "runs": false,
+  "requirements": [
+    { "id": 1, "text": "Client: Discover servers (Start enumerating, Pair)", "status": "fail", "reason": "App did not build/run; controls dead.", "suspected_skill_gap": "Migration left compile errors (Suspending/Resuming + missing BLE PHY members); skill had no pattern for either, so the build never went green." },
+    { "id": 2, "text": "Client: Connect to a server (Connect/Read/Subscribe/Write)", "status": "fail", "reason": "App did not build/run; controls dead.", "suspected_skill_gap": "Same non-building root cause." },
+    { "id": 3, "text": "Server: Publish foreground (Start Service)", "status": "fail", "reason": "App did not build/run.", "suspected_skill_gap": "Scenario3 uses Application.Suspending/Resuming + missing PHY members; no skill guidance to stub/remove." },
+    { "id": 4, "text": "Server: Publish background (Start Service)", "status": "fail", "reason": "App did not build/run.", "suspected_skill_gap": "Scenario4 same as Scenario3." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "All scenarios", "uwp": "UWP app renders Start enumerating / Pair / Connect / Start Service controls", "winui": "No WinUI screenshot — app failed to build, never launched", "screenshot_ref": "parity/baseline/screenshots/*.png (UWP only; winui_screenshot null)" }
+  ],
+  "missing_features": [
+    "Client: Discover servers",
+    "Client: Connect to a server",
+    "Server: Publish foreground",
+    "Server: Publish background"
+  ],
+  "summary": "100% behavioral regression (4/4 fail) caused solely by a non-building WinUI 3 app: 16 compile errors from WinUI-3-removed lifecycle events (Application.Suspending/Resuming) and member-level missing BLE WinRT APIs. No feature-logic problems were even reachable."
+}

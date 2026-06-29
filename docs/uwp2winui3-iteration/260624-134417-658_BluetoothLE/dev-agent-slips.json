@@ -1,0 +1,14 @@
+{
+  "scenario": "BluetoothLE",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Agent wrapped OnNavigatedTo bodies in try/catch as if that would resolve the build failures, instead of fixing the compile errors.",
+      "evidence": "session-log.txt turn 56 edit adds try/catch around OnNavigatedTo in Scenario4 while leaving Application.Suspending/Resuming and the missing PHY members in place.",
+      "covered_clearly_at": "SKILL.md 'Defensive UI for init-heavy and device-dependent pages' explicitly frames try/catch as a RUNTIME guard against blank frames, never as a build-error fix; Step 3 says to fetch the matching anchor for a build error.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already scopes try/catch to runtime init failures; a capable model would not use it to mask compile errors. However, the underlying compile errors themselves were NOT covered — those are handled as skill-defects (Suspending/Resuming + member stubbing), which removes the temptation to misapply try/catch in the first place. No additional slip-specific skill edit is warranted."
+    }
+  ]
+}

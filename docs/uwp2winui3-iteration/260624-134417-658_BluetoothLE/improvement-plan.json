@@ -1,0 +1,28 @@
+{
+  "scenario": "BluetoothLE",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated code keeps Application.Suspending/Resuming event registrations, which do not exist on Microsoft.UI.Xaml.Application -> CS1061 -> app never builds.",
+      "evidence": "discrepancies.json buildErrors 'CS1061 ... Application.Suspending/Resuming not in WinUI 3'; session-log.txt turn 56.",
+      "root_cause": "WinUI 3 has no UWP suspend/resume process-lifetime events; skill's lifecycle section covered only OnLaunched/OnActivated.",
+      "tier": 3,
+      "change": "Added a 'Common build errors' subsection telling the agent to delete the Suspending/Resuming registration + handlers and move work to OnNavigatedTo/OnNavigatedFrom or Window.Closed.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent removes the dead events; this CS1061 cluster disappears.",
+      "falsifiable_check": "On re-run, no CS1061 on Application.Suspending/Resuming; build healthcheck no longer lists it."
+    },
+    {
+      "problem": "Member-level missing WinRT APIs (BLE secondary-PHY flags, IsLowEnergyUncoded2MPhySupported, UpdateAdvertisingParameters) on otherwise-supported types were left as compile errors, sinking the whole build (score 0).",
+      "evidence": "migration-score.json winui_build_status; discrepancies.json buildErrors CS0117/CS1061 cluster.",
+      "root_cause": "Skill only modeled whole-file/namespace deferral; no per-member stub/guard strategy, and the agent (mis)used try/catch on a compile-time error.",
+      "tier": 3,
+      "change": "Added a 'Common build errors' subsection (stub/guard a missing member: false for capability reads, drop the call for writes; try/catch cannot mask a compile error; non-building app scores zero) and a Critical-Rules API-level bullet 'build-ability outranks member-level fidelity' clarifying this is neither a new defer row nor fabrication.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md + skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent stubs the missing members and reaches a clean build instead of stalling; scenarios become reachable.",
+      "falsifiable_check": "On re-run, winui_build_status = clean build; the CS0117/CS1061 member cluster is gone; the 4 scenarios are no longer 'unreachable'."
+    }
+  ],
+  "deferred_to_human": []
+}

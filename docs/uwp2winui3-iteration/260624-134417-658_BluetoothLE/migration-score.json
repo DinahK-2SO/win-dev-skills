@@ -1,0 +1,52 @@
+{
+  "features": [
+    {
+      "verdict": "fail",
+      "note": "Migrated app does not build/run; scenario unreachable. UWP golden shows Start enumerating + Pair.",
+      "winui_screenshot": null,
+      "winui_responded": false,
+      "uwp_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Client_Discover_servers.png",
+      "name": "Client: Discover servers"
+    },
+    {
+      "verdict": "fail",
+      "note": "Migrated app does not build/run; scenario unreachable.",
+      "winui_screenshot": null,
+      "winui_responded": false,
+      "uwp_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Client_Connect_to_a_server.png",
+      "name": "Client: Connect to a server"
+    },
+    {
+      "verdict": "fail",
+      "note": "Migrated app does not build/run; scenario unreachable.",
+      "winui_screenshot": null,
+      "winui_responded": false,
+      "uwp_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Server_Publish_foreground.png",
+      "name": "Server: Publish foreground"
+    },
+    {
+      "verdict": "fail",
+      "note": "Migrated app does not build/run; scenario unreachable.",
+      "winui_screenshot": null,
+      "winui_responded": false,
+      "uwp_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Server_Publish_background.png",
+      "name": "Server: Publish background"
+    }
+  ],
+  "behavioral_regressions": 4,
+  "parity_result": "parity/winui3/parity-result.json",
+  "uwp_launchable": true,
+  "winui_build_status": "failed: 16 compile errors (missing BLE PHY APIs GattServiceProviderAdvertisingParameters.UseLowEnergyUncoded{1,2}MPhyAsSecondaryPhy, BluetoothAdapter.IsLowEnergyUncoded2MPhySupported, GattServiceProvider/Connection.UpdateAdvertisingParameters; Application.Suspending/Resuming not on WinUI 3 Application; XAML compiler internal error WMC9999)",
+  "features_pass": 0,
+  "features_fail": 4,
+  "features_partial": 0,
+  "scenario": "BluetoothLE",
+  "uwp_capture_status": "ok (live UWP app launched, window title 'Bluetooth Low Energy C# sample', PID 14696; uwp-app-runner reported ok:false on a transient file-sharing violation during launch-detection, but the process was confirmed running and screenshotted). Per-action UWP frames did not register responses because SDK-sample nav items carry a 'N) ' prefix the title-invoke could not match, and BLE actions are hardware-gated.",
+  "winui_launchable": false,
+  "features_total": 4,
+  "score": 0
+}

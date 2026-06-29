@@ -1,0 +1,27 @@
+{
+  "scenario": "BluetoothLE",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated code keeps `Application.Current.Suspending += ...` / `.Resuming += ...` (and the App_Suspending/App_Resuming handlers), which do not compile in WinUI 3.",
+      "evidence": "discrepancies.json buildErrors: 'CS1061 Scenario4:99,100,116,117 Application.Suspending/Resuming not in WinUI 3'; session-log.txt turn 56 edit wraps OnNavigatedTo in try/catch but leaves the Suspending/Resuming registration untouched.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md and SKILL.md for 'Suspending', 'Resuming', 'lifecycle' — lifecycle section covers only OnLaunched/OnActivated/AppInstance; no mention of the Suspending/Resuming events.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "WinUI 3 Microsoft.UI.Xaml.Application has no Suspending/Resuming events (no UWP process-lifetime model on desktop), but the skill never tells the agent this, so it left the registrations as compile errors.",
+      "proposed_fix": "Add a 'Common build errors' subsection: CS1061 on Application.Suspending/Resuming -> delete the registration/unregistration lines and the handler bodies; move any pause/resume work to OnNavigatedTo/OnNavigatedFrom or Window.Closed.",
+      "generalizes": "UWP apps and virtually every Windows-universal SDK sample register Suspending/Resuming for app lifetime; this exact compile error recurs in any UWP->WinUI 3 migration that touches app/page lifetime."
+    },
+    {
+      "problem": "Member-level WinRT APIs that are absent from the WinAppSDK projection (on otherwise-supported types) were left as compile errors instead of being stubbed/guarded, so the whole app failed to build.",
+      "evidence": "discrepancies.json buildErrors: 'CS0117 ... GattServiceProviderAdvertisingParameters.UseLowEnergyUncoded1MPhyAsSecondaryPhy missing', 'CS1061 ... BluetoothAdapter.IsLowEnergyUncoded2MPhySupported missing', 'CS1061 ... GattServiceProvider.UpdateAdvertisingParameters missing'; migration-score.json winui_build_status lists all of these.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md for 'CS1061','CS0117','member','projection','stub','degrade' — only whole-namespace-family deferral (unsupported-api-inventory.json) and startup-crash deferral exist; no guidance for a single missing member of a supported type.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill only models 'whole type/file unsupported -> defer'. When a supported type is missing one newer/niche member, the file cannot be deferred and has no per-member strategy, so the agent left compile errors (and even tried try/catch, which cannot fix a compile-time error).",
+      "proposed_fix": "Add a 'Common build errors' subsection for CS1061/CS0117 on a supported WinRT type: stub/guard the missing member (constant false for capability reads, drop the call for writes) to keep the build green; note that try/catch cannot mask a compile error and that a non-building app scores zero on every feature. Add a matching API-level rule in SKILL.md ('build-ability outranks member-level fidelity').",
+      "generalizes": "Every UWP app targets a WinRT surface; newer/niche members (capability flags, Update* overloads, experimental contracts) routinely fail to project into WinAppSDK. The 'one missing member must not sink the whole build' pattern recurs across all device/media/networking migrations."
+    }
+  ]
+}

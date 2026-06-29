@@ -185,6 +185,7 @@ After PASS, do a final `winapp build` to confirm the build is still clean. Only 
 
 - Never fabricate API calls. If unsure of the WinUI 3 equivalent, fetch the relevant anchor via `Get-MigrationPattern.ps1`, or consult the official [API mapping table](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/api-mapping-table).
 - **Do not add new `defer` rows.** The bootstrap already decided which files are deferred (any file with an unsupported-API hit). Refine the rationale in `MIGRATION-DEFERRED.md` if needed, but do not move a row from `migrate-with-adaptation` → `defer` to dodge a hard TODO. "Looks complex" / "not core to demo" / "redundant" are **not** valid reasons.
+- **Build-ability outranks member-level fidelity.** If a single *member* of an otherwise-supported type is missing from the WinAppSDK projection — a `CS1061`/`CS0117` that the patterns file can't map to a replacement — **stub or guard that member so the project still builds** instead of leaving the compile error. A non-building app scores zero on every feature, so a clean build with one gracefully-degraded member beats a faithful-but-uncompilable port. A missing-member error is compile-time, so `try/catch` cannot mask it — remove/neutralise the reference and let the feature degrade. This is *not* a new `defer` row (those are for whole unsupported files) and *not* fabrication (you are removing an unavailable call, not inventing one). See [Common build errors](./MIGRATION-PATTERNS.md#common-build-errors-after-the-namespace-rewrite).
 
 ### Comment hygiene
 

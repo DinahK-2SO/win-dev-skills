@@ -54,6 +54,31 @@ Generated sources never belong in source control or the migrated tree — only `
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
 
+### `CS1061: 'Application' does not contain a definition for 'Suspending'` / `'Resuming'`
+
+WinUI 3's `Microsoft.UI.Xaml.Application` has **no `Suspending` or `Resuming` events** — the UWP process-lifetime model does not exist for a desktop app. UWP code (especially SDK samples) commonly registers these, often in a page's `OnNavigatedTo` with a matching unregister in `OnNavigatedFrom`:
+
+```csharp
+// UWP — does NOT compile in WinUI 3:
+Application.Current.Suspending += App_Suspending;
+Application.Current.Resuming  += App_Resuming;
+```
+
+Fix: **delete the registration/unregistration lines and the `App_Suspending` / `App_Resuming` handlers.** Qualifying the type does not help — the events are absent on both `Application` and `Application.Current`. A desktop app is not suspended/resumed, so any work those handlers did (pausing/resuming UI updates, releasing a device) either belongs in the page's own `OnNavigatedTo`/`OnNavigatedFrom` (which already run on navigation), or — if it must fire on app exit — in `Window.Closed` / `AppWindow` events.
+
+### `CS1061` / `CS0117` on a *supported* WinRT type — a member the projection doesn't expose
+
+Distinct from a whole *type* being unsupported (which defers the file): here the **type migrates fine**, but one **member** — a newer or niche property/method/event — is not in the Windows App SDK projection (e.g. a recently-added capability flag, an extra advertising/PHY option, or an `Update…` overload). The compiler reports `CS1061` (missing member) or `CS0117` (missing field) on a type that otherwise resolves.
+
+You **cannot** defer the file (the rest of it is fine) and you **cannot** catch this at runtime — a missing-member reference is a *compile-time* error, so wrapping it in `try/catch` changes nothing and the project still won't build. **A project that doesn't build scores zero on every feature**, so reaching a clean build by gracefully degrading one member always beats a faithful-but-uncompilable port.
+
+Fix: **stub or guard the unavailable member in place** so the file compiles and the feature degrades visibly instead of vanishing:
+
+- A read (a capability / `Is…Supported` flag): treat it as unavailable — substitute a constant (`false`) and let the existing "not supported on this device / version of Windows" UI path run.
+- A write / call (`obj.UpdateX(...)`, `someParams.SomeFlag = …`): drop the call (the extra behaviour is simply not applied) and keep the surrounding flow intact.
+
+This is an in-file adaptation, **not** a new `defer` row, and it does **not** violate "never fabricate API calls" — you are *removing* an unavailable call, not inventing one. If future readers need context, leave a single `// See PATTERNS.md#unsupported-on-winui-3-desktop-no-migration-path` note; do not name the dropped API in the comment.
+
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
 Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding files in `MIGRATION-MAPPING.md` get `Triage label = defer`; cite the specific API in `MIGRATION-DEFERRED.md`.

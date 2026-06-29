@@ -1,0 +1,34 @@
+{
+  "scenario": "BluetoothLE",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap scaffolded the WinUI 3 shell and seeded MIGRATION-MAPPING.md; the agent migrated the namespace + shell without manual copying." }
+  ],
+  "tools_problematic": [
+    { "tool": "dotnet/winapp build loop", "problem": "Agent stayed in a build->edit loop until turn 67 with the build still failing; never reached a clean compile.", "evidence": "session-log.txt tail shows TURN 67 with 'BluetoothLE ... XamlPreCom' still running and the trial ending; migration-score.json winui_build_status = 'failed: 16 compile errors'." }
+  ],
+  "tool_limitations": [
+    { "tool": "Get-MigrationPattern.ps1 anchors", "limitation": "No anchor/pattern exists for member-level missing WinRT APIs (CS1061/CS0117 on a supported type) nor for Application.Suspending/Resuming, so the agent had nothing to fetch when those errors surfaced.", "suggested_tweak": "Add both cases to the 'Common build errors' section of MIGRATION-PATTERNS.md (done in this improvement)." }
+  ],
+  "failed_apis": [
+    { "api": "Application.Current.Suspending / .Resuming (Microsoft.UI.Xaml.Application)", "why_tried": "UWP sample registers suspend/resume handlers in Scenario3/Scenario4 OnNavigatedTo to pause/resume UI updates.", "root_cause": "WinUI 3 Application has no Suspending/Resuming events (no UWP process-lifetime model on desktop).", "fix": "Delete the registration/unregistration lines and the handlers; move pause/resume work to OnNavigatedTo/OnNavigatedFrom or Window.Closed." },
+    { "api": "GattServiceProviderAdvertisingParameters.UseLowEnergyUncoded1MPhyAsSecondaryPhy / UseLowEnergyUncoded2MPhyAsSecondaryPhy", "why_tried": "UWP BLE server scenarios set secondary-PHY advertising flags.", "root_cause": "Member not exposed by the Windows App SDK WinRT projection even on net10.0-windows10.0.26100.0.", "fix": "Drop the property assignment (extra-advertising behaviour not applied); keep surrounding flow so the file builds." },
+    { "api": "BluetoothAdapter.IsLowEnergyUncoded2MPhySupported", "why_tried": "Gate the 2M-PHY UI on adapter capability.", "root_cause": "Capability flag missing from the projection.", "fix": "Treat as false (substitute constant) so the existing 'not supported' UI path runs and the file compiles." },
+    { "api": "GattServiceProvider.UpdateAdvertisingParameters / GattServiceProviderConnection.UpdateAdvertisingParameters", "why_tried": "Update live advertising parameters.", "root_cause": "Method overload missing from the projection.", "fix": "Drop the call; advertising simply isn't updated at runtime." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Bluetooth GATT server PHY members", "special_handling": "Type family is supported (marked sensitivePresence/SEQUENTIAL) but several newer member-level APIs are absent from the projection; must be stubbed/guarded per-member to keep the build green." }
+  ],
+  "errors_encountered": [
+    { "error": "CS1061 BluetoothAdapter.IsLowEnergyUncoded2MPhySupported missing", "root_cause": "Member not in WinAppSDK projection.", "fix": "Substitute false; let existing 'not supported' branch run." },
+    { "error": "CS0117 GattServiceProviderAdvertisingParameters.UseLowEnergyUncoded1MPhyAsSecondaryPhy missing", "root_cause": "Field/property not in projection.", "fix": "Remove the assignment." },
+    { "error": "CS1061 Application.Suspending / Application.Resuming missing", "root_cause": "Events do not exist on Microsoft.UI.Xaml.Application.", "fix": "Delete handler registration and bodies." },
+    { "error": "WMC9999 XAML compiler internal error (NullReferenceException) in MarkupCompilePass2", "root_cause": "Downstream symptom: code-behind for scenario pages did not compile, leaving the XAML markup compile in an inconsistent state.", "fix": "Resolves once the underlying CS errors are fixed and the code-behind compiles." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario3/Scenario4 server pages, turns ~50-67", "symptom": "Wrapped OnNavigatedTo bodies in try/catch but left Application.Current.Suspending/Resuming and the missing PHY members untouched; build never went green.", "turns_or_retries": "build loop persisted through trial end (turn 67)", "root_cause": "Agent applied the runtime 'defensive UI try/catch' guidance to what were actually compile-time errors (missing members/events), which try/catch cannot fix; and had no skill guidance permitting it to stub a single missing member.", "how_resolved": "Not resolved — trial ended with 16 compile errors; score 0.", "preventable_by": "Skill guidance that (a) names Application.Suspending/Resuming as removed in WinUI 3, and (b) states that a missing-member compile error must be stubbed/guarded (not try/catch'd) to keep the build green, since a non-building app scores zero." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

@@ -1,0 +1,360 @@
+{
+  "featureName": "Bluetooth Low Energy C# Sample",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\BluetoothLE\\cs",
+  "generated": "2026-06-29T22:33:21.0385135+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Client: Discover servers",
+      "class": "Scenario1_Discovery",
+      "slug": "Client_Discover_servers",
+      "screenshot": "01_Client_Discover_servers.png",
+      "controls": [
+        {
+          "name": "EnumerateButton",
+          "type": "Button",
+          "label": "Start enumerating",
+          "events": []
+        },
+        {
+          "name": "PairButton",
+          "type": "Button",
+          "label": "Pair",
+          "events": []
+        },
+        {
+          "name": "ResultsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start enumerating",
+          "alt": "EnumerateButton",
+          "type": "Button",
+          "label": "Start enumerating",
+          "name": "EnumerateButton",
+          "event": ""
+        },
+        {
+          "target": "Pair",
+          "alt": "PairButton",
+          "type": "Button",
+          "label": "Pair",
+          "name": "PairButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Client: Connect to a server",
+      "class": "Scenario2_Client",
+      "slug": "Client_Connect_to_a_server",
+      "screenshot": "02_Client_Connect_to_a_server.png",
+      "controls": [
+        {
+          "name": "ConnectButton",
+          "type": "Button",
+          "label": "Connect",
+          "events": []
+        },
+        {
+          "name": "ServiceList",
+          "type": "ComboBox",
+          "label": "Choose a service",
+          "events": []
+        },
+        {
+          "name": "CharacteristicList",
+          "type": "ComboBox",
+          "label": "Choose a characteristic",
+          "events": []
+        },
+        {
+          "name": "CharacteristicReadButton",
+          "type": "Button",
+          "label": "Read Value",
+          "events": []
+        },
+        {
+          "name": "ValueChangedSubscribeToggle",
+          "type": "Button",
+          "label": "Subscribe to value changes",
+          "events": []
+        },
+        {
+          "name": "CharacteristicWriteValue",
+          "type": "TextBox",
+          "label": "Enter text/number to send",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Write Value as Number",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Write Value as UTF-8",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Connect",
+          "alt": "ConnectButton",
+          "type": "Button",
+          "label": "Connect",
+          "name": "ConnectButton",
+          "event": ""
+        },
+        {
+          "target": "Read Value",
+          "alt": "CharacteristicReadButton",
+          "type": "Button",
+          "label": "Read Value",
+          "name": "CharacteristicReadButton",
+          "event": ""
+        },
+        {
+          "target": "Subscribe to value changes",
+          "alt": "ValueChangedSubscribeToggle",
+          "type": "Button",
+          "label": "Subscribe to value changes",
+          "name": "ValueChangedSubscribeToggle",
+          "event": ""
+        },
+        {
+          "target": "Write Value as Number",
+          "alt": "",
+          "type": "Button",
+          "label": "Write Value as Number",
+          "name": "",
+          "event": ""
+        },
+        {
+          "target": "Write Value as UTF-8",
+          "alt": "",
+          "type": "Button",
+          "label": "Write Value as UTF-8",
+          "name": "",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "SelectedDeviceRun",
+            "type": "Run"
+          },
+          {
+            "name": "CharacteristicWriteValue",
+            "type": "TextBox"
+          },
+          {
+            "name": "CharacteristicLatestValue",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Server: Publish foreground",
+      "class": "Scenario3_ServerForeground",
+      "slug": "Server_Publish_foreground",
+      "screenshot": "03_Server_Publish_foreground.png",
+      "controls": [
+        {
+          "name": "Publishing2MPHY",
+          "type": "CheckBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "PublishButton",
+          "type": "Button",
+          "label": "Start Service",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "TextBox",
+          "label": "0",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "TextBox",
+          "label": "INV",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "TextBox",
+          "label": "0",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "TextBox",
+          "label": "0",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start Service",
+          "alt": "PublishButton",
+          "type": "Button",
+          "label": "Start Service",
+          "name": "PublishButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "ServiceIdRun",
+            "type": "Run"
+          },
+          {
+            "name": "PeripheralWarning",
+            "type": "TextBlock"
+          },
+          {
+            "name": "Publishing2MPHYReasonRun",
+            "type": "Run"
+          },
+          {
+            "name": "OperationLabel",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Server: Publish background",
+      "class": "Scenario4_ServerBackground",
+      "slug": "Server_Publish_background",
+      "screenshot": "04_Server_Publish_background.png",
+      "controls": [
+        {
+          "name": "Publishing2MPHY",
+          "type": "CheckBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "PublishButton",
+          "type": "Button",
+          "label": "Start Service",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "TextBox",
+          "label": "0",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "TextBox",
+          "label": "INV",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "TextBox",
+          "label": "0",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "TextBox",
+          "label": "0",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start Service",
+          "alt": "PublishButton",
+          "type": "Button",
+          "label": "Start Service",
+          "name": "PublishButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "ServiceIdRun",
+            "type": "Run"
+          },
+          {
+            "name": "PeripheralWarning",
+            "type": "TextBlock"
+          },
+          {
+            "name": "Publishing2MPHYReasonRun",
+            "type": "Run"
+          },
+          {
+            "name": "OperationLabel",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

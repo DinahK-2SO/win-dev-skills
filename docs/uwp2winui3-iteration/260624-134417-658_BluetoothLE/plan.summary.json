@@ -1,0 +1,15 @@
+{
+  "scenario": "BluetoothLE",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "PATTERNS: add Common-build-error for Application.Suspending/Resuming (removed in WinUI 3) — delete registrations + handlers, move work to OnNavigatedTo/OnNavigatedFrom or Window.Closed; recurs in every lifetime-touching UWP migration.",
+    "PATTERNS: add Common-build-error for member-level missing WinRT APIs (CS1061/CS0117 on a supported type) — stub/guard the member to keep the build green; try/catch can't fix compile errors and a non-building app scores zero.",
+    "SKILL: add API-level rule 'build-ability outranks member-level fidelity' so the agent stubs a single missing member instead of stalling, clarifying it's neither a defer row nor fabrication."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": []
+}
