@@ -1,0 +1,32 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Produced MIGRATION-MAPPING.md/MIGRATION-DEFERRED.md, rewrote using:/xmlns: namespaces, and pre-seeded triage labels so the agent transformed MainPage in place rather than re-authoring it." },
+    { "tool": "Defensive-UI guidance (SKILL.md 'Defensive UI for init-heavy and device-dependent pages')", "evidence": "Agent wrapped camera init in try/catch and added a visible StatusText fallback ('This sample could not initialize on this machine. / No camera device found.') instead of returning silently, which kept the page from crashing on a camera-less box." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Validates process-alive and text/residue fidelity but has no contrast/visibility check, so a page that renders content white-on-white passes every gate while being visually blank.", "suggested_tweak": "Cannot reliably regex 'Foreground=White' (legitimate over dark containers) -> handled with a sharpened prose rule instead of a noisy validator gate." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "CaptureElement", "special_handling": "Listed unsupported on WinUI 3 Desktop; here migrated to an Image surface, acceptable for the camera-less parity case (preview blank in both UWP and WinUI)." }
+  ],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    {
+      "where": "MainPage.xaml fallback StatusText + disabled command button glyphs",
+      "symptom": "Migrated page renders effectively blank: the 'No camera device found' fallback and the three disabled buttons are invisible, where the UWP golden showed three visible grey buttons.",
+      "turns_or_retries": "Not a loop; a silent visual defect carried straight from the UWP source without any agent realising it.",
+      "root_cause": "UWP camera sample uses Foreground=\"White\" (and white icon Fill/BorderBrush + TranslucentBlackBrush) designed to sit over a live camera preview. WinUI 3's default theme follows the system (Light), so ApplicationPageBackgroundThemeBrush resolves to white; the camera surface is blank/absent, so white foreground content renders white-on-white and is invisible.",
+      "how_resolved": "Not resolved by the agent; scorer downgraded the only feature from pass to partial (score 50) for a blank-vs-populated frame.",
+      "preventable_by": "SKILL.md defensive-fallback rule must require the fallback to be CONTRAST-visible against the default Light page background (theme-aware foreground, not hardcoded white), and MIGRATION-PATTERNS.md must flag hardcoded literal Foreground/Fill='White' carried from media/camera-overlay pages as invisible on WinUI 3's default Light theme."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No camera hardware in the validation environment.", "workaround": "Both UWP and WinUI leave all controls disabled; this is faithful, not a regression. Only the white-on-white invisibility was a defect." }
+  ]
+}

@@ -223,6 +223,14 @@ fallback** (don't only log and return). The fallback can be as simple as a centr
 saying *"This sample could not initialize on this machine."* plus the exception's `Message`
 underneath (for hardware, name the missing device kind).
 
+**"Visible" means contrast-visible, not just `Visibility=Visible`.** The fallback must read against
+WinUI 3's **default Light** page background (`ApplicationPageBackgroundThemeBrush` is white). Give it a
+theme-aware foreground — `Foreground="{ThemeResource TextFillColorPrimaryBrush}"` or just the default
+(omit `Foreground`). **Never** reuse a hardcoded `Foreground="White"` copied from a camera/media-overlay
+source page: with the preview surface blank/absent the text renders white-on-white and the page still
+captures as blank, defeating the whole purpose of the fallback. See
+[Hardcoded literal colours](./MIGRATION-PATTERNS.md#hardcoded-literal-colours-assume-the-wrong-default-theme).
+
 This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1`
 Section 7) still passes the process-alive gate, but the scenario silently renders blank and the
 benchmark's per-scenario / screenshot check penalises the trial. A few lines of guard prevent a

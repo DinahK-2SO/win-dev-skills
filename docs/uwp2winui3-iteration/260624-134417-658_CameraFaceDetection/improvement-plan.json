@@ -1,0 +1,30 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Hardcoded literal Foreground=\"White\" (and white icon Fill/glyphs) carried from the UWP camera overlay renders invisible white-on-white in WinUI 3, because the migrated app defaults to the system Light theme and ApplicationPageBackgroundThemeBrush is white while the preview surface is blank/absent.",
+      "evidence": "Generated MainPage.xaml (session-log.txt ~1303-1342, 2538): StatusText Foreground=\"White\" and button Setter Foreground=White over Grid Background={ThemeResource ApplicationPageBackgroundThemeBrush}; scorer discrepancies.json ids 'blank-fallback-text'/'invisible-disabled-buttons'; migration-score.json verdict partial (50).",
+      "root_cause": "Skill teaches resource-reference migration (StaticResource->ThemeResource) but never warns about hardcoded literal colours or the UWP(dark)->WinUI(Light) default-theme shift.",
+      "tier": 3,
+      "change": "Added a 'Hardcoded literal colours assume the wrong default theme' subsection under the ThemeResource pattern: explains UWP media/camera overlays hardcode white-on-dark, WinUI 3 defaults to Light, so white content goes invisible; fix is theme brushes ({ThemeResource TextFillColorPrimaryBrush}) or keep the contrasting dark container.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent replaces literal white foreground/glyphs with theme-aware brushes (or preserves the dark container), so migrated camera/media pages render visible content on the Light default theme.",
+      "falsifiable_check": "On re-run, generated XAML contains no Foreground=\"White\" directly on the page background; the camera-less screenshot shows visible content (buttons/fallback) instead of a blank white frame; requirement #0 goes partial->pass."
+    },
+    {
+      "problem": "The defensive-UI fallback the agent added was Visible but invisible in practice (white-on-white), so the page still captured blank. The rule secured that a fallback exists, not that it is seen.",
+      "evidence": "SKILL.md defensive-UI Rule (lines 221-224) was followed (StatusText set Visible) yet discrepancies.json 'blank-fallback-text': 'renders white-on-white and is invisible'.",
+      "root_cause": "'Visible fallback' was under-specified: it didn't require contrast against WinUI 3's default Light page background.",
+      "tier": 3,
+      "change": "Sharpened the existing Rule with a clause: '\"Visible\" means contrast-visible, not just Visibility=Visible' — use a theme-aware foreground ({ThemeResource TextFillColorPrimaryBrush} or default), never a hardcoded Foreground=\"White\" copied from a media-overlay source; cross-links the new PATTERNS subsection.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Defensive fallbacks (the device-absent path common to headless validation) render a readable message instead of an invisible one.",
+      "falsifiable_check": "On re-run, the device-absent fallback TextBlock uses a theme/default foreground and is legible in the captured screenshot (non-blank frame)."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-1 idea (not auto-applied, false-positive risk): Validate-UwpMigration.ps1 could WARN on literal Foreground=\"White\"/white Fill in migrated XAML, but white-over-dark-container usage is legitimate so a context-free grep would be noisy; left as prose."
+  ]
+}

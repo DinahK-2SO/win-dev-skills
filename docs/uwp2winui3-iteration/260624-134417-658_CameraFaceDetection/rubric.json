@@ -1,0 +1,18 @@
+{
+  "scenario": "CameraFaceDetection",
+  "source": "uwp-samples-standalone/Samples/CameraFaceDetection/cs",
+  "summary": "Single-page UWP sample: a full-window camera preview (CaptureElement) with an overlay Canvas for face-detection bounding boxes, plus three command buttons that are disabled until the camera initializes.",
+  "features": [
+    {
+      "name": "CameraFaceDetection",
+      "controls": [
+        { "id": "PreviewControl", "kind": "camera-preview", "expected": "Full-window camera preview surface (CaptureElement in UWP -> Image/MediaPlayerElement in WinUI). Blank when no camera." },
+        { "id": "FacesCanvas", "kind": "overlay", "expected": "Canvas overlay hosting face bounding boxes, aligned to the preview." },
+        { "id": "PhotoButton", "kind": "button", "action": "PhotoButton_Click", "expected": "Camera symbol icon; disabled until camera ready; takes a photo." },
+        { "id": "VideoButton", "kind": "button", "action": "VideoButton_Click", "expected": "Red ellipse (start) / white rectangle (stop) icon; disabled until camera ready; toggles video recording." },
+        { "id": "FaceDetectionButton", "kind": "button", "action": "FaceDetectionButton_Click", "expected": "Contact / Contact2 icon; disabled until camera ready; toggles face detection." }
+      ],
+      "notes": "All three buttons start with IsEnabled=False and are only enabled after the camera initializes. On a machine with no camera, the correct faithful behavior is: blank preview and all buttons remaining disabled."
+    }
+  ]
+}

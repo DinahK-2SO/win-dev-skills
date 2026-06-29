@@ -1,0 +1,32 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 0,
+  "score": 50,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    {
+      "id": 0,
+      "text": "Full-window camera preview with face-detection overlay and three command buttons that stay disabled until the camera initializes; on a camera-less machine all controls present, all disabled, preview blank, ideally with a visible fallback.",
+      "status": "partial",
+      "reason": "Structurally and behaviorally faithful (PhotoButton/VideoButton/FaceDetectionButton + PreviewControl/FacesCanvas present with correct AutomationIds, all disabled like the UWP golden), but the page renders visually blank: the 'No camera device found' StatusText is Foreground=White on the white default page background (invisible), and the disabled buttons (white glyphs) also render invisibly. Capped at partial for blank-vs-populated frame.",
+      "suspected_skill_gap": "Skill's defensive-fallback rule does not require the fallback to be contrast-visible against WinUI 3's default Light theme background; and no pattern warns that hardcoded Foreground/Fill='White' from media-overlay UWP pages becomes invisible on the Light default theme."
+    }
+  ],
+  "visual_discrepancies": [
+    {
+      "feature": "Fallback status text",
+      "uwp": "No fallback text; three visible grey disabled buttons make the page non-blank.",
+      "winui": "StatusText set Visible but Foreground=White on white background -> invisible; frame effectively blank.",
+      "screenshot_ref": "parity/winui3/screenshots/01_CameraFaceDetection.png"
+    },
+    {
+      "feature": "Disabled command buttons",
+      "uwp": "PhotoButton/VideoButton/FaceDetectionButton render as visible light-grey rounded controls with grey glyphs.",
+      "winui": "Same buttons present and disabled with correct AutomationIds but white glyphs over white page render essentially invisibly.",
+      "screenshot_ref": "parity/winui3/screenshots/01_CameraFaceDetection.png"
+    }
+  ],
+  "missing_features": [],
+  "summary": "Only feature scored partial (50). The migration is structurally/behaviourally faithful; the sole defect is white-on-white invisible content (fallback text + disabled button glyphs) caused by hardcoded white foreground inherited from the UWP camera overlay meeting WinUI 3's default Light page background."
+}

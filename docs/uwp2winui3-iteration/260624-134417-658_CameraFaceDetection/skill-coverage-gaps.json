@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The defensive-UI fallback the agent added was technically present and Visible, but invisible in practice (white-on-white), so the page still captured as blank. The skill's fallback rule secured that a fallback EXISTS but not that it is actually SEEN.",
+      "evidence": "SKILL.md 'Defensive UI for init-heavy and device-dependent pages' rule (lines 221-224) was followed: agent set StatusText='This sample could not initialize on this machine. / No camera device found.' and made it Visible. discrepancies.json id 'blank-fallback-text': it 'renders white-on-white and is invisible'. migration-score.json: verdict partial.",
+      "covered_at": "SKILL.md ### Defensive UI for init-heavy and device-dependent pages, the **Rule:** paragraph (lines 221-224): 'swap the page's main content for a visible fallback ... a centred TextBlock saying \"This sample could not initialize on this machine.\"'",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Sharpen the existing Rule so 'visible' means 'contrast-visible against the default Light page background': the fallback TextBlock must use a theme-aware foreground (e.g. {ThemeResource TextFillColorPrimaryBrush}) or default app foreground, NOT a hardcoded/inherited Foreground=\"White\" copied from a media-overlay source. One clause + a brace-free example is enough; do not add a new topic.",
+      "generalizes": "The defensive fallback fires on exactly the device-absent path most common in headless validation environments (camera, sensors, media). If the fallback inherits the source page's white overlay foreground, it is invisible across every such scenario, defeating the rule's whole purpose."
+    }
+  ]
+}

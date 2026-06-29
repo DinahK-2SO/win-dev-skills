@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Content carried verbatim from the UWP camera overlay with hardcoded literal Foreground=\"White\" (and white icon Fill/BorderBrush) renders invisible white-on-white in the migrated app, because WinUI 3's default theme follows the system (Light) and ApplicationPageBackgroundThemeBrush resolves to white while the camera/media surface is blank or absent.",
+      "evidence": "Generated MainPage.xaml (session-log.txt line ~1303-1342, 2538): '<TextBlock x:Name=\"StatusText\" Foreground=\"White\" ...>' and button style '<Setter Property=\"Foreground\" Value=\"White\"/>' over '<Grid Background=\"{ThemeResource ApplicationPageBackgroundThemeBrush}\">'; scorer migration-score.json verdict partial / discrepancies.json id 'blank-fallback-text' and 'invisible-disabled-buttons'.",
+      "skill_search": "Grepped SKILL.md and MIGRATION-PATTERNS.md for 'White', 'Foreground', 'theme', 'literal', 'RequestedTheme', 'TextFillColor', 'default theme'. The only colour guidance is the 'DynamicResource/StaticResource -> ThemeResource' section (MIGRATION-PATTERNS.md ~601); nothing addresses hardcoded literal colour values or the UWP-vs-WinUI default-theme difference.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill teaches resource-reference migration but never warns that hardcoded literal colours (especially white foreground/glyphs designed to sit over a dark camera/media preview) become invisible against WinUI 3's default Light page background, where UWP samples historically assumed a dark backdrop.",
+      "proposed_fix": "Add a short subsection under the ThemeResource pattern in MIGRATION-PATTERNS.md: 'Hardcoded literal colours assume the wrong default theme'. State that UWP media/camera-overlay pages hardcode Foreground=\"White\"/white Fill to sit over a preview, but WinUI 3 defaults to the system (Light) theme so these go invisible on the white ApplicationPageBackgroundThemeBrush when the surface is blank/absent. Fix: replace literal white text/glyph colours with theme brushes (e.g. {ThemeResource TextFillColorPrimaryBrush}) OR keep the contrasting (dark/translucent-black) container behind them; do not leave white foreground directly on the page background.",
+      "generalizes": "Every UWP camera/media/video sample (CameraStarterKit family, MediaPlayer overlays) uses white-on-dark overlay chrome, and ALL migrated apps inherit WinUI 3's Light default theme, so white-foreground content over an absent/blank surface is a recurring invisibility defect independent of this scenario."
+    }
+  ]
+}

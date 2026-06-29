@@ -1,0 +1,23 @@
+{
+  "scenario": "CameraFaceDetection",
+  "uwp_launchable": true,
+  "score": 50,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 1,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "CameraFaceDetection",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_CameraFaceDetection.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_CameraFaceDetection.png",
+      "note": "Structurally and behaviorally faithful: all three buttons (PhotoButton, VideoButton, FaceDetectionButton) plus PreviewControl/FacesCanvas are present in the WinUI UIA tree with correct AutomationIds, and all are disabled exactly as in the UWP golden because no camera hardware exists (no dead-control regression -- nothing responds in the UWP golden either). Downgraded to partial for a visual-fidelity defect: the WinUI page renders effectively blank where the UWP golden showed three visible (disabled) buttons. The defensive 'No camera device found' StatusText is set Foreground=White on a white background, so it is invisible, and the disabled buttons also render invisibly. The parity gate passed structurally (100), but the visual judgment of a blank-vs-populated frame caps this at partial."
+    }
+  ]
+}

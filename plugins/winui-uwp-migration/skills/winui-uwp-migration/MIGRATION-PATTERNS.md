@@ -616,6 +616,27 @@ WinUI 3 ships Fluent theme resources under `ThemeResource`. UWP code that used `
 
 The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-reference with the [Fluent Design colour palette](https://learn.microsoft.com/windows/apps/design/style/xaml-theme-resources).
 
+### Hardcoded literal colours assume the wrong default theme
+
+`ThemeResource` migration only fixes *resource references*. Watch separately for **hardcoded literal
+colour values** — `Foreground="White"`, white icon `Fill`/`Stroke`/`BorderBrush`, `TranslucentBlackBrush`
+chrome. UWP camera/media/video samples (CameraStarterKit family, `MediaPlayerElement` overlays) hardcode
+these so light text/glyphs sit over a **dark live preview**. A migrated WinUI 3 app defaults to the
+**system (Light)** theme, so `ApplicationPageBackgroundThemeBrush` resolves to **white**; when the
+preview surface is blank or the device is absent, the white foreground renders **white-on-white and is
+invisible** — the page captures as blank even though every control is present.
+
+Fix: don't leave a literal-white foreground directly on the page background. Either
+
+- replace literal text/glyph colours with theme brushes that adapt to Light/Dark/HighContrast — e.g.
+  `Foreground="{ThemeResource TextFillColorPrimaryBrush}"` (or just omit `Foreground` to inherit the
+  default), or
+- keep the original contrasting container (the dark / translucent-black panel) behind the white content
+  so the white still reads.
+
+This is the same defect the defensive fallback in SKILL.md (*Defensive UI for init-heavy and
+device-dependent pages*) must avoid.
+
 ### Controls that need element-level swaps
 
 | UWP element | WinUI 3 element | Notes |

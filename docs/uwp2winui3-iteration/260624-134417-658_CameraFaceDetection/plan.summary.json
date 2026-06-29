@@ -1,0 +1,16 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: add 'Hardcoded literal colours assume the wrong default theme' — UWP camera/media overlays hardcode Foreground=White/white glyphs over a dark preview, but WinUI 3 defaults to the Light theme so they render white-on-white invisible; fix with theme brushes or keep the contrasting container.",
+    "SKILL.md: sharpen the defensive-UI fallback Rule so 'visible' means contrast-visible against the default Light background — use {ThemeResource TextFillColorPrimaryBrush}/default foreground, never a hardcoded white inherited from the source page."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Validate-UwpMigration.ps1 grep-warn for literal Foreground=White is too false-positive-prone (legit over dark containers); left as prose."
+  ]
+}
