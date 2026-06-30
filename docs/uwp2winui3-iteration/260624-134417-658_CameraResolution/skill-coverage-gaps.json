@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The 'Initialize Camera' action is behaviorally dead in WinUI across all 3 scenarios: the button disables on click and never re-enables, and no Status feedback is shown, while UWP shows a status message. Two compounding causes copied faithfully from the UWP source: (1) device init catches only UnauthorizedAccessException, and (2) the click handler disables the control around the await with no finally.",
+      "evidence": "migration-score.json features[].winui_responded=false (3/3 partial); SampleConfiguration.cs:80 'catch (UnauthorizedAccessException)' is the only catch around MediaCapture.InitializeAsync(); Scenario1_PreviewSettings.xaml.cs:77-79 sets button.IsEnabled=false, awaits InitializeCameraAsync(), then IsEnabled=true with no finally.",
+      "covered_at": "SKILL.md section 'Defensive UI for init-heavy and device-dependent pages' (lines ~200-229) and MIGRATION-PATTERNS.md#silent-navigation-failures cross-reference (line ~386).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Extend the EXISTING 'Defensive UI for init-heavy and device-dependent pages' section to also cover device init that is DEFERRED to an async event handler (button click), whose failure mode is a dead control + lost status rather than a blank frame. Add two general rules: (a) broaden a narrow `catch (UnauthorizedAccessException)` around device init to also handle the device-absent throw (COMException / FileNotFoundException) and emit a status message, because the validation/dev box usually has no device and unpackaged WinUI 3 does not honor the webcam capability like UWP; (b) when an async handler disables its trigger control during an await, restore IsEnabled in a `finally` so a throw can never leave the control permanently dead.",
+      "generalizes": "Both rules are environment-driven and recur across any UWP→WinUI 3 sample that initializes hardware/media or does async work behind a button: the access-denied exception the UWP code anticipated is only one of several denial paths, and disable-around-await without finally is a universal anti-pattern that silently dead-ends interactive controls whenever the awaited work throws."
+    }
+  ]
+}

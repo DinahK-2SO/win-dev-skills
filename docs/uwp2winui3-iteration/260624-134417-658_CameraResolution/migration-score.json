@@ -1,0 +1,41 @@
+{
+  "scenario": "CameraResolution",
+  "uwp_launchable": true,
+  "score": 50,
+  "features_total": 3,
+  "features_pass": 0,
+  "features_partial": 3,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 3,
+  "features": [
+    {
+      "name": "Change camera preview settings",
+      "verdict": "partial",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Change_camera_preview_settings__a01_Initialize_Camera.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Change_camera_preview_settings__a01_Initialize_Camera.png",
+      "note": "All controls present and layout faithful, but Initialize Camera is dead in WinUI (disabled, no Status output) while UWP shows a status message on click. Behavioral regression -> partial."
+    },
+    {
+      "name": "Change preview and photo settings",
+      "verdict": "partial",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Change_preview_and_photo_settings__a01_Initialize_Camera.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Change_preview_and_photo_settings__a01_Initialize_Camera.png",
+      "note": "All 3 controls present (coverage 3/3) and layout faithful, but Initialize Camera is dead in WinUI vs responsive in UWP. Behavioral regression -> partial."
+    },
+    {
+      "name": "Match aspect ratios",
+      "verdict": "partial",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Match_aspect_ratios__a01_Initialize_Camera.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Match_aspect_ratios__a01_Initialize_Camera.png",
+      "note": "Initialize Camera dead in WinUI vs responsive in UWP. Compare-Parity flagged Video Settings combo as missing (coverage 2/3) but visual inspection confirms it is present (likely missing AutomationId). Behavioral regression -> partial."
+    }
+  ]
+}

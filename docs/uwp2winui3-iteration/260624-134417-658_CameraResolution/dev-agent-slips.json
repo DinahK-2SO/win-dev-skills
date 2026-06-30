@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Scenario 3 'Video Settings' ComboBox was reported by Compare-Parity as not found in the UIA tree (coverage 2/3), although it is visually present and rendered. Likely a missing AutomationProperties.AutomationId rather than a dropped control.",
+      "evidence": "discrepancies.json scenario 3 'structural-false-negative'; migration-score.json features[2].note: 'Compare-Parity flagged Video Settings combo as missing (coverage 2/3) but visual inspection confirms it is present'.",
+      "covered_clearly_at": "N/A — eval-tooling sensitivity in winui3-parity-check (UIA name/AutomationId lookup), not a migration-skill behavior. The control is present and functional.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Low severity, does not fail the scenario (verdict still partial for the camera reason, not this one). Adding AutomationProperties.AutomationId purely to satisfy the parity tool's UIA lookup would be tuning the migration output to the measurement instrument; the control already renders and works. No generalizable migration defect. Recorded as eval-tool sensitivity only."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "score": 50,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Change camera preview settings", "status": "partial", "reason": "All controls present and layout faithful, but Initialize Camera is dead in WinUI (disabled, no Status output) while UWP shows a status message on click.", "suspected_skill_gap": "Defensive-UI guidance covers ctor/Loaded init only; the async button-click device-init path (narrow catch + no finally) is not covered, leaving a dead control and no status feedback." },
+    { "id": 1, "text": "Change preview and photo settings", "status": "partial", "reason": "All 3 controls present (coverage 3/3) and layout faithful, but Initialize Camera is dead in WinUI vs responsive in UWP.", "suspected_skill_gap": "Same async device-init coverage gap." },
+    { "id": 2, "text": "Match aspect ratios", "status": "partial", "reason": "Initialize Camera dead in WinUI vs responsive in UWP. Compare-Parity flagged Video Settings combo as missing (coverage 2/3) but it is visually present (likely missing AutomationId).", "suspected_skill_gap": "Same async device-init coverage gap; plus a minor structural false-negative attributable to missing AutomationProperties.AutomationId (eval-tooling sensitivity, not a true drop)." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Initialize Camera (Scenario 1)", "uwp": "Click shows red Status panel 'The app was denied access to the camera'", "winui": "Button greyed/disabled, no Status panel rendered", "screenshot_ref": "parity/winui3/screenshots/01_Change_camera_preview_settings__a01_Initialize_Camera.png" },
+    { "feature": "Status output area (Scenario 1)", "uwp": "'Status:' label + colored StatusBorder visible after init", "winui": "No status area shown (NotifyUser never invoked on the uncaught-exception path)", "screenshot_ref": "parity/baseline/screenshots/01_Change_camera_preview_settings__a01_Initialize_Camera.png" }
+  ],
+  "missing_features": [
+    "Behavioral response of Initialize Camera (status feedback) across all 3 scenarios"
+  ],
+  "summary": "Migrated app reproduces layout and navigation faithfully in all 3 scenarios but the Initialize Camera action is behaviorally dead in WinUI: a narrow device-init catch (UnauthorizedAccessException only) plus disable-around-await without finally leaves the button permanently disabled and suppresses all status feedback when init fails on a camera-less box."
+}

@@ -228,6 +228,45 @@ Section 7) still passes the process-alive gate, but the scenario silently render
 benchmark's per-scenario / screenshot check penalises the trial. A few lines of guard prevent a
 large score loss.
 
+#### Deferred (button-click / async) device init — the *dead control* failure mode
+
+The same hazard often lives **not** in the constructor but in an `async` event handler that runs
+the real init when the user clicks (e.g. an *Initialize Camera* / *Connect* / *Start* button). Here
+the page renders fine, so it is **not** a blank frame — instead the **control goes dead**: it
+disables and never recovers, and any status text the UWP app would have shown never appears. To a
+parity reviewer this is a behavioral regression (the control responds in UWP, does nothing in
+WinUI) even though the build and smoke launch pass. Two general rules prevent it:
+
+1. **Restore `IsEnabled` in a `finally`.** UWP samples routinely write
+   `btn.IsEnabled = false; await DoWorkAsync(); btn.IsEnabled = true;`. If the `await` throws, the
+   re-enable line never runs and the control is **permanently dead**. Always wrap it:
+
+   ```csharp
+   button.IsEnabled = false;
+   try { await InitializeDeviceAsync(); }
+   finally { button.IsEnabled = true; }   // control can never get stuck disabled
+   ```
+
+2. **Don't catch only `UnauthorizedAccessException` around device init.** UWP hardware samples
+   guard `await mediaCapture.InitializeAsync()` (and the sensor/Bluetooth/location equivalents) with
+   `catch (UnauthorizedAccessException)` only — the one path they expected on a *consented* device
+   whose access was revoked. The validation/dev box usually has **no device at all**, and an
+   unpackaged WinUI 3 app does **not** honor the appxmanifest `<DeviceCapability>` the way UWP did,
+   so init throws a *different* type — typically `COMException` (e.g. `0xC00DABE0`, "no capture
+   device") or `FileNotFoundException`. Broaden the catch so **every** init failure degrades to a
+   visible status message instead of an uncaught throw that escapes the `async void` handler:
+
+   ```csharp
+   try { await mediaCapture.InitializeAsync(); /* StartPreview, populate UI … */ }
+   catch (Exception ex)   // device-absent / access-denied / driver error all land here
+   {
+       rootPage?.NotifyUser($"Could not initialize the camera: {ex.Message}", NotifyType.ErrorMessage);
+   }
+   ```
+
+   Preserve the sample's existing `NotifyUser` / status-panel call so the user still gets feedback —
+   that status output is itself part of UWP parity.
+
 ## Post-Migration
 
 ### Restore sandboxing (if needed)

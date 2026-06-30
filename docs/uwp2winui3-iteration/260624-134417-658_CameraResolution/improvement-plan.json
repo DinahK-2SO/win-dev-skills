@@ -1,0 +1,20 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Device init (camera) deferred to an async button-click handler leaves the control permanently disabled and shows no status when init fails on a device-less box: the handler disables the control around an await with no finally, and init catches only UnauthorizedAccessException. Reproduced as 3/3 partial scenarios (Initialize Camera dead in WinUI).",
+      "evidence": "migration-score.json features[].winui_responded=false (3/3 partial); SampleConfiguration.cs:80 'catch (UnauthorizedAccessException)' only; Scenario1_PreviewSettings.xaml.cs:77-79 disable/await/enable with no finally.",
+      "root_cause": "The skill's 'Defensive UI for init-heavy and device-dependent pages' section only covers ctor/Loaded init (blank-frame failure mode). The interactive async-handler path (dead-control + lost-status failure mode) was not covered, so the agent faithfully copied the UWP narrow-catch + disable-around-await pattern, which breaks when the validation box has no camera and the throw is a non-UnauthorizedAccessException.",
+      "tier": 3,
+      "change": "Extended the existing 'Defensive UI for init-heavy and device-dependent pages' section in SKILL.md with a 'Deferred (button-click / async) device init' subsection giving two general rules with code: (1) restore IsEnabled in a finally so an await throw can't dead-end the control; (2) broaden a narrow `catch (UnauthorizedAccessException)` around device init to catch device-absent throws (COMException/FileNotFoundException) and emit the sample's existing NotifyUser status.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "On re-run of any hardware/media sample with a click-to-initialize control, the control re-enables after a failed init and a status message renders, restoring behavioral parity with the UWP golden.",
+      "falsifiable_check": "CameraResolution scenarios go partial->pass (or winui_responded=true) because Initialize Camera re-enables and Status shows a message on a camera-less box; no async-void uncaught exception from device init."
+    }
+  ],
+  "deferred_to_human": [
+    "Compare-Parity (winui3-parity-check eval skill) UIA false-negative on the Scenario 3 'Video Settings' combo (coverage 2/3 despite the control being present). Eval-tool sensitivity; out of scope for the migration skill."
+  ]
+}

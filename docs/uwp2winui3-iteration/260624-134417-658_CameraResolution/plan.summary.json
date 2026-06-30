@@ -1,0 +1,16 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "SKILL.md: extend Defensive-UI section to cover deferred async (button-click) device init — the dead-control failure mode, not just blank-frame ctor init",
+    "Rule: restore IsEnabled in a finally around disable-during-await handlers so an init throw can't permanently dead-end the control",
+    "Rule: broaden narrow `catch (UnauthorizedAccessException)` around MediaCapture/device init to handle device-absent throws (COMException/FileNotFoundException) and still emit the sample's NotifyUser status"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "winui3-parity-check UIA false-negative on Scenario 3 Video Settings combo (eval-tool sensitivity, out of scope)"
+  ]
+}

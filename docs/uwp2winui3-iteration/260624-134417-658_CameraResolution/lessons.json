@@ -1,0 +1,29 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 + MIGRATION-PATTERNS.md", "evidence": "Namespace rewrite and structural scaffold succeeded; app builds (metrics.builds=true) and runs (metrics.runs=true) with all 3 scenario pages present and visually faithful." },
+    { "tool": "SKILL.md 'Defensive UI for init-heavy and device-dependent pages'", "evidence": "Dev-agent applied the ctor try/catch fallback in every scenario page (e.g. Scenario1_PreviewSettings.xaml.cs:39-53 swaps RootGrid for a TextBlock on construction failure)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "SKILL.md Defensive-UI section", "limitation": "Only covers init done in the page constructor/Loaded (failure mode = blank frame). It does not cover device init deferred to an async button-click handler, whose failure mode is a dead control + lost status feedback on a page that otherwise renders fine.", "suggested_tweak": "Extend the section to cover async event-handler init: broaden the device-init catch beyond UnauthorizedAccessException, and restore control.IsEnabled in a finally." }
+  ],
+  "failed_apis": [
+    { "api": "MediaCapture.InitializeAsync()", "why_tried": "Camera preview/photo/video init on Initialize Camera click", "root_cause": "On a box without an accessible camera (validation/dev environment), InitializeAsync throws an exception type OTHER than UnauthorizedAccessException (e.g. COMException 0xC00DABE0 'no capture device' / FileNotFoundException). The migrated handler only catches UnauthorizedAccessException, so the throw escapes the async void handler.", "fix": "Broaden the catch around device init to Exception (or add COMException/FileNotFoundException) and surface a status message; the access-denied path the UWP sample anticipated is only one of several denial paths." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "MediaCapture / camera init", "special_handling": "The physical device is usually absent in the validation environment, and the absent-device exception differs from the access-denied exception. Init must degrade gracefully to a visible status message and re-enable its trigger control, not just handle UnauthorizedAccessException." }
+  ],
+  "errors_encountered": [
+    { "error": "Initialize Camera button becomes permanently disabled/greyed with no Status output after click (behavioral regression vs UWP).", "root_cause": "InitializeCameraButton_Click sets button.IsEnabled=false, awaits InitializeCameraAsync (which only catches UnauthorizedAccessException), then sets IsEnabled=true. When InitializeAsync throws a different exception type, the re-enable line is skipped and no NotifyUser is called, leaving a dead control and no feedback.", "fix": "Use try/finally to always restore IsEnabled; broaden the device-init catch so any init failure produces a status message." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario1/2/3 *_Click init handlers + SampleConfiguration.InitializeCameraAsync", "symptom": "Initialize Camera is behaviorally dead in WinUI (disabled, no Status) while responsive in UWP, in all 3 scenarios.", "turns_or_retries": "n/a (built clean; regression only visible at runtime, not caught by the agent)", "root_cause": "Faithfully copied the UWP pattern of disabling the control around an await without a finally, and catching only UnauthorizedAccessException around device init. On a device-less box the awaited init throws a non-UnauthorizedAccessException, so the control is never re-enabled and no status is shown.", "how_resolved": "Not resolved by the dev-agent.", "preventable_by": "Extending SKILL.md 'Defensive UI' to require try/finally restore of IsEnabled around await and a broadened catch for device-init in interactive handlers." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Validation/dev box has no accessible camera; unpackaged WinUI 3 run does not honor the appxmanifest webcam capability the same way UWP does.", "workaround": "Treat device init as expected-to-fail in validation: always degrade to a visible status message and a usable (re-enabled) control." }
+  ]
+}
