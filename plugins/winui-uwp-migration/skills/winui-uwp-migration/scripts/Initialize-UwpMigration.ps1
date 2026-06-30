@@ -478,6 +478,8 @@ foreach ($rel in $deferredKeys) {
 }
 if ($deferredKeys.Count -eq 0) {
     [void]$dlines.Add('| (none) | — |')
+    [void]$dlines.Add('')
+    [void]$dlines.Add('No items deferred.')
 }
 Set-Content -LiteralPath $deferredPath -Value $dlines -Encoding UTF8
 

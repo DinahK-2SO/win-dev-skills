@@ -1,0 +1,30 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "R3-R5: bootstrap scaffolded the project, copied source, injected TODO[migrate-NNN] anchors and pre-seeded MIGRATION-MAPPING.md/MIGRATION-DEFERRED.md; agent followed it without friction." },
+    { "tool": "Get-MigrationPattern.ps1 (threading anchor)", "evidence": "R6: fetched the threading pattern to resolve the Dispatcher.RunAsync TODOs in the three SEQUENTIAL scenario files." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "R15: validation reported PASS; gated the final build/handoff." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1", "problem": "Emitted a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows' even though nothing was deferred (the legitimate zero-deferral case).", "evidence": "R15-R16: agent spent two turns opening MIGRATION-DEFERRED.md to confirm the WARN was benign before proceeding." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Its 'no defer rows' branch only treats the deferred file as clean when its text contains the literal phrase 'No items deferred', but Initialize-UwpMigration.ps1 seeds a '| (none) | — |' placeholder row, so the two never agree on the empty case.", "suggested_tweak": "Recognize the bootstrap's '(none)' placeholder as the canonical empty state (and have the bootstrap also print the literal phrase) so a zero-deferral migration validates without a WARN." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Media.Capture / MediaCapture video-profile APIs", "special_handling": "Triaged SEQUENTIAL by the bootstrap (sensitive capture namespace); resolved via the threading anchor for Dispatcher.RunAsync. Migrated as-is; runtime ERROR text ('No Video Device Id found') matches the UWP golden." }
+  ],
+  "errors_encountered": [
+    { "error": "Broken Scenario file with a duplicate class/namespace block after a single edit", "root_cause": "Agent attempted a whole-file rewrite with one edit whose old_str matched only the file header/using block, so the original class body remained appended after the new content.", "fix": "R12-R14: agent re-viewed the file and removed the duplicated tail (lines 233-439) in a follow-up edit." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Validation step (R15-R16)", "symptom": "Spurious MIGRATION-DEFERRED.md WARN on a zero-deferral migration", "turns_or_retries": "2 turns spent confirming the WARN was benign", "root_cause": "Producer/validator phrase mismatch: bootstrap seeds '(none)' placeholder; validator only accepts literal 'No items deferred'.", "how_resolved": "Agent manually inspected the file, judged the WARN benign, proceeded.", "preventable_by": "Aligning Validate-UwpMigration.ps1 and Initialize-UwpMigration.ps1 on the empty-deferred sentinel so the WARN never fires when nothing was deferred." },
+    { "where": "Sample-shell reconstruction (R9-R11)", "symptom": "Several planning turns to reconstruct the SDK-sample shell (MainPage.Current, NotifyUser/NotifyType, SampleConfiguration partial MainPage, App.xaml SampleHeader/ScenarioDescription styles) and consolidate the SDKTemplate namespace into the app namespace.", "turns_or_retries": "~3 planning turns", "root_cause": "SKILL.md's Shell-conversion table names the 'MainPage + ListView + Frame (SDK-sample idiom)' row but does not enumerate the SDKTemplate helper scaffolding that every Windows-universal-sample carries, so the agent reverse-engineered it from source.", "how_resolved": "Agent reimplemented the shell helpers and changed namespace SDKTemplate -> CameraProfile.", "preventable_by": "Adding a short note under the existing SDK-sample shell row listing the SDKTemplate helpers to recreate and the namespace consolidation." },
+    { "where": "Whole-file rewrite (R12-R14)", "symptom": "Duplicate class/namespace after a partial edit", "turns_or_retries": "3 turns", "root_cause": "Single edit with old_str matching only the header left the old class body duplicated.", "how_resolved": "Removed the duplicate tail in a follow-up edit.", "preventable_by": "General editing discipline (replace the whole file when rewriting wholesale) — not migration-specific; capable re-run avoids it." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

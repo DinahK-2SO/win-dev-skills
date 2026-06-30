@@ -1,0 +1,3097 @@
+
+=== TURN 0 ===
+
+--- TOOL: report_intent ---
+{"intent":"Exploring UWP source code"}
+
+--- TOOL: skill ---
+{"skill":"winui-uwp-migration"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+Skill "winui-uwp-migration" loaded successfully. Follow the instructions in the skill context.
+
+=== TURN 1 ===
+
+--- TOOL: report_intent ---
+{"intent":"Bootstrapping WinUI3 migration"}
+
+--- TOOL: powershell ---
+{"command":"cd C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app; dotnet new winui -n CameraProfile; \"SCAFFOLD_EXIT=$LASTEXITCODE\"","description":"Scaffold WinUI 3 project","initial_wait":60,"mode":"sync"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+The template "WinUI Blank App" was created successfully.Processing post-creation actions...
+Adding a package reference Microsoft.WindowsAppSDK to project file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj:
+CameraProfile
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CameraProfile
+CameraProfile
+CameraProfile
+CameraProfile
+(0.1s)
+(0.1s)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+info : Adding PackageReference for package 'Microsoft.WindowsAppSDK' into project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj'.
+info :   GET https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windowsappsdk/index.json
+info :   OK https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windowsappsdk/index.json 182ms
+info : Restoring packages for C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj...
+info :   GET https://api.nuget.org/v3/vulnerabilities/index.json
+info :   OK https://api.nuget.org/v3/vulnerabilities/index.json 19ms
+info :   GET https://api.nuget.org/v3-vulnerabilities/2026.06.30.00.01.29/vulnerability.base.json
+info :   GET https://api.nuget.org/v3-vulnerabilities/2026.06.30.00.01.29/2026.06.30.00.01.29/vulnerability.update.json
+info :   OK https://api.nuget.org/v3-vulnerabilities/2026.06.30.00.01.29/vulnerability.base.json 4ms
+info :   OK https://api.nuget.org/v3-vulnerabilities/2026.06.30.00.01.29/2026.06.30.00.01.29/vulnerability.update.json 7ms
+info : Package 'Microsoft.WindowsAppSDK' is compatible with all the specified frameworks in project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj'.
+info : PackageReference for package 'Microsoft.WindowsAppSDK' version '2.2.0' updated in file 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj'.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\obj\CameraProfile.csproj.nuget.g.props.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\obj\CameraProfile.csproj.nuget.g.targets.
+info : Writing assets file to disk. Path: C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\obj\project.assets.json
+log  : Restored C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj (in 1.02 sec).
+Successfully added a reference to the project file.Adding a package reference Microsoft.Windows.SDK.BuildTools to project file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj:
+CameraProfile
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+info : Adding PackageReference for package 'Microsoft.Windows.SDK.BuildTools' into project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj'.
+info :   GET https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools/index.json
+info :   OK https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools/index.json 180ms
+info : Restoring packages for C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj...
+info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.30.00.01.29/vulnerability.base.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.30.00.01.29/2026.06.30.00.01.29/vulnerability.update.json
+info : Package 'Microsoft.Windows.SDK.BuildTools' is compatible with all the specified frameworks in project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj'.
+info : PackageReference for package 'Microsoft.Windows.SDK.BuildTools' version '10.0.28000.2270' updated in file 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj'.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\obj\CameraProfile.csproj.nuget.g.props.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\obj\CameraProfile.csproj.nuget.g.targets.
+info : Writing assets file to disk. Path: C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\obj\project.assets.json
+log  : Restored C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj (in 320 ms).
+Successfully added a reference to the project file.Adding a package reference Microsoft.Windows.SDK.BuildTools.WinApp to project file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj:
+CameraProfile
+
+
+
+info : X.509 certificate chain validation will use the default trust store selected by .NET for code signing.
+info : X.509 certificate chain validation will use the default trust store selected by .NET for timestamping.
+info : Adding PackageReference for package 'Microsoft.Windows.SDK.BuildTools.WinApp' into project 'C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj'.
+info :   GET https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools.winapp/index.json
+info :   OK https://api.nuget.org/v3/registration5-gz-semver2/microsoft.windows.sdk.buildtools.winapp/index.json 185ms
+info : Restoring packages for C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\Camera
+aProfile\CameraProfile.csproj...
+info :   CACHE https://api.nuget.org/v3/vulnerabilities/index.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.30.00.01.29/vulnerability.base.json
+info :   CACHE https://api.nuget.org/v3-vulnerabilities/2026.06.30.00.01.29/2026.06.30.00.01.29/vulnerability.update.jso
+on
+info : Package 'Microsoft.Windows.SDK.BuildTools.WinApp' is compatible with all the specified frameworks in project 'C:\
+\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj'.   
+info : PackageReference for package 'Microsoft.Windows.SDK.BuildTools.WinApp' version '0.4.0' updated in file 'C:\ado\wi
+in-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfile.csproj'.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\Camer
+raProfile\obj\CameraProfile.csproj.nuget.g.props.
+info : Generating MSBuild file C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\Camer
+raProfile\obj\CameraProfile.csproj.nuget.g.targets.
+info : Writing assets file to disk. Path: C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfil
+le\app\CameraProfile\obj\project.assets.json
+log  : Restored C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\Camera
+aProfile.csproj (in 320 ms).
+Successfully added a reference to the project file.
+
+Restoring C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\CameraProfil
+le.csproj:
+csproj
+(0.1s)
+(0.1s)
+Restore succeeded.
+
+
+An update for template package 'Microsoft.WindowsAppSDK.WinUI.CSharp.Templates@0.0.5-alpha' is available.
+To update the package use:
+   dotnet new install Microsoft.WindowsAppSDK.WinUI.CSharp.Templates@0.0.6-alpha
+
+SCAFFOLD_EXIT=0
+<exited with exit code 0>
+
+=== TURN 2 ===
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Initialize-UwpMigration.ps1\" -Source \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\CameraProfile\\cs\" -Target \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\"; \"BOOTSTRAP_EXIT=$LASTEXITCODE\"","description":"Run bootstrap migration script","initial_wait":120,"mode":"sync"}
+--- RESULT ---
+==> Initialize-UwpMigration
+    Source : C:\ado\win-dev-skills-benchmark\agent-benchmark\uwp-samples-standalone\Samples\CameraProfile\cs
+    Target : C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile
+    Copied 8 source files
+    Preserved CameraProfile.csproj at .uwp-source/ (reference only — do not edit, do not include in build)
+    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in 4 of 13 .cs/.xaml files
+    Snapshotted visible text from 4 XAML file(s) -> .fidelity-snapshot.json
+
+=== BOOTSTRAP COMPLETE ===
+Source files copied   : 8
+Namespace rewrites    : 4 of 13 .cs/.xaml files
+Neutralized classes   : 0 file(s)
+Triage breakdown      :
+  migrate-as-is              5
+  migrate-with-adaptation    3
+Inline TODOs injected : 6
+  SEQUENTIAL files    : 3
+  BATCH files         : 0
+Artifacts:
+  MIGRATION-MAPPING.md       (triage labels per file)
+  MIGRATION-DEFERRED.md      (pre-seeded; anchors only)
+  .bootstrap-meta.json       (per-file mode, schema v2)
+  .uwp-source/               (original UWP .csproj for reference)
+Next:
+  1. Open a TODO-bearing source file (search for TODO[migrate- )
+  2. Read its mode in .bootstrap-meta.json (perFileMode[<path>])
+  3. Resolve each TODO via: scripts/Get-MigrationPattern.ps1 -Anchor <id>
+  4. BATCH = fix all TODOs in file then build; SEQUENTIAL = fix one then build
+  5. End by running scripts/Validate-UwpMigration.ps1 -Target <target>
+==========================
+BOOTSTRAP_EXIT=0
+<exited with exit code 0>
+
+=== TURN 3 ===
+
+--- TOOL: powershell ---
+{"command":"Test-Path \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\MIGRATION-MAPPING.md\"","description":"Self-check bootstrap","mode":"sync"}
+--- RESULT ---
+True
+<exited with exit code 0>
+
+=== TURN 4 ===
+
+--- TOOL: report_intent ---
+{"intent":"Reading migration mapping"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\MIGRATION-MAPPING.md"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\.bootstrap-meta.json"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+1. # Migration Mapping
+2. 
+3. Seeded by Initialize-UwpMigration.ps1. **Do not add or remove rows** during Steps 2-5;
+4. only refine the Triage label and flip the Status. Deferred rows must also appear
+5. in `MIGRATION-DEFERRED.md`.
+6. 
+7. | Source file | Target file | Triage label | Status |
+8. |---|---|---|---|
+9. | Package.appxmanifest | Package.appxmanifest | migrate-as-is | copied |
+10. | SampleConfiguration.cs | SampleConfiguration.cs | migrate-as-is | copied |
+11. | Scenario1_SetRecordProfile.xaml | Scenario1_SetRecordProfile.xaml | migrate-as-is | copied |
+12. | Scenario1_SetRecordProfile.xaml.cs | Scenario1_SetRecordProfile.xaml.cs | migrate-with-adaptation | copied |
+13. | Scenario2_ConcurrentProfile.xaml | Scenario2_ConcurrentProfile.xaml | migrate-as-is | copied |
+14. | Scenario2_ConcurrentProfile.xaml.cs | Scenario2_ConcurrentProfile.xaml.cs | migrate-with-adaptation | copied |
+15. | Scenario3_EnableHdrProfile.xaml | Scenario3_EnableHdrProfile.xaml | migrate-as-is | copied |
+16. | Scenario3_EnableHdrProfile.xaml.cs | Scenario3_EnableHdrProfile.xaml.cs | migrate-with-adaptation | copied |
+17. 
+--- RESULT ---
+1. {
+2.   "version": 2,
+3.   "timestamp": "2026-06-30T14:04:36.0451237+08:00",
+4.   "sourcePath": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\CameraProfile\\cs",
+5.   "seededRowCount": 8,
+6.   "todoCount": 6,
+7.   "sensitiveFileCount": 3,
+8.   "deferredCount": 0,
+9.   "perFileMode": {
+10.     "Scenario1_SetRecordProfile.xaml.cs": "SEQUENTIAL",
+11.     "Scenario2_ConcurrentProfile.xaml.cs": "SEQUENTIAL",
+12.     "Scenario3_EnableHdrProfile.xaml.cs": "SEQUENTIAL"
+13.   },
+14.   "neutralizedClasses": []
+15. }
+16. 
+
+=== TURN 5 ===
+
+--- TOOL: report_intent ---
+{"intent":"Migrating scenario files"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+.bootstrap-meta.json
+.fidelity-snapshot.json
+.github
+.gitignore
+.uwp-source
+AGENTS.md
+App.xaml
+App.xaml.cs
+Assets
+CameraProfile.csproj
+MIGRATION-DEFERRED.md
+MIGRATION-MAPPING.md
+MainPage.xaml
+MainPage.xaml.cs
+MainWindow.xaml
+MainWindow.xaml.cs
+Package.appxmanifest
+Properties
+SampleConfiguration.cs
+Scenario1_SetRecordProfile.xaml
+Scenario1_SetRecordProfile.xaml.cs
+Scenario2_ConcurrentProfile.xaml
+Scenario2_ConcurrentProfile.xaml.cs
+Scenario3_EnableHdrProfile.xaml
+Scenario3_EnableHdrProfile.xaml.cs
+app.manifest
+obj
+
+=== TURN 6 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario1_SetRecordProfile.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario2_ConcurrentProfile.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario3_EnableHdrProfile.xaml.cs"}
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the Microsoft Public License.
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. namespace CameraProfile
+13. {
+14.     using System;
+15.     using System.Collections.Generic;
+16.     using System.Globalization;
+17.     using System.Linq;
+18.     using System.Threading.Tasks;
+19.     using Windows.Devices.Enumeration;
+20.     using Windows.Media.Capture;
+21.     using Microsoft.UI.Xaml;
+22.     using Microsoft.UI.Xaml.Controls;
+23.     using Microsoft.UI.Xaml.Navigation;
+24.     using SDKTemplate;
+25. 
+26.     /// <summary>
+27.     /// SetRecordProfile page that can be used on its own or navigated to within a Frame.
+28.     /// </summary>
+29.     public sealed partial class Scenario1_SetRecordProfile : Page
+30.     {
+31.         /// <summary>
+32.         /// Private MainPage object for status updates
+33.         /// </summary>
+34.         private MainPage rootPage;
+35. 
+36.         /// <summary>
+37.         /// Initializes a new instance of the <see cref="Scenario1_SetRecordProfile"/> class.
+38.         /// </summary>
+39.         public Scenario1_SetRecordProfile()
+40.         {
+41.             this.InitializeComponent();
+42.         }
+43. 
+44.         /// <summary>
+45.         /// Override default OnNavigateTo to initialize 
+46.         /// the rootPage object for Status message updates
+47.         /// </summary>
+48.         /// <param name="e">Contains state information and event data associated with the event</param>
+49.         protected override void OnNavigatedTo(NavigationEventArgs e)
+50.         {
+51.             rootPage = MainPage.Current;
+52.         }
+53. 
+54.         /// <summary>
+55.         /// Locates a video profile for the back camera and then queries if
+56.         /// the discovered profile supports 640x480 30 FPS recording.
+57.         /// If a supported profile is located, then we configure media
+58.         /// settings to the matching profile. Else we use default profile.
+59.         /// </summary>
+60.         /// <param name="sender">Contains information regarding button that fired event</param>
+61.         /// <param name="e">Contains state information and event data associated with the event</param>
+62.         private async void InitRecordProfileBtn_Click(object sender, RoutedEventArgs e)
+63.         {
+64.             MediaCapture mediaCapture = new MediaCapture();
+65.             MediaCaptureInitializationSettings mediaInitSettings = new MediaCaptureInitializationSettings();
+66.             string videoDeviceId = string.Empty;
+67. 
+68.             // Look for a video capture device Id with a video profile matching panel location
+69.             videoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);
+70. 
+71.             if (string.IsNullOrEmpty(videoDeviceId))
+72.             {
+73.                 await LogStatus("ERROR: No Video Device Id found, verify your device supports profiles", NotifyType.ErrorMessage);
+74.                 return;
+75.             }
+76. 
+77.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Found video capture device that supports Video Profile, Device Id:\r\n {0}", videoDeviceId));
+78.             await LogStatusToOutputBox("Retrieving all Video Profiles");
+79.             IReadOnlyList<MediaCaptureVideoProfile> profiles = MediaCapture.FindAllVideoProfiles(videoDeviceId);
+80. 
+81.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Number of Video Profiles found: {0}", profiles.Count));
+82. 
+83.             // Output all Video Profiles found, frame rate is rounded up for display purposes
+84.             foreach (var profile in profiles)
+85.             {
+86.                 var description = profile.SupportedRecordMediaDescription;
+87.                 foreach (var desc in description)
+88.                 {
+89.                     await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture,
+90.                         "Video Profile Found: Profile Id: {0}\r\n Width: {1} Height: {2} FrameRate: {3}", profile.Id, desc.Width, desc.Height, Math.Round(desc.FrameRate).ToString()));
+91.                 }
+92.             }
+93. 
+94.             // Look for WVGA 30FPS profile 
+95.             await LogStatusToOutputBox("Querying for matching WVGA 30FPS Profile");
+96.             var match = (from profile in profiles
+97.                          from desc in profile.SupportedRecordMediaDescription
+98.                          where desc.Width == 640 && desc.Height == 480 && Math.Round(desc.FrameRate) == 30
+99.                          select new { profile, desc }).FirstOrDefault();
+100. 
+101.             if (match != null)
+102.             {
+103.                 mediaInitSettings.VideoProfile = match.profile;
+104.                 mediaInitSettings.RecordMediaDescription = match.desc;
+105.                 await LogStatus(string.Format(CultureInfo.InvariantCulture,
+106.                         "Matching WVGA 30FPS Video Profile found: \r\n Profile Id: {0}\r\n Width: {1} Height: {2} FrameRate: {3}",
+107.                         mediaInitSettings.VideoProfile.Id, mediaInitSettings.RecordMediaDescription.Width,
+108.                         mediaInitSettings.RecordMediaDescription.Height, Math.Round(mediaInitSettings.RecordMediaDescription.FrameRate).ToString()), NotifyType.StatusMessage);
+109.             }
+110.             else
+111.             {
+112.                 // Could not locate a WVGA 30FPS profile, use default video recording profile
+113.                 mediaInitSettings.VideoProfile = profiles[0];
+114.                 await LogStatus("Could not locate a matching profile, setting to default recording profile", NotifyType.ErrorMessage);
+115.             }
+116. 
+117.             await mediaCapture.InitializeAsync(mediaInitSettings);
+118.             await LogStatusToOutputBox("Media Capture settings initialized to selected profile");
+119. 
+120.         }
+121. 
+122.         /// <summary>
+123.         /// Locates a video profile for the back camera and then queries if
+124.         /// the discovered profile is a matching custom profile.
+125.         /// If a custom profile is located, we configure media
+126.         /// settings to the custom profile. Else we use default profile.
+127.         /// </summary>
+128.         /// <param name="sender">Contains information regarding button that fired event</param>
+129.         /// <param name="e">Contains state information and event data associated with the event</param>
+130.         private async void InitCustomProfileBtn_Click(object sender, RoutedEventArgs e)
+131.         {
+132.             MediaCapture mediaCapture = new MediaCapture();
+133.             MediaCaptureInitializationSettings mediaInitSettings = new MediaCaptureInitializationSettings();
+134.             string videoDeviceId = string.Empty;
+135. 
+136.             // For demonstration purposes, we use the Profile Id from WVGA 640x480 30 FPS profile available
+137.             // on desktop simulator and phone emulators 
+138.             string customProfileId = "{A0E517E8-8F8C-4F6F-9A57-46FC2F647EC0},0";
+139. 
+140.             videoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);
+141. 
+142.             if (string.IsNullOrEmpty(videoDeviceId))
+143.             {
+144.                 await LogStatus("ERROR: No Video Device Id found, verify your device supports profiles", NotifyType.ErrorMessage);
+145.                 return;
+146.             }
+147. 
+148.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Found video capture device that supports Video Profile, Device Id:\r\n {0}", videoDeviceId));
+149.             await LogStatusToOutputBox("Querying device for custom profile support");
+150.             mediaInitSettings.VideoProfile =  (from profile in MediaCapture.FindAllVideoProfiles(videoDeviceId)
+151.                                  where profile.Id == customProfileId
+152.                                  select profile).FirstOrDefault();
+153. 
+154.             // In the event the profile isn't located, we set Video Profile to the default
+155.             if (mediaInitSettings.VideoProfile == null)
+156.             {
+157.                 await LogStatus("Could not locate a matching profile, setting to default recording profile", NotifyType.ErrorMessage);
+158.                 mediaInitSettings.VideoProfile = MediaCapture.FindAllVideoProfiles(videoDeviceId).FirstOrDefault();
+159.             }
+160. 
+161.             await LogStatus(string.Format(CultureInfo.InvariantCulture, "Custom recording profile located: {0}", customProfileId), NotifyType.StatusMessage);
+162.             await mediaCapture.InitializeAsync(mediaInitSettings);
+163.         }
+164. 
+165.         /// <summary>
+166.         /// Helper method to obtain a device Id that supports a Video Profile.
+167.         /// If no Video Profile is found we return empty string indicating that there isn't a device on 
+168.         /// the desired panel with a supported Video Profile.
+169.         /// </summary>
+170.         /// <param name="panel">Contains Device Enumeration information regarding camera panel we are looking for</param>
+171.         /// <returns>Device Information Id string</returns>
+172.         public async Task<string> GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel panel)
+173.         {
+174.             string deviceId = string.Empty;
+175. 
+176.             // Find all video capture devices
+177.             await LogStatusToOutputBox("Looking for all video capture devices");
+178.             DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+179.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Number of video capture devices found: {0}", devices.Count.ToString()));
+180. 
+181.             // Loop through devices looking for device that supports Video Profile
+182.             foreach (var device in devices)
+183.             {
+184.                 // Check if the device on the requested panel supports Video Profile
+185.                 if (MediaCapture.IsVideoProfileSupported(device.Id) && device.EnclosureLocation.Panel == panel)
+186.                 {
+187.                     // We've located a device that supports Video Profiles on expected panel
+188.                     deviceId = device.Id;
+189.                     break;
+190.                 }
+191.             }
+192. 
+193.             return deviceId;
+194.         }
+195. 
+196.         /// <summary>
+197.         /// Marshall log message to the UI thread
+198.         /// and update outputBox, this method is for more general messages
+199.         /// </summary>
+200.         /// <param name="message">Message to log to the outputBox</param>
+201.         private async Task LogStatusToOutputBox(string message)
+202.         {
+203.             // TODO[migrate-001]: see PATTERNS.md#threading
+204.             await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+205.             {
+206.                 outputBox.Text += message + "\r\n";
+207.                 outputScrollViewer.ChangeView(0, outputBox.ActualHeight, 1);
+208.             });
+209.         }
+210. 
+211.         /// <summary>
+212.         /// Method to log Status to Main Status block,
+213.         /// this method is for important status messages to be 
+214.         /// displayed at bottom of scenario page
+215.         /// </summary>
+216.         /// <param name="message">Message to log to the output box</param>
+217.         /// <param name="type">Notification Type for status message</param>
+218.         private async Task LogStatus(string message, NotifyType type)
+219.         {
+220.             // TODO[migrate-002]: see PATTERNS.md#threading
+221.             await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+222.             {
+223.                 rootPage.NotifyUser(message, type);
+224.             });
+225.             await LogStatusToOutputBox(message);
+226.         }
+227. 
+228. 
+229.     }
+230. }
+231. 
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the Microsoft Public License.
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. namespace CameraProfile
+13. {
+14.     using System;
+15.     using System.Globalization;
+16.     using System.Linq;
+17.     using System.Threading.Tasks;
+18.     using Windows.Devices.Enumeration;
+19.     using Windows.Media.Capture;
+20.     using Microsoft.UI.Xaml.Controls;
+21.     using Microsoft.UI.Xaml.Navigation;
+22.     using SDKTemplate;
+23. 
+24.     /// <summary>
+25.     /// ConcurrenProfile page that can be used on its own or navigated to within a Frame.
+26.     /// </summary>
+27.     public sealed partial class Scenario2_ConcurrentProfile : Page
+28.     {
+29.         /// <summary>
+30.         /// Private MainPage object for status updates
+31.         /// </summary>
+32.         private MainPage rootPage;
+33. 
+34.         /// <summary>
+35.         /// Initializes a new instance of the <see cref="Scenario2_ConcurrentProfile"/> class.
+36.         /// </summary>
+37.         public Scenario2_ConcurrentProfile()
+38.         {
+39.             this.InitializeComponent();
+40.         }
+41. 
+42.         /// <summary>
+43.         /// Override default OnNavigateTo to initialize 
+44.         /// the rootPage object for Status message updates
+45.         /// </summary>
+46.         /// <param name="e">Contains state information and event data associated with the event</param>
+47.         protected override void OnNavigatedTo(NavigationEventArgs e)
+48.         {
+49.             rootPage = MainPage.Current;
+50.         }
+51. 
+52.         /// <summary>
+53.         /// Finds the video profile for the front and back camera and queries if
+54.         /// both cameras have a matching video recording profile that supports concurrency.
+55.         /// If a matching concurrent profile is supported, then we configure media initialization
+56.         /// settings for both cameras to the matching profile. 
+57.         /// </summary>
+58.         /// <param name="sender">Contains information regarding button that fired event</param>
+59.         /// <param name="e">Contains state information and event data associated with the event</param>
+60.         private async void CheckConcurrentProfileBtn_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+61.         {
+62.             // Initialize our concurrency support flag.
+63.             bool concurrencySupported = false;
+64. 
+65.             string frontVideoDeviceId = string.Empty;
+66.             string backVideoDeviceId = string.Empty;
+67. 
+68.             MediaCapture mediaCaptureFront = new MediaCapture();
+69.             MediaCapture mediaCaptureBack = new MediaCapture();
+70. 
+71.             // Find front and back Device Id of capture device that supports Video Profile
+72.             await LogStatusToOutputBox("Looking for all video capture devices on front panel");
+73.             frontVideoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Front);
+74.             await LogStatusToOutputBox("Looking for all video capture devices on back panel");
+75.             backVideoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);
+76. 
+77.             // First check if the devices support video profiles, if not there's no reason to proceed
+78.             if (string.IsNullOrEmpty(frontVideoDeviceId) || string.IsNullOrEmpty(backVideoDeviceId))
+79.             {
+80.                 await LogStatus("ERROR: A capture device doesn't support Video Profile", NotifyType.ErrorMessage);
+81.                 return;
+82.             }
+83. 
+84.             await LogStatusToOutputBox("Video Profiles are supported on both cameras");
+85. 
+86.             // Create MediaCaptureInitilization settings for each video capture device
+87.             MediaCaptureInitializationSettings mediaInitSettingsFront = new MediaCaptureInitializationSettings();
+88.             MediaCaptureInitializationSettings mediaInitSettingsBack = new MediaCaptureInitializationSettings();
+89. 
+90.             mediaInitSettingsFront.VideoDeviceId = frontVideoDeviceId;
+91.             mediaInitSettingsBack.VideoDeviceId = backVideoDeviceId;
+92.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Front Device Id located: {0}", frontVideoDeviceId.ToString()));
+93.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Back Device Id located: {0}", backVideoDeviceId.ToString()));
+94. 
+95.             await LogStatusToOutputBox("Querying for concurrent profile");
+96. 
+97.             // Acquire concurrent profiles available to front and back capture devices, then locate a concurrent
+98.             // profile Id that matches for both devices
+99.             var concurrentProfile = (from frontProfile in MediaCapture.FindConcurrentProfiles(frontVideoDeviceId)
+100.                                      from backProfile in MediaCapture.FindConcurrentProfiles(backVideoDeviceId)
+101.                                      where frontProfile.Id == backProfile.Id
+102.                                      select new { frontProfile, backProfile }).FirstOrDefault();
+103. 
+104.             if (concurrentProfile != null)
+105.             {
+106.                 mediaInitSettingsFront.VideoProfile = concurrentProfile.frontProfile;
+107.                 mediaInitSettingsBack.VideoProfile = concurrentProfile.backProfile;
+108.                 concurrencySupported = true;
+109. 
+110.                 await LogStatus("Concurrent profile located, device supports concurrency", NotifyType.StatusMessage);
+111.             }
+112.             else
+113.             {
+114.                 // There are no concurrent profiles available on this device, thus
+115.                 // there is not profile to select. With a lack of concurrent profile
+116.                 // each camera will have to be managed manually and cannot support
+117.                 // simultaneous streams. So we set the Video profile to null to 
+118.                 // indicate that camera must be managed individually.
+119.                 mediaInitSettingsFront.VideoProfile = null;
+120.                 mediaInitSettingsBack.VideoProfile = null;
+121. 
+122.                 await LogStatus("No Concurrent profiles located, device does not support concurrency", NotifyType.ErrorMessage);
+123.             }
+124. 
+125.             await LogStatusToOutputBox("Initializing Front camera settings");
+126.             await mediaCaptureFront.InitializeAsync(mediaInitSettingsFront);
+127.             if (concurrencySupported)
+128.             {
+129.                 await LogStatusToOutputBox("Device supports concurrency, initializing Back camera settings");
+130.                 
+131.                 // Only initialize the back camera if concurrency is available.  Otherwise,
+132.                 // we can only use one camera at a time (which in this case will be the front
+133.                 // camera).
+134.                 await mediaCaptureBack.InitializeAsync(mediaInitSettingsBack);
+135.             }
+136.         }
+137. 
+138.         /// <summary>
+139.         /// Helper method to obtain a device Id that supports a Video Profile.
+140.         /// If no Video Profile is found we return empty string indicating that there isn't a device on 
+141.         /// the desired panel with a supported Video Profile.
+142.         /// </summary>
+143.         /// <param name="panel">Contains Device Enumeration information regarding camera panel we are looking for</param>
+144.         /// <returns>Device Information Id string</returns>
+145.         public async Task<string> GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel panel)
+146.         {
+147.             string deviceId = string.Empty;
+148. 
+149.             // Finds all video capture devices
+150.             DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+151.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Number of video capture devices found: {0}", devices.Count.ToString()));
+152. 
+153.             foreach (var device in devices)
+154.             {
+155.                 // Check if the device on the requested panel supports Video Profile
+156.                 if (MediaCapture.IsVideoProfileSupported(device.Id) && device.EnclosureLocation.Panel == panel)
+157.                 {
+158.                     // We've located a device that supports Video Profiles on expected panel
+159.                     deviceId = device.Id;
+160.                     break;
+161.                 }
+162.             }
+163. 
+164.             return deviceId;
+165.         }
+166. 
+167.         /// <summary>
+168.         /// Marshall log message to the UI thread
+169.         /// and update outputBox, this method is for more general messages
+170.         /// </summary>
+171.         /// <param name="message">Message to log to the outputBox</param>
+172.         private async Task LogStatusToOutputBox(string message)
+173.         {
+174.             // TODO[migrate-003]: see PATTERNS.md#threading
+175.             await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+176.             {
+177.                 outputBox.Text += message + "\r\n";
+178.                 outputScrollViewer.ChangeView(0, outputBox.ActualHeight, 1);
+179.             });
+180.         }
+181. 
+182.         /// <summary>
+183.         /// Method to log Status to Main Status block,
+184.         /// this method is for important status messages to be 
+185.         /// displayed at bottom of scenario page
+186.         /// </summary>
+187.         /// <param name="message">Message to log to the output box</param>
+188.         /// <param name="type">Notification Type for status message</param>
+189.         private async Task LogStatus(string message, NotifyType type)
+190.         {
+191.             // TODO[migrate-004]: see PATTERNS.md#threading
+192.             await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+193.             {
+194.                 rootPage.NotifyUser(message, type);
+195.             });
+196.             await LogStatusToOutputBox(message);
+197.         }
+198.     }
+199. 
+200. }
+201. 
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the Microsoft Public License.
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. namespace CameraProfile
+13. {
+14.     using System;
+15.     using System.Collections.Generic;
+16.     using System.Globalization;
+17.     using Windows.Devices.Enumeration;
+18.     using Windows.Media.Capture;
+19.     using Microsoft.UI.Xaml.Controls;
+20.     using Microsoft.UI.Xaml.Navigation;
+21.     using SDKTemplate;
+22.     using System.Threading.Tasks;
+23. 
+24. 
+25.     /// <summary>
+26.     /// EnableHDRProfile page that can be used on its own or navigated to within a Frame.
+27.     /// </summary>
+28.     public sealed partial class Scenario3_EnableHdrProfile : Page
+29.     {
+30.         /// <summary>
+31.         /// Private MainPage object for status updates
+32.         /// </summary>
+33.         private MainPage rootPage;
+34. 
+35.         /// <summary>
+36.         /// Initializes a new instance of the <see cref="Scenario3_EnableHdrProfile"/> class.
+37.         /// </summary>
+38.         public Scenario3_EnableHdrProfile()
+39.         {
+40.             this.InitializeComponent();
+41.         }
+42. 
+43.         /// <summary>
+44.         /// Override default OnNavigateTo to initialize 
+45.         /// the rootPage object for Status message updates
+46.         /// </summary>
+47.         /// <param name="e">Contains state information and event data associated with the event</param>
+48.         protected override void OnNavigatedTo(NavigationEventArgs e)
+49.         {
+50.             rootPage = MainPage.Current;
+51.         }
+52. 
+53.         /// <summary>
+54.         /// Finds the video profiles for the back camera. Then queries for a profile that supports
+55.         /// HDR video recording. If a HDR supported video profile is located, then we configure media settings to the
+56.         /// matching profile. Finally we initialize media capture HDR recording mode to auto.
+57.         /// </summary>
+58.         /// <param name="sender">Contains information regarding button that fired event</param>
+59.         /// <param name="e">Contains state information and event data associated with the event</param>
+60.         private async void CheckHdrSupportBtn_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+61.         {
+62.             string videoDeviceId = string.Empty;
+63.             bool HdrVideoSupported = false;
+64.             MediaCapture mediaCapture = new MediaCapture();
+65.             MediaCaptureInitializationSettings mediaCaptureInitSetttings = new MediaCaptureInitializationSettings();
+66. 
+67.             // Select the first video capture device found on the back of the device
+68.             await LogStatusToOutputBox("Querying for video capture device on back of the device that supports Video Profile");
+69.             videoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);
+70. 
+71.             if (string.IsNullOrEmpty(videoDeviceId))
+72.             {
+73.                 await LogStatus("ERROR: No Video Device Id found, verify your device supports profiles", NotifyType.ErrorMessage);
+74.                 return;
+75.             }
+76. 
+77.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture,
+78.                 "Found device that supports Video Profile, Device Id:\r\n {0}", videoDeviceId));
+79.             IReadOnlyList<MediaCaptureVideoProfile> profiles = MediaCapture.FindKnownVideoProfiles(videoDeviceId, KnownVideoProfile.VideoRecording);
+80. 
+81.             // Walk through available profiles, look for first profile with HDR supported Video Profile
+82.             foreach (MediaCaptureVideoProfile profile in profiles)
+83.             {
+84.                 IReadOnlyList<MediaCaptureVideoProfileMediaDescription> recordMediaDescription = profile.SupportedRecordMediaDescription;
+85.                 foreach (MediaCaptureVideoProfileMediaDescription videoProfileMediaDescription in recordMediaDescription)
+86.                 {
+87.                     if (videoProfileMediaDescription.IsHdrVideoSupported)
+88.                     {
+89.                         // We've located the profile and description for HDR Video, set profile and flag
+90.                         mediaCaptureInitSetttings.VideoProfile = profile;
+91.                         mediaCaptureInitSetttings.RecordMediaDescription = videoProfileMediaDescription;
+92.                         HdrVideoSupported = true;
+93.                         await LogStatus("HDR supported video profile found, set video profile to current HDR supported profile", NotifyType.StatusMessage);
+94.                         break;
+95.                     }
+96.                 }
+97. 
+98.                 if (HdrVideoSupported)
+99.                 {
+100.                     break;
+101.                 }
+102.             }
+103. 
+104.             await LogStatusToOutputBox("Initializing Media settings to HDR Supported video profile");
+105.             await mediaCapture.InitializeAsync(mediaCaptureInitSetttings);
+106.             if (HdrVideoSupported)
+107.             {
+108.                 await LogStatusToOutputBox("Initializing HDR Video Mode to Auto");
+109.                 mediaCapture.VideoDeviceController.HdrVideoControl.Mode = Windows.Media.Devices.HdrVideoMode.Auto;
+110.             }
+111.         }
+112. 
+113.         /// <summary>
+114.         /// Helper method to obtain a device Id that supports a Video Profile.
+115.         /// If no Video Profile is found we return empty string indicating that there isn't a device on 
+116.         /// the desired panel with a supported Video Profile.
+117.         /// </summary>
+118.         /// <param name="panel">Contains Device Enumeration information regarding camera panel we are looking for</param>
+119.         /// <returns>Device Information Id string</returns>
+120.         public async Task<string> GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel panel)
+121.         {
+122.             string deviceId = string.Empty;
+123. 
+124.             // Finds all video capture devices
+125.             await LogStatusToOutputBox("Looking for all video capture devices");
+126.             DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+127.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Number of video capture devices found: {0}", devices.Count.ToString()));
+128. 
+129.             foreach (var device in devices)
+130.             {
+131.                 // Check if the device on the requested panel supports Video Profile
+132.                 if (MediaCapture.IsVideoProfileSupported(device.Id) && device.EnclosureLocation.Panel == panel)
+133.                 {
+134.                     // We've located a device that supports Video Profiles on expected panel
+135.                     deviceId = device.Id;
+136.                     break;
+137.                 }
+138.             }
+139. 
+140.             return deviceId;
+141.         }
+142. 
+143.         /// <summary>
+144.         /// Marshall log message to the UI thread
+145.         /// and update outputBox, this method is for more general messages
+146.         /// </summary>
+147.         /// <param name="message">Message to log to the outputBox</param>
+148.         private async Task LogStatusToOutputBox(string message)
+149.         {
+150.             // TODO[migrate-005]: see PATTERNS.md#threading
+151.             await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+152.             {
+153.                 outputBox.Text += message + "\r\n";
+154.                 outputScrollViewer.ChangeView(0, outputBox.ActualHeight, 1);
+155.             });
+156.         }
+157. 
+158.         /// <summary>
+159.         /// Method to log Status to Main Status block,
+160.         /// this method is for important status messages to be 
+161.         /// displayed at bottom of scenario page
+162.         /// </summary>
+163.         /// <param name="message">Message to log to the output box</param>
+164.         /// <param name="type">Notification Type for status message</param>
+165.         private async Task LogStatus(string message, NotifyType type)
+166.         {
+167.             // TODO[migrate-006]: see PATTERNS.md#threading
+168.             await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+169.             {
+170.                 rootPage.NotifyUser(message, type);
+171.             });
+172.             await LogStatusToOutputBox(message);
+173.         }
+174.     }
+175. }
+176. 
+177. 
+
+=== TURN 7 ===
+Now let me fetch the threading migration pattern and also look at the other files I need to understand:
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Get-MigrationPattern.ps1\" -Anchor threading","description":"Get threading migration pattern","mode":"sync"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\SampleConfiguration.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\MainPage.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\MainPage.xaml.cs"}
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the Microsoft Public License.
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using System.Collections.Generic;
+14. using Microsoft.UI.Xaml.Controls;
+15. using CameraProfile;
+16. 
+17. namespace SDKTemplate
+18. {
+19.     public partial class MainPage : Page
+20.     {
+21.         public const string FEATURE_NAME = "CameraProfile";
+22. 
+23.         List<Scenario> scenarios = new List<Scenario>
+24.         {
+25.             new Scenario() { Title="Locate Record Specific Profile", ClassType=typeof(Scenario1_SetRecordProfile)},
+26.             new Scenario() { Title="Query Profile for Concurrency", ClassType=typeof(Scenario2_ConcurrentProfile)},
+27.             new Scenario() { Title="Query Profile for HDR Support", ClassType=typeof(Scenario3_EnableHdrProfile)}
+28.         };
+29.     }
+30. 
+31.     public class Scenario
+32.     {
+33.         public string Title { get; set; }
+34.         public Type ClassType { get; set; }
+35.     }
+36. }
+37. 
+--- RESULT ---
+1. <?xml version="1.0" encoding="utf-8" ?>
+2. <Page
+3.     x:Class="CameraProfile.MainPage"
+4.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+5.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+6.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+7.     xmlns:local="using:CameraProfile"
+8.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+9.     mc:Ignorable="d">
+10. 
+11.     <!--
+12.         This is the main content area of your application.
+13.         Add your UI elements here — for example, controls, layouts, and data-bound views.
+14.         Use 'dotnet new winui-page' to create additional pages and navigate to them via
+15.         the Frame in MainWindow (RootFrame).
+16.     -->
+17.     <Grid />
+18. </Page>
+19. 
+--- RESULT ---
+1. using Microsoft.UI.Xaml.Controls;
+2. 
+3. // To learn more about WinUI, the WinUI project structure,
+4. // and more about our project templates, see: http://aka.ms/winui-project-info.
+5. 
+6. namespace CameraProfile;
+7. 
+8. /// <summary>
+9. /// The main content page displayed inside the application window.
+10. /// Add your UI logic, event handlers, and data binding here.
+11. /// </summary>
+12. public sealed partial class MainPage : Page
+13. {
+14.     public MainPage()
+15.     {
+16.         InitializeComponent();
+17. 
+18.         // TODO: Add your initialization logic here.
+19.     }
+20. }
+21. 
+--- RESULT ---
+<a id="threading"></a>
+## Threading: CoreDispatcher → DispatcherQueueUWP (replace this):```csharp
+await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => StatusText.Text = "Done");
+```WinUI 3:```csharp
+DispatcherQueue.TryEnqueue(() => StatusText.Text = "Done");
+DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () => ProgressBar.Value = 100);
+```Cache the queue off the UI thread via `DispatcherQueue.GetForCurrentThread()`. UWP's ASTA reentrancy protection is gone — watch for reentrancy in async code that pumps messages. See the official [threading guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/threading).
+<exited with exit code 0>
+
+=== TURN 8 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\CameraProfile\\cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone"}
+--- RESULT ---
+.git
+LICENSE
+README.md
+Samples
+SharedContent
+--- RESULT ---
+AppPackages
+CameraProfile.csproj
+CameraProfile.sln
+Package.appxmanifest
+SampleConfiguration.cs
+Scenario1_SetRecordProfile.xaml
+Scenario1_SetRecordProfile.xaml.cs
+Scenario2_ConcurrentProfile.xaml
+Scenario2_ConcurrentProfile.xaml.cs
+Scenario3_EnableHdrProfile.xaml
+Scenario3_EnableHdrProfile.xaml.cs
+bin
+obj
+
+=== TURN 9 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent"}
+--- RESULT ---
+Templates
+cpp
+cppwinrt
+cs
+media
+vb
+xaml
+
+=== TURN 10 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\cs"}
+--- RESULT ---
+App.xaml.cs
+AssemblyInfo.cs
+Default.rd.xml
+DeviceHelpers.cs
+DispatcherTaskExtensions.cs
+FrameRenderer.cs
+Library.rd.xml
+Logging
+MainPage.xaml
+MainPage.xaml.cs
+
+=== TURN 11 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\cs\\MainPage.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\cs\\MainPage.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\SharedContent\\cs\\App.xaml.cs"}
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using Windows.ApplicationModel.Activation;
+14. using Windows.UI.Xaml;
+15. using Windows.UI.Xaml.Controls;
+16. using Windows.UI.Xaml.Navigation;
+17. 
+18. // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=402347&clcid=0x409
+19. 
+20. namespace SDKTemplate
+21. {
+22.     /// <summary>
+23.     /// Provides application-specific behavior to supplement the default Application class.
+24.     /// </summary>
+25.     sealed partial class App : Application
+26.     {
+27.         /// <summary>
+28.         /// Initializes the singleton application object.  This is the first line of authored code
+29.         /// executed, and as such is the logical equivalent of main() or WinMain().
+30.         /// </summary>
+31.         public App()
+32.         {
+33.             this.InitializeComponent();
+34.             this.Construct();
+35.         }
+36. 
+37.         /// <summary>
+38.         /// Invoked when the application is launched normally by the end user.  Other entry points
+39.         /// will be used such as when the application is launched to open a specific file.
+40.         /// </summary>
+41.         /// <param name="e">Details about the launch request and process.</param>
+42.         protected override void OnLaunched(LaunchActivatedEventArgs e)
+43.         {
+44. 
+45. #if DEBUG
+46.             if (System.Diagnostics.Debugger.IsAttached)
+47.             {
+48.                 this.DebugSettings.EnableFrameRateCounter = false;
+49.             }
+50. #endif
+51. 
+52.             Frame rootFrame = Window.Current.Content as Frame;
+53. 
+54.             // Do not repeat app initialization when the Window already has content,
+55.             // just ensure that the window is active
+56.             if (rootFrame == null)
+57.             {
+58.                 // Create a Frame to act as the navigation context and navigate to the first page
+59.                 rootFrame = new Frame();
+60.                 // Set the default language
+61.                 rootFrame.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
+62. 
+63.                 rootFrame.NavigationFailed += OnNavigationFailed;
+64. 
+65.                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
+66.                 {
+67.                     //TODO: Load state from previously suspended application
+68.                 }
+69. 
+70.                 // Place the frame in the current Window
+71.                 Window.Current.Content = rootFrame;
+72.             }
+73. 
+74.             if (rootFrame.Content == null)
+75.             {
+76.                 // When the navigation stack isn't restored navigate to the first page,
+77.                 // configuring the new page by passing required information as a navigation
+78.                 // parameter
+79.                 rootFrame.Navigate(typeof(MainPage), e.Arguments);
+80.             }
+81. 
+82.             // Ensure the current window is active
+83.             Window.Current.Activate();
+84. 
+85.             // Some samples want access to the LaunchActivatedEventArgs.
+86.             LaunchCompleted(e);
+87.         }
+88. 
+89.         private Frame CreateRootFrame()
+90.         {
+91.             Frame rootFrame = Window.Current.Content as Frame;
+92. 
+93.             // Do not repeat app initialization when the Window already has content,
+94.             // just ensure that the window is active
+95.             if (rootFrame == null)
+96.             {
+97.                 // Create a Frame to act as the navigation context and navigate to the first page
+98.                 rootFrame = new Frame();
+99. 
+100.                 // Set the default language
+101.                 rootFrame.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
+102.                 rootFrame.NavigationFailed += OnNavigationFailed;
+103. 
+104.                 // Place the frame in the current Window
+105.                 Window.Current.Content = rootFrame;
+106.             }
+107. 
+108.             return rootFrame;
+109.         }
+110. 
+111.         /// <summary>
+112.         /// Invoked when Navigation to a certain page fails
+113.         /// </summary>
+114.         /// <param name="sender">The Frame which failed navigation</param>
+115.         /// <param name="e">Details about the navigation failure</param>
+116.         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+117.         {
+118.             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+119.         }
+120. 
+121.         // Add any application constructor code in here.
+122.         partial void Construct();
+123. 
+124.         // Add any OnLaunched customization here.
+125.         partial void LaunchCompleted(LaunchActivatedEventArgs e);
+126.     }
+127. }
+128. 
+--- RESULT ---
+1. ﻿//*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the MIT License (MIT).
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. using System;
+13. using System.Collections.Generic;
+14. using Windows.UI.Core;
+15. using Windows.UI.Xaml;
+16. using Windows.UI.Xaml.Automation.Peers;
+17. using Windows.UI.Xaml.Controls;
+18. using Windows.UI.Xaml.Data;
+19. using Windows.UI.Xaml.Media;
+20. using Windows.UI.Xaml.Navigation;
+21. 
+22. // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
+23. 
+24. namespace SDKTemplate
+25. {
+26.     /// <summary>
+27.     /// An empty page that can be used on its own or navigated to within a Frame.
+28.     /// </summary>
+29.     public sealed partial class MainPage : Page
+30.     {
+31.         public static MainPage Current;
+32. 
+33.         public MainPage()
+34.         {
+35.             this.InitializeComponent();
+36. 
+37.             // This is a static public property that allows downstream pages to get a handle to the MainPage instance
+38.             // in order to call methods that are in this class.
+39.             Current = this;
+40.             SampleTitle.Text = FEATURE_NAME;
+41.         }
+42. 
+43.         protected override void OnNavigatedTo(NavigationEventArgs e)
+44.         {
+45.             // Populate the scenario list from the SampleConfiguration.cs file
+46.             var itemCollection = new List<Scenario>();
+47.             int i = 1;
+48.             foreach (Scenario s in scenarios)
+49.             {
+50.                 itemCollection.Add(new Scenario { Title = $"{i++}) {s.Title}", ClassType = s.ClassType });
+51.             }
+52.             ScenarioControl.ItemsSource = itemCollection;
+53. 
+54.             if (Window.Current.Bounds.Width < 640)
+55.             {
+56.                 ScenarioControl.SelectedIndex = -1;
+57.             }
+58.             else
+59.             {
+60.                 ScenarioControl.SelectedIndex = 0;
+61.             }
+62.         }
+63. 
+64.         /// <summary>
+65.         /// Called whenever the user changes selection in the scenarios list.  This method will navigate to the respective
+66.         /// sample scenario page.
+67.         /// </summary>
+68.         /// <param name="sender"></param>
+69.         /// <param name="e"></param>
+70.         private void ScenarioControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+71.         {
+72.             // Clear the status block when navigating scenarios.
+73.             NotifyUser(String.Empty, NotifyType.StatusMessage);
+74. 
+75.             ListBox scenarioListBox = sender as ListBox;
+76.             Scenario s = scenarioListBox.SelectedItem as Scenario;
+77.             if (s != null)
+78.             {
+79.                 ScenarioFrame.Navigate(s.ClassType);
+80.                 if (Window.Current.Bounds.Width < 640)
+81.                 {
+82.                     Splitter.IsPaneOpen = false;
+83.                 }
+84.             }
+85.         }
+86. 
+87.         public List<Scenario> Scenarios
+88.         {
+89.             get { return this.scenarios; }
+90.         }
+91. 
+92.         /// <summary>
+93.         /// Display a message to the user.
+94.         /// This method may be called from any thread.
+95.         /// </summary>
+96.         /// <param name="strMessage"></param>
+97.         /// <param name="type"></param>
+98.         public void NotifyUser(string strMessage, NotifyType type)
+99.         {
+100.             // If called from the UI thread, then update immediately.
+101.             // Otherwise, schedule a task on the UI thread to perform the update.
+102.             if (Dispatcher.HasThreadAccess)
+103.             {
+104.                 UpdateStatus(strMessage, type);
+105.             }
+106.             else
+107.             {
+108.                 var task = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => UpdateStatus(strMessage, type));
+109.             }
+110.         }
+111. 
+112.         private void UpdateStatus(string strMessage, NotifyType type)
+113.         {
+114.             switch (type)
+115.             {
+116.                 case NotifyType.StatusMessage:
+117.                     StatusBorder.Background = new SolidColorBrush(Windows.UI.Colors.Green);
+118.                     break;
+119.                 case NotifyType.ErrorMessage:
+120.                     StatusBorder.Background = new SolidColorBrush(Windows.UI.Colors.Red);
+121.                     break;
+122.             }
+123. 
+124.             StatusBlock.Text = strMessage;
+125. 
+126.             // Collapse the StatusBlock if it has no text to conserve real estate.
+127.             StatusBorder.Visibility = (StatusBlock.Text != String.Empty) ? Visibility.Visible : Visibility.Collapsed;
+128.             if (StatusBlock.Text != String.Empty)
+129.             {
+130.                 StatusBorder.Visibility = Visibility.Visible;
+131.                 StatusPanel.Visibility = Visibility.Visible;
+132.             }
+133.             else
+134.             {
+135.                 StatusBorder.Visibility = Visibility.Collapsed;
+136.                 StatusPanel.Visibility = Visibility.Collapsed;
+137.             }
+138. 
+139. 			// Raise an event if necessary to enable a screen reader to announce the status update.
+140. 			var peer = FrameworkElementAutomationPeer.FromElement(StatusBlock);
+141. 			if (peer != null)
+142. 			{
+143. 				peer.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
+144. 			}
+145. 		}
+146. 
+147.         async void Footer_Click(object sender, RoutedEventArgs e)
+148.         {
+149.             await Windows.System.Launcher.LaunchUriAsync(new Uri(((HyperlinkButton)sender).Tag.ToString()));
+150.         }
+151. 
+152.         private void Button_Click(object sender, RoutedEventArgs e)
+153.         {
+154.             Splitter.IsPaneOpen = !Splitter.IsPaneOpen;
+155.         }
+156.     }
+157.     public enum NotifyType
+158.     {
+159.         StatusMessage,
+160.         ErrorMessage
+161.     };
+162. }
+163. 
+--- RESULT ---
+1. ﻿<!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the MIT License (MIT).
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Page
+14.     x:Class="SDKTemplate.MainPage"
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+17.     xmlns:local="using:SDKTemplate"
+18.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+19.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+20.     mc:Ignorable="d">
+21. 
+22.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+23.         <Grid.RowDefinitions>
+24.             <RowDefinition Height="Auto"/>
+25.             <RowDefinition Height="*"/>
+26.         </Grid.RowDefinitions>
+27.         <SplitView x:Name="Splitter" IsPaneOpen="True" Grid.Row="1" DisplayMode="Inline">
+28.             <SplitView.Pane>
+29.                 <RelativePanel Margin="10,0,0,0">
+30.                     <TextBlock x:Name="SampleTitle" Text="Sample Title Here" Style="{StaticResource SampleHeaderTextStyle}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+31.                     <!-- Provide an AutomationProperties.Name for a list to a screen reader. A shipping app would localize this. -->
+32.                     <ListBox x:Name="ScenarioControl" SelectionChanged="ScenarioControl_SelectionChanged" AutomationProperties.Name="Scenarios"
+33.                  SelectionMode="Single" HorizontalAlignment="Left" Background="Transparent" BorderThickness="0"
+34.                  VerticalAlignment="Top" RelativePanel.Below="SampleTitle" Margin="0,10,0,0" RelativePanel.Above="FooterPanel">
+35.                         <ListBox.ItemTemplate>
+36.                             <DataTemplate x:DataType="local:Scenario">
+37.                                 <TextBlock Text="{x:Bind Title}"/>
+38.                             </DataTemplate>
+39.                         </ListBox.ItemTemplate>
+40.                     </ListBox>
+41.                     <StackPanel x:Name="FooterPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True">
+42.                         <Image Source="Assets/microsoft-sdk.png" AutomationProperties.Name="Microsoft Logo" Stretch="None" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+43.                         <TextBlock x:Name="Copyright" Text="&#xA9; Microsoft Corporation. All rights reserved." Style="{StaticResource CopyrightTextStyle}"
+44.                                    RelativePanel.Above="LinksPanel" Margin="10,10,0,0"
+45.                                    TextWrapping="Wrap"/>
+46.                         <StackPanel x:Name="LinksPanel" Orientation="Horizontal" Margin="10,10,0,10">
+47.                             <HyperlinkButton Content="Trademarks" Tag="http://go.microsoft.com/fwlink/?LinkID=623755"
+48.                         Click="Footer_Click" FontSize="12" Style="{StaticResource HyperlinkStyle}" />
+49.                             <TextBlock Text="|"  Style="{StaticResource SeparatorStyle}" VerticalAlignment="Center" />
+50.                             <HyperlinkButton x:Name="PrivacyLink" Content="Privacy" Tag="http://privacy.microsoft.com" Click="Footer_Click" FontSize="12" Style="{StaticResource HyperlinkStyle}"/>
+51.                         </StackPanel>
+52.                     </StackPanel>
+53.                 </RelativePanel>
+54.             </SplitView.Pane>
+55.             <RelativePanel>
+56.                 <Frame x:Name="ScenarioFrame" Margin="5" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True"/>
+57.                 <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
+58.                     <TextBlock x:Name="StatusLabel" Margin="10,0,0,10" TextWrapping="Wrap" Text="Status:" />
+59.                     <Border x:Name="StatusBorder" Margin="0,0,0,0">
+60.                         <ScrollViewer VerticalScrollMode="Auto"  VerticalScrollBarVisibility="Auto" MaxHeight="200">
+61.                             <!-- Use LiveSetting to enable screen readers to announce the status update. -->
+62.                             <TextBlock x:Name="StatusBlock" FontWeight="Bold" AutomationProperties.LiveSetting="Assertive"
+63.                                    MaxWidth="{Binding ElementName=Splitter, Path=ActualWidth}" Margin="10,10,10,20" TextWrapping="Wrap"  />
+64.                         </ScrollViewer>
+65.                     </Border>
+66.                 </StackPanel>
+67.             </RelativePanel>
+68.         </SplitView>
+69.         <StackPanel x:Name="HeaderPanel" Orientation="Horizontal">
+70.             <Border Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" Grid.Row="0">
+71.                 <ToggleButton Style="{StaticResource SymbolButton}" Click="Button_Click" VerticalAlignment="Top" Foreground="{ThemeResource ApplicationForegroundThemeBrush}">
+72.                     <ToggleButton.Content>
+73.                         <FontIcon x:Name="Hamburger" FontFamily="Segoe MDL2 Assets" Glyph="&#xE700;" Margin="0,10,0,0"/>
+74.                     </ToggleButton.Content>
+75.                 </ToggleButton>
+76.             </Border>
+77.             <!-- Use AutomationProperties.AccessibilityView to let a screen reader know that the image is purely decorative.
+78.                  (If the Image conveyed useful information we'd not use AccessibilityView, but instead provide a localized 
+79.                  name for the Image to convey its purpose.) -->
+80.             <Image x:Name="WindowsLogo" Stretch="None" Source="Assets/windows-sdk.png" Margin="0,15,0,0" AutomationProperties.AccessibilityView="Raw" />
+81.             <TextBlock x:Name="Header" Text="Universal Windows Platform sample" Style="{StaticResource TagLineTextStyle}" Margin="0,15,0,0" />
+82.         </StackPanel>
+83.     </Grid>
+84. </Page>
+85. 
+
+=== TURN 12 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\App.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\MainWindow.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\MainWindow.xaml.cs"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario1_SetRecordProfile.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario2_ConcurrentProfile.xaml"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario3_EnableHdrProfile.xaml"}
+--- RESULT ---
+1. ﻿using Windows.ApplicationModel;
+2. using Windows.ApplicationModel.Activation;
+3. using Windows.Foundation;
+4. using Windows.Foundation.Collections;
+5. using Microsoft.UI.Xaml;
+6. using Microsoft.UI.Xaml.Controls;
+7. using Microsoft.UI.Xaml.Controls.Primitives;
+8. using Microsoft.UI.Xaml.Data;
+9. using Microsoft.UI.Xaml.Input;
+10. using Microsoft.UI.Xaml.Media;
+11. using Microsoft.UI.Xaml.Navigation;
+12. using Microsoft.UI.Xaml.Shapes;
+13. 
+14. // To learn more about WinUI, the WinUI project structure,
+15. // and more about our project templates, see: http://aka.ms/winui-project-info.
+16. 
+17. namespace CameraProfile;
+18. 
+19. /// <summary>
+20. /// Provides application-specific behavior to supplement the default Application class.
+21. /// </summary>
+22. public partial class App : Application
+23. {
+24.     private Window? _window;
+25.     
+26.     /// <summary>
+27.     /// Initializes the singleton application object.  This is the first line of authored code
+28.     /// executed, and as such is the logical equivalent of main() or WinMain().
+29.     /// </summary>
+30.     public App()
+31.     {
+32.         InitializeComponent();
+33.     }
+34. 
+35.     /// <summary>
+36.     /// Invoked when the application is launched.
+37.     /// </summary>
+38.     /// <param name="args">Details about the launch request and process.</param>
+39.     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+40.     {
+41.         _window = new MainWindow();
+42.         _window.Activate();
+43.     }
+44. }
+45. 
+--- RESULT ---
+1. <?xml version="1.0" encoding="utf-8" ?>
+2. <Window
+3.     x:Class="CameraProfile.MainWindow"
+4.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+5.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+6.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+7.     xmlns:local="using:CameraProfile"
+8.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+9.     Title="CameraProfile"
+10.     mc:Ignorable="d">
+11.     <Window.SystemBackdrop>
+12.         <MicaBackdrop />
+13.     </Window.SystemBackdrop>
+14. 
+15.     <Grid>
+16.         <Grid.RowDefinitions>
+17.             <RowDefinition Height="Auto" />
+18.             <RowDefinition Height="*" />
+19.         </Grid.RowDefinitions>
+20. 
+21.         <TitleBar x:Name="AppTitleBar" Title="CameraProfile">
+22.             <TitleBar.IconSource>
+23.                 <ImageIconSource ImageSource="Assets/AppIcon.ico" />
+24.             </TitleBar.IconSource>
+25.         </TitleBar>
+26. 
+27.         <!--
+28.             The Frame hosts pages for your application content. Add your UI to
+29.             MainPage.xaml rather than here so you can use Page features such as
+30.             navigation events and the Loaded lifecycle.
+31.         -->
+32.         <Frame x:Name="RootFrame" Grid.Row="1" />
+33.     </Grid>
+34. </Window>
+35. 
+--- RESULT ---
+1. using Microsoft.UI.Xaml;
+2. 
+3. // To learn more about WinUI, the WinUI project structure,
+4. // and more about our project templates, see: http://aka.ms/winui-project-info.
+5. 
+6. namespace CameraProfile;
+7. 
+8. /// <summary>
+9. /// The application window. This hosts a Frame that displays pages. Add your
+10. /// UI and logic to MainPage.xaml / MainPage.xaml.cs instead of here so you
+11. /// can use Page features such as navigation events and the Loaded lifecycle.
+12. /// </summary>
+13. public sealed partial class MainWindow : Window
+14. {
+15.     public MainWindow()
+16.     {
+17.         InitializeComponent();
+18. 
+19.         ExtendsContentIntoTitleBar = true;
+20.         SetTitleBar(AppTitleBar);
+21. 
+22.         AppWindow.SetIcon("Assets/AppIcon.ico");
+23. 
+24.         // Navigate the root frame to the main page on startup.
+25.         RootFrame.Navigate(typeof(MainPage));
+26.     }
+27. }
+28. 
+--- RESULT ---
+1. <!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the Microsoft Public License.
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Page
+14.     x:Class="CameraProfile.Scenario1_SetRecordProfile"
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+17.     xmlns:local="using:CameraProfile"
+18.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+19.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+20.     mc:Ignorable="d">
+21. 
+22.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+23.         <Grid x:Name="RootGrid" Margin="12,20,12,12">
+24.             <Grid.RowDefinitions>
+25.                 <RowDefinition Height="Auto"/>
+26.                 <RowDefinition Height="Auto"/>
+27.                 <RowDefinition Height="*"/>
+28.             </Grid.RowDefinitions>
+29.             <StackPanel Margin="0,0,0,10">
+30.                 <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
+31.                 <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" TextWrapping="Wrap">
+32.                     Query if camera supports a specific profile for recording then initialize the media capture settings with that profile.
+33.                     First option is to query for a matching profile of 640x480 30FPS. Second option is to query for a specific custom profile.
+34.                     In the event the profile can't be found we set to the first recording default profile.
+35.                 </TextBlock>
+36.             </StackPanel>
+37. 
+38.             <StackPanel Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
+39.                 <Button Content="Find 640x480 30FPS Recording Profile" Click="InitRecordProfileBtn_Click"/>
+40.                 <Button Content="Find Custom Recording Profile" Click="InitCustomProfileBtn_Click"/>
+41.             </StackPanel>
+42. 
+43.             <ScrollViewer Grid.Row="2" Name="outputScrollViewer" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto">
+44.                 <TextBox x:Name="outputBox" AcceptsReturn="True" HorizontalAlignment="Stretch"/>
+45.             </ScrollViewer>
+46. 
+47.             <!-- Status Block for providing messages to the user.  Use the
+48.              NotifyUser() method to populate the message -->
+49.             <TextBlock x:Name="StatusBlock" Grid.Row="2" Margin="12, 10, 12, 10" Visibility="Collapsed"/>
+50.         </Grid>
+51.     </Grid>
+52. </Page>
+53. 
+--- RESULT ---
+1. <!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the Microsoft Public License.
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Page
+14.     x:Class="CameraProfile.Scenario2_ConcurrentProfile"
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+17.     xmlns:local="using:CameraProfile"
+18.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+19.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+20.     mc:Ignorable="d">
+21. 
+22.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+23.         <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="12,20,12,12">
+24.             <Grid.RowDefinitions>
+25.                 <RowDefinition Height="Auto"/>
+26.                 <RowDefinition Height="Auto"/>
+27.                 <RowDefinition Height="*"/>
+28.             </Grid.RowDefinitions>
+29.             <StackPanel Margin="0,0,0,10">
+30.                 <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
+31.                 <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" TextWrapping="Wrap">
+32.                     Utilize camera profiles to verify if a device supports concurrent camera 
+33. usage. In this example we query a device for concurrency by checking if both front and rear cameras have a matching concurrent profile. 
+34.                     If so we initialize media capture settings of both devices to the concurrent profile.
+35.                 </TextBlock>
+36.             </StackPanel>
+37. 
+38.             <StackPanel Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
+39.                 <Button Content="Query for Concurrent Profile" Click="CheckConcurrentProfileBtn_Click"/>
+40.             </StackPanel>
+41. 
+42.             <ScrollViewer Grid.Row="2" Name="outputScrollViewer" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto">
+43.                 <TextBox x:Name="outputBox" AcceptsReturn="True" HorizontalAlignment="Stretch"/>
+44.             </ScrollViewer>
+45. 
+46.             <!-- Status Block for providing messages to the user.  Use the
+47.              NotifyUser() method to populate the message -->
+48.             <TextBlock x:Name="StatusBlock" Grid.Row="2" Margin="12, 10, 12, 10" Visibility="Collapsed"/>
+49.         </Grid>
+50.     </Grid>
+51. </Page>
+52. 
+--- RESULT ---
+1. <!--
+2. //*********************************************************
+3. //
+4. // Copyright (c) Microsoft. All rights reserved.
+5. // This code is licensed under the Microsoft Public License.
+6. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+7. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+8. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+9. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+10. //
+11. //*********************************************************
+12. -->
+13. <Page
+14.     x:Class="CameraProfile.Scenario3_EnableHdrProfile"
+15.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+16.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+17.     xmlns:local="using:CameraProfile"
+18.     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+19.     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+20.     mc:Ignorable="d">
+21. 
+22.     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+23.         <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="12,20,12,12">
+24.             <Grid.RowDefinitions>
+25.                 <RowDefinition Height="Auto"/>
+26.                 <RowDefinition Height="Auto"/>
+27.                 <RowDefinition Height="*"/>
+28.             </Grid.RowDefinitions>
+29.             <StackPanel Margin="0,0,0,10">
+30.                 <TextBlock Text="Description:" Style="{StaticResource SampleHeaderTextStyle}"/>
+31.                 <TextBlock Style="{StaticResource ScenarioDescriptionTextStyle}" TextWrapping="Wrap">
+32.                     Utilize camera profiles to verify if a device supports HDR video recording. In this
+33.                     example we acquire the record media descriptions from the available video profile and query
+34.                     the profile for HDR support.
+35.                 </TextBlock>
+36.             </StackPanel>
+37. 
+38.             <StackPanel Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
+39.                 <Button Content="Query Profile for HDR Support" Click="CheckHdrSupportBtn_Click"/>
+40.             </StackPanel>
+41. 
+42.             <ScrollViewer Grid.Row="2" Name="outputScrollViewer" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto">
+43.                 <TextBox x:Name="outputBox" AcceptsReturn="True" HorizontalAlignment="Stretch"/>
+44.             </ScrollViewer>
+45. 
+46.             <!-- Status Block for providing messages to the user.  Use the
+47.              NotifyUser() method to populate the message -->
+48.             <TextBlock x:Name="StatusBlock" Grid.Row="2" Margin="12, 10, 12, 10" Visibility="Collapsed"/>
+49.         </Grid>
+50.     </Grid>
+51. </Page>
+52. 
+
+=== TURN 13 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Package.appxmanifest"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\CameraProfile.csproj"}
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\CameraProfile\\cs\\Package.appxmanifest"}
+--- RESULT ---
+1. <?xml version="1.0" encoding="utf-8"?>
+2. <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
+3.   <Identity Name="Microsoft.SDKSamples.CameraProfile.CS" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" Version="1.0.0.0" />
+4.   <mp:PhoneIdentity PhoneProductId="762108de-1073-45a1-8838-aedc96cd07ee" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+5.   <Properties>
+6.     <DisplayName>CameraProfile</DisplayName>
+7.     <PublisherDisplayName>Microsoft Corporation</PublisherDisplayName>
+8.     <Logo>Assets\StoreLogo-sdk.png</Logo>
+9.   </Properties>
+10.   <Dependencies>
+11.     <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.10240.0" MaxVersionTested="10.0.22621.0" />
+12.   </Dependencies>
+13.   <Resources>
+14.     <Resource Language="x-generate" />
+15.   </Resources>
+16.   <Applications>
+17.     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="CameraProfile.App">
+18.       <uap:VisualElements DisplayName="CameraProfile" Square150x150Logo="Assets\SquareTile-sdk.png" Square44x44Logo="Assets\SmallTile-sdk.png" Description="CameraProfile" BackgroundColor="#00b2f0">
+19.         <uap:SplashScreen Image="Assets\Splash-sdk.png" />
+20.         <uap:DefaultTile>
+21.           <uap:ShowNameOnTiles>
+22.             <uap:ShowOn Tile="square150x150Logo" />
+23.           </uap:ShowNameOnTiles>
+24.         </uap:DefaultTile>
+25.       </uap:VisualElements>
+26.     </Application>
+27.   </Applications>
+28.   <Capabilities>
+29.     <DeviceCapability Name="webcam" />
+30.     <DeviceCapability Name="microphone" />
+31.   </Capabilities>
+32. </Package>
+--- RESULT ---
+1. <Project Sdk="Microsoft.NET.Sdk">
+2.   <PropertyGroup>
+3.     <OutputType>WinExe</OutputType>
+4.     <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+5.     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+6.     <RootNamespace>CameraProfile</RootNamespace>
+7.     <ApplicationManifest>app.manifest</ApplicationManifest>
+8.     <Platforms>x86;x64;ARM64</Platforms>
+9.     <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToLowerInvariant())</RuntimeIdentifier>
+10.     <PublishProfile Condition="Exists('Properties\PublishProfiles\win-$(Platform).pubxml')">win-$(Platform).pubxml</PublishProfile>
+11.     <UseWinUI>true</UseWinUI>
+12.     <WinUISDKReferences>false</WinUISDKReferences>
+13.     <EnableMsixTooling>true</EnableMsixTooling>
+14.     <ImplicitUsings>enable</ImplicitUsings>
+15.     <Nullable>enable</Nullable>
+16.   </PropertyGroup>
+17. 
+18.   <ItemGroup>
+19.     <Content Include="Assets\SplashScreen.scale-200.png" />
+20.     <Content Include="Assets\LockScreenLogo.scale-200.png" />
+21.     <Content Include="Assets\Square150x150Logo.scale-200.png" />
+22.     <Content Include="Assets\Square44x44Logo.scale-200.png" />
+23.     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+24.     <Content Include="Assets\Square44x44Logo.targetsize-48_altform-lightunplated.png" />
+25.     <Content Include="Assets\StoreLogo.png" />
+26.     <Content Include="Assets\AppIcon.ico" />
+27.     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+28.   </ItemGroup>
+29. 
+30.   <ItemGroup>
+31.     <Manifest Include="$(ApplicationManifest)" />
+32.   </ItemGroup>
+33. 
+34.   <!--
+35.     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+36.     Tools extension to be activated for this project even if the Windows App SDK Nuget
+37.     package has not yet been restored.
+38.   -->
+39.   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+40.     <ProjectCapability Include="Msix" />
+41.   </ItemGroup>
+42. 
+43.   <!--
+44.     Microsoft.Windows.SDK.BuildTools.WinApp adds first-class support for
+45.     `dotnet run` on packaged WinUI apps: it hooks the .NET CLI Run target to
+46.     register a debug identity via the winapp CLI and launch the app with
+47.     package identity (AUMID).
+48.     Set <EnableWinAppRunSupport>false</EnableWinAppRunSupport> in a
+49.     <PropertyGroup> above to opt out.
+50.   -->
+51.   <ItemGroup>
+52.     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
+53.     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+54.     <PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinApp" Version="0.4.0" />
+55.   </ItemGroup>
+56. 
+57.   <!--
+58.     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
+59.     Explorer "Package and Publish" context menu entry to be enabled for this project even if
+60.     the Windows App SDK Nuget package has not yet been restored.
+61.   -->
+62.   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+63.     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+64.   </PropertyGroup>
+65. 
+66.   <!-- Publish Properties -->
+67.   <PropertyGroup>
+68.     <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+69.     <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+70.     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+71.     <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+72.   </PropertyGroup>
+73. </Project>
+--- RESULT ---
+1. <?xml version="1.0" encoding="utf-8"?>
+2. <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
+3.   <Identity Name="Microsoft.SDKSamples.CameraProfile.CS" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" Version="1.0.0.0" />
+4.   <mp:PhoneIdentity PhoneProductId="762108de-1073-45a1-8838-aedc96cd07ee" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+5.   <Properties>
+6.     <DisplayName>CameraProfile</DisplayName>
+7.     <PublisherDisplayName>Microsoft Corporation</PublisherDisplayName>
+8.     <Logo>Assets\StoreLogo-sdk.png</Logo>
+9.   </Properties>
+10.   <Dependencies>
+11.     <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.10240.0" MaxVersionTested="10.0.22621.0" />
+12.   </Dependencies>
+13.   <Resources>
+14.     <Resource Language="x-generate" />
+15.   </Resources>
+16.   <Applications>
+17.     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="CameraProfile.App">
+18.       <uap:VisualElements DisplayName="CameraProfile" Square150x150Logo="Assets\SquareTile-sdk.png" Square44x44Logo="Assets\SmallTile-sdk.png" Description="CameraProfile" BackgroundColor="#00b2f0">
+19.         <uap:SplashScreen Image="Assets\Splash-sdk.png" />
+20.         <uap:DefaultTile>
+21.           <uap:ShowNameOnTiles>
+22.             <uap:ShowOn Tile="square150x150Logo" />
+23.           </uap:ShowNameOnTiles>
+24.         </uap:DefaultTile>
+25.       </uap:VisualElements>
+26.     </Application>
+27.   </Applications>
+28.   <Capabilities>
+29.     <DeviceCapability Name="webcam" />
+30.     <DeviceCapability Name="microphone" />
+31.   </Capabilities>
+32. </Package>
+
+=== TURN 14 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\App.xaml"}
+--- RESULT ---
+1. <?xml version="1.0" encoding="utf-8"?>
+2. <Application
+3.     x:Class="CameraProfile.App"
+4.     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+5.     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+6.     xmlns:local="using:CameraProfile">
+7.     <Application.Resources>
+8.         <ResourceDictionary>
+9.             <ResourceDictionary.MergedDictionaries>
+10.                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+11.                 <!-- Other merged dictionaries here -->
+12.             </ResourceDictionary.MergedDictionaries>
+13.             <!-- Other app resources here -->
+14.         </ResourceDictionary>
+15.     </Application.Resources>
+16. </Application>
+17. 
+
+=== TURN 15 ===
+Now I have everything I need. Let me implement all the migration changes in parallel:
+
+--- TOOL: report_intent ---
+{"intent":"Implementing all migration changes"}
+
+--- TOOL: edit ---
+{"new_str":"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Package\n  xmlns=\"http://schemas.microsoft.com/appx/manifest/foundation/windows10\"\n  xmlns:uap=\"http://schemas.microsoft.com/appx/manifest/uap/windows10\"\n  xmlns:rescap=\"http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities\"\n  IgnorableNamespaces=\"uap rescap\">\n\n  <Identity Name=\"Microsoft.SDKSamples.CameraProfile.CS\" Publisher=\"CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US\" Version=\"1.0.0.0\" />\n  <Properties>\n    <DisplayName>CameraProfile</DisplayName>\n    <PublisherDisplayName>Microsoft Corporation</PublisherDisplayName>\n    <Logo>Assets\\StoreLogo.png</Logo>\n  </Properties>\n  <Dependencies>\n    <TargetDeviceFamily Name=\"Windows.Desktop\" MinVersion=\"10.0.17763.0\" MaxVersionTested=\"10.0.22621.0\" />\n  </Dependencies>\n  <Resources>\n    <Resource Language=\"x-generate\" />\n  </Resources>\n  <Applications>\n    <Application Id=\"App\" Executable=\"$targetnametoken$.exe\" EntryPoint=\"$targetentrypoint$\">\n      <uap:VisualElements DisplayName=\"CameraProfile\" Square150x150Logo=\"Assets\\Square150x150Logo.scale-200.png\" Square44x44Logo=\"Assets\\Square44x44Logo.scale-200.png\" Description=\"CameraProfile\" BackgroundColor=\"transparent\">\n        <uap:DefaultTile Wide310x150Logo=\"Assets\\Wide310x150Logo.scale-200.png\" />\n        <uap:SplashScreen Image=\"Assets\\SplashScreen.scale-200.png\" />\n      </uap:VisualElements>\n    </Application>\n  </Applications>\n  <Capabilities>\n    <rescap:Capability Name=\"runFullTrust\" />\n    <DeviceCapability Name=\"webcam\" />\n    <DeviceCapability Name=\"microphone\" />\n  </Capabilities>\n</Package>","old_str":"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Package xmlns=\"http://schemas.microsoft.com/appx/manifest/foundation/windows10\" xmlns:mp=\"http://schemas.microsoft.com/appx/2014/phone/manifest\" xmlns:uap=\"http://schemas.microsoft.com/appx/manifest/uap/windows10\" IgnorableNamespaces=\"uap mp\">\n  <Identity Name=\"Microsoft.SDKSamples.CameraProfile.CS\" Publisher=\"CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US\" Version=\"1.0.0.0\" />\n  <mp:PhoneIdentity PhoneProductId=\"762108de-1073-45a1-8838-aedc96cd07ee\" PhonePublisherId=\"00000000-0000-0000-0000-000000000000\" />\n  <Properties>\n    <DisplayName>CameraProfile</DisplayName>\n    <PublisherDisplayName>Microsoft Corporation</PublisherDisplayName>\n    <Logo>Assets\\StoreLogo-sdk.png</Logo>\n  </Properties>\n  <Dependencies>\n    <TargetDeviceFamily Name=\"Windows.Universal\" MinVersion=\"10.0.10240.0\" MaxVersionTested=\"10.0.22621.0\" />\n  </Dependencies>\n  <Resources>\n    <Resource Language=\"x-generate\" />\n  </Resources>\n  <Applications>\n    <Application Id=\"App\" Executable=\"$targetnametoken$.exe\" EntryPoint=\"CameraProfile.App\">\n      <uap:VisualElements DisplayName=\"CameraProfile\" Square150x150Logo=\"Assets\\SquareTile-sdk.png\" Square44x44Logo=\"Assets\\SmallTile-sdk.png\" Description=\"CameraProfile\" BackgroundColor=\"#00b2f0\">\n        <uap:SplashScreen Image=\"Assets\\Splash-sdk.png\" />\n        <uap:DefaultTile>\n          <uap:ShowNameOnTiles>\n            <uap:ShowOn Tile=\"square150x150Logo\" />\n          </uap:ShowNameOnTiles>\n        </uap:DefaultTile>\n      </uap:VisualElements>\n    </Application>\n  </Applications>\n  <Capabilities>\n    <DeviceCapability Name=\"webcam\" />\n    <DeviceCapability Name=\"microphone\" />\n  </Capabilities>\n</Package>","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Package.appxmanifest"}
+
+--- TOOL: edit ---
+{"new_str":"            <!-- Styles shared across scenario pages -->\n            <Style x:Key=\"SampleHeaderTextStyle\" TargetType=\"TextBlock\">\n                <Setter Property=\"FontSize\" Value=\"18\"/>\n                <Setter Property=\"FontWeight\" Value=\"SemiBold\"/>\n                <Setter Property=\"Foreground\" Value=\"{ThemeResource TextFillColorPrimaryBrush}\"/>\n            </Style>\n            <Style x:Key=\"ScenarioDescriptionTextStyle\" TargetType=\"TextBlock\">\n                <Setter Property=\"FontSize\" Value=\"14\"/>\n                <Setter Property=\"Foreground\" Value=\"{ThemeResource TextFillColorSecondaryBrush}\"/>\n            </Style>\n            <Style x:Key=\"CopyrightTextStyle\" TargetType=\"TextBlock\">\n                <Setter Property=\"FontSize\" Value=\"11\"/>\n                <Setter Property=\"Foreground\" Value=\"{ThemeResource TextFillColorSecondaryBrush}\"/>\n            </Style>\n            <Style x:Key=\"TagLineTextStyle\" TargetType=\"TextBlock\">\n                <Setter Property=\"FontSize\" Value=\"16\"/>\n                <Setter Property=\"FontWeight\" Value=\"SemiBold\"/>\n                <Setter Property=\"Foreground\" Value=\"{ThemeResource TextFillColorPrimaryBrush}\"/>\n            </Style>","old_str":"            <!-- Other app resources here -->","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\App.xaml"}
+
+--- TOOL: edit ---
+{"new_str":"using Microsoft.UI.Xaml;","old_str":"﻿using Windows.ApplicationModel;\nusing Windows.ApplicationModel.Activation;\nusing Windows.Foundation;\nusing Windows.Foundation.Collections;\nusing Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Controls.Primitives;\nusing Microsoft.UI.Xaml.Data;\nusing Microsoft.UI.Xaml.Input;\nusing Microsoft.UI.Xaml.Media;\nusing Microsoft.UI.Xaml.Navigation;\nusing Microsoft.UI.Xaml.Shapes;","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\App.xaml.cs"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\Package.appxmanifest updated with changes.
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\App.xaml updated with changes.
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\App.xaml.cs updated with changes.
+
+=== TURN 16 ===
+Now update MainPage.xaml with the full SDK sample shell:
+
+--- TOOL: edit ---
+{"new_str":"<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n<Page\n    x:Class=\"CameraProfile.MainPage\"\n    xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"\n    xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"\n    xmlns:d=\"http://schemas.microsoft.com/expression/blend/2008\"\n    xmlns:local=\"using:CameraProfile\"\n    xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"\n    mc:Ignorable=\"d\">\n\n    <Grid Background=\"{ThemeResource ApplicationPageBackgroundThemeBrush}\">\n        <Grid.RowDefinitions>\n            <RowDefinition Height=\"Auto\"/>\n            <RowDefinition Height=\"*\"/>\n        </Grid.RowDefinitions>\n        <SplitView x:Name=\"Splitter\" IsPaneOpen=\"True\" Grid.Row=\"1\" DisplayMode=\"Inline\">\n            <SplitView.Pane>\n                <RelativePanel Margin=\"10,0,0,0\">\n                    <TextBlock x:Name=\"SampleTitle\" Text=\"CameraProfile\" Style=\"{StaticResource SampleHeaderTextStyle}\" TextWrapping=\"Wrap\" Margin=\"0,10,0,0\"/>\n                    <ListBox x:Name=\"ScenarioControl\" SelectionChanged=\"ScenarioControl_SelectionChanged\"\n                             AutomationProperties.Name=\"Scenarios\" SelectionMode=\"Single\"\n                             HorizontalAlignment=\"Left\" Background=\"Transparent\" BorderThickness=\"0\"\n                             VerticalAlignment=\"Top\" RelativePanel.Below=\"SampleTitle\" Margin=\"0,10,0,0\"\n                             RelativePanel.Above=\"FooterPanel\">\n                        <ListBox.ItemTemplate>\n                            <DataTemplate x:DataType=\"local:Scenario\">\n                                <TextBlock Text=\"{x:Bind Title}\"/>\n                            </DataTemplate>\n                        </ListBox.ItemTemplate>\n                    </ListBox>\n                    <StackPanel x:Name=\"FooterPanel\" Orientation=\"Vertical\" RelativePanel.AlignBottomWithPanel=\"True\">\n                        <TextBlock x:Name=\"Copyright\" Text=\"&#xA9; Microsoft Corporation. All rights reserved.\"\n                                   Style=\"{StaticResource CopyrightTextStyle}\" Margin=\"10,10,0,0\" TextWrapping=\"Wrap\"/>\n                        <StackPanel x:Name=\"LinksPanel\" Orientation=\"Horizontal\" Margin=\"10,10,0,10\">\n                            <HyperlinkButton Content=\"Trademarks\" Tag=\"http://go.microsoft.com/fwlink/?LinkID=623755\"\n                                             Click=\"Footer_Click\" FontSize=\"12\"/>\n                            <TextBlock Text=\"|\" VerticalAlignment=\"Center\" Margin=\"4,0\"/>\n                            <HyperlinkButton x:Name=\"PrivacyLink\" Content=\"Privacy\"\n                                             Tag=\"http://privacy.microsoft.com\" Click=\"Footer_Click\" FontSize=\"12\"/>\n                        </StackPanel>\n                    </StackPanel>\n                </RelativePanel>\n            </SplitView.Pane>\n            <RelativePanel>\n                <Frame x:Name=\"ScenarioFrame\" Margin=\"5\" NavigationFailed=\"ScenarioFrame_NavigationFailed\"\n                       RelativePanel.AlignTopWithPanel=\"True\" RelativePanel.Above=\"StatusPanel\"\n                       RelativePanel.AlignRightWithPanel=\"True\" RelativePanel.AlignLeftWithPanel=\"True\"/>\n                <StackPanel x:Name=\"StatusPanel\" Orientation=\"Vertical\"\n                            RelativePanel.AlignBottomWithPanel=\"True\"\n                            RelativePanel.AlignRightWithPanel=\"True\"\n                            RelativePanel.AlignLeftWithPanel=\"True\">\n                    <TextBlock x:Name=\"StatusLabel\" Margin=\"10,0,0,10\" TextWrapping=\"Wrap\" Text=\"Status:\" />\n                    <Border x:Name=\"StatusBorder\" Margin=\"0,0,0,0\">\n                        <ScrollViewer VerticalScrollMode=\"Auto\" VerticalScrollBarVisibility=\"Auto\" MaxHeight=\"200\">\n                            <TextBlock x:Name=\"StatusBlock\" FontWeight=\"Bold\"\n                                       AutomationProperties.LiveSetting=\"Assertive\"\n                                       Margin=\"10,10,10,20\" TextWrapping=\"Wrap\"/>\n                        </ScrollViewer>\n                    </Border>\n                </StackPanel>\n            </RelativePanel>\n        </SplitView>\n        <StackPanel x:Name=\"HeaderPanel\" Orientation=\"Horizontal\" Grid.Row=\"0\">\n            <TextBlock x:Name=\"Header\" Text=\"Windows App SDK sample\"\n                       Style=\"{StaticResource TagLineTextStyle}\" Margin=\"16,15,0,0\"/>\n        </StackPanel>\n    </Grid>\n</Page>","old_str":"<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n<Page\n    x:Class=\"CameraProfile.MainPage\"\n    xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"\n    xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"\n    xmlns:d=\"http://schemas.microsoft.com/expression/blend/2008\"\n    xmlns:local=\"using:CameraProfile\"\n    xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"\n    mc:Ignorable=\"d\">\n\n    <!--\n        This is the main content area of your application.\n        Add your UI elements here — for example, controls, layouts, and data-bound views.\n        Use 'dotnet new winui-page' to create additional pages and navigate to them via\n        the Frame in MainWindow (RootFrame).\n    -->\n    <Grid />\n</Page>","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\MainPage.xaml"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\MainPage.xaml updated with changes.
+
+=== TURN 17 ===
+Now update MainPage.xaml.cs with the full shell logic:
+
+--- TOOL: edit ---
+{"new_str":"using System;\nusing System.Collections.Generic;\nusing Microsoft.UI;\nusing Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Automation.Peers;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Media;\nusing Microsoft.UI.Xaml.Navigation;\n\nnamespace CameraProfile;\n\npublic sealed partial class MainPage : Page\n{\n    public static MainPage? Current { get; private set; }\n\n    public MainPage()\n    {\n        InitializeComponent();\n        Current = this;\n        SampleTitle.Text = FEATURE_NAME;\n    }\n\n    protected override void OnNavigatedTo(NavigationEventArgs e)\n    {\n        var itemCollection = new List<Scenario>();\n        int i = 1;\n        foreach (Scenario s in scenarios)\n        {\n            itemCollection.Add(new Scenario { Title = $\"{i++}) {s.Title}\", ClassType = s.ClassType });\n        }\n        ScenarioControl.ItemsSource = itemCollection;\n        ScenarioControl.SelectedIndex = 0;\n    }\n\n    private void ScenarioControl_SelectionChanged(object sender, SelectionChangedEventArgs e)\n    {\n        NotifyUser(string.Empty, NotifyType.StatusMessage);\n        ListBox scenarioListBox = (ListBox)sender;\n        if (scenarioListBox.SelectedItem is Scenario s)\n        {\n            ScenarioFrame.Navigate(s.ClassType);\n        }\n    }\n\n    public List<Scenario> Scenarios => scenarios;\n\n    public void NotifyUser(string strMessage, NotifyType type)\n    {\n        if (DispatcherQueue.HasThreadAccess)\n        {\n            UpdateStatus(strMessage, type);\n        }\n        else\n        {\n            DispatcherQueue.TryEnqueue(() => UpdateStatus(strMessage, type));\n        }\n    }\n\n    private void UpdateStatus(string strMessage, NotifyType type)\n    {\n        switch (type)\n        {\n            case NotifyType.StatusMessage:\n                StatusBorder.Background = new SolidColorBrush(Colors.Green);\n                break;\n            case NotifyType.ErrorMessage:\n                StatusBorder.Background = new SolidColorBrush(Colors.Red);\n                break;\n        }\n\n        StatusBlock.Text = strMessage;\n\n        if (StatusBlock.Text != string.Empty)\n        {\n            StatusBorder.Visibility = Visibility.Visible;\n            StatusPanel.Visibility = Visibility.Visible;\n        }\n        else\n        {\n            StatusBorder.Visibility = Visibility.Collapsed;\n            StatusPanel.Visibility = Visibility.Collapsed;\n        }\n\n        var peer = FrameworkElementAutomationPeer.FromElement(StatusBlock);\n        peer?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);\n    }\n\n    private async void Footer_Click(object sender, RoutedEventArgs e)\n    {\n        await Windows.System.Launcher.LaunchUriAsync(new Uri(((HyperlinkButton)sender).Tag.ToString()!));\n    }\n\n    private void ScenarioFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)\n    {\n        throw new Exception($\"Failed to load page: {e.SourcePageType.FullName}\", e.Exception);\n    }\n}\n\npublic enum NotifyType\n{\n    StatusMessage,\n    ErrorMessage,\n}","old_str":"using Microsoft.UI.Xaml.Controls;\n\n// To learn more about WinUI, the WinUI project structure,\n// and more about our project templates, see: http://aka.ms/winui-project-info.\n\nnamespace CameraProfile;\n\n/// <summary>\n/// The main content page displayed inside the application window.\n/// Add your UI logic, event handlers, and data binding here.\n/// </summary>\npublic sealed partial class MainPage : Page\n{\n    public MainPage()\n    {\n        InitializeComponent();\n\n        // TODO: Add your initialization logic here.\n    }\n}","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\MainPage.xaml.cs"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\MainPage.xaml.cs updated with changes.
+
+=== TURN 18 ===
+Now update SampleConfiguration.cs to use `CameraProfile` namespace:
+
+--- TOOL: edit ---
+{"new_str":"using System;\nusing System.Collections.Generic;\n\nnamespace CameraProfile;\n\npublic partial class MainPage\n{\n    public const string FEATURE_NAME = \"CameraProfile\";\n\n    private List<Scenario> scenarios = new List<Scenario>\n    {\n        new Scenario() { Title = \"Locate Record Specific Profile\", ClassType = typeof(Scenario1_SetRecordProfile) },\n        new Scenario() { Title = \"Query Profile for Concurrency\", ClassType = typeof(Scenario2_ConcurrentProfile) },\n        new Scenario() { Title = \"Query Profile for HDR Support\", ClassType = typeof(Scenario3_EnableHdrProfile) },\n    };\n}\n\npublic class Scenario\n{\n    public string Title { get; set; } = string.Empty;\n    public Type ClassType { get; set; } = typeof(MainPage);\n}","old_str":"using System;\nusing System.Collections.Generic;\nusing Microsoft.UI.Xaml.Controls;\nusing CameraProfile;\n\nnamespace SDKTemplate\n{\n    public partial class MainPage : Page\n    {\n        public const string FEATURE_NAME = \"CameraProfile\";\n\n        List<Scenario> scenarios = new List<Scenario>\n        {\n            new Scenario() { Title=\"Locate Record Specific Profile\", ClassType=typeof(Scenario1_SetRecordProfile)},\n            new Scenario() { Title=\"Query Profile for Concurrency\", ClassType=typeof(Scenario2_ConcurrentProfile)},\n            new Scenario() { Title=\"Query Profile for HDR Support\", ClassType=typeof(Scenario3_EnableHdrProfile)}\n        };\n    }\n\n    public class Scenario\n    {\n        public string Title { get; set; }\n        public Type ClassType { get; set; }\n    }\n}","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\SampleConfiguration.cs"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\SampleConfiguration.cs updated with changes.
+
+=== TURN 19 ===
+Now fix the three scenario files — resolve all threading TODOs and fix namespace references:
+
+--- TOOL: edit ---
+{"new_str":"//*********************************************************\n//\n// Copyright (c) Microsoft. All rights reserved.\n// This code is licensed under the Microsoft Public License.\n// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF\n// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY\n// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR\n// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.\n//\n//*********************************************************\n\nnamespace CameraProfile;\n\nusing System;\nusing System.Collections.Generic;\nusing System.Globalization;\nusing System.Linq;\nusing System.Threading.Tasks;\nusing Windows.Devices.Enumeration;\nusing Windows.Media.Capture;\nusing Microsoft.UI.Xaml;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;\n\n/// <summary>\n/// SetRecordProfile page that can be used on its own or navigated to within a Frame.\n/// </summary>\npublic sealed partial class Scenario1_SetRecordProfile : Page\n{\n    /// <summary>\n    /// Private MainPage object for status updates\n    /// </summary>\n    private MainPage? rootPage;\n\n    /// <summary>\n    /// Initializes a new instance of the <see cref=\"Scenario1_SetRecordProfile\"/> class.\n    /// </summary>\n    public Scenario1_SetRecordProfile()\n    {\n        this.InitializeComponent();\n    }\n\n    /// <summary>\n    /// Override default OnNavigateTo to initialize \n    /// the rootPage object for Status message updates\n    /// </summary>\n    /// <param name=\"e\">Contains state information and event data associated with the event</param>\n    protected override void OnNavigatedTo(NavigationEventArgs e)\n    {\n        rootPage = MainPage.Current;\n    }\n\n    /// <summary>\n    /// Locates a video profile for the back camera and then queries if\n    /// the discovered profile supports 640x480 30 FPS recording.\n    /// If a supported profile is located, then we configure media\n    /// settings to the matching profile. Else we use default profile.\n    /// </summary>\n    /// <param name=\"sender\">Contains information regarding button that fired event</param>\n    /// <param name=\"e\">Contains state information and event data associated with the event</param>\n    private async void InitRecordProfileBtn_Click(object sender, RoutedEventArgs e)\n    {\n        try\n        {\n            MediaCapture mediaCapture = new MediaCapture();\n            MediaCaptureInitializationSettings mediaInitSettings = new MediaCaptureInitializationSettings();\n            string videoDeviceId = string.Empty;\n\n            // Look for a video capture device Id with a video profile matching panel location\n            videoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);\n\n            if (string.IsNullOrEmpty(videoDeviceId))\n            {\n                await LogStatus(\"ERROR: No Video Device Id found, verify your device supports profiles\", NotifyType.ErrorMessage);\n                return;\n            }\n\n            await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Found video capture device that supports Video Profile, Device Id:\\r\\n {0}\", videoDeviceId));\n            await LogStatusToOutputBox(\"Retrieving all Video Profiles\");\n            IReadOnlyList<MediaCaptureVideoProfile> profiles = MediaCapture.FindAllVideoProfiles(videoDeviceId);\n\n            await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Number of Video Profiles found: {0}\", profiles.Count));\n\n            // Output all Video Profiles found, frame rate is rounded up for display purposes\n            foreach (var profile in profiles)\n            {\n                var description = profile.SupportedRecordMediaDescription;\n                foreach (var desc in description)\n                {\n                    await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture,\n                        \"Video Profile Found: Profile Id: {0}\\r\\n Width: {1} Height: {2} FrameRate: {3}\", profile.Id, desc.Width, desc.Height, Math.Round(desc.FrameRate).ToString()));\n                }\n            }\n\n            // Look for WVGA 30FPS profile \n            await LogStatusToOutputBox(\"Querying for matching WVGA 30FPS Profile\");\n            var match = (from profile in profiles\n                         from desc in profile.SupportedRecordMediaDescription\n                         where desc.Width == 640 && desc.Height == 480 && Math.Round(desc.FrameRate) == 30\n                         select new { profile, desc }).FirstOrDefault();\n\n            if (match != null)\n            {\n                mediaInitSettings.VideoProfile = match.profile;\n                mediaInitSettings.RecordMediaDescription = match.desc;\n                await LogStatus(string.Format(CultureInfo.InvariantCulture,\n                        \"Matching WVGA 30FPS Video Profile found: \\r\\n Profile Id: {0}\\r\\n Width: {1} Height: {2} FrameRate: {3}\",\n                        mediaInitSettings.VideoProfile.Id, mediaInitSettings.RecordMediaDescription.Width,\n                        mediaInitSettings.RecordMediaDescription.Height, Math.Round(mediaInitSettings.RecordMediaDescription.FrameRate).ToString()), NotifyType.StatusMessage);\n            }\n            else\n            {\n                // Could not locate a WVGA 30FPS profile, use default video recording profile\n                mediaInitSettings.VideoProfile = profiles[0];\n                await LogStatus(\"Could not locate a matching profile, setting to default recording profile\", NotifyType.ErrorMessage);\n            }\n\n            await mediaCapture.InitializeAsync(mediaInitSettings);\n            await LogStatusToOutputBox(\"Media Capture settings initialized to selected profile\");\n        }\n        catch (Exception ex)\n        {\n            await LogStatus(string.Format(CultureInfo.InvariantCulture, \"Error: {0}\", ex.Message), NotifyType.ErrorMessage);\n        }\n    }\n\n    /// <summary>\n    /// Locates a video profile for the back camera and then queries if\n    /// the discovered profile is a matching custom profile.\n    /// If a custom profile is located, we configure media\n    /// settings to the custom profile. Else we use default profile.\n    /// </summary>\n    /// <param name=\"sender\">Contains information regarding button that fired event</param>\n    /// <param name=\"e\">Contains state information and event data associated with the event</param>\n    private async void InitCustomProfileBtn_Click(object sender, RoutedEventArgs e)\n    {\n        try\n        {\n            MediaCapture mediaCapture = new MediaCapture();\n            MediaCaptureInitializationSettings mediaInitSettings = new MediaCaptureInitializationSettings();\n            string videoDeviceId = string.Empty;\n\n            // For demonstration purposes, we use the Profile Id from WVGA 640x480 30 FPS profile available\n            // on desktop simulator and phone emulators \n            string customProfileId = \"{A0E517E8-8F8C-4F6F-9A57-46FC2F647EC0},0\";\n\n            videoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);\n\n            if (string.IsNullOrEmpty(videoDeviceId))\n            {\n                await LogStatus(\"ERROR: No Video Device Id found, verify your device supports profiles\", NotifyType.ErrorMessage);\n                return;\n            }\n\n            await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Found video capture device that supports Video Profile, Device Id:\\r\\n {0}\", videoDeviceId));\n            await LogStatusToOutputBox(\"Querying device for custom profile support\");\n            mediaInitSettings.VideoProfile = (from profile in MediaCapture.FindAllVideoProfiles(videoDeviceId)\n                                              where profile.Id == customProfileId\n                                              select profile).FirstOrDefault();\n\n            // In the event the profile isn't located, we set Video Profile to the default\n            if (mediaInitSettings.VideoProfile == null)\n            {\n                await LogStatus(\"Could not locate a matching profile, setting to default recording profile\", NotifyType.ErrorMessage);\n                mediaInitSettings.VideoProfile = MediaCapture.FindAllVideoProfiles(videoDeviceId).FirstOrDefault();\n            }\n\n            await LogStatus(string.Format(CultureInfo.InvariantCulture, \"Custom recording profile located: {0}\", customProfileId), NotifyType.StatusMessage);\n            await mediaCapture.InitializeAsync(mediaInitSettings);\n        }\n        catch (Exception ex)\n        {\n            await LogStatus(string.Format(CultureInfo.InvariantCulture, \"Error: {0}\", ex.Message), NotifyType.ErrorMessage);\n        }\n    }\n\n    /// <summary>\n    /// Helper method to obtain a device Id that supports a Video Profile.\n    /// If no Video Profile is found we return empty string indicating that there isn't a device on \n    /// the desired panel with a supported Video Profile.\n    /// </summary>\n    /// <param name=\"panel\">Contains Device Enumeration information regarding camera panel we are looking for</param>\n    /// <returns>Device Information Id string</returns>\n    public async Task<string> GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel panel)\n    {\n        string deviceId = string.Empty;\n\n        // Find all video capture devices\n        await LogStatusToOutputBox(\"Looking for all video capture devices\");\n        DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);\n        await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Number of video capture devices found: {0}\", devices.Count.ToString()));\n\n        // Loop through devices looking for device that supports Video Profile\n        foreach (var device in devices)\n        {\n            // Check if the device on the requested panel supports Video Profile\n            if (MediaCapture.IsVideoProfileSupported(device.Id) && device.EnclosureLocation.Panel == panel)\n            {\n                // We've located a device that supports Video Profiles on expected panel\n                deviceId = device.Id;\n                break;\n            }\n        }\n\n        return deviceId;\n    }\n\n    /// <summary>\n    /// Marshall log message to the UI thread\n    /// and update outputBox, this method is for more general messages\n    /// </summary>\n    /// <param name=\"message\">Message to log to the outputBox</param>\n    private Task LogStatusToOutputBox(string message)\n    {\n        outputBox.Text += message + \"\\r\\n\";\n        outputScrollViewer.ChangeView(0, outputBox.ActualHeight, 1);\n        return Task.CompletedTask;\n    }\n\n    /// <summary>\n    /// Method to log Status to Main Status block,\n    /// this method is for important status messages to be \n    /// displayed at bottom of scenario page\n    /// </summary>\n    /// <param name=\"message\">Message to log to the output box</param>\n    /// <param name=\"type\">Notification Type for status message</param>\n    private Task LogStatus(string message, NotifyType type)\n    {\n        rootPage?.NotifyUser(message, type);\n        return LogStatusToOutputBox(message);\n    }\n}","old_str":"//*********************************************************\n//\n// Copyright (c) Microsoft. All rights reserved.\n// This code is licensed under the Microsoft Public License.\n// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF\n// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY\n// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR\n// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.\n//\n//*********************************************************\n\nnamespace CameraProfile\n{\n    using System;\n    using System.Collections.Generic;\n    using System.Globalization;\n    using System.Linq;\n    using System.Threading.Tasks;\n    using Windows.Devices.Enumeration;\n    using Windows.Media.Capture;\n    using Microsoft.UI.Xaml;\n    using Microsoft.UI.Xaml.Controls;\n    using Microsoft.UI.Xaml.Navigation;\n    using SDKTemplate;","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario1_SetRecordProfile.xaml.cs"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\Scenario1_SetRecordProfile.xaml.cs updated with changes.
+
+=== TURN 20 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario1_SetRecordProfile.xaml.cs","view_range":[1,30]}
+--- RESULT ---
+1. //*********************************************************
+2. //
+3. // Copyright (c) Microsoft. All rights reserved.
+4. // This code is licensed under the Microsoft Public License.
+5. // THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+6. // ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+7. // IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+8. // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+9. //
+10. //*********************************************************
+11. 
+12. namespace CameraProfile;
+13. 
+14. using System;
+15. using System.Collections.Generic;
+16. using System.Globalization;
+17. using System.Linq;
+18. using System.Threading.Tasks;
+19. using Windows.Devices.Enumeration;
+20. using Windows.Media.Capture;
+21. using Microsoft.UI.Xaml;
+22. using Microsoft.UI.Xaml.Controls;
+23. using Microsoft.UI.Xaml.Navigation;
+24. 
+25. /// <summary>
+26. /// SetRecordProfile page that can be used on its own or navigated to within a Frame.
+27. /// </summary>
+28. public sealed partial class Scenario1_SetRecordProfile : Page
+29. {
+30.     /// <summary>
+
+=== TURN 21 ===
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario1_SetRecordProfile.xaml.cs","view_range":[190,250]}
+--- RESULT ---
+190.         DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+191.         await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Number of video capture devices found: {0}", devices.Count.ToString()));
+192. 
+193.         // Loop through devices looking for device that supports Video Profile
+194.         foreach (var device in devices)
+195.         {
+196.             // Check if the device on the requested panel supports Video Profile
+197.             if (MediaCapture.IsVideoProfileSupported(device.Id) && device.EnclosureLocation.Panel == panel)
+198.             {
+199.                 // We've located a device that supports Video Profiles on expected panel
+200.                 deviceId = device.Id;
+201.                 break;
+202.             }
+203.         }
+204. 
+205.         return deviceId;
+206.     }
+207. 
+208.     /// <summary>
+209.     /// Marshall log message to the UI thread
+210.     /// and update outputBox, this method is for more general messages
+211.     /// </summary>
+212.     /// <param name="message">Message to log to the outputBox</param>
+213.     private Task LogStatusToOutputBox(string message)
+214.     {
+215.         outputBox.Text += message + "\r\n";
+216.         outputScrollViewer.ChangeView(0, outputBox.ActualHeight, 1);
+217.         return Task.CompletedTask;
+218.     }
+219. 
+220.     /// <summary>
+221.     /// Method to log Status to Main Status block,
+222.     /// this method is for important status messages to be 
+223.     /// displayed at bottom of scenario page
+224.     /// </summary>
+225.     /// <param name="message">Message to log to the output box</param>
+226.     /// <param name="type">Notification Type for status message</param>
+227.     private Task LogStatus(string message, NotifyType type)
+228.     {
+229.         rootPage?.NotifyUser(message, type);
+230.         return LogStatusToOutputBox(message);
+231.     }
+232. }
+233. 
+234.     /// <summary>
+235.     /// SetRecordProfile page that can be used on its own or navigated to within a Frame.
+236.     /// </summary>
+237.     public sealed partial class Scenario1_SetRecordProfile : Page
+238.     {
+239.         /// <summary>
+240.         /// Private MainPage object for status updates
+241.         /// </summary>
+242.         private MainPage rootPage;
+243. 
+244.         /// <summary>
+245.         /// Initializes a new instance of the <see cref="Scenario1_SetRecordProfile"/> class.
+246.         /// </summary>
+247.         public Scenario1_SetRecordProfile()
+248.         {
+249.             this.InitializeComponent();
+250.         }
+
+=== TURN 22 ===
+The file has duplicate content. Let me view the full file and replace it entirely:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario1_SetRecordProfile.xaml.cs","view_range":[230,-1]}
+--- RESULT ---
+230.         return LogStatusToOutputBox(message);
+231.     }
+232. }
+233. 
+234.     /// <summary>
+235.     /// SetRecordProfile page that can be used on its own or navigated to within a Frame.
+236.     /// </summary>
+237.     public sealed partial class Scenario1_SetRecordProfile : Page
+238.     {
+239.         /// <summary>
+240.         /// Private MainPage object for status updates
+241.         /// </summary>
+242.         private MainPage rootPage;
+243. 
+244.         /// <summary>
+245.         /// Initializes a new instance of the <see cref="Scenario1_SetRecordProfile"/> class.
+246.         /// </summary>
+247.         public Scenario1_SetRecordProfile()
+248.         {
+249.             this.InitializeComponent();
+250.         }
+251. 
+252.         /// <summary>
+253.         /// Override default OnNavigateTo to initialize 
+254.         /// the rootPage object for Status message updates
+255.         /// </summary>
+256.         /// <param name="e">Contains state information and event data associated with the event</param>
+257.         protected override void OnNavigatedTo(NavigationEventArgs e)
+258.         {
+259.             rootPage = MainPage.Current;
+260.         }
+261. 
+262.         /// <summary>
+263.         /// Locates a video profile for the back camera and then queries if
+264.         /// the discovered profile supports 640x480 30 FPS recording.
+265.         /// If a supported profile is located, then we configure media
+266.         /// settings to the matching profile. Else we use default profile.
+267.         /// </summary>
+268.         /// <param name="sender">Contains information regarding button that fired event</param>
+269.         /// <param name="e">Contains state information and event data associated with the event</param>
+270.         private async void InitRecordProfileBtn_Click(object sender, RoutedEventArgs e)
+271.         {
+272.             MediaCapture mediaCapture = new MediaCapture();
+273.             MediaCaptureInitializationSettings mediaInitSettings = new MediaCaptureInitializationSettings();
+274.             string videoDeviceId = string.Empty;
+275. 
+276.             // Look for a video capture device Id with a video profile matching panel location
+277.             videoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);
+278. 
+279.             if (string.IsNullOrEmpty(videoDeviceId))
+280.             {
+281.                 await LogStatus("ERROR: No Video Device Id found, verify your device supports profiles", NotifyType.ErrorMessage);
+282.                 return;
+283.             }
+284. 
+285.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Found video capture device that supports Video Profile, Device Id:\r\n {0}", videoDeviceId));
+286.             await LogStatusToOutputBox("Retrieving all Video Profiles");
+287.             IReadOnlyList<MediaCaptureVideoProfile> profiles = MediaCapture.FindAllVideoProfiles(videoDeviceId);
+288. 
+289.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Number of Video Profiles found: {0}", profiles.Count));
+290. 
+291.             // Output all Video Profiles found, frame rate is rounded up for display purposes
+292.             foreach (var profile in profiles)
+293.             {
+294.                 var description = profile.SupportedRecordMediaDescription;
+295.                 foreach (var desc in description)
+296.                 {
+297.                     await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture,
+298.                         "Video Profile Found: Profile Id: {0}\r\n Width: {1} Height: {2} FrameRate: {3}", profile.Id, desc.Width, desc.Height, Math.Round(desc.FrameRate).ToString()));
+299.                 }
+300.             }
+301. 
+302.             // Look for WVGA 30FPS profile 
+303.             await LogStatusToOutputBox("Querying for matching WVGA 30FPS Profile");
+304.             var match = (from profile in profiles
+305.                          from desc in profile.SupportedRecordMediaDescription
+306.                          where desc.Width == 640 && desc.Height == 480 && Math.Round(desc.FrameRate) == 30
+307.                          select new { profile, desc }).FirstOrDefault();
+308. 
+309.             if (match != null)
+310.             {
+311.                 mediaInitSettings.VideoProfile = match.profile;
+312.                 mediaInitSettings.RecordMediaDescription = match.desc;
+313.                 await LogStatus(string.Format(CultureInfo.InvariantCulture,
+314.                         "Matching WVGA 30FPS Video Profile found: \r\n Profile Id: {0}\r\n Width: {1} Height: {2} FrameRate: {3}",
+315.                         mediaInitSettings.VideoProfile.Id, mediaInitSettings.RecordMediaDescription.Width,
+316.                         mediaInitSettings.RecordMediaDescription.Height, Math.Round(mediaInitSettings.RecordMediaDescription.FrameRate).ToString()), NotifyType.StatusMessage);
+317.             }
+318.             else
+319.             {
+320.                 // Could not locate a WVGA 30FPS profile, use default video recording profile
+321.                 mediaInitSettings.VideoProfile = profiles[0];
+322.                 await LogStatus("Could not locate a matching profile, setting to default recording profile", NotifyType.ErrorMessage);
+323.             }
+324. 
+325.             await mediaCapture.InitializeAsync(mediaInitSettings);
+326.             await LogStatusToOutputBox("Media Capture settings initialized to selected profile");
+327. 
+328.         }
+329. 
+330.         /// <summary>
+331.         /// Locates a video profile for the back camera and then queries if
+332.         /// the discovered profile is a matching custom profile.
+333.         /// If a custom profile is located, we configure media
+334.         /// settings to the custom profile. Else we use default profile.
+335.         /// </summary>
+336.         /// <param name="sender">Contains information regarding button that fired event</param>
+337.         /// <param name="e">Contains state information and event data associated with the event</param>
+338.         private async void InitCustomProfileBtn_Click(object sender, RoutedEventArgs e)
+339.         {
+340.             MediaCapture mediaCapture = new MediaCapture();
+341.             MediaCaptureInitializationSettings mediaInitSettings = new MediaCaptureInitializationSettings();
+342.             string videoDeviceId = string.Empty;
+343. 
+344.             // For demonstration purposes, we use the Profile Id from WVGA 640x480 30 FPS profile available
+345.             // on desktop simulator and phone emulators 
+346.             string customProfileId = "{A0E517E8-8F8C-4F6F-9A57-46FC2F647EC0},0";
+347. 
+348.             videoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);
+349. 
+350.             if (string.IsNullOrEmpty(videoDeviceId))
+351.             {
+352.                 await LogStatus("ERROR: No Video Device Id found, verify your device supports profiles", NotifyType.ErrorMessage);
+353.                 return;
+354.             }
+355. 
+356.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Found video capture device that supports Video Profile, Device Id:\r\n {0}", videoDeviceId));
+357.             await LogStatusToOutputBox("Querying device for custom profile support");
+358.             mediaInitSettings.VideoProfile =  (from profile in MediaCapture.FindAllVideoProfiles(videoDeviceId)
+359.                                  where profile.Id == customProfileId
+360.                                  select profile).FirstOrDefault();
+361. 
+362.             // In the event the profile isn't located, we set Video Profile to the default
+363.             if (mediaInitSettings.VideoProfile == null)
+364.             {
+365.                 await LogStatus("Could not locate a matching profile, setting to default recording profile", NotifyType.ErrorMessage);
+366.                 mediaInitSettings.VideoProfile = MediaCapture.FindAllVideoProfiles(videoDeviceId).FirstOrDefault();
+367.             }
+368. 
+369.             await LogStatus(string.Format(CultureInfo.InvariantCulture, "Custom recording profile located: {0}", customProfileId), NotifyType.StatusMessage);
+370.             await mediaCapture.InitializeAsync(mediaInitSettings);
+371.         }
+372. 
+373.         /// <summary>
+374.         /// Helper method to obtain a device Id that supports a Video Profile.
+375.         /// If no Video Profile is found we return empty string indicating that there isn't a device on 
+376.         /// the desired panel with a supported Video Profile.
+377.         /// </summary>
+378.         /// <param name="panel">Contains Device Enumeration information regarding camera panel we are looking for</param>
+379.         /// <returns>Device Information Id string</returns>
+380.         public async Task<string> GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel panel)
+381.         {
+382.             string deviceId = string.Empty;
+383. 
+384.             // Find all video capture devices
+385.             await LogStatusToOutputBox("Looking for all video capture devices");
+386.             DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+387.             await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, "Number of video capture devices found: {0}", devices.Count.ToString()));
+388. 
+389.             // Loop through devices looking for device that supports Video Profile
+390.             foreach (var device in devices)
+391.             {
+392.                 // Check if the device on the requested panel supports Video Profile
+393.                 if (MediaCapture.IsVideoProfileSupported(device.Id) && device.EnclosureLocation.Panel == panel)
+394.                 {
+395.                     // We've located a device that supports Video Profiles on expected panel
+396.                     deviceId = device.Id;
+397.                     break;
+398.                 }
+399.             }
+400. 
+401.             return deviceId;
+402.         }
+403. 
+404.         /// <summary>
+405.         /// Marshall log message to the UI thread
+406.         /// and update outputBox, this method is for more general messages
+407.         /// </summary>
+408.         /// <param name="message">Message to log to the outputBox</param>
+409.         private async Task LogStatusToOutputBox(string message)
+410.         {
+411.             // TODO[migrate-001]: see PATTERNS.md#threading
+412.             await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+413.             {
+414.                 outputBox.Text += message + "\r\n";
+415.                 outputScrollViewer.ChangeView(0, outputBox.ActualHeight, 1);
+416.             });
+417.         }
+418. 
+419.         /// <summary>
+420.         /// Method to log Status to Main Status block,
+421.         /// this method is for important status messages to be 
+422.         /// displayed at bottom of scenario page
+423.         /// </summary>
+424.         /// <param name="message">Message to log to the output box</param>
+425.         /// <param name="type">Notification Type for status message</param>
+426.         private async Task LogStatus(string message, NotifyType type)
+427.         {
+428.             // TODO[migrate-002]: see PATTERNS.md#threading
+429.             await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+430.             {
+431.                 rootPage.NotifyUser(message, type);
+432.             });
+433.             await LogStatusToOutputBox(message);
+434.         }
+435. 
+436. 
+437.     }
+438. }
+439. 
+
+=== TURN 23 ===
+
+--- TOOL: edit ---
+{"new_str":"        return LogStatusToOutputBox(message);\n    }\n}","old_str":"        return LogStatusToOutputBox(message);\n    }\n}\n\n    /// <summary>\n    /// SetRecordProfile page that can be used on its own or navigated to within a Frame.\n    /// </summary>\n    public sealed partial class Scenario1_SetRecordProfile : Page\n    {\n        /// <summary>\n        /// Private MainPage object for status updates\n        /// </summary>\n        private MainPage rootPage;\n\n        /// <summary>\n        /// Initializes a new instance of the <see cref=\"Scenario1_SetRecordProfile\"/> class.\n        /// </summary>\n        public Scenario1_SetRecordProfile()\n        {\n            this.InitializeComponent();\n        }\n\n        /// <summary>\n        /// Override default OnNavigateTo to initialize \n        /// the rootPage object for Status message updates\n        /// </summary>\n        /// <param name=\"e\">Contains state information and event data associated with the event</param>\n        protected override void OnNavigatedTo(NavigationEventArgs e)\n        {\n            rootPage = MainPage.Current;\n        }\n\n        /// <summary>\n        /// Locates a video profile for the back camera and then queries if\n        /// the discovered profile supports 640x480 30 FPS recording.\n        /// If a supported profile is located, then we configure media\n        /// settings to the matching profile. Else we use default profile.\n        /// </summary>\n        /// <param name=\"sender\">Contains information regarding button that fired event</param>\n        /// <param name=\"e\">Contains state information and event data associated with the event</param>\n        private async void InitRecordProfileBtn_Click(object sender, RoutedEventArgs e)\n        {\n            MediaCapture mediaCapture = new MediaCapture();\n            MediaCaptureInitializationSettings mediaInitSettings = new MediaCaptureInitializationSettings();\n            string videoDeviceId = string.Empty;\n\n            // Look for a video capture device Id with a video profile matching panel location\n            videoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);\n\n            if (string.IsNullOrEmpty(videoDeviceId))\n            {\n                await LogStatus(\"ERROR: No Video Device Id found, verify your device supports profiles\", NotifyType.ErrorMessage);\n                return;\n            }\n\n            await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Found video capture device that supports Video Profile, Device Id:\\r\\n {0}\", videoDeviceId));\n            await LogStatusToOutputBox(\"Retrieving all Video Profiles\");\n            IReadOnlyList<MediaCaptureVideoProfile> profiles = MediaCapture.FindAllVideoProfiles(videoDeviceId);\n\n            await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Number of Video Profiles found: {0}\", profiles.Count));\n\n            // Output all Video Profiles found, frame rate is rounded up for display purposes\n            foreach (var profile in profiles)\n            {\n                var description = profile.SupportedRecordMediaDescription;\n                foreach (var desc in description)\n                {\n                    await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture,\n                        \"Video Profile Found: Profile Id: {0}\\r\\n Width: {1} Height: {2} FrameRate: {3}\", profile.Id, desc.Width, desc.Height, Math.Round(desc.FrameRate).ToString()));\n                }\n            }\n\n            // Look for WVGA 30FPS profile \n            await LogStatusToOutputBox(\"Querying for matching WVGA 30FPS Profile\");\n            var match = (from profile in profiles\n                         from desc in profile.SupportedRecordMediaDescription\n                         where desc.Width == 640 && desc.Height == 480 && Math.Round(desc.FrameRate) == 30\n                         select new { profile, desc }).FirstOrDefault();\n\n            if (match != null)\n            {\n                mediaInitSettings.VideoProfile = match.profile;\n                mediaInitSettings.RecordMediaDescription = match.desc;\n                await LogStatus(string.Format(CultureInfo.InvariantCulture,\n                        \"Matching WVGA 30FPS Video Profile found: \\r\\n Profile Id: {0}\\r\\n Width: {1} Height: {2} FrameRate: {3}\",\n                        mediaInitSettings.VideoProfile.Id, mediaInitSettings.RecordMediaDescription.Width,\n                        mediaInitSettings.RecordMediaDescription.Height, Math.Round(mediaInitSettings.RecordMediaDescription.FrameRate).ToString()), NotifyType.StatusMessage);\n            }\n            else\n            {\n                // Could not locate a WVGA 30FPS profile, use default video recording profile\n                mediaInitSettings.VideoProfile = profiles[0];\n                await LogStatus(\"Could not locate a matching profile, setting to default recording profile\", NotifyType.ErrorMessage);\n            }\n\n            await mediaCapture.InitializeAsync(mediaInitSettings);\n            await LogStatusToOutputBox(\"Media Capture settings initialized to selected profile\");\n\n        }\n\n        /// <summary>\n        /// Locates a video profile for the back camera and then queries if\n        /// the discovered profile is a matching custom profile.\n        /// If a custom profile is located, we configure media\n        /// settings to the custom profile. Else we use default profile.\n        /// </summary>\n        /// <param name=\"sender\">Contains information regarding button that fired event</param>\n        /// <param name=\"e\">Contains state information and event data associated with the event</param>\n        private async void InitCustomProfileBtn_Click(object sender, RoutedEventArgs e)\n        {\n            MediaCapture mediaCapture = new MediaCapture();\n            MediaCaptureInitializationSettings mediaInitSettings = new MediaCaptureInitializationSettings();\n            string videoDeviceId = string.Empty;\n\n            // For demonstration purposes, we use the Profile Id from WVGA 640x480 30 FPS profile available\n            // on desktop simulator and phone emulators \n            string customProfileId = \"{A0E517E8-8F8C-4F6F-9A57-46FC2F647EC0},0\";\n\n            videoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);\n\n            if (string.IsNullOrEmpty(videoDeviceId))\n            {\n                await LogStatus(\"ERROR: No Video Device Id found, verify your device supports profiles\", NotifyType.ErrorMessage);\n                return;\n            }\n\n            await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Found video capture device that supports Video Profile, Device Id:\\r\\n {0}\", videoDeviceId));\n            await LogStatusToOutputBox(\"Querying device for custom profile support\");\n            mediaInitSettings.VideoProfile =  (from profile in MediaCapture.FindAllVideoProfiles(videoDeviceId)\n                                 where profile.Id == customProfileId\n                                 select profile).FirstOrDefault();\n\n            // In the event the profile isn't located, we set Video Profile to the default\n            if (mediaInitSettings.VideoProfile == null)\n            {\n                await LogStatus(\"Could not locate a matching profile, setting to default recording profile\", NotifyType.ErrorMessage);\n                mediaInitSettings.VideoProfile = MediaCapture.FindAllVideoProfiles(videoDeviceId).FirstOrDefault();\n            }\n\n            await LogStatus(string.Format(CultureInfo.InvariantCulture, \"Custom recording profile located: {0}\", customProfileId), NotifyType.StatusMessage);\n            await mediaCapture.InitializeAsync(mediaInitSettings);\n        }\n\n        /// <summary>\n        /// Helper method to obtain a device Id that supports a Video Profile.\n        /// If no Video Profile is found we return empty string indicating that there isn't a device on \n        /// the desired panel with a supported Video Profile.\n        /// </summary>\n        /// <param name=\"panel\">Contains Device Enumeration information regarding camera panel we are looking for</param>\n        /// <returns>Device Information Id string</returns>\n        public async Task<string> GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel panel)\n        {\n            string deviceId = string.Empty;\n\n            // Find all video capture devices\n            await LogStatusToOutputBox(\"Looking for all video capture devices\");\n            DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);\n            await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Number of video capture devices found: {0}\", devices.Count.ToString()));\n\n            // Loop through devices looking for device that supports Video Profile\n            foreach (var device in devices)\n            {\n                // Check if the device on the requested panel supports Video Profile\n                if (MediaCapture.IsVideoProfileSupported(device.Id) && device.EnclosureLocation.Panel == panel)\n                {\n                    // We've located a device that supports Video Profiles on expected panel\n                    deviceId = device.Id;\n                    break;\n                }\n            }\n\n            return deviceId;\n        }\n\n        /// <summary>\n        /// Marshall log message to the UI thread\n        /// and update outputBox, this method is for more general messages\n        /// </summary>\n        /// <param name=\"message\">Message to log to the outputBox</param>\n        private async Task LogStatusToOutputBox(string message)\n        {\n            // TODO[migrate-001]: see PATTERNS.md#threading\n            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>\n            {\n                outputBox.Text += message + \"\\r\\n\";\n                outputScrollViewer.ChangeView(0, outputBox.ActualHeight, 1);\n            });\n        }\n\n        /// <summary>\n        /// Method to log Status to Main Status block,\n        /// this method is for important status messages to be \n        /// displayed at bottom of scenario page\n        /// </summary>\n        /// <param name=\"message\">Message to log to the output box</param>\n        /// <param name=\"type\">Notification Type for status message</param>\n        private async Task LogStatus(string message, NotifyType type)\n        {\n            // TODO[migrate-002]: see PATTERNS.md#threading\n            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>\n            {\n                rootPage.NotifyUser(message, type);\n            });\n            await LogStatusToOutputBox(message);\n        }\n\n\n    }\n}","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario1_SetRecordProfile.xaml.cs"}
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\Scenario1_SetRecordProfile.xaml.cs updated with changes.
+
+=== TURN 24 ===
+Now rewrite Scenario2 and Scenario3 completely:
+
+--- TOOL: powershell ---
+{"command":"Set-Content -Path \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario2_ConcurrentProfile.xaml.cs\" -Value @'\n//*********************************************************\n//\n// Copyright (c) Microsoft. All rights reserved.\n// This code is licensed under the Microsoft Public License.\n// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF\n// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY\n// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR\n// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.\n//\n//*********************************************************\n\nnamespace CameraProfile;\n\nusing System;\nusing System.Globalization;\nusing System.Linq;\nusing System.Threading.Tasks;\nusing Windows.Devices.Enumeration;\nusing Windows.Media.Capture;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;\n\n/// <summary>\n/// ConcurrenProfile page that can be used on its own or navigated to within a Frame.\n/// </summary>\npublic sealed partial class Scenario2_ConcurrentProfile : Page\n{\n    /// <summary>\n    /// Private MainPage object for status updates\n    /// </summary>\n    private MainPage? rootPage;\n\n    /// <summary>\n    /// Initializes a new instance of the <see cref=\"Scenario2_ConcurrentProfile\"/> class.\n    /// </summary>\n    public Scenario2_ConcurrentProfile()\n    {\n        this.InitializeComponent();\n    }\n\n    /// <summary>\n    /// Override default OnNavigateTo to initialize \n    /// the rootPage object for Status message updates\n    /// </summary>\n    /// <param name=\"e\">Contains state information and event data associated with the event</param>\n    protected override void OnNavigatedTo(NavigationEventArgs e)\n    {\n        rootPage = MainPage.Current;\n    }\n\n    /// <summary>\n    /// Finds the video profile for the front and back camera and queries if\n    /// both cameras have a matching video recording profile that supports concurrency.\n    /// If a matching concurrent profile is supported, then we configure media initialization\n    /// settings for both cameras to the matching profile. \n    /// </summary>\n    /// <param name=\"sender\">Contains information regarding button that fired event</param>\n    /// <param name=\"e\">Contains state information and event data associated with the event</param>\n    private async void CheckConcurrentProfileBtn_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)\n    {\n        try\n        {\n            // Initialize our concurrency support flag.\n            bool concurrencySupported = false;\n\n            string frontVideoDeviceId = string.Empty;\n            string backVideoDeviceId = string.Empty;\n\n            MediaCapture mediaCaptureFront = new MediaCapture();\n            MediaCapture mediaCaptureBack = new MediaCapture();\n\n            // Find front and back Device Id of capture device that supports Video Profile\n            await LogStatusToOutputBox(\"Looking for all video capture devices on front panel\");\n            frontVideoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Front);\n            await LogStatusToOutputBox(\"Looking for all video capture devices on back panel\");\n            backVideoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);\n\n            // First check if the devices support video profiles, if not there's no reason to proceed\n            if (string.IsNullOrEmpty(frontVideoDeviceId) || string.IsNullOrEmpty(backVideoDeviceId))\n            {\n                await LogStatus(\"ERROR: A capture device doesn't support Video Profile\", NotifyType.ErrorMessage);\n                return;\n            }\n\n            await LogStatusToOutputBox(\"Video Profiles are supported on both cameras\");\n\n            // Create MediaCaptureInitilization settings for each video capture device\n            MediaCaptureInitializationSettings mediaInitSettingsFront = new MediaCaptureInitializationSettings();\n            MediaCaptureInitializationSettings mediaInitSettingsBack = new MediaCaptureInitializationSettings();\n\n            mediaInitSettingsFront.VideoDeviceId = frontVideoDeviceId;\n            mediaInitSettingsBack.VideoDeviceId = backVideoDeviceId;\n            await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Front Device Id located: {0}\", frontVideoDeviceId.ToString()));\n            await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Back Device Id located: {0}\", backVideoDeviceId.ToString()));\n\n            await LogStatusToOutputBox(\"Querying for concurrent profile\");\n\n            // Acquire concurrent profiles available to front and back capture devices, then locate a concurrent\n            // profile Id that matches for both devices\n            var concurrentProfile = (from frontProfile in MediaCapture.FindConcurrentProfiles(frontVideoDeviceId)\n                                     from backProfile in MediaCapture.FindConcurrentProfiles(backVideoDeviceId)\n                                     where frontProfile.Id == backProfile.Id\n                                     select new { frontProfile, backProfile }).FirstOrDefault();\n\n            if (concurrentProfile != null)\n            {\n                mediaInitSettingsFront.VideoProfile = concurrentProfile.frontProfile;\n                mediaInitSettingsBack.VideoProfile = concurrentProfile.backProfile;\n                concurrencySupported = true;\n\n                await LogStatus(\"Concurrent profile located, device supports concurrency\", NotifyType.StatusMessage);\n            }\n            else\n            {\n                // There are no concurrent profiles available on this device, thus\n                // there is not profile to select. With a lack of concurrent profile\n                // each camera will have to be managed manually and cannot support\n                // simultaneous streams. So we set the Video profile to null to \n                // indicate that camera must be managed individually.\n                mediaInitSettingsFront.VideoProfile = null;\n                mediaInitSettingsBack.VideoProfile = null;\n\n                await LogStatus(\"No Concurrent profiles located, device does not support concurrency\", NotifyType.ErrorMessage);\n            }\n\n            await LogStatusToOutputBox(\"Initializing Front camera settings\");\n            await mediaCaptureFront.InitializeAsync(mediaInitSettingsFront);\n            if (concurrencySupported)\n            {\n                await LogStatusToOutputBox(\"Device supports concurrency, initializing Back camera settings\");\n\n                // Only initialize the back camera if concurrency is available.  Otherwise,\n                // we can only use one camera at a time (which in this case will be the front\n                // camera).\n                await mediaCaptureBack.InitializeAsync(mediaInitSettingsBack);\n            }\n        }\n        catch (Exception ex)\n        {\n            await LogStatus(string.Format(CultureInfo.InvariantCulture, \"Error: {0}\", ex.Message), NotifyType.ErrorMessage);\n        }\n    }\n\n    /// <summary>\n    /// Helper method to obtain a device Id that supports a Video Profile.\n    /// If no Video Profile is found we return empty string indicating that there isn't a device on \n    /// the desired panel with a supported Video Profile.\n    /// </summary>\n    /// <param name=\"panel\">Contains Device Enumeration information regarding camera panel we are looking for</param>\n    /// <returns>Device Information Id string</returns>\n    public async Task<string> GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel panel)\n    {\n        string deviceId = string.Empty;\n\n        // Finds all video capture devices\n        DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);\n        await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Number of video capture devices found: {0}\", devices.Count.ToString()));\n\n        foreach (var device in devices)\n        {\n            // Check if the device on the requested panel supports Video Profile\n            if (MediaCapture.IsVideoProfileSupported(device.Id) && device.EnclosureLocation.Panel == panel)\n            {\n                // We've located a device that supports Video Profiles on expected panel\n                deviceId = device.Id;\n                break;\n            }\n        }\n\n        return deviceId;\n    }\n\n    /// <summary>\n    /// Marshall log message to the UI thread\n    /// and update outputBox, this method is for more general messages\n    /// </summary>\n    /// <param name=\"message\">Message to log to the outputBox</param>\n    private Task LogStatusToOutputBox(string message)\n    {\n        outputBox.Text += message + \"\\r\\n\";\n        outputScrollViewer.ChangeView(0, outputBox.ActualHeight, 1);\n        return Task.CompletedTask;\n    }\n\n    /// <summary>\n    /// Method to log Status to Main Status block,\n    /// this method is for important status messages to be \n    /// displayed at bottom of scenario page\n    /// </summary>\n    /// <param name=\"message\">Message to log to the output box</param>\n    /// <param name=\"type\">Notification Type for status message</param>\n    private Task LogStatus(string message, NotifyType type)\n    {\n        rootPage?.NotifyUser(message, type);\n        return LogStatusToOutputBox(message);\n    }\n}\n'@\n\"DONE\"","description":"Rewrite Scenario2 file","mode":"sync"}
+
+--- TOOL: powershell ---
+{"command":"Set-Content -Path \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\Scenario3_EnableHdrProfile.xaml.cs\" -Value @'\n//*********************************************************\n//\n// Copyright (c) Microsoft. All rights reserved.\n// This code is licensed under the Microsoft Public License.\n// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF\n// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY\n// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR\n// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.\n//\n//*********************************************************\n\nnamespace CameraProfile;\n\nusing System;\nusing System.Collections.Generic;\nusing System.Globalization;\nusing System.Threading.Tasks;\nusing Windows.Devices.Enumeration;\nusing Windows.Media.Capture;\nusing Microsoft.UI.Xaml.Controls;\nusing Microsoft.UI.Xaml.Navigation;\n\n/// <summary>\n/// EnableHDRProfile page that can be used on its own or navigated to within a Frame.\n/// </summary>\npublic sealed partial class Scenario3_EnableHdrProfile : Page\n{\n    /// <summary>\n    /// Private MainPage object for status updates\n    /// </summary>\n    private MainPage? rootPage;\n\n    /// <summary>\n    /// Initializes a new instance of the <see cref=\"Scenario3_EnableHdrProfile\"/> class.\n    /// </summary>\n    public Scenario3_EnableHdrProfile()\n    {\n        this.InitializeComponent();\n    }\n\n    /// <summary>\n    /// Override default OnNavigateTo to initialize \n    /// the rootPage object for Status message updates\n    /// </summary>\n    /// <param name=\"e\">Contains state information and event data associated with the event</param>\n    protected override void OnNavigatedTo(NavigationEventArgs e)\n    {\n        rootPage = MainPage.Current;\n    }\n\n    /// <summary>\n    /// Finds the video profiles for the back camera. Then queries for a profile that supports\n    /// HDR video recording. If a HDR supported video profile is located, then we configure media settings to the\n    /// matching profile. Finally we initialize media capture HDR recording mode to auto.\n    /// </summary>\n    /// <param name=\"sender\">Contains information regarding button that fired event</param>\n    /// <param name=\"e\">Contains state information and event data associated with the event</param>\n    private async void CheckHdrSupportBtn_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)\n    {\n        try\n        {\n            string videoDeviceId = string.Empty;\n            bool HdrVideoSupported = false;\n            MediaCapture mediaCapture = new MediaCapture();\n            MediaCaptureInitializationSettings mediaCaptureInitSetttings = new MediaCaptureInitializationSettings();\n\n            // Select the first video capture device found on the back of the device\n            await LogStatusToOutputBox(\"Querying for video capture device on back of the device that supports Video Profile\");\n            videoDeviceId = await GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel.Back);\n\n            if (string.IsNullOrEmpty(videoDeviceId))\n            {\n                await LogStatus(\"ERROR: No Video Device Id found, verify your device supports profiles\", NotifyType.ErrorMessage);\n                return;\n            }\n\n            await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture,\n                \"Found device that supports Video Profile, Device Id:\\r\\n {0}\", videoDeviceId));\n            IReadOnlyList<MediaCaptureVideoProfile> profiles = MediaCapture.FindKnownVideoProfiles(videoDeviceId, KnownVideoProfile.VideoRecording);\n\n            // Walk through available profiles, look for first profile with HDR supported Video Profile\n            foreach (MediaCaptureVideoProfile profile in profiles)\n            {\n                IReadOnlyList<MediaCaptureVideoProfileMediaDescription> recordMediaDescription = profile.SupportedRecordMediaDescription;\n                foreach (MediaCaptureVideoProfileMediaDescription videoProfileMediaDescription in recordMediaDescription)\n                {\n                    if (videoProfileMediaDescription.IsHdrVideoSupported)\n                    {\n                        // We've located the profile and description for HDR Video, set profile and flag\n                        mediaCaptureInitSetttings.VideoProfile = profile;\n                        mediaCaptureInitSetttings.RecordMediaDescription = videoProfileMediaDescription;\n                        HdrVideoSupported = true;\n                        await LogStatus(\"HDR supported video profile found, set video profile to current HDR supported profile\", NotifyType.StatusMessage);\n                        break;\n                    }\n                }\n\n                if (HdrVideoSupported)\n                {\n                    break;\n                }\n            }\n\n            await LogStatusToOutputBox(\"Initializing Media settings to HDR Supported video profile\");\n            await mediaCapture.InitializeAsync(mediaCaptureInitSetttings);\n            if (HdrVideoSupported)\n            {\n                await LogStatusToOutputBox(\"Initializing HDR Video Mode to Auto\");\n                mediaCapture.VideoDeviceController.HdrVideoControl.Mode = Windows.Media.Devices.HdrVideoMode.Auto;\n            }\n        }\n        catch (Exception ex)\n        {\n            await LogStatus(string.Format(CultureInfo.InvariantCulture, \"Error: {0}\", ex.Message), NotifyType.ErrorMessage);\n        }\n    }\n\n    /// <summary>\n    /// Helper method to obtain a device Id that supports a Video Profile.\n    /// If no Video Profile is found we return empty string indicating that there isn't a device on \n    /// the desired panel with a supported Video Profile.\n    /// </summary>\n    /// <param name=\"panel\">Contains Device Enumeration information regarding camera panel we are looking for</param>\n    /// <returns>Device Information Id string</returns>\n    public async Task<string> GetVideoProfileSupportedDeviceIdAsync(Windows.Devices.Enumeration.Panel panel)\n    {\n        string deviceId = string.Empty;\n\n        // Finds all video capture devices\n        await LogStatusToOutputBox(\"Looking for all video capture devices\");\n        DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);\n        await LogStatusToOutputBox(string.Format(CultureInfo.InvariantCulture, \"Number of video capture devices found: {0}\", devices.Count.ToString()));\n\n        foreach (var device in devices)\n        {\n            // Check if the device on the requested panel supports Video Profile\n            if (MediaCapture.IsVideoProfileSupported(device.Id) && device.EnclosureLocation.Panel == panel)\n            {\n                // We've located a device that supports Video Profiles on expected panel\n                deviceId = device.Id;\n                break;\n            }\n        }\n\n        return deviceId;\n    }\n\n    /// <summary>\n    /// Marshall log message to the UI thread\n    /// and update outputBox, this method is for more general messages\n    /// </summary>\n    /// <param name=\"message\">Message to log to the outputBox</param>\n    private Task LogStatusToOutputBox(string message)\n    {\n        outputBox.Text += message + \"\\r\\n\";\n        outputScrollViewer.ChangeView(0, outputBox.ActualHeight, 1);\n        return Task.CompletedTask;\n    }\n\n    /// <summary>\n    /// Method to log Status to Main Status block,\n    /// this method is for important status messages to be \n    /// displayed at bottom of scenario page\n    /// </summary>\n    /// <param name=\"message\">Message to log to the output box</param>\n    /// <param name=\"type\">Notification Type for status message</param>\n    private Task LogStatus(string message, NotifyType type)\n    {\n        rootPage?.NotifyUser(message, type);\n        return LogStatusToOutputBox(message);\n    }\n}\n'@\n\"DONE\"","description":"Rewrite Scenario3 file","mode":"sync"}
+--- RESULT ---
+DONE
+<exited with exit code 0>
+--- RESULT ---
+DONE
+<exited with exit code 0>
+
+=== TURN 25 ===
+Now build the project:
+
+--- TOOL: report_intent ---
+{"intent":"Building the project"}
+
+--- TOOL: powershell ---
+{"command":"cd C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\n$arch = $env:PROCESSOR_ARCHITECTURE\n$Platform = if ($arch -eq 'AMD64') { 'x64' } else { $arch }\ndotnet build -c Debug -p:Platform=$Platform 2>&1; \"BUILD_EXIT=$LASTEXITCODE\"","description":"Build the WinUI3 project","initial_wait":120,"mode":"sync"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+csproj
+(0.1s)
+(0.1s)
+(0.1s)
+(0.2s)
+(0.2s)
+(0.3s)
+(0.3s)
+(0.4s)
+(0.4s)
+(0.5s)
+(0.5s)
+(0.6s)
+(0.6s)
+(0.7s)
+(0.7s)
+(0.8s)
+(0.8s)
+(0.9s)
+(0.9s)
+Restore complete (0.9s)
+  csproj net10.0-windows10.0.26100.0 win-x64                                                                     (0.9s) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(0.9s)
+(0.9s)
+(0.9s)
+(0.9s)
+(0.9s)
+(0.9s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                   ProcessFrameworkReferences (0.0s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                         ResolvePackageAssets (0.1s) 
+(0.1s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                     ResolveRuntimePackAssets (0.2s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                   ResolveTargetingPackAssets (0.2s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                    ResolveAssemblyReferences (0.2s) 
+(0.3s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                           MarkupCompilePass1 (0.3s) 
+(0.4s)
+(0.4s)
+(0.5s)
+(0.5s)
+(0.6s)
+(0.6s)
+(0.7s)
+(0.7s)
+(0.8s)
+(0.8s)
+(0.9s)
+(0.9s)
+(0.9s)
+(1.0s)
+(1.0s)
+(1.1s)
+(1.1s)
+(1.2s)
+(1.2s)
+(1.3s)
+(1.3s)
+(1.4s)
+(1.4s)
+(1.5s)
+(1.5s)
+(1.6s)
+(1.6s)
+(1.6s)
+(1.7s)
+(1.7s)
+(1.8s)
+(1.8s)
+(1.9s)
+(1.9s)
+(2.0s)
+(2.0s)
+(2.1s)
+(2.1s)
+(2.2s)
+(2.2s)
+(2.2s)
+(2.3s)
+(2.3s)
+(2.4s)
+(2.4s)
+(2.5s)
+(2.5s)
+(2.6s)
+(2.6s)
+(2.7s)
+(2.7s)
+(2.8s)
+(2.8s)
+(2.8s)
+(2.9s)
+(2.9s)
+(3.0s)
+(3.0s)
+(3.1s)
+(3.1s)
+(3.2s)
+(3.2s)
+(3.3s)
+(3.3s)
+(3.4s)
+(3.4s)
+(3.5s)
+(3.5s)
+(3.5s)
+(3.6s)
+(3.6s)
+(3.7s)
+(3.7s)
+(3.8s)
+(3.8s)
+(3.9s)
+(3.9s)
+(4.0s)
+(4.0s)
+(4.1s)
+(4.1s)
+(4.2s)
+(4.2s)
+(4.3s)
+(4.3s)
+(4.3s)
+(4.4s)
+(4.4s)
+(4.5s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                               XamlPreCompile (4.5s) 
+(4.6s)
+(4.6s)
+(4.7s)
+(4.7s)
+(4.8s)
+(4.8s)
+(4.9s)
+(4.9s)
+(5.0s)
+(5.0s)
+(5.0s)
+(5.1s)
+(5.1s)
+(5.2s)
+(5.2s)
+(5.3s)
+(5.3s)
+(5.4s)
+(5.4s)
+(5.5s)
+(5.5s)
+(5.6s)
+(5.6s)
+(5.7s)
+(5.7s)
+(5.7s)
+(5.8s)
+(5.8s)
+(5.9s)
+(5.9s)
+(6.0s)
+(6.0s)
+(6.1s)
+(6.1s)
+(6.2s)
+(6.2s)
+(6.3s)
+(6.3s)
+(6.4s)
+(6.4s)
+(6.4s)
+(6.5s)
+(6.5s)
+(6.6s)
+(6.6s)
+(6.7s)
+(6.7s)
+(6.8s)
+(6.8s)
+(6.9s)
+(6.9s)
+(7.0s)
+(7.0s)
+(7.1s)
+(7.1s)
+(7.1s)
+(7.2s)
+(7.2s)
+(7.3s)
+(7.3s)
+(7.4s)
+(7.4s)
+(7.5s)
+(7.5s)
+(7.6s)
+(7.6s)
+(7.7s)
+(7.7s)
+(7.8s)
+(7.8s)
+(7.8s)
+(7.9s)
+(7.9s)
+(8.0s)
+(8.0s)
+(8.1s)
+(8.1s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                           MarkupCompilePass2 (8.2s) 
+(8.2s)
+(8.3s)
+(8.3s)
+(8.4s)
+(8.4s)
+(8.4s)
+(8.5s)
+(8.5s)
+(8.6s)
+(8.6s)
+(8.7s)
+(8.7s)
+(8.8s)
+(8.8s)
+(8.9s)
+(8.9s)
+(9.0s)
+(9.0s)
+(9.1s)
+(9.1s)
+(9.2s)
+(9.2s)
+(9.2s)
+(9.3s)
+(9.3s)
+(9.4s)
+(9.4s)
+(9.5s)
+(9.5s)
+(9.6s)
+(9.6s)
+(9.7s)
+(9.7s)
+(9.8s)
+(9.8s)
+(9.9s)
+(9.9s)
+(9.9s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                          MarkupCompilePass2 (10.0s) 
+(10.0s)
+(10.1s)
+(10.1s)
+(10.2s)
+(10.2s)
+(10.3s)
+(10.3s)
+(10.4s)
+(10.4s)
+(10.5s)
+(10.5s)
+(10.6s)
+(10.6s)
+(10.6s)
+(10.7s)
+(10.7s)
+(10.8s)
+(10.8s)
+(10.9s)
+(10.9s)
+(11.0s)
+(11.0s)
+(11.1s)
+(11.1s)
+(11.2s)
+(11.2s)
+(11.3s)
+(11.3s)
+(11.3s)
+(11.4s)
+(11.4s)
+(11.5s)
+(11.5s)
+(11.6s)
+(11.6s)
+(11.7s)
+(11.7s)
+(11.8s)
+(11.8s)
+(11.9s)
+(11.9s)
+(12.0s)
+(12.0s)
+(12.0s)
+(12.1s)
+(12.1s)
+(12.2s)
+(12.2s)
+(12.3s)
+(12.3s)
+(12.4s)
+(12.4s)
+(12.5s)
+(12.5s)
+(12.6s)
+(12.6s)
+(12.7s)
+(12.7s)
+(12.7s)
+(12.8s)
+(12.8s)
+(12.9s)
+(12.9s)
+(13.0s)
+(13.0s)
+(13.1s)
+(13.1s)
+(13.2s)
+(13.2s)
+(13.3s)
+(13.3s)
+(13.3s)
+(13.4s)
+(13.4s)
+(13.5s)
+(13.5s)
+(13.6s)
+(13.6s)
+(13.7s)
+(13.7s)
+(13.8s)
+(13.8s)
+(13.9s)
+(13.9s)
+(14.0s)
+(14.0s)
+(14.1s)
+(14.1s)
+(14.1s)
+(14.2s)
+(14.2s)
+(14.3s)
+(14.3s)
+(14.4s)
+(14.4s)
+(14.5s)
+(14.5s)
+(14.6s)
+(14.6s)
+(14.7s)
+(14.7s)
+(14.7s)
+(14.8s)
+(14.8s)
+(14.9s)
+(14.9s)
+(15.0s)
+(15.0s)
+(15.1s)
+(15.1s)
+(15.2s)
+(15.2s)
+(15.3s)
+(15.3s)
+(15.4s)
+(15.4s)
+(15.4s)
+(15.5s)
+(15.5s)
+(15.6s)
+(15.6s)
+(15.7s)
+(15.7s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64  InitializeSourceControlInformationFromSourceControlManager (15.8s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64               TranslateGitLabUrlsInSourceControlInformation (15.8s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64      SetEmbeddedFilesFromSourceControlManagerUntrackedFiles (15.9s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                                 CoreCompile (15.9s) 
+(16.0s)
+(16.0s)
+(16.1s)
+(16.1s)
+(16.1s)
+(16.2s)
+(16.2s)
+(16.3s)
+(16.3s)
+(16.4s)
+(16.4s)
+(16.5s)
+(16.5s)
+(16.6s)
+(16.6s)
+(16.7s)
+(16.7s)
+(16.7s)
+(16.8s)
+(16.8s)
+(16.9s)
+(16.9s)
+(17.0s)
+(17.0s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                              _CreateAppHost (17.1s) 
+(17.1s)
+(17.2s)
+(17.2s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                   _CopyFilesMarkedCopyLocal (17.3s) 
+(17.3s)
+(17.4s)
+(17.4s)
+(17.4s)
+(17.5s)
+(17.5s)
+(17.6s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                 GenerateBuildDependencyFile (17.6s) 
+(17.7s)
+(17.7s)
+(17.8s)
+(17.8s)
+(17.9s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                      GenerateBuildRuntimeConfigurationFiles (17.9s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                       _GenerateProjectPriConfigurationFiles (18.0s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                 _GenerateProjectPriFileCore (18.0s) 
+(18.1s)
+(18.1s)
+(18.1s)
+(18.2s)
+(18.2s)
+(18.3s)
+(18.3s)
+(18.4s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                      _ComputeResolvedCopyLocalPublishAssets (18.4s) 
+(18.5s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                        SDKRedistOutputGroup (18.5s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                     _GetProjectArchitecture (18.6s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                                  _ComputeAppxPackagePayload (18.6s) 
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                         _GenerateCurrentProjectAppxManifest (18.7s) 
+(18.7s)
+(18.8s)
+(18.8s)
+(18.8s)
+(18.9s)
+(18.9s)
+(19.0s)
+(19.0s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64                              _GenerateAppxPackageRecipeFile (19.1s) 
+(19.1s)
+  CameraProfile net10.0-windows10.0.26100.0 win-x64 succeeded (19.2s) →
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\CameraProfile.dllBuild succeeded in 20.9s
+BUILD_EXIT=0
+<exited with exit code 0>
+
+=== TURN 26 ===
+Build succeeded. Now let's update the MIGRATION-MAPPING.md to flip all statuses to `done`, then run validation:
+
+--- TOOL: report_intent ---
+{"intent":"Updating mapping and validating"}
+
+--- TOOL: edit ---
+{"new_str":"| Package.appxmanifest | Package.appxmanifest | migrate-as-is | done |\n| SampleConfiguration.cs | SampleConfiguration.cs | migrate-as-is | done |\n| Scenario1_SetRecordProfile.xaml | Scenario1_SetRecordProfile.xaml | migrate-as-is | done |\n| Scenario1_SetRecordProfile.xaml.cs | Scenario1_SetRecordProfile.xaml.cs | migrate-with-adaptation | done |\n| Scenario2_ConcurrentProfile.xaml | Scenario2_ConcurrentProfile.xaml | migrate-as-is | done |\n| Scenario2_ConcurrentProfile.xaml.cs | Scenario2_ConcurrentProfile.xaml.cs | migrate-with-adaptation | done |\n| Scenario3_EnableHdrProfile.xaml | Scenario3_EnableHdrProfile.xaml | migrate-as-is | done |\n| Scenario3_EnableHdrProfile.xaml.cs | Scenario3_EnableHdrProfile.xaml.cs | migrate-with-adaptation | done |","old_str":"| Package.appxmanifest | Package.appxmanifest | migrate-as-is | copied |\n| SampleConfiguration.cs | SampleConfiguration.cs | migrate-as-is | copied |\n| Scenario1_SetRecordProfile.xaml | Scenario1_SetRecordProfile.xaml | migrate-as-is | copied |\n| Scenario1_SetRecordProfile.xaml.cs | Scenario1_SetRecordProfile.xaml.cs | migrate-with-adaptation | copied |\n| Scenario2_ConcurrentProfile.xaml | Scenario2_ConcurrentProfile.xaml | migrate-as-is | copied |\n| Scenario2_ConcurrentProfile.xaml.cs | Scenario2_ConcurrentProfile.xaml.cs | migrate-with-adaptation | copied |\n| Scenario3_EnableHdrProfile.xaml | Scenario3_EnableHdrProfile.xaml | migrate-as-is | copied |\n| Scenario3_EnableHdrProfile.xaml.cs | Scenario3_EnableHdrProfile.xaml.cs | migrate-with-adaptation | copied |","path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\MIGRATION-MAPPING.md"}
+--- RESULT ---
+Intent logged
+--- RESULT ---
+File C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile\MIGRATION-MAPPING.md updated with changes.
+
+=== TURN 27 ===
+
+--- TOOL: powershell ---
+{"command":"& \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\.github\\skills\\winui-uwp-migration\\scripts\\Validate-UwpMigration.ps1\" -Target \"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\"; \"VALIDATE_EXIT=$LASTEXITCODE\"","description":"Run migration validator","initial_wait":180,"mode":"sync"}
+--- RESULT ---
+==> Validate-UwpMigration
+    Target : C:\ado\win-dev-skills-benchmark\agent-benchmark\results\run73\000_CameraProfile\app\CameraProfile[PASS] Residue grep — 0 UWP-only API references in non-deferred .cs/.xaml/.csproj
+[PASS] No TODO[migrate-] markers remain in source
+[PASS] MIGRATION-MAPPING.md row count = 8 (matches seed)
+[PASS] MIGRATION-MAPPING.md — all Triage labels resolved
+[PASS] MIGRATION-MAPPING.md — no rows stuck at Status=copied
+[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency
+[PASS] Package.appxmanifest — all 5 image reference(s) resolvable under Assets/
+[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared
+[INFO] Running dotnet build (x64 Debug, -t:Rebuild) against CameraProfile.csproj (~30-60s)...
+[PASS] dotnet build succeeded (0 warning(s), 0 WUI analyzer warning(s))
+[INFO] Smoke-launching app via Test-AppLaunch.ps1 (~10s settle)...
+[PASS] Smoke launch — app stayed alive after launch (pid 29432)
+[PASS] Visible-text fidelity — snapshotted labels/descriptions all still present
+
+==> Validate-UwpMigration: PASS
+VALIDATE_EXIT=0
+<exited with exit code 0>
+
+=== TURN 28 ===
+Validation **PASS**. The one WARN is about MIGRATION-DEFERRED.md having pre-seeded content but no actual deferred files — let me check and clean that up:
+
+--- TOOL: view ---
+{"path":"C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\\MIGRATION-DEFERRED.md"}
+--- RESULT ---
+1. # Deferred Files
+2. 
+3. Files in this list have a triage label of `defer` in MIGRATION-MAPPING.md and were
+4. skipped by Initialize-UwpMigration.ps1's mechanical pass. Each row references one or
+5. more PATTERNS.md anchors that describe the WinUI 3 equivalent — refer to that section
+6. (via `Get-MigrationPattern.ps1 -Anchor <id>`) before deciding the final disposition.
+7. 
+8. | File | Anchors |
+9. |---|---|
+10. | (none) | — |
+11. 
+
+=== TURN 29 ===
+The deferred file correctly has `(none)` — the warn is benign. Let me do the final `winapp build` as required:
+
+--- TOOL: powershell ---
+{"command":"cd C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run73\\000_CameraProfile\\app\\CameraProfile\n$arch = $env:PROCESSOR_ARCHITECTURE\n$Platform = if ($arch -eq 'AMD64') { 'x64' } else { $arch }\ndotnet build -c Debug -p:Platform=$Platform 2>&1 | Select-String -Pattern \"error|warning|succeeded|failed\" | Select-Object -Last 10; \"BUILD_EXIT=$LASTEXITCODE\"","description":"Final build confirmation","initial_wait":60,"mode":"sync"}
+--- RESULT ---
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+BUILD_EXIT=0
+<exited with exit code 0>
+
+=== TURN 30 ===
+✅ Migration complete. Here's a summary of what was done:
+
+**All 8 files migrated — Validator: PASS**
+
+| Change | Details |
+|---|---|
+| `Package.appxmanifest` | Updated to `Windows.Desktop` target, added `rescap:runFullTrust`, fixed asset paths to WinUI3 defaults, kept `webcam`/`microphone` capabilities |
+| `App.xaml` | Added `SampleHeaderTextStyle`, `ScenarioDescriptionTextStyle`, `CopyrightTextStyle`, `TagLineTextStyle` resources |
+| `App.xaml.cs` | Removed unnecessary UWP `using` statements |
+| `MainPage.xaml` | Implemented full SDK-sample shell: `SplitView` pane with scenario `ListBox`, content `Frame`, status panel |
+| `MainPage.xaml.cs` | Implemented `MainPage.Current`, `NotifyUser()`/`NotifyType`, scenario navigation, footer links |
+| `SampleConfiguration.cs` | Changed namespace `SDKTemplate` → `CameraProfile` (partial class alignment); fixed nullable properties |
+| `Scenario1/2/3 .xaml.cs` | Resolved all 6 `TODO[migrate-NNN]` threading markers — replaced `Dispatcher.RunAsync` with direct UI calls (already on UI thread); removed `using SDKTemplate`; added `try/catch` to button handlers for graceful error display on hardware-absent machines |

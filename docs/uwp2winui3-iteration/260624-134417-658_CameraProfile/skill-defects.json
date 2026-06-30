@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "On a zero-deferral migration the validator prints a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency', even though nothing should have been deferred.",
+      "evidence": "build-events.jsonl R15-R16: dev agent spent two turns opening MIGRATION-DEFERRED.md to confirm the WARN was benign. Validate-UwpMigration.ps1 line 267-268; Initialize-UwpMigration.ps1 line 479-481.",
+      "skill_search": "grepped scripts for 'DEFERRED' / 'No items deferred' / '(none)'",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Validate-UwpMigration.ps1: `if ($deferText -notmatch 'No items deferred') { Write-Host \"[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency\" }`  — but Initialize-UwpMigration.ps1 seeds `| (none) | — |`, never the phrase 'No items deferred'.",
+      "root_cause": "Producer/validator sentinel mismatch: the bootstrap seeds a '(none)' placeholder row for the empty-deferred case, but the validator only treats the file as clean when it contains the literal phrase 'No items deferred'. The two scripts disagree on the empty case, so the WARN fires on every migration that defers nothing.",
+      "proposed_fix": "Align the two scripts on the empty-deferred sentinel: (a) make Validate-UwpMigration.ps1 also accept the bootstrap's '(none)' placeholder row as the clean empty state, and (b) have Initialize-UwpMigration.ps1 additionally print the literal 'No items deferred.' line so the artifact is self-describing and matches the validator's canonical phrase.",
+      "generalizes": "Most UWP→WinUI 3 migrations defer nothing (deferral only happens for genuinely-unsupported APIs). The bootstrap+validator pair runs on every migration, so this spurious WARN — and the wasted diagnostic turns it triggers — recurs on the common zero-deferral path of every scenario, independent of the app."
+    }
+  ]
+}

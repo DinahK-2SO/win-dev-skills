@@ -1,0 +1,19 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Locate Record Specific Profile", "status": "pass", "reason": "3/3 controls present; both Find buttons live; identical output/red status bar.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Query Profile for Concurrency", "status": "pass", "reason": "2/2 controls present; identical front/back enumeration output.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Query Profile for HDR Support", "status": "pass", "reason": "2/2 controls present; button live in both apps (manual AutomationId check); identical output.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Theme", "uwp": "dark theme", "winui": "light theme", "screenshot_ref": "parity/winui3/screenshots/*.png" },
+    { "feature": "Header label", "uwp": "Universal Windows Platform sample", "winui": "Windows App SDK sample", "screenshot_ref": "parity/winui3/screenshots/*.png" },
+    { "feature": "Hamburger toggle", "uwp": "header band shows hamburger toggle", "winui": "nav list always visible", "screenshot_ref": "parity/winui3/screenshots/*.png" }
+  ],
+  "missing_features": [],
+  "summary": "No functional discrepancies. All three scenarios reproduce the UWP behavior verbatim (100% control coverage, identical output text and status). Remaining differences are expected migration cosmetics. The only process friction was a spurious validator WARN on the empty MIGRATION-DEFERRED.md and extra turns reconstructing the SDKTemplate sample shell."
+}

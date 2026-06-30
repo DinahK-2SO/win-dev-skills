@@ -1,0 +1,44 @@
+{
+  "scenario": "CameraProfile",
+  "feature": "CameraProfile",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Locate Record Specific Profile",
+      "controls": [
+        "Find 640x480 30FPS Recording Profile (button)",
+        "Find Custom Recording Profile (button)",
+        "outputBox (output)"
+      ],
+      "actions": [
+        "Find 640x480 30FPS Recording Profile",
+        "Find Custom Recording Profile"
+      ],
+      "expectedOutput": "Looking for all video capture devices / Number of video capture devices found: 0 / ERROR: No Video Device Id found, verify your device supports profiles"
+    },
+    {
+      "number": 2,
+      "title": "Query Profile for Concurrency",
+      "controls": [
+        "Query for Concurrent Profile (button)",
+        "outputBox (output)"
+      ],
+      "actions": [
+        "Query for Concurrent Profile"
+      ],
+      "expectedOutput": "Looking for all video capture devices on front panel / Number of video capture devices found: 0 / Looking for all video capture devices on back panel / Number of video capture devices found: 0 / ERROR: A capture device doesn't support Video Profile"
+    },
+    {
+      "number": 3,
+      "title": "Query Profile for HDR Support",
+      "controls": [
+        "Query Profile for HDR Support (button)",
+        "outputBox (output)"
+      ],
+      "actions": [
+        "Query Profile for HDR Support"
+      ],
+      "expectedOutput": "Querying for video capture device on back of the device that supports Video Profile / Looking for all video capture devices / Number of video capture devices found: 0 / ERROR: No Video Device Id found, verify your device supports profiles"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Validator raises a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows' on every zero-deferral migration, costing the dev agent diagnostic turns (R15-R16).",
+      "evidence": "build-events.jsonl R15-R16; Validate-UwpMigration.ps1:267; Initialize-UwpMigration.ps1:480 seeds '| (none) | — |' which never matches the validator's required phrase 'No items deferred'.",
+      "root_cause": "Producer/validator sentinel mismatch on the empty-deferred case.",
+      "tier": 1,
+      "change": "Validate-UwpMigration.ps1 now treats the bootstrap's '(none)' placeholder row as the clean empty state (accepts it in addition to the literal phrase); Initialize-UwpMigration.ps1 now also writes an explicit 'No items deferred.' line so the artifact is self-describing and matches the validator.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1, skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Zero-deferral migrations validate with a PASS line and no DEFERRED WARN; agents stop spending turns investigating a benign warning.",
+      "falsifiable_check": "On a re-run that defers nothing, Validate-UwpMigration.ps1 prints '[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes no items deferred' and no '[WARN] ... mapping has no defer rows'."
+    },
+    {
+      "problem": "SKILL.md names the 'MainPage + ListView + Frame (SDK-sample idiom)' shell row but does not enumerate the SDKTemplate helper scaffolding, so the agent spent several turns reconstructing it (R9-R11).",
+      "evidence": "build-events.jsonl R9-R11: planning turns enumerating MainPage.Current, NotifyUser/NotifyType, SampleConfiguration partial MainPage, App.xaml sample styles, and the SDKTemplate->app namespace consolidation.",
+      "root_cause": "Existing shell-conversion guidance is under-specified for the SDKTemplate sample framework shared by the Windows-universal-samples corpus.",
+      "tier": 3,
+      "change": "Added a short note under the existing Shell-conversion table listing the SDKTemplate helpers to recreate (static MainPage.Current, NotifyUser/NotifyType, SampleConfiguration as partial MainPage, App.xaml sample text styles) and the SDKTemplate->app namespace consolidation. Sharpens the existing row; no new topic.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "On SDK-sample migrations the agent recreates the shell helpers directly from the skill instead of reverse-engineering them, reducing planning turns.",
+      "falsifiable_check": "On a re-run of any Windows-universal-sample migration, the agent provides MainPage.Current + NotifyUser/NotifyType + the partial SampleConfiguration and consolidates the SDKTemplate namespace without first reverse-engineering them from source over multiple turns."
+    }
+  ],
+  "deferred_to_human": []
+}

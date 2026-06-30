@@ -264,10 +264,13 @@ if (-not (Test-Path -LiteralPath $mapPath)) {
     } else {
         if (Test-Path -LiteralPath $deferPath) {
             $deferText = Get-Content -LiteralPath $deferPath -Raw
-            if ($deferText -notmatch 'No items deferred') {
+            # The empty-deferred case is legitimate (most migrations defer nothing). Accept
+            # either the explicit phrase or the bootstrap's '(none)' placeholder row as clean,
+            # so a zero-deferral migration does not raise a spurious WARN.
+            if ($deferText -notmatch 'No items deferred' -and $deferText -notmatch '\|\s*\(none\)\s*\|') {
                 Write-Host "[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency"
             } else {
-                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes 'No items deferred.'"
+                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes no items deferred"
             }
         } else {
             Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md not required"

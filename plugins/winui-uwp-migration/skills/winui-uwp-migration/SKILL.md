@@ -99,6 +99,14 @@ Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 | `TabView` (UWP) | `TabView` (WinUI 3) — namespace change only |
 | Plain `Frame` (single page) | Single `Page` hosted directly under the `Window` |
 
+**SDK-sample (`SDKTemplate`) idiom — recreate the shared shell helpers.** When the source is a Windows-universal-sample (a `MainPage` shell that hosts scenarios listed in `SampleConfiguration.cs`), the scenario pages depend on a small shared framework that lives in the `SDKTemplate` namespace. Migrating the shell means re-providing these, not just swapping the container control:
+
+- A static `MainPage.Current` accessor the scenarios call back into.
+- The status helper `NotifyUser(string, NotifyType)` (with the `NotifyType` enum) that drives the status bar.
+- `SampleConfiguration.cs` as a `partial class MainPage` (the scenario list lives here) — keep it `partial` and aligned with your `MainPage`.
+- The App.xaml sample text styles the pages reference (e.g. `SampleHeaderTextStyle`, `ScenarioDescriptionTextStyle`).
+- Consolidate the shared `SDKTemplate` namespace into your app's own project namespace so the partial `MainPage` halves and the scenarios compile as one type.
+
 If the source shell doesn't match anything above, preserve its structure as faithfully as controls allow.
 
 **Navigation invariants** (apply regardless of shell control choice):

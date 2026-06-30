@@ -1,0 +1,41 @@
+{
+  "scenario": "CameraProfile",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 3,
+  "features_pass": 3,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Locate Record Specific Profile",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Locate_Record_Specific_Profile.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Locate_Record_Specific_Profile.png",
+      "note": "3/3 controls present. Both 'Find 640x480 30FPS' and 'Find Custom Recording Profile' buttons live; identical output ('...found: 0 / ERROR: No Video Device Id found...') and red status bar in both apps."
+    },
+    {
+      "name": "Query Profile for Concurrency",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Query_Profile_for_Concurrency.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Query_Profile_for_Concurrency.png",
+      "note": "2/2 controls present. 'Query for Concurrent Profile' button live; identical front/back enumeration output ending 'ERROR: A capture device doesn't support Video Profile' in both apps."
+    },
+    {
+      "name": "Query Profile for HDR Support",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Query_Profile_for_HDR_Support.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Query_Profile_for_HDR_Support.png",
+      "note": "2/2 controls present. Automated action invoke was ambiguous (button text matches nav item) so it registered 0/1 live in BOTH the UWP golden and the WinUI capture; manual actuation by AutomationId confirmed the button is live in both apps with identical output ('ERROR: No Video Device Id found...'). No regression — pass."
+    }
+  ]
+}

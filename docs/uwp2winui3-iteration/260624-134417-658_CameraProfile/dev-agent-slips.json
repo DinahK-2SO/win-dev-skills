@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "A Scenario file was left with a duplicate class/namespace block after the agent attempted a whole-file rewrite with a single edit whose old_str matched only the file header, leaving the original class body appended.",
+      "evidence": "build-events.jsonl R12-R14: agent re-viewed the file, recognized the duplicated tail, and removed lines 233-439 in a follow-up edit.",
+      "covered_clearly_at": "Not a migration-knowledge issue — this is generic file-editing tool discipline (replace the entire file when rewriting wholesale). The migration skill correctly does not carry general edit-tool instructions.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable model on re-run avoids this by matching the full file in the rewrite edit; it is unrelated to UWP→WinUI 3 knowledge and adding 'don't leave duplicate class bodies' guidance to the migration skill would be noise."
+    }
+  ]
+}

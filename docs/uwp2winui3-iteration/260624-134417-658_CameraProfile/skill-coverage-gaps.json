@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The dev agent spent several planning turns reverse-engineering and reconstructing the SDKTemplate sample-shell scaffolding — MainPage.Current, the NotifyUser/NotifyType status helper, SampleConfiguration.cs as a partial MainPage, the App.xaml sample styles (SampleHeaderTextStyle, ScenarioDescriptionTextStyle, etc.), and consolidating the SDKTemplate namespace into the app namespace.",
+      "evidence": "build-events.jsonl R9-R11 (planning turns enumerating MainPage.Current/NotifyUser/SampleConfiguration/App.xaml styles and the SDKTemplate->CameraProfile namespace change). Confirms it was inferred from source, not from the skill.",
+      "covered_at": "SKILL.md Step 1 'Shell conversion' table — the row `MainPage + ListView + Frame (SDK-sample idiom) | NavigationView + Frame`.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Under the existing 'Shell conversion' table, add a short note on the SDK-sample (SDKTemplate) idiom that lists the helper scaffolding to recreate (a static `MainPage.Current`, the `NotifyUser`/`NotifyType` status helper, `SampleConfiguration.cs` as a `partial` `MainPage`, and the App.xaml sample text styles) and the one structural rename (the shared `SDKTemplate` namespace must be consolidated into the app's own namespace). Keep it to a few lines — sharpen the row that is already there, do not add a new topic.",
+      "generalizes": "Every app in Microsoft's Windows-universal-samples family (the canonical UWP→WinUI 3 migration corpus) is built on this exact SDKTemplate shell. Naming its helpers and the namespace consolidation once saves the same reconstruction turns on every such scenario."
+    }
+  ]
+}
