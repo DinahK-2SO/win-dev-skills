@@ -1,0 +1,24 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 1,
+  "score": 0,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    {
+      "id": 1,
+      "text": "Scenario renders a non-blank page comparable to the UWP golden (two buttons or an explicit visible fallback must be visible).",
+      "status": "fail",
+      "reason": "Migrated content area renders fully blank/white in two independent captures. StatusText fallback is present in the UIA tree but not visibly rendered; VsToggleButton and VideoButton are anchored HorizontalAlignment=Right at x=1248 in a 1280-wide window and are clipped off the right edge.",
+      "suspected_skill_gap": "The skill says defer CaptureElement and don't fake the type, and separately says swap to a visible fallback when init THROWS. It never tells the agent that a page whose hero control was DEFERRED (no throw) must carry a visible DECLARATIVE placeholder, so the page renders blank."
+    }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Page content", "uwp": "Light-gray preview background with two visible overlay buttons (camera/VS toggle + red record ellipse) near the right edge, both disabled.", "winui": "Fully blank white content area; fallback text not visible; buttons clipped at right edge.", "screenshot_ref": "parity/winui3/screenshots/01_CameraVideoStabilization.png vs parity/baseline/screenshots/01_CameraVideoStabilization.png" }
+  ],
+  "missing_features": [
+    "Visible page content after deferring the camera preview (blank render).",
+    "Camera preview, VS on/off toggle, video recording (deferred — no WinUI 3 desktop equivalent; matches UWP disabled state on a camera-less machine)."
+  ],
+  "summary": "Single-page camera sample. The unsupported CaptureElement was correctly deferred, but the substitute page renders blank: the fallback message is wired in OnNavigatedTo instead of a visible declarative placeholder, and the only static controls are clipped at the window edge. Blank render = scenario fail."
+}

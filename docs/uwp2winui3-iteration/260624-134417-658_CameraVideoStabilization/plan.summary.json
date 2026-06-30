@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "winui-uwp-migration: when deferring an unsupported hero control (CaptureElement/InkCanvas/MapControl), require a VISIBLE declarative XAML placeholder in its place so the page never renders blank",
+    "winui-uwp-migration: extend the Defensive-UI visible-fallback rule to deferred-content pages (not only throwing init) and prefer a declarative placeholder over OnNavigatedTo/Loaded code-behind text"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Eval-only: process-alive smoke check cannot detect a blank-but-alive page; a harness-level render/screenshot check would catch it (out of scope for the migration skill).",
+    "Overlay-button edge clipping is a scenario-specific layout artifact; not generalized to avoid over-fitting."
+  ]
+}

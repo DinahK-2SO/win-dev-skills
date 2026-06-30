@@ -1,0 +1,20 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "CameraVideoStabilization",
+      "class": "MainPage",
+      "controls": [
+        { "name": "PreviewControl", "type": "CaptureElement", "role": "live camera preview surface" },
+        { "name": "VsToggleButton", "type": "Button", "role": "toggle video stabilization on/off", "initialEnabled": false },
+        { "name": "VideoButton", "type": "Button", "role": "start/stop recording", "initialEnabled": false }
+      ],
+      "actions": [
+        { "control": "VsToggleButton", "event": "Click", "uwpResponded": false, "note": "disabled (no camera) in live UWP golden" },
+        { "control": "VideoButton", "event": "Click", "uwpResponded": false, "note": "disabled (no camera) in live UWP golden" }
+      ],
+      "passCriteria": "non-blank page comparable to UWP golden; the two buttons (or a visible fallback) must be visible; controls present in UIA tree; no live UWP control dead in WinUI"
+    }
+  ]
+}

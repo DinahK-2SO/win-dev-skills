@@ -223,6 +223,15 @@ fallback** (don't only log and return). The fallback can be as simple as a centr
 saying *"This sample could not initialize on this machine."* plus the exception's `Message`
 underneath (for hardware, name the missing device kind).
 
+**This applies equally to a page whose hero control was *deferred* (not just one that *throws*).**
+A page does not have to throw to render blank: if its primary visible surface was an
+unsupported control you removed (e.g. a full-bleed `CaptureElement`/`InkCanvas`/`MapControl`),
+the page is left empty and screenshots byte-uniform. Leave a **visible *declarative* placeholder
+in the XAML** in the removed control's place (a `Border` filling the cell + a centred
+`TextBlock` naming the unavailable feature) — prefer this over text assigned only in
+`OnNavigatedTo`/`Loaded`, which can sit in the UIA tree without ever rendering. See
+[`MIGRATION-PATTERNS.md#capture`](./MIGRATION-PATTERNS.md#cs0246--wmc0001-captureelement-could-not-be-found).
+
 This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1`
 Section 7) still passes the process-alive gate, but the scenario silently renders blank and the
 benchmark's per-scenario / screenshot check penalises the trial. A few lines of guard prevent a

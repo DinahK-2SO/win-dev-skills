@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "A page whose primary visible surface is a DEFERRED unsupported control (CaptureElement) renders BLANK: the substitute message was wired in OnNavigatedTo and ended up in the UIA tree without rendering, so the scored screenshot is byte-uniform white = scenario FAIL.",
+      "evidence": "migration-score.json verdict=fail ('FULLY BLANK/white content area ... StatusText fallback present in the UIA tree ... not visually rendered'); MainPage.xaml.cs sets fallback text in OnNavigatedTo (lines 33-41); session-log L2788.",
+      "root_cause": "The skill's two relevant pieces only fire for (a) the build error of faking the unsupported type and (b) a page whose init THROWS. A deferred-hero-control page does not throw, so the agent removed the control and left the only visible content to code-behind, yielding a blank page.",
+      "tier": 3,
+      "change": "Sharpen existing guidance (no new topic): (1) PATTERNS.md#capture now adds a positive instruction + XAML snippet to replace a deferred hero/preview control with a VISIBLE DECLARATIVE placeholder (Border filling the cell + centered TextBlock), and warns against relying on OnNavigatedTo/Loaded for the only visible content. (2) SKILL.md Defensive-UI Rule now explicitly extends the visible-fallback requirement to DEFERRED-content pages (not only throwing init) and prefers a declarative XAML placeholder.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "On scenarios that defer a single unsupported hero control, the agent leaves a visibly-rendered placeholder instead of a blank page.",
+      "falsifiable_check": "On a re-run of any deferred-hero-control scenario, the page screenshot is NOT byte-uniform (visible Border + centered text), and the parity verdict for that scenario moves off 'blank-render fail' (fail -> partial/pass)."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/eval: Test-AppLaunch.ps1 / Validate-UwpMigration.ps1 Section 7 only prove process-alive and cannot detect a blank-but-alive page. A render/screenshot self-check would catch this directly, but adding screenshot/parity capability to the migration skill is out of scope (belongs to the eval skills). Consider a harness-level render check.",
+    "The overlay-button clipping (HorizontalAlignment=Right at x=1248) is a scenario-specific window-sizing artifact of a faithfully-preserved edge-anchored layout; not generalized into a skill rule to avoid over-fitting."
+  ]
+}

@@ -52,7 +52,27 @@ Generated sources never belong in source control or the migrated tree — only `
 
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
-`<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
+`<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element of the **same type** — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
+
+**But do not just delete it and leave a hole.** When the deferred control is the page's
+**primary/hero visible surface** (a full-bleed `CaptureElement`, `InkCanvas`, `MapControl`,
+etc.), removing it with no substitute leaves the page **rendering blank** — a byte-uniform
+screenshot that fails the parity check even though the build and smoke launch are green.
+Replace it with a **visible declarative placeholder in XAML** that fills the same cell:
+
+```xml
+<!-- was the hero camera preview; deferred (no WinUI 3 desktop equivalent) -->
+<Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}">
+    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+               TextWrapping="Wrap" TextAlignment="Center"
+               Text="Camera preview is not available on this platform."/>
+</Border>
+```
+
+Put the placeholder **directly in the XAML markup** so it is visible the instant the page
+loads — do **not** rely on `OnNavigatedTo`/`Loaded` code-behind to populate the only
+visible content (that text can end up in the UIA tree but never render, leaving the page
+blank). See **Defensive UI for init-heavy and device-dependent pages** in SKILL.md.
 
 ## Unsupported on WinUI 3 Desktop (no migration path)
 

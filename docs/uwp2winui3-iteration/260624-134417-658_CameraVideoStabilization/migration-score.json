@@ -1,0 +1,23 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 1,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "CameraVideoStabilization",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_CameraVideoStabilization.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_CameraVideoStabilization.png",
+      "note": "UWP golden renders a gray preview with two visible buttons (VS toggle + record), both disabled because no camera is attached on this machine. The migrated WinUI 3 app renders a FULLY BLANK/white content area in two independent captures: the StatusText fallback (present in the UIA tree with full text) is not visually rendered, and both buttons are pushed to x=1248 in a 1280-wide window so they are clipped at the right edge and effectively invisible. Per the parity rubric a blank-rendering scenario is a fail. Core feature (camera preview, VS toggle, recording) was also deferred to empty no-op Click handlers with both buttons IsEnabled=False; this matches the UWP's disabled state on a camera-less machine, so it is not a NEW behavioral regression (behavioral_regressions=0), but no feature behavior was preserved and the substitute fallback UI does not display. Structural Compare-Parity reported PASS only because the source-derived checklist had 0 controls (Extract-UwpFeatureChecklist did not parse MainPage.xaml, which lives in the shared/ sibling folder); that gate is not meaningful here, so this verdict rests on the screenshot comparison and UIA evidence."
+    }
+  ]
+}

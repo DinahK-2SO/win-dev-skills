@@ -1,0 +1,36 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log L3553: validator flagged a residual `CaptureElement` identifier left in an XAML comment on MainPage.xaml line 40, which the agent then sanitized (L3561)." },
+    { "tool": "unsupported-api-inventory.json", "evidence": "session-log L2058: the `<CaptureElement>` pattern was matched and drove the defer decision, so the agent did not waste time hunting for a non-existent replacement." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Test-AppLaunch.ps1 / Validate-UwpMigration.ps1 Section 7", "limitation": "Only proves the process stayed alive; it cannot tell the agent that the single migrated page renders BLANK (controls present in the UIA tree but nothing visible). The build/validate gates were all green yet the scored screenshot was byte-uniform white.", "suggested_tweak": "Not fixable in the migration skill (no screenshot capability may be added per scope); reinforce in prose that a deferred-content page must carry a visible declarative placeholder so 'green gates' cannot mask a blank page." }
+  ],
+  "failed_apis": [
+    { "api": "CaptureElement (Windows.UI.Xaml.Controls)", "why_tried": "It is the hero control of the sample (the live camera preview surface PreviewControl).", "root_cause": "No WinUI 3 desktop equivalent (MediaPlayerElement is playback-only).", "fix": "Deferred per skill; replaced with a fallback TextBlock. Correct per PATTERNS.md#capture." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "CaptureElement", "special_handling": "Defer (no migration path). Skill is correct that the type cannot be faked, but it gives no positive instruction to leave a VISIBLE placeholder in the deferred control's place, so the resulting page rendered blank." }
+  ],
+  "errors_encountered": [
+    { "error": "Residual UWP API identifier `CaptureElement` left inside an XAML comment", "root_cause": "Agent named the original API in a placeholder comment; the validator residue grep flags any unsupported-API token even in comments.", "fix": "Rewrote the comment to reference PATTERNS.md#capture instead of the API name (session-log L3561)." }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "MainPage.xaml / MainPage.xaml.cs — substituting the deferred CaptureElement",
+      "symptom": "The migrated single page renders fully blank/white (two byte-identical 7464-byte captures). The fallback message is in the UIA tree but not visibly rendered; the only static controls (two overlay buttons) are anchored HorizontalAlignment=Right and are clipped off the right edge at x=1248 in a 1280-wide window.",
+      "turns_or_retries": "Single pass; the agent never visually verified the page because the only launch tool (Test-AppLaunch) proves process-alive only.",
+      "root_cause": "When a page's entire visible surface is a deferred/unsupported hero control, the migration leaves the page with no reliably-visible content: the substitute text was assigned in OnNavigatedTo (code-path dependent) rather than a declarative, always-visible XAML placeholder, and the remaining static controls were anchored flush to the window edge.",
+      "how_resolved": "Not resolved — shipped blank; scored fail.",
+      "preventable_by": "Skill guidance to replace a deferred hero/preview control with a VISIBLE declarative XAML placeholder (a Border filling the cell + centered TextBlock) so the page is never blank, and to not rely on OnNavigatedTo/Loaded to populate the only visible content."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No camera attached on the validation machine, so both buttons are disabled in both UWP and WinUI builds.", "workaround": "This matched the UWP golden (buttons disabled), so it is not a new behavioral regression; the failure is the blank render, not the disabled buttons." }
+  ]
+}

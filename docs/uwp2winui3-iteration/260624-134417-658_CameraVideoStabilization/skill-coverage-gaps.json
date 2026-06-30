@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "When a page's primary visible surface is a DEFERRED unsupported control (here CaptureElement), the migrated page renders BLANK: the substitute message was assigned in OnNavigatedTo and the only static controls were clipped at the window edge, so the scored screenshot is byte-uniform white = scenario FAIL.",
+      "evidence": "migration-score.json verdict=fail ('renders a FULLY BLANK/white content area ... StatusText fallback present in the UIA tree ... is not visually rendered'); MainPage.xaml.cs sets the fallback text in OnNavigatedTo (lines 33-41); session-log L2788 'replacing the unsupported CaptureElement with a fallback'.",
+      "covered_at": "PATTERNS.md#capture (line 53-55) — 'Do not try to fake it with a placeholder XAML element ... MediaPlayerElement covers playback only'; AND SKILL.md 'Defensive UI for init-heavy and device-dependent pages' (lines 200-229) — 'wrap the init in try/catch; on catch, swap the page's main content for a visible fallback'.",
+      "why_missed": "grey-zone / under-emphasized — the two pieces of guidance only fire for (a) the build-error of faking the type and (b) a page whose init THROWS. A page whose hero control was DEFERRED does not throw, so neither piece tells the agent it must still render a visible placeholder. The 'visible fallback' is also framed as runtime code (try/catch), which the agent translated into OnNavigatedTo text that did not visibly render.",
+      "proposed_improvement": "Sharpen the EXISTING guidance, do not invent a new topic: (1) In PATTERNS.md#capture, after 'Do not try to fake it', add the positive instruction — replace a deferred hero/preview control with a VISIBLE DECLARATIVE XAML placeholder (a Border filling the same Grid cell + a centered TextBlock naming the unavailable feature) so the page is never blank; do not rely on OnNavigatedTo/Loaded to populate the only visible content. (2) In SKILL.md Defensive-UI 'Rule', state that the visible-fallback requirement applies equally to DEFERRED-content pages (not only throwing init), and prefer a declarative XAML placeholder over text assigned only in code-behind.",
+      "generalizes": "Many UWP SDK samples are built around a single unsupported hero control with no WinUI 3 desktop equivalent (CaptureElement, InkCanvas, MapControl, some WebView/print surfaces). Deferring that control without a visible declarative placeholder yields a blank page that fails any screenshot-based parity check, regardless of scenario."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Camera preview / VS toggle / video recording were deferred to empty no-op Click handlers with both buttons IsEnabled=False; no feature behavior preserved.",
+      "evidence": "MainPage.xaml.cs VsToggleButton_Click/VideoButton_Click are empty (lines 44-50); migration-score.json behavioral_regressions=0.",
+      "covered_clearly_at": "PATTERNS.md#capture (lines 53-55) and 'Unsupported on WinUI 3 Desktop (no migration path)' (lines 57-62) — CaptureElement has no equivalent and the file is deferred.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Deferring CaptureElement is exactly what the skill prescribes, and on the camera-less validation box the UWP golden's buttons are also disabled, so this is not a new behavioral regression. No skill edit is warranted for the deferral itself; the only fixable issue is the BLANK RENDER (a coverage gap, handled separately)."
+    },
+    {
+      "problem": "VsToggleButton and VideoButton anchored HorizontalAlignment=Right land at x=1248 in a 1280-wide window and are clipped at the right edge.",
+      "evidence": "discrepancies.json layout item; MainPage.xaml StackPanel HorizontalAlignment=Right (line 52).",
+      "covered_clearly_at": "SKILL.md migrate-in-place rule (lines 8, 179-182) — preserve the source layout verbatim. The migrated XAML faithfully reproduces the UWP edge-anchored StackPanel; the original UWP golden also places these buttons at the right edge (baseline screenshot).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The clipping is a per-pixel, scenario-specific window-sizing artifact of an edge-anchored overlay, not a recurring skill rule. The migration preserved the source layout faithfully (which the skill requires); inventing a general 'add margins to edge-anchored controls' rule would over-fit and risk altering faithful layouts elsewhere. The real, general fix is the visible-placeholder change, which fills the page center so a clipped overlay no longer leaves the page blank."
+    }
+  ]
+}
