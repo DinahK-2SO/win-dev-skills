@@ -1,0 +1,28 @@
+{
+  "scenario": "Compass",
+  "uwp_launchable": true,
+  "uwp_window_title": "Compass C# Sample",
+  "uwp_capture_status": "ok",
+  "hardware_gated": true,
+  "hardware_note": "No compass sensor on this machine; live sensor output is hardware-gated (status bar reads 'No compass found'). Control presence is the parity target, not data values.",
+  "features": [
+    {
+      "number": 1,
+      "title": "Data Events",
+      "controls": ["Enable", "Disable"],
+      "outputs": ["ScenarioOutput_MagneticNorth", "ScenarioOutput_TrueNorth", "ScenarioOutput_HeadingAccuracy", "StatusBlock"]
+    },
+    {
+      "number": 2,
+      "title": "Polling",
+      "controls": ["Enable", "Disable"],
+      "outputs": ["ScenarioOutput_MagneticNorth", "ScenarioOutput_TrueNorth", "ScenarioOutput_HeadingAccuracy", "StatusBlock"]
+    },
+    {
+      "number": 3,
+      "title": "Calibration",
+      "controls": ["High", "Approximate", "Unreliable"],
+      "outputs": ["InputTextBlock", "StatusBlock"]
+    }
+  ]
+}

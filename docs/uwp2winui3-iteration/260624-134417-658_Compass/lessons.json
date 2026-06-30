@@ -1,0 +1,25 @@
+{
+  "scenario": "Compass",
+  "index": 1,
+  "tools_helpful": [],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [],
+  "errors_encountered": [
+    {
+      "error": "401 unauthorized: AuthenticateToken authentication failed (model.call_failure, statusCode 401, source top_level)",
+      "root_cause": "The migration agent's very first model call failed authentication (Request ID 25BB:3E2780:F2E46:10CE39:6A4427F0). The session ended immediately via session.error errorType=authorization after assistant.turn_start with zero tool calls. This is an infrastructure/harness credential failure, not anything produced by the migration skill or the dev-agent's reasoning.",
+      "fix": "Re-authenticate the harness (valid model token) and re-run the trial. No code/skill change can prevent a 401 at the transport layer."
+    }
+  ],
+  "dev_agent_struggles": [],
+  "missing_tooling": [],
+  "env_issues": [
+    {
+      "issue": "Build trial aborted at turn 0 with HTTP 401 (authentication failed) on the first model call. results.json: builds:false, runs:false, score:0, session_time '1s', sub_agent_count 0, premium_requests 0; session-log.txt is empty (16 bytes). The app directory contains only .git/.github/nuget.config — the agent never created a .csproj, hence the downstream 'No csproj' score.",
+      "workaround": "None available to the migration skill. The trial is a null/void run: the migration skillset was never exercised. Requires harness credential refresh and a re-run before any skill evidence can be gathered for this scenario."
+    }
+  ]
+}

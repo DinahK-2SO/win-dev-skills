@@ -1,0 +1,10 @@
+{
+  "scenario": "Compass",
+  "index": 1,
+  "applied": false,
+  "items": [],
+  "deferred_to_human": [
+    "Tier-0 harness/auth failure: the migration agent's first model call returned HTTP 401 'AuthenticateToken authentication failed' (Request ID 25BB:3E2780:F2E46:10CE39:6A4427F0). The session aborted at turn 0 with session.error errorType=authorization, producing zero tool calls and no .csproj (results.json builds:false runs:false score:0 session_time '1s'). This is a benchmark credential/transport failure, not a migration-skill issue. Refresh the model token and re-run the Compass trial to collect real skill evidence. No migration skillset edit can prevent or compensate for a 401."
+  ],
+  "notes": "No skill-defect or skill-coverage-gap items exist for this trial: the migration skill was never exercised (turn-0 401 auth failure). Per plan-and-apply-improvement discipline (solution hierarchy + devil's advocate + falsifiable check), applying any skill change here would be unprincipled — there is no observable signal a skill edit could move on re-run, since the failure is at the auth layer. Therefore no files under the migration skillset were modified."
+}

@@ -1,0 +1,44 @@
+{
+  "scenario": "Compass",
+  "uwp_launchable": true,
+  "uwp_capture_status": "ok",
+  "winui_launchable": false,
+  "winui_launch_error": "dotnet run failed: 'Couldn't find a project to run.' No .csproj/.sln exists in 000_Compass/app (only .git, .github, nuget.config). Matches trial results.json builds:false, runs:false, fail_reason:'No csproj'.",
+  "score": 0,
+  "features_total": 3,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 3,
+  "behavioral_regressions": 0,
+  "parity_result": null,
+  "hardware_note": "No compass sensor on this machine; UWP live sensor output is hardware-gated ('No compass found'). Control presence is the parity target. Does not affect score: the WinUI app does not exist, so all features fail on structure.",
+  "features": [
+    {
+      "name": "Data Events",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "winui_screenshot": null,
+      "note": "No WinUI 3 project produced; scenario absent. UWP golden present (Enable/Disable buttons, output rows). UWP control response hardware-gated (no compass)."
+    },
+    {
+      "name": "Polling",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Polling.png",
+      "winui_screenshot": null,
+      "note": "No WinUI 3 project produced; scenario absent. UWP golden present (Enable/Disable buttons, output rows). UWP control response hardware-gated (no compass)."
+    },
+    {
+      "name": "Calibration",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Calibration.png",
+      "winui_screenshot": null,
+      "note": "No WinUI 3 project produced; scenario absent. UWP golden present (High/Approximate/Unreliable radio buttons)."
+    }
+  ]
+}
