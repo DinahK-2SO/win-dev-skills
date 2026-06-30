@@ -1,0 +1,34 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap performed the bulk Windows.UI.Xaml -> Microsoft.UI.Xaml rewrite and preserved .uwp-source; scaffold built after merge (TURN 41 'Build succeeded')." },
+    { "tool": "dotnet build -p:Platform=$arch", "evidence": "Native dotnet build surfaced the actionable CS1061 errors that pinpointed the UWP-only lifecycle events (TURN 34)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "unsupported-api-inventory.json", "limitation": "Classifies <CaptureElement> as 'unsupported' (any hit -> defer), which forces the migration to abandon the central live-camera-preview feature even though a fully-supported replacement exists.", "suggested_tweak": "Reclassify CaptureElement as 'adaptable' with an anchor to a camera-preview recipe (MediaFrameReader -> SoftwareBitmapSource -> Image)." }
+  ],
+  "failed_apis": [
+    { "api": "Application.Current.Suspending / Application.Current.Resuming", "why_tried": "UWP MainPage subscribes to these in OnNavigatedTo to pause/resume the camera.", "root_cause": "Microsoft.UI.Xaml.Application has no Suspending/Resuming events in WinUI 3 desktop (CS1061).", "fix": "Removed the event subscriptions and the handlers; gate UI activity on App.MainWindow.AppWindow.IsVisible / Window.Activated instead." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md '### CS0246 / WMC0001: CaptureElement could not be found' and 'Unsupported on WinUI 3 Desktop' list", "wrong": "States CaptureElement has 'no compatible replacement' and the file must be deferred.", "correct": "Live camera preview IS migratable: run MediaCapture, create a MediaFrameReader (CreateFrameReaderAsync), convert each SoftwareBitmap to Bgra8/Premultiplied, push into a SoftwareBitmapSource bound to an <Image>. Scored 100/100 in this trial." }
+  ],
+  "special_apis": [
+    { "api": "CaptureElement (live preview)", "special_handling": "Replace XAML <CaptureElement> with <Image>; drive it from MediaCapture.CreateFrameReaderAsync + SoftwareBitmapSource (SoftwareBitmap.Convert to Bgra8/Premultiplied before SetBitmapAsync)." },
+    { "api": "Camera lifecycle on a Page", "special_handling": "UWP Suspending/Resuming hooks are gone; use Window.Activated + AppWindow.IsVisible to decide when to start/stop the preview." }
+  ],
+  "errors_encountered": [
+    { "error": "CS1061: 'Application' does not contain a definition for 'Suspending' / 'Resuming'", "root_cause": "UWP Application lifecycle events do not exist on Microsoft.UI.Xaml.Application.", "fix": "Delete the += / -= subscriptions and the now-dead handlers; remove the _isSuspending gate." },
+    { "error": "AppxManifest splash image [Splash-sdk.png] cannot be located / runFullTrust deploy failure", "root_cause": "UWP manifest's -sdk branded asset references copied over the scaffold without the asset files; Windows.Universal target / missing runFullTrust.", "fix": "Already documented in MIGRATION-PATTERNS.md manifest checklist; kept scaffold asset references and Windows.Desktop + runFullTrust." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainPage.xaml.cs lifecycle migration", "symptom": "CS1061 on Application.Suspending/Resuming, then cascading cleanup of the handlers and _isSuspending field", "turns_or_retries": "TURN 34-41 (~7 turns)", "root_cause": "Skill lifecycle section covers OnLaunched/activation but never states the Suspending/Resuming events are removed in WinUI 3 desktop.", "how_resolved": "Removed subscriptions, handlers, and the _isSuspending gate; rebuilt clean.", "preventable_by": "A lifecycle-section note: 'Application.Suspending/Resuming do not exist in WinUI 3 desktop — delete page subscriptions; use Window.Activated / AppWindow.IsVisible.'" },
+    { "where": "CaptureElement preview", "symptom": "Skill instructed deferring the only feature of the app; agent overrode it to keep parity", "turns_or_retries": "n/a (agent ignored skill guidance)", "root_cause": "Skill wrongly classifies CaptureElement live preview as having no migration path.", "how_resolved": "Agent built MediaFrameReader + SoftwareBitmapSource preview into an Image; scored 100.", "preventable_by": "Replace the 'defer CaptureElement' guidance with the supported preview recipe and reclassify the inventory entry as adaptable." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No camera present on the build machine", "workaround": "App correctly keeps Photo/Video buttons disabled (matching UWP ground truth) and shows a 'No camera device found' fallback message." }
+  ]
+}

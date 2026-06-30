@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "CameraStarterKit single page: PreviewControl + PhotoButton + VideoButton, hardware-gated disabled state with no camera", "status": "pass", "reason": "All UWP controls migrated with matching AutomationIds; buttons disabled (no camera) exactly as UWP ground truth; preview surface migrated from CaptureElement to Image via SoftwareBitmap.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Disabled PhotoButton/VideoButton glyphs", "uwp": "Disabled buttons clearly render their glyphs (grey Camera SymbolIcon, red record Ellipse).", "winui": "Same buttons render faintly over the white page background due to default WinUI disabled styling; UIA confirms both present at correct positions, isEnabled=false.", "screenshot_ref": "parity/winui3/screenshots/01_CameraStarterKit.png" }
+  ],
+  "missing_features": [],
+  "summary": "Functionally faithful migration, 100/100. Only delta is a minor cosmetic disabled-button visual difference; no missing or dead controls, zero behavioral regressions. The success depended on the agent OVERRIDING the skill's incorrect 'defer CaptureElement' guidance."
+}

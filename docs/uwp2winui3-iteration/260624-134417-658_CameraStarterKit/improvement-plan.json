@@ -1,0 +1,28 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Skill wrongly tells the agent that <CaptureElement> live camera preview has no WinUI 3 migration path and the file must be deferred; the trial scored 100/100 only because the agent ignored this guidance and built a working preview.",
+      "evidence": "MIGRATION-PATTERNS.md CS0246 section + unsupported-api-inventory.json 'unsupported' list classified CaptureElement as defer; migration-score.json score=100 with 'CaptureElement(PreviewControl) -> Image(PreviewImage) via SoftwareBitmap'; app source MainPage.xaml.cs:255-315.",
+      "root_cause": "Skill conflated 'no drop-in XAML preview element' with 'no migration path'. MediaCapture works on WinUI 3 desktop; preview is reproduced via MediaFrameReader -> SoftwareBitmapSource -> Image.",
+      "tier": 2,
+      "change": "Reclassified CaptureElement in unsupported-api-inventory.json from 'unsupported' (defer) to 'adaptable' (anchor 'camera-preview', tier 'sensitive'); rewrote the CS0246/CaptureElement section to point at a supported recipe; added a new '<a id=camera-preview>' Camera Preview section with the full MediaCapture + MediaFrameReader + SoftwareBitmapSource -> Image recipe.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Future camera-sample migrations keep (not defer) the live preview, with a concrete, correct recipe; the bootstrap injects an adaptable TODO routed to the camera-preview anchor instead of marking the file defer.",
+      "falsifiable_check": "On re-run, Initialize-UwpMigration.ps1 no longer marks the CaptureElement file 'defer'; Get-MigrationPattern.ps1 -Anchor camera-preview returns the recipe; the preview requirement scores pass without the agent having to override the skill."
+    },
+    {
+      "problem": "UWP pages subscribing to Application.Current.Suspending/Resuming fail with CS1061 because those events do not exist on Microsoft.UI.Xaml.Application; the lifecycle section covered activation but not this removal.",
+      "evidence": "session-log.txt TURN 34 'error CS1061: Application does not contain a definition for Suspending ... Resuming'; resolved over TURN 35-41.",
+      "root_cause": "Lifecycle guidance never states the Suspending/Resuming events are gone or what replaces page-level pause/resume.",
+      "tier": 3,
+      "change": "Added an explicit note to the Application Lifecycle section: these events do not exist; delete page subscriptions + handlers; gate pause/resume on Window.Activated + AppWindow.IsVisible.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents recognize the CS1061 immediately and remove the subscriptions instead of spending several turns unwinding them.",
+      "falsifiable_check": "On re-run of any resource-owning UWP page, the CS1061 Suspending/Resuming error is fixed in a single edit (no multi-turn loop)."
+    }
+  ],
+  "deferred_to_human": []
+}

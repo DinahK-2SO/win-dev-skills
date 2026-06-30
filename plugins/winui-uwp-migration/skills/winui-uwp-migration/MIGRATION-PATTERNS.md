@@ -52,7 +52,12 @@ Generated sources never belong in source control or the migrated tree — only `
 
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
-`<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
+`<CaptureElement>` (the UWP live-camera-preview element) has **no drop-in XAML control**
+in WinUI 3 desktop, **but the feature is fully migratable** — do **not** defer it. The
+camera stack (`Windows.Media.Capture.MediaCapture` and the frame-reader family) works on
+WinUI 3 desktop; only the preview *surface* changes. Replace the element with an `<Image>`
+and pump frames into it. See [Camera preview](#camera-preview) for the full recipe.
+(`MediaPlayerElement` is for media *playback* only and is not the replacement here.)
 
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
@@ -404,6 +409,15 @@ switch (args.Kind)
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
 
+**`Application.Current.Suspending` / `Application.Current.Resuming` do not exist** on
+`Microsoft.UI.Xaml.Application` (you get `CS1061: 'Application' does not contain a
+definition for 'Suspending'/'Resuming'`). UWP pages commonly subscribe to these (often in
+`OnNavigatedTo`) to pause/resume resources such as a camera, audio graph, file watcher, or
+network stream. On migration, **delete those `+= / -=` subscriptions and their handlers**.
+If you still need to pause/resume work when the app loses or regains focus/visibility, gate
+it on the window instead — `App.MainWindow.Activated` (inspect `WindowActivatedEventArgs`)
+and `AppWindow.IsVisible` — rather than the removed lifecycle events.
+
 <a id="background-tasks"></a>
 ## Background Tasks
 
@@ -440,6 +454,80 @@ var s = loader.GetString("Greeting");
 ## Text Rendering: DirectWrite → DWriteCore
 
 If you do custom text rendering with DirectWrite, switch to **DWriteCore** — the WinAppSDK implementation. APIs are largely parallel; see the [DWriteCore migration guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/dwritecore).
+
+<a id="camera-preview"></a>
+## Camera Preview (`CaptureElement` replacement)
+
+UWP shows the live camera feed with `<CaptureElement Source="{x:Bind MediaCapture}"/>`.
+WinUI 3 desktop has no `CaptureElement`, but `MediaCapture` itself works. Render the
+preview by reading frames and displaying them in an `<Image>` via a `SoftwareBitmapSource`.
+
+**XAML** — swap the element, keep the name/automation id:
+
+```xml
+<!-- UWP:   <CaptureElement x:Name="PreviewControl" .../> -->
+<Image x:Name="PreviewImage" Stretch="Uniform"/>
+```
+
+**Code-behind** — initialize `MediaCapture`, then drive the `Image` from a
+`MediaFrameReader`:
+
+```csharp
+using Windows.Media.Capture;
+using Windows.Media.Capture.Frames;
+using Windows.Graphics.Imaging;
+using Microsoft.UI.Xaml.Media.Imaging;   // SoftwareBitmapSource
+
+private MediaCapture? _mediaCapture;
+private MediaFrameReader? _frameReader;
+private SoftwareBitmapSource? _previewSource;
+
+private async Task StartPreviewAsync()
+{
+    _mediaCapture = new MediaCapture();
+    await _mediaCapture.InitializeAsync(
+        new MediaCaptureInitializationSettings { VideoDeviceId = cameraDevice.Id });
+
+    _previewSource = new SoftwareBitmapSource();
+    PreviewImage.Source = _previewSource;
+
+    var frameSource = _mediaCapture.FrameSources.Values
+        .First(s => s.Info.MediaStreamType == MediaStreamType.VideoPreview
+                 || s.Info.MediaStreamType == MediaStreamType.VideoRecord);
+
+    _frameReader = await _mediaCapture.CreateFrameReaderAsync(
+        frameSource, MediaEncodingSubtypes.Bgra8);
+    _frameReader.FrameArrived += FrameReader_FrameArrived;
+    await _frameReader.StartAsync();
+}
+
+private void FrameReader_FrameArrived(MediaFrameReader sender, MediaFrameArrivedEventArgs args)
+{
+    using var frame = sender.TryAcquireLatestFrame();
+    var bitmap = frame?.VideoMediaFrame?.SoftwareBitmap;
+    if (bitmap is null) return;
+
+    // SoftwareBitmapSource requires Bgra8 + premultiplied alpha.
+    var displayable = (bitmap.BitmapPixelFormat != BitmapPixelFormat.Bgra8
+                       || bitmap.BitmapAlphaMode != BitmapAlphaMode.Premultiplied)
+        ? SoftwareBitmap.Convert(bitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied)
+        : bitmap;
+
+    DispatcherQueue.TryEnqueue(async () =>
+    {
+        try { await _previewSource!.SetBitmapAsync(displayable); } catch { /* shutting down */ }
+    });
+}
+```
+
+Notes:
+- `SoftwareBitmapSource.SetBitmapAsync` **requires `Bgra8` + premultiplied alpha** —
+  always `SoftwareBitmap.Convert(...)` first or the frame throws / renders blank.
+- Marshal the UI update with `DispatcherQueue.TryEnqueue` (frames arrive on a worker
+  thread; see [Threading](#threading)).
+- Mirror a front camera with `PreviewImage.FlowDirection = FlowDirection.RightToLeft`.
+- The packaged manifest still needs `<DeviceCapability Name="webcam" />` (and `microphone`
+  for video) plus `runFullTrust` — see the manifest checklist above.
 
 <a id="controls"></a>
 ## Controls and Features

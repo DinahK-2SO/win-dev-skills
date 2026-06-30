@@ -1,0 +1,20 @@
+{
+  "scenario": "CameraStarterKit",
+  "appType": "single-page UWP camera sample",
+  "groundTruth": "live UWP app (Release, .NET Native) launched via uwp-app-runner; window 'Camera Starter Kit C# Sample', pid 5704",
+  "features": [
+    {
+      "id": 1,
+      "name": "CameraStarterKit",
+      "page": "MainPage",
+      "controls": [
+        { "name": "PreviewControl", "uwpType": "CaptureElement", "winuiEquivalent": "Image (PreviewImage) via SoftwareBitmap rendering", "role": "live camera preview surface" },
+        { "name": "PhotoButton", "uwpType": "Button (Camera SymbolIcon)", "action": "PhotoButton_Click", "role": "capture a photo; disabled until camera initializes" },
+        { "name": "VideoButton", "uwpType": "Button (red Ellipse / white Rectangle toggle)", "action": "VideoButton_Click", "role": "start/stop video recording; disabled until camera initializes" }
+      ],
+      "expectedBehavior": "On launch the app initializes the default camera; while no camera is available both buttons remain disabled and the preview surface is blank. With a camera, preview streams live and the two buttons enable.",
+      "hardwareGated": true,
+      "notes": "No camera device is present on this measurement machine, so the ground-truth UWP app shows both buttons in their disabled initial state with a blank preview. The migrated app must replicate this same hardware-gated state (disabled buttons, blank preview) and ideally surface a fallback message."
+    }
+  ]
+}

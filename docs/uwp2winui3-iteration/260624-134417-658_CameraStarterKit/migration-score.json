@@ -1,0 +1,23 @@
+{
+  "scenario": "CameraStarterKit",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 1,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "CameraStarterKit",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_CameraStarterKit.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_CameraStarterKit.png",
+      "note": "Single-page camera sample. All UWP controls faithfully migrated: CaptureElement(PreviewControl) -> Image(PreviewImage) via SoftwareBitmap, plus PhotoButton and VideoButton with matching AutomationIds. Measured with no camera present, so the live UWP ground truth itself shows both buttons in their disabled initial state over a blank preview; the WinUI 3 app replicates that exact hardware-gated state (UIA: PhotoButton/VideoButton present, isEnabled=false) and adds a defensive 'No camera device found' fallback message. No control responds in either app (0 actuable actions while disabled), so there is no dead-control regression. Only delta is a minor cosmetic one: UWP renders the disabled buttons' glyphs visibly while WinUI's default disabled styling renders them faintly. Parity gate: PASS (100/100)."
+    }
+  ]
+}

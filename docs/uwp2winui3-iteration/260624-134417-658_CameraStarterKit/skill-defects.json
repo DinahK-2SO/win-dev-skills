@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Skill tells the agent that <CaptureElement> live camera preview has no WinUI 3 replacement and the file must be deferred — but a fully-supported replacement exists and the agent achieved 100/100 by ignoring the skill.",
+      "evidence": "MIGRATION-PATTERNS.md line 55 ('there is no compatible replacement ... MediaPlayerElement covers playback only') + unsupported-api-inventory.json line 11 (CaptureElement under 'unsupported' -> defer). Trial result: migration-score.json score=100, note 'CaptureElement(PreviewControl) -> Image(PreviewImage) via SoftwareBitmap'. App source MainPage.xaml.cs:255-315 implements MediaFrameReader + SoftwareBitmapSource.",
+      "skill_search": "grep CaptureElement|MediaCapture|SoftwareBitmap across skills/winui-uwp-migration",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "`MediaPlayerElement` covers playback only, not the live camera preview API surface ... there is no compatible replacement (file should be marked Triage label = defer).",
+      "root_cause": "The skill conflates 'no drop-in XAML preview element' with 'no migration path'. WinUI 3 desktop fully supports MediaCapture; the live preview is reproduced by reading frames (MediaFrameReader / GetPreviewFrameAsync) and displaying SoftwareBitmaps in an Image via SoftwareBitmapSource.",
+      "proposed_fix": "Rewrite the CS0246/CaptureElement section and the Unsupported list entry to give the supported recipe: <CaptureElement> -> <Image x:Name=PreviewImage/>; MediaCapture.InitializeAsync, then CreateFrameReaderAsync (Bgra8), on FrameArrived push SoftwareBitmap.Convert(...Bgra8, Premultiplied) into a SoftwareBitmapSource set as PreviewImage.Source. Move the CaptureElement entry in unsupported-api-inventory.json from 'unsupported' to 'adaptable' with anchor 'camera-preview'.",
+      "generalizes": "CaptureElement is the standard UWP live-camera-preview element used by every UWP camera sample (CameraStarterKit, CameraFrames, CameraResolution, etc.). Deferring it discards the central feature of any camera app. The MediaCapture+SoftwareBitmapSource pattern is the canonical, documented WinUI 3 replacement and applies to all of them."
+    }
+  ]
+}

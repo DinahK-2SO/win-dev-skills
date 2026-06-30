@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Disabled PhotoButton/VideoButton glyphs render faintly in WinUI 3 vs visibly in UWP (minor cosmetic delta).",
+      "evidence": "discrepancies.json D1: UIA confirms both buttons present at correct positions with isEnabled=false; difference is only the default WinUI disabled-visual styling over a white background.",
+      "covered_clearly_at": "Out of scope for a skill rule — this is the framework's default disabled control styling, not a migration mistake, and the controls are functionally correct (disabled because no camera).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Cosmetic-only, no functional or behavioral regression (score stayed 100). Encoding a per-control disabled-visual tweak would be scenario-specific over-fitting; a re-run would produce the same correct, fully-functional result."
+    }
+  ]
+}

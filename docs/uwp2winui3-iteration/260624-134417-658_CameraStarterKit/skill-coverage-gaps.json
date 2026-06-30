@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "UWP pages that subscribe to Application.Current.Suspending / Application.Current.Resuming (to pause/resume the camera or other resources) fail to build with CS1061 because these events do not exist on Microsoft.UI.Xaml.Application.",
+      "evidence": "session-log.txt TURN 34 'error CS1061: Application does not contain a definition for Suspending ... Resuming' (4 occurrences in MainPage.xaml.cs). Resolved across TURN 35-41 by deleting subscriptions, handlers, and the _isSuspending gate.",
+      "covered_at": "MIGRATION-PATTERNS.md '<a id=\"lifecycle\"></a> ## Application Lifecycle and Activation' (covers OnLaunched/OnActivated/AppLifecycle).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add an explicit line to the existing lifecycle section: Microsoft.UI.Xaml.Application has NO Suspending/Resuming events. Delete page-level `Application.Current.Suspending += / Resuming +=` subscriptions and their handlers; if you must pause/resume work (camera, audio, file streams) gate it on Window.Activated (WindowActivationState) and AppWindow.IsVisible instead.",
+      "generalizes": "Suspend/resume resource management is a near-universal UWP pattern (camera, media playback, file watchers, networking). Any such page hits this exact CS1061 on migration, so naming the removed events + the Window.Activated/AppWindow.IsVisible replacement helps every resource-owning sample."
+    }
+  ]
+}
