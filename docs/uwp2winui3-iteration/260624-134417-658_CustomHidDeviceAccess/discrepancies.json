@@ -1,0 +1,18 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "score": 0,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Connecting To Device — description, Connect/Disconnect buttons, device ListView, status bar", "status": "fail", "reason": "Whole window blank white; controls exist in UIA tree with valid geometry but nothing paints.", "suspected_skill_gap": "Scaffold Mica SystemBackdrop not composited in headless capture; skill had no guidance to remove it or set an opaque root background." },
+    { "id": 2, "text": "Feature Reports — description, feature report read/write controls, status bar", "status": "fail", "reason": "Identical blank frame.", "suspected_skill_gap": "Same whole-window backdrop blank." },
+    { "id": 3, "text": "Input Report Events — description, register/unregister controls, status bar", "status": "fail", "reason": "Identical blank frame.", "suspected_skill_gap": "Same whole-window backdrop blank." },
+    { "id": 4, "text": "Input and Output Reports — description, read-input/write-output controls, status bar", "status": "fail", "reason": "Identical blank frame.", "suspected_skill_gap": "Same whole-window backdrop blank." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "All scenarios", "uwp": "Full rich UI (nav list, description, buttons, device list, green status bar).", "winui": "Byte-uniform blank white window; only min/max/close caption buttons visible.", "screenshot_ref": "parity/winui3/screenshots/01_Connecting_To_Device.png (12562 bytes) vs parity/baseline/screenshots/01_Connecting_To_Device.png (80979 bytes)" }
+  ],
+  "missing_features": [],
+  "summary": "Every feature failed for a single root cause: the migrated window renders entirely blank because the scaffold's Mica SystemBackdrop cannot composite in the capture environment. Not a per-page navigation/init failure — the whole window (including the app's own title bar) is unpainted while the UIA tree is fully populated."
+}

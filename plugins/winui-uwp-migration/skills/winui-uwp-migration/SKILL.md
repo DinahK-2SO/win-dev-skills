@@ -199,6 +199,15 @@ Do:
 
 ### Defensive UI for init-heavy and device-dependent pages
 
+> **Two different blank-render modes — don't confuse them.** If the *entire* window is blank
+> (nothing paints except the OS caption buttons, yet the UIA tree is full of correctly-placed
+> controls), the cause is usually the scaffold's Mica/Acrylic `<Window.SystemBackdrop>`, which
+> can't composite on headless/remote/software-GPU hosts. That is fixed at the *window* level
+> (remove the backdrop, give the root layout an opaque `Background`) — see
+> [Whole-window blank render](./MIGRATION-PATTERNS.md#system-backdrop-blank-window). The rest of
+> this section is the *per-page* mode: one scenario frame goes blank while the shell around it
+> still renders.
+
 A page can build cleanly, navigate without crashing the process, and still leave a **blank content
 frame** if its constructor or `Loaded` handler throws while doing real initialization work. Because
 `Frame.Navigate` does not terminate the app on a page-construction throw (see [Silent navigation

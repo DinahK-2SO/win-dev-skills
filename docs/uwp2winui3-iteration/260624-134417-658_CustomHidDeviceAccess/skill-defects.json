@@ -1,0 +1,17 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated app renders a completely blank white window on every scenario (app builds + launches, UIA tree fully populated, nothing painted). Caused by the scaffold's <Window.SystemBackdrop><MicaBackdrop/> failing to composite on the headless/software-GPU capture host.",
+      "evidence": "migration-score.json: 4/4 features fail, 'controls exist in the UIA tree with valid geometry but nothing is painted'; parity screenshot 01_Connecting_To_Device.png is 12562-byte uniform white vs 80979-byte UWP golden. session-log.txt lines 2077-2091 show the scaffolded MainWindow.xaml kept <Window.SystemBackdrop><MicaBackdrop/>.",
+      "skill_search": "grepped winui-uwp-migration for 'Mica|Backdrop|blank|render|Background' — all 'blank' guidance (SKILL.md 'Defensive UI', MIGRATION-PATTERNS 'Silent navigation failures') covers PER-PAGE blanks from navigation/init throws or deferred controls. Nothing covers a WHOLE-WINDOW blank from a system backdrop; 'Backdrop' only appears once, as an AcrylicBrush mapping row.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "dotnet new winui (mandated by Step 0) scaffolds MainWindow.xaml with a Mica SystemBackdrop that requires DWM composition unavailable on headless/RDP/VM/software-GPU hosts; the window paints blank while staying alive, so every process-alive gate the skill owns passes.",
+      "proposed_fix": "Initialize-UwpMigration.ps1 step 3c: strip <Window.SystemBackdrop>…</Window.SystemBackdrop> from scaffolded Window shells during bootstrap. Validate-UwpMigration.ps1 Section 9: WARN if a Mica/DesktopAcrylic backdrop survives. MIGRATION-PATTERNS.md#system-backdrop-blank-window + a SKILL.md Defensive-UI callout documenting the whole-window mode and the opaque-root-Background fix.",
+      "generalizes": "EVERY UWP→WinUI 3 migration starts from `dotnet new winui`, which always emits the Mica SystemBackdrop, and the benchmark/CI capture hosts are headless/software-GPU — so any scaffolded app can score a false zero from a blank window regardless of migration correctness. UWP has no backdrop, so removing it never reduces parity."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "dotnet new winui + Initialize-UwpMigration.ps1", "evidence": "session-log.txt lines 19, 2077-2091 — scaffold + bootstrap produced a buildable WinUI 3 shell (MainWindow.xaml with NavigationView/Frame) with 0 build errors per migration-score.json notes." }
+  ],
+  "tools_problematic": [
+    { "tool": "dotnet build (native)", "problem": "Builds took >300s repeatedly; the dev-agent hit the runner's 300s window multiple times (turns 63-70), stopped/cleaned/rebuilt, and ran out of time before verifying render.", "evidence": "session-log.txt tail: shellId build4/6 'still running after 300 seconds', dotnet clean + --no-incremental rebuild at turns 69-70; subject results.json builds:false/runs:false from a migration-time TIMEOUT (migration-score.json notes)." }
+  ],
+  "tool_limitations": [
+    { "tool": "Test-AppLaunch.ps1 / Validate-UwpMigration Section 7", "limitation": "Only proves the process stayed alive; it does not capture a screenshot, so a whole-window blank render (app alive, nothing painted) passes every gate the migration skill owns.", "suggested_tweak": "Added a Validate-UwpMigration Section 9 WARN that flags a surviving Mica/Acrylic SystemBackdrop — the most common cause of a whole-window blank that the alive-check cannot see." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Window.SystemBackdrop / MicaBackdrop (scaffold default)", "special_handling": "Requires live DWM composition; renders the whole window blank on headless/RDP/VM/software-GPU hosts. Must be removed (or code-behind-guarded by MicaController.IsSupported()) and the root layout given an opaque Background." }
+  ],
+  "errors_encountered": [
+    { "error": "Migrated app launches (pid 4708) but renders a completely blank white window on every scenario; only OS caption buttons visible.", "root_cause": "The dotnet-new-winui scaffold's <Window.SystemBackdrop><MicaBackdrop/> requires DWM composition absent in the capture environment; content laid out (UIA tree populated, valid geometry) but never composited.", "fix": "Strip <Window.SystemBackdrop> from the Window shell in the bootstrap and give the root layout an opaque Background (ApplicationPageBackgroundThemeBrush)." },
+    { "error": "dotnet build exceeded the 300s command window several times.", "root_cause": "Cold WinAppSDK restore/compile plus filtering output through Select-String in sync mode; environmental slowness, not a code defect.", "fix": "Environmental; not a skill change. Dev-agent should build once and wait rather than repeatedly stop/clean/rebuild." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "turns 63-70 (build loop)", "symptom": "Repeated 300s build timeouts; stop_powershell, dotnet clean, --no-incremental rebuild; never reached a render-verification step.", "turns_or_retries": "~8 turns", "root_cause": "Slow cold builds + output filtering; the agent spent its remaining budget re-building rather than validating the UI.", "how_resolved": "Not resolved before timeout; subject reported builds:false/runs:false though the app in fact builds and launches.", "preventable_by": "Environmental (build speed) — out of skill scope. The blank render it never got to see is prevented by the bootstrap SystemBackdrop strip." },
+    { "where": "MainWindow.xaml (scaffold shell)", "symptom": "Whole-window blank render at score time.", "turns_or_retries": "n/a (not observed by dev-agent)", "root_cause": "Scaffold Mica backdrop kept verbatim.", "how_resolved": "Fixed in skill: bootstrap now strips the backdrop; validator WARNs if re-introduced.", "preventable_by": "Initialize-UwpMigration.ps1 step 3c (auto-strip) + Validate-UwpMigration Section 9 WARN + MIGRATION-PATTERNS#system-backdrop-blank-window." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Capture/validation host has no GPU/DWM composition for Mica/Acrylic; cold dotnet builds are slow (>300s).", "workaround": "Do not depend on system backdrops to paint; build once and wait for completion instead of stop/clean/rebuild loops." }
+  ]
+}

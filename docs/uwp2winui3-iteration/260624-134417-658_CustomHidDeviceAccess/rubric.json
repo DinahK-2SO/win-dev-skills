@@ -1,0 +1,46 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "source": "uwp-samples-standalone/Samples/CustomHidDeviceAccess/cs",
+  "groundTruth": "original UWP app launched (Release, pid 18220, windowTitle 'Custom HID Device Access C# UAP')",
+  "features": [
+    {
+      "number": 1,
+      "title": "Connecting To Device",
+      "expected": [
+        "Description text block",
+        "'Connect to device' button",
+        "'Disconnect from device' button (disabled until connected)",
+        "'Select a Hid Device:' device ListView",
+        "Status bar ('No devices currently selected')"
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Feature Reports",
+      "expected": [
+        "Description text block",
+        "Feature report read/write controls",
+        "Status bar"
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Input Report Events",
+      "expected": [
+        "Description text block",
+        "Register/unregister input-report-event controls",
+        "Status bar"
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Input and Output Reports",
+      "expected": [
+        "Description text block",
+        "Read-input / write-output report controls",
+        "Status bar"
+      ]
+    }
+  ],
+  "note": "Extract-UwpFeatureChecklist.ps1 parsed 4 scenarios but 0 controls/actions per scenario, so the structural gate is trivially satisfied and NON-diagnostic here. Ground truth for grading is the UWP golden screenshot (full rich UI) vs the WinUI candidate screenshot."
+}

@@ -22,6 +22,7 @@ Checks (numbering matches the `# ─── N.` sections in the code):
 6. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
 7. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
 8. Visible-text fidelity (WARN-only) — compares each non-deferred XAML to the bootstrap's verbatim visible-text snapshot (.fidelity-snapshot.json) and WARNs about labels/captions/descriptions that vanished (regenerated/paraphrased page); never fails the gate
+9. System backdrop render guard (WARN-only) — WARNs when a Window shell still declares a Mica/DesktopAcrylic <Window.SystemBackdrop>, which paints a blank client area in headless/remote/software-GPU capture
 
 .PARAMETER Target
 Migrated WinUI 3 project root (same folder used as -Target for
@@ -670,6 +671,30 @@ if (Test-Path -LiteralPath $snapPath) {
             Add-Diag 'Visible-text fidelity (WARN)' (($diagBlock) -join "`r`n")
         }
     }
+}
+
+# ─── 9. System backdrop render guard (WARN-only) ───────────────────────────────
+# Mica / DesktopAcrylic system backdrops need live DWM composition that is absent on
+# headless / remote-desktop / software-GPU hosts (including the validation capture host).
+# A Window that relies on one paints a byte-uniform BLANK client area: the UIA tree is
+# populated and controls have valid geometry, but nothing composites, so a screenshot
+# reviewer reads it as a crash. The bootstrap strips the scaffold's backdrop; this WARN
+# catches a backdrop RE-introduced during a hand-written shell conversion. UWP had no
+# equivalent, so removing it costs no parity — delete <Window.SystemBackdrop> and give the
+# root layout an opaque Background="{ThemeResource ApplicationPageBackgroundThemeBrush}".
+$backdropHits = New-Object System.Collections.Generic.List[string]
+foreach ($f in ($files | Where-Object { $_.Extension -eq '.xaml' })) {
+    $txt = [System.IO.File]::ReadAllText($f.FullName)
+    if ($txt -match '<Window\.SystemBackdrop|MicaBackdrop|DesktopAcrylicBackdrop') {
+        [void]$backdropHits.Add([System.IO.Path]::GetRelativePath($Target, $f.FullName))
+    }
+}
+if ($backdropHits.Count -gt 0) {
+    Write-Host "[WARN] System backdrop present in $($backdropHits.Count) Window shell(s) — Mica/Acrylic renders BLANK in headless/remote/software-GPU capture; remove <Window.SystemBackdrop> and set an opaque root Background:"
+    foreach ($h in $backdropHits) { Write-Host "       $h" }
+    Add-Diag 'System backdrop render guard (WARN)' (($backdropHits) -join "`r`n")
+} else {
+    Write-Host "[PASS] No render-blocking system backdrop (Mica/Acrylic) in Window shells"
 }
 
 # ─── Summary ───────────────────────────────────────────────────────────────────

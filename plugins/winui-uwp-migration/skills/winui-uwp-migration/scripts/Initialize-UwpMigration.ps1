@@ -13,6 +13,7 @@ Steps:
 1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
+3c. Strip the scaffold's <Window.SystemBackdrop> (Mica/Acrylic) — it renders blank in headless/remote/software-GPU capture
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
 4b/4c. Per-file triage against unsupported-api-inventory.json + inline TODO injection
        (`// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — anchor-only, never an API name)
@@ -130,6 +131,32 @@ foreach ($f in $nsFiles) {
     }
 }
 Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+
+# ─── 3c. Neutralize scaffold system backdrop (Mica/Acrylic) ────────────────────
+# `dotnet new winui` seeds MainWindow.xaml with a <Window.SystemBackdrop><MicaBackdrop/>
+# block. Mica / DesktopAcrylic require live DWM composition that is ABSENT on headless
+# / remote-desktop / software-GPU hosts (including the validation capture host and most
+# CI). A Window that depends on a backdrop to paint renders a byte-uniform BLANK client
+# area — the UIA tree is fully populated and controls have valid geometry, but nothing is
+# composited, so a screenshot reviewer sees an empty window and scores it as a crash.
+# UWP had no equivalent backdrop, so removing it costs zero parity. Strip it up front so
+# every migrated shell paints on an opaque background regardless of the host's GPU/DWM.
+$backdropBlockRe = [System.Text.RegularExpressions.RegexOptions]::Singleline
+$bdChanged = 0
+foreach ($f in $nsFiles) {
+    if (-not $f.Name.ToLowerInvariant().EndsWith('.xaml')) { continue }
+    $orig = [System.IO.File]::ReadAllText($f.FullName)
+    if ($orig -notmatch '<Window\.SystemBackdrop') { continue }
+    $new = [System.Text.RegularExpressions.Regex]::Replace($orig, '[ \t]*<Window\.SystemBackdrop>.*?</Window\.SystemBackdrop>\r?\n?', '', $backdropBlockRe)
+    $new = [System.Text.RegularExpressions.Regex]::Replace($new, '[ \t]*<Window\.SystemBackdrop[^>]*/>\r?\n?', '', $backdropBlockRe)
+    if ($new -ne $orig) {
+        [System.IO.File]::WriteAllText($f.FullName, $new)
+        $bdChanged++
+    }
+}
+if ($bdChanged -gt 0) {
+    Write-Host "    Removed <Window.SystemBackdrop> (Mica/Acrylic) from $bdChanged Window shell(s) — backdrops don't composite in headless/remote/software-GPU capture, leaving a byte-uniform blank window"
+}
 
 # ─── 3b. Visible-text fidelity snapshot ────────────────────────────────────────
 # Capture the user-visible/static text present in each copied XAML *now*, while it

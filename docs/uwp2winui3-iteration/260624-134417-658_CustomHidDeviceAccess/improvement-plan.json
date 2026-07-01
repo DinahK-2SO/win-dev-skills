@@ -1,0 +1,36 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Whole-window blank render: the scaffold's <Window.SystemBackdrop><MicaBackdrop/> cannot composite on headless/software-GPU capture hosts, so the migrated window paints blank (UIA tree populated, nothing rendered) and scores 0 despite building and launching.",
+      "evidence": "migration-score.json (4/4 fail, 'controls exist in the UIA tree with valid geometry but nothing is painted'); parity 01_Connecting_To_Device.png 12562 bytes uniform-white vs 80979-byte UWP golden; session-log.txt 2077-2091 (scaffold Mica backdrop kept).",
+      "root_cause": "dotnet new winui (mandated Step 0) always emits a Mica SystemBackdrop that depends on DWM composition absent in the validation/CI environment; the app stays alive so every process-alive gate passes.",
+      "tier": 1,
+      "change": "Add bootstrap step 3c to Initialize-UwpMigration.ps1 that strips <Window.SystemBackdrop>…</Window.SystemBackdrop> (and self-closing form) from every scaffolded/target Window .xaml so no migrated shell depends on a backdrop to paint.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Every migrated window paints its content on the default opaque background regardless of host GPU/DWM; captures are no longer byte-uniform blank.",
+      "falsifiable_check": "On re-run, parity screenshots are no longer ~12.5KB uniform-white; feature #1 controls (Connect/Disconnect buttons, device list, status bar) are visible; the app scores > 0."
+    },
+    {
+      "problem": "The alive-check gates (Test-AppLaunch / Validator §7) cannot see a whole-window blank, so a re-introduced backdrop (e.g. from a hand-written shell conversion) would go unflagged.",
+      "evidence": "SKILL.md line 160 + MIGRATION-PATTERNS 229-230: process-alive gate does not navigate/capture; the blank passed all of them in this trial.",
+      "tier": 1,
+      "change": "Add Validate-UwpMigration.ps1 Section 9: WARN when any Window .xaml still declares a Mica/DesktopAcrylic SystemBackdrop, pointing at the remove-backdrop + opaque-root-Background fix.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "A surviving backdrop is surfaced as a WARN during Step 4 validation instead of silently shipping a blank window.",
+      "falsifiable_check": "Running the validator on a shell that still has <MicaBackdrop/> prints '[WARN] System backdrop present …'; a stripped shell prints '[PASS] No render-blocking system backdrop'."
+    },
+    {
+      "problem": "No documentation distinguishing the whole-window backdrop blank from the per-page navigation/init blank, so an agent that hand-writes or regenerates the Window shell has no guidance to avoid re-adding the backdrop.",
+      "evidence": "grep of the skill: 'Backdrop' appeared only as an AcrylicBrush mapping row; all blank-render prose was per-page.",
+      "tier": 3,
+      "change": "Add MIGRATION-PATTERNS.md#system-backdrop-blank-window (symptom/root-cause/fix) and a SKILL.md 'Defensive UI' callout distinguishing the two blank modes and pointing to it.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "An agent doing a shell conversion knows not to rely on a system backdrop and to give the root layout an opaque Background.",
+      "falsifiable_check": "Get-MigrationPattern.ps1 -Anchor system-backdrop-blank-window returns the new section; SKILL.md links to it from the Defensive-UI section."
+    }
+  ],
+  "deferred_to_human": []
+}

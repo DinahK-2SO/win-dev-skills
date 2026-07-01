@@ -366,6 +366,43 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 
 The Step 4 validator runs this same check (`Validate-UwpMigration.ps1` Section 7) and **fails** when the app registers but dies at startup, surfacing the captured signature in `.validator-diagnostics.txt`.
 
+<a id="system-backdrop-blank-window"></a>
+## Whole-window blank render — Mica/Acrylic `SystemBackdrop` in headless environments
+
+There is a **second, distinct** blank-render mode from the per-page one below. Here the *entire*
+window paints a byte-uniform blank client area — not one scenario frame, but everything, including
+the app's own title bar/content — while only the OS caption buttons (min/max/close) remain visible.
+The UIA tree is **fully populated** and every control reports valid on-screen geometry; nothing is
+composited to the framebuffer.
+
+**Root cause.** The `dotnet new winui` scaffold seeds `MainWindow.xaml` with a system backdrop:
+
+```xml
+<Window.SystemBackdrop>
+    <MicaBackdrop />
+</Window.SystemBackdrop>
+```
+
+Mica and `DesktopAcrylicBackdrop` require live **DWM composition / a real GPU**. On headless,
+remote-desktop (RDP), VM, or software-rendered hosts — which includes the parity-capture host and
+most CI — that composition is unavailable, and the window renders blank instead of falling back to a
+solid brush. Because the app still launches and stays alive, the smoke launch passes; only a
+screenshot reveals the empty window (indistinguishable from a crash → an automatic zero score).
+UWP had no equivalent backdrop, so the original app renders fine in the *same* environment — the
+blank is introduced purely by the WinUI scaffold.
+
+**Fix (generalizes to every scaffolded app).** Do **not** let the window depend on a backdrop to
+paint:
+
+- Remove the `<Window.SystemBackdrop>…</Window.SystemBackdrop>` block. The bootstrap
+  (`Initialize-UwpMigration.ps1`, step 3c) already strips it from the scaffold; if you hand-write or
+  regenerate the `Window` shell, do **not** re-add it. `Validate-UwpMigration.ps1` (Section 9) WARNs
+  if a backdrop survives.
+- Give the shell's root layout an **opaque** background so content always paints:
+  `<Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">`.
+- If you genuinely want Mica on capable machines, set it in code-behind guarded by
+  `MicaController.IsSupported()` — never as the sole thing behind the content.
+
 <a id="silent-navigation-failures"></a>
 ## Silent navigation failures — page renders blank, app stays alive
 

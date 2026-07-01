@@ -1,0 +1,17 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Bootstrap strips the scaffold's Mica <Window.SystemBackdrop> (Initialize-UwpMigration.ps1 step 3c) — backdrops don't composite on headless/software-GPU capture hosts, so they left every migrated window blank",
+    "Validator WARNs on a surviving Mica/Acrylic SystemBackdrop (Validate-UwpMigration.ps1 Section 9) so a re-introduced backdrop can't ship a blank window past the alive-only gates",
+    "Document the whole-window blank mode: MIGRATION-PATTERNS.md#system-backdrop-blank-window + SKILL.md Defensive-UI callout distinguishing it from the per-page blank"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": []
+}

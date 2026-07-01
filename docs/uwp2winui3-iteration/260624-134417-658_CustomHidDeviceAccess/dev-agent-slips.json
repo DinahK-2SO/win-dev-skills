@@ -1,0 +1,14 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Dev-agent spent turns 63-70 in a build loop (repeated 300s dotnet build timeouts, stop/clean/--no-incremental rebuild) and ran out of budget; its results.json reported builds:false/runs:false even though the app in fact builds and launches.",
+      "evidence": "session-log.txt tail: shellId build4/6 'still running after 300 seconds', dotnet clean at turn 69, --no-incremental rebuild at turn 70; migration-score.json notes 'results.json had builds:false/runs:false due to a migration-time timeout, not a build error'.",
+      "covered_clearly_at": "SKILL.md line 141 warns explicitly against filtering build output (Where-Object/Select-String) while shelling out to dotnet build, which swallows lines and makes the agent poll an empty buffer. The skill also mandates native `dotnet` and Test-AppLaunch.ps1 rather than repeated raw rebuilds.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The slowness is environmental (cold WinAppSDK restore/compile) and the skill already warns against the exact output-filtering pattern the agent used; a capable re-run that builds once and waits (or heeds the existing warning) avoids the loop without any skill edit."
+    }
+  ]
+}

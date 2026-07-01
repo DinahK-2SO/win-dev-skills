@@ -1,0 +1,51 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 4,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 4,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Connecting To Device",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Connecting_To_Device.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Connecting_To_Device.png",
+      "note": "UWP renders full UI (Connect/Disconnect buttons, device list, status). WinUI app renders a completely blank white window; controls exist in the UIA tree with valid geometry but nothing is painted. Blank screenshot = fail."
+    },
+    {
+      "name": "Feature Reports",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Feature_Reports.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Feature_Reports.png",
+      "note": "WinUI renders blank white; UWP paints its UI. Blank screenshot = fail."
+    },
+    {
+      "name": "Input Report Events",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Input_Report_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Input_Report_Events.png",
+      "note": "WinUI renders blank white; UWP paints its UI. Blank screenshot = fail."
+    },
+    {
+      "name": "Input and Output Reports",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Input_and_Output_Reports.png",
+      "winui_screenshot": "parity/winui3/screenshots/04_Input_and_Output_Reports.png",
+      "note": "WinUI renders blank white; UWP paints its UI. Blank screenshot = fail."
+    }
+  ],
+  "notes": "Migrated app builds (0 errors) and launches (pid 4708) but renders a completely blank white window on every scenario. UI-Automation tree is populated with correctly-positioned controls, yet nothing paints — a critical visual/rendering failure making the app unusable. Compare-Parity.ps1 reported a FALSE 100/100 PASS because the extracted checklist had 0 controls/0 actions per scenario (non-diagnostic); the score below reflects the authoritative visual comparison against the live UWP golden. The subject's results.json had builds:false/runs:false due to a migration-time timeout, not a build error."
+}
