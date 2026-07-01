@@ -424,6 +424,27 @@ switch (args.Kind)
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
 
+### Suspend / resume events are removed
+
+`Microsoft.UI.Xaml.Application` has **no** `Suspending`, `Resuming`, `EnteredBackground`, or `LeavingBackground` events (and there is no `SuspendingEventHandler`/`SuspendingEventArgs`/`SuspendingDeferral`). Desktop WinUI 3 apps are not process-lifetime-managed the way UWP apps were, so any `App.Current.Suspending += …` / `Application.Current.Resuming += …` subscription fails to build with `CS1061: 'Application' does not contain a definition for 'Suspending'/'Resuming'`.
+
+This shows up constantly in device-access samples via the shared `EventHandlerForDevice` helper, which registers suspend/resume handlers to close/reopen a device handle across PLM transitions. Migrate it by re-wiring the same handler bodies to the window/process lifetime:
+
+```csharp
+// UWP (delete these):
+// App.Current.Suspending += appSuspendEventHandler;   // SuspendingEventHandler
+// App.Current.Resuming   += appResumeEventHandler;
+
+// WinUI 3: run "release resources / close device" logic on the main window closing.
+// (App.MainWindow is the tracked main Window static — see the windowing section.)
+App.MainWindow!.Closed += (s, e) => OnAppSuspension(s, null);
+// There is no resume event: desktop apps aren't suspended, so the resume path is a no-op —
+// delete the .Resuming subscription and leave OnAppResume unused (or call it once at startup
+// if it did first-time device setup).
+```
+
+Keep the existing `OnAppSuspension` / `OnAppResume` **method bodies** — only their registration changes. Adjust their signatures if they took a `SuspendingEventArgs` (that type is gone; pass the args you have, or `null`, since the body typically only closes the device). `SuspendingOperation.GetDeferral()` calls inside those bodies can simply be dropped — `Window.Closed` runs synchronously.
+
 <a id="background-tasks"></a>
 ## Background Tasks
 
@@ -683,6 +704,8 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 ### `x:Bind` and compiled bindings
 
 `x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+
+**XAML compiler errors are often a cascade from a failed C# compile.** `WMC0909` "Cannot resolve DataType", `WMC1111` "DataTemplates containing x:Bind need x:DataType", and `WMC9999` "Xaml Internal Error" frequently appear on XAML that is actually correct (the `x:DataType` and its target type are valid) simply because a `CS####` error elsewhere in the project stopped the C# compile before the XamlCompiler could resolve types. **Fix every `CS` error first, then rebuild** before treating any DataType/x:Bind error as real — do not delete a valid `x:DataType` to chase a WMC error.
 
 ### Page root element
 

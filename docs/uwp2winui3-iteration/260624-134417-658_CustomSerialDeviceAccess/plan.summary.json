@@ -1,0 +1,15 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add Application.Suspending/.Resuming/.EnteredBackground/.LeavingBackground to unsupported-api-inventory.json (anchor: lifecycle) so Initialize-UwpMigration.ps1 flags these removed UWP events with a TODO — they caused 4 CS1061 that failed the whole build.",
+    "Document the suspend/resume migration in MIGRATION-PATTERNS.md #lifecycle: these events don't exist on Microsoft.UI.Xaml.Application; re-wire teardown to Window.Closed and no-op the resume path (recurs across the whole device-access sample family).",
+    "Note in the x:Bind section that WMC0909/WMC1111/WMC9999 XAML errors are usually a cascade from a failed C# compile — fix CS errors first, don't delete valid x:DataType."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

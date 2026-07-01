@@ -1,0 +1,15 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "XAML compiler errors WMC0909 'Cannot resolve DataType', WMC1111 'DataTemplates ... need x:DataType', and WMC9999 internal error were emitted even though the x:DataType and its target type (SDKTemplate.Scenario) were valid; they are a cascade from the failed C# compile. The x:Bind section only lists XLS0414/MC3074 and does not warn about this cascade, risking the agent chasing phantom XAML bugs instead of the real C# error.",
+      "evidence": "migration-score.json winui_build_errors lists WMC0909/WMC1111/WMC9999 on MainPage.xaml alongside the 4 CS1061; final MainPage.xaml:37-38 has a correct <DataTemplate x:DataType=\"local:Scenario\"> and SampleConfiguration.cs defines public class Scenario in namespace SDKTemplate.",
+      "covered_at": "MIGRATION-PATTERNS.md, section '### x:Bind and compiled bindings' (~line 683-685)",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add one sentence to the existing x:Bind section: WMC0909/WMC1111/WMC9999 (and other XamlCompiler internal errors) are frequently a *cascade* from a failed C# compile in the same project — resolve all CS errors first, then re-run the build before treating any DataType/x:Bind error as real; do not delete valid x:DataType attributes to chase them.",
+      "generalizes": "The WinUI XamlCompiler runs after C# type resolution and routinely crashes with WMC9999 / mis-reports DataType errors whenever the code-behind or a referenced type failed to compile. Any migration that still has an open C# error (a very common intermediate state) will see these misleading XAML errors, across all scenarios."
+    }
+  ]
+}

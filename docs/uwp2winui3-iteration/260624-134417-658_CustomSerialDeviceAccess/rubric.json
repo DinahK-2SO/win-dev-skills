@@ -1,0 +1,80 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\CustomSerialDeviceAccess\\cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Connect/Disconnect",
+      "controls": [
+        "ButtonConnectToDevice (Button)",
+        "ButtonDisconnectFromDevice (Button)",
+        "ConnectDevices (ListBox)"
+      ],
+      "actions": [
+        "Connect to device -> ButtonConnectToDevice",
+        "Disconnect from device -> ButtonDisconnectFromDevice"
+      ],
+      "max_points": 1
+    },
+    {
+      "number": 2,
+      "title": "Configure Device",
+      "controls": [
+        "BreakStateSignalToggleSwitch (ToggleSwitch)",
+        "DataTerminalReadyEnabledToggleSwitch (ToggleSwitch)",
+        "RequestToSendEnabledToggleSwitch (ToggleSwitch)",
+        "BaudRateInputValue (TextBox)",
+        "BaudRateSetButton (Button)",
+        "ParityComboBox (ComboBox)",
+        "StopBitCountComboBox (ComboBox)",
+        "HandShakeComboBox (ComboBox)",
+        "DataBitsComboBox (ComboBox)"
+      ],
+      "actions": [
+        "On -> BreakStateSignalToggleSwitch",
+        "On -> DataTerminalReadyEnabledToggleSwitch",
+        "On -> RequestToSendEnabledToggleSwitch",
+        "SET -> BaudRateSetButton"
+      ],
+      "max_points": 1
+    },
+    {
+      "number": 3,
+      "title": "Read/Write",
+      "controls": [
+        "WriteTimeoutInputValue (TextBox)",
+        "WriteTimeoutButton (Button)",
+        "WriteBytesInputValue (TextBox)",
+        "WriteButton (Button)",
+        "WriteCancelButton (Button)",
+        "ReadTimeoutInputValue (TextBox)",
+        "ReadTimeoutButton (Button)",
+        "ReadButton (Button)",
+        "ReadCancelButton (Button)"
+      ],
+      "actions": [
+        "SET -> WriteTimeoutButton",
+        "WRITE BYTES -> WriteButton",
+        "CANCEL WRITE -> WriteCancelButton",
+        "SET -> ReadTimeoutButton",
+        "READ BYTES -> ReadButton",
+        "CANCEL READ -> ReadCancelButton"
+      ],
+      "max_points": 1
+    },
+    {
+      "number": 4,
+      "title": "Events",
+      "controls": [
+        "PinChangedToggleSwitch (ToggleSwitch)",
+        "ErrorReceivedToggleSwitch (ToggleSwitch)"
+      ],
+      "actions": [
+        "On -> PinChangedToggleSwitch",
+        "On -> ErrorReceivedToggleSwitch"
+      ],
+      "max_points": 1
+    }
+  ],
+  "grading": "Per feature: pass=1, partial=0.5, fail=0. score = round(100*(pass+0.5*partial)/total)."
+}

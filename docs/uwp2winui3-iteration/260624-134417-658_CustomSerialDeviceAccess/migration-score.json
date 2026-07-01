@@ -1,0 +1,52 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 4,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 4,
+  "uwp_capture_status": "ok: UWP app built (Release), launched (pid 13168, window 'Custom Serial Device Access UAP/CS') and golden frame captured. Per-scenario UIA navigation was limited because the UWP CoreWindow (hosted by ApplicationFrameHost) exposes only a top-level Pane to UI Automation; the live launch frame is a valid ground-truth golden.",
+  "winui_build_status": "failed: 11 compiler errors",
+  "winui_build_errors": "CS1061: 'Application' does not contain a definition for 'Suspending' (Scenario1_ConnectDisconnect.xaml.cs:215,223; EventHandlerForDevice.cs:398,406); CS1061: 'Application' does not contain a definition for 'Resuming' (Scenario1_ConnectDisconnect.xaml.cs:217,225; EventHandlerForDevice.cs:400,409); WMC0909: Cannot resolve DataType local:Scenario (MainPage.xaml:37); WMC1111: DataTemplates containing x:Bind need x:DataType (MainPage.xaml:38); WMC9999: Xaml Internal Error: Object reference not set to an instance of an object",
+  "parity_result": null,
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Connect/Disconnect",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Connect_Disconnect.png",
+      "winui_screenshot": null,
+      "note": "WinUI 3 app fails to build (11 compiler errors), so this scenario cannot be launched, captured, or actuated. UWP golden shows the live scenario; WinUI equivalent is entirely non-functional."
+    },
+    {
+      "name": "Configure Device",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Configure_Device.png",
+      "winui_screenshot": null,
+      "note": "WinUI 3 app fails to build (11 compiler errors), so this scenario cannot be launched, captured, or actuated. UWP golden shows the live scenario; WinUI equivalent is entirely non-functional."
+    },
+    {
+      "name": "Read/Write",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Read_Write.png",
+      "winui_screenshot": null,
+      "note": "WinUI 3 app fails to build (11 compiler errors), so this scenario cannot be launched, captured, or actuated. UWP golden shows the live scenario; WinUI equivalent is entirely non-functional."
+    },
+    {
+      "name": "Events",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Events.png",
+      "winui_screenshot": null,
+      "note": "WinUI 3 app fails to build (11 compiler errors), so this scenario cannot be launched, captured, or actuated. UWP golden shows the live scenario; WinUI equivalent is entirely non-functional."
+    }
+  ]
+}

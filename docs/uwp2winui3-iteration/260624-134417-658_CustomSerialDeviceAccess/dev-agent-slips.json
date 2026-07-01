@@ -1,0 +1,14 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CoreDispatcher.RunAsync sites in EventHandlerForDevice.cs / Scenario1 were flagged with #threading TODOs; these were the correctly-routed adaptations and are not part of the build failure.",
+      "evidence": "session-log.txt: TODO[migrate-001..007] all reference PATTERNS.md#threading; final code uses rootPage.DispatcherQueue.TryEnqueue(...) at EventHandlerForDevice.cs:379, showing the threading migration was applied.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md #threading (CoreDispatcher -> DispatcherQueue) with TODO injection wired via unsupported-api-inventory.json 'CoreDispatcher' entry",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The threading pattern is already covered and was applied correctly; it is not a defect. Listed here only to confirm it is out of scope for a skill edit."
+    }
+  ]
+}

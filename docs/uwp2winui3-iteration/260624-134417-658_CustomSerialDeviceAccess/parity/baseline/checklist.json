@@ -1,0 +1,499 @@
+{
+  "featureName": "CustomSerialDeviceAccess",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\CustomSerialDeviceAccess\\cs",
+  "generated": "2026-07-02T06:30:52.4518531+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Connect/Disconnect",
+      "class": "Scenario1_ConnectDisconnect",
+      "slug": "Connect_Disconnect",
+      "screenshot": "01_Connect_Disconnect.png",
+      "controls": [
+        {
+          "name": "ButtonConnectToDevice",
+          "type": "Button",
+          "label": "Connect to device",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonDisconnectFromDevice",
+          "type": "Button",
+          "label": "Disconnect from device",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ConnectDevices",
+          "type": "ListBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Connect to device",
+          "alt": "ButtonConnectToDevice",
+          "type": "Button",
+          "label": "Connect to device",
+          "name": "ButtonConnectToDevice",
+          "event": "Click"
+        },
+        {
+          "target": "Disconnect from device",
+          "alt": "ButtonDisconnectFromDevice",
+          "type": "Button",
+          "label": "Disconnect from device",
+          "name": "ButtonDisconnectFromDevice",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Configure Device",
+      "class": "Scenario2_ConfigureDevice",
+      "slug": "Configure_Device",
+      "screenshot": "02_Configure_Device.png",
+      "controls": [
+        {
+          "name": "BreakStateSignalToggleSwitch",
+          "type": "ToggleSwitch",
+          "label": "On",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "DataTerminalReadyEnabledToggleSwitch",
+          "type": "ToggleSwitch",
+          "label": "On",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "RequestToSendEnabledToggleSwitch",
+          "type": "ToggleSwitch",
+          "label": "On",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "BaudRateInputValue",
+          "type": "TextBox",
+          "label": "Enter Baud Rate",
+          "events": []
+        },
+        {
+          "name": "BaudRateSetButton",
+          "type": "Button",
+          "label": "SET",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ParityComboBox",
+          "type": "ComboBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "StopBitCountComboBox",
+          "type": "ComboBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "HandShakeComboBox",
+          "type": "ComboBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "DataBitsComboBox",
+          "type": "ComboBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "On",
+          "alt": "BreakStateSignalToggleSwitch",
+          "type": "ToggleSwitch",
+          "label": "On",
+          "name": "BreakStateSignalToggleSwitch",
+          "event": "Toggled"
+        },
+        {
+          "target": "On",
+          "alt": "DataTerminalReadyEnabledToggleSwitch",
+          "type": "ToggleSwitch",
+          "label": "On",
+          "name": "DataTerminalReadyEnabledToggleSwitch",
+          "event": "Toggled"
+        },
+        {
+          "target": "On",
+          "alt": "RequestToSendEnabledToggleSwitch",
+          "type": "ToggleSwitch",
+          "label": "On",
+          "name": "RequestToSendEnabledToggleSwitch",
+          "event": "Toggled"
+        },
+        {
+          "target": "SET",
+          "alt": "BaudRateSetButton",
+          "type": "Button",
+          "label": "SET",
+          "name": "BaudRateSetButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "CarrierDetectStateValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "DataSetReadyStateValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "BreakStateSignalValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "DataTerminalReadyEnabledValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "RequestToSendEnabledValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "BaudRateValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "BaudRateInputValue",
+            "type": "TextBox"
+          },
+          {
+            "name": "ParityValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StopBitCountValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "HandShakeValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "DataBitsValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Read/Write",
+      "class": "Scenario3_ReadWrite",
+      "slug": "Read_Write",
+      "screenshot": "03_Read_Write.png",
+      "controls": [
+        {
+          "name": "WriteTimeoutInputValue",
+          "type": "TextBox",
+          "label": "Enter Write Timeout",
+          "events": []
+        },
+        {
+          "name": "WriteTimeoutButton",
+          "type": "Button",
+          "label": "SET",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "WriteBytesInputValue",
+          "type": "TextBox",
+          "label": "Enter text to write",
+          "events": [
+            "TextChanged"
+          ]
+        },
+        {
+          "name": "WriteButton",
+          "type": "Button",
+          "label": "WRITE BYTES",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "WriteCancelButton",
+          "type": "Button",
+          "label": "CANCEL WRITE",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ReadTimeoutInputValue",
+          "type": "TextBox",
+          "label": "Enter Read Timeout",
+          "events": []
+        },
+        {
+          "name": "ReadTimeoutButton",
+          "type": "Button",
+          "label": "SET",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ReadButton",
+          "type": "Button",
+          "label": "READ BYTES",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ReadCancelButton",
+          "type": "Button",
+          "label": "CANCEL READ",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "SET",
+          "alt": "WriteTimeoutButton",
+          "type": "Button",
+          "label": "SET",
+          "name": "WriteTimeoutButton",
+          "event": "Click"
+        },
+        {
+          "target": "WRITE BYTES",
+          "alt": "WriteButton",
+          "type": "Button",
+          "label": "WRITE BYTES",
+          "name": "WriteButton",
+          "event": "Click"
+        },
+        {
+          "target": "CANCEL WRITE",
+          "alt": "WriteCancelButton",
+          "type": "Button",
+          "label": "CANCEL WRITE",
+          "name": "WriteCancelButton",
+          "event": "Click"
+        },
+        {
+          "target": "SET",
+          "alt": "ReadTimeoutButton",
+          "type": "Button",
+          "label": "SET",
+          "name": "ReadTimeoutButton",
+          "event": "Click"
+        },
+        {
+          "target": "READ BYTES",
+          "alt": "ReadButton",
+          "type": "Button",
+          "label": "READ BYTES",
+          "name": "ReadButton",
+          "event": "Click"
+        },
+        {
+          "target": "CANCEL READ",
+          "alt": "ReadCancelButton",
+          "type": "Button",
+          "label": "CANCEL READ",
+          "name": "ReadCancelButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "WriteTimeoutValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "WriteTimeoutInputValue",
+            "type": "TextBox"
+          },
+          {
+            "name": "WriteBytesInputValue",
+            "type": "TextBox"
+          },
+          {
+            "name": "WriteBytesCounterValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "WriteBytesTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ReadTimeoutValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ReadTimeoutInputValue",
+            "type": "TextBox"
+          },
+          {
+            "name": "ReadBytesCounterValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ReadBytesTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Events",
+      "class": "Scenario4_Events",
+      "slug": "Events",
+      "screenshot": "04_Events.png",
+      "controls": [
+        {
+          "name": "PinChangedToggleSwitch",
+          "type": "ToggleSwitch",
+          "label": "On",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "ErrorReceivedToggleSwitch",
+          "type": "ToggleSwitch",
+          "label": "On",
+          "events": [
+            "Toggled"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "On",
+          "alt": "PinChangedToggleSwitch",
+          "type": "ToggleSwitch",
+          "label": "On",
+          "name": "PinChangedToggleSwitch",
+          "event": "Toggled"
+        },
+        {
+          "target": "On",
+          "alt": "ErrorReceivedToggleSwitch",
+          "type": "ToggleSwitch",
+          "label": "On",
+          "name": "ErrorReceivedToggleSwitch",
+          "event": "Toggled"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "PinChangedValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ErrorReceivedValue",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "score": 0,
+  "builds": false,
+  "runs": false,
+  "requirements": [
+    { "id": 0, "text": "Connect/Disconnect", "status": "fail", "reason": "WinUI 3 app fails to build (11 compiler errors); scenario cannot launch or be actuated.", "suspected_skill_gap": "Application.Suspending/Resuming removal not covered by skill -> CS1061 blocks build." },
+    { "id": 1, "text": "Configure Device", "status": "fail", "reason": "Blocked by same build failure.", "suspected_skill_gap": "Same lifecycle-events defect." },
+    { "id": 2, "text": "Read/Write", "status": "fail", "reason": "Blocked by same build failure.", "suspected_skill_gap": "Same lifecycle-events defect." },
+    { "id": 3, "text": "Events", "status": "fail", "reason": "Blocked by same build failure.", "suspected_skill_gap": "Same lifecycle-events defect." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "All scenarios", "uwp": "UWP golden frames captured (parity/baseline/screenshots/01-04).", "winui": "No WinUI screenshot — app never built/launched.", "screenshot_ref": "parity/baseline/screenshots/01_Connect_Disconnect.png" }
+  ],
+  "missing_features": ["Connect/Disconnect", "Configure Device", "Read/Write", "Events"],
+  "summary": "Total build failure. Root cause is unmigrated UWP Application.Suspending/Resuming subscriptions (4 CS1061); the XAML WMC0909/WMC1111/WMC9999 errors are a cascade from that failed C# compile. Zero scenarios runnable."
+}

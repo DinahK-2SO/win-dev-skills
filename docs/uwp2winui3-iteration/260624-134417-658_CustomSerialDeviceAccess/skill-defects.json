@@ -1,0 +1,17 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "UWP Application suspend/resume events (App.Current.Suspending / .Resuming) are unmigrated and cause 4x CS1061, failing the whole build.",
+      "evidence": "migration-score.json winui_build_errors: \"CS1061: 'Application' does not contain a definition for 'Suspending' ... 'Resuming'\"; final source EventHandlerForDevice.cs:398/400/406/409 and Scenario1_ConnectDisconnect.xaml.cs:215/217/223/225 still contain App.Current.Suspending += / .Resuming +=.",
+      "skill_search": "grepped winui-uwp-migration for 'Suspend|Resum|EnteredBackground|LeavingBackground|SuspendingEventHandler' -> zero matches in SKILL.md, MIGRATION-PATTERNS.md, and unsupported-api-inventory.json",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Microsoft.UI.Xaml.Application does not expose Suspending/Resuming (or EnteredBackground/LeavingBackground); desktop WinUI 3 apps aren't PLM-suspended. The skill's #lifecycle section only covers OnLaunched/activation, and the inventory has no pattern for the suspend/resume surface, so no TODO was injected and the agent left the UWP code verbatim.",
+      "proposed_fix": "1) Add an 'adaptable' entry to scripts/unsupported-api-inventory.json matching the suspend/resume event surface, routed to anchor 'lifecycle', so Initialize-UwpMigration.ps1 injects a TODO at each site. 2) Extend MIGRATION-PATTERNS.md #lifecycle with a subsection: these events are removed; move teardown to the main Window.Closed event and drop the resume path (or no-op it).",
+      "generalizes": "The EventHandlerForDevice suspend/resume helper is copy-pasted across the entire Windows-universal-samples device-access family (SerialPort, USB, HID, Bluetooth, PointOfService), and Application.Suspending/Resuming/EnteredBackground/LeavingBackground appear in countless UWP apps. Any of them hits the identical CS1061 today."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "UWP Application.Suspending/.Resuming subscriptions are unmigrated (4x CS1061), breaking the entire build; skill has zero coverage and injects no TODO.",
+      "evidence": "migration-score.json winui_build_errors (CS1061 Suspending/Resuming x4); final EventHandlerForDevice.cs:398/400/406/409 + Scenario1_ConnectDisconnect.xaml.cs:215/217/223/225 still contain App.Current.Suspending/.Resuming.",
+      "root_cause": "Microsoft.UI.Xaml.Application does not expose Suspending/Resuming/EnteredBackground/LeavingBackground; desktop apps aren't PLM-suspended. Neither the inventory nor PATTERNS.md #lifecycle mentioned this surface.",
+      "tier": 1,
+      "change": "Added an 'adaptable' entry to unsupported-api-inventory.json matching the suspend/resume event surface, routed to anchor 'lifecycle' so Initialize-UwpMigration.ps1 injects a TODO at every site; plus a new PATTERNS.md #lifecycle subsection documenting the Window.Closed replacement and no-op resume.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json + skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The agent gets an inline TODO->#lifecycle at each Suspending/Resuming site and clear guidance to re-wire to Window.Closed, eliminating the 4 CS1061 and letting the build/launch succeed.",
+      "falsifiable_check": "On re-run, no CS1061 'Application does not contain a definition for Suspending/Resuming'; build succeeds and the app launches (features move fail->pass)."
+    },
+    {
+      "problem": "Misleading WMC0909/WMC1111/WMC9999 XAML errors (a cascade from the failed C# compile) could send the agent to delete a valid x:DataType instead of fixing the real CS error.",
+      "evidence": "migration-score.json winui_build_errors lists WMC0909/WMC1111/WMC9999 on MainPage.xaml even though x:DataType='local:Scenario' and public class SDKTemplate.Scenario are valid.",
+      "root_cause": "The XamlCompiler runs after C# type resolution; an open CS error makes it mis-report/crash on correct XAML. The x:Bind section only mentioned XLS0414/MC3074.",
+      "tier": 3,
+      "change": "Added a sentence to the existing '### x:Bind and compiled bindings' section: WMC0909/WMC1111/WMC9999 are usually a cascade from a failed C# compile; fix all CS errors first and don't delete valid x:DataType.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent triages CS errors before XAML errors, avoiding wasted edits/regressions on valid XAML.",
+      "falsifiable_check": "On a re-run with an intermediate CS error, the agent fixes the CS error and the WMC errors disappear without any x:DataType edit."
+    }
+  ],
+  "deferred_to_human": []
+}

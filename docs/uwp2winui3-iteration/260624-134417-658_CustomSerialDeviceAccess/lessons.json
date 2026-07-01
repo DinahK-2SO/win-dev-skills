@@ -1,0 +1,28 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 TODO injection", "evidence": "Injected // TODO[migrate-00N]: see PATTERNS.md#threading at CoreDispatcher.RunAsync sites (EventHandlerForDevice.cs:380/557/583, Scenario1_ConnectDisconnect.xaml.cs:381/399/417/494); the agent used them to route threading fixes." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "unsupported-api-inventory.json", "limitation": "Has no entry for the UWP Application suspension/resume event surface (Application.Suspending/Resuming, SuspendingEventHandler, SuspendingEventArgs, EnteredBackground/LeavingBackground), so Initialize-UwpMigration.ps1 injected no TODO at those lines and the agent left them unmigrated.", "suggested_tweak": "Add an 'adaptable' inventory entry for the suspension/resume event surface routed to the #lifecycle anchor." }
+  ],
+  "failed_apis": [
+    { "api": "Microsoft.UI.Xaml.Application.Suspending / .Resuming (via App.Current.Suspending += ...)", "why_tried": "UWP EventHandlerForDevice + Scenario1 register for app suspend/resume to close/reopen the serial device handle across PLM transitions.", "root_cause": "Microsoft.UI.Xaml.Application does not expose Suspending/Resuming (nor EnteredBackground/LeavingBackground); desktop WinUI 3 apps are not process-lifetime-managed like UWP. Code compiled under UWP now fails CS1061.", "fix": "Remove the Suspending/Resuming subscriptions; hook the main Window.Closed event (and, if needed, drop the resume path) to release device handles. Keep the existing OnAppSuspension/OnAppResume method bodies but change how they are wired." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "EventHandlerForDevice suspension pattern", "special_handling": "This helper class is copy-pasted verbatim across the entire Windows-universal-samples device-access family (SerialPort/CustomSerialDeviceAccess, Usb/CustomUsbDeviceAccess, CustomHidDeviceAccess, Bluetooth, PointOfService). All of them subscribe to Application.Suspending/Resuming, so the same CS1061 recurs everywhere." }
+  ],
+  "errors_encountered": [
+    { "error": "CS1061: 'Application' does not contain a definition for 'Suspending' (Scenario1_ConnectDisconnect.xaml.cs:215,223; EventHandlerForDevice.cs:398,406)", "root_cause": "Application.Suspending event removed in WinUI 3.", "fix": "Replace with Window.Closed-based teardown; remove Resuming path." },
+    { "error": "CS1061: 'Application' does not contain a definition for 'Resuming'", "root_cause": "Application.Resuming event removed in WinUI 3.", "fix": "Remove; no direct desktop equivalent." },
+    { "error": "WMC0909: Cannot resolve DataType local:Scenario (MainPage.xaml:37); WMC1111: DataTemplates containing x:Bind need x:DataType (MainPage.xaml:38); WMC9999: Xaml Internal Error: Object reference not set", "root_cause": "Cascade: the 4 CS1061 errors fail the C# compile, so the XAML compiler cannot resolve the (present, public) SDKTemplate.Scenario type behind x:DataType='local:Scenario', which surfaces as WMC0909/WMC1111 and a WMC9999 internal crash. The x:DataType was actually present and correct.", "fix": "Resolve the upstream C# compile errors first; the WMC errors then disappear." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "EventHandlerForDevice.cs RegisterForAppEvents / Scenario1_ConnectDisconnect.xaml.cs StartHandlingAppEvents", "symptom": "Left App.Current.Suspending/Resuming subscriptions unchanged -> 4 CS1061 build errors -> app never compiled or launched (score 0, all 4 features fail).", "turns_or_retries": "Not resolved before trial end.", "root_cause": "No TODO was injected at these lines and PATTERNS.md #lifecycle section says nothing about Suspending/Resuming being removed, so the agent had no signal or guidance to adapt them.", "how_resolved": "Unresolved.", "preventable_by": "Add Application.Suspending/Resuming to unsupported-api-inventory.json (routes a #lifecycle TODO) and document the Window.Closed replacement in the PATTERNS.md #lifecycle section." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}
