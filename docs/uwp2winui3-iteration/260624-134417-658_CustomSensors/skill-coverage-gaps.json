@@ -1,0 +1,23 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Ported UWP code produced a wave of 16 nullable warnings (CS8618 non-nullable field/property not initialized, CS8625 null literal to non-nullable) because the WinUI 3 scaffold enables <Nullable>enable</Nullable> while UWP projects default to nullable disabled.",
+      "evidence": "build-events.jsonl T34 build output: 'SampleConfiguration.cs(31,23): warning CS8618 ...', 'Scenario1_DataEvents.xaml.cs(45,16): warning CS8618 ... customSensor', 'Scenario2_Polling.xaml.cs(75,40): warning CS8625 ...' (16 warnings total). Dev-agent spent extra edit passes at T29 and T38 annotating fields.",
+      "covered_at": "MIGRATION-PATTERNS.md line 186 — a single inline comment '// With <Nullable>enable</Nullable>, declare as nullable since the assignment only happens during OnLaunched.' inside the Windowing section, applied only to App.MainWindow.",
+      "why_missed": "under-emphasized — the nullable consequence is mentioned once, scoped to one specific field in the Windowing example, so it reads as a windowing detail rather than a project-wide rule that every ported UWP field/assignment will trip.",
+      "proposed_improvement": "Promote the existing one-line nullable remark into a short, general 'Nullable reference types' note that states the scaffold enables <Nullable>enable</Nullable>, lists the recurring warnings (CS8618 deferred-init field/property, CS8625/CS8602 null literals) and the standard fixes (nullable-annotate deferred-init fields, null-forgive after guaranteed init). Keep it tight; do not disable nullable.",
+      "generalizes": "EVERY UWP->WinUI 3 migration inherits a nullable-enabled scaffold while the source UWP code was written nullable-disabled, so this warning wave and its fixes recur in essentially every scenario that ports non-trivial code-behind."
+    },
+    {
+      "problem": "x:Bind against a const/static member (FEATURE_NAME) failed the build with CS0176 'cannot be accessed with an instance reference', blocking the first build.",
+      "evidence": "build-events.jsonl T34 build output: 'MainPage.g.cs(146,50): error CS0176: Member MainPage.FEATURE_NAME cannot be accessed with an instance reference; qualify it with a type name instead'; T35 assistant: 'FEATURE_NAME is a const so can't use x:Bind'. Fixed at T36 by binding an instance wrapper 'public string FeatureName => FEATURE_NAME;'.",
+      "covered_at": "MIGRATION-PATTERNS.md lines 683-685 — the '### x:Bind and compiled bindings' section, which currently only discusses namespace type-not-found errors (XLS0414/MC3074).",
+      "why_missed": "not prominent — the x:Bind section exists but says nothing about binding to static/const members; the only x:Bind failure mode it names is a stale-namespace one, so the agent had no pointer to the CS0176 static-access rule.",
+      "proposed_improvement": "Add one sentence to the existing x:Bind section: x:Bind resolves an INSTANCE path, so binding a static/const member (e.g. the SDK-sample FEATURE_NAME const) emits CS0176 — type-qualify it ({x:Bind local:MyPage.FEATURE_NAME}) or expose an instance wrapper property.",
+      "generalizes": "The Windows SDK UWP sample template (used across many scenarios) declares 'public const string FEATURE_NAME' and other static members, and any migrated XAML that x:Binds a static/const value hits the same CS0176 regardless of scenario."
+    }
+  ]
+}

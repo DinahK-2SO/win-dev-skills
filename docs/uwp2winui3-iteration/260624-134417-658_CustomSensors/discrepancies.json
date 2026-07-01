@@ -1,0 +1,16 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Data events scenario (Enable/Disable, CO2 level, status)", "status": "pass", "reason": "Enable responds with 'No custom sensor found' (correct hardware-gated behavior), Disable disabled initially, CO2 level 'No data'. Matches UWP.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Polling scenario (Get CO2 level, CO2 level, status)", "status": "pass", "reason": "Get CO2 level responds 'No custom sensor found', CO2 level 'No data'. Matches UWP.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "all screenshots", "uwp": "rendered UI visible", "winui": "blank white client area (title bar only)", "screenshot_ref": "parity/winui3/screenshots/*.png" }
+  ],
+  "missing_features": [],
+  "summary": "No functional or structural discrepancies. Both scenarios reproduce UWP controls, disabled states, output text and behavior. The blank WinUI 3 screenshots are a known DirectComposition/PrintWindow capture artifact (UIA tree fully populated, controls respond), not a migration defect. All improvement signal comes from build-time friction (CS0176 x:Bind-to-const and a CS8618/CS8625 nullable warning wave)."
+}

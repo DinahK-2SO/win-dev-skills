@@ -1,0 +1,21 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Agent ran 'winapp build' at final verification; the winapp CLI has no 'build' subcommand.",
+      "evidence": "build-events.jsonl T44 output: ''build' was not matched...Unrecognized command or argument 'build''; T45 assistant: 'winapp build isn't a command in this version — the build was already confirmed via dotnet build'.",
+      "covered_clearly_at": "SKILL.md / plan-and-apply guidance consistently use native 'dotnet build' / 'dotnet run'; the skill never instructs 'winapp build'. Validate-UwpMigration.ps1 already runs dotnet build.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already prescribes the correct native dotnet build path and the validator ran it successfully; the agent invented a non-existent subcommand and immediately self-corrected. A capable model on re-run would use dotnet build. Adding 'don't run winapp build' text would just bloat the skill."
+    },
+    {
+      "problem": "Agent produced a malformed constructor while editing the scenario files and had to restore the correct structure.",
+      "evidence": "build-events.jsonl T29-T32 assistant messages: 'I need to fix the malformed constructor. Let me restore the correct structure'.",
+      "covered_clearly_at": "N/A — this is an editing mechanics error, not a migration-knowledge topic the skill could or should cover.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Purely an edit slip during code modification, unrelated to any UWP->WinUI 3 guidance; self-corrected within the same session. No generalizable skill content would prevent it."
+    }
+  ]
+}

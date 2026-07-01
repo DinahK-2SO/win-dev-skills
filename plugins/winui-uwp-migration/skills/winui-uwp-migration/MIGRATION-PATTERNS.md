@@ -684,6 +684,15 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 `x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
 
+`x:Bind` resolves an **instance** path, so binding a `static`/`const` member (e.g. the SDK-sample `public const string FEATURE_NAME`) fails the build with `CS0176` "cannot be accessed with an instance reference". Either type-qualify the path (`{x:Bind local:MainPage.FEATURE_NAME}`) or expose an instance wrapper property (`public string FeatureName => FEATURE_NAME;`) and bind that.
+
+### Nullable reference types
+
+The WinUI 3 scaffold enables `<Nullable>enable</Nullable>`, but UWP projects default to nullable-*disabled*. Ported code-behind therefore lights up warnings that were silent in UWP — expect a wave of them and clean them up rather than suppressing nullable:
+
+- `CS8618` (non-nullable field/property not initialized in the constructor): for fields assigned later (deferred init in `OnLaunched`, `OnNavigatedTo`, a `Loaded` handler, or after an async device call), declare the field **nullable** — `private CustomSensor? customSensor;` — not `required`.
+- `CS8625` (null literal to non-nullable) / `CS8602` (dereference of a possibly-null reference): annotate the member as nullable, or null-forgive (`x!`) only where a value is genuinely guaranteed by lifecycle.
+
 ### Page root element
 
 WinUI 3 `Page` is still a valid root and is the right target for content navigated to via `Frame`. Keep `Page` as the root for any source `Page`. Only `MainPage` itself is replaced by `MainWindow` (see Shell Conversion in SKILL.md Step 3) — never wholesale convert a content `Page` into a `Window`.

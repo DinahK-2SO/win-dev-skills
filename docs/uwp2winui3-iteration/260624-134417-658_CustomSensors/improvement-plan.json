@@ -1,0 +1,30 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "WinUI 3 scaffold enables <Nullable>enable</Nullable> over nullable-disabled UWP source, producing a wave of CS8618/CS8625 warnings on ported code-behind that the dev-agent had to clean up manually.",
+      "evidence": "build-events.jsonl T34: 16x CS8618/CS8625 (e.g. 'Scenario1_DataEvents.xaml.cs(45,16): warning CS8618 ... customSensor'); lessons.json errors_encountered + dev_agent_struggles (T29, T38).",
+      "root_cause": "Skill mentioned <Nullable>enable</Nullable> only once, scoped to a single App.MainWindow field (MIGRATION-PATTERNS.md:186); no general rule that all ported UWP code trips the nullable analyzer.",
+      "tier": 3,
+      "change": "Added a concise '### Nullable reference types' subsection to MIGRATION-PATTERNS.md naming the recurring warnings (CS8618 deferred-init fields, CS8625/CS8602 null literals) and the standard fixes (nullable-annotate deferred-init fields; null-forgive only where lifecycle guarantees a value).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Dev-agent writes nullable-correct fields on the first pass, eliminating the CS8618/CS8625 warning wave and the extra edit passes.",
+      "falsifiable_check": "On re-run, dotnet build emits 0 CS8618/CS8625/CS8602 warnings for ported code-behind (vs 16 here), and no dedicated nullable-cleanup turns appear in build-events.jsonl."
+    },
+    {
+      "problem": "x:Bind against a const/static member (FEATURE_NAME) failed the build with CS0176, the only hard build error in the trial.",
+      "evidence": "build-events.jsonl T34: 'MainPage.g.cs(146,50): error CS0176: Member MainPage.FEATURE_NAME cannot be accessed with an instance reference'; T35-T36 fix.",
+      "root_cause": "The x:Bind section (MIGRATION-PATTERNS.md:683-685) covered only namespace/type-not-found failures, saying nothing about static/const binding resolving to an illegal instance path.",
+      "tier": 3,
+      "change": "Added one sentence to the existing '### x:Bind and compiled bindings' section: static/const targets emit CS0176 under x:Bind; type-qualify ({x:Bind local:MainPage.FEATURE_NAME}) or expose an instance wrapper property.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Dev-agent type-qualifies or wraps static/const x:Bind targets, avoiding CS0176 on the first build.",
+      "falsifiable_check": "On re-run, no CS0176 error appears in build-events.jsonl and the first dotnet build of the shell succeeds."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier 0/eval-capture: WinUI 3 window screenshots render blank (DirectComposition/PrintWindow limitation) — verification relies on the UIA tree. This is an eval-instrument limitation, out of scope for the migration skill."
+  ]
+}

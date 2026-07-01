@@ -1,0 +1,31 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "T44 validator PASS (0 warnings, 0 errors on dotnet build) confirmed the migration was complete before the agent stopped." },
+    { "tool": "Get-MigrationPattern.ps1 / MIGRATION-PATTERNS.md", "evidence": "T12 the agent fetched windowing + namespace patterns and used them to resolve the TODOs correctly." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Reports PASS while dotnet still emits 16 nullable warnings (CS8618/CS8625); the agent had to notice and clean these up manually across turns.", "suggested_tweak": "N/A — warnings are acceptable; the gap is guidance, not tooling." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Custom.CustomSensor", "special_handling": "Ported unchanged; hardware-gated. With no CO2 sensor present, GetDeviceSelector/FromIdAsync yields no device and the app correctly shows 'No custom sensor found'. No WinUI-specific shim required." }
+  ],
+  "errors_encountered": [
+    { "error": "MainPage.g.cs(146,50): error CS0176: Member 'MainPage.FEATURE_NAME' cannot be accessed with an instance reference", "root_cause": "XAML used {x:Bind FEATURE_NAME} against a const/static member. x:Bind generates an instance-qualified access path, which is illegal for static/const members.", "fix": "Bind to an instance member instead — the agent added 'public string FeatureName => FEATURE_NAME;' and bound {x:Bind FeatureName}. (Alternatively type-qualify: {x:Bind local:MainPage.FEATURE_NAME}.)" },
+    { "error": "SampleConfiguration.cs / Scenario*.xaml.cs: 16x warning CS8618 (non-nullable field/property not initialized) and CS8625 (null literal to non-nullable)", "root_cause": "The WinUI 3 scaffold enables <Nullable>enable</Nullable>, but the ported UWP code declared fields like 'private CustomSensor customSensor;' and passed null literals as if nullable were off (UWP projects default to nullable disabled).", "fix": "Made deferred-init fields nullable ('private CustomSensor? customSensor;') and null-annotated the null-literal call sites." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "T35-T36 build", "symptom": "One hard build error CS0176 on x:Bind to the FEATURE_NAME const blocked the first build.", "turns_or_retries": "1 build cycle", "root_cause": "No skill guidance that x:Bind cannot resolve static/const members via an instance path.", "how_resolved": "Rebound to an instance-property wrapper.", "preventable_by": "A note in the MIGRATION-PATTERNS.md x:Bind section that static/const targets need a type-qualified path or an instance wrapper (CS0176)." },
+    { "where": "T29, T38 nullable cleanup", "symptom": "16 CS8618/CS8625 warnings from ported UWP code under the nullable-enabled scaffold; agent spent extra edit turns annotating fields.", "turns_or_retries": "2 edit passes", "root_cause": "Skill only mentions <Nullable>enable</Nullable> once for a single App.MainWindow field; no general guidance that ALL ported UWP code will trip nullable warnings.", "how_resolved": "Declared deferred-init fields nullable and annotated null call sites.", "preventable_by": "A general nullable-migration note listing the CS8618/CS8625/CS8602 wave and the standard fixes (nullable field for deferred init, null-forgive after guaranteed init)." },
+    { "where": "T29-T32", "symptom": "Agent produced a malformed constructor while editing scenario files and had to restore it.", "turns_or_retries": "2 turns", "root_cause": "Ordinary edit slip, not a knowledge gap.", "how_resolved": "Re-edited to the correct structure.", "preventable_by": "N/A — dev-agent slip." },
+    { "where": "T44-T45", "symptom": "Agent ran 'winapp build' which does not exist in this winapp CLI version.", "turns_or_retries": "1 turn", "root_cause": "Agent assumed a winapp build subcommand; the skill never instructs 'winapp build'.", "how_resolved": "Fell back to the dotnet build already run by the validator.", "preventable_by": "N/A — dev-agent slip; the skill correctly uses native dotnet build." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 window screenshots capture a blank white client area (title bar only) due to DirectComposition/PrintWindow limitation.", "workaround": "Verification done via the populated UIA tree + control actuation, not pixels. This is an eval-capture artifact, not a migration defect." }
+  ]
+}

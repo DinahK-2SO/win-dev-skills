@@ -1,0 +1,20 @@
+{
+  "scenario": "CustomSensors",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\CustomSensors\\cs",
+  "features": [
+    {
+      "number": 1,
+      "title": "Data events",
+      "controls": ["ScenarioEnableButton (Enable)", "ScenarioDisableButton (Disable)"],
+      "outputs": ["InputTextBlock (description)", "ScenarioOutputCO2Level (CO2 level ppmv)", "StatusBlock"],
+      "expected_behavior": "Enable registers a CO2 custom-sensor DataReport event listener; with no sensor present the status shows 'No custom sensor found'. Disable is greyed until Enable succeeds. CO2 level shows 'No data' until a report arrives."
+    },
+    {
+      "number": 2,
+      "title": "Polling",
+      "controls": ["GetCO2LevelButton (Get CO2 level)"],
+      "outputs": ["InputTextBlock (description)", "ScenarioOutputCO2Level (CO2 level ppmv)", "StatusBlock"],
+      "expected_behavior": "Get CO2 level polls the custom sensor for its latest reading; with no sensor present the status shows 'No custom sensor found'. CO2 level shows 'No data'."
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "featureName": "CustomSensors",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\CustomSensors\\cs",
+  "generated": "2026-07-02T04:47:02.0095690+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Data events",
+      "class": "Scenario1_DataEvents",
+      "slug": "Data_events",
+      "screenshot": "01_Data_events.png",
+      "controls": [
+        {
+          "name": "ScenarioEnableButton",
+          "type": "Button",
+          "label": "Enable",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ScenarioDisableButton",
+          "type": "Button",
+          "label": "Disable",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Enable",
+          "alt": "ScenarioEnableButton",
+          "type": "Button",
+          "label": "Enable",
+          "name": "ScenarioEnableButton",
+          "event": "Click"
+        },
+        {
+          "target": "Disable",
+          "alt": "ScenarioDisableButton",
+          "type": "Button",
+          "label": "Disable",
+          "name": "ScenarioDisableButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutputCO2Level",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Polling",
+      "class": "Scenario2_Polling",
+      "slug": "Polling",
+      "screenshot": "02_Polling.png",
+      "controls": [
+        {
+          "name": "GetCO2LevelButton",
+          "type": "Button",
+          "label": "Get CO2 level",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get CO2 level",
+          "alt": "GetCO2LevelButton",
+          "type": "Button",
+          "label": "Get CO2 level",
+          "name": "GetCO2LevelButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutputCO2Level",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

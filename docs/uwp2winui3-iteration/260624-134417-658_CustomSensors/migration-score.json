@@ -1,0 +1,33 @@
+{
+  "scenario": "CustomSensors",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (UWP launched Release, pid 26832, windowTitle 'CustomSensors'; golden frame captured. UWP CoreWindow is hosted by ApplicationFrameHost so its controls are not UIA-drivable; golden is visual-only, no per-control behavioral baseline).",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "capture_caveat": "WinUI 3 screenshots render as blank white client area (title bar only) due to a known DirectComposition/PrintWindow capture limitation. NOT a blank page: the live UIA tree is fully populated and laid out, and controls respond when invoked. Verdicts are based on the populated UIA tree + behavioral responses matching the UWP source.",
+  "features": [
+    {
+      "name": "Data events",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Data_events.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Data_events.png",
+      "note": "Coverage 2/2. Enable button responds -> status 'No custom sensor found' (correct hardware-gated behavior; no CO2 sensor present). Disable is correctly disabled initially. CO2 level shows 'No data'. Matches UWP source. UWP golden control actuation unavailable (ApplicationFrameHost UIA limitation), so uwp_responded is null; no regression."
+    },
+    {
+      "name": "Polling",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Polling.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Polling.png",
+      "note": "Coverage 1/1. Get CO2 level button responds -> status 'No custom sensor found' (correct hardware-gated behavior). CO2 level shows 'No data'. Matches UWP source. UWP golden control actuation unavailable; uwp_responded null; no regression."
+    }
+  ]
+}
