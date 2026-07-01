@@ -1,0 +1,14 @@
+{
+  "scenario": "ContentIndexer",
+  "index": 96,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Validate-UwpMigration FAILed with '14 row(s) still Status=copied' because the dev-agent had not flipped MIGRATION-MAPPING.md Status from the seeded 'copied' to 'done' before running the validator.",
+      "evidence": "session-log.txt line 3353 ([FAIL] ... 14 row(s) still Status=copied); resolved in turns 33-34 by a bulk 'copied'->'done' replace, then re-run → PASS (line 3427).",
+      "covered_clearly_at": "MIGRATION-MAPPING.md header seeded by Initialize-UwpMigration.ps1 (lines 448-450): 'Do not add or remove rows during Steps 2-5; only refine the Triage label and flip the Status.' The validator check #3 also explicitly enforces 'no row stuck at Status=copied'.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The workflow is prominently stated in the seeded mapping file and enforced by the validator; the agent simply ran the validator before flipping and immediately self-corrected. A capable model on re-run flips statuses as it completes files with no skill change needed."
+    }
+  ]
+}

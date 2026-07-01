@@ -1,0 +1,20 @@
+{
+  "scenario": "ContentIndexer",
+  "index": 96,
+  "applied": true,
+  "items": [
+    {
+      "problem": "A correct migration with zero deferred files always emits a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency', pulling the dev-agent into investigating a non-issue at the finish line.",
+      "evidence": "session-log.txt lines 3364 & 3418 (WARN on both validator runs); turns 35-36 the dev-agent opens MIGRATION-DEFERRED.md to check it, on a 100/100 app. Root cause found by grepping the two scripts: Initialize seeds '| (none) | — |' (Initialize-UwpMigration.ps1 line 480) but Validate only treats the file as clean if it matches 'No items deferred' (Validate-UwpMigration.ps1 line 267).",
+      "root_cause": "The bootstrap seeder and the validator use inconsistent empty-deferred sentinels, so the zero-defer case (the common case) always trips the else-branch WARN.",
+      "tier": 1,
+      "change": "Align the empty-deferred sentinel across the two scripts: (1) Initialize-UwpMigration.ps1 now writes an explicit '_No items deferred._' note in the zero-defer branch; (2) Validate-UwpMigration.ps1 now also accepts the '| (none) |' placeholder row as clean (defensive for already-seeded/hand-edited projects). Both encode one rule: an empty deferred list is a valid, expected state and must not produce a WARN.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1, skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Zero-defer migrations pass the DEFERRED.md consistency check cleanly; the dev-agent no longer spends turns investigating a benign WARN.",
+      "falsifiable_check": "Re-run Validate-UwpMigration.ps1 on any migration with no deferred files → it prints '[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes ...' instead of the '[WARN] ... check consistency'. A genuine inconsistency (mapping has no defer rows but DEFERRED.md still lists a real file) still WARNs — verified: '| Foo.cs | speech |' stays flagged."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/style: the scaffold pastes non-nullable-annotated UWP code into a net10 project with <Nullable>enable>, producing ~24-48 CS86xx nullable warnings on every migration. Harmless (0 WUI analyzer warnings, build/score unaffected) but noisy; consider whether the scaffold csproj should set <Nullable>disable</Nullable> to match UWP semantics. Left for a human because it is opinionated and could mask real null issues."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "scenario": "ContentIndexer",
+  "index": 96,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "A correct migration with zero deferred files always emits a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency', causing the dev-agent to stop and investigate a non-issue.",
+      "evidence": "session-log.txt lines 3364 and 3418 (WARN printed on both validator runs); turns 35-36 show the dev-agent opening MIGRATION-DEFERRED.md to check the WARN before declaring done, on an app that scored 100/100.",
+      "skill_search": "grepped Validate-UwpMigration.ps1 and Initialize-UwpMigration.ps1 for DEFERRED / 'No items deferred' / '(none)'",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize-UwpMigration.ps1 line 480 seeds the empty file with '| (none) | — |'; Validate-UwpMigration.ps1 line 267 only treats the file as clean when it matches the literal 'No items deferred' — the two sentinels disagree, so the else-branch WARN always fires when there are zero defer rows.",
+      "root_cause": "The bootstrap seed and the validator use inconsistent empty-deferred sentinels. The '(none)' placeholder written by the seed is never recognized by the validator as the clean state.",
+      "proposed_fix": "Align the sentinel in both scripts: (1) Initialize writes an explicit 'No items deferred.' note in the zero-defer case; (2) Validate also accepts the '| (none) |' placeholder row as clean. Either alone fixes it; doing both makes it robust to already-seeded projects.",
+      "generalizes": "Deferring zero APIs is the common case for the many UWP samples that use no unsupported APIs (this whole ContentIndexer sample deferred nothing). Every such migration currently trips the same false WARN and burns dev-agent attention/turns at the finish line, regardless of scenario."
+    }
+  ]
+}

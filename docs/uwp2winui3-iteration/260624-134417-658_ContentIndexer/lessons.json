@@ -1,0 +1,30 @@
+{
+  "scenario": "ContentIndexer",
+  "index": 96,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied 14 files, mass-rewrote namespaces, seeded MIGRATION-MAPPING.md and injected TODO markers; agent proceeded straight to per-file triage (session-log turns ~10-30)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught the one process gap (14 rows still Status=copied) and ran a clean dotnet build (48 warnings, 0 WUI analyzer warnings) + smoke launch; drove the app to PASS (session-log lines 3348-3428)." },
+    { "tool": "dotnet build -p:Platform=$arch", "evidence": "Built succeeded first attempt: 'Build succeeded with 24 warning(s)' / BUILD_EXIT=0 (session-log lines 3326-3327)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 (check 4: MIGRATION-DEFERRED.md consistency)", "problem": "Emits a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency' when there are zero deferred files.", "evidence": "session-log lines 3364 and 3418; the app was actually complete and correct (score 100)." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 / Initialize-UwpMigration.ps1", "limitation": "The two scripts disagree on the empty-deferred sentinel: Initialize seeds '| (none) | — |' (Initialize-UwpMigration.ps1 line 480) but Validate only treats the file as clean when it matches the literal 'No items deferred' (Validate-UwpMigration.ps1 line 267), so the zero-defer case always WARNs.", "suggested_tweak": "Align the sentinel: have Initialize write an explicit 'No items deferred.' note, and have Validate also accept the '(none)' placeholder row as clean." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Storage.Search.ContentIndexer", "special_handling": "Preserved as-is — the platform Search Indexer APIs work unchanged in WinUI 3 desktop; retrieve/query results remain system-Search-Indexer gated exactly as in the UWP source." }
+  ],
+  "errors_encountered": [
+    { "error": "Validate-UwpMigration FAIL: '14 row(s) still Status=copied'", "root_cause": "Agent finished migrating files but had not flipped MIGRATION-MAPPING.md Status from the seeded 'copied' to 'done'.", "fix": "Bulk-replaced '| copied |' with '| done |' in MIGRATION-MAPPING.md, then re-ran validator → PASS (session-log turns 33-34)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "End of run, after validator PASS", "symptom": "Dev-agent stopped to open and inspect MIGRATION-DEFERRED.md to decide whether the '[WARN] ... check consistency' signalled a real problem.", "turns_or_retries": "~2 turns (35-36)", "root_cause": "Initialize seeds the empty-deferred file with a '(none)' placeholder that the validator does not recognize as the 'clean' sentinel, so a correct zero-defer migration still WARNs.", "how_resolved": "Agent concluded the WARN was a harmless template placeholder and declared done.", "preventable_by": "Make Initialize-UwpMigration.ps1 and Validate-UwpMigration.ps1 agree on the empty-deferred sentinel so a zero-defer migration produces a PASS, not a WARN." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Scoring session could not raster the WinUI window (blank DirectComposition capture) nor drive the UWP CoreWindow UIA/input.", "workaround": "Score relied on populated per-scenario UIA trees + manual behavioral actuation; not a migration defect and out of scope for the migration skill." }
+  ]
+}

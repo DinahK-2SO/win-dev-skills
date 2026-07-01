@@ -1,0 +1,16 @@
+{
+  "scenario": "ContentIndexer",
+  "index": 96,
+  "applied": true,
+  "bullets": [
+    "Fix spurious empty-MIGRATION-DEFERRED.md validator WARN: align the sentinel so a zero-defer migration (the common case) passes cleanly instead of pulling the dev-agent into a non-issue.",
+    "Initialize-UwpMigration.ps1 now writes an explicit '_No items deferred._' note when nothing is deferred; Validate-UwpMigration.ps1 also accepts the existing '| (none) |' placeholder as clean."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": [
+    "Scaffold emits ~24-48 nullable (CS86xx) warnings because non-annotated UWP code lands in a <Nullable>enable</Nullable> net10 project; harmless but noisy — consider <Nullable>disable</Nullable>."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "scenario": "ContentIndexer",
+  "index": 96,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Add item to the index using the ContentIndexer", "status": "pass", "reason": "7/7 controls present; AddToIndexButton invoked and responded (+2 status tokens).", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Update and delete indexed items using the ContentIndexer", "status": "pass", "reason": "All controls present with AutomationIds and correct labels.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Retrieve indexed items added using the ContentIndexer", "status": "pass", "reason": "Add/Retrieve buttons wired to ContentIndexer.CreateQuery().GetAsync(); system-Search-Indexer gated exactly like the UWP source.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Check the index revision number", "status": "pass", "reason": "CheckIndexRevisionButton present and wired to the revision comparison.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Add indexed items by using appcontent-ms files", "status": "pass", "reason": "Actuated -> sample1/2/3.appcontent-ms added to the Indexed folder.", "suspected_skill_gap": "" },
+    { "id": 6, "text": "Delete indexed appcontent-ms files", "status": "pass", "reason": "Add/Delete-single/Delete-all all produced correct functional output.", "suspected_skill_gap": "" },
+    { "id": 7, "text": "Retrieve indexed properties from appcontent-ms files", "status": "pass", "reason": "appcontent-ms files added; Retrieve wired and system-indexer gated like scenario 3.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No functional or parity discrepancies. All 7 scenarios present, reachable by verbatim titles, structurally complete, behaviorally functional. The scoring note's caveats (blank WinUI raster, UWP UIA/input unavailable, checklist under-count) are measurement-instrument limitations of that session, not migration defects. The only migration-skill signal is a spurious validator WARN on the empty MIGRATION-DEFERRED.md."
+}

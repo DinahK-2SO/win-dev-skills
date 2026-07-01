@@ -1,0 +1,50 @@
+{
+  "scenario": "ContentIndexer",
+  "featureName": "Content indexer C# sample",
+  "source": "uwp-samples-standalone/Samples/ContentIndexer/cs",
+  "gradingModel": "round(100 * (pass + 0.5*partial) / features_total)",
+  "features": [
+    {
+      "number": 1,
+      "title": "Add item to the index using the ContentIndexer",
+      "expectedControls": ["ItemKeyInput", "NameInput", "KeywordsInput", "CommentInput", "ContentInput", "LanguageInput", "AddToIndexButton"],
+      "expectedBehavior": "Filling the fields and clicking 'Add to index' pushes an item to the Windows Search Index via ContentIndexer.Update and reports a status message."
+    },
+    {
+      "number": 2,
+      "title": "Update and delete indexed items using the ContentIndexer",
+      "expectedControls": ["AddToIndexButton", "ItemNameInput", "UpdateNameButton", "DeleteKeywordsButton", "DeleteSingleItemButton", "DeleteMultipleItemsButton", "DeleteAllItemsButton"],
+      "expectedBehavior": "Add seed items, then update the ItemNameDisplay property, delete the Keywords property, and delete single/multiple/all items, each reporting status."
+    },
+    {
+      "number": 3,
+      "title": "Retrieve indexed items added using the ContentIndexer",
+      "expectedControls": ["AddToIndexButton", "RetrieveAllItemsButton", "RetrieveMatchingItemsButton"],
+      "expectedBehavior": "Add items, then retrieve all items or items matching a query ('0') via ContentIndexer.CreateQuery/GetAsync; results depend on the system Search Indexer having processed the items."
+    },
+    {
+      "number": 4,
+      "title": "Check the index revision number",
+      "expectedControls": ["CheckIndexRevisionButton"],
+      "expectedBehavior": "Clicking compares the tracked revision number against the indexer's reported revision and reports the result."
+    },
+    {
+      "number": 5,
+      "title": "Add indexed items by using appcontent-ms files",
+      "expectedControls": ["AddToIndexButton"],
+      "expectedBehavior": "Copies sample appcontent-ms files into the app's Indexed folder so the platform indexes them; reports the files added."
+    },
+    {
+      "number": 6,
+      "title": "Delete indexed appcontent-ms files",
+      "expectedControls": ["AddToIndexButton", "DeleteSingleItemButton", "DeleteAllItemsButton"],
+      "expectedBehavior": "Add appcontent-ms files, then delete a single item or all items from the Indexed folder; reports the files removed."
+    },
+    {
+      "number": 7,
+      "title": "Retrieve indexed properties from appcontent-ms files",
+      "expectedControls": ["AddToIndexButton", "RetrieveAllItemsButton", "RetrieveMatchingItemsButton"],
+      "expectedBehavior": "Add appcontent-ms files, then retrieve indexed properties for all items or a matching query ('Sample 1'); results depend on the system Search Indexer."
+    }
+  ]
+}

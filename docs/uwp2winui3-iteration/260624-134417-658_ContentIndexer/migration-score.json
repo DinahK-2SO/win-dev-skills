@@ -1,0 +1,78 @@
+{
+  "scenario": "ContentIndexer",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 7,
+  "features_pass": 7,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (partial): the original UWP app built (Release), deployed, and launched — process 'Indexer' (Windows.UI.Core.CoreWindow 'Content Indexer C# Sample'), scenario-1 default frame captured as the golden. Per-scenario UWP navigation and control actuation were NOT possible: the CoreWindow exposes an empty cross-process UIA tree and synthetic mouse input is blocked in this session (SetCursorPos/SendInput no-op). So only the scenario-1 UWP golden is genuine; there is no per-scenario UWP behavioral baseline.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "notes": "Structural parity gate = 100/100 (7/7 pass). Verdicts corroborated by manual behavioral actuation of the WinUI 3 app (all scenarios reachable by verbatim titles; add/delete/count/appcontent-ms operations produce correct functional output; retrieve/query buttons are wired to the real ContentIndexer API and are system-Search-Indexer gated exactly as the UWP source). WinUI rasters are blank due to a DirectComposition capture limitation in this session (no composited display surface), NOT an app defect — UIA trees are fully populated per scenario and descriptive text matches the sample. The checklist extractor under-counted controls for scenarios 2-7; the migration actually contains all source buttons (verified in the UIA tree). No dead controls and no functional discrepancies found.",
+  "features": [
+    {
+      "name": "Add item to the index using the ContentIndexer",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Add_item_to_the_index_using_the_ContentIndexer.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Add_item_to_the_index_using_the_ContentIndexer.png",
+      "note": "7/7 controls present (6 TextBoxes + AddToIndexButton); AddToIndexButton invoked and responded (+2 status tokens). uwp_responded not measurable (UWP UIA/input unavailable)."
+    },
+    {
+      "name": "Update and delete indexed items using the ContentIndexer",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_Update_and_delete_indexed_items_using_the_ContentIndexer.png",
+      "note": "All controls present with AutomationIds and correct labels: AddToIndexButton, ItemNameInput, UpdateNameButton, DeleteKeywordsButton, DeleteSingleItemButton, DeleteMultipleItemsButton, DeleteAllItemsButton (richer than checklist's single entry). No UWP per-scenario golden (navigation unavailable)."
+    },
+    {
+      "name": "Retrieve indexed items added using the ContentIndexer",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/03_Retrieve_indexed_items_added_using_the_ContentIndexer.png",
+      "note": "Add/Retrieve-all/Retrieve-matching buttons present. 'Add items to index' -> 'Number of items currently in the index: 3'. Retrieve buttons wired to ContentIndexer.CreateQuery().GetAsync() -> NotifyUser; visible results are system-Search-Indexer gated, identical to the UWP source handler."
+    },
+    {
+      "name": "Check the index revision number",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/04_Check_the_index_revision_number.png",
+      "note": "CheckIndexRevisionButton present and wired to the revision-number comparison; descriptive text matches the sample."
+    },
+    {
+      "name": "Add indexed items by using appcontent-ms files",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/05_Add_indexed_items_by_using_appcontent_ms_files.png",
+      "note": "'Add items to index' actuated -> status listed sample1/2/3.appcontent-ms added to the Indexed folder."
+    },
+    {
+      "name": "Delete indexed appcontent-ms files",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/06_Delete_indexed_appcontent_ms_files.png",
+      "note": "Add / Delete-single / Delete-all all actuated with correct functional output (files added, then sample1 deleted, then sample2/sample3 deleted)."
+    },
+    {
+      "name": "Retrieve indexed properties from appcontent-ms files",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/07_Retrieve_indexed_properties_from_appcontent_ms_files.png",
+      "note": "'Add items to index' actuated -> appcontent-ms files added; Retrieve buttons wired and system-Search-Indexer gated like scenario 3."
+    }
+  ]
+}
