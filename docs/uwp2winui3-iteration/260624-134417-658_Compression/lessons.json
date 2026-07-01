@@ -1,0 +1,27 @@
+{
+  "scenario": "Compression",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied 4 source files verbatim, seeded MIGRATION-MAPPING.md + TODO[migrate-NNN] markers; agent confirmed with Test-Path (exec #6) and proceeded cleanly." },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "Agent fetched the pickers/csproj/manifest anchors (exec #22,#25,#29) instead of loading the full MIGRATION-PATTERNS.md; picker interop applied correctly." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Final gate reported PASS (session-log L2302-2307): 0 WUI analyzer warnings, no rows stuck at Status=copied." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "edit (in-place editor) on SEQUENTIAL files", "limitation": "Scenario1.xaml.cs is marked SEQUENTIAL because Windows.Storage.Compression API names trip the output-safety filter; repeatedly naming Compressor/Decompressor in edit old_str/new_str is friction, so the agent fell back to a wholesale here-string Set-Content rewrite of the whole .cs (exec #42 backup, #43 rewrite).", "suggested_tweak": "Skill should explicitly forbid wholesale Set-Content/here-string rewrite of ANY bootstrap-copied source file (not just *.xaml) and reiterate edit-in-place for SEQUENTIAL .cs files." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "FileOpenPicker (Windows.Storage.Pickers)", "special_handling": "WinUI 3 desktop pickers must be initialized with the window HWND: WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow) + WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd). Agent applied this correctly (exec #43) from MIGRATION-PATTERNS.md#pickers." },
+    { "api": "Windows.Storage.Compression (Compressor/Decompressor)", "special_handling": "Supported on WinUI 3 desktop; namespace family trips the model output-safety filter, so bootstrap marked the file SEQUENTIAL." }
+  ],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    { "where": "Scenario1.xaml.cs (SEQUENTIAL file)", "symptom": "Agent abandoned in-place edit and rewrote the entire code-behind via a here-string piped to Set-Content -Encoding UTF8 (exec #43), after taking a backup (exec #42).", "turns_or_retries": "turns 22-26; one backup + one wholesale overwrite", "root_cause": "The fidelity rule that forbids wholesale-overwrite is scoped in SKILL.md only to '*.xaml' files; code-behind .cs has no equivalent prohibition, and SEQUENTIAL files (filtered API names) make in-place edits feel costly, so wholesale Set-Content is the path of least resistance.", "how_resolved": "Outcome happened to be faithful this time (visible descriptions live in Scenario1.xaml, not the .cs; build + validator passed).", "preventable_by": "Generalize the 'edit in place, never wholesale-overwrite the bootstrap copy' rule from *.xaml to ALL bootstrap-copied source files (incl. .cs code-behind/helpers), and warn against Set-Content/here-string fallback on SEQUENTIAL files." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Every winapp/PrintWindow screenshot of the migrated WinUI 3 main window rendered blank white (~7 KB) and the ComboBox popup rendered black, while the same tool captured the UWP CoreWindow golden fully (48 KB) and the native file dialog rendered fine.", "workaround": "None available to the migration skill — this is a WinUI 3 DirectComposition/swapchain render-to-capture limitation of the headless/non-interactive session (score note: parity/winui3 screenshots). Belongs to the eval/harness layer, not the migration skill." }
+  ]
+}

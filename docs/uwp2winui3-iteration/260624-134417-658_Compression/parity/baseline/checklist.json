@@ -1,0 +1,80 @@
+{
+  "featureName": "Compression",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Compression\\cs",
+  "generated": "2026-07-01T12:02:08.9265459+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Compression/Decompression sample",
+      "class": "Scenario1",
+      "slug": "Compression_Decompression_sample",
+      "screenshot": "01_Compression_Decompression_sample.png",
+      "controls": [
+        {
+          "name": "CompressAlgorithmComboBox",
+          "type": "ComboBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "CompressFileButton",
+          "type": "Button",
+          "label": "Compress File...",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Compress File...",
+          "alt": "CompressFileButton",
+          "type": "Button",
+          "label": "Compress File...",
+          "name": "CompressFileButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "DefaultTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "XpressTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "XpressHuffTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "MszipTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "LzmsTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "Progress",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

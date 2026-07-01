@@ -1,0 +1,14 @@
+{
+  "scenario": "Compression",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Build emitted 32 nullable-reference warnings (CS8600/CS8602/CS8618) from the ported UWP code, which predates nullable reference types.",
+      "evidence": "build-output.txt tail (CS8618 Title/ClassType, CS8600/CS8602 in Scenario1.xaml.cs); session-log reasoning turn 29-30.",
+      "covered_clearly_at": "SKILL.md > Step 4 validator check #6 explicitly scopes the build healthcheck to 'zero WUI analyzer warnings' (WUI000x), not CS-nullable warnings. The agent correctly reasoned these are harmless and non-blocking, and the validator PASSED.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Not actually a defect: nullable warnings on ported pre-nullable UWP code are expected and do not affect build/score. The skill already defines the pass bar (0 WUI warnings) prominently; a re-run behaves identically. No skill edit warranted."
+    }
+  ]
+}

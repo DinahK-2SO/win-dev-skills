@@ -1,0 +1,20 @@
+{
+  "scenario": "Compression",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "On the SEQUENTIAL code-behind Scenario1.xaml.cs, the dev-agent overwrote the entire file with a here-string piped to Set-Content instead of editing the bootstrap copy in place. It was faithful only by luck (visible text lived in the .xaml, not the .cs).",
+      "evidence": "build-events.jsonl exec #42 (backup Scenario1.xaml.cs.bak) + exec #43 (@'...full file...'@ | Set-Content Scenario1.xaml.cs -Encoding UTF8); reasoning turns 22-26. Classified in skill-coverage-gaps.json.",
+      "root_cause": "SKILL.md's 'never wholesale-overwrite the bootstrap copy' fidelity rule is scoped only to '*.xaml'; code-behind/helper .cs files have no equivalent prohibition, and SEQUENTIAL (filtered-API) files make Set-Content the path of least resistance. The validator's verbatim-text check covers XAML only, so a .cs rewrite is unguarded.",
+      "tier": 3,
+      "change": "Two surgical prose edits: (1) widen the Fidelity anti-overwrite rule from '*.xaml' to all bootstrap-copied source files (incl. *.xaml.cs and helper *.cs), noting the validator text-check is XAML-only so .cs rewrites are unguarded; (2) add a clause to the Step 1 SEQUENTIAL bullet: a filtered-API file is not a licence to wholesale-rewrite — keep editing in place, cross-linking the Fidelity rule.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "On re-run, the dev-agent edits code-behind and helper .cs in place rather than overwriting them, preserving user-visible strings verbatim even on SEQUENTIAL files.",
+      "falsifiable_check": "No `Set-Content` / here-string wholesale overwrite of a `*.cs` (or `*.xaml`) bootstrap-copied file appears in build-events.jsonl on a re-run, and Validate-UwpMigration.ps1 visible-text check stays clean; a Tier-3 (prose) change is used because a Tier-1 validator diff of arbitrary .cs verbatim text is infeasible (legitimate .cs edits are the norm)."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0 / eval-harness: WinUI 3 main-window and popup content rendered blank in every PrintWindow/winapp capture in this headless session (UWP golden and native file dialog captured fine). This is a DirectComposition/swapchain render-to-capture limitation of the capture environment, not a migration defect, and it is the sole cause of the PARTIAL (score 50). No migration-skill change can guarantee capture in this mode; the capture harness (e.g. forcing WARP/software rendering or an interactive desktop for WinUI 3 capture) is where this belongs. Do NOT edit the eval skills (winui3-parity-check / uwp-app-runner) to work around it."
+  ]
+}

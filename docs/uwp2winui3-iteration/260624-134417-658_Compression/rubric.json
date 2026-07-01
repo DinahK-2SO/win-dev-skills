@@ -1,0 +1,94 @@
+{
+  "scenario": "Compression",
+  "created_at": "2026-07-01T12:10:00+08:00",
+  "uwp_capture_status": "ok",
+  "features": [
+    {
+      "id": "scenario-navigation",
+      "area": "Shell",
+      "name": "Scenario list + sample title",
+      "description": "The app shows the 'Compression' sample title and a scenario list containing '1) Compression/Decompression sample', which is selected on launch.",
+      "expected_behaviour": [
+        "Header/title area reads 'Compression'",
+        "Scenario list contains the item '1) Compression/Decompression sample'",
+        "That scenario is selected and its page is shown on launch"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Compression_Decompression_sample.png",
+      "weight": 1
+    },
+    {
+      "id": "default-description",
+      "area": "Scenario 1",
+      "name": "Default algorithm description on load",
+      "description": "On load the DefaultTextBlock is visible showing 'DEFAULT: No compression algorithms explicitly specified. Xpress is used by default.'; all other algorithm descriptions are collapsed.",
+      "expected_behaviour": [
+        "The DEFAULT description text is visible on initial load",
+        "Xpress/XpressHuff/Mszip/Lzms descriptions are collapsed initially"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Compression_Decompression_sample.png",
+      "weight": 1
+    },
+    {
+      "id": "algorithm-combobox",
+      "area": "Scenario 1",
+      "name": "Algorithm ComboBox",
+      "description": "A ComboBox (CompressAlgorithmComboBox) offers 5 items: Default, Xpress, XpressHuff, Mszip, Lzms, with 'Default' selected (SelectedIndex=0).",
+      "expected_behaviour": [
+        "ComboBox shows 'Default' as the selected value on load",
+        "Opening the ComboBox lists Default, Xpress, XpressHuff, Mszip, Lzms"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Compression_Decompression_sample.png",
+      "weight": 2
+    },
+    {
+      "id": "algorithm-description-switch",
+      "area": "Scenario 1",
+      "name": "Description switches with algorithm selection",
+      "description": "SelectionChanged shows the description TextBlock for the newly selected algorithm and collapses the previously selected one.",
+      "expected_behaviour": [
+        "Selecting 'Xpress' shows the XPRESS description and hides the DEFAULT one",
+        "Each algorithm selection reveals only its matching description text"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "compress-file-button",
+      "area": "Scenario 1",
+      "name": "Compress File... button opens file picker",
+      "description": "Clicking 'Compress File...' (CompressFileButton) invokes DoScenario, which opens a FileOpenPicker (all file types) to select an input file.",
+      "expected_behaviour": [
+        "A 'Compress File...' button is present next to the ComboBox",
+        "Clicking it opens a single-file open picker with a '*' (All files) filter"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Compression_Decompression_sample.png",
+      "weight": 2
+    },
+    {
+      "id": "compress-decompress-progress",
+      "area": "Scenario 1",
+      "name": "Compress + decompress with progress log",
+      "description": "After a file is picked, the app compresses it with the selected algorithm, then decompresses it, writing a step-by-step log into the Progress TextBlock (picked / created / streams wired / bytes compressed / bytes decompressed).",
+      "expected_behaviour": [
+        "Progress text reports the picked file name",
+        "Progress text reports compressed byte count and decompressed byte count",
+        "Progress log matches the UWP sequence of messages"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "status-notification",
+      "area": "Shell",
+      "name": "Status bar notifications",
+      "description": "The shared status area (NotifyUser) shows 'Working...' during the operation and 'All done' on success, or the error message on failure.",
+      "expected_behaviour": [
+        "Status shows 'Working...' when the operation starts",
+        "Status shows 'All done' after a successful compress/decompress",
+        "Errors (e.g. cancelled picker) surface as an error status message"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

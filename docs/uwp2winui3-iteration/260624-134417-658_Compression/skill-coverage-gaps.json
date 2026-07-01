@@ -1,0 +1,15 @@
+{
+  "scenario": "Compression",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "On the SEQUENTIAL code-behind Scenario1.xaml.cs, the dev-agent abandoned in-place editing and overwrote the ENTIRE file with a here-string piped to Set-Content -Encoding UTF8, after first taking a .bak backup.",
+      "evidence": "build-events.jsonl exec #42 (Get-Content ... | Set-Content Scenario1.xaml.cs.bak) then exec #43 (@'...full file...'@ | Set-Content Scenario1.xaml.cs -Encoding UTF8). Reasoning at turns 22-26: 'the file header is slightly different from what I expected... view the whole file... then do the replacement.'",
+      "covered_at": "SKILL.md > Critical Rules > Fidelity, bullet: 'Do not regenerate XAML from scratch, and never overwrite a whole `*.xaml` file with freshly authored markup (e.g. a scripted Set-Content / here-string loop...)' — and Step 1 > perFileMode > SEQUENTIAL bullet (line 70).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Widen the existing 'never wholesale-overwrite the bootstrap copy' rule from '*.xaml' to ALL bootstrap-copied source files (code-behind .cs and helper classes included), and add one clause to the SEQUENTIAL bullet warning that a filtered-API file is NOT a license to fall back to Set-Content/here-string wholesale rewrite — keep editing in place. Do not invent a new topic; sharpen the wording that is already there.",
+      "generalizes": "Every UWP→WinUI 3 migration edits bootstrap-copied .cs code-behind and helper classes, and files touching filtered API namespaces (Compression, and other media/crypto/etc families) are routinely marked SEQUENTIAL. Wholesale Set-Content rewrite of a .cs is unguarded by the validator (its visible-text snapshot check covers XAML only), so it silently risks dropping or paraphrasing user-visible strings living in code-behind (e.g. NotifyUser/status messages) across many scenarios."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "scenario": "Compression",
+  "index": 0,
+  "score": 50,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Compression/Decompression sample renders + behaves faithfully vs UWP golden", "status": "partial", "reason": "Structural coverage 2/2, 'Compress File...' button live (opens real FileOpenPicker), ComboBox expands, source logic ported verbatim; graded PARTIAL only because every WinUI 3 window capture rendered blank so visual parity could not be confirmed.", "suspected_skill_gap": "None — this is an eval/environment swapchain render-to-capture limitation, not a migration defect. The migration skill produced a faithful, live app." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Main window initial render", "uwp": "Full content, 48 KB (parity/baseline/screenshots/01_Compression_Decompression_sample.png)", "winui": "Blank white, 7 KB (parity/winui3/screenshots/01_Compression_Decompression_sample.png)", "screenshot_ref": "parity/winui3/screenshots/01_Compression_Decompression_sample.png" },
+    { "feature": "Algorithm ComboBox dropdown", "uwp": "n/a", "winui": "PopupHost renders solid black (parity/winui3/screenshots/combo_open2.png)", "screenshot_ref": "parity/winui3/screenshots/combo_open2.png" }
+  ],
+  "missing_features": [],
+  "summary": "The migrated WinUI 3 app is structurally and behaviorally faithful (UIA tree fully laid out, Compress File button live, logic ported verbatim, validator PASS). The single scenario is graded PARTIAL solely because the WinUI 3 XAML content did not composite to a capturable surface in this headless session, so pixel parity with the UWP golden could not be confirmed. This is an environment/eval-capture limitation, not a functional migration gap."
+}
