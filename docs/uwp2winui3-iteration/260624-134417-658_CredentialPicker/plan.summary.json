@@ -1,0 +1,16 @@
+{
+  "scenario": "CredentialPicker",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add <a id=\"appxmanifest\"> anchor to MIGRATION-PATTERNS.md and point SKILL.md Step 2 at it, so manifest reconciliation is fetchable by its obvious anchor name (agent's -Anchor appxmanifest guess previously errored 'not found')",
+    "Generalize the nullable note in MIGRATION-PATTERNS.md beyond App.MainWindow to cover all copied UWP code (static back-pointers, unset auto-props, sender/e casts) that trips CS8618/CS8600/CS8602 under the scaffold's <Nullable>enable</Nullable>"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Hardware/OS-gated system dialogs (CredentialPicker.PickAsync) no-op in the headless eval environment — measurement gate, not a migration-skill fix."
+  ]
+}

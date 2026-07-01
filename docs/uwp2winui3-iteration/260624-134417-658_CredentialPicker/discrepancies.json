@@ -1,0 +1,17 @@
+{
+  "scenario": "CredentialPicker",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Scenario 1 — Message (9 controls): Message, Target, Launch, Domain, Username, Password, CredentialSaved, CheckboxState, Status; Launch calls PickAsync(target, message).", "status": "pass", "reason": "All 9 controls present with correct values; Launch wired (caught PickAsync COMException registered).", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Scenario 2 — Message+Caption (10 controls): adds Caption; Launch calls PickAsync(target, message, caption).", "status": "pass", "reason": "All 10 controls present; Caption='WindowCaption'; navigation distinct via UIA; Launch no-op is hardware-gated PickAsync (flagged, not a defect).", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Scenario 3 — CredentialPickerOptions (14 controls): adds SaveCheckboxSelection, ProtocolSelection, CustomProtocol, AlwaysShowDialog; Launch builds CredentialPickerOptions and calls PickAsync(options).", "status": "pass", "reason": "All 14 controls present incl. both ComboBoxes; preserves the UWP 'Protcol' label typo; Launch wired (hardware-gated no-op flagged).", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Launch (Scenario 2 & 3)", "uwp": "No UWP behavioral golden (UWP CoreWindow not UIA-drivable).", "winui": "Launch produced no new visible token when invoked (0/1 live) — CredentialPicker.PickAsync is hardware/OS-gated and throws COMException in headless.", "screenshot_ref": "parity/winui3/screenshots/02_Message_Caption.png, 03_CredentialPickerOptions.png" }
+  ],
+  "missing_features": [],
+  "summary": "100% structural parity, all three requirements pass. Only behavioral flags are the hardware-gated PickAsync no-op (environment, not a defect) and blank WinUI screenshots (capture limitation; content verified via UIA tree). No migration defects."
+}

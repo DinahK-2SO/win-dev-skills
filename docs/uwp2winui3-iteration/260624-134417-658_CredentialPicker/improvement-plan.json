@@ -1,0 +1,30 @@
+{
+  "scenario": "CredentialPicker",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Manifest reconciliation guidance not fetchable by its natural anchor name (`Get-MigrationPattern.ps1 -Anchor appxmanifest` errored 'not found').",
+      "evidence": "session-log.txt lines 1751-1757 (failed) then 1764 (recovered via csproj); skill-coverage-gaps.json item 1.",
+      "root_cause": "The Package.appxmanifest subsections live under the `csproj` <a id> with no anchor of their own, so the obvious `appxmanifest` anchor is unresolvable.",
+      "tier": 2,
+      "change": "Added `<a id=\"appxmanifest\"></a>` immediately before the '### Package.appxmanifest — reconcile image references' heading in MIGRATION-PATTERNS.md, and updated SKILL.md Step 2 to fetch `-Anchor appxmanifest` alongside `-Anchor csproj`. This also tightens the `csproj` fetch (now stops before the manifest content).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agents fetch manifest guidance directly by the obvious anchor on every packaged migration; no failed-call detour.",
+      "falsifiable_check": "On re-run, `Get-MigrationPattern.ps1 -Anchor appxmanifest` exits 0 and returns the manifest section (verified: it now does); the 'Anchor #appxmanifest not found' error no longer appears in the build log."
+    },
+    {
+      "problem": "Copied UWP sample code emits ~12 CS8618/CS8600/CS8602 nullable warnings under the scaffold's <Nullable>enable</Nullable>, chased down file-by-file.",
+      "evidence": "session-log.txt lines 2522-2556 (warning list), 2563 (agent comment), 1971/1986/2001 (MainPage.Current! fixes); skill-coverage-gaps.json item 2.",
+      "root_cause": "The nullable note in MIGRATION-PATTERNS.md only illustrated the App.MainWindow field; it did not state that ALL copied UWP code (static back-pointers, unset auto-props, sender/e casts) predictably trips CS86xx under the nullable-enabled scaffold.",
+      "tier": 3,
+      "change": "Generalized the existing nullable note (no new topic) to enumerate the three recurring warning shapes and their idiomatic fixes: framework-guaranteed statics → null-forgive (`MainPage.Current!`); unset auto-props → nullable/`required`; casts → null-check/forgive. Notes these are non-fatal but should be cleared for a clean validator run.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents clear all nullable residue in one pass instead of per-warning spelunking.",
+      "falsifiable_check": "On re-run, Validate-UwpMigration.ps1 reports 0 warnings on first validation and the build log shows fewer per-warning fix iterations."
+    }
+  ],
+  "deferred_to_human": [
+    "CredentialPicker.PickAsync (and other hardware/OS-gated system dialogs) no-op / throw COMException in the headless capture environment. This is an eval-environment gate, not a migration defect; no migration-skill change is appropriate. Note for harness owners if behavioral goldens for such APIs are ever needed."
+  ]
+}

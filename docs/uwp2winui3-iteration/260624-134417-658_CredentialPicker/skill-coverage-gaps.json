@@ -1,0 +1,23 @@
+{
+  "scenario": "CredentialPicker",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The agent could not fetch the Package.appxmanifest reconciliation guidance by its natural anchor name; `Get-MigrationPattern.ps1 -Anchor appxmanifest` errored 'Anchor #appxmanifest not found', costing a failed call before it recovered by guessing `-Anchor csproj`.",
+      "evidence": "session-log.txt lines 1751-1757 (failed appxmanifest call) then 1764 (recovered via csproj).",
+      "covered_at": "MIGRATION-PATTERNS.md '## Project File Updates' (<a id=\"csproj\">) → nested '### Package.appxmanifest — reconcile image references' + '### Manifest migration checklist (Windows.Desktop + runFullTrust)'. Content exists but only reachable under the `csproj` anchor; no `appxmanifest`/`manifest` id.",
+      "why_missed": "not prominent",
+      "proposed_improvement": "Add a dedicated <a id=\"appxmanifest\"> anchor immediately before the manifest subsections so the obvious anchor name resolves, and point SKILL.md Step 2 (Reconcile the project file) at `-Anchor appxmanifest` alongside `-Anchor csproj`.",
+      "generalizes": "Every packaged UWP→WinUI 3 migration must reconcile Package.appxmanifest (asset refs, Windows.Desktop target, rescap:runFullTrust). Agents naturally guess the anchor by the artifact name; a resolvable `appxmanifest` anchor makes the guidance reliably fetchable on every scenario, not just this one."
+    },
+    {
+      "problem": "Copied UWP sample code emitted ~12 CS8618/CS8600/CS8602 nullable warnings under the scaffold's <Nullable>enable</Nullable> (SampleConfiguration.cs Title/ClassType; MainPage.Current back-pointers and event-handler casts in the scenario code-behinds), which the agent had to chase down file-by-file.",
+      "evidence": "session-log.txt lines 2522-2556 (the warning list) and 2563 ('The warnings are just nullable annotations from the original code. Let me fix them'); fixes at 1971/1986/2001 (MainPage.Current!).",
+      "covered_at": "MIGRATION-PATTERNS.md '## Windowing' nullable note (line ~186): 'With <Nullable>enable</Nullable>, declare as nullable...' + null-forgive example — but scoped only to the App.MainWindow field.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Generalize the existing nullable note (do not add a new topic) to state that ANY copied UWP code triggers CS86xx under the nullable-enabled scaffold, with the three recurring shapes and their fixes: framework-guaranteed static back-pointers (e.g. MainPage.Current) → null-forgive; unset auto-props (Title/ClassType) → nullable or required; sender/e casts → null-check/forgive.",
+      "generalizes": "The scaffold always enables <Nullable>enable</Nullable> and UWP sample code across the whole SDK-sample family predates NRT (shared SampleConfiguration.cs, MainPage.Current pattern), so these exact warnings recur on essentially every migration; a general note clears them in one pass instead of per-warning spelunking."
+    }
+  ]
+}

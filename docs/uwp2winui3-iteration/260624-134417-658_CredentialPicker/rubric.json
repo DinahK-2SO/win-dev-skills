@@ -1,0 +1,28 @@
+{
+  "scenario": "CredentialPicker",
+  "source": "uwp-samples-standalone/Samples/CredentialPicker/cs",
+  "features": [
+    {
+      "number": 1,
+      "title": "Message",
+      "controls_expected": 9,
+      "key_controls": ["Message (TextBox='Enter your credentials')", "Target (TextBox='contoso.com')", "Launch (Button)", "Domain", "Username", "Password", "CredentialSaved", "CheckboxState", "Status"],
+      "action": "Launch -> CredentialPicker.PickAsync(target, message); write returned Domain/Username/Password/CredentialSaved/CheckboxState/Status"
+    },
+    {
+      "number": 2,
+      "title": "Message+Caption",
+      "controls_expected": 10,
+      "key_controls": ["Message", "Caption (TextBox='WindowCaption')", "Target", "Launch", "Domain", "Username", "Password", "CredentialSaved", "CheckboxState", "Status"],
+      "action": "Launch -> PickAsync(target, message, caption)"
+    },
+    {
+      "number": 3,
+      "title": "CredentialPickerOptions",
+      "controls_expected": 14,
+      "key_controls": ["Message", "Caption", "Target", "SaveCheckboxSelection (ComboBox)", "ProtocolSelection (ComboBox)", "CustomProtocol (TextBox)", "AlwaysShowDialog (CheckBox)", "Launch", "Domain", "Username", "Password", "CredentialSaved", "CheckboxState", "Status"],
+      "action": "Launch -> PickAsync(CredentialPickerOptions{...}) honoring protocol/save-option/always-show"
+    }
+  ],
+  "grading": "pass = reachable + full control coverage + faithful content/behavior; partial = recognizable but missing/dead controls; fail = blank/unreachable or dropped scenario"
+}

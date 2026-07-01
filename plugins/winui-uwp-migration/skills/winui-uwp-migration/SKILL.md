@@ -118,6 +118,13 @@ The scaffold's `.csproj` is wired for WinAppSDK; the UWP `.csproj` at `.uwp-sour
 
 Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are incompatible.
 
+Then reconcile the **manifest** (packaged apps always need this — asset references,
+`Windows.Desktop` target, `rescap:runFullTrust`). Fetch it by its own anchor:
+
+```powershell
+& "<skill-root>/scripts/Get-MigrationPattern.ps1" -Anchor appxmanifest
+```
+
 ### Step 3 — Build, fix what tooling missed
 
 Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:

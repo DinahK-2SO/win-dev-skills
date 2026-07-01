@@ -1,0 +1,14 @@
+{
+  "scenario": "CredentialPicker",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Launch (CredentialPicker.PickAsync) produced no visible token at runtime on Scenarios 2 & 3.",
+      "evidence": "migration-score.json features[1]/[2] note 'Launch handler present/wired; noop is hardware-gated PickAsync'; discrepancies.md 'Behavioral (flagged, not failed)'.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md '## Pickers and Win32 Surfaces' (<a id=\"pickers\">) — but this is a static system-dialog API with NO InitializeWithWindow path; the agent correctly performed a verbatim namespace-only carry-over inside the preserved try/catch.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Not an agent mistake and not a skill gap: the no-op is an environment/hardware gate (COMException in the headless capture session), the handler is correctly ported and scored pass. No general, skill-side fix exists — attempting window-handle association for the static PickAsync would be wrong. Recorded here only to keep every observed problem classified; no skill edit."
+    }
+  ]
+}

@@ -201,6 +201,24 @@ Consumers running after `OnLaunched` can safely null-forgive:
 var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow!);
 ```
 
+The same nullable-reference friction applies to **any UWP code you copy in**, because the
+scaffold enables `<Nullable>enable</Nullable>` while most UWP sample code predates NRT.
+This is expected residue after the port, not a real bug — clear it, don't suppress the
+warnings project-wide:
+
+- Static "back-pointer" fields the framework guarantees after startup (e.g. a shared
+  `MainPage.Current` / page `rootPage`) → null-forgive at the assignment:
+  `MainPage rootPage = MainPage.Current!;` (**CS8618** on the field / **CS8602** on use).
+- Auto-properties on copied helper/config classes that the constructor doesn't set
+  (e.g. sample `Title` / `ClassType`) → make them nullable (`string?`) or add `required`
+  (**CS8618**).
+- Event handlers that cast `sender`/`e` or index a collection that may miss
+  (`(FrameworkElement)sender`, `as SomeType`) → null-check or null-forgive at the use site
+  (**CS8600** / **CS8602**).
+
+These CS86xx warnings do not fail the build, but resolving them keeps the validator's
+warning count at zero and the ported code idiomatic.
+
 Resize via `AppWindow`:
 
 ```csharp
@@ -530,6 +548,7 @@ public void Control_DefaultState_IsValid()
 
 Do **not** copy the UWP `.csproj` over the scaffold's. The two formats are incompatible — the UWP csproj carries `<TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>`, `<OutputType>AppContainerExe</OutputType>`, explicit `<Compile Include="...">` items, and `Microsoft.Common.props` imports, none of which build under WinAppSDK.
 
+<a id="appxmanifest"></a>
 ### Package.appxmanifest — reconcile image references with the assets you actually have
 
 The WinUI 3 scaffold ships with a default `Package.appxmanifest` that references assets the template provides under `Assets/` (`SplashScreen.scale-200.png`, `Square150x150Logo.scale-200.png`, `Square44x44Logo.scale-200.png`, `StoreLogo.png`, `Wide310x150Logo.scale-200.png`, `LockScreenLogo.scale-200.png`). The UWP SDK sample's manifest usually points at sample-branded assets with a `-sdk` suffix (`Splash-sdk.png`, `squareTile-sdk.png`, `SmallTile-sdk.png`, `StoreLogo-sdk.png`).

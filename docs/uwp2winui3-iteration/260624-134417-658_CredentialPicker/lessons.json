@@ -1,0 +1,34 @@
+{
+  "scenario": "CredentialPicker",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Turn ~4: bootstrapped the WinUI 3 scaffold, preserved UWP csproj at .uwp-source/, seeded MIGRATION-MAPPING.md + TODO[migrate-NNN] markers; migration proceeded without manual scaffolding." },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "Turn 15: -Anchor csproj returned the Project File Updates + manifest cheat-sheet, giving the agent the csproj/manifest reconciliation guidance without opening the whole patterns file." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log line 2687: '[PASS] dotnet build succeeded (0 warning(s), 0 WUI analyzer warning(s))' + visible-text fidelity PASS confirmed done." }
+  ],
+  "tools_problematic": [
+    { "tool": "Get-MigrationPattern.ps1", "problem": "Natural anchor guess for the manifest section fails.", "evidence": "session-log line 1751-1757: `-Anchor appxmanifest` returned \"Anchor '#appxmanifest' not found\"; the agent recovered by guessing `-Anchor csproj`." }
+  ],
+  "tool_limitations": [
+    { "tool": "Get-MigrationPattern.ps1", "limitation": "Only <a id=\"...\"> anchors are addressable; the Package.appxmanifest guidance lived under the `csproj` anchor with no dedicated id, so the obvious `appxmanifest`/`manifest` name did not resolve.", "suggested_tweak": "Add an <a id=\"appxmanifest\"> anchor before the manifest subsections and point SKILL.md Step 2 at it." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.Security.Credentials.UI.CredentialPicker.PickAsync", "why_tried": "Core Launch behavior of all three scenarios (faithful port of the UWP sample).", "root_cause": "PickAsync is a static system credential-dialog API that is hardware/OS-gated and throws COMException 'The handle is invalid.' in the headless capture environment; unlike instance pickers it exposes no object to InitializeWithWindow.", "fix": "None required — the UWP try/catch was preserved verbatim and surfaces the exception via NotifyUser; scored pass. Environment-gated no-op, not a migration defect." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "CredentialPicker.PickAsync (static)", "special_handling": "No InitializeWithWindow path exists for the static picker API; the correct migration is a verbatim namespace-only carry-over inside the existing try/catch. Do not attempt window-handle association as with instance pickers." }
+  ],
+  "errors_encountered": [
+    { "error": "Get-MigrationPattern.ps1: Anchor '#appxmanifest' not found", "root_cause": "The Package.appxmanifest reconciliation content is nested under the `csproj` anchor's section and has no <a id> of its own, so its natural anchor name is unresolvable.", "fix": "Added <a id=\"appxmanifest\"> anchor; SKILL.md Step 2 now fetches it explicitly." },
+    { "error": "CS8618 / CS8600 / CS8602 nullable warnings (SampleConfiguration Title/ClassType; Scenario*_*.xaml.cs MainPage.Current and event-handler casts)", "root_cause": "The WinUI 3 scaffold enables <Nullable>enable</Nullable>, but the copied UWP sample code (shared SampleConfiguration.cs, MainPage.Current back-pointers, object casts) predates nullable reference types.", "fix": "Null-forgive framework-guaranteed statics (MainPage.Current!), make unset auto-props nullable/required, null-check casts. Warnings are non-fatal but cleared for a clean validator run." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turn 14-15, project-file/manifest reconciliation", "symptom": "Get-MigrationPattern.ps1 -Anchor appxmanifest failed with 'not found'.", "turns_or_retries": "1 failed call + 1 recovery call", "root_cause": "Manifest guidance not addressable by its obvious anchor name (buried under csproj).", "how_resolved": "Agent guessed -Anchor csproj, which happened to include the manifest cheat-sheet.", "preventable_by": "Dedicated <a id=\"appxmanifest\"> anchor + SKILL.md pointer (applied)." },
+    { "where": "Turns ~30-40, post-build cleanup", "symptom": "~12 CS86xx nullable warnings across SampleConfiguration.cs and the three scenario code-behinds.", "turns_or_retries": "several small edits (MainPage.Current! x3, prop/cast fixes)", "root_cause": "Nullable-enabled scaffold vs. NRT-unaware UWP sample code; skill only illustrated the App.MainWindow case.", "how_resolved": "Agent applied null-forgiving / nullable-annotation fixes; validator then reported 0 warnings.", "preventable_by": "Generalize the existing nullable note to cover copied sample code (static back-pointers, auto-props, event-handler casts) (applied)." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "CredentialPicker.PickAsync throws COMException 'The handle is invalid.' in headless run; WinUI screenshots render blank (DirectComposition not grabbable by PrintWindow).", "workaround": "Parity confirmed via the UIA text tree (9/9, 10/10, 14/14 controls) rather than pixels; the Launch no-op is flagged for manual review, not failed. Measurement limitation, not a migration defect." }
+  ]
+}
