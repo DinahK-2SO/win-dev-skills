@@ -1,0 +1,31 @@
+{
+  "scenario": "DisplayOrientation",
+  "feature": "Display orientation",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\DisplayOrientation\\cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Show and lock orientation",
+      "class": "Scenario1_Orientation",
+      "controls": [
+        { "name": "PreferLandscape", "type": "CheckBox", "label": "Prefer landscape", "weight": 1 },
+        { "name": "PreferPortrait", "type": "CheckBox", "label": "Prefer portrait", "weight": 1 },
+        { "name": "PreferLandscapeFlipped", "type": "CheckBox", "label": "Prefer landscape flipped", "weight": 1 },
+        { "name": "PreferPortraitFlipped", "type": "CheckBox", "label": "Prefer portrait flipped", "weight": 1 },
+        { "name": "ApplyPreferences", "type": "Button", "label": "Apply preferences", "weight": 1, "action": true }
+      ],
+      "outputs": [
+        "NativeOrientationTextBlock",
+        "CurrentOrientationTextBlock",
+        "AutoRotationPreferencesTextBlock",
+        "StatusBlock"
+      ],
+      "verdict_rules": {
+        "pass": "reachable, non-blank, >=80% controls present, action controls that respond in UWP golden also respond in WinUI",
+        "partial": "reachable, >=40% control coverage, or controls present but action dead vs UWP",
+        "fail": "blank/unreachable page or <40% coverage"
+      }
+    }
+  ],
+  "notes": "UWP golden 'Apply preferences' button produced no visible text change (newTokens=0) because with no checkbox selected the auto-rotation preference stays 'None'; behavioral responsiveness is therefore not a differentiator here. The dominant signal is structural: whether the scenario page and its controls render at all."
+}

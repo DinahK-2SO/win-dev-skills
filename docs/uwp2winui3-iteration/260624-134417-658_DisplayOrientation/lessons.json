@@ -1,0 +1,32 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Scaffolded the WinUI 3 project, rewrote namespaces, injected TODO[migrate-001] pointing at PATTERNS.md#getforcurrentview for DisplayInformation.GetForCurrentView(); the agent resolved that TODO correctly with a Win32 EnumDisplaySettings + AppWindow.Changed approach." },
+    { "tool": "Get-MigrationPattern.ps1 / MIGRATION-PATTERNS.md#getforcurrentview", "evidence": "Gave the agent the GetForCurrentView replacement table so it did not blindly keep DisplayInformation.GetForCurrentView()." }
+  ],
+  "tools_problematic": [
+    { "tool": "Test-AppLaunch.ps1 (smoke launch)", "problem": "Reported PASS ('app stayed alive 10s', pid 29580/22120) even though the single scenario page fails to render. The blank-page failure is invisible to a process-alive gate because the NRE was swallowed by the nested scenario Frame's NavigationFailed handler.", "evidence": "session-log.txt lines 1926-1930 and 1957-1958 show PASS; score notes show 0/5 controls, blank page." }
+  ],
+  "tool_limitations": [
+    { "tool": "unsupported-api-inventory.json", "limitation": "Only detects DisplayInformation via the generic \\bGetForCurrentView\\s*\\( pattern. Static/instance members that do NOT go through GetForCurrentView() — DisplayInformation.AutoRotationPreferences (get/set), CurrentOrientation, NativeOrientation, OrientationChanged — are undetected, so no TODO is injected and the agent leaves them in place.", "suggested_tweak": "Add an adaptable entry matching \\bDisplayInformation\\b routed to the getforcurrentview anchor." }
+  ],
+  "failed_apis": [
+    { "api": "App.MainWindow (static window reference)", "why_tried": "Scenario1_Orientation.OnNavigatedTo reads App.MainWindow!.AppWindow to subscribe to AppWindow.Changed.", "root_cause": "The scaffold's MainWindow constructor calls RootFrame.Navigate(typeof(MainPage)); MainPage.OnNavigatedTo adds a NavigationViewItem and sets SelectedItem, which cascades synchronously into ScenarioFrame.Navigate(Scenario1). All of this runs INSIDE `new MainWindow()`, before App.OnLaunched assigns `MainWindow = window`. So App.MainWindow is null and `App.MainWindow!.AppWindow` throws NullReferenceException.", "fix": "Keep the MainWindow constructor inert: assign App.MainWindow before Activate and defer the first RootFrame.Navigate to an Activated/Loaded handler (documented at PATTERNS.md 'Initialization order — keep MainWindow's constructor inert')." },
+    { "api": "DisplayInformation.AutoRotationPreferences (static get/set)", "why_tried": "Scenario1 reads it in UpdateContent() and sets it in ApplyRotationLock_Click to report/lock auto-rotation.", "root_cause": "DisplayInformation is CoreWindow/ApplicationView-bound; its members compile but throw at runtime in a WinUI 3 desktop app. This is a latent second failure (masked in this trial by the earlier NRE) that would still leave the page broken once the init-order bug is fixed.", "fix": "Auto-rotation lock has no WinUI 3 desktop equivalent; report current/native orientation via Win32 EnumDisplaySettings (which the agent already did) and drop/guard the AutoRotationPreferences get/set." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md, 'Initialization order — keep MainWindow's constructor inert' (line ~291)", "wrong": "\"Validator catches this race with a 10s smoke launch after the build healthcheck passes.\"", "correct": "The smoke launch only catches it when the null-static read reaches the ROOT frame and crashes the process. When the offending page is reached through a nested content Frame (e.g. a NavigationView scenario frame), Frame.Navigate marshals the exception into NavigationFailed WITHOUT crashing — the process stays alive and the smoke launch reports green while the page is blank." }
+  ],
+  "special_apis": [
+    { "api": "DisplayInformation.* (orientation)", "special_handling": "Static members (AutoRotationPreferences) and instance members via GetForCurrentView() are all view-bound. Orientation READ -> Win32 EnumDisplaySettings/DEVMODE.dmDisplayOrientation; auto-rotation LOCK -> no desktop equivalent." }
+  ],
+  "errors_encountered": [
+    { "error": "Navigation to DisplayOrientation.Scenario1_Orientation failed: Object reference not set to an instance of an object.", "root_cause": "NullReferenceException from App.MainWindow!.AppWindow read in Scenario1.OnNavigatedTo while App.MainWindow is still null during MainWindow construction (scaffold navigates from the ctor).", "fix": "Defer first navigation until after App.MainWindow is assigned (constructor-inert pattern)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Runtime verification after build", "symptom": "Agent declared success on a 'stayed alive 10s' smoke launch and never drove the shell to confirm the one scenario rendered.", "turns_or_retries": "N/A (single pass, no re-run)", "root_cause": "Skill text overstated that the smoke launch/validator catches the null-static init-order race; agent trusted the green smoke launch.", "how_resolved": "Not resolved — shipped a blank page.", "preventable_by": "Correcting the false 'validator catches this race' claim and reinforcing that page rendering must be verified per scenario (already in silent-navigation-failures); and injecting a TODO for DisplayInformation so the AutoRotationPreferences trap is surfaced too." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

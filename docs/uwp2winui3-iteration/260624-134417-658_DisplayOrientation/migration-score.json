@@ -1,0 +1,23 @@
+{
+  "scenario": "DisplayOrientation",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 1,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Show and lock orientation",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Show_and_lock_orientation.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Show_and_lock_orientation.png",
+      "note": "WinUI 3 content area renders completely blank. 0/5 controls present (all four Prefer* checkboxes and the Apply preferences button missing from both the UIA tree and screenshot); all output text (Native/Current orientation, Auto-rotation preferences) absent. Blank page persists after manual navigation. UWP golden shows the full page. Behavioral responsiveness is not a differentiator (the Apply button produced no visible change even in UWP with no checkbox selected); the failure is total absence of scenario content."
+    }
+  ]
+}

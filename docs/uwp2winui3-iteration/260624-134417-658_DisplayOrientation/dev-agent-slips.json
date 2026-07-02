@@ -1,0 +1,14 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Scenario1.OnNavigatedTo reads App.MainWindow!.AppWindow, which is null because the scaffold's MainWindow constructor navigates (RootFrame.Navigate(MainPage)) before App.OnLaunched assigns App.MainWindow. This throws the NullReferenceException that blanks the page.",
+      "evidence": "MainWindow.xaml.cs line 25 `RootFrame.Navigate(typeof(MainPage))` inside the ctor; App.xaml.cs assigns MainWindow AFTER `new MainWindow()`; Scenario1.OnNavigatedTo line 32 reads App.MainWindow!.AppWindow; UIA tree records the resulting NRE.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'Initialization order — keep MainWindow's constructor inert' (lines 246-291): explicitly states App.MainWindow is null for the entire duration of `new MainWindow()`, lists 'AppWindow.GetFromWindowId(...) chained through App.MainWindow' as a trip, and gives the exact safe pattern (assign before Activate; defer first navigation to an Activated/Loaded handler).",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The constructor-inert rule and its fix code are already prominent and correct; a capable re-run that applies the documented deferral would resolve the NRE without any skill edit. (The separate, generalizable weaknesses — the false 'validator catches this' claim and the missing DisplayInformation detection — ARE addressed as skill-defects.)"
+    }
+  ]
+}

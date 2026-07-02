@@ -1,0 +1,18 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Fix false claim that the smoke launch catches the null-static init-order race: it only crashes on root-frame throws; nested scenario-frame throws are swallowed into NavigationFailed (blank page, process alive) — cross-link render check (MIGRATION-PATTERNS.md).",
+    "Detect all DisplayInformation usage, not just GetForCurrentView(): add \\bDisplayInformation\\b to the adaptable API inventory so a TODO is injected for static AutoRotationPreferences/orientation members that compile but throw at runtime in desktop.",
+    "Document DisplayInformation desktop replacements (orientation read -> Win32 EnumDisplaySettings; auto-rotation lock -> no equivalent) and widen defensive-init guidance to cover OnNavigatedTo and view-bound WinRT APIs."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Migration smoke launch only checks process-alive and cannot see nested-frame blank pages; per-scenario render verification belongs to the eval skills, out of scope for the migration skill."
+  ]
+}

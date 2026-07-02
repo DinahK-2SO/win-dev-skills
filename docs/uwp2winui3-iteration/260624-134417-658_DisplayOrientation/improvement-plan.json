@@ -1,0 +1,40 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migration agent trusted a green 10s smoke launch and shipped a blank page; the page-load NRE was swallowed by the nested scenario Frame so the process stayed alive.",
+      "evidence": "MIGRATION-PATTERNS.md ~line 291 falsely claimed 'Validator catches this race with a 10s smoke launch'; session-log 1926-1930 shows smoke launch PASS; UIA tree shows the swallowed NavigationFailed NRE.",
+      "root_cause": "The init-order section overstated the smoke launch's reach. It only crashes/catches when the null-static read hits the root frame; a throw in a nested content Frame is swallowed into NavigationFailed (process alive, page blank).",
+      "tier": 3,
+      "change": "Correct the sentence to scope the smoke launch to root-frame crashes only, and cross-link silent-navigation-failures + require a per-scenario render check.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent no longer treats a green smoke launch as proof the init-order race is absent; drives/renders each scenario and catches blank pages.",
+      "falsifiable_check": "On re-run the agent verifies scenario rendering (not just process-alive) and requirement #1 goes fail->pass; no blank-frame regression."
+    },
+    {
+      "problem": "DisplayInformation members other than GetForCurrentView() (static AutoRotationPreferences, CurrentOrientation, NativeOrientation, OrientationChanged) are undetected and undocumented, so the agent left AutoRotationPreferences in place — a runtime trap.",
+      "evidence": "unsupported-api-inventory.json matched only \\bGetForCurrentView\\s*\\(; Scenario1_Orientation.xaml.cs lines 55/77 use DisplayInformation.AutoRotationPreferences with no injected TODO.",
+      "root_cause": "DisplayInformation is view/CoreWindow-bound; all members compile but throw at runtime in desktop. The inventory only caught the GetForCurrentView() form.",
+      "tier": 1,
+      "change": "Add an 'adaptable' inventory entry matching \\bDisplayInformation\\b routed to the getforcurrentview anchor (injects a TODO, marks the file for adaptation, and enables residue detection). Plus a Tier-3 patterns subsection documenting the members and their desktop replacements.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json + skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Initialize-UwpMigration injects a TODO on every DisplayInformation line so the agent adapts AutoRotationPreferences instead of shipping a runtime crash.",
+      "falsifiable_check": "On re-run, a TODO is injected on Scenario1 lines using DisplayInformation; the built app no longer throws on AutoRotationPreferences and the orientation outputs render."
+    },
+    {
+      "problem": "Defensive-init guidance lists only constructor/Loaded as throw sites and omits OnNavigatedTo and view-bound WinRT APIs, where the actual NRE and the AutoRotationPreferences trap live.",
+      "evidence": "SKILL.md lines 200-224 named only 'constructor or Loaded' + hardware/media/asset/DI triggers; the throws here are in Scenario1.OnNavigatedTo.",
+      "root_cause": "Under-emphasis: OnNavigatedTo and view-bound WinRT APIs were not called out as init-guard sites/triggers.",
+      "tier": 3,
+      "change": "Add OnNavigatedTo as a throw site and a trigger bullet for view-bound WinRT APIs (DisplayInformation/ApplicationView/UIViewSettings) that compile but throw in desktop.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent guards OnNavigatedTo init and treats view-bound APIs as adaptable, degrading to a visible fallback instead of a blank frame.",
+      "falsifiable_check": "On re-run, pages that init in OnNavigatedTo/touch DisplayInformation are guarded and render (or show a fallback), not blank."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/harness: the migration smoke launch (Test-AppLaunch.ps1 / Validate-UwpMigration.ps1 Section 7) cannot see nested-frame blank pages because it only checks process-alive. Driving the shell to verify per-scenario rendering belongs to the eval skills (winui3-parity-check) and is out of scope for the migration skill — noted for the human, not auto-applied."
+  ]
+}

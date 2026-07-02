@@ -1,0 +1,27 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The migration agent trusted a green 10s smoke launch and shipped a blank app. The blank page was caused by a NullReferenceException swallowed by a nested scenario Frame, so the process stayed alive.",
+      "evidence": "session-log.txt lines 1926-1930/1957-1958 ('app stayed alive 10s', PASS); score notes UIA tree = 'Navigation to Scenario1_Orientation failed: Object reference not set to an instance of an object.'",
+      "skill_search": "grep 'stayed alive', 'Validator catches this race', 'smoke launch' in SKILL.md / MIGRATION-PATTERNS.md",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md ~line 291: 'Validator catches this race with a 10s smoke launch after the build healthcheck passes.'",
+      "root_cause": "The claim is only true when the null-static read reaches the ROOT frame and crashes the process. When the offending page is reached through a NESTED content Frame (NavigationView scenario frame), Frame.Navigate marshals the exception into NavigationFailed without terminating the process, so the smoke launch reports green on a blank page. The overconfident claim gave the agent false assurance.",
+      "proposed_fix": "Correct the sentence to say the smoke launch only catches the race when it crashes the root/process; a throw in a nested scenario frame is swallowed (blank page, process alive) and must be caught by a per-scenario render check (cross-link silent-navigation-failures).",
+      "generalizes": "Every NavigationView/Frame-based SDK-sample migration has nested-frame navigation. A null-static init-order read (or any page-load throw) in a scenario page is systematically swallowed, so relying on the process-alive smoke launch under-reports blank pages across scenarios."
+    },
+    {
+      "problem": "DisplayInformation static/instance members other than GetForCurrentView() are undetected and undocumented, so the agent left DisplayInformation.AutoRotationPreferences (get/set) in place — a runtime trap in WinUI 3 desktop.",
+      "evidence": "Scenario1_Orientation.xaml.cs line 55 (get) and line 77 (set) use DisplayInformation.AutoRotationPreferences; unsupported-api-inventory.json only matches \\bGetForCurrentView\\s*\\( so no TODO was injected for these lines.",
+      "skill_search": "grep 'DisplayInformation', 'AutoRotation', 'DisplayOrientation' across skill — only DisplayInformation.GetForCurrentView() appears (PATTERNS.md#getforcurrentview); AutoRotationPreferences/CurrentOrientation/NativeOrientation/OrientationChanged absent.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "DisplayInformation is CoreWindow/ApplicationView-bound; its members compile but throw at runtime in desktop. The inventory pattern only catches the GetForCurrentView() form, missing the static AutoRotationPreferences and other members, so no TODO/defer signal is produced.",
+      "proposed_fix": "(Tier 1) Add an 'adaptable' inventory entry matching \\bDisplayInformation\\b routed to the getforcurrentview anchor so a TODO is injected. (Tier 3) Expand PATTERNS.md#getforcurrentview to document that DisplayInformation static/instance members (AutoRotationPreferences get/set, CurrentOrientation, NativeOrientation, OrientationChanged) are view-bound and throw at runtime: orientation READ -> Win32 EnumDisplaySettings; auto-rotation LOCK -> no desktop equivalent.",
+      "generalizes": "Any display-orientation / screen-rotation / DPI sample uses DisplayInformation beyond GetForCurrentView(). Detecting and documenting the whole type prevents recurring silent runtime traps across those scenarios."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The 'Defensive UI for init-heavy and device-dependent pages' section lists constructor/Loaded as the throw sites and enumerates hardware/media/asset/DI triggers, but omits OnNavigatedTo and the class of view-bound WinRT APIs (DisplayInformation, ApplicationView, UIViewSettings, etc.) that compile but throw at runtime in desktop. The actual NRE and the latent AutoRotationPreferences trap both live in OnNavigatedTo.",
+      "evidence": "SKILL.md lines 200-224 mention only 'constructor or Loaded handler' and triggers hardware/media/assets/DI; the real throw sites here are Scenario1.OnNavigatedTo (App.MainWindow NRE at line 32; DisplayInformation.AutoRotationPreferences at line 55).",
+      "covered_at": "SKILL.md 'Defensive UI for init-heavy and device-dependent pages' (~lines 200-224)",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add OnNavigatedTo alongside constructor/Loaded as a throw site, and add a trigger bullet for view-bound WinRT APIs that compile but throw in desktop (DisplayInformation, ApplicationView, UIViewSettings) so init-guarding covers them too.",
+      "generalizes": "SDK samples routinely do first-run work in OnNavigatedTo and touch view-bound WinRT APIs; widening the defensive-init guidance to those sites/APIs helps many scenarios avoid blank pages."
+    }
+  ]
+}

@@ -288,7 +288,13 @@ public MainWindow()
 private bool _navigated;
 ```
 
-Validator catches this race with a 10s smoke launch after the build healthcheck passes — see `Validate-UwpMigration.ps1` Section 7.
+The validator's 10s smoke launch catches this race **only when the null-static read
+reaches the root frame and crashes the process**. When the offending page is reached
+through a **nested content `Frame`** (e.g. a `NavigationView` scenario frame), `Frame.Navigate`
+marshals the exception into `NavigationFailed` **without terminating the process** — the
+smoke launch (and `Validate-UwpMigration.ps1` Section 7) then reports **green on a blank
+page**. Do not treat a green smoke launch as proof this race is absent; confirm every
+scenario actually renders (see [Silent navigation failures](#silent-navigation-failures)).
 
 ### AppWindow API replacements
 
@@ -315,6 +321,24 @@ None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is 
 | `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+
+### `DisplayInformation` is view-bound — not just `GetForCurrentView()`
+
+`DisplayInformation` is CoreWindow/`ApplicationView`-bound. **Every** member — the
+`GetForCurrentView()` instance path **and the static members** — compiles fine but
+**throws at runtime** in a WinUI 3 desktop app. The `GetForCurrentView()` row above only
+covers the DPI use case; the orientation members are the ones that silently blank
+orientation/rotation samples:
+
+| UWP `DisplayInformation` member | WinUI 3 desktop replacement |
+|---------------------------------|-----------------------------|
+| `.AutoRotationPreferences` (static get/set) | **No desktop equivalent** — orientation lock is not a desktop windowing concept. Drop the get/set (or store the intent yourself). |
+| `.CurrentOrientation` / `.NativeOrientation` | Read via Win32 `EnumDisplaySettings` (`DEVMODE.dmDisplayOrientation` + `dmPelsWidth/Height`). |
+| `.OrientationChanged` (via `GetForCurrentView()`) | Subscribe to `AppWindow.Changed` and re-query the Win32 values. |
+
+These are **runtime traps**: the build is clean and the analyzer is silent, so treat any
+`DisplayInformation` reference as adaptable and resolve it before shipping.
+
 
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces

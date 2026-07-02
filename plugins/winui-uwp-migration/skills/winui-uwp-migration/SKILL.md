@@ -207,9 +207,12 @@ checks the process is alive, this failure is **silent** — and a blank page is 
 from a crash to a screenshot-based reviewer (three byte-identical screenshots that fail blank-frame
 checks).
 
-This applies to **any page that does non-trivial initialization in its constructor or `Loaded`**, not
-only hardware pages. Common triggers:
+This applies to **any page that does non-trivial initialization in its constructor, `Loaded`,
+or `OnNavigatedTo`**, not only hardware pages. Common triggers:
 
+- **View-bound WinRT APIs** — `DisplayInformation` (incl. static `AutoRotationPreferences`),
+  `ApplicationView`, `UIViewSettings`, and other CoreWindow/view-scoped types compile but
+  **throw at runtime** in a desktop app; see [GetForCurrentView Replacements](./MIGRATION-PATTERNS.md#getforcurrentview).
 - **Physical hardware** — camera, microphone, location, sensors, Bluetooth, NFC (the device is often
   absent, including in the validation environment).
 - **Media** — `new MediaPlayer()`, `MediaPlayerElement.SetMediaPlayer(...)`, reading

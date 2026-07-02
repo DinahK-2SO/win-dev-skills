@@ -1,0 +1,28 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 0,
+  "score": 0,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    {
+      "id": 1,
+      "text": "Show and lock orientation",
+      "status": "fail",
+      "reason": "WinUI 3 content area renders completely blank. 0/5 controls present (four Prefer* checkboxes + Apply preferences button absent from UIA tree and screenshot); all output text absent. UIA tree contains the error 'Navigation to DisplayOrientation.Scenario1_Orientation failed: Object reference not set to an instance of an object.'",
+      "suspected_skill_gap": "NullReferenceException from App.MainWindow!.AppWindow read in Scenario1.OnNavigatedTo while App.MainWindow is still null during MainWindow construction. The scaffold navigates from the ctor; the init-order rule IS documented (dev-agent slip), but two skill weaknesses let it ship: (1) the init-order section wrongly claims the smoke launch catches the race — it does not when the throw is swallowed by a nested scenario frame; (2) DisplayInformation.AutoRotationPreferences is a second, undetected runtime trap."
+    }
+  ],
+  "visual_discrepancies": [
+    {
+      "feature": "Show and lock orientation",
+      "uwp": "Full page: description text, 'Native orientation: Landscape', 'Current orientation: Landscape', 'Auto-rotation preferences: None', four Prefer* checkboxes, Apply preferences button.",
+      "winui": "Blank white content area; NavigationView shell + nav item present but scenario frame empty. StatusBlock shows a NavigationFailed NRE message.",
+      "screenshot_ref": "parity/winui3/screenshots/01_Show_and_lock_orientation.png vs parity/baseline/screenshots/01_Show_and_lock_orientation.png"
+    }
+  ],
+  "missing_features": [
+    "All Scenario1 controls and outputs (blank page)"
+  ],
+  "summary": "Clean build + green smoke launch masked a total content-rendering failure. Primary cause: null-static init-order race (App.MainWindow read during MainWindow ctor via nested scenario-frame navigation) throwing an NRE that the nested Frame swallowed. Secondary latent cause: DisplayInformation.AutoRotationPreferences runtime trap."
+}
