@@ -1,0 +1,577 @@
+{
+  "featureName": "Custom USB Device Access",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\CustomUsbDeviceAccess\\cs",
+  "generated": "2026-07-03T00:46:03.3467544+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Connect/Disconnect",
+      "class": "Scenario1_ConnectDisconnect",
+      "slug": "Connect_Disconnect",
+      "screenshot": "01_Connect_Disconnect.png",
+      "controls": [
+        {
+          "name": "ButtonConnectToDevice",
+          "type": "Button",
+          "label": "Connect to device",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonDisconnectFromDevice",
+          "type": "Button",
+          "label": "Disconnect from device",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ConnectDevices",
+          "type": "ListBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Connect to device",
+          "alt": "ButtonConnectToDevice",
+          "type": "Button",
+          "label": "Connect to device",
+          "name": "ButtonConnectToDevice",
+          "event": "Click"
+        },
+        {
+          "target": "Disconnect from device",
+          "alt": "ButtonDisconnectFromDevice",
+          "type": "Button",
+          "label": "Disconnect from device",
+          "name": "ButtonDisconnectFromDevice",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Control Transfer",
+      "class": "Scenario2_ControlTransfer",
+      "slug": "Control_Transfer",
+      "screenshot": "02_Control_Transfer.png",
+      "controls": [
+        {
+          "name": "OsrFx2SevenSegmentSettingInput",
+          "type": "ComboBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "ButtonGetOsrFx2SevenSegment",
+          "type": "Button",
+          "label": "Get Seven Segment Display",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonSetOsrFx2SevenSegment",
+          "type": "Button",
+          "label": "Set Seven Segment Display",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "SuperMuttLedBlinkPatternInput",
+          "type": "ComboBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "ButtonGetSuperMuttLedBlinkPattern",
+          "type": "Button",
+          "label": "Get Led Blink Pattern",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonSetSuperMuttLedBlinkPattern",
+          "type": "Button",
+          "label": "Set Led Blink Pattern",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get Seven Segment Display",
+          "alt": "ButtonGetOsrFx2SevenSegment",
+          "type": "Button",
+          "label": "Get Seven Segment Display",
+          "name": "ButtonGetOsrFx2SevenSegment",
+          "event": "Click"
+        },
+        {
+          "target": "Set Seven Segment Display",
+          "alt": "ButtonSetOsrFx2SevenSegment",
+          "type": "Button",
+          "label": "Set Seven Segment Display",
+          "name": "ButtonSetOsrFx2SevenSegment",
+          "event": "Click"
+        },
+        {
+          "target": "Get Led Blink Pattern",
+          "alt": "ButtonGetSuperMuttLedBlinkPattern",
+          "type": "Button",
+          "label": "Get Led Blink Pattern",
+          "name": "ButtonGetSuperMuttLedBlinkPattern",
+          "event": "Click"
+        },
+        {
+          "target": "Set Led Blink Pattern",
+          "alt": "ButtonSetSuperMuttLedBlinkPattern",
+          "type": "Button",
+          "label": "Set Led Blink Pattern",
+          "name": "ButtonSetSuperMuttLedBlinkPattern",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "OsrFx2ScenarioText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "SuperMuttScenarioText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Interrupt Pipes",
+      "class": "Scenario3_InterruptPipes",
+      "slug": "Interrupt_Pipes",
+      "screenshot": "03_Interrupt_Pipes.png",
+      "controls": [
+        {
+          "name": "ButtonRegisterOsrFx2InterruptEvent",
+          "type": "Button",
+          "label": "Register For Interrupt Event",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonWriteSuperMuttInterruptOut",
+          "type": "Button",
+          "label": "Write To Interrupt Out",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonRegisterSuperMuttInterruptEvent",
+          "type": "Button",
+          "label": "Register For Interrupt Event",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonUnregisterInterruptEvent",
+          "type": "Button",
+          "label": "Unregister From Interrupt Event",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Register For Interrupt Event",
+          "alt": "ButtonRegisterOsrFx2InterruptEvent",
+          "type": "Button",
+          "label": "Register For Interrupt Event",
+          "name": "ButtonRegisterOsrFx2InterruptEvent",
+          "event": "Click"
+        },
+        {
+          "target": "Write To Interrupt Out",
+          "alt": "ButtonWriteSuperMuttInterruptOut",
+          "type": "Button",
+          "label": "Write To Interrupt Out",
+          "name": "ButtonWriteSuperMuttInterruptOut",
+          "event": "Click"
+        },
+        {
+          "target": "Register For Interrupt Event",
+          "alt": "ButtonRegisterSuperMuttInterruptEvent",
+          "type": "Button",
+          "label": "Register For Interrupt Event",
+          "name": "ButtonRegisterSuperMuttInterruptEvent",
+          "event": "Click"
+        },
+        {
+          "target": "Unregister From Interrupt Event",
+          "alt": "ButtonUnregisterInterruptEvent",
+          "type": "Button",
+          "label": "Unregister From Interrupt Event",
+          "name": "ButtonUnregisterInterruptEvent",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "OsrFx2ScenarioText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "SuperMuttScenarioText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "SwitchStates",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Bulk Pipes",
+      "class": "Scenario4_BulkPipes",
+      "slug": "Bulk_Pipes",
+      "screenshot": "04_Bulk_Pipes.png",
+      "controls": [
+        {
+          "name": "ButtonBulkRead",
+          "type": "Button",
+          "label": "Read 512 bytes",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonBulkWrite",
+          "type": "Button",
+          "label": "Write 512 bytes",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonBulkReadWrite",
+          "type": "Button",
+          "label": "Continuously Read and Write 512 bytes",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonCancelAllIoTasks",
+          "type": "Button",
+          "label": "Cancel all Read/Write tasks",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Read 512 bytes",
+          "alt": "ButtonBulkRead",
+          "type": "Button",
+          "label": "Read 512 bytes",
+          "name": "ButtonBulkRead",
+          "event": "Click"
+        },
+        {
+          "target": "Write 512 bytes",
+          "alt": "ButtonBulkWrite",
+          "type": "Button",
+          "label": "Write 512 bytes",
+          "name": "ButtonBulkWrite",
+          "event": "Click"
+        },
+        {
+          "target": "Continuously Read and Write 512 bytes",
+          "alt": "ButtonBulkReadWrite",
+          "type": "Button",
+          "label": "Continuously Read and Write 512 bytes",
+          "name": "ButtonBulkReadWrite",
+          "event": "Click"
+        },
+        {
+          "target": "Cancel all Read/Write tasks",
+          "alt": "ButtonCancelAllIoTasks",
+          "type": "Button",
+          "label": "Cancel all Read/Write tasks",
+          "name": "ButtonCancelAllIoTasks",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "GeneralScenarioText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "USB Descriptors",
+      "class": "Scenario5_UsbDescriptors",
+      "slug": "USB_Descriptors",
+      "screenshot": "05_USB_Descriptors.png",
+      "controls": [
+        {
+          "name": "ListOfDescriptorTypes",
+          "type": "ListBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        }
+      ],
+      "actions": [],
+      "outputs": [
+        [
+          {
+            "name": "GenericScenarioText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "DescriptorOutput",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Interface Settings",
+      "class": "Scenario6_InterfaceSettings",
+      "slug": "Interface_Settings",
+      "screenshot": "06_Interface_Settings.png",
+      "controls": [
+        {
+          "name": "InterfaceSettingsToChoose",
+          "type": "ComboBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "ButtonSetSetting",
+          "type": "Button",
+          "label": "Set Interface Setting",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonGetSetting",
+          "type": "Button",
+          "label": "Get Interface Setting",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Set Interface Setting",
+          "alt": "ButtonSetSetting",
+          "type": "Button",
+          "label": "Set Interface Setting",
+          "name": "ButtonSetSetting",
+          "event": "Click"
+        },
+        {
+          "target": "Get Interface Setting",
+          "alt": "ButtonGetSetting",
+          "type": "Button",
+          "label": "Get Interface Setting",
+          "name": "ButtonGetSetting",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "GenericScenarioText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Sync Device",
+      "class": "Scenario7_SyncDevice",
+      "slug": "Sync_Device",
+      "screenshot": "07_Sync_Device.png",
+      "controls": [
+        {
+          "name": "ButtonSync",
+          "type": "Button",
+          "label": "Sync with the device",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ButtonCancelSync",
+          "type": "Button",
+          "label": "Cancel Sync with the device",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Sync with the device",
+          "alt": "ButtonSync",
+          "type": "Button",
+          "label": "Sync with the device",
+          "name": "ButtonSync",
+          "event": "Click"
+        },
+        {
+          "target": "Cancel Sync with the device",
+          "alt": "ButtonCancelSync",
+          "type": "Button",
+          "label": "Cancel Sync with the device",
+          "name": "ButtonCancelSync",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "GeneralScenarioText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ProgressBarText",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

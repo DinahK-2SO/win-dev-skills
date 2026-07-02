@@ -424,6 +424,27 @@ switch (args.Kind)
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
 
+### Suspending / Resuming are gone
+
+`Microsoft.UI.Xaml.Application` has **no `Suspending` or `Resuming` events** and the
+`SuspendingEventHandler` / `SuspendingEventArgs` types do not exist — desktop WinUI 3 apps
+are never suspended/resumed the way UWP apps are. Any UWP code that does
+`App.Current.Suspending += …` / `App.Current.Resuming += …` (very common in the
+`EventHandlerForDevice` helper of the device-access samples, and in apps that release a
+resource on suspend) **will not compile**. Delete the subscriptions and the handler
+fields, then relocate the cleanup:
+
+| UWP | WinUI 3 replacement |
+|-----|---------------------|
+| `App.Current.Suspending += …` (release/close a resource) | `Window.Closed` (per-window) or `AppWindow.Closing` — run the same teardown there. |
+| `App.Current.Resuming += …` (re-acquire a resource) | No equivalent — re-acquire lazily on next use; there is no resume event. |
+
+```csharp
+// UWP:  App.Current.Suspending += appSuspendEventHandler;
+// WinUI 3 (in the window that owns the resource):
+this.Closed += (s, e) => { /* same teardown the OnAppSuspension body did */ };
+```
+
 <a id="background-tasks"></a>
 ## Background Tasks
 
@@ -683,6 +704,17 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 ### `x:Bind` and compiled bindings
 
 `x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+
+**Keep the root namespace consistent, or compiled bindings break.** `x:Bind` / `x:DataType`
+resolve model types by their **CLR namespace**, matched through `x:Class` and the
+`xmlns:local="using:…"` prefix. UWP SDK samples use a shared root namespace (often
+`SDKTemplate`) that differs from the scaffolded WinUI 3 project name — do **not** rename it
+in only some files. If `x:Class`, `xmlns:local`, and the C# `namespace` of the bound type
+drift apart, `x:DataType="local:Foo"` fails with `WMC0909 "Cannot resolve DataType"` /
+`WMC1111`, and the cascade often surfaces as a `WMC9999` internal XAML-compiler error.
+Fix by unifying the namespace across every `.cs` `namespace`, every `x:Class`, and every
+`xmlns:local="using:…"` (grep the project for both the old and new root namespace and make
+them agree) — not by deleting the `x:DataType`.
 
 ### Page root element
 

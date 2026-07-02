@@ -1,0 +1,49 @@
+{
+  "scenario": "CustomUsbDeviceAccess",
+  "summary": "Migrated WinUI 3 app fails to compile; no candidate capture possible. All 7 UWP scenarios have no working WinUI counterpart.",
+  "build_error": "Migrated WinUI 3 app does not build (dotnet build/run exit 1). 11 compiler errors: Application.Suspending/Resuming not defined on WinUI 3 Microsoft.UI.Xaml.Application (Scenario1_ConnectDisconnect.xaml.cs, EventHandlerForDevice.cs); XAML WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 x:DataType missing + WMC9999 internal compiler error in MainPage.xaml. App is non-functional; cannot be launched.",
+  "discrepancies": [
+    {
+      "scenario": "Connect/Disconnect",
+      "type": "scenario-missing",
+      "severity": "critical",
+      "detail": "Entire scenario absent in candidate: migrated WinUI 3 app fails to build so no page renders. UWP golden shows this scenario present and functional."
+    },
+    {
+      "scenario": "Control Transfer",
+      "type": "scenario-missing",
+      "severity": "critical",
+      "detail": "Entire scenario absent in candidate: migrated WinUI 3 app fails to build so no page renders. UWP golden shows this scenario present and functional."
+    },
+    {
+      "scenario": "Interrupt Pipes",
+      "type": "scenario-missing",
+      "severity": "critical",
+      "detail": "Entire scenario absent in candidate: migrated WinUI 3 app fails to build so no page renders. UWP golden shows this scenario present and functional."
+    },
+    {
+      "scenario": "Bulk Pipes",
+      "type": "scenario-missing",
+      "severity": "critical",
+      "detail": "Entire scenario absent in candidate: migrated WinUI 3 app fails to build so no page renders. UWP golden shows this scenario present and functional."
+    },
+    {
+      "scenario": "USB Descriptors",
+      "type": "scenario-missing",
+      "severity": "critical",
+      "detail": "Entire scenario absent in candidate: migrated WinUI 3 app fails to build so no page renders. UWP golden shows this scenario present and functional."
+    },
+    {
+      "scenario": "Interface Settings",
+      "type": "scenario-missing",
+      "severity": "critical",
+      "detail": "Entire scenario absent in candidate: migrated WinUI 3 app fails to build so no page renders. UWP golden shows this scenario present and functional."
+    },
+    {
+      "scenario": "Sync Device",
+      "type": "scenario-missing",
+      "severity": "critical",
+      "detail": "Entire scenario absent in candidate: migrated WinUI 3 app fails to build so no page renders. UWP golden shows this scenario present and functional."
+    }
+  ]
+}

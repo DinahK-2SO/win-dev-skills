@@ -1,0 +1,14 @@
+{
+  "scenario": "CustomUsbDeviceAccess",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Dev-agent burned turns 82-99 repeatedly launching dotnet build and polling with long read_powershell waits, running out of turns before ever fixing the compile errors.",
+      "evidence": "session-log.txt turns 82-99: 4 build restarts (shellIds 5,6,build1,8), 120-600s waits, log ends mid-build at turn 99.",
+      "covered_clearly_at": "SKILL.md build/validate loop guidance to build with dotnet and inspect errors; the process problem (slow first build + not capturing filtered output early) is an agent workflow choice, not missing skill content about which APIs to fix.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "This is an execution/time-budget management slip; the fix (redirect build output to a file and grep 'error') is generic tooling hygiene a capable model applies on re-run, and the two real skill defects above (once fixed) remove most of the build/fix cycling that caused it. Adding 'don't waste turns' prose would just bloat the skill."
+    }
+  ]
+}

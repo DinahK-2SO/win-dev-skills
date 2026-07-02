@@ -1,0 +1,34 @@
+{
+  "scenario": "CustomUsbDeviceAccess",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap performed the Windows.UI.Xaml -> Microsoft.UI.Xaml namespace rewrite and seeded MIGRATION-MAPPING/DEFERRED; the .cs files show the rewrite landed." }
+  ],
+  "tools_problematic": [
+    { "tool": "dotnet build (net10.0 WinUI first build)", "problem": "First build was extremely slow; the dev-agent burned turns 82-99 polling read_powershell/stop_powershell and ran out of turns before ever seeing the full error list or fixing it.", "evidence": "session-log.txt turns 82-99: repeated 120-600s read_powershell waits on shellIds 5,6,build1,8; log ends mid-build at turn 99." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 / unsupported-api-inventory.json", "limitation": "Inventory has no entry for Application.Suspending/Resuming or SuspendingEventHandler, so no inline TODO was injected at the suspend/resume call sites and the validator did not flag them.", "suggested_tweak": "Add an 'adaptable' inventory entry routing to the #lifecycle anchor so Initialize injects a TODO at every Suspending/Resuming use site." }
+  ],
+  "failed_apis": [
+    { "api": "Application.Current.Suspending / Application.Current.Resuming (Microsoft.UI.Xaml.Application)", "why_tried": "Copied verbatim from the UWP sample's EventHandlerForDevice.cs / Scenario1 / Scenario4 to release the USB device on suspend and re-open on resume.", "root_cause": "WinUI 3 Microsoft.UI.Xaml.Application removed the Suspending/Resuming events and the SuspendingEventHandler/SuspendingEventArgs types; desktop apps are not suspended/resumed like UWP.", "fix": "Remove the Suspending/Resuming subscriptions and SuspendingEventHandler/SuspendingEventArgs types; move any resource-release logic to Window.Closed / AppWindow.Closing (there is no suspend/resume on desktop)." },
+    { "api": "x:DataType=\"local:Scenario\" compiled binding in MainPage.xaml DataTemplate", "why_tried": "Copied from UWP MainPage.xaml ListBox.ItemTemplate using {x:Bind Title}.", "root_cause": "The dev-agent left the project in a split root namespace (MainPage.xaml.cs + SampleConfiguration.cs are 'SDKTemplate'; every Scenario*.cs is 'CustomUsbDeviceAccess'); x:Class/xmlns:local resolved to a namespace inconsistent with the model types, so the XAML compiler could not resolve local:Scenario (WMC0909/WMC1111) and cascaded to an internal compiler error (WMC9999).", "fix": "Keep C# namespace, x:Class, and xmlns:local=\"using:...\" consistent across the whole project; x:Bind/x:DataType resolve types by CLR namespace." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "EventHandlerForDevice.cs suspend/resume pattern", "special_handling": "This helper class ships in the entire UWP 'custom device access' sample family (USB/serial/HID/Bluetooth) and hardcodes App.Current.Suspending/Resuming wiring that has no WinUI 3 equivalent." }
+  ],
+  "errors_encountered": [
+    { "error": "CS: Application does not contain a definition for 'Suspending'/'Resuming' (Scenario1_ConnectDisconnect.xaml.cs, EventHandlerForDevice.cs)", "root_cause": "WinUI 3 Application has no Suspending/Resuming events.", "fix": "Delete the event subscriptions; relocate cleanup to Window.Closed." },
+    { "error": "WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 x:DataType missing + WMC9999 internal compiler error in MainPage.xaml", "root_cause": "Split/renamed root namespace made local:Scenario unresolvable for compiled bindings.", "fix": "Unify the root namespace across .cs, x:Class and xmlns:local." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "session-log.txt turns 82-99", "symptom": "Repeatedly launched dotnet build, then spent 4-6 turns each polling with 120-600s read_powershell waits and stop_powershell restarts; never converged on a clean error list.", "turns_or_retries": "~18 turns (82-99) with 4 build restarts", "root_cause": "net10.0 WinUI first build is slow and the raw build output is a wall of progress dots that hides the error lines; the agent kept re-running instead of capturing filtered output early.", "how_resolved": "Not resolved — the trial ended (turn 99) with the build still running and errors unfixed.", "preventable_by": "Skill guidance to always redirect build output to a file and grep for 'error' (e.g. 'dotnet build ... 2>&1 > out.txt; Select-String error out.txt'), plus flagging the unsupported APIs up front via inventory TODOs so fewer build/fix cycles are needed." }
+  ],
+  "missing_tooling": [
+    { "need": "Inventory coverage for the UWP app-lifecycle Suspending/Resuming events so Initialize injects TODOs at the call sites.", "would_have_saved": "The 11 compile errors that made the app non-functional (score 0)." }
+  ],
+  "env_issues": [
+    { "issue": "First dotnet build of a net10.0 WinUI project takes minutes and emits noisy progress output.", "workaround": "Redirect to a file and filter for error/warning lines." }
+  ]
+}

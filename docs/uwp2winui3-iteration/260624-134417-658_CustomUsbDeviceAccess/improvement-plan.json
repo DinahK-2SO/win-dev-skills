@@ -1,0 +1,30 @@
+{
+  "scenario": "CustomUsbDeviceAccess",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "UWP Application.Suspending/Resuming (SuspendingEventHandler/Args) copied verbatim don't exist on WinUI 3 Microsoft.UI.Xaml.Application -> build fails; skill had no coverage and no inventory signal.",
+      "evidence": "migration-score.json build_error 'Application.Suspending/Resuming not defined ... Scenario1_ConnectDisconnect.xaml.cs, EventHandlerForDevice.cs'; call sites in EventHandlerForDevice.cs / Scenario1 / Scenario4.",
+      "root_cause": "MIGRATION-PATTERNS.md #lifecycle only covered OnLaunched/OnActivated; unsupported-api-inventory.json had no Suspending pattern, so Initialize injected no TODO and Validate flagged nothing.",
+      "tier": 1,
+      "change": "Added an 'adaptable' inventory entry (pattern for SuspendingEventHandler/Args and .Suspending/.Resuming += / -=, anchor '#lifecycle', tier safe) so Initialize-UwpMigration injects a TODO at every call site; also extended the #lifecycle section of MIGRATION-PATTERNS.md with a 'Suspending / Resuming are gone' subsection (map cleanup to Window.Closed / AppWindow.Closing, no resume equivalent).",
+      "file": "scripts/unsupported-api-inventory.json + MIGRATION-PATTERNS.md",
+      "expected_effect": "Every future migration surfaces suspend/resume sites as inline TODOs routed to the #lifecycle guidance, and the dev-agent has a concrete replacement, so the app compiles.",
+      "falsifiable_check": "On re-run, Initialize injects '// TODO[migrate-NNN]: see PATTERNS.md#lifecycle' at each App.Current.Suspending/Resuming line and the build no longer emits 'Application does not contain a definition for Suspending/Resuming'."
+    },
+    {
+      "problem": "x:Bind/x:DataType compiled bindings fail (WMC0909/WMC1111/WMC9999) when the SDK-sample root namespace (SDKTemplate) is only partially reconciled with the scaffold project name.",
+      "evidence": "migration-score.json build_error 'WMC0909 Cannot resolve DataType local:Scenario ... WMC9999 internal compiler error in MainPage.xaml'; MainPage.xaml.cs/SampleConfiguration.cs=SDKTemplate vs Scenario*.cs=CustomUsbDeviceAccess.",
+      "root_cause": "The x:Bind section only mentioned XLS0414/MC3074 from stale UWP prefixes; it did not warn that x:Bind resolves by CLR namespace and that a drifted/partially-renamed root namespace breaks compiled bindings.",
+      "tier": 3,
+      "change": "Sharpened the existing '### x:Bind and compiled bindings' section: added WMC0909/WMC1111/WMC9999 symptoms and the rule to keep C# namespace, x:Class, and xmlns:local='using:...' consistent project-wide (fix by unifying, not by deleting x:DataType).",
+      "file": "MIGRATION-PATTERNS.md",
+      "expected_effect": "Dev-agent keeps a single consistent root namespace, so DataTemplate x:Bind/x:DataType resolve and MainPage.xaml compiles.",
+      "falsifiable_check": "On re-run, MainPage.xaml compiles with no WMC0909/WMC1111/WMC9999 and the ListBox item template renders scenario titles."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/harness: first net10.0 WinUI build is slow and emits noisy progress output; the dev-agent wasted turns 82-99 polling it. Consider a harness/preset build helper that redirects output to a file and returns only error/warning lines, or a larger turn budget for the build/fix loop."
+  ]
+}

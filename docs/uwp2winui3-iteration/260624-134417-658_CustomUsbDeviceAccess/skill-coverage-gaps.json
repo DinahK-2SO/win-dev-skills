@@ -1,0 +1,15 @@
+{
+  "scenario": "CustomUsbDeviceAccess",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Compiled bindings (x:Bind / x:DataType) fail with WMC0909 'Cannot resolve DataType' / WMC1111 / WMC9999 internal compiler error when the project is left with an inconsistent root namespace (SDK sample's 'SDKTemplate' vs the new project name), because x:Bind resolves types by CLR namespace.",
+      "evidence": "migration-score.json build_error ('WMC0909 Cannot resolve DataType local:Scenario + WMC1111 x:DataType missing + WMC9999 internal compiler error in MainPage.xaml'); code inspection: MainPage.xaml.cs + SampleConfiguration.cs are namespace 'SDKTemplate' while Scenario*.cs are 'CustomUsbDeviceAccess'.",
+      "covered_at": "MIGRATION-PATTERNS.md '### x:Bind and compiled bindings' section (~line 683), which currently only mentions XLS0414/MC3074 'type was not found' from stale UWP namespace prefixes.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Sharpen the existing x:Bind section to also cover WMC0909/WMC1111/WMC9999 and add the rule: keep C# namespace, x:Class, and xmlns:local=\"using:...\" consistent project-wide; do not partially rename an SDK sample's root namespace (e.g. SDKTemplate) to the new project name, since x:Bind/x:DataType resolve model types by CLR namespace.",
+      "generalizes": "Every migrated UWP SDK sample in this benchmark family uses a shared 'SDKTemplate' root namespace that differs from the scaffolded project name; any DataTemplate using x:Bind/x:DataType will fail identically whenever the namespace is only partially reconciled."
+    }
+  ]
+}

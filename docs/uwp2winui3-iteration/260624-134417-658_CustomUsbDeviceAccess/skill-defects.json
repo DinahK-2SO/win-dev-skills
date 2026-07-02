@@ -1,0 +1,17 @@
+{
+  "scenario": "CustomUsbDeviceAccess",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "UWP app-lifecycle suspend/resume APIs (Application.Current.Suspending/Resuming, SuspendingEventHandler, SuspendingEventArgs) copied verbatim fail to compile against WinUI 3 Microsoft.UI.Xaml.Application, which removed them.",
+      "evidence": "migration-score.json build_error ('Application.Suspending/Resuming not defined on WinUI 3 ... Scenario1_ConnectDisconnect.xaml.cs, EventHandlerForDevice.cs'); session-log grep shows App.Current.Suspending += / Resuming += and SuspendingEventHandler in EventHandlerForDevice.cs, Scenario1, Scenario4.",
+      "skill_search": "grep for 'Suspending|Resuming|Suspend|lifecycle' across winui-uwp-migration; grep 'Suspend' in unsupported-api-inventory.json",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "MIGRATION-PATTERNS.md #lifecycle only covers OnLaunched/OnActivated/OnFileActivated; it never mentions the Suspending/Resuming events, and unsupported-api-inventory.json has no matching pattern, so Initialize injected no TODO and Validate flagged nothing.",
+      "proposed_fix": "Add an 'adaptable' entry to unsupported-api-inventory.json (pattern matching Application.Current.Suspending/Resuming and SuspendingEventHandler/Args, anchor '#lifecycle') so Initialize injects a TODO at each call site, AND extend the #lifecycle section of MIGRATION-PATTERNS.md to state that WinUI 3 has no Suspending/Resuming and to relocate cleanup to Window.Closed / AppWindow.Closing.",
+      "generalizes": "UWP apps and the entire UWP device-access sample family (USB/serial/HID/Bluetooth) ship EventHandlerForDevice with hardcoded suspend/resume wiring; suspend-based resource cleanup is a ubiquitous UWP idiom that always breaks the WinUI 3 build."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "scenario": "CustomUsbDeviceAccess",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add Application.Suspending/Resuming to the unsupported-API inventory (anchor #lifecycle) so Initialize injects TODOs at each site; WinUI 3 Application has no suspend/resume events.",
+    "Document Suspending/Resuming removal in MIGRATION-PATTERNS.md #lifecycle: relocate cleanup to Window.Closed / AppWindow.Closing, no resume equivalent.",
+    "Sharpen the x:Bind section to cover WMC0909/WMC1111/WMC9999 and require a consistent root namespace (x:Class / xmlns:local / C# namespace) so compiled bindings resolve."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Harness/preset help for the slow, noisy first net10.0 WinUI build that consumed the dev-agent's turn budget."
+  ]
+}
