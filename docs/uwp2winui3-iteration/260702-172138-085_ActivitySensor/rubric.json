@@ -1,0 +1,15 @@
+{
+  "feature": "Activity sensor",
+  "scenarios": [
+    { "number": 1, "title": "Current activity", "controls": ["ScenarioGetCurrentActivityButton"], "actions": ["Get Current Activity"] },
+    { "number": 2, "title": "Activity history", "controls": ["ScenarioGetActivityHistoryButton"], "actions": ["Get Activity History"] },
+    { "number": 3, "title": "Events", "controls": ["ScenarioEnableReadingChangedButton", "ScenarioDisableReadingChangedButton"], "actions": ["ReadingChanged On", "ReadingChanged Off"] },
+    { "number": 4, "title": "Background activity", "controls": ["ScenarioRegisterTaskButton", "ScenarioUnregisterTaskButton"], "actions": ["Register Task", "Unregister Task"] }
+  ],
+  "scoreFormula": "round(100 * (pass + 0.5*partial) / total)",
+  "thresholds": { "pass": 0.8, "partial": 0.4 },
+  "environmentCaveats": [
+    "No interactive foreground desktop (GetForegroundWindow==0): live UWP app suspends (empty UIA, only Scenario 1 frame captured); WinUI 3 screenshots blank (no DWM composition) but UIA tree fully populated.",
+    "No activity-sensor hardware: UWP shows 'No data' everywhere, so sensor/background actions are hardware-gated in both apps."
+  ]
+}

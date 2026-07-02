@@ -1,0 +1,14 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Trial timed out (results.json builds:false/score:0/timeout:true) even though the committed code builds and scores 100/100.",
+      "evidence": "results.json metrics.timeout:true vs migration-score.json score:100; the two build errors were resolved by turn ~90 (session-log 'Build succeeded' lines 4525-5188).",
+      "covered_clearly_at": "SKILL.md Step 3 'Build command discipline (avoid agent stalls)' (lines 136-140) already prescribes sync builds / exit sentinels; the agent used them and did finish the build.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The timeout is an environment/time-budget artifact, not a guidance gap; the committed app is correct and the score step confirms pass. No skill edit would change this."
+    }
+  ]
+}

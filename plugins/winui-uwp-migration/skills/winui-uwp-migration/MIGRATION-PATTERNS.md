@@ -27,6 +27,19 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0118: '<Name>' is a namespace but is used like a type`
+
+The app's **root namespace collides with a WinRT type the code uses unqualified**. This is systemic for Windows SDK samples: each sample is named after the exact API it demonstrates (`ActivitySensor`, `Barometer`, `Compass`, `Accelerometer`, `Geolocation`, …), so scaffolding with `dotnet new winui -n ActivitySensor` sets `<RootNamespace>ActivitySensor</RootNamespace>` — and now `ActivitySensor` resolves to *your* namespace, shadowing `Windows.Devices.Sensors.ActivitySensor`.
+
+Fix by making the project's root namespace **the source's own namespace**, never the sample/API name. Windows SDK samples universally use `namespace SDKTemplate`, so:
+
+```xml
+<!-- ActivitySensor.csproj -->
+<RootNamespace>SDKTemplate</RootNamespace>
+```
+
+and align the scaffold's `App`/`MainWindow` `x:Class` + `namespace` to the same value so the whole project (scaffold shell + copied source files) shares one namespace. See the `<RootNamespace>` rule under [Project File Updates](#csproj) — set this during Step 2 so this collision never compiles in the first place. (Fully-qualifying every use of the type also works but is fragile — fix the root namespace instead.)
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -408,6 +421,25 @@ public void Control_DefaultState_IsValid()
 - Reference `Microsoft.Windows.SDK.BuildTools.WinApp` to wire `dotnet run` into `winapp run`.
 - Keep `Package.appxmanifest` for packaged scenarios; set `<WindowsPackageType>None</WindowsPackageType>` for unpackaged.
 
+### `<RootNamespace>` — match the source, not the project name
+
+`dotnet new winui -n <Name>` sets `<RootNamespace>` to `<Name>`, and the scaffold's `App`/`MainWindow` are generated in that namespace — while `Initialize-UwpMigration.ps1` copies the source files **verbatim**, keeping their original namespace (Windows SDK samples use `SDKTemplate`). That split has two consequences you must reconcile here, before the first build:
+
+1. **Namespace collision.** SDK samples are named after the WinRT API they demonstrate, so a project named `ActivitySensor`/`Barometer`/`Compass`/… produces a `<RootNamespace>` that shadows the same-named WinRT type and fails with `CS0118: '<Name>' is a namespace but is used like a type`.
+2. **Split namespace.** The scaffold shell and the copied source live in two different namespaces, forcing cross-namespace `using`s and `x:Class` mismatches.
+
+Both vanish if you set the project's root namespace to the **source's** dominant namespace and align the scaffold shell to it. Detect the source namespace and apply it:
+
+```powershell
+# dominant root namespace of the source (SDK samples → SDKTemplate)
+$ns = (Select-String -Path "<Target>\.uwp-source\**\*.cs" -Pattern 'namespace\s+([\w.]+)' |
+       ForEach-Object { $_.Matches.Groups[1].Value } | Group-Object | Sort-Object Count -Descending |
+       Select-Object -First 1).Name
+```
+
+Then set `<RootNamespace>$ns</RootNamespace>` in the scaffold `.csproj`, and update `App.xaml`/`App.xaml.cs`/`MainWindow.xaml`/`MainWindow.xaml.cs` so their `namespace`, `x:Class`, and `xmlns:local="using:…"` all use `$ns`. Never leave `<RootNamespace>` equal to the sample/demonstrated-API name.
+
+
 ### PackageReference reconciliation cheat-sheet
 
 `Initialize-UwpMigration.ps1` preserves the UWP `.csproj` at `<Target>/.uwp-source/` and leaves the WinUI 3 scaffold's `.csproj` intact. Open both side-by-side and merge:
@@ -546,7 +578,15 @@ WinUI 3 `Page`:
 
 ### Resource references: `DynamicResource` → `ThemeResource`
 
-WinUI 3 ships Fluent theme resources under `ThemeResource`. UWP code that used `{StaticResource}` for theme brushes still works, but most app templates and the system theme dictionary expect `{ThemeResource}`. Migrate references to system brushes / styles to `{ThemeResource}` so they respond to light/dark/high-contrast changes.
+WinUI 3 ships Fluent theme resources under `ThemeResource`. UWP code that used `{StaticResource}` for theme brushes still works, but most app templates and the system theme dictionary expect `{ThemeResource}`. Migrate references to system **brushes and other value setters** to `{ThemeResource}` so they respond to light/dark/high-contrast changes.
+
+⚠️ **`{ThemeResource}` is only for brush/value setters — never for `Style.BasedOn`.** `Style.BasedOn` is resolved at **XAML-compile time**, so it must reference a `Style` via `{StaticResource}` (or a direct key); a deferred `{ThemeResource}` lookup there fails to compile with:
+
+```
+XamlCompiler error WMC0141: Style BasedOn property must be a Style, not 'ThemeResourceExtension' object
+```
+
+SDK samples share a `Styles.xaml` full of `BasedOn="{StaticResource BodyTextBlockStyle}"` (and `TitleTextBlockStyle`, `SubtitleTextBlockStyle`, …). **Leave those `BasedOn` references as `{StaticResource}`** — do not rewrite them to `{ThemeResource}`. Only convert the individual brush/value `<Setter>`s inside a style (and standalone `Background`/`Foreground` references) to `{ThemeResource}`.
 
 `{StaticResource}` will not switch on theme change:
 

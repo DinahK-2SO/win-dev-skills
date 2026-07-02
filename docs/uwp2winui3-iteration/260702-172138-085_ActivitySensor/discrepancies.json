@@ -1,0 +1,34 @@
+{
+  "structuralDiscrepancies": [],
+  "behavioralObservations": [
+    {
+      "scenario": "Events",
+      "control": "ScenarioDisableReadingChangedButton",
+      "observation": "ReadingChanged Off did not invoke/produce output during capture",
+      "assessment": "state/hardware-gated; primary action (On) responded; no UWP baseline to confirm regression",
+      "isMigrationDefect": false
+    },
+    {
+      "scenario": "Background activity",
+      "control": "ScenarioRegisterTaskButton / ScenarioUnregisterTaskButton",
+      "observation": "no visible output change on invoke",
+      "assessment": "hardware-gated (no activity-sensor hardware; UWP also shows 'No data'); controls present and wired",
+      "isMigrationDefect": false
+    }
+  ],
+  "environmentDiscrepancies": [
+    {
+      "observation": "WinUI 3 screenshots blank/black",
+      "cause": "headless host, no foreground desktop -> no DWM composition; UIA tree fully populated",
+      "isMigrationDefect": false
+    },
+    {
+      "observation": "No UWP behavioral golden captured (per-scenario)",
+      "cause": "live UWP app suspends without a foreground desktop -> empty UIA, only initial frame captured",
+      "isMigrationDefect": false
+    }
+  ],
+  "missingControls": [],
+  "deadControls": [],
+  "wrongOutputText": []
+}

@@ -1,0 +1,30 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0118 'namespace but is used like a type' — the WinUI project's RootNamespace shadows the WinRT type the sample demonstrates (also leaves a scaffold-vs-source namespace split).",
+      "evidence": "session-log.txt turn 65 'error CS0118'; turn 15 'dotnet new winui -n ActivitySensor'; source declares 'namespace SDKTemplate'; grep of the migration skill returns no RootNamespace/CS0118 guidance.",
+      "root_cause": "The skill's Step 2 gives no rule for RootNamespace, so the agent keeps the scaffold's project-name namespace, which equals the demonstrated WinRT type (systemic for API-named SDK samples).",
+      "tier": 3,
+      "change": "Add a '<RootNamespace> — match the source' subsection to MIGRATION-PATTERNS.md#csproj (with a detect-the-source-namespace snippet), a 'CS0118' entry to the 'Common build errors' section, and a one-line rule in SKILL.md Step 2 pointing to it.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "The agent sets RootNamespace to the source namespace (SDKTemplate) during Step 2, so the app compiles first time with no namespace collision or split; if CS0118 still appears the build-errors section names the exact fix.",
+      "falsifiable_check": "On a re-run of any API-named SDK sample (ActivitySensor/Barometer/Compass/…), the first build produces zero CS0118 'namespace but is used like a type' errors and the .csproj RootNamespace equals the source's namespace."
+    },
+    {
+      "problem": "WMC0141 'Style BasedOn property must be a Style, not ThemeResourceExtension' — Style.BasedOn was migrated to {ThemeResource}.",
+      "evidence": "session-log.txt turn 65 'App.xaml(14,14): WMC0141'; source SharedContent/Styles.xaml uses BasedOn=\"{StaticResource BodyTextBlockStyle}\" (9 styles); MIGRATION-PATTERNS.md line 549 told the agent to migrate 'brushes / styles' to {ThemeResource}.",
+      "root_cause": "The ThemeResource guidance over-generalized to 'styles', so BasedOn (a compile-time reference that must be StaticResource) got rewritten to a deferred ThemeResource lookup, which is illegal.",
+      "tier": 3,
+      "change": "Narrow the ThemeResource section to brush/value setters and add an explicit warning that Style.BasedOn must stay {StaticResource}, with the WMC0141 error text and the shared Styles.xaml example.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The agent leaves BasedOn as {StaticResource} and only converts brush/value setters to {ThemeResource}, avoiding WMC0141.",
+      "falsifiable_check": "On a re-run, App.xaml/Styles.xaml compile with zero WMC0141 errors and every Style.BasedOn still uses {StaticResource}."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0 harness: the starter template command 'dotnet new winui -n {app_name}' names the project after the sample (== the demonstrated WinRT type). Consider passing a neutral project name (or the source namespace) so RootNamespace never collides — the skill now works around this, but the harness could remove the hazard at the source."
+  ]
+}

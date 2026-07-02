@@ -1,0 +1,17 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "migration: set <RootNamespace> to the source namespace (SDKTemplate), not the project/sample name, to stop CS0118 collisions with the same-named WinRT type",
+    "migration: document CS0118 'namespace but is used like a type' as a common build error with root cause + RootNamespace fix",
+    "migration: scope {ThemeResource} to brush/value setters and forbid it on Style.BasedOn (must stay {StaticResource}) to avoid WMC0141"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Tier-0 harness starter names the project after the sample (== demonstrated WinRT type); consider a neutral project name so RootNamespace never collides."
+  ]
+}

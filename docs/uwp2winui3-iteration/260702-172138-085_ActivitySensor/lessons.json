@@ -1,0 +1,29 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "dotnet build -c Debug -p:Platform=x64 with BUILD_EXIT sentinel", "evidence": "session-log.txt turns 65-68: sync builds with an explicit '\"BUILD_EXIT=$LASTEXITCODE\"' final line gave the agent a clean readable result every turn." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "It rewrites Windows.UI.Xaml -> Microsoft.UI.Xaml but does not reconcile the app root namespace: the scaffold uses ProjectName as RootNamespace while the copied source files keep their own namespace (SDKTemplate), leaving a split-namespace project the agent must fix by hand.", "suggested_tweak": "Detect the source's dominant root namespace and set the scaffold's <RootNamespace> to match (or at least warn when ProjectName != source namespace)." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#resource-references-dynamicresource-themeresource (line 549)", "wrong": "'Migrate references to system brushes / styles to {ThemeResource}' — applied to a Style.BasedOn reference this produces XamlCompiler error WMC0141.", "correct": "Style.BasedOn must resolve at XAML-compile time and requires {StaticResource} (or a direct key); only brush/value setters that must swap on theme change use {ThemeResource}. BasedOn must never use {ThemeResource}." }
+  ],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.ActivitySensor", "special_handling": "The WinRT type name equals the SDK sample's folder/app name. Naming the WinUI project (RootNamespace) 'ActivitySensor' shadows the type and yields CS0118 'namespace but is used like a type'. Keep the project/root namespace off the demonstrated API's name (use the source's SDKTemplate)." }
+  ],
+  "errors_encountered": [
+    { "error": "3_ChangeEvents.xaml.cs(33,17): error CS0118: 'ActivitySensor' is a namespace but is used like a type", "root_cause": "Project scaffolded with 'dotnet new winui -n ActivitySensor' -> RootNamespace 'ActivitySensor' collides with the Windows.Devices.Sensors.ActivitySensor type the sample uses unqualified.", "fix": "Set <RootNamespace> to the source namespace 'SDKTemplate' and align App/MainWindow namespaces to it (session-log turns 66-68)." },
+    { "error": "App.xaml(14,14): XamlCompiler error WMC0141: Style BasedOn property must be a Style, not 'ThemeResourceExtension' object", "root_cause": "A shared-content style (BasicTextStyle, BasedOn=\"{StaticResource BodyTextBlockStyle}\") was migrated to BasedOn=\"{ThemeResource BodyTextBlockStyle}\" following the over-broad 'styles -> ThemeResource' guidance; BasedOn cannot be a deferred ThemeResource lookup.", "fix": "Use {StaticResource} for Style.BasedOn (session-log turn 66)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Build phase (turns 65-68)", "symptom": "Two XAML/C# compile errors (CS0118 + WMC0141) blocked the first successful build; agent had to rename the namespace across App.xaml/App.xaml.cs/MainWindow.xaml/.cs and rewrite the style.", "turns_or_retries": "~3 turns", "root_cause": "Scaffold RootNamespace collided with the demonstrated WinRT type, and ThemeResource guidance misapplied to Style.BasedOn.", "how_resolved": "Changed RootNamespace to SDKTemplate; changed BasedOn to a plain FontSize setter.", "preventable_by": "SKILL.md project-file reconcile step instructing RootNamespace = source root namespace (never the demonstrated API/sample name), plus a MIGRATION-PATTERNS CS0118 anchor; and correcting the ThemeResource section to exclude Style.BasedOn." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Trial results.json shows builds:false/score:0/timeout:true, but the committed code in fact builds and the score step rated it 100/100.", "workaround": "The stale mid-timeout snapshot is an environment artifact; grade from committed code / score notes, not the trial results.json." }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "featureName": "Activity sensor",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\ActivitySensor\\cs",
+  "generated": "2026-07-02T18:42:30.2855729+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Current activity",
+      "class": "Scenario1_CurrentActivity",
+      "slug": "Current_activity",
+      "screenshot": "01_Current_activity.png",
+      "controls": [
+        {
+          "name": "ScenarioGetCurrentActivityButton",
+          "type": "Button",
+          "label": "Get Current Activity",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get Current Activity",
+          "alt": "ScenarioGetCurrentActivityButton",
+          "type": "Button",
+          "label": "Get Current Activity",
+          "name": "ScenarioGetCurrentActivityButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Activity",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Confidence",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Timestamp",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Activity history",
+      "class": "Scenario2_History",
+      "slug": "Activity_history",
+      "screenshot": "02_Activity_history.png",
+      "controls": [
+        {
+          "name": "ScenarioGetActivityHistoryButton",
+          "type": "Button",
+          "label": "Get Activity History",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get Activity History",
+          "alt": "ScenarioGetActivityHistoryButton",
+          "type": "Button",
+          "label": "Get Activity History",
+          "name": "ScenarioGetActivityHistoryButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Count",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Activity1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Confidence1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Timestamp1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_ActivityN",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_ConfidenceN",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_TimestampN",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Events",
+      "class": "Scenario3_ChangeEvents",
+      "slug": "Events",
+      "screenshot": "03_Events.png",
+      "controls": [
+        {
+          "name": "ScenarioEnableReadingChangedButton",
+          "type": "Button",
+          "label": "ReadingChanged On",
+          "events": []
+        },
+        {
+          "name": "ScenarioDisableReadingChangedButton",
+          "type": "Button",
+          "label": "ReadingChanged Off",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "ReadingChanged On",
+          "alt": "ScenarioEnableReadingChangedButton",
+          "type": "Button",
+          "label": "ReadingChanged On",
+          "name": "ScenarioEnableReadingChangedButton",
+          "event": ""
+        },
+        {
+          "target": "ReadingChanged Off",
+          "alt": "ScenarioDisableReadingChangedButton",
+          "type": "Button",
+          "label": "ReadingChanged Off",
+          "name": "ScenarioDisableReadingChangedButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Activity",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Confidence",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_ReadingTimestamp",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Background activity",
+      "class": "Scenario4_BackgroundActivity",
+      "slug": "Background_activity",
+      "screenshot": "04_Background_activity.png",
+      "controls": [
+        {
+          "name": "ScenarioRegisterTaskButton",
+          "type": "Button",
+          "label": "Register Task",
+          "events": []
+        },
+        {
+          "name": "ScenarioUnregisterTaskButton",
+          "type": "Button",
+          "label": "Unregister Task",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Register Task",
+          "alt": "ScenarioRegisterTaskButton",
+          "type": "Button",
+          "label": "Register Task",
+          "name": "ScenarioRegisterTaskButton",
+          "event": ""
+        },
+        {
+          "target": "Unregister Task",
+          "alt": "ScenarioUnregisterTaskButton",
+          "type": "Button",
+          "label": "Unregister Task",
+          "name": "ScenarioUnregisterTaskButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_TaskRegistration",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_TaskStatus",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_ReportCount",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_LastActivity",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_LastConfidence",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_LastTimestamp",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0118 'ActivitySensor is a namespace but is used like a type' — the WinUI project's root namespace shadowed the WinRT type the sample uses.",
+      "evidence": "session-log.txt turn 65: build fails with '3_ChangeEvents.xaml.cs(33,17): error CS0118'; turn 15: scaffolded via 'dotnet new winui -n ActivitySensor'; source files all declare 'namespace SDKTemplate'.",
+      "skill_search": "grep RootNamespace|SDKTemplate|'namespace but is used'|CS0118 across skills/winui-uwp-migration — no hits in SKILL.md, MIGRATION-PATTERNS.md, or any script (only the Windows.UI.Xaml->Microsoft.UI.Xaml rewrite).",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The scaffold sets <RootNamespace> to the project name, and the harness names the project after the sample (which equals the demonstrated WinRT type). Nothing tells the agent to set RootNamespace to the source's own root namespace, so the app namespace collides with the API type and also splits from the copied source files (which keep 'SDKTemplate').",
+      "proposed_fix": "In SKILL.md Step 2 (project-file reconcile) add a rule: set <RootNamespace> in the scaffold .csproj to the source's dominant root namespace (grep the source .cs for 'namespace <X>'; SDK samples use SDKTemplate) and align App/MainWindow x:Class + namespace to it — never leave RootNamespace equal to the sample/demonstrated-API name. Add a MIGRATION-PATTERNS.md anchor 'namespace-collision' documenting CS0118 root cause + fix so Get-MigrationPattern.ps1 -Anchor namespace-collision resolves it during Step 3.",
+      "generalizes": "Every Windows-universal-samples app is named after the WinRT API it demonstrates (ActivitySensor, Barometer, Compass, Accelerometer, Geolocation, ...) and all share 'namespace SDKTemplate'. Naming the WinUI RootNamespace after the sample reproduces this exact CS0118 collision (and namespace split) on the whole corpus."
+    },
+    {
+      "problem": "WMC0141 'Style BasedOn property must be a Style, not ThemeResourceExtension' — Style.BasedOn was migrated to {ThemeResource}.",
+      "evidence": "session-log.txt turn 65: 'App.xaml(14,14): XamlCompiler error WMC0141'; the source shared-content Styles.xaml (lines 112-143) uses BasedOn=\"{StaticResource BodyTextBlockStyle}\" for 9 styles, correctly with StaticResource.",
+      "skill_search": "grep BasedOn|ThemeResource|WMC0141 in skills/winui-uwp-migration — the only guidance is MIGRATION-PATTERNS.md line 549 telling the agent to migrate 'brushes / styles' to {ThemeResource}; nothing carves out BasedOn.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Migrate references to system brushes / styles to `{ThemeResource}` so they respond to light/dark/high-contrast changes.",
+      "root_cause": "The 'styles -> ThemeResource' guidance is over-broad. Style.BasedOn is resolved at XAML-compile time and must be a StaticResource (or literal key); {ThemeResource} is a deferred lookup and is illegal there, producing WMC0141.",
+      "proposed_fix": "Amend the MIGRATION-PATTERNS.md ThemeResource section to scope {ThemeResource} to brush/value setters and add an explicit rule: Style.BasedOn (and other compile-time style references) must stay {StaticResource} — never convert BasedOn to {ThemeResource}.",
+      "generalizes": "All Windows-universal-samples share the same SharedContent/Styles.xaml with many BasedOn=\"{StaticResource ...}\" styles, so a blanket 'styles -> ThemeResource' migration breaks the XAML compiler on every sample. The BasedOn/StaticResource rule is a general WinUI XAML constraint, not scenario-specific."
+    }
+  ]
+}

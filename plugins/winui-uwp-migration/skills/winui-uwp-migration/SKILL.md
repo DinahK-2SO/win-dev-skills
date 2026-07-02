@@ -118,6 +118,8 @@ The scaffold's `.csproj` is wired for WinAppSDK; the UWP `.csproj` at `.uwp-sour
 
 Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are incompatible.
 
+Set `<RootNamespace>` in the scaffold `.csproj` to the **source's** dominant namespace (SDK samples use `SDKTemplate`), and align the scaffold's `App`/`MainWindow` `namespace` + `x:Class` to it. Never leave `<RootNamespace>` equal to the project/sample name: SDK samples are named after the WinRT API they demo, so that shadows the same-named type and fails with `CS0118: '<Name>' is a namespace but is used like a type`. See [Project File Updates → `<RootNamespace>`](./MIGRATION-PATTERNS.md#csproj).
+
 ### Step 3 — Build, fix what tooling missed
 
 Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
