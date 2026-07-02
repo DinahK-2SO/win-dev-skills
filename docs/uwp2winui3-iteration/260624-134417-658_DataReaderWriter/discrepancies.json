@@ -1,0 +1,14 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Read and write simple structured data.", "status": "pass", "reason": "SendButton (Copy Strings) present and live; invoking it filled ElementsRead with 'Hello / World / 1 2 3 4 5 / Très bien! / Goodbye' — a correct DataWriter->DataReader round-trip.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Dump file contents using ReadBytes().", "status": "pass", "reason": "HexDumpButton (Hex Dump) present and live; invoking it filled ReadBytesOutput with a correct offset+hex dump of the bundled PNG (header 8950 4e47, trailer 49454e44ae426082 IEND).", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No functional or parity discrepancies. Both scenarios pass (100/100). The only issues were build-loop friction (CS0234 for Windows.UI.Colors and a DataTemplate x:Bind resolution error), both fixed before scoring. WinUI 3 screenshots were blank due to a headless-capture limitation, not a rendering defect."
+}

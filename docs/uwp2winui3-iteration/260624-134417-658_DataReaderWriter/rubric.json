@@ -1,0 +1,32 @@
+{
+  "scenario": "DataReaderWriter",
+  "feature": "DataReader/Writer Sample",
+  "uwpSource": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\DataReaderWriter\\cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Read and write simple structured data.",
+      "class": "WriteReadStream",
+      "controls": [
+        { "name": "SendButton", "type": "Button", "label": "Copy Strings", "action": "Click=TransferData" }
+      ],
+      "outputs": [
+        { "name": "ElementsToWrite", "type": "TextBlock", "note": "Static input strings: Hello;World;1 2 3 4 5;Très bien!;Goodbye" },
+        { "name": "ElementsRead", "type": "TextBlock", "note": "Strings read back from the memory stream after Copy Strings, one per line" }
+      ],
+      "expectedBehavior": "Clicking 'Copy Strings' writes the strings via DataWriter into a memory stream then reads them back via DataReader, displaying each on its own line in ElementsRead."
+    },
+    {
+      "number": 2,
+      "title": "Dump file contents using ReadBytes().",
+      "class": "ReadBytes",
+      "controls": [
+        { "name": "HexDumpButton", "type": "Button", "label": "Hex Dump", "action": "Click=HexDump" }
+      ],
+      "outputs": [
+        { "name": "ReadBytesOutput", "type": "TextBlock", "note": "Monospaced hex dump of the embedded PNG image bytes" }
+      ],
+      "expectedBehavior": "Clicking 'Hex Dump' opens a sequential-access stream over the bundled image, reads bytes with ReadBytes(), and renders a formatted hex dump (offset + hex columns) in ReadBytesOutput."
+    }
+  ]
+}

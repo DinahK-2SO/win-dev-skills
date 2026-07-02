@@ -1,0 +1,33 @@
+{
+  "scenario": "DataReaderWriter",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (partial golden): UWP app launched in Release (pid 27208, window 'DataReader/Writer C# Sample'); Scenario 1 visual golden captured. Scenario 2 navigation and control actuation were unavailable because the live UWP CoreWindow exposes no UIA child tree (only the top-level Pane) and this session has no interactive foreground for input injection. Not a hard launch failure.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "notes": "Migrated WinUI 3 app built clean (dotnet build, 0 warnings/0 errors) and launched (pid 20512, own top-level WinUIDesktopWin32WindowClass window). WinUI 3 screenshots captured blank white in the client area because this headless session (GetForegroundWindow=0) cannot composite the DirectComposition swapchain into a capturable frame; the full UIA tree renders with correct text/bounds and both controls produce correct output when actuated, so parity was verified behaviorally via UI Automation rather than pixels. Compare-Parity.ps1 PASS 100/100.",
+  "features": [
+    {
+      "name": "Read and write simple structured data.",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Read_and_write_simple_structured_data.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Read_and_write_simple_structured_data.png",
+      "note": "Control 'SendButton' (Copy Strings) present and live. Invoking it filled ElementsRead with 'Hello / World / 1 2 3 4 5 / Très bien! / Goodbye' — a correct DataWriter->DataReader round-trip matching the UWP source. UWP click-response not measurable (CoreWindow exposes no UIA); WinUI behavior verified directly."
+    },
+    {
+      "name": "Dump file contents using ReadBytes().",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Dump_file_contents_using_ReadBytes.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Dump_file_contents_using_ReadBytes.png",
+      "note": "Control 'HexDumpButton' (Hex Dump) present and live. Invoking it filled ReadBytesOutput with a correct offset+hex dump of the bundled PNG (header 8950 4e47, trailer 49454e44ae426082 IEND). UWP golden for this scenario unavailable (could not navigate live UWP); parity judged from source behavior + verified WinUI behavior. UWP baseline screenshot listed is the initial frame (nav to S2 could not be driven in UWP)."
+    }
+  ]
+}

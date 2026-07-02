@@ -110,8 +110,17 @@ All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
 | `Windows.UI.Composition` | `Microsoft.UI.Composition` |
 | `Windows.UI.Input` | `Microsoft.UI.Input` |
 | `Windows.UI.Colors` | `Microsoft.UI.Colors` |
+| `Windows.UI.ColorHelper` | `Microsoft.UI.ColorHelper` |
 | `Windows.UI.Text` | `Microsoft.UI.Text` |
 | `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` |
+
+> **Colors caveat — helper classes move, the struct stays.** Only the helper *classes*
+> `Colors` and `ColorHelper` relocated to `Microsoft.UI`. The `Windows.UI.Color` **struct**
+> (and `Windows.Foundation.Point/Size/Rect`) stay in their original namespaces. Never do a
+> blanket `Windows.UI` → `Microsoft.UI` replace — rewrite the specific moved classes only
+> (e.g. `new SolidColorBrush(Windows.UI.Colors.Red)` → `new SolidColorBrush(Colors.Red)`).
+> The bootstrap (`Initialize-UwpMigration.ps1`) rewrites `Windows.UI.Colors`/`ColorHelper`
+> automatically; a leftover triggers **CS0234**.
 
 <a id="threading"></a>
 ## Threading: CoreDispatcher → DispatcherQueue

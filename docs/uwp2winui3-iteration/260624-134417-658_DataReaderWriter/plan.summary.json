@@ -1,0 +1,16 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: mass-rewrite Windows.UI.Colors/ColorHelper -> Microsoft.UI.* at bootstrap (word-boundary preserves the Windows.UI.Color struct) — prevents the recurring CS0234 the color-using migration hit.",
+    "unsupported-api-inventory.json: add residueOnly rule for Windows.UI.Colors/ColorHelper so the validator fails fast on any leftover helper-class reference.",
+    "MIGRATION-PATTERNS.md: add ColorHelper row + caveat that helper classes move to Microsoft.UI while the Color struct and Point/Size/Rect stay (no blanket Windows.UI->Microsoft.UI replace)."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

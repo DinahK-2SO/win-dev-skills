@@ -1,0 +1,31 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 namespace mass-rewrite", "evidence": "session-log: 'Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml' handled the bulk Xaml namespace moves so the ported MainPage/scenario code compiled against Microsoft.UI.Xaml.*" },
+    { "tool": "dotnet build (native)", "evidence": "build-output.txt: 'BUILD SUCCEEDED' after the color/DataTemplate fixes; final score 100/100 with 0 warnings/0 errors." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "The mass-rewrite only maps 'Windows.UI.Xaml' -> 'Microsoft.UI.Xaml'. It does NOT rewrite the non-Xaml framework types that also relocated to Microsoft.UI (Windows.UI.Colors, Windows.UI.ColorHelper), so ported code still referencing them fails to compile.", "suggested_tweak": "Extend the bootstrap rewrite to also map Windows.UI.Colors/ColorHelper -> Microsoft.UI.* using a trailing word boundary so the Windows.UI.Color struct (which stays) is preserved." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.UI.Colors", "why_tried": "Ported UWP code set StatusBorder.Background = new SolidColorBrush(Windows.UI.Colors.Green/Red).", "root_cause": "In WinApp SDK the Colors class moved from the Windows.UI namespace to Microsoft.UI; only the Windows.UI.Color struct stayed. Bootstrap did not rewrite it.", "fix": "Changed to Colors.Green/Colors.Red (Microsoft.UI.Colors)." },
+    { "api": "DataTemplate x:Bind with x:DataType=\"local:Scenario\"", "why_tried": "Ported UWP ListBox ItemTemplate used compiled binding.", "root_cause": "XAML compiler emitted WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 + an internal WMC9999.", "fix": "Switched the DataTemplate to classic {Binding Title} (no x:DataType)." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.UI.Colors / Windows.UI.ColorHelper", "special_handling": "These moved to Microsoft.UI.* in WinApp SDK, but the Windows.UI.Color struct (and Point/Size/Rect) did NOT — a naive Windows.UI->Microsoft.UI replace is wrong; only the helper classes move." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: The type or namespace name 'Colors' does not exist in the namespace 'Windows.UI' (MainPage.xaml.cs lines 110,113)", "root_cause": "Windows.UI.Colors relocated to Microsoft.UI.Colors; bootstrap namespace rewrite covers only Windows.UI.Xaml.", "fix": "Use Microsoft.UI.Colors (referenced as Colors)." },
+    { "error": "XamlCompiler WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 + WMC9999 (MainPage.xaml lines 25-26)", "root_cause": "x:Bind DataTemplate could not resolve the x:DataType at XAML-compile time.", "fix": "Replaced x:Bind/x:DataType with classic {Binding}." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "First dotnet build of the ported MainPage", "symptom": "Build failed with CS0234 (Windows.UI.Colors) and XamlCompiler WMC0909/WMC1111/WMC9999 (DataTemplate x:DataType).", "turns_or_retries": "1 failed build -> targeted fixes -> clean build", "root_cause": "Ported UWP code kept Windows.UI.Colors (a moved-but-unrewritten type) and an x:Bind DataTemplate whose x:DataType didn't resolve.", "how_resolved": "Rewrote Windows.UI.Colors -> Colors and DataTemplate x:Bind -> {Binding}.", "preventable_by": "Extending Initialize-UwpMigration.ps1's namespace mass-rewrite to also map the moved non-Xaml Windows.UI helper classes (Colors/ColorHelper) to Microsoft.UI, plus a validator residue rule as backstop." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 client-area screenshots captured blank white in the headless session (GetForegroundWindow=0).", "workaround": "Parity was verified behaviorally via UI Automation actuation; this is a capture-environment limit, not a migration defect." }
+  ]
+}

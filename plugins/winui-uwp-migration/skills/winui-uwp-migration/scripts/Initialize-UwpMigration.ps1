@@ -131,6 +131,28 @@ foreach ($f in $nsFiles) {
 }
 Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 
+# ─── 3a. Non-Xaml Windows.UI type moves: Colors / ColorHelper -> Microsoft.UI ───
+# A handful of framework HELPER CLASSES relocated out of Windows.UI into Microsoft.UI
+# in WinApp SDK, but the Windows.UI.Color STRUCT (and Point/Size/Rect) stayed put — so a
+# blanket 'Windows.UI' -> 'Microsoft.UI' replace is wrong. Rewrite only the moved classes,
+# using a trailing word boundary so 'Windows.UI.Colors'/'Windows.UI.ColorHelper' match
+# while 'Windows.UI.Color' (the struct) is left untouched. Prevents CS0234 at build time.
+$uiTypeMoves = @(
+    @{ From = 'Windows\.UI\.Colors\b';      To = 'Microsoft.UI.Colors' },
+    @{ From = 'Windows\.UI\.ColorHelper\b'; To = 'Microsoft.UI.ColorHelper' }
+)
+$uiChanged = 0
+foreach ($f in $nsFiles) {
+    $orig = [System.IO.File]::ReadAllText($f.FullName)
+    $new = $orig
+    foreach ($m in $uiTypeMoves) { $new = $new -replace $m.From, $m.To }
+    if ($new -ne $orig) {
+        [System.IO.File]::WriteAllText($f.FullName, $new)
+        $uiChanged++
+    }
+}
+Write-Host "    Rewrote Windows.UI.Colors/ColorHelper -> Microsoft.UI.* in $uiChanged file(s)"
+
 # ─── 3b. Visible-text fidelity snapshot ────────────────────────────────────────
 # Capture the user-visible/static text present in each copied XAML *now*, while it
 # still matches the source verbatim. The validator later WARNs if any of these

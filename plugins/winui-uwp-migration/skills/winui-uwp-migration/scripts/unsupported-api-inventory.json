@@ -36,6 +36,7 @@
   ],
   "residueOnly": [
     { "pattern": "using\\s+Windows\\.UI\\.Xaml",                               "name": "using Windows.UI.Xaml",      "reason": "Should have been rewritten by Initialize-UwpMigration.ps1" },
+    { "pattern": "Windows\\.UI\\.Colors\\b|Windows\\.UI\\.ColorHelper\\b",       "name": "Windows.UI.Colors / Windows.UI.ColorHelper", "reason": "Helper classes moved to Microsoft.UI in WinApp SDK; rewritten by Initialize-UwpMigration.ps1. (The Windows.UI.Color struct stays, so the pattern uses a trailing \\b to avoid matching it.)" },
     { "pattern": "Windows\\.UI\\.Xaml\\.(Controls|Data|Documents|Input|Markup|Media|Navigation|Shapes|Automation|Hosting)", "name": "Windows.UI.Xaml.* (fully-qualified)", "reason": "Should have been rewritten by Initialize-UwpMigration.ps1" },
     { "pattern": "xmlns:[a-zA-Z]+=\"using:Windows\\.UI\\.Xaml",                "name": "xmlns: using:Windows.UI.Xaml",   "reason": "XAML xmlns clause should have been rewritten" },
     { "pattern": "Microsoft\\.NETCore\\.UniversalWindowsPlatform",             "name": "Microsoft.NETCore.UniversalWindowsPlatform PackageReference", "reason": "UWP-only NuGet — drop and use Microsoft.WindowsAppSDK" },

@@ -1,0 +1,15 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The namespace mapping table lumps the Windows.UI.Colors class move in with the Windows.UI.Xaml.* NAMESPACE moves, without warning that sibling Windows.UI types (the Color struct, Point/Size/Rect) do NOT move. A reader applying a blanket 'Windows.UI -> Microsoft.UI' mental model can either miss Colors or over-rewrite the struct.",
+      "evidence": "MIGRATION-PATTERNS.md:112 '| `Windows.UI.Colors` | `Microsoft.UI.Colors` |' sits inside the 'All Windows.UI.Xaml.* namespaces move' table with no struct-stays caveat; the dev-agent kept Windows.UI.Colors and hit CS0234 (session-log.txt:2231).",
+      "covered_at": "MIGRATION-PATTERNS.md §Namespace Mapping, table row line 112.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add a short caveat under the table: the moved-to-Microsoft.UI helper CLASSES are Colors and ColorHelper, whereas the Windows.UI.Color struct (and Point/Size/Rect) stay in Windows.UI — so never do a blanket Windows.UI->Microsoft.UI replace. Also add the ColorHelper row.",
+      "generalizes": "The struct-stays / helpers-move split trips up every color-using migration; making the boundary explicit prevents both under- and over-rewriting across scenarios."
+    }
+  ]
+}

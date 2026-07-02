@@ -1,0 +1,38 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Ported UWP code using Windows.UI.Colors / Windows.UI.ColorHelper fails to build with CS0234 because those helper classes moved to Microsoft.UI, but the bootstrap namespace mass-rewrite only handles Windows.UI.Xaml.",
+      "evidence": "session-log.txt:2231-2232 CS0234 'Colors does not exist in namespace Windows.UI' at MainPage.xaml.cs(110,63)/(113,63); manual fix at 2284-2287.",
+      "root_cause": "Initialize-UwpMigration.ps1 §3 rewrites only 'Windows.UI.Xaml'; the non-Xaml helper classes that also relocated to Microsoft.UI are never rewritten and no residue rule flags them.",
+      "tier": 1,
+      "change": "Added a bootstrap rewrite step (§3a) mapping Windows.UI.Colors -> Microsoft.UI.Colors and Windows.UI.ColorHelper -> Microsoft.UI.ColorHelper with a trailing \\b so the Windows.UI.Color struct is preserved.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Named-color brushes and ColorHelper calls compile immediately after bootstrap; no CS0234 build round-trip.",
+      "falsifiable_check": "On a re-run of any color-using UWP app, the ported source contains Microsoft.UI.Colors (not Windows.UI.Colors) after Initialize-UwpMigration.ps1, and dotnet build emits no CS0234 for Colors/ColorHelper."
+    },
+    {
+      "problem": "The validator's residue grep does not catch leftover Windows.UI.Colors/ColorHelper if the bootstrap is skipped or the agent re-introduces them by hand.",
+      "evidence": "unsupported-api-inventory.json residueOnly previously covered only Windows.UI.Xaml* / UWP csproj markers.",
+      "root_cause": "No backstop rule for the moved non-Xaml helper classes.",
+      "tier": 1,
+      "change": "Added a residueOnly pattern 'Windows\\.UI\\.Colors\\b|Windows\\.UI\\.ColorHelper\\b' so Validate-UwpMigration.ps1 fails fast on any leftover (word-boundary keeps the Color struct exempt).",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+      "expected_effect": "Validator flags any remaining Windows.UI.Colors/ColorHelper before the build, pointing the agent at the fix.",
+      "falsifiable_check": "Validate-UwpMigration.ps1 reports a residue hit if a file still contains Windows.UI.Colors, and passes once rewritten."
+    },
+    {
+      "problem": "The namespace mapping table lists Windows.UI.Colors among the Windows.UI.Xaml.* namespace moves without warning that the Windows.UI.Color struct (and Point/Size/Rect) do NOT move, inviting either a missed rewrite or an over-broad Windows.UI->Microsoft.UI replace.",
+      "evidence": "MIGRATION-PATTERNS.md:112 inside the 'all Windows.UI.Xaml.* move' table; dev-agent kept Windows.UI.Colors and hit CS0234.",
+      "root_cause": "Under-emphasized struct-stays / helpers-move distinction.",
+      "tier": 3,
+      "change": "Added a ColorHelper row and a caveat blockquote clarifying that only Colors/ColorHelper move while the Color struct and Point/Size/Rect stay — never do a blanket Windows.UI->Microsoft.UI replace.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "If the agent hand-edits colors (bootstrap not run on a file), it applies the correct targeted rewrite instead of over/under-rewriting.",
+      "falsifiable_check": "Get-MigrationPattern.ps1 for the namespace section surfaces the caveat; manual color rewrites use Microsoft.UI.Colors while leaving Windows.UI.Color intact."
+    }
+  ],
+  "deferred_to_human": []
+}

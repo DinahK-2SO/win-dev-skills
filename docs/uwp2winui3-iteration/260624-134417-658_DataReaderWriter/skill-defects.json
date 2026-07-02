@@ -1,0 +1,17 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Ported UWP code referencing Windows.UI.Colors (and, generally, Windows.UI.ColorHelper) fails to compile with CS0234 because those framework classes moved to Microsoft.UI in WinApp SDK, but the bootstrap namespace mass-rewrite only handles Windows.UI.Xaml.",
+      "evidence": "session-log.txt:2231-2232 'error CS0234: The type or namespace name \\'Colors\\' does not exist in the namespace \\'Windows.UI\\'' at MainPage.xaml.cs(110,63) and (113,63); fixed at session-log.txt:2284-2287.",
+      "skill_search": "grepped winui-uwp-migration for 'Windows.UI.Colors', 'ColorHelper', 'Colors', and the Initialize-UwpMigration.ps1 rewrite (-replace 'Windows\\.UI\\.Xaml').",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 §3 rewrites only 'Windows.UI.Xaml' -> 'Microsoft.UI.Xaml'. The non-Xaml types that also relocated to Microsoft.UI (Colors, ColorHelper) are never rewritten and no residue rule flags them, so they survive into the build as a compile error.",
+      "proposed_fix": "Add a bootstrap rewrite step in Initialize-UwpMigration.ps1 mapping 'Windows.UI.Colors' -> 'Microsoft.UI.Colors' and 'Windows.UI.ColorHelper' -> 'Microsoft.UI.ColorHelper' (trailing word boundary so the Windows.UI.Color STRUCT is preserved), add the same as a residueOnly pattern in unsupported-api-inventory.json, and add a caveat row/note in MIGRATION-PATTERNS.md that the helper classes move while the Color struct stays.",
+      "generalizes": "Named-color brushes (SolidColorBrush(Colors.X)) and ColorHelper.FromArgb are pervasive across UWP samples; every UWP app that sets colors from code hits this exact CS0234 after migration. The move is mechanical and deterministic, so fixing it in tooling helps every future scenario."
+    }
+  ]
+}

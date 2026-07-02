@@ -1,0 +1,14 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "DataTemplate x:Bind with x:DataType=\"local:Scenario\" failed to compile (WMC0909 'Cannot resolve DataType' + WMC1111 + internal WMC9999); the dev-agent recovered by switching to classic {Binding Title}.",
+      "evidence": "session-log.txt:2236-2238 (WMC0909/WMC1111/WMC9999) and the fix at 2299 replacing x:Bind/x:DataType with {Binding Title}.",
+      "covered_clearly_at": "This is a one-off XAML-compiler resolution quirk on a ported ItemTemplate, not a documented migration pattern. The dev-agent diagnosed and fixed it in a single turn with a correct, standard fallback ({Binding}). No general skill rule would reliably pre-empt the internal WMC9999, and forcing a blanket x:Bind->Binding rule would be wrong guidance (x:Bind is the recommended default).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable model already recovered correctly in one step; the failure is scenario/compiler-specific (internal WMC9999) rather than a generalizable pattern, and encoding 'prefer {Binding} over x:Bind' would degrade guidance for other scenarios. Not worth a skill edit."
+    }
+  ]
+}
