@@ -316,6 +316,34 @@ None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is 
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
 
+> `ApplicationView.GetForCurrentView()` maps to `AppWindow` **only for window-management members** (size, presenter, title bar). Per-view *capabilities* like `IsScreenCaptureEnabled` are **not** AppWindow properties — see "Screen-capture protection" below.
+
+<a id="screen-capture"></a>
+## Screen-capture protection (`IsScreenCaptureEnabled`)
+
+UWP toggles capture/recording protection through the per-view flag `ApplicationView.GetForCurrentView().IsScreenCaptureEnabled`. **There is no equivalent property on `Microsoft.UI.Windowing.AppWindow`** (assuming one exists produces `CS1061: 'AppWindow' does not contain a definition for 'IsScreenCaptureEnabled'`). The WinUI 3 desktop equivalent is the Win32 `SetWindowDisplayAffinity` call on the window HWND.
+
+| UWP | WinUI 3 desktop |
+|-----|-----------------|
+| `IsScreenCaptureEnabled = false` (block capture) | `SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE)` |
+| `IsScreenCaptureEnabled = true` (allow capture) | `SetWindowDisplayAffinity(hwnd, WDA_NONE)` |
+
+```csharp
+using System.Runtime.InteropServices;
+
+[DllImport("user32.dll", SetLastError = true)]
+private static extern bool SetWindowDisplayAffinity(nint hwnd, uint dwAffinity);
+
+private const uint WDA_NONE = 0x00000000;
+private const uint WDA_EXCLUDEFROMCAPTURE = 0x00000011; // fully excludes the window from capture
+
+// e.g. protect the window while a page is shown, restore on navigate-away
+var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow!);
+SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
+```
+
+Notes: apply on `OnNavigatedTo` and restore `WDA_NONE` on `OnNavigatedFrom` if only one page needs protection; a window excluded from capture correctly screenshots blank. `WDA_MONITOR (0x01)` renders the window black instead of excluding it — prefer `WDA_EXCLUDEFROMCAPTURE` for the UWP parity behaviour. `Windows.Media.Capture.AppCapture` (recording state) is a separate concern: `AppCapture.GetForCurrentView()` may be unavailable at runtime (wrap in try/catch), but the static `AppCapture.SetAllowedAsync(bool)` still works.
+
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces
 
@@ -682,7 +710,7 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 ### `x:Bind` and compiled bindings
 
-`x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+`x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML. If a `DataTemplate x:DataType="local:MyType"` with `{x:Bind}` fails markup compile with `WMC0909` "Cannot resolve DataType" or `WMC1111` "DataTemplates containing x:Bind need a DataType" (often alongside `WMC1509` "No LocalAssembly parameter"), the project-local model type isn't resolving during markup compilation — the reliable fix is to fall back to classic `{Binding}` (e.g. `Text="{Binding Title}"`), which binds at runtime and needs no `x:DataType`.
 
 ### Page root element
 

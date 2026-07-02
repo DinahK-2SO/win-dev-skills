@@ -1,0 +1,15 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "A UWP `DataTemplate x:DataType=\"local:Scenario\"` with `{x:Bind}` failed markup compile (WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 'DataTemplates containing x:Bind need a DataType'). The agent recovered by switching the template to classic `{Binding}`.",
+      "evidence": "session-log.txt ~2246-2247 (WMC0909/WMC1111), ~2299 ('XAML can't resolve local:Scenario with x:DataType — need to use {Binding} instead'), ~2305 (edit to `{Binding Title}`).",
+      "covered_at": "MIGRATION-PATTERNS.md, section `### x:Bind and compiled bindings` (~line 683): 'x:Bind is supported... Compiled bindings against Windows.UI.Xaml.* types resolve... If the build emits XLS0414/MC3074 \"type was not found\", look for stale UWP namespace prefixes.'",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Extend the existing x:Bind section to cover the DataTemplate case: when a `DataTemplate x:DataType=\"local:...\"` fails with WMC0909/WMC1111 (often alongside WMC1509 'No LocalAssembly parameter'), the pragmatic fix is to fall back to classic `{Binding}` (runtime binding, no x:DataType needed). Keep it a short addition to the existing paragraph, not a new topic.",
+      "generalizes": "UWP universal-sample shells (and many list-driven UWP apps) routinely author `ListBox/ListView` item templates as `DataTemplate x:DataType=\"local:...\"` + `{x:Bind}` over project-local model types. This exact template pattern recurs across scenarios, so documenting the WMC0909/WMC1111 recovery generalizes broadly."
+    }
+  ]
+}

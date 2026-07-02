@@ -1,0 +1,17 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add screen-capture protection mapping: UWP ApplicationView.IsScreenCaptureEnabled -> Win32 SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE/WDA_NONE), since AppWindow has no such member (prevents a recurring CS1061).",
+    "Route IsScreenCaptureEnabled to a new PATTERNS.md#screen-capture anchor in unsupported-api-inventory.json so the injected TODO points at the correct fix instead of the generic GetForCurrentView table.",
+    "Extend the x:Bind section to cover WMC0909/WMC1111 DataTemplate x:DataType resolution failures over project-local types, with the classic {Binding} fallback."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json"
+  ],
+  "deferred_to_human": [
+    "Blank WinUI 3 screenshots for MediaPlayerElement-hosting windows are a winapp/parity-check capture limitation (eval tooling), out of scope for the migration skill."
+  ]
+}

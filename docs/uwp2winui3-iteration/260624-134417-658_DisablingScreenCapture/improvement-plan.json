@@ -1,0 +1,30 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "UWP `ApplicationView.IsScreenCaptureEnabled` (screen-capture / content protection) has no skill mapping; the windowing/GetForCurrentView guidance implies AppWindow carries it, so the agent guessed `AppWindow.IsScreenCaptureEnabled` and hit CS1061 before rewriting to Win32 SetWindowDisplayAffinity.",
+      "evidence": "session-log.txt ~2243 (CS1061), ~2302 (fix), ~2950 (agent summary). skill grep for ScreenCapture/DisplayAffinity/WDA_ = 0 hits.",
+      "root_cause": "No documented UWP→WinUI 3 mapping for screen-capture protection; AppWindow lacks the member and the Win32 substitute was undocumented.",
+      "tier": 1,
+      "change": "Added `IsScreenCaptureEnabled` adaptable pattern in unsupported-api-inventory.json routed to a new `screen-capture` anchor (placed before the generic GetForCurrentView/ApplicationView patterns so the injected TODO points to the correct section); added a `<a id=\"screen-capture\"></a>` section to MIGRATION-PATTERNS.md documenting SetWindowDisplayAffinity + WDA constants + HWND retrieval; added a clarifying note under the GetForCurrentView table that per-view capabilities like IsScreenCaptureEnabled are not AppWindow members.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On a re-run, the IsScreenCaptureEnabled line gets a `PATTERNS.md#screen-capture` TODO and the agent writes SetWindowDisplayAffinity directly, with no CS1061 build round-trip.",
+      "falsifiable_check": "Re-run migration of any app using IsScreenCaptureEnabled: no CS1061 on AppWindow.IsScreenCaptureEnabled, and the injected TODO reads `see PATTERNS.md#screen-capture`."
+    },
+    {
+      "problem": "A `DataTemplate x:DataType=\"local:Scenario\"` with `{x:Bind}` failed markup compile (WMC0909/WMC1111); the x:Bind skill section covered only XLS0414/MC3074 namespace issues, not the project-local DataTemplate resolution failure or its `{Binding}` fallback.",
+      "evidence": "session-log.txt ~2246-2247 (WMC0909/WMC1111), ~2305 (switched to {Binding}).",
+      "root_cause": "Existing x:Bind guidance under-emphasized the DataTemplate x:DataType project-local-type resolution case.",
+      "tier": 3,
+      "change": "Extended the existing `### x:Bind and compiled bindings` paragraph to name WMC0909/WMC1111 (and the WMC1509 co-symptom) and prescribe the classic `{Binding}` fallback. Kept as a sharpening of existing content, not a new section, because the fix is one recovery sentence and a script route would over-fire on valid x:Bind usage.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent recognizes WMC0909/WMC1111 in DataTemplates and falls back to {Binding} without exploratory retries.",
+      "falsifiable_check": "Re-run any UWP sample-shell migration with a ListBox/ListView x:Bind item template: WMC0909/WMC1111 is resolved on the first fix attempt (or avoided)."
+    }
+  ],
+  "deferred_to_human": [
+    "Blank WinUI 3 screenshots for windows hosting MediaPlayerElement (DirectComposition overlay vs winapp PrintWindow) prevent pixel-level parity verification. This is a limitation of the eval tooling (winui3-parity-check / winapp capture), which is out of scope for the migration skill and must not be changed here."
+  ]
+}

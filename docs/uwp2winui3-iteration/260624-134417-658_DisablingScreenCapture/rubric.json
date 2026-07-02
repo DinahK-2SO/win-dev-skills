@@ -1,0 +1,25 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "featureName": "Disabling screen capture C# sample",
+  "uwp_ground_truth": {
+    "launched": true,
+    "pid": 20020,
+    "windowTitle": "Disabling Screen Capture C# sample",
+    "uia_limitation": "CoreWindow exposed only root Pane to UIA; per-scenario nav and control actuation not drivable on original app"
+  },
+  "candidate": {
+    "path": "results/run120/000_DisablingScreenCapture/app/DisablingScreenCapture",
+    "builds": true,
+    "launches": true,
+    "pid": 26272
+  },
+  "features": [
+    { "number": 1, "title": "Enabling screen capture", "requires": ["Description text", "MediaPlayerElement", "StatusBlock"] },
+    { "number": 2, "title": "Disabling screen capture", "requires": ["WDA_EXCLUDEFROMCAPTURE applied", "Description text", "MediaPlayerElement"] },
+    { "number": 3, "title": "Managing AppCapture", "requires": ["AllowAppCaptureCheckBox ToggleSwitch wired to AppCapture.SetAllowedAsync", "status output"] }
+  ],
+  "capture_caveats": {
+    "winui_screenshots_blank": "winapp PrintWindow capture returns white for WinUI 3 windows hosting a MediaPlayerElement; UIA tree fully populated and matches UWP",
+    "scenario2_blank_expected": "scenario 2 applies WDA_EXCLUDEFROMCAPTURE, so a blank capture is the correct/intended behavior"
+  }
+}

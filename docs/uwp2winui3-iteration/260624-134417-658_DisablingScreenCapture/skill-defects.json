@@ -1,0 +1,17 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "UWP screen-capture protection (`ApplicationView.GetForCurrentView().IsScreenCaptureEnabled = false/true`) has no documented WinUI 3 mapping. The agent followed the windowing/GetForCurrentView guidance (ApplicationView → AppWindow), guessed `AppWindow.IsScreenCaptureEnabled`, and hit a build failure.",
+      "evidence": "session-log.txt ~2243-2244: `error CS1061: 'AppWindow' does not contain a definition for 'IsScreenCaptureEnabled'`. Fixed at ~2302 by adding Win32 `SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE/WDA_NONE)`. Confirmed in the agent's own summary (~2950).",
+      "skill_search": "Grepped winui-uwp-migration for `ScreenCapture|DisplayAffinity|WDA_|content protect|IsProtected` across SKILL.md, MIGRATION-PATTERNS.md, and scripts/*.json — 0 hits.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill maps `ApplicationView.GetForCurrentView()` generically to `AppWindow.GetFromWindowId(...)` but never states that the screen-capture-protection capability is NOT an AppWindow member and requires a Win32 HWND call.",
+      "proposed_fix": "Add a `<a id=\"screen-capture\"></a>` section to MIGRATION-PATTERNS.md documenting `SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE / WDA_NONE)` (with WDA constants and HWND-via-WindowNative), add a clarifying row to the GetForCurrentView/AppWindow tables, and add an `IsScreenCaptureEnabled` adaptable entry in unsupported-api-inventory.json routed to the `screen-capture` anchor (placed before the generic GetForCurrentView/ApplicationView patterns so the injected TODO points to the right section).",
+      "generalizes": "Screen-capture prevention / content protection (privacy screens, DRM, secure fields) is a recurring UWP capability; any UWP app that sets IsScreenCaptureEnabled will hit the identical dead-end mapping to AppWindow. The Win32 SetWindowDisplayAffinity substitution is the standard, app-agnostic WinUI 3 desktop equivalent."
+    }
+  ]
+}

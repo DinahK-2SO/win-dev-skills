@@ -1,0 +1,14 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "`AppCapture.GetForCurrentView()` needed adaptation for WinUI 3 desktop; the agent wrapped it in try/catch with a fallback message and kept the static `AppCapture.SetAllowedAsync(bool)` for the toggle.",
+      "evidence": "session-log.txt ~1803 (edit adding try/catch around AppCapture.GetForCurrentView) and ~2951 (agent summary: 'Wrapped in try/catch with a graceful fallback message; SetAllowedAsync() (static) still works').",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md `<a id=\"getforcurrentview\"></a> ## GetForCurrentView() Replacements' — the section states plainly that none of the GetForCurrentView() singletons work in WinUI 3 desktop, which is exactly the guidance the agent applied. The generic `GetForCurrentView()` pattern in unsupported-api-inventory.json already routes such calls to this anchor.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already prominently covers the GetForCurrentView family and the agent handled it correctly (build passed, control wired, scenario scored pass). Adding an AppCapture-specific note would be scenario-specific bloat; a capable re-run handles it from the existing GetForCurrentView guidance."
+    }
+  ]
+}

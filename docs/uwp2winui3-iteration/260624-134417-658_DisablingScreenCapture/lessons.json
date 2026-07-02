@@ -1,0 +1,31 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 inline TODO injection", "evidence": "session-log: each UWP-only call carried a `// TODO[migrate-NNN]: see PATTERNS.md#getforcurrentview` marker (Scenario2_Disable.xaml.cs lines 27/34, Scenario3_AppCapture.xaml.cs line 33), which the agent used as its worklist." },
+    { "tool": "dotnet build error output", "evidence": "CS1061 and WMC0909/WMC1111 from `dotnet build` (session-log ~2243-2247) precisely told the agent which API guesses were invalid, driving the fixes." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "unsupported-api-inventory.json TODO routing", "limitation": "`ApplicationView.GetForCurrentView().IsScreenCaptureEnabled` matched the generic `GetForCurrentView()` / `ApplicationView` patterns and was routed to PATTERNS.md#getforcurrentview, whose table only offers `AppWindow.GetFromWindowId(...)` — no coverage for the screen-capture-protection capability.", "suggested_tweak": "Add a dedicated `IsScreenCaptureEnabled` adaptable pattern routed to a `screen-capture` anchor." }
+  ],
+  "failed_apis": [
+    { "api": "Microsoft.UI.Windowing.AppWindow.IsScreenCaptureEnabled", "why_tried": "Agent followed the windowing/GetForCurrentView guidance that maps ApplicationView → AppWindow and assumed the capture flag lived on AppWindow.", "root_cause": "WinUI 3 `AppWindow` has no `IsScreenCaptureEnabled` member; the UWP per-view capture flag has no AppWindow analog.", "fix": "Win32 P/Invoke `SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE)` on nav-in and `WDA_NONE` on nav-out, HWND from `WindowNative.GetWindowHandle(App.MainWindow!)`." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md #getforcurrentview / #windowing tables", "wrong": "Implies every `ApplicationView.GetForCurrentView()` capability maps onto `AppWindow`.", "correct": "Window-management members map to AppWindow, but `IsScreenCaptureEnabled` (content protection) does not — it needs Win32 `SetWindowDisplayAffinity`." }
+  ],
+  "special_apis": [
+    { "api": "Windows.Media.Capture.AppCapture", "special_handling": "`AppCapture.GetForCurrentView()` may be unavailable at runtime; wrap in try/catch with a fallback status message. The static `AppCapture.SetAllowedAsync(bool)` still works for the toggle." }
+  ],
+  "errors_encountered": [
+    { "error": "CS1061 'AppWindow' does not contain a definition for 'IsScreenCaptureEnabled'", "root_cause": "No AppWindow equivalent for UWP `ApplicationView.IsScreenCaptureEnabled`.", "fix": "Replace with Win32 `SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE/WDA_NONE)`." },
+    { "error": "WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 'DataTemplates containing x:Bind need a DataType'", "root_cause": "A `DataTemplate x:DataType=\"local:Scenario\"` with `{x:Bind}` could not resolve the project-local type during markup compile (accompanied by WMC1509 'No LocalAssembly parameter during MarkupCompilePass2').", "fix": "Switched the template to classic `{Binding Title}` (runtime binding, no x:DataType required)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario2_Disable.xaml.cs OnNavigatedTo/OnNavigatedFrom", "symptom": "First conversion guessed `App.MainWindow.AppWindow.IsScreenCaptureEnabled = false/true`, which failed to build (CS1061).", "turns_or_retries": "1 build round-trip (first edit → build error → corrected edit)", "root_cause": "Skill had no mapping for UWP screen-capture protection; windowing guidance pointed at AppWindow, which lacks the member.", "how_resolved": "Rewrote using Win32 `SetWindowDisplayAffinity` P/Invoke with WDA_EXCLUDEFROMCAPTURE / WDA_NONE.", "preventable_by": "A dedicated `screen-capture` pattern in MIGRATION-PATTERNS.md plus an inventory route so the injected TODO points straight to it." },
+    { "where": "MainPage.xaml scenario ListBox ItemTemplate", "symptom": "UWP `DataTemplate x:DataType=\"local:Scenario\"` with `{x:Bind}` failed markup compile (WMC0909/WMC1111).", "turns_or_retries": "1 build round-trip", "root_cause": "x:Bind section documents automatic namespace resolution but not the DataTemplate x:DataType project-local-type resolution failure or its fallback.", "how_resolved": "Switched to classic `{Binding Title}`.", "preventable_by": "Extend the existing x:Bind section to note the WMC0909/WMC1111 DataTemplate case and the `{Binding}` fallback." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

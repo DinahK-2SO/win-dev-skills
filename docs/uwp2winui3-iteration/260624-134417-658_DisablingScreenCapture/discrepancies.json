@@ -1,0 +1,17 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Enabling screen capture: description text, MediaPlayerElement, shared StatusBlock", "status": "pass", "reason": "WinUI UIA matches UWP content.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Disabling screen capture: apply content protection so window is excluded from capture", "status": "pass", "reason": "SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE) on nav-in / WDA_NONE on nav-out.", "suspected_skill_gap": "Correct at final state, but reached only after a CS1061 build failure — skill lacked the ApplicationView.IsScreenCaptureEnabled → SetWindowDisplayAffinity mapping." },
+    { "id": 3, "text": "Managing AppCapture: ToggleSwitch wired to AppCapture.SetAllowedAsync", "status": "pass", "reason": "Control present and wired; behavioral effect only visible during active capture.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "All scenarios", "uwp": "Rendered frame with nav list + description + media player", "winui": "Blank white screenshot (fully populated 45-element UIA tree)", "screenshot_ref": "001_score/notes/parity/winui3/screenshots/*.png" }
+  ],
+  "missing_features": [],
+  "summary": "No parity defects (100/100). The two skill-eligible findings are build-time friction the agent recovered from: (1) missing screen-capture-protection API mapping; (2) x:Bind DataTemplate resolution gap. Blank WinUI screenshots are a measurement caveat (winapp PrintWindow vs MediaPlayerElement composition surface), not an app fault, and belong to the eval tooling (not editable)."
+}
