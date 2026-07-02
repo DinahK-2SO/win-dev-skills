@@ -1,0 +1,60 @@
+{
+  "scenario": "DatagramSocket",
+  "feature": "DatagramSocket",
+  "source": "uwp-samples-standalone/Samples/DatagramSocket/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Start Datagram Listener",
+      "controls": [
+        { "name": "ServiceNameForListener", "type": "TextBox", "expected": "text '22112'" },
+        { "name": "InboundBufferSize", "type": "TextBox", "expected": "empty, numeric input" },
+        { "name": "BindToAny", "type": "RadioButton", "expected": "'Bind to any address', selected by default" },
+        { "name": "BindToAddress", "type": "RadioButton", "expected": "'Bind to specific address (select from below list of IPv4 or IPv6)'" },
+        { "name": "BindToAdapter", "type": "RadioButton", "expected": "'Bind to adapter (select an adapter based on the GUIDs below)'" },
+        { "name": "AdapterList", "type": "ComboBox", "expected": "disabled" },
+        { "name": "StartListener", "type": "Button", "expected": "content 'Listen'" }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Connect to Listener",
+      "controls": [
+        { "name": "HostNameForConnect", "type": "TextBox", "expected": "text 'localhost', disabled" },
+        { "name": "ServiceNameForConnect", "type": "TextBox", "expected": "text '22112'" },
+        { "name": "DontFragment", "type": "ToggleSwitch", "expected": "'Don't fragment flag'" },
+        { "name": "ConnectSocket", "type": "Button", "expected": "content 'Connect'" }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Send Data",
+      "controls": [
+        { "name": "SendHello", "type": "Button", "expected": "content 'Send 'hello''" },
+        { "name": "SendOutput", "type": "TextBlock", "expected": "status output" }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Close Socket",
+      "controls": [
+        { "name": "CloseSockets", "type": "Button", "expected": "content 'Close'" }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Multicast/Broadcast",
+      "controls": [
+        { "name": "MulticastRadioButton", "type": "RadioButton", "expected": "'Multicast'" },
+        { "name": "(Broadcast)", "type": "RadioButton", "expected": "'Broadcast'" },
+        { "name": "ServiceName", "type": "TextBox", "expected": "text '22113'" },
+        { "name": "RemoteAddressLabel", "type": "TextBlock", "expected": "'Multicast Group:' (set in code)" },
+        { "name": "RemoteAddress", "type": "TextBox", "expected": "'224.3.0.5' (default set in code)" },
+        { "name": "StartListener", "type": "Button", "expected": "'Start listener and join multicast group' (set in code)" },
+        { "name": "SendMessageButton", "type": "Button", "expected": "content 'Send 'hello''" },
+        { "name": "CloseListenerButton", "type": "Button", "expected": "content 'Close Listener'" },
+        { "name": "SendOutput", "type": "TextBlock", "expected": "status output" }
+      ]
+    }
+  ]
+}

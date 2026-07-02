@@ -1,0 +1,14 @@
+{
+  "scenario": "DatagramSocket",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: document CS0118 'namespace used like a type' — the scaffold's RootNamespace matches a same-named WinRT type (DatagramSocket/StreamSocket/MediaCapture/…); fix via per-file type alias or fully-qualify, and note the WMC0909/WMC1509 XAML errors are a downstream cascade that clears once CS0118 is fixed."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Optional Tier-1 detector in Validate/Initialize-UwpMigration.ps1 to pre-warn when RootNamespace/AssemblyName equals a WinRT type name used in the sources."
+  ]
+}

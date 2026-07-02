@@ -1,0 +1,14 @@
+{
+  "scenario": "DatagramSocket",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "First fix attempt used a greedy PowerShell -replace that corrupted its own alias definition ('using WinDatagramSocket = Windows.Networking.Sockets.DatagramSocket;' became '...Sockets.WinDatagramSocket;'), forcing a second cleanup pass before the build went green.",
+      "evidence": "session-log.txt:4466 (greedy regex), :4498/:4529 (corrupted alias line in Scenario1/Scenario5), :4552-4562 (cleanup pass).",
+      "covered_clearly_at": "N/A — this is a generic tooling technique choice (ad-hoc bulk regex), not a UWP→WinUI migration topic the skill should encode.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The mistake is a self-inflicted regex error unrelated to migration knowledge; a capable model on re-run would edit the files more carefully or use a scoped alias. Encoding 'don't write greedy regex' into the migration skill would be noise. The real, generalizable lesson (the CS0118 collision and its clean alias fix) is captured as a skill-defect, which itself removes the incentive to hand-roll a regex."
+    }
+  ]
+}

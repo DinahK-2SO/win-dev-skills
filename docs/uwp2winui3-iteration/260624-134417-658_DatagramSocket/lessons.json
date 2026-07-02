@@ -1,0 +1,25 @@
+{
+  "scenario": "DatagramSocket",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "dotnet build -p:Platform=$Platform", "evidence": "session-log.txt:5238-5242 — native build surfaced the CS0118 errors and confirmed BUILD_EXIT=0 after the fix." }
+  ],
+  "tools_problematic": [
+    { "tool": "PowerShell -replace bulk regex over .xaml.cs files", "problem": "A too-greedy regex ('\\bDatagramSocket\\b(?!Sample|MessageReceived|WinRT|Socket)') corrupted the alias definition itself, rewriting 'using WinDatagramSocket = Windows.Networking.Sockets.DatagramSocket;' into '...Sockets.WinDatagramSocket;', requiring a second cleanup pass.", "evidence": "session-log.txt:4466-4562" }
+  ],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Networking.Sockets.DatagramSocket", "special_handling": "Its short type name is identical to the project RootNamespace/AssemblyName (DatagramSocket), so unqualified uses in code resolve to the namespace, not the type → CS0118. Must be fully-qualified or aliased." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0118: 'DatagramSocket' is a namespace but is used like a type (Scenario1_Start.xaml.cs:182, Scenario2_Connect.xaml.cs:131, Scenario5_MulticastAndBroadcast.xaml.cs:34,253)", "root_cause": "Project RootNamespace is 'DatagramSocket' (session-log.txt:1944, the scaffold names it after the UWP sample), which shadows the same-named WinRT type Windows.Networking.Sockets.DatagramSocket. C# resolves the bare identifier to the in-scope namespace.", "fix": "Alias the WinRT type once per file ('using WinDatagramSocket = Windows.Networking.Sockets.DatagramSocket;') or fully-qualify each usage; then replace the bare-type declarations/instantiations with the alias." },
+    { "error": "XamlCompiler WMC0909 'Cannot resolve DataType local:Scenario' + WMC1509 'No LocalAssembly parameter during MarkupCompilePass2' + WMC1111 (MainPage.xaml:40-41)", "root_cause": "Cascade from the CS0118 failure: when MarkupCompilePass1/C# compile fails, the XAML compiler cannot resolve project-local types, producing these secondary errors. Not an independent defect.", "fix": "Resolving the CS0118 collision cleared all of these; the final build had 0 errors (session-log.txt:5057)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario1-5 .xaml.cs build fixing", "symptom": "7-error build (4x CS0118 + 3 cascading XAML errors) that looked like two unrelated problems (namespace collision + a XAML DataType error).", "turns_or_retries": "2 build cycles (first regex fix corrupted the alias line, second pass fixed it, then a clean build).", "root_cause": "No skill guidance existed for project-name/WinRT-type collision; the agent had to diagnose CS0118 from scratch and hand-roll a bulk regex, which mangled its own alias.", "how_resolved": "Added a per-file type alias and replaced bare-type usages; rebuilt clean.", "preventable_by": "A documented 'CS0118 — RootNamespace collides with a same-named WinRT type' pattern in MIGRATION-PATTERNS.md 'Common build errors' with the alias/fully-qualify fix and a note that same-named XAML DataType errors are a downstream cascade." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

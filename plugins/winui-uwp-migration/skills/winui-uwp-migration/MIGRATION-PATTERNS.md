@@ -27,6 +27,24 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0118: '<Name>' is a namespace but is used like a type`
+
+UWP SDK samples are conventionally named after the **very API they demonstrate**, and the scaffold sets the project `<RootNamespace>`/`<AssemblyName>` to that sample name. When a source file then uses the same-named WinRT type **unqualified**, C# binds the bare identifier to the **project namespace** instead of the type, so a build that looks correct fails with `CS0118`. Example: a project named `DatagramSocket` using `Windows.Networking.Sockets.DatagramSocket` — every `DatagramSocket socket = …` resolves to the namespace. This also hits `StreamSocket`, `MediaCapture`, `FileOpenPicker`, `DeviceInformation`, `Geolocator`, and any other sample whose name equals a WinRT type it consumes.
+
+Fix by disambiguating the **type** (do **not** rename the project namespace — that would break every `x:Class` in the XAML). Add one alias at the top of each affected file and use it for the declarations/instantiations:
+
+```csharp
+using Windows.Networking.Sockets;
+using WinDatagramSocket = Windows.Networking.Sockets.DatagramSocket; // alias the WinRT type
+
+// then:
+private WinDatagramSocket listenerSocket = null;
+```
+
+Or fully-qualify each usage (`Windows.Networking.Sockets.DatagramSocket socket = …`). Prefer targeted, per-declaration edits over a broad find-replace — a greedy regex easily rewrites the alias definition itself or unrelated identifiers.
+
+**Cascade note:** while the C# side is broken, the XAML compiler cannot resolve project-local types and emits secondary errors — `WMC0909 'Cannot resolve DataType local:<Type>'`, `WMC1509 'No LocalAssembly parameter … during MarkupCompilePass2'`, `WMC1111` — pointing at `MainPage.xaml`/`x:Bind` `DataType`s. These are **downstream of the `CS0118` failure**, not independent defects; they clear once the collision is fixed. Resolve the `CS0118` first, then rebuild before chasing any XAML type-resolution error.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:

@@ -1,0 +1,20 @@
+{
+  "scenario": "DatagramSocket",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0118: '<Name>' is a namespace but is used like a type — the scaffold sets RootNamespace/AssemblyName to the UWP sample name, which for API-named samples (DatagramSocket, StreamSocket, MediaCapture, …) collides with the same-named WinRT type; unqualified type uses bind to the namespace and fail the build, cascading into WMC0909/WMC1509 XAML errors.",
+      "evidence": "session-log.txt:4400-4408 (7-error build), :4459-4472 + :4552-4562 (two-pass fix), :5057 (0-error rebuild); RootNamespace at :1944. skill-defects.json item 1.",
+      "root_cause": "Migration skill had zero coverage of the project-namespace-vs-WinRT-type collision; the 'Common build errors' section documents CS0104/CS0227/CS0101/CS0246 but not CS0118, so the agent diagnosed from scratch and hand-rolled a regex that corrupted its own alias.",
+      "tier": 3,
+      "change": "Added a '### CS0118: <Name> is a namespace but is used like a type' subsection to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite', with the root cause (RootNamespace == WinRT type name), the alias fix ('using WinX = Windows....<Name>;') and fully-qualify alternative, a warning against broad find-replace, and a cascade note that same-named XAML DataType errors (WMC0909/WMC1509/WMC1111) clear once CS0118 is fixed.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On any API-named sample, the agent recognizes CS0118 immediately, applies a per-file alias/fully-qualify (not a greedy regex), and does not waste cycles chasing the cascaded XAML errors.",
+      "falsifiable_check": "On a re-run of an API-named sample (e.g. DatagramSocket/StreamSocket), the build reaches 0 errors in one fix cycle with no corrupted alias line, and the WMC0909/WMC1509 errors are not investigated separately."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-1 option (not applied): a Validate/Initialize script could pre-warn when RootNamespace/AssemblyName equals a WinRT type name used in the sources. Deferred because the existing dotnet-build gate already surfaces CS0118, the fix is a code edit the agent must make anyway, and a reliable name-collision detector needs the WinRT type catalog — prose in the exact section the build gate already points to is the higher-leverage, lower-risk change."
+  ]
+}

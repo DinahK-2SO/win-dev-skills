@@ -1,0 +1,17 @@
+{
+  "scenario": "DatagramSocket",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Start Datagram Listener — 7 controls", "status": "pass", "reason": "All 7 controls present with correct labels/defaults; matches live UWP golden.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Connect to Listener — 4 controls", "status": "pass", "reason": "All 4 controls present; graded vs UWP source XAML.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Send Data", "status": "pass", "reason": "SendHello + SendOutput present.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Close Socket", "status": "pass", "reason": "CloseSockets='Close' present.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Multicast/Broadcast — 9 controls", "status": "pass", "reason": "All 9 controls present incl. code-set values.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No functional migration defects; 5/5 pass, 100/100. WinUI screenshots captured blank due to a headless swapchain-compositor limitation (measurement caveat, not a migration defect). The only actionable evidence is a build-time struggle (CS0118 RootNamespace/WinRT-type collision) that did not reduce the score but cost extra build cycles and is uncovered by the skill."
+}

@@ -1,0 +1,17 @@
+{
+  "scenario": "DatagramSocket",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0118: 'DatagramSocket' is a namespace but is used like a type — the project RootNamespace/AssemblyName ('DatagramSocket', session-log.txt:1944) is identical to the WinRT type Windows.Networking.Sockets.DatagramSocket, so every unqualified use of the type binds to the namespace instead, failing the build (4 sites; also cascades into WMC0909/WMC1509/WMC1111 XAML errors on MainPage.xaml).",
+      "evidence": "session-log.txt:4400-4408 (7-error build), :4459-4472 (agent diagnosis + first, corrupted regex fix), :4552-4562 (cleanup pass), :5057 (0-error rebuild). RootNamespace at session-log.txt:1944.",
+      "skill_search": "Grepped winui-uwp-migration for 'CS0118', 'collision', 'used like a type', 'RootNamespace', 'type alias', 'WinRT type name' — no matches. MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' covers CS0104/CS0227/CS0101/CS0246 but not this collision.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "UWP SDK-style samples are conventionally named after the very API they demonstrate, and the scaffold sets RootNamespace/AssemblyName to that name. When a source file uses the same-named WinRT type unqualified, C# resolves the identifier to the project namespace → CS0118, plus downstream XAML type-resolution errors from the failed C# pass.",
+      "proposed_fix": "Add a subsection to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite': \"### CS0118: '<Name>' is a namespace but is used like a type\" documenting the RootNamespace-vs-WinRT-type collision, the alias fix ('using WinX = Windows....<Name>;') or fully-qualification, and a note that same-named XAML DataType errors (WMC0909/WMC1509) are a downstream cascade that clears once the C# collision is fixed.",
+      "generalizes": "Recurs for any UWP sample whose project name matches a WinRT type it uses — DatagramSocket, StreamSocket, MediaCapture, FileOpenPicker, DeviceInformation, Geolocator, etc. The scaffold naming convention makes this a broad, repeatable class of first-build failure, not a one-off."
+    }
+  ]
+}
