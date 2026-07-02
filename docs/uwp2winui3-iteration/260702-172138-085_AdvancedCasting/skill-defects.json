@@ -1,0 +1,17 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated app fails to build with CS5001 (no static Main) + WMC1509 (No LocalAssembly during MarkupCompilePass2) + WMC9999 (XAML compiler 'Object reference not set to an instance of an object'), zeroing the score. Root cause: .csproj <DefineConstants> contained DISABLE_XAML_GENERATED_MAIN with no hand-written Program.cs/Main.",
+      "evidence": "notes(score)/winui-build.log L181-183 (WMC1509+CS5001+WMC9999); migration app csproj line '<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>' with no Program.cs in the project. Reproduced: adding only that constant to a clean `dotnet new winui` scaffold produced all three messages; removing it restored 'Build succeeded'.",
+      "skill_search": "grepped winui-uwp-migration for 'DISABLE_XAML_GENERATED_MAIN', 'WMC1509', 'WMC9999', 'CS5001', 'No LocalAssembly', 'entry point', 'static Main' — the build-error catalog in MIGRATION-PATTERNS.md covers CS0104/CS0227/CS0246 only.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "DISABLE_XAML_GENERATED_MAIN suppresses the SDK's auto-generated App.g.i.cs Main; MarkupCompilePass2 then runs without a LocalAssembly (WMC1509), crashes (WMC9999), and emits no Main (CS5001). WMC9999 is an opaque internal error that misdirects the agent toward a non-existent XAML-file bug.",
+      "proposed_fix": "(1) MIGRATION-PATTERNS.md: add a 'Common build errors' entry documenting the CS5001+WMC1509+WMC9999 signature, its DISABLE_XAML_GENERATED_MAIN root cause, and both fixes (remove the constant, or add a proper [STAThread] Program.Main), and explicitly warn that WMC9999 is NOT a XAML-file bug. (2) Validate-UwpMigration.ps1 build-FAILED branch: detect the signature and, when the csproj has the constant but no static Main, print the exact root cause + fix.",
+      "generalizes": "The failure is a project-level entry-point/XAML-compiler misconfiguration independent of any app feature. WMC9999's opaque wording makes any migration agent likely to misdiagnose it, and DISABLE_XAML_GENERATED_MAIN is a plausible constant to add when researching WinUI 3 unpackaged/bootstrap startup. It therefore recurs across arbitrary UWP→WinUI 3 scenarios, not just AdvancedCasting."
+    }
+  ]
+}

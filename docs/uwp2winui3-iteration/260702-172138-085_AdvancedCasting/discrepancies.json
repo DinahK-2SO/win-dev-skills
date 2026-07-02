@@ -1,0 +1,20 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 1,
+  "score": 0.0,
+  "builds": false,
+  "runs": false,
+  "requirements": [
+    { "id": 1, "text": "1 - Media Element Casting 101", "status": "fail", "reason": "WinUI 3 app does not build (CS5001 + WMC9999); scenario cannot render.", "suspected_skill_gap": "No skill coverage for the DISABLE_XAML_GENERATED_MAIN entry-point build failure." },
+    { "id": 2, "text": "2 - Casting APIs and a Custom Cast Button", "status": "fail", "reason": "WinUI 3 app does not build (CS5001 + WMC9999).", "suspected_skill_gap": "Same build-blocking csproj misconfiguration." },
+    { "id": 3, "text": "3 - DIAL Sender Universal Windows app", "status": "fail", "reason": "WinUI 3 app does not build (CS5001 + WMC9999).", "suspected_skill_gap": "Same build-blocking csproj misconfiguration." },
+    { "id": 4, "text": "4 - DIAL Receiver Windows Universal app", "status": "fail", "reason": "WinUI 3 app does not build (CS5001 + WMC9999).", "suspected_skill_gap": "Same build-blocking csproj misconfiguration." },
+    { "id": 5, "text": "5 - Multi-View Media Application", "status": "fail", "reason": "WinUI 3 app does not build (CS5001 + WMC9999).", "suspected_skill_gap": "Same build-blocking csproj misconfiguration." },
+    { "id": 6, "text": "6 - Combine Casting Methods", "status": "fail", "reason": "WinUI 3 app does not build (CS5001 + WMC9999).", "suspected_skill_gap": "Same build-blocking csproj misconfiguration." }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [
+    "All 6 scenarios absent at runtime — the migrated app never launches because it fails to build."
+  ],
+  "summary": "Single root cause zeroed the score: the migrated .csproj defined DISABLE_XAML_GENERATED_MAIN without a custom Main, so the XAML markup compiler crashed (WMC9999) and no entry point was emitted (CS5001). No per-feature parity could be measured."
+}

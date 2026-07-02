@@ -1,0 +1,14 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: document the CS5001+WMC1509+WMC9999 build signature — root cause is DISABLE_XAML_GENERATED_MAIN without a hand-written Main, not a XAML-file bug — with both fixes, so agents stop chasing the opaque WMC9999 error.",
+    "Validate-UwpMigration.ps1: in the build-FAILED branch, detect that signature and print the exact DISABLE_XAML_GENERATED_MAIN root cause + fix (falls back to a 'broken entry point, not a XAML bug' note for bare WMC9999)."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": []
+}

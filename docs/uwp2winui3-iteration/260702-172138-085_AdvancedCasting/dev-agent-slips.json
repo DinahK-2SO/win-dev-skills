@@ -1,0 +1,14 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The migration was declared done while the app still failed `dotnet build` (CS5001 + WMC9999). A green build is a hard precondition the agent did not meet.",
+      "evidence": "score-notes migration-score.json build_error + winui-build.log L182-183 show 2 errors at scoring time; session-log.txt contains no successful build confirmation and no CS5001/WMC lines, indicating the mandatory validate/build gate was not honored before declaring done.",
+      "covered_clearly_at": "SKILL.md Step 4 (lines 142-170): '🛑 You are NOT done until Validate-UwpMigration.ps1 reports PASS', '#6 dotnet build healthcheck — clean build', 'Do not report done with a FAIL.', 'After PASS, do a final winapp build ... Only then declare done.'",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The requirement to reach a clean build before declaring done is already stated prominently and unambiguously at Step 4. A capable model on re-run that runs the gate would not ship a build-broken app; no skill edit is needed for the gate itself. (The separate, generalizable difficulty — correctly diagnosing the opaque WMC9999 signature — is addressed as a skill-defect.)"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "dotnet new winui", "evidence": "session-log TURN 1 scaffolded the project cleanly; the stock template builds and needs no DISABLE_XAML_GENERATED_MAIN." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 (build healthcheck)", "problem": "It reports the raw CS5001/WMC9999 error lines but gave no interpretation, so the opaque WMC9999 'Object reference not set' would send an agent chasing a non-existent XAML bug.", "evidence": "winui-build.log lines 181-183: WMC1509 + CS5001 + WMC9999 with no root-cause guidance." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "No signature-to-root-cause mapping for entry-point/XAML-compiler failures.", "suggested_tweak": "Detect CS5001+WMC1509+WMC9999 and name the DISABLE_XAML_GENERATED_MAIN root cause + fix." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [],
+  "errors_encountered": [
+    {
+      "error": "CS5001 'Program does not contain a static Main method suitable for an entry point' + WMC1509 'No LocalAssembly parameter given during MarkupCompilePass2' + WMC9999 'Object reference not set to an instance of an object' (Microsoft.UI.Xaml.Markup.Compiler)",
+      "root_cause": "The .csproj <DefineConstants> included DISABLE_XAML_GENERATED_MAIN with no hand-written Program.cs/Main. That suppresses the SDK's auto-generated App.g.i.cs Main; MarkupCompilePass2 then runs without a LocalAssembly (WMC1509), crashes with WMC9999, and no Main is emitted (CS5001). Reproduced deterministically: adding only that constant to a clean `dotnet new winui` scaffold produces all three messages; removing it fixes the build.",
+      "fix": "Remove DISABLE_XAML_GENERATED_MAIN from <DefineConstants> (let the SDK generate Main), or add a Program.cs with [STAThread] static void Main calling Application.Start."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Project configuration / final build",
+      "symptom": "Migrated app fails to build (dotnet build & dotnet run); every one of the 6 features scored fail because the app never launches.",
+      "turns_or_retries": "Not surfaced in session-log.txt (no CS5001/WMC lines logged); the agent declared done without a clean build.",
+      "root_cause": "csproj carried DISABLE_XAML_GENERATED_MAIN without a custom Main; the opaque WMC9999 XAML-compiler crash masks the real entry-point cause.",
+      "how_resolved": "Not resolved by the agent; caught by scoring.",
+      "preventable_by": "A validator hint mapping CS5001+WMC9999+WMC1509 to the DISABLE_XAML_GENERATED_MAIN root cause, plus a documented build-error entry so the agent doesn't misread WMC9999 as a XAML bug."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

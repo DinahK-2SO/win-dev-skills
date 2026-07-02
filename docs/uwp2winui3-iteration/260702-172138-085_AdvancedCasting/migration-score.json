@@ -1,0 +1,70 @@
+{
+  "scenario": "AdvancedCasting",
+  "uwp_launchable": true,
+  "score": 0.0,
+  "features_total": 6,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 6,
+  "uwp_capture_status": "ok (with caveat): original UWP app built Release/.NET Native and launched (PID 12752, window \"ScreenCasting C# Sample\"); default view captured live (uwp_launch.png, scenario 1 playing \"Big Buck Bunny\"). The uwp-app-runner initially reported ok:false at build (mispackaged standalone sample: shared\\ XAML folder missing -> restored) and then a false-negative launch verify, but the process was confirmed alive with a visible window and a real screenshot. Per-scenario navigation of the golden could NOT be automated: this .NET Native UWP CoreWindow exposes no inner UIA tree to winapp (invoke/search return 0 elements) and interactive foreground/mouse input is unavailable in this automation session (GetForegroundWindow=0; clicks intercepted by desktop/other windows), so the 6 per-scenario baseline frames are the initial view, not distinct navigations.",
+  "winui_capture_status": "none: migrated WinUI 3 app fails to build (dotnet build & dotnet run), so it could not be launched or captured.",
+  "build_error": "Migrated WinUI 3 app FAILS to build (dotnet build/run). Errors: CS5001 \"Program does not contain a static Main method suitable for an entry point\"; WMC9999 XAML Internal Error \"Object reference not set to an instance of an object\" (Microsoft.UI.Xaml.Markup.Compiler pass 2, WMC1509 No LocalAssembly). Non-functional migration -> cannot launch or capture; every feature FAIL.",
+  "parity_result": null,
+  "behavioral_regressions": 6,
+  "features": [
+    {
+      "name": "1 - Media Element Casting 101",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_1_Media_Element_Casting_101.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (CS5001 missing Main entry point + WMC9999 XAML compiler internal error); scenario cannot render or be actuated."
+    },
+    {
+      "name": "2 - Casting APIs and a Custom Cast Button",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_2_Casting_APIs_and_a_Custom_Cast_Button.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (CS5001 missing Main entry point + WMC9999 XAML compiler internal error); scenario cannot render or be actuated."
+    },
+    {
+      "name": "3 - DIAL Sender Universal Windows app",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_3_DIAL_Sender_Universal_Windows_app.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (CS5001 missing Main entry point + WMC9999 XAML compiler internal error); scenario cannot render or be actuated."
+    },
+    {
+      "name": "4 - DIAL Receiver Windows Universal app",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_4_DIAL_Receiver_Windows_Universal_app.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (CS5001 missing Main entry point + WMC9999 XAML compiler internal error); scenario cannot render or be actuated."
+    },
+    {
+      "name": "5 - Multi-View Media Application",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/05_5_Multi_View_Media_Application.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (CS5001 missing Main entry point + WMC9999 XAML compiler internal error); scenario cannot render or be actuated."
+    },
+    {
+      "name": "6 - Combine Casting Methods",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/06_6_Combine_Casting_Methods.png",
+      "winui_screenshot": null,
+      "note": "Migrated WinUI 3 app does not build (CS5001 missing Main entry point + WMC9999 XAML compiler internal error); scenario cannot render or be actuated."
+    }
+  ]
+}

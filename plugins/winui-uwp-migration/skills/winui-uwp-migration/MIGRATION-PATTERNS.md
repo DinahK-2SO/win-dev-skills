@@ -39,6 +39,36 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
 
+### `CS5001: Program does not contain a static 'Main'` + `WMC1509: No LocalAssembly` + `WMC9999: Object reference not set to an instance of an object`
+
+These three appear **together** and are a single root cause, not three problems. `WMC9999` is an opaque "Object reference not set" internal error from `Microsoft.UI.Xaml.Markup.Compiler` — **do not chase it as a XAML bug**; no XAML file is at fault. The trigger is that the XAML-compiler's auto-generated entry point (`App.g.i.cs`'s `Main`, produced from `App.xaml`) was suppressed, so `MarkupCompilePass2` runs without a `LocalAssembly` (WMC1509), crashes (WMC9999), and never emits `Main` (CS5001).
+
+The usual cause in a `dotnet new winui` scaffold is a `<DefineConstants>` that includes **`DISABLE_XAML_GENERATED_MAIN`** without a matching hand-written `Program.cs`. That constant tells the SDK "I provide my own `Main`" — if you don't, the build breaks exactly this way. (Adding it alone to an otherwise-clean scaffold reproduces all three messages.)
+
+**Fix — pick one:**
+
+- **Preferred:** remove `DISABLE_XAML_GENERATED_MAIN` from the `.csproj` `<DefineConstants>` and let the SDK generate `Main`. The stock scaffold does **not** define it; a migration almost never needs it.
+- **Only if you genuinely need single-instancing/redirection:** keep the constant and add a `Program.cs` with a real entry point:
+  ```csharp
+  public static class Program
+  {
+      [STAThread]
+      static void Main(string[] args)
+      {
+          WinRT.ComWrappersSupport.InitializeComWrappers();
+          Microsoft.UI.Xaml.Application.Start(_ =>
+          {
+              var context = new Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(
+                  Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread());
+              System.Threading.SynchronizationContext.SetSynchronizationContext(context);
+              _ = new App();
+          });
+      }
+  }
+  ```
+
+The same signature also appears if `App.xaml`'s `<ApplicationDefinition>` build action or `x:Class` was broken — verify `App.xaml` is still the application definition and its `x:Class` matches `App.xaml.cs` before adding any custom `Main`.
+
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
 Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding files in `MIGRATION-MAPPING.md` get `Triage label = defer`; cite the specific API in `MIGRATION-DEFERRED.md`.

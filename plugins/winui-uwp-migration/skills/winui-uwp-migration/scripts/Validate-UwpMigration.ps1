@@ -494,6 +494,25 @@ if (-not $csproj) {
             $shownN++
         }
         if ($distinct.Count -gt 15) { Write-Host "       ($($distinct.Count - 15) more distinct — see .validator-diagnostics.txt)" }
+        # Targeted root-cause hint for the opaque XAML-compiler entry-point crash.
+        # CS5001 + WMC1509 + WMC9999 fire together when the auto-generated Main is
+        # suppressed. The usual trigger is DISABLE_XAML_GENERATED_MAIN in the csproj
+        # with no hand-written Main — surface the exact fix instead of the generic hint.
+        $joinedBuild = ($buildOut -join "`n")
+        if ($joinedBuild -match 'WMC9999|WMC1509|CS5001') {
+            $csprojText = try { [System.IO.File]::ReadAllText($csproj) } catch { '' }
+            $hasDisable = $csprojText -match 'DISABLE_XAML_GENERATED_MAIN'
+            $csprojDir  = Split-Path -Parent $csproj
+            $hasCustomMain = @(Get-ChildItem -LiteralPath $csprojDir -Recurse -File -Include *.cs -ErrorAction SilentlyContinue |
+                Where-Object { $_.FullName -notmatch $excludePattern } |
+                Where-Object { ([System.IO.File]::ReadAllText($_.FullName)) -match 'static\s+(async\s+)?(void|int|System\.Threading\.Tasks\.Task|Task)\s+Main\s*\(' }).Count -gt 0
+            if ($hasDisable -and -not $hasCustomMain) {
+                Write-Host "       ROOT CAUSE: csproj <DefineConstants> has DISABLE_XAML_GENERATED_MAIN but no hand-written static Main exists — the SDK's auto-generated Main is suppressed (WMC9999 is NOT a XAML bug)."
+                Write-Host "       FIX: remove DISABLE_XAML_GENERATED_MAIN from the .csproj (let the SDK generate Main), or add a Program.cs with [STAThread] static void Main. See PATTERNS.md > 'CS5001 ... WMC9999'."
+            } elseif ($joinedBuild -match 'WMC9999') {
+                Write-Host "       NOTE: WMC9999/WMC1509 is a suppressed/broken XAML entry point, not a XAML file bug — verify App.xaml is the ApplicationDefinition and its x:Class matches App.xaml.cs. See PATTERNS.md > 'CS5001 ... WMC9999'."
+            }
+        }
         Write-Host "       Common patterns: PATTERNS.md > 'Common build errors after the namespace rewrite'."
         Add-Diag 'Build: dotnet build failed' (($diagBlock) -join "`r`n")
         $failures++

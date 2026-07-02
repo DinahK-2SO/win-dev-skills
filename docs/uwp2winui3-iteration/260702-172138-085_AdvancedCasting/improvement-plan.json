@@ -1,0 +1,28 @@
+{
+  "scenario": "AdvancedCasting",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated app fails to build with the opaque CS5001 + WMC1509 + WMC9999 XAML-compiler signature caused by DISABLE_XAML_GENERATED_MAIN in the csproj without a hand-written Main; the skill's build-error catalog does not cover it (covers only CS0104/CS0227/CS0246).",
+      "evidence": "score-notes/winui-build.log L181-183; migration csproj <DefineConstants> line; reproduced by injecting the constant into a clean `dotnet new winui` scaffold (identical 3 errors) and fixed by removing it (Build succeeded).",
+      "root_cause": "DISABLE_XAML_GENERATED_MAIN suppresses the SDK's auto-generated App.g.i.cs Main; MarkupCompilePass2 runs without a LocalAssembly (WMC1509), crashes (WMC9999), and emits no entry point (CS5001). WMC9999's wording misdirects the agent toward a non-existent XAML-file bug.",
+      "tier": 3,
+      "change": "Added a 'Common build errors' entry to MIGRATION-PATTERNS.md documenting the CS5001+WMC1509+WMC9999 signature, its DISABLE_XAML_GENERATED_MAIN root cause, both fixes (remove the constant, or add a proper [STAThread] Program.Main), and an explicit warning that WMC9999 is NOT a XAML-file bug.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "An agent hitting this signature reads the catalog, removes the constant (or adds a Main), and gets a clean build instead of chasing the XAML compiler.",
+      "falsifiable_check": "On re-run, the AdvancedCasting build produces 0 errors (no CS5001/WMC9999) and the app launches so all 6 features become measurable."
+    },
+    {
+      "problem": "Validate-UwpMigration.ps1 surfaced the raw CS5001/WMC9999 lines with no interpretation, so the opaque error offered no path to the real (entry-point) root cause.",
+      "evidence": "Validate-UwpMigration.ps1 build-FAILED branch printed only file:line codes + a generic 'Common patterns' pointer; winui-build.log shows the un-interpreted signature.",
+      "root_cause": "No signature-to-root-cause mapping for the suppressed/broken XAML entry point.",
+      "tier": 1,
+      "change": "In the build-FAILED branch, detect CS5001/WMC1509/WMC9999 in the build output; when the csproj has DISABLE_XAML_GENERATED_MAIN but no static Main, print the exact ROOT CAUSE + FIX; otherwise (bare WMC9999) print a note that it is a broken entry point, not a XAML-file bug. Verified: the hint fires on the repro and removing the constant clears the build.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The mandatory Step 4 gate now names the root cause in-place, so the agent can't be misled by WMC9999 and can't declare done without acting on it.",
+      "falsifiable_check": "Running the validator against a project with the constant and no Main prints the 'ROOT CAUSE: ... DISABLE_XAML_GENERATED_MAIN ...' line (confirmed on repro); after the fix the build healthcheck reports PASS."
+    }
+  ],
+  "deferred_to_human": []
+}
