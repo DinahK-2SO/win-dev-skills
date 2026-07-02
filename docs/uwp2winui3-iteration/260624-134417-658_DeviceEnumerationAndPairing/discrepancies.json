@@ -1,0 +1,21 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Device Picker Common Control", "status": "pass", "reason": "4/4 controls; pickSingleDeviceButton responded.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Enumerate and Watch Devices", "status": "pass", "reason": "4/4; Start Watcher -> '273 devices found...'. Parity 'partial' was a nav-title-ambiguity capture artifact.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Enumerate and Watch Devices in a Background Task", "status": "pass", "reason": "3/3; watcher responded.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Enumerate Snapshot of Devices", "status": "pass", "reason": "3/3; Find returned device list.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Get Single Device", "status": "pass", "reason": "4/4; Get gated by remembered id (expected).", "suspected_skill_gap": "" },
+    { "id": 6, "text": "Custom Filter with Additional Properties", "status": "pass", "reason": "4/4; Start/Stop responded.", "suspected_skill_gap": "" },
+    { "id": 7, "text": "Request Specific DeviceInformationKind", "status": "pass", "reason": "4/4; Start/Stop responded.", "suspected_skill_gap": "" },
+    { "id": 8, "text": "Basic Device Pairing", "status": "pass", "reason": "6/6; watcher responded; Pair/Unpair selection-gated (expected).", "suspected_skill_gap": "" },
+    { "id": 9, "text": "Custom Device Pairing", "status": "pass", "reason": "19/19 (12 visible + 7 by-design Collapsed ceremony controls present in wired markup).", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No genuine migration defects: all 9 features pass. The two structural-parity 'partial' flags were measurement artifacts (nav-title prefix ambiguity for scenario 2; by-design Visibility=Collapsed pairing-ceremony controls for scenario 9). All improvement signal is in the dev-agent's build struggles (CS0246 DispatcherQueue in a helper class, a WMC XAML cascade, and CS0579 duplicate AssemblyInfo attributes), captured in lessons.json."
+}

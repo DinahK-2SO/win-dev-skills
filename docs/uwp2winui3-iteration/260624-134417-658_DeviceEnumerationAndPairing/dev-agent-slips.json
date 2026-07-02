@@ -1,0 +1,14 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "202 nullability warnings (CS8600/CS8602/CS8612/CS8618/CS8625/CS8629) across the migrated .cs files; none are fatal and none affected the score.",
+      "evidence": "Second failed build listed 52 such warnings (session-log 6239-6328); final green build reports '202 warning(s), 0 WUI analyzer warning(s)' (session-log 6844/7417). Score = 100.",
+      "covered_clearly_at": "Not a migration-pattern concern: these come from the SDK-style project's default nullable context and are benign. The skill correctly does not require chasing nullable-reference warnings; Validate-UwpMigration.ps1 gates on WUI analyzer warnings (0), not CS86xx.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Nullability warnings are non-fatal build noise unrelated to UWP->WinUI 3 API migration and did not affect build/run/parity. Teaching the skill to suppress them would add noise for zero score impact; a capable model correctly leaves them."
+    }
+  ]
+}

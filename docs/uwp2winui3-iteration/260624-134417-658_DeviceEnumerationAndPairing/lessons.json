@@ -1,0 +1,31 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Inserted 17 `TODO[migrate-NNN]: see PATTERNS.md#threading` markers at every CoreDispatcher/RunAsync call site (session-log lines 425-575, 713-725, 940, 1154-1202); mass-rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml. Gave the agent a precise, anchor-linked work list." },
+    { "tool": "Get-MigrationPattern.ps1 -Anchor threading", "evidence": "Agent fetched the threading anchor (session-log 786-789, 1475-1481) to convert Dispatcher.RunAsync -> DispatcherQueue.TryEnqueue." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Post-build healthcheck reported [PASS] dotnet build succeeded (0 WUI analyzer warnings) at session-log 6844/6924/7417." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Copies legacy `Properties/AssemblyInfo.cs` (including sub-project `Tasks/Properties/AssemblyInfo.cs`) into the live tree. The SDK-style WinUI csproj auto-generates the same assembly attributes, so the copied file yields CS0579 duplicate-attribute errors.", "suggested_tweak": "Exclude *AssemblyInfo.cs from the source copy (SDK auto-generates these), mirroring the existing bin/obj skip; preserve a reference copy under .uwp-source/." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#threading code sample", "wrong": "Shows bare `DispatcherQueue.TryEnqueue(...)` as if `DispatcherQueue` is always in scope and omits the `using Microsoft.UI.Dispatching;` directive.", "correct": "In a non-Page/non-DependencyObject helper class `DispatcherQueue` is neither an inherited member nor auto-imported; the class needs `using Microsoft.UI.Dispatching;` and must receive the queue (ctor injection) or call `DispatcherQueue.GetForCurrentThread()`." }
+  ],
+  "special_apis": [
+    { "api": "DispatcherQueue (Microsoft.UI.Dispatching)", "special_handling": "Instance member only on DependencyObject/Page. Plain helper classes (e.g. DeviceWatcherHelper) must have `using Microsoft.UI.Dispatching;` and receive/fetch a DispatcherQueue rather than referencing `Dispatcher`/`DispatcherQueue` directly." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0246: The type or namespace name 'DispatcherQueue' could not be found (DeviceWatcherHelper.cs 21,13 and 73,9)", "root_cause": "Helper class replaced Dispatcher.RunAsync with DispatcherQueue.TryEnqueue but had no `using Microsoft.UI.Dispatching;` and no DispatcherQueue in scope (it is not a Page).", "fix": "Added `using Microsoft.UI.Dispatching;`, added a `DispatcherQueue dispatcherQueue` field + constructor parameter, and passed `DispatcherQueue` from each Page (`new DeviceWatcherHelper(resultCollection, DispatcherQueue)`)." },
+    { "error": "XamlCompiler WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 'DataTemplates containing x:Bind need a DataType' + WMC1509 'No LocalAssembly parameter...' + WMC9999 internal error (MainPage.xaml 24/25)", "root_cause": "CASCADE from the CS0246 C# compile failure: when the C# fails to compile, MarkupCompilePass2 gets no LocalAssembly, so every project-local x:Bind DataType (here `local:Scenario`) fails to resolve. MainPage.xaml already had a correct `x:DataType=\"local:Scenario\"` and was never re-edited (confirmed: no MainPage.xaml edit between failed build 5896 and success 6807).", "fix": "None needed for the XAML. Once the CS0246 errors were fixed and the C# compiled, all WMC errors disappeared." },
+    { "error": "CS0579: Duplicate 'AssemblyCompany/Configuration/FileVersion/Product/Title/Version' attribute (obj/.../AssemblyInfo.cs, 6 errors)", "root_cause": "Legacy `Tasks/Properties/AssemblyInfo.cs` from the UWP background-task sub-project was copied into the tree and compiled by the SDK default `**/*.cs` glob, duplicating the attributes the SDK auto-generates.", "fix": "Added `<Compile Remove=\"Tasks\\Properties\\AssemblyInfo.cs\" />` to the csproj (session-log 6445-6451)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "DeviceWatcherHelper.cs threading conversion", "symptom": "Build failed with CS0246 DispatcherQueue not found; a chain of WMC0909/WMC1111/WMC9999 XAML errors on MainPage.xaml appeared to compound the failure.", "turns_or_retries": "2 failed builds (BUILD_EXIT=1 at session-log 5897 and 6332) before the first green build at 6810; 4 failed builds total across the trial.", "root_cause": "Helper class lacked `using Microsoft.UI.Dispatching;` and an in-scope DispatcherQueue; the resulting C# failure cascaded into misleading XAML DataType errors.", "how_resolved": "Injected DispatcherQueue via constructor from each Page + added the using; XAML errors self-resolved once C# compiled.", "preventable_by": "Sharpen MIGRATION-PATTERNS.md#threading to show the `using` and the helper-class injection/GetForCurrentThread rule; add a note that WMC DataType errors on project-local x:Bind types are usually a cascade from CS#### errors (fix C# first)." },
+    { "where": "csproj compile set", "symptom": "CS0579 duplicate assembly-attribute errors after the DispatcherQueue fix.", "turns_or_retries": "1 failed build (6332).", "root_cause": "Legacy AssemblyInfo.cs from a sub-project was compiled alongside SDK auto-generated attributes.", "how_resolved": "Excluded the file with `<Compile Remove>`.", "preventable_by": "Initialize-UwpMigration.ps1 should not copy legacy *AssemblyInfo.cs into the live tree (SDK auto-generates them)." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

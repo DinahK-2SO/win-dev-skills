@@ -1,0 +1,752 @@
+{
+  "featureName": "Device Enumeration and Pairing C# Sample",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\DeviceEnumerationAndPairing\\cs",
+  "generated": "2026-07-03T04:31:15.6444707+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Device Picker Common Control",
+      "class": "Scenario1_DevicePicker",
+      "slug": "Device_Picker_Common_Control",
+      "screenshot": "01_Device_Picker_Common_Control.png",
+      "controls": [
+        {
+          "name": "selectorComboBox",
+          "type": "ComboBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "pickSingleDeviceButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "showDevicePickerButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "resultsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "pickSingleDeviceButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "pickSingleDeviceButton",
+          "event": ""
+        },
+        {
+          "target": "showDevicePickerButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "showDevicePickerButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Enumerate and Watch Devices",
+      "class": "Scenario2_DeviceWatcher",
+      "slug": "Enumerate_and_Watch_Devices",
+      "screenshot": "02_Enumerate_and_Watch_Devices.png",
+      "controls": [
+        {
+          "name": "selectorComboBox",
+          "type": "ComboBox",
+          "label": "Choose a device selector:",
+          "events": []
+        },
+        {
+          "name": "startWatcherButton",
+          "type": "Button",
+          "label": "Start Watcher",
+          "events": []
+        },
+        {
+          "name": "stopWatcherButton",
+          "type": "Button",
+          "label": "Stop Watcher",
+          "events": []
+        },
+        {
+          "name": "resultsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start Watcher",
+          "alt": "startWatcherButton",
+          "type": "Button",
+          "label": "Start Watcher",
+          "name": "startWatcherButton",
+          "event": ""
+        },
+        {
+          "target": "Stop Watcher",
+          "alt": "stopWatcherButton",
+          "type": "Button",
+          "label": "Stop Watcher",
+          "name": "stopWatcherButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Enumerate and Watch Devices in a Background Task",
+      "class": "Scenario3_BackgroundDeviceWatcher",
+      "slug": "Enumerate_and_Watch_Devices_in_a_Background_Task",
+      "screenshot": "03_Enumerate_and_Watch_Devices_in_a_Background_Task.png",
+      "controls": [
+        {
+          "name": "selectorComboBox",
+          "type": "ComboBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "startWatcherButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "stopWatcherButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "startWatcherButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "startWatcherButton",
+          "event": ""
+        },
+        {
+          "target": "stopWatcherButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "stopWatcherButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Enumerate Snapshot of Devices",
+      "class": "Scenario4_Snapshot",
+      "slug": "Enumerate_Snapshot_of_Devices",
+      "screenshot": "04_Enumerate_Snapshot_of_Devices.png",
+      "controls": [
+        {
+          "name": "selectorComboBox",
+          "type": "ComboBox",
+          "label": "Choose a device selector:",
+          "events": []
+        },
+        {
+          "name": "findButton",
+          "type": "Button",
+          "label": "Find",
+          "events": []
+        },
+        {
+          "name": "resultsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Find",
+          "alt": "findButton",
+          "type": "Button",
+          "label": "Find",
+          "name": "findButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Get Single Device",
+      "class": "Scenario5_GetSingleDevice",
+      "slug": "Get_Single_Device",
+      "screenshot": "05_Get_Single_Device.png",
+      "controls": [
+        {
+          "name": "interfaceIdTextBox",
+          "type": "TextBox",
+          "label": "Remembered device id:",
+          "events": []
+        },
+        {
+          "name": "InformationKindTextBox",
+          "type": "TextBox",
+          "label": "Remembered device information kind:",
+          "events": []
+        },
+        {
+          "name": "getButton",
+          "type": "Button",
+          "label": "Get",
+          "events": []
+        },
+        {
+          "name": "resultsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get",
+          "alt": "getButton",
+          "type": "Button",
+          "label": "Get",
+          "name": "getButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "interfaceIdTextBox",
+            "type": "TextBox"
+          },
+          {
+            "name": "InformationKindTextBox",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Custom Filter with Additional Properties",
+      "class": "Scenario6_CustomFilterAddedProps",
+      "slug": "Custom_Filter_with_Additional_Properties",
+      "screenshot": "06_Custom_Filter_with_Additional_Properties.png",
+      "controls": [
+        {
+          "name": "aqsFilterTextBox",
+          "type": "TextBox",
+          "label": "System.Devices.InterfaceClassGuid:=&quot;{e6327cad-dcec-4949-ae8a-991e976a79d2}&quot; AND System.Devices.InterfaceEnabled:=System.StructuredQueryType.Boolean#True",
+          "events": []
+        },
+        {
+          "name": "startWatcherButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "stopWatcherButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "resultsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "startWatcherButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "startWatcherButton",
+          "event": ""
+        },
+        {
+          "target": "stopWatcherButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "stopWatcherButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "aqsFilterTextBox",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Request Specific DeviceInformationKind",
+      "class": "Scenario7_DeviceInformationKind",
+      "slug": "Request_Specific_DeviceInformationKind",
+      "screenshot": "07_Request_Specific_DeviceInformationKind.png",
+      "controls": [
+        {
+          "name": "kindComboBox",
+          "type": "ComboBox",
+          "label": "Choose a DeviceInformationKind:",
+          "events": []
+        },
+        {
+          "name": "startWatcherButton",
+          "type": "Button",
+          "label": "Start Watcher",
+          "events": []
+        },
+        {
+          "name": "stopWatcherButton",
+          "type": "Button",
+          "label": "Stop Watcher",
+          "events": []
+        },
+        {
+          "name": "resultsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start Watcher",
+          "alt": "startWatcherButton",
+          "type": "Button",
+          "label": "Start Watcher",
+          "name": "startWatcherButton",
+          "event": ""
+        },
+        {
+          "target": "Stop Watcher",
+          "alt": "stopWatcherButton",
+          "type": "Button",
+          "label": "Stop Watcher",
+          "name": "stopWatcherButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "Basic Device Pairing",
+      "class": "Scenario8_PairDevice",
+      "slug": "Basic_Device_Pairing",
+      "screenshot": "08_Basic_Device_Pairing.png",
+      "controls": [
+        {
+          "name": "selectorComboBox",
+          "type": "ComboBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "startWatcherButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "stopWatcherButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "pairButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "unpairButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "resultsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "startWatcherButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "startWatcherButton",
+          "event": ""
+        },
+        {
+          "target": "stopWatcherButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "stopWatcherButton",
+          "event": ""
+        },
+        {
+          "target": "pairButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "pairButton",
+          "event": ""
+        },
+        {
+          "target": "unpairButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "unpairButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "title": "Custom Device Pairing",
+      "class": "Scenario9_CustomPairDevice",
+      "slug": "Custom_Device_Pairing",
+      "screenshot": "09_Custom_Device_Pairing.png",
+      "controls": [
+        {
+          "name": "selectorComboBox",
+          "type": "ComboBox",
+          "label": "Choose a device selector:",
+          "events": []
+        },
+        {
+          "name": "confirmOnlyOption",
+          "type": "CheckBox",
+          "label": "ConfirmOnly",
+          "events": []
+        },
+        {
+          "name": "displayPinOption",
+          "type": "CheckBox",
+          "label": "DisplayPin",
+          "events": []
+        },
+        {
+          "name": "providePinOption",
+          "type": "CheckBox",
+          "label": "ProvidePin",
+          "events": []
+        },
+        {
+          "name": "confirmPinMatchOption",
+          "type": "CheckBox",
+          "label": "ConfirmPinMatch",
+          "events": []
+        },
+        {
+          "name": "passwordCredentialOption",
+          "type": "CheckBox",
+          "label": "Credential",
+          "events": []
+        },
+        {
+          "name": "protectionLevelComboBox",
+          "type": "ComboBox",
+          "label": "Choose a protection level:",
+          "events": []
+        },
+        {
+          "name": "startWatcherButton",
+          "type": "Button",
+          "label": "Start Watcher",
+          "events": []
+        },
+        {
+          "name": "stopWatcherButton",
+          "type": "Button",
+          "label": "Stop Watcher",
+          "events": []
+        },
+        {
+          "name": "pairButton",
+          "type": "Button",
+          "label": "Pair Selected Device",
+          "events": []
+        },
+        {
+          "name": "unpairButton",
+          "type": "Button",
+          "label": "Unpair Selected Device",
+          "events": []
+        },
+        {
+          "name": "pinEntryTextBox",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "okButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "usernameEntryTextBox",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "passwordEntryTextBox",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "verifyButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "yesButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "noButton",
+          "type": "Button",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "resultsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start Watcher",
+          "alt": "startWatcherButton",
+          "type": "Button",
+          "label": "Start Watcher",
+          "name": "startWatcherButton",
+          "event": ""
+        },
+        {
+          "target": "Stop Watcher",
+          "alt": "stopWatcherButton",
+          "type": "Button",
+          "label": "Stop Watcher",
+          "name": "stopWatcherButton",
+          "event": ""
+        },
+        {
+          "target": "Pair Selected Device",
+          "alt": "pairButton",
+          "type": "Button",
+          "label": "Pair Selected Device",
+          "name": "pairButton",
+          "event": ""
+        },
+        {
+          "target": "Unpair Selected Device",
+          "alt": "unpairButton",
+          "type": "Button",
+          "label": "Unpair Selected Device",
+          "name": "unpairButton",
+          "event": ""
+        },
+        {
+          "target": "okButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "okButton",
+          "event": ""
+        },
+        {
+          "target": "verifyButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "verifyButton",
+          "event": ""
+        },
+        {
+          "target": "yesButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "yesButton",
+          "event": ""
+        },
+        {
+          "target": "noButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "noButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "pairingTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "pinEntryTextBox",
+            "type": "TextBox"
+          },
+          {
+            "name": "usernameEntryTextBox",
+            "type": "TextBox"
+          },
+          {
+            "name": "passwordEntryTextBox",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

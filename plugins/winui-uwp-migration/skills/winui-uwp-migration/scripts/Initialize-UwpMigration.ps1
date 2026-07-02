@@ -81,6 +81,15 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     if (('\' + $rel) -match $srcExcludePattern) { return $false }
     $name = $_.Name.ToLowerInvariant()
+    # Never copy legacy classic-project assembly metadata into the live tree. SDK-style
+    # WinUI 3 projects default `GenerateAssemblyInfo=true` and emit AssemblyCompany/
+    # Configuration/FileVersion/Product/Title/Version themselves. Any copied
+    # `Properties\AssemblyInfo.cs` (each sub-project — background Tasks, test libs — ships
+    # its own) is then compiled by the default `**/*.cs` glob and collides with the
+    # generated attributes, failing the build with `CS0579: Duplicate '...Attribute'`.
+    # These files are preserved under .uwp-source/ (step 2b) so any custom attributes
+    # (e.g. InternalsVisibleTo) remain available for the agent to re-add deliberately.
+    if ($name -eq 'assemblyinfo.cs') { return $false }
     $match = $false
     foreach ($ext in $patterns) {
         if ($name.EndsWith($ext)) { $match = $true; break }
@@ -113,6 +122,25 @@ if ($uwpCsprojs.Count -gt 0) {
     }
 } else {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
+}
+
+# ─── 2b. Preserve legacy AssemblyInfo.cs as read-only reference ─────────────────
+# Skipped from the live copy above (they cause CS0579). Keep a reference copy so any
+# non-boilerplate attributes (e.g. [assembly: InternalsVisibleTo(...)]) are recoverable.
+$uwpAsmInfo = Get-ChildItem -Path $Source -Recurse -File -Filter 'AssemblyInfo.cs' -ErrorAction SilentlyContinue |
+    Where-Object { ('\' + [System.IO.Path]::GetRelativePath($Source, $_.FullName)) -notmatch $srcExcludePattern }
+if ($uwpAsmInfo.Count -gt 0) {
+    if (-not (Test-Path -LiteralPath $refDir)) {
+        New-Item -ItemType Directory -Path $refDir -Force | Out-Null
+    }
+    foreach ($a in $uwpAsmInfo) {
+        $relA = [System.IO.Path]::GetRelativePath($Source, $a.FullName)
+        $dst = Join-Path $refDir $relA
+        $dstDir = [System.IO.Path]::GetDirectoryName($dst)
+        if (-not (Test-Path -LiteralPath $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
+        Copy-Item -LiteralPath $a.FullName -Destination $dst -Force
+    }
+    Write-Host "    Skipped $($uwpAsmInfo.Count) legacy AssemblyInfo.cs (SDK auto-generates these; avoids CS0579) — preserved under .uwp-source/ for reference"
 }
 
 # ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────

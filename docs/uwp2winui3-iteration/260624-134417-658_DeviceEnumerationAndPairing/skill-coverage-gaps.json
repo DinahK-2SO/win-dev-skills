@@ -1,0 +1,15 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "CS0246 'DispatcherQueue could not be found' in a non-Page helper class (DeviceWatcherHelper.cs). The threading pattern is documented, but the code sample implies `DispatcherQueue` is always ambient and omits the required `using Microsoft.UI.Dispatching;`, so the agent converted `Dispatcher.RunAsync` -> `DispatcherQueue.TryEnqueue` inside a plain helper class where neither the type nor a queue instance was in scope.",
+      "evidence": "First failed build (session-log 5851-5852): 2x CS0246 'DispatcherQueue' in DeviceWatcherHelper.cs (21,13 and 73,9). Fix (session-log 5290/5314-5319 and 5365/5407/5417/5427/5438): added `using Microsoft.UI.Dispatching;`, added a `DispatcherQueue dispatcherQueue` field + ctor param, and passed `DispatcherQueue` from each Page.",
+      "covered_at": "MIGRATION-PATTERNS.md '## Threading: CoreDispatcher -> DispatcherQueue' (lines 117-132), plus the namespace-mapping row 'Windows.UI.Core (dispatcher) -> Microsoft.UI.Dispatching' (line 114) and the WUI0003 table row (line 606).",
+      "why_missed": "not prominent / ambiguous — the sample `DispatcherQueue.TryEnqueue(...)` reads as if `DispatcherQueue` is an in-scope member (true only inside a DependencyObject/Page). It never shows the `using Microsoft.UI.Dispatching;` and does not flag the non-Page helper-class case, which is exactly where the CS0246 occurred.",
+      "proposed_improvement": "Sharpen the existing Threading section: (1) add `using Microsoft.UI.Dispatching;` to the WinUI 3 sample; (2) add one sentence — in a non-Page/non-DependencyObject helper class, `DispatcherQueue` is neither inherited nor auto-imported, so add the using and either inject a `DispatcherQueue` via the constructor (pass the Page's `this.DispatcherQueue`) or call `DispatcherQueue.GetForCurrentThread()`.",
+      "generalizes": "UWP samples routinely factor watcher/callback marshalling into non-Page helper classes (DeviceWatcherHelper, FileWatcher, etc.) that in UWP grab a CoreDispatcher. In WinUI 3 those classes are not DependencyObjects, so the missing-using + no-ambient-queue CS0246 recurs across many scenarios."
+    }
+  ]
+}

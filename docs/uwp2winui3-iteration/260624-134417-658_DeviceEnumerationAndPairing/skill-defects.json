@@ -1,0 +1,27 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Legacy `AssemblyInfo.cs` copied from the UWP source (here `Tasks/Properties/AssemblyInfo.cs`) is compiled by the SDK-style default `**/*.cs` glob and duplicates the assembly attributes the SDK auto-generates, producing CS0579 'Duplicate ...Attribute' build errors.",
+      "evidence": "build-events.jsonl second failed build (session-log 6300-6331): 6x error CS0579 for AssemblyCompany/Configuration/FileVersion/Product/Title/Version in obj/.../DeviceEnumerationAndPairing.AssemblyInfo.cs; agent fix at session-log 6445-6451 (`<Compile Remove=\"Tasks\\Properties\\AssemblyInfo.cs\" />`).",
+      "skill_search": "grepped winui-uwp-migration for 'CS0579|AssemblyInfo|GenerateAssemblyInfo|Duplicate.*Attribute' -> no matches (SKILL.md, MIGRATION-PATTERNS.md, all scripts).",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 copies every `.cs` (excluding only bin/obj) into the live tree; classic-project `Properties/AssemblyInfo.cs` files then collide with SDK auto-generated attributes because SDK-style projects default `GenerateAssemblyInfo=true`.",
+      "proposed_fix": "Tier 1: in Initialize-UwpMigration.ps1's copy step, skip files named `AssemblyInfo.cs` (SDK auto-generates these attributes), and preserve a reference copy under `.uwp-source/` so any custom attributes (e.g. InternalsVisibleTo) remain visible. Add a short note under MIGRATION-PATTERNS.md 'Common build errors' documenting CS0579 and this behavior.",
+      "generalizes": "Every classic UWP project ships `Properties/AssemblyInfo.cs`, and multi-project samples (background Tasks, test libs) ship several. SDK-style WinUI 3 projects always auto-generate these attributes, so CS0579 recurs across essentially any UWP->WinUI 3 migration that copies source verbatim."
+    },
+    {
+      "problem": "XAML-compiler errors on project-local `x:Bind`/`x:DataType` types (WMC0909 'Cannot resolve DataType ...', WMC1111 'DataTemplates containing x:Bind need a DataType', WMC1509 'No LocalAssembly parameter...', WMC9999 internal error) are frequently a CASCADE from an upstream C# compile failure, not an actual XAML bug. The agent risks editing already-correct XAML instead of fixing the C#.",
+      "evidence": "First failed build (session-log 5851-5896) reported CS0246 (DispatcherQueue) AND WMC0909/WMC1111/WMC9999 on MainPage.xaml. MainPage.xaml already contained a correct `x:DataType=\"local:Scenario\"` (session-log 1670/1756) and was NEVER re-edited between the failed build (5896) and the green build (6807) — the WMC errors disappeared purely by fixing the CS0246.",
+      "skill_search": "grepped for 'WMC0909|LocalAssembly|MarkupCompile|x:DataType' -> only a brief x:Bind note (MIGRATION-PATTERNS.md:685) about XLS0414/MC3074 stale-namespace prefixes; nothing about the C#-failure cascade or WMC0909/WMC1509.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "When C# compilation fails, MarkupCompilePass2 receives no LocalAssembly (WMC1509), so every project-defined type referenced by `x:Bind`/`x:DataType` fails to resolve (WMC0909/WMC1111) and can trip the internal WMC9999.",
+      "proposed_fix": "Tier 3: add a short subsection to MIGRATION-PATTERNS.md 'Common build errors' — when WMC0909/WMC1111/WMC1509/WMC9999 reference project-local x:Bind types, fix all CS#### errors first and rebuild before touching the XAML; WMC1509 'No LocalAssembly parameter' is the tell.",
+      "generalizes": "x:Bind with x:DataType against app-local types is ubiquitous in these UWP sample apps (the shared MainPage scenario ListBox alone uses it). Any migration whose C# transiently fails to compile will surface these phantom XAML errors, so the diagnostic saves wasted turns across scenarios."
+    }
+  ]
+}

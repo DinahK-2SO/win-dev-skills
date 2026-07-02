@@ -1,0 +1,23 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "featureName": "Device Enumeration and Pairing C# Sample",
+  "source": "uwp-samples-standalone/Samples/DeviceEnumerationAndPairing/cs",
+  "checklist": "parity/baseline/checklist.json",
+  "gradingRules": {
+    "pass": "Reachable; every checklist control present (visible in UIA tree, plus by-design collapsed/dynamic controls verified in wired markup); exercisable actions produce the same visible effect as the UWP original.",
+    "partial": "Recognizable but a real control is missing, or a live UWP control is dead in WinUI.",
+    "fail": "Unreachable, blank, or largely absent scenario."
+  },
+  "scoreFormula": "round(100 * (pass + 0.5*partial) / features_total)",
+  "scenarios": [
+    { "number": 1, "title": "Device Picker Common Control", "controls": 4, "actions": ["pickSingleDeviceButton", "showDevicePickerButton"] },
+    { "number": 2, "title": "Enumerate and Watch Devices", "controls": 4, "actions": ["startWatcherButton", "stopWatcherButton"] },
+    { "number": 3, "title": "Enumerate and Watch Devices in a Background Task", "controls": 3, "actions": ["startWatcherButton", "stopWatcherButton"] },
+    { "number": 4, "title": "Enumerate Snapshot of Devices", "controls": 3, "actions": ["findButton"] },
+    { "number": 5, "title": "Get Single Device", "controls": 4, "actions": ["getButton"] },
+    { "number": 6, "title": "Custom Filter with Additional Properties", "controls": 4, "actions": ["startWatcherButton", "stopWatcherButton"] },
+    { "number": 7, "title": "Request Specific DeviceInformationKind", "controls": 4, "actions": ["startWatcherButton", "stopWatcherButton"] },
+    { "number": 8, "title": "Basic Device Pairing", "controls": 6, "actions": ["startWatcherButton", "stopWatcherButton", "pairButton", "unpairButton"] },
+    { "number": 9, "title": "Custom Device Pairing", "controls": 19, "actions": ["startWatcherButton", "stopWatcherButton", "pairButton", "unpairButton", "okButton", "verifyButton", "yesButton", "noButton"] }
+  ]
+}

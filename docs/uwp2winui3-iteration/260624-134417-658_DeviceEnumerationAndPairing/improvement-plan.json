@@ -1,0 +1,38 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0579 'Duplicate ...Attribute' build failure caused by a legacy AssemblyInfo.cs (here Tasks/Properties/AssemblyInfo.cs) copied into the tree and compiled alongside the SDK's auto-generated assembly attributes.",
+      "evidence": "lessons.json errors_encountered[2] / skill-defects.json item 1; session-log 6300-6331 (6x CS0579), agent workaround at 6445-6451.",
+      "root_cause": "Initialize-UwpMigration.ps1 copied every .cs (excluding only bin/obj); SDK-style WinUI projects default GenerateAssemblyInfo=true, so classic Properties/AssemblyInfo.cs collides with the generated attributes.",
+      "tier": 1,
+      "change": "Initialize-UwpMigration.ps1 now skips *AssemblyInfo.cs on the source copy (preventing CS0579 non-ignorably) and preserves a reference copy under .uwp-source/ so custom attributes (e.g. InternalsVisibleTo) remain recoverable. Documented CS0579 + this behavior in MIGRATION-PATTERNS.md 'Common build errors'.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The copied tree no longer contains legacy AssemblyInfo.cs, so the first build does not emit CS0579; agents no longer spend a build cycle diagnosing/excluding it.",
+      "falsifiable_check": "On a re-run of any UWP sample that ships Properties/AssemblyInfo.cs, `dotnet build` produces zero CS0579 errors and no AssemblyInfo.cs appears in the live project tree (only under .uwp-source/)."
+    },
+    {
+      "problem": "WMC0909/WMC1111/WMC1509/WMC9999 XAML-compiler errors on project-local x:Bind/x:DataType types that are actually a cascade from a C# compile failure; the agent risks rewriting already-correct XAML.",
+      "evidence": "skill-defects.json item 2; session-log 5851-5896 (CS0246 + WMC on MainPage.xaml), MainPage.xaml never re-edited before the green build at 6807.",
+      "root_cause": "A failed C# compile denies MarkupCompilePass2 a LocalAssembly (WMC1509), so every app-defined x:Bind DataType fails to resolve.",
+      "tier": 3,
+      "change": "Added a 'Common build errors' subsection: WMC DataType-resolution errors referencing project-local types are usually downstream of CS#### errors — fix the C# first and rebuild before touching XAML; WMC1509 is the tell.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents stop chasing phantom XAML errors and prioritize the C# fix, reducing failed-build cycles on any migration with app-local compiled bindings.",
+      "falsifiable_check": "On a re-run where a C# error coexists with WMC0909/WMC1111 on correct XAML, the agent fixes only the C# and the WMC errors clear on rebuild with no XAML edit."
+    },
+    {
+      "problem": "CS0246 'DispatcherQueue could not be found' when converting CoreDispatcher.RunAsync in a non-Page helper class.",
+      "evidence": "skill-coverage-gaps.json item 1; session-log 5851-5852 (2x CS0246 in DeviceWatcherHelper.cs); fix injected a DispatcherQueue via ctor + added using.",
+      "root_cause": "The threading pattern's sample shows bare DispatcherQueue.TryEnqueue as if ambient and omits `using Microsoft.UI.Dispatching;`; DispatcherQueue is an inherited member only on DependencyObject/Page, not on plain helper classes.",
+      "tier": 3,
+      "change": "Sharpened MIGRATION-PATTERNS.md#threading: added `using Microsoft.UI.Dispatching;` to the sample and a helper-class rule (inject the Page's this.DispatcherQueue via constructor, or use DispatcherQueue.GetForCurrentThread()).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Threading conversions inside non-Page helper classes compile on the first try (correct using + queue acquisition).",
+      "falsifiable_check": "On a re-run of a scenario with a non-Page dispatcher helper, DeviceWatcherHelper-style files build with 0 CS0246 for DispatcherQueue."
+    }
+  ],
+  "deferred_to_human": []
+}

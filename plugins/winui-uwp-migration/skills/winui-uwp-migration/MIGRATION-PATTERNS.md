@@ -35,6 +35,26 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 ```
 
+### `CS0579: Duplicate '...Attribute'` (e.g. `AssemblyTitleAttribute`, `AssemblyVersionAttribute`)
+
+The classic UWP project model keeps assembly metadata in `Properties\AssemblyInfo.cs`; multi-project samples (a background-task project, a test library) each ship their own. SDK-style WinUI 3 projects default `GenerateAssemblyInfo=true` and emit those same attributes themselves, so any legacy `AssemblyInfo.cs` that the default `**/*.cs` glob compiles collides with the generated set — one `CS0579` per attribute.
+
+`Initialize-UwpMigration.ps1` handles this automatically: it does **not** copy `AssemblyInfo.cs` into the live tree (it preserves a reference copy under `.uwp-source/`). If you still hit `CS0579` (a file added manually or by an older bootstrap), delete the offending `AssemblyInfo.cs`, or exclude it, or turn off the generated set:
+
+```xml
+<!-- exclude a single stray file -->
+<ItemGroup>
+  <Compile Remove="Tasks\Properties\AssemblyInfo.cs" />
+</ItemGroup>
+
+<!-- or, if you deliberately keep a hand-written AssemblyInfo.cs -->
+<PropertyGroup>
+  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+</PropertyGroup>
+```
+
+Prefer deleting/excluding the legacy file — the attributes it carries (company, version, title) are boilerplate the SDK regenerates. Only keep it (with `GenerateAssemblyInfo=false`) if it holds attributes you actually need, e.g. `[assembly: InternalsVisibleTo(...)]`.
+
 ### Thousands of `CS0101` duplicate-type / `CS0227` / `CS0234` errors (often a build that hangs)
 
 If `dotnet build` floods with **tens of thousands** of `CS0101` ("already contains a definition for …"), `CS0227`, or `CS0234` errors — or the build appears to hang for minutes — the cause is almost always **stale UWP build output that was copied into the migrated tree**. A previously-built UWP project (especially a multi-project sample with sub-folders) leaves machine-generated sources under `bin/` and `obj/`, e.g. .NET-Native ILC files at `obj\<arch>\Release\ilc\**\*.g.cs` and `*.McgInterop\ImplTypes.g.cs`. The SDK-style WinUI `.csproj` globs `**/*.cs`, and MSBuild's default `bin`/`obj` exclusion only covers the **project-root** `bin`/`obj` — any **nested** sub-project `bin`/`obj` is still compiled, producing the duplicate types.
@@ -73,6 +93,12 @@ Put the placeholder **directly in the XAML markup** so it is visible the instant
 loads — do **not** rely on `OnNavigatedTo`/`Loaded` code-behind to populate the only
 visible content (that text can end up in the UIA tree but never render, leaving the page
 blank). See **Defensive UI for init-heavy and device-dependent pages** in SKILL.md.
+
+### XAML-compiler `WMC` errors on `x:Bind` types that are really a C# cascade
+
+`WMC0909: Cannot resolve DataType '<local:Type>'`, `WMC1111: DataTemplates containing x:Bind need a DataType`, and an internal `WMC9999: Object reference not set...` that reference **project-local** types are frequently **not** XAML bugs — they are a **cascade from a C# compile failure**. When the C# fails to compile, `MarkupCompilePass2` gets no LocalAssembly (you will also see `WMC1509: No LocalAssembly parameter given during MarkupCompilePass2` — the tell), so every app-defined type used in `x:Bind`/`x:DataType` becomes unresolvable.
+
+**Fix the `CS####` errors first, rebuild, and only then look at the XAML.** In practice the WMC errors vanish once the C# compiles. Do not add/remove `x:DataType` or rewrite the DataTemplate in response to these — if the `x:DataType` is already present and correct (it usually is), editing the markup wastes turns and can introduce a real regression.
 
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
@@ -125,8 +151,23 @@ await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => StatusText.Text =
 WinUI 3:
 
 ```csharp
+using Microsoft.UI.Dispatching;   // DispatcherQueue lives here — not auto-imported
+
 DispatcherQueue.TryEnqueue(() => StatusText.Text = "Done");
 DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () => ProgressBar.Value = 100);
+```
+
+`DispatcherQueue` is an instance member **only on `DependencyObject`/`Page`** (via the inherited `this.DispatcherQueue` property). A **plain helper class** (e.g. a `DeviceWatcherHelper`, `FileWatcher`, or any callback marshaller factored out of a page — a common UWP shape where the class grabbed a `CoreDispatcher`) is **not** a `DependencyObject`, so `DispatcherQueue` is neither in scope nor auto-imported. Referencing it there fails with `CS0246: The type or namespace name 'DispatcherQueue' could not be found`. In such a class you must add `using Microsoft.UI.Dispatching;` **and** obtain a queue by either:
+
+```csharp
+// Option A — inject the queue from the owning Page (pass this.DispatcherQueue):
+public DeviceWatcherHelper(ObservableCollection<...> results, DispatcherQueue dispatcherQueue)
+{
+    this.dispatcherQueue = dispatcherQueue;   // then: dispatcherQueue.TryEnqueue(...)
+}
+
+// Option B — cache it when the helper is created on the UI thread:
+private readonly DispatcherQueue dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 ```
 
 Cache the queue off the UI thread via `DispatcherQueue.GetForCurrentThread()`. UWP's ASTA reentrancy protection is gone — watch for reentrancy in async code that pumps messages. See the official [threading guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/threading).
