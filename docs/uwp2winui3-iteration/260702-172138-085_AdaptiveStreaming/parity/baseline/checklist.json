@@ -1,0 +1,711 @@
+{
+  "featureName": "AdaptiveStreaming",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\AdaptiveStreaming\\cs",
+  "generated": "2026-07-02T22:45:39.0420794+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Simplest Adaptive Streaming",
+      "class": "Scenario1_SimplestAdaptiveStreaming",
+      "slug": "Simplest_Adaptive_Streaming",
+      "screenshot": "01_Simplest_Adaptive_Streaming.png",
+      "controls": [
+        {
+          "name": "Load",
+          "type": "Button",
+          "label": "Load",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "mediaPlayerElement",
+          "type": "MediaPlayerElement",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Load",
+          "alt": "Load",
+          "type": "Button",
+          "label": "Load",
+          "name": "Load",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Event Handlers",
+      "class": "Scenario2_EventHandlers",
+      "slug": "Event_Handlers",
+      "screenshot": "02_Event_Handlers.png",
+      "controls": [
+        {
+          "name": "mediaPlayerElement",
+          "type": "MediaPlayerElement",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Network Request Modification",
+      "class": "Scenario3_RequestModification",
+      "slug": "Network_Request_Modification",
+      "screenshot": "03_Network_Request_Modification.png",
+      "controls": [
+        {
+          "name": "RadioButtonNone",
+          "type": "RadioButton",
+          "label": "None",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "RadioButtonAuthorizationHeader",
+          "type": "RadioButton",
+          "label": "Authorization Header",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "RadioButtonUrlQueryParameter",
+          "type": "RadioButton",
+          "label": "Url Query Parameter",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "RadioButtonApplicationDownloaded",
+          "type": "RadioButton",
+          "label": "Application Downloaded",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "HcdpOff",
+          "type": "RadioButton",
+          "label": "HDCP Off",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "HcdpOn",
+          "type": "RadioButton",
+          "label": "HDCP On",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "HdcpOnWithTypeEnforcement",
+          "type": "RadioButton",
+          "label": "HDCP On With Type Enforcement",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "mediaPlayerElement",
+          "type": "MediaPlayerElement",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "None",
+          "alt": "RadioButtonNone",
+          "type": "RadioButton",
+          "label": "None",
+          "name": "RadioButtonNone",
+          "event": "Click"
+        },
+        {
+          "target": "Authorization Header",
+          "alt": "RadioButtonAuthorizationHeader",
+          "type": "RadioButton",
+          "label": "Authorization Header",
+          "name": "RadioButtonAuthorizationHeader",
+          "event": "Click"
+        },
+        {
+          "target": "Url Query Parameter",
+          "alt": "RadioButtonUrlQueryParameter",
+          "type": "RadioButton",
+          "label": "Url Query Parameter",
+          "name": "RadioButtonUrlQueryParameter",
+          "event": "Click"
+        },
+        {
+          "target": "Application Downloaded",
+          "alt": "RadioButtonApplicationDownloaded",
+          "type": "RadioButton",
+          "label": "Application Downloaded",
+          "name": "RadioButtonApplicationDownloaded",
+          "event": "Click"
+        },
+        {
+          "target": "HDCP Off",
+          "alt": "HcdpOff",
+          "type": "RadioButton",
+          "label": "HDCP Off",
+          "name": "HcdpOff",
+          "event": "Click"
+        },
+        {
+          "target": "HDCP On",
+          "alt": "HcdpOn",
+          "type": "RadioButton",
+          "label": "HDCP On",
+          "name": "HcdpOn",
+          "event": "Click"
+        },
+        {
+          "target": "HDCP On With Type Enforcement",
+          "alt": "HdcpOnWithTypeEnforcement",
+          "type": "RadioButton",
+          "label": "HDCP On With Type Enforcement",
+          "name": "HdcpOnWithTypeEnforcement",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "EffectiveHdcpProtectionText",
+            "type": "Run"
+          },
+          {
+            "name": "DesiredMaxBitrateText",
+            "type": "Run"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Adaptive Streaming Tuning",
+      "class": "Scenario4_Tuning",
+      "slug": "Adaptive_Streaming_Tuning",
+      "screenshot": "04_Adaptive_Streaming_Tuning.png",
+      "controls": [
+        {
+          "name": "DesiredMinBitrateList",
+          "type": "ComboBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "InitialBitrateList",
+          "type": "ComboBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "DesiredMaxBitrateList",
+          "type": "ComboBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "BitrateDowngradeTriggerRatioText",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Set",
+          "events": []
+        },
+        {
+          "name": "BitrateHeadroomTriggerRatioText",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Set",
+          "events": []
+        },
+        {
+          "name": "mediaPlayerElement",
+          "type": "MediaPlayerElement",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Set",
+          "alt": "",
+          "type": "Button",
+          "label": "Set",
+          "name": "",
+          "event": ""
+        },
+        {
+          "target": "Set",
+          "alt": "",
+          "type": "Button",
+          "label": "Set",
+          "name": "",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "BitrateDowngradeTriggerRatioText",
+            "type": "TextBox"
+          },
+          {
+            "name": "BitrateHeadroomTriggerRatioText",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Metadata",
+      "class": "Scenario5_Metadata",
+      "slug": "Metadata",
+      "screenshot": "05_Metadata.png",
+      "controls": [
+        {
+          "name": "mediaPlayerElement",
+          "type": "MediaPlayerElement",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Ad Insertion",
+      "class": "Scenario6_AdInsertion",
+      "slug": "Ad_Insertion",
+      "screenshot": "06_Ad_Insertion.png",
+      "controls": [
+        {
+          "name": "mediaPlayerElement",
+          "type": "MediaPlayerElement",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Live Seekable Range",
+      "class": "Scenario7_LiveSeekableRange",
+      "slug": "Live_Seekable_Range",
+      "screenshot": "07_Live_Seekable_Range.png",
+      "controls": [
+        {
+          "name": "mediaPlayerElement",
+          "type": "MediaPlayerElement",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "DesiredSeekableWindowSize",
+          "type": "TextBox",
+          "label": "DesiredSeekableWindowSize",
+          "events": []
+        },
+        {
+          "name": "DesiredSeekableWindowSizeButton",
+          "type": "Button",
+          "label": "Set",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "DesiredLiveOffset",
+          "type": "TextBox",
+          "label": "DesiredLiveOffset",
+          "events": []
+        },
+        {
+          "name": "DesiredLiveOffsetButton",
+          "type": "Button",
+          "label": "Set",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "PositionSlider",
+          "type": "Slider",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "LogCurrentTimeCorrelation",
+          "type": "Button",
+          "label": "Log Times",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "GoToStart",
+          "type": "Button",
+          "label": "GoToStart",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "&lt;&lt;15m",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "&lt;&lt;5m",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "&lt;&lt;30s",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "&lt;&lt;2s",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "PlayButton",
+          "type": "Button",
+          "label": "",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "PauseButton",
+          "type": "Button",
+          "label": "",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "2s&gt;&gt;",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "30s&gt;&gt;",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "5m&gt;&gt;",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "15m&gt;&gt;",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "GoToLive",
+          "type": "Button",
+          "label": "GoToLive",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Set",
+          "alt": "DesiredSeekableWindowSizeButton",
+          "type": "Button",
+          "label": "Set",
+          "name": "DesiredSeekableWindowSizeButton",
+          "event": "Click"
+        },
+        {
+          "target": "Set",
+          "alt": "DesiredLiveOffsetButton",
+          "type": "Button",
+          "label": "Set",
+          "name": "DesiredLiveOffsetButton",
+          "event": "Click"
+        },
+        {
+          "target": "Log Times",
+          "alt": "LogCurrentTimeCorrelation",
+          "type": "Button",
+          "label": "Log Times",
+          "name": "LogCurrentTimeCorrelation",
+          "event": "Click"
+        },
+        {
+          "target": "GoToStart",
+          "alt": "GoToStart",
+          "type": "Button",
+          "label": "GoToStart",
+          "name": "GoToStart",
+          "event": "Click"
+        },
+        {
+          "target": "&lt;&lt;15m",
+          "alt": "",
+          "type": "Button",
+          "label": "&lt;&lt;15m",
+          "name": "",
+          "event": "Click"
+        },
+        {
+          "target": "&lt;&lt;5m",
+          "alt": "",
+          "type": "Button",
+          "label": "&lt;&lt;5m",
+          "name": "",
+          "event": "Click"
+        },
+        {
+          "target": "&lt;&lt;30s",
+          "alt": "",
+          "type": "Button",
+          "label": "&lt;&lt;30s",
+          "name": "",
+          "event": "Click"
+        },
+        {
+          "target": "&lt;&lt;2s",
+          "alt": "",
+          "type": "Button",
+          "label": "&lt;&lt;2s",
+          "name": "",
+          "event": "Click"
+        },
+        {
+          "target": "PlayButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "PlayButton",
+          "event": "Click"
+        },
+        {
+          "target": "PauseButton",
+          "alt": "",
+          "type": "Button",
+          "label": "",
+          "name": "PauseButton",
+          "event": "Click"
+        },
+        {
+          "target": "2s&gt;&gt;",
+          "alt": "",
+          "type": "Button",
+          "label": "2s&gt;&gt;",
+          "name": "",
+          "event": "Click"
+        },
+        {
+          "target": "30s&gt;&gt;",
+          "alt": "",
+          "type": "Button",
+          "label": "30s&gt;&gt;",
+          "name": "",
+          "event": "Click"
+        },
+        {
+          "target": "5m&gt;&gt;",
+          "alt": "",
+          "type": "Button",
+          "label": "5m&gt;&gt;",
+          "name": "",
+          "event": "Click"
+        },
+        {
+          "target": "15m&gt;&gt;",
+          "alt": "",
+          "type": "Button",
+          "label": "15m&gt;&gt;",
+          "name": "",
+          "event": "Click"
+        },
+        {
+          "target": "GoToLive",
+          "alt": "GoToLive",
+          "type": "Button",
+          "label": "GoToLive",
+          "name": "GoToLive",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "MaxSeekableWindowSize",
+            "type": "TextBlock"
+          },
+          {
+            "name": "DesiredSeekableWindowSize",
+            "type": "TextBox"
+          },
+          {
+            "name": "DesiredLiveOffset",
+            "type": "TextBox"
+          },
+          {
+            "name": "MinLiveOffset",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StartPosition",
+            "type": "TextBlock"
+          },
+          {
+            "name": "CurrentPosition",
+            "type": "TextBlock"
+          },
+          {
+            "name": "EndPosition",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

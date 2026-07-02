@@ -494,6 +494,17 @@ if (-not $csproj) {
             $shownN++
         }
         if ($distinct.Count -gt 15) { Write-Host "       ($($distinct.Count - 15) more distinct — see .validator-diagnostics.txt)" }
+        # Targeted hint: the Windows.Web.Http vs System.Net.Http CS0104 ambiguity is a
+        # very common UWP->WinUI 3 failure (any code using AdaptiveMediaSource/IHttpFilter
+        # or the Windows.Web.Http stack). It comes from the scaffold's
+        # <ImplicitUsings>enable</ImplicitUsings> injecting a global 'using System.Net.Http'.
+        $httpAmbiguity = @($buildOut | Select-String -Pattern "error CS0104.*ambiguous.*(System\.Net\.Http|Windows\.Web\.Http)")
+        if ($httpAmbiguity.Count -gt 0) {
+            Write-Host "       HINT: CS0104 Http ambiguity = ImplicitUsings injects 'System.Net.Http' which collides with the UWP 'Windows.Web.Http' stack."
+            Write-Host "             Fix in the .csproj: <ImplicitUsings>disable</ImplicitUsings> (or <Using Remove=`"System.Net.Http`" />)."
+            Write-Host "             Keep Windows.Web.Http — IHttpFilter/AdaptiveMediaSource interception won't compile against System.Net.Http."
+            Write-Host "             See MIGRATION-PATTERNS.md > 'CS0104: HttpClient ... ambiguous ... System.Net.Http ... Windows.Web.Http'."
+        }
         Write-Host "       Common patterns: PATTERNS.md > 'Common build errors after the namespace rewrite'."
         Add-Diag 'Build: dotnet build failed' (($diagBlock) -join "`r`n")
         $failures++

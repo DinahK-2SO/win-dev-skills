@@ -27,6 +27,36 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0104: 'HttpClient' / 'HttpRequestMessage' / 'HttpResponseMessage' is an ambiguous reference between 'System.Net.Http.*' and 'Windows.Web.Http.*'`
+
+UWP networking and media code uses the **`Windows.Web.Http`** stack (`HttpClient`, `HttpRequestMessage`, `HttpResponseMessage`, `IHttpFilter`, `HttpBaseProtocolFilter`), not `System.Net.Http`. `Windows.Web.Http` is also **mandatory** for `AdaptiveMediaSource` request interception (`AdaptiveMediaSourceDownloadRequestedEventArgs`, custom `IHttpFilter` loggers, auth-header injection) — those APIs are typed with the `Windows.Web.Http` message types and have no `System.Net.Http` equivalent.
+
+The scaffold `.csproj` ships `<ImplicitUsings>enable</ImplicitUsings>`, which injects a **global `using System.Net.Http`**. Combined with the migrated file's `using Windows.Web.Http;`, every `Http*` type name is now in scope twice → CS0104. A frequent knock-on is **`CS0535: '…' does not implement interface member 'IHttpFilter.SendRequestAsync(HttpRequestMessage)'`** (the override binds to the wrong `HttpRequestMessage`) and even a cascading XAML markup-compiler crash (`WMC9999`) once the C# assembly fails to build — both clear automatically once the ambiguity is resolved.
+
+Fix (prefer the project-wide option when the app uses `Windows.Web.Http` anywhere):
+
+```xml
+<!-- Option A (recommended) — the whole .csproj: stop injecting System.Net.Http globally.
+     UWP source carries its own explicit usings, so disabling implicit usings is safe. -->
+<ImplicitUsings>disable</ImplicitUsings>
+```
+
+```xml
+<!-- Option B — keep ImplicitUsings on but drop just the colliding global using: -->
+<ItemGroup>
+  <Using Remove="System.Net.Http" />
+</ItemGroup>
+```
+
+```csharp
+// Option C — per-file alias (use when a single file legitimately needs BOTH stacks):
+using HttpClient = Windows.Web.Http.HttpClient;
+using HttpRequestMessage = Windows.Web.Http.HttpRequestMessage;
+using HttpResponseMessage = Windows.Web.Http.HttpResponseMessage;
+```
+
+Do **not** "fix" this by switching the code to `System.Net.Http` — `IHttpFilter` / `AdaptiveMediaSource` interception won't compile against it.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:

@@ -1,0 +1,16 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: document the CS0104 Windows.Web.Http vs System.Net.Http ambiguity (ImplicitUsings root cause + CS0535/WMC9999 cascade + three fixes) — recurs for any UWP app using the Windows.Web.Http/AdaptiveMediaSource/IHttpFilter stack.",
+    "Validate-UwpMigration.ps1: emit a targeted fix hint when a build FAIL contains a CS0104 Http-namespace ambiguity, so the validator's own output names the disable-ImplicitUsings fix."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": [
+    "Consider shipping the migration scaffold .csproj with <ImplicitUsings>disable</ImplicitUsings> by default (harness-owned template, outside this skill)."
+  ]
+}

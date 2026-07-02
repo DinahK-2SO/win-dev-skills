@@ -1,0 +1,30 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "14 CS0104 build errors (HttpClient/HttpRequestMessage/HttpResponseMessage ambiguous between System.Net.Http.* and Windows.Web.Http.*) + 2 cascading CS0535 (IHttpFilter) + a WMC9999 markup-compiler crash on the first post-migration build.",
+      "evidence": "session-log.txt lines 9900-9953 ('Build failed with 17 error(s)'), 14 CS0104 + 2 CS0535 lines; fix at line 9960 (csproj ImplicitUsings enable->disable); scaffold default at line 3886.",
+      "root_cause": "Scaffold .csproj ships <ImplicitUsings>enable</ImplicitUsings>, injecting a global 'using System.Net.Http' that collides with the UWP Windows.Web.Http stack (HttpClient/HttpRequestMessage/HttpResponseMessage/IHttpFilter) used by AdaptiveMediaSource request interception. MIGRATION-PATTERNS.md's CS0104 section only covered the XAML LaunchActivatedEventArgs ambiguity.",
+      "tier": 3,
+      "change": "Add a 'CS0104: HttpClient/HttpRequestMessage/HttpResponseMessage ambiguous between System.Net.Http and Windows.Web.Http' subsection to MIGRATION-PATTERNS.md 'Common build errors', documenting the ImplicitUsings root cause, the CS0535/WMC9999 cascade, and three fixes (disable ImplicitUsings / <Using Remove> / per-file alias), with a warning not to switch to System.Net.Http.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On a re-run, an agent that hits the Http CS0104 batch has a documented, copy-pasteable fix instead of trial-and-error; resolving it also clears the CS0535 and WMC9999 cascades.",
+      "falsifiable_check": "In a future UWP->WinUI 3 trial whose source uses Windows.Web.Http, the build reaches success without a stuck loop on CS0104/CS0535, and the .csproj ends with ImplicitUsings disabled (or System.Net.Http removed)."
+    },
+    {
+      "problem": "The validator reports CS0104 as an opaque distinct-error line with only a generic 'PATTERNS.md > Common build errors' pointer, so the agent must still diagnose the Http ambiguity itself.",
+      "evidence": "Validate-UwpMigration.ps1 build-FAIL branch (lines ~469-499) printed distinct CS codes + a generic pointer only; the Http ambiguity is the highest-frequency CS0104 after the XAML one.",
+      "root_cause": "No per-code hint for the common Windows.Web.Http/System.Net.Http collision.",
+      "tier": 1,
+      "change": "In Validate-UwpMigration.ps1's build-FAIL branch, detect CS0104 lines referencing System.Net.Http/Windows.Web.Http and print a targeted hint (disable ImplicitUsings, keep Windows.Web.Http, see the new PATTERNS.md anchor).",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The validator's own FAIL output names the exact fix, so the agent's 'validator must PASS' loop converges without re-deriving the cause; Tier 1 so it cannot be ignored while the build is red.",
+      "falsifiable_check": "When a re-run build fails with an Http CS0104, the validator stdout contains the 'ImplicitUsings injects System.Net.Http' HINT line, and the subsequent fixed build passes."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/Tier-2 scaffold option: consider shipping the migration scaffold .csproj with <ImplicitUsings>disable</ImplicitUsings> by default (UWP source carries explicit usings, so implicit usings mostly cause collisions like this). Not auto-applied because the scaffold/csproj template is harness-owned, outside the winui-uwp-migration skill this loop edits."
+  ]
+}

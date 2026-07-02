@@ -1,0 +1,32 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bulk Windows.UI.Xaml->Microsoft.UI.Xaml rewrite + MIGRATION-MAPPING.md triage table let the agent migrate all 7 scenarios; final build succeeded (session-log line 11754 'Build succeeded')." },
+    { "tool": "Validate-UwpMigration.ps1 (dotnet build healthcheck)", "evidence": "Its build gate surfaced the CS0104 batch as a hard FAIL so the agent had to fix them before declaring done (session-log line 9953 'Build failed with 17 error(s)')." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "On a build FAIL it prints distinct CS#### codes but only a generic 'PATTERNS.md > Common build errors' pointer; it does not recognise the very common Windows.Web.Http/System.Net.Http CS0104 ambiguity and give the concrete fix.", "suggested_tweak": "Add a targeted CS0104-Http detector that prints the disable-ImplicitUsings / alias fix." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.Web.Http.IHttpFilter (SendRequestAsync)", "why_tried": "AdaptiveStreaming intercepts download requests via an IHttpFilter logger and AddAuthorizationHeaderFilter.", "root_cause": "IHttpFilter.SendRequestAsync is typed with Windows.Web.Http.HttpRequestMessage/HttpResponseMessage; because System.Net.Http was also in scope (see CS0104), the compiler bound the override signature to the wrong types and reported CS0535 'does not implement interface member'.", "fix": "Remove System.Net.Http from scope (disable ImplicitUsings) so the Windows.Web.Http types bind, then the IHttpFilter implementation compiles." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Web.Http.HttpClient / HttpRequestMessage / HttpResponseMessage / IHttpFilter", "special_handling": "UWP networking and AdaptiveMediaSource request-interception code uses the Windows.Web.Http stack, NOT System.Net.Http. These names collide 1:1 with System.Net.Http, so both namespaces cannot be in scope at once." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0104: 'HttpClient'/'HttpRequestMessage'/'HttpResponseMessage' is an ambiguous reference between 'System.Net.Http.*' and 'Windows.Web.Http.*' (14 occurrences across ContentSelector, AdaptiveMediaSourceHttpFilterLogger, Scenario2-7)", "root_cause": "The scaffold .csproj ships <ImplicitUsings>enable</ImplicitUsings>, which injects a global 'using System.Net.Http'. The migrated source keeps its UWP 'using Windows.Web.Http;', so every Http* type name is ambiguous.", "fix": "Set <ImplicitUsings>disable</ImplicitUsings> in the .csproj (session-log line 9960). Alternatives: <Using Remove=\"System.Net.Http\" /> or per-file 'using HttpClient = Windows.Web.Http.HttpClient;'." },
+    { "error": "CS0535: 'AdaptiveMediaSourceHttpFilterLogger'/'AddAuthorizationHeaderFilter' does not implement interface member 'IHttpFilter.SendRequestAsync(HttpRequestMessage)'", "root_cause": "Cascade of the CS0104 ambiguity — the override resolved HttpRequestMessage to System.Net.Http instead of Windows.Web.Http, so it no longer matched the interface.", "fix": "Same fix as CS0104 (remove System.Net.Http from scope)." },
+    { "error": "XamlCompiler WMC1509 / 'Xaml Internal Error WMC9999: Object reference not set to an instance of an object' during MarkupCompilePass2", "root_cause": "Cascade of the failed C# compile — MarkupCompilePass2 could not load the LocalAssembly because the project failed to build on the CS0104 errors. Disappeared once the C# errors were fixed.", "fix": "Fix the underlying CS0104 compile errors; the markup-compiler crash was downstream, not independent." },
+    { "error": "MSB 'The process cannot access the file ... AdaptiveStreaming.dll ... because it is being used by another process' (interop.targets 724) — Build failed with 1 error", "root_cause": "A previously launched instance of the app was still running while the agent rebuilt, locking the output dll.", "fix": "Stop the running app process before rebuilding; transient/environmental, not a code defect." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "First full build after migration (session-log lines 9900-9960)", "symptom": "17 build errors, 14 of them the same CS0104 Http ambiguity across 8 files, plus 2 CS0535 and a cascading WMC9999 XAML markup-compiler crash.", "turns_or_retries": "Resolved in one diagnosis: edited the .csproj ImplicitUsings from enable to disable, which cleared all 14 CS0104 + 2 CS0535 + the WMC9999 cascade at once.", "root_cause": "Scaffold .csproj default <ImplicitUsings>enable</ImplicitUsings> injects global System.Net.Http, colliding with the UWP Windows.Web.Http stack the sample uses.", "how_resolved": "Set <ImplicitUsings>disable</ImplicitUsings>.", "preventable_by": "Documenting the Windows.Web.Http vs System.Net.Http CS0104 ambiguity (and the ImplicitUsings root cause + fix) in MIGRATION-PATTERNS.md, and having Validate-UwpMigration.ps1 emit a targeted hint when it sees CS0104 on Http types." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Output dll locked by a still-running app instance during rebuild (interop.targets 724).", "workaround": "Stop the running AdaptiveStreaming process before rebuilding." }
+  ]
+}

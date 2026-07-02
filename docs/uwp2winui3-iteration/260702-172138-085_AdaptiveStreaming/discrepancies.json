@@ -1,0 +1,19 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "1) Simplest Adaptive Streaming", "status": "pass", "reason": "Load button + MediaPlayerElement present; Load responded. Description matches.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "2) Event Handlers", "status": "pass", "reason": "Fully built; gate 0/1 only because MediaPlayerElement AutomationId isn't surfaced by its automation peer (tooling artifact).", "suspected_skill_gap": "" },
+    { "id": 3, "text": "3) Network Request Modification", "status": "pass", "reason": "All 7 radios present with correct AutomationIds; HDCP Off/On/Enforcement responded.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "4) Adaptive Streaming Tuning", "status": "pass", "reason": "3 bitrate ComboBoxes, 2 trigger-ratio TextBoxes, 2 Set buttons present.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "5) Metadata", "status": "pass", "reason": "Fully built; gate 0/1 due to MediaPlayerElement AutomationId artifact only.", "suspected_skill_gap": "" },
+    { "id": 6, "text": "6) Ad Insertion", "status": "pass", "reason": "Fully built; gate 0/1 due to MediaPlayerElement AutomationId artifact only.", "suspected_skill_gap": "" },
+    { "id": 7, "text": "7) Live Seekable Range", "status": "pass", "reason": "All 19 controls + 7 output TextBlocks present; gate 10/19 was an HTML-escaped-label artifact.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No migration defects. All 7 scenarios pass by UIA-tree inspection. Every parity shortfall traces to the evaluation harness (MediaPlayerElement AutomationId not exposed; HTML-escaped seek-button labels) or environment limits (headless: blank WinUI screenshots, non-walkable UWP CoreWindow), not to the generated WinUI 3 app. The only reusable improvement signal comes from the build log: a recurring Windows.Web.Http vs System.Net.Http CS0104 ambiguity caused by the scaffold's ImplicitUsings=enable."
+}

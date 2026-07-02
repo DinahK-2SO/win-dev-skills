@@ -1,0 +1,14 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "One rebuild failed with MSB 'The process cannot access the file ... AdaptiveStreaming.dll ... because it is being used by another process' (interop.targets 724).",
+      "evidence": "session-log ~line 11486 'Build failed with 1 error(s) and 192 warning(s)'; the cleanup step then ran Stop-Process on the AdaptiveStreaming process.",
+      "covered_clearly_at": "N/A — this is a transient/environmental file lock (a previously launched app instance held the output dll), not a migration-code issue and not a skill topic.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A stale running instance locking the build output is an environmental race the agent recovers from by stopping the process before rebuild; it does not recur from any skill guidance and needs no skill edit."
+    }
+  ]
+}

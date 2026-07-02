@@ -1,0 +1,17 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "14 CS0104 build errors: 'HttpClient' / 'HttpRequestMessage' / 'HttpResponseMessage' ambiguous between System.Net.Http.* and Windows.Web.Http.* (across ContentSelector, AdaptiveMediaSourceHttpFilterLogger, Scenario2-7), plus 2 cascading CS0535 (IHttpFilter.SendRequestAsync not implemented) and a WMC9999 XAML markup-compiler crash.",
+      "evidence": "session-log.txt lines 9900-9953 ('Build failed with 17 error(s)'); the 14 CS0104 lines and 2 CS0535 lines; fix at line 9960 editing csproj ImplicitUsings enable->disable; scaffold default at line 3886 '<ImplicitUsings>enable</ImplicitUsings>'.",
+      "skill_search": "grepped winui-uwp-migration for Windows.Web.Http | System.Net.Http | ambiguous | IHttpFilter | HttpClient | ImplicitUsings | CS0104",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The scaffold .csproj ships <ImplicitUsings>enable</ImplicitUsings>, which injects a global 'using System.Net.Http'. UWP networking / AdaptiveMediaSource code keeps 'using Windows.Web.Http;', so every Http* type name collides. MIGRATION-PATTERNS.md's CS0104 section only documents the XAML LaunchActivatedEventArgs ambiguity, not the Http-namespace one, and nothing documents the ImplicitUsings root cause.",
+      "proposed_fix": "Add a 'CS0104: Http* ambiguous between System.Net.Http and Windows.Web.Http' subsection to MIGRATION-PATTERNS.md 'Common build errors' explaining the ImplicitUsings root cause and the fixes (disable ImplicitUsings, or <Using Remove=\"System.Net.Http\" />, or per-file alias). Add a targeted hint in Validate-UwpMigration.ps1's build-FAIL branch when CS0104 references Http types.",
+      "generalizes": "Windows.Web.Http is the idiomatic UWP HTTP stack and is REQUIRED for AdaptiveMediaSource / IHttpFilter request interception, HttpBaseProtocolFilter, and much UWP networking code. Its type names (HttpClient, HttpRequestMessage, HttpResponseMessage) collide 1:1 with System.Net.Http, which ImplicitUsings=enable imports globally. Any UWP app touching Windows.Web.Http will hit this exact CS0104 batch after the scaffold build — it is not specific to adaptive streaming."
+    }
+  ]
+}
