@@ -1,0 +1,16 @@
+{
+  "scenario": "Geolocation",
+  "index": 130,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: add Section 5c that FAILs on a copied UWP windows.backgroundTasks EntryPoint extension lacking a windows.activatableClass.inProcessServer registration — this is the deterministic cause of the 0x80080204 AppX-registration failure that leaves a clean-building app unlaunchable.",
+    "MIGRATION-PATTERNS.md: add manifest-checklist item 5 to reconcile UWP <Extension> blocks (esp. windows.backgroundTasks) — remove by default for foreground parity, or add an inProcessServer ActivatableClass for full fidelity.",
+    "SKILL.md: extend the Package.appxmanifest healthcheck bullet to flag orphaned windows.backgroundTasks extensions and link the checklist, so the manifest step is understood as full reconciliation, not just three attribute fixes."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": []
+}

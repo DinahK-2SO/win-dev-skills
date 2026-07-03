@@ -1,0 +1,716 @@
+{
+  "featureName": "Geolocation",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Geolocation\\cs",
+  "generated": "2026-07-04T02:26:18.7549149+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Track position",
+      "class": "Scenario1_TrackPosition",
+      "slug": "Track_position",
+      "screenshot": "01_Track_position.png",
+      "controls": [
+        {
+          "name": "StartTrackingButton",
+          "type": "Button",
+          "label": "Start Tracking",
+          "events": []
+        },
+        {
+          "name": "StopTrackingButton",
+          "type": "Button",
+          "label": "Stop Tracking",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start Tracking",
+          "alt": "StartTrackingButton",
+          "type": "Button",
+          "label": "Start Tracking",
+          "name": "StartTrackingButton",
+          "event": ""
+        },
+        {
+          "target": "Stop Tracking",
+          "alt": "StopTrackingButton",
+          "type": "Button",
+          "label": "Stop Tracking",
+          "name": "StopTrackingButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "ScenarioOutput_Status",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Latitude",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Longitude",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Accuracy",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Source",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_IsRemoteSource",
+            "type": "TextBlock"
+          },
+          {
+            "name": "LocationDisabledMessage",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Get position",
+      "class": "Scenario2_GetPosition",
+      "slug": "Get_position",
+      "screenshot": "02_Get_position.png",
+      "controls": [
+        {
+          "name": "DesiredAccuracyInMeters",
+          "type": "TextBox",
+          "label": "0",
+          "events": []
+        },
+        {
+          "name": "GetGeolocationButton",
+          "type": "Button",
+          "label": "Get Geolocation",
+          "events": []
+        },
+        {
+          "name": "CancelGetGeolocationButton",
+          "type": "Button",
+          "label": "Cancel",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get Geolocation",
+          "alt": "GetGeolocationButton",
+          "type": "Button",
+          "label": "Get Geolocation",
+          "name": "GetGeolocationButton",
+          "event": ""
+        },
+        {
+          "target": "Cancel",
+          "alt": "CancelGetGeolocationButton",
+          "type": "Button",
+          "label": "Cancel",
+          "name": "CancelGetGeolocationButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "DesiredAccuracyInMeters",
+            "type": "TextBox"
+          },
+          {
+            "name": "Label_DilutionOfPrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "Label_PosPrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "Label_HorzPrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "Label_VertPrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "Label_GeomPrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "Label_TimePrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Latitude",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Longitude",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Accuracy",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Source",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_IsRemoteSource",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_PosPrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_HorzPrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_VertPrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_GeomPrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_TimePrecision",
+            "type": "TextBlock"
+          },
+          {
+            "name": "LocationDisabledMessage",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Background position",
+      "class": "Scenario3_BackgroundTask",
+      "slug": "Background_position",
+      "screenshot": "03_Background_position.png",
+      "controls": [
+        {
+          "name": "RegisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Register",
+          "events": []
+        },
+        {
+          "name": "UnregisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Unregister",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Register",
+          "alt": "RegisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Register",
+          "name": "RegisterBackgroundTaskButton",
+          "event": ""
+        },
+        {
+          "target": "Unregister",
+          "alt": "UnregisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Unregister",
+          "name": "UnregisterBackgroundTaskButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Latitude",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Longitude",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Accuracy",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Foreground geofencing",
+      "class": "Scenario4_ForegroundGeofence",
+      "slug": "Foreground_geofencing",
+      "screenshot": "04_Foreground_geofencing.png",
+      "controls": [
+        {
+          "name": "Id",
+          "type": "TextBox",
+          "label": "(Required)",
+          "events": []
+        },
+        {
+          "name": "SetPositionToHereButton",
+          "type": "Button",
+          "label": "Set to Here",
+          "events": []
+        },
+        {
+          "name": "Latitude",
+          "type": "TextBox",
+          "label": "(Required)",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "TextBox",
+          "label": "(Required)",
+          "events": []
+        },
+        {
+          "name": "Radius",
+          "type": "TextBox",
+          "label": "(Required)",
+          "events": []
+        },
+        {
+          "name": "DwellTime",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "StartImmediately",
+          "type": "RadioButton",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "StartAtSpecificTime",
+          "type": "RadioButton",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "StartDate",
+          "type": "DatePicker",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "StartTime",
+          "type": "TimePicker",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "SingleUse",
+          "type": "CheckBox",
+          "label": "Single Use",
+          "events": []
+        },
+        {
+          "name": "CreateGeofenceButton",
+          "type": "Button",
+          "label": "Create Geofence",
+          "events": []
+        },
+        {
+          "name": "RegisteredGeofenceListBox",
+          "type": "ListBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "RemoveGeofenceItem",
+          "type": "Button",
+          "label": "Remove Geofence",
+          "events": []
+        },
+        {
+          "name": "GeofenceEventsListBox",
+          "type": "ListBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Set to Here",
+          "alt": "SetPositionToHereButton",
+          "type": "Button",
+          "label": "Set to Here",
+          "name": "SetPositionToHereButton",
+          "event": ""
+        },
+        {
+          "target": "StartImmediately",
+          "alt": "",
+          "type": "RadioButton",
+          "label": "",
+          "name": "StartImmediately",
+          "event": ""
+        },
+        {
+          "target": "StartAtSpecificTime",
+          "alt": "",
+          "type": "RadioButton",
+          "label": "",
+          "name": "StartAtSpecificTime",
+          "event": ""
+        },
+        {
+          "target": "Create Geofence",
+          "alt": "CreateGeofenceButton",
+          "type": "Button",
+          "label": "Create Geofence",
+          "name": "CreateGeofenceButton",
+          "event": ""
+        },
+        {
+          "target": "Remove Geofence",
+          "alt": "RemoveGeofenceItem",
+          "type": "Button",
+          "label": "Remove Geofence",
+          "name": "RemoveGeofenceItem",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "Id",
+            "type": "TextBox"
+          },
+          {
+            "name": "Latitude",
+            "type": "TextBox"
+          },
+          {
+            "name": "Radius",
+            "type": "TextBox"
+          },
+          {
+            "name": "DwellTime",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Background geofencing",
+      "class": "Scenario5_GeofenceBackgroundTask",
+      "slug": "Background_geofencing",
+      "screenshot": "05_Background_geofencing.png",
+      "controls": [
+        {
+          "name": "RegisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Register",
+          "events": []
+        },
+        {
+          "name": "UnregisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Unregister",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Register",
+          "alt": "RegisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Register",
+          "name": "RegisterBackgroundTaskButton",
+          "event": ""
+        },
+        {
+          "target": "Unregister",
+          "alt": "UnregisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Unregister",
+          "name": "UnregisterBackgroundTaskButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Get last visit",
+      "class": "Scenario6_GetLastVisit",
+      "slug": "Get_last_visit",
+      "screenshot": "06_Get_last_visit.png",
+      "controls": [
+        {
+          "name": "GetLastVisitButton",
+          "type": "Button",
+          "label": "Get last Visit",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get last Visit",
+          "alt": "GetLastVisitButton",
+          "type": "Button",
+          "label": "Get last Visit",
+          "name": "GetLastVisitButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "ScenarioOutput_VisitStateChange",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Timestamp",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Latitude",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Longitude",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Accuracy",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_IsRemoteSource",
+            "type": "TextBlock"
+          },
+          {
+            "name": "LocationDisabledMessage",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Foreground visit monitoring",
+      "class": "Scenario7_ForegroundVisits",
+      "slug": "Foreground_visit_monitoring",
+      "screenshot": "07_Foreground_visit_monitoring.png",
+      "controls": [
+        {
+          "name": "StartMonitoringButton",
+          "type": "Button",
+          "label": "Start Monitoring",
+          "events": []
+        },
+        {
+          "name": "StopMonitoringButton",
+          "type": "Button",
+          "label": "Stop Monitoring",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start Monitoring",
+          "alt": "StartMonitoringButton",
+          "type": "Button",
+          "label": "Start Monitoring",
+          "name": "StartMonitoringButton",
+          "event": ""
+        },
+        {
+          "target": "Stop Monitoring",
+          "alt": "StopMonitoringButton",
+          "type": "Button",
+          "label": "Stop Monitoring",
+          "name": "StopMonitoringButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "ScenarioOutput_VisitStateChange",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Timestamp",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Latitude",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Longitude",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Accuracy",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_IsRemoteSource",
+            "type": "TextBlock"
+          },
+          {
+            "name": "LocationDisabledMessage",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "Background visit monitoring",
+      "class": "Scenario8_VisitsBackgroundTask",
+      "slug": "Background_visit_monitoring",
+      "screenshot": "08_Background_visit_monitoring.png",
+      "controls": [
+        {
+          "name": "RegisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Register",
+          "events": []
+        },
+        {
+          "name": "UnregisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Unregister",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Register",
+          "alt": "RegisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Register",
+          "name": "RegisterBackgroundTaskButton",
+          "event": ""
+        },
+        {
+          "target": "Unregister",
+          "alt": "UnregisterBackgroundTaskButton",
+          "type": "Button",
+          "label": "Unregister",
+          "name": "UnregisterBackgroundTaskButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

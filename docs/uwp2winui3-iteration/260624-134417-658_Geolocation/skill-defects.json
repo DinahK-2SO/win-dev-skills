@@ -1,0 +1,17 @@
+{
+  "scenario": "Geolocation",
+  "index": 130,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated packaged WinUI 3 app fails AppX registration (0x80080204) because the copied Package.appxmanifest keeps UWP windows.backgroundTasks in-process EntryPoint extensions with no windows.activatableClass.inProcessServer registration. App never launches; all 8 scenarios fail.",
+      "evidence": "migration-score.json winui_launchable=false, winui_launch_error='error 0x80080204 - App manifest validation error, Package.appxmanifest line 31: EntryPoint=BackgroundTask.GeofenceBackgroundTask without ActivatableClassId in windows.activatableClass.inProcessServer'. discrepancies.md 'Blocking defect'. Manifest has 3 <Extension Category=\"windows.backgroundTasks\"> blocks.",
+      "skill_search": "grep of skills/winui-uwp-migration for 'backgroundTask|activatableClass|inProcessServer|ActivatableClassId|0x80080204' → NO MATCHES; MIGRATION-PATTERNS.md 'Manifest migration checklist' lists only TargetDeviceFamily/rescap/runFullTrust; Validate-UwpMigration.ps1 Section 5b checks only those three.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill treats the manifest as needing only TargetDeviceFamily/rescap/runFullTrust fixes and copies everything else as-is. It has no awareness that UWP windows.backgroundTasks EntryPoint extensions are invalid in a packaged WinUI 3 manifest without an in-process activatable-class registration.",
+      "proposed_fix": "(Tier 1) Add a static check in Validate-UwpMigration.ps1 Section 5 that FAILs when Package.appxmanifest contains <Extension Category=\"windows.backgroundTasks\"> with an EntryPoint, naming the 0x80080204 cause and the two fixes. (Tier 3) Add a 'Background tasks' item to the MIGRATION-PATTERNS.md Manifest migration checklist describing removal (default) or inProcessServer registration.",
+      "generalizes": "UWP SDK samples routinely declare in-process background tasks (geolocation, timer, push notification, media transport, sensor). Any such app migrated by copying the manifest as-is deterministically fails AppX registration with 0x80080204 and scores 0 on launch, regardless of scenario. It is a manifest-shape difference, not a Geolocation-specific bug."
+    }
+  ]
+}

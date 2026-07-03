@@ -365,6 +365,25 @@ if (Test-Path -LiteralPath $manifestPath) {
         Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
         $manifestFailures++
     }
+    # ─── 5c. Package.appxmanifest UWP background-task extensions ───────────────
+    # A UWP app declares in-process background tasks with
+    #   <Extension Category="windows.backgroundTasks" EntryPoint="Ns.Type">…</Extension>
+    # UWP auto-registered these WinRT classes. A *packaged WinUI 3 / Windows App
+    # SDK* app does NOT: the AppX registrar rejects the whole package at launch
+    # with 0x80080204 — "not allowed to have EntryPoint=… without ActivatableClassId
+    # in windows.activatableClass.inProcessServer" — for every non-audio task that
+    # lacks a matching windows.activatableClass.inProcessServer registration. The
+    # build is CLEAN, so this only surfaces at registration time and otherwise
+    # zeroes the score (Geolocation: all 8 scenarios unreachable → 0/100).
+    if ($manifestText -match '<Extension\s+Category="windows\.backgroundTasks"' -and
+        $manifestText -notmatch 'Category="windows\.activatableClass\.inProcessServer"') {
+        Write-Host "[FAIL] Package.appxmanifest declares a UWP <Extension Category=`"windows.backgroundTasks`"> with an EntryPoint but no matching windows.activatableClass.inProcessServer registration."
+        Write-Host "       Impact: `winapp run` / `dotnet run` fails AppX registration with 0x80080204 — the app never launches (build stays clean, so nothing else catches it)."
+        Write-Host "       Fix (default, foreground parity): delete the <Extension Category=`"windows.backgroundTasks`"> block(s). The C# BackgroundTaskBuilder code still compiles; only in-app registration is skipped, and every foreground scenario becomes reachable."
+        Write-Host "       Fix (full fidelity): add a matching <Extension Category=`"windows.activatableClass.inProcessServer`"> ActivatableClass entry for each task."
+        Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist' item 5 (background tasks)."
+        $manifestFailures++
+    }
     if ($manifestFailures -eq 0) {
         Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared"
     } else {

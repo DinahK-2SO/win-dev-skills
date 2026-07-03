@@ -1,0 +1,22 @@
+{
+  "scenario": "Geolocation",
+  "summary": "The migrated WinUI 3 app builds cleanly (0 errors, 88 warnings) but is NON-FUNCTIONAL: it cannot be launched. Both 'winapp run <build-output>' and 'dotnet run' fail at package registration with error 0x80080204. Because the app never launches, every one of the 8 scenarios is unreachable and fails. The original UWP app launched successfully and served as ground truth.",
+  "blocking_defect": {
+    "type": "invalid-appxmanifest",
+    "error_code": "0x80080204",
+    "location": "Package.appxmanifest line 31, column 12",
+    "detail": "EntryPoint=\"BackgroundTask.GeofenceBackgroundTask\" is declared without a corresponding ActivatableClassId in windows.activatableClass.inProcessServer. A non-audio background task must register its in-process server activatable class. Package registration is rejected, so the app cannot start.",
+    "impact": "App fails to register/launch entirely — no scenario is reachable."
+  },
+  "per_scenario": [
+    { "index": 1, "title": "Track position", "verdict": "fail", "reason": "App did not launch; scenario unreachable (coverage 0/2)." },
+    { "index": 2, "title": "Get position", "verdict": "fail", "reason": "App did not launch; scenario unreachable (coverage 0/3)." },
+    { "index": 3, "title": "Background position", "verdict": "fail", "reason": "App did not launch; scenario unreachable (coverage 0/2)." },
+    { "index": 4, "title": "Foreground geofencing", "verdict": "fail", "reason": "App did not launch; scenario unreachable (coverage 0/15)." },
+    { "index": 5, "title": "Background geofencing", "verdict": "fail", "reason": "App did not launch; scenario unreachable (coverage 0/2)." },
+    { "index": 6, "title": "Get last visit", "verdict": "fail", "reason": "App did not launch; scenario unreachable (coverage 0/1)." },
+    { "index": 7, "title": "Foreground visit monitoring", "verdict": "fail", "reason": "App did not launch; scenario unreachable (coverage 0/2)." },
+    { "index": 8, "title": "Background visit monitoring", "verdict": "fail", "reason": "App did not launch; scenario unreachable (coverage 0/2)." }
+  ],
+  "uwp_capture_note": "Original UWP app launched successfully (Release build, PID 17492, windowTitle 'Geolocation C# Sample'). A golden screenshot of the default view (Scenario 1) was captured. Per-scenario navigation and per-control actuation of the ORIGINAL UWP app could not be driven on this host: the legacy UWP CoreWindow does not expose its UIA content tree to external automation (winapp inspect/search/invoke return only the top-level Pane), and synthetic Win32 mouse/keyboard input did not reach the session (GetCursorPos stayed at 0,0). This limits the UWP behavioral baseline but does not affect the verdict, since the migrated app never launched."
+}

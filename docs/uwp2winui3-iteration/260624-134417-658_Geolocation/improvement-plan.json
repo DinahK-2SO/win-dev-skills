@@ -1,0 +1,28 @@
+{
+  "scenario": "Geolocation",
+  "index": 130,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Packaged WinUI 3 app builds clean but fails AppX registration with 0x80080204 because the copied Package.appxmanifest keeps UWP windows.backgroundTasks EntryPoint extensions with no windows.activatableClass.inProcessServer registration. App never launches → 0/100.",
+      "evidence": "migration-score.json winui_launch_error (0x80080204, Package.appxmanifest line 31, EntryPoint=BackgroundTask.GeofenceBackgroundTask); discrepancies.md 'Blocking defect'; skill grep for backgroundTask/activatableClass → no matches.",
+      "root_cause": "The migration skill has no coverage of UWP background-task manifest extensions and no validator/checklist step to reconcile them; the manifest checklist implied TargetDeviceFamily/rescap/runFullTrust were the complete set.",
+      "tier": 1,
+      "change": "Added Section 5c to Validate-UwpMigration.ps1: statically FAILs when Package.appxmanifest contains <Extension Category=\"windows.backgroundTasks\"> without a windows.activatableClass.inProcessServer registration, naming the 0x80080204 cause and both fixes. Can't be ignored — it fails the gate before launch.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The clean-build-but-unlaunchable manifest is caught at validation time; the agent removes the block(s) (or adds the inProcessServer class) and the app registers and launches.",
+      "falsifiable_check": "On re-run, Validate-UwpMigration.ps1 emits '[FAIL] … windows.backgroundTasks … 0x80080204' for the copied manifest; after the fix the app launches (winui_launchable=true) and the 8 scenarios become reachable (score > 0)."
+    },
+    {
+      "problem": "Manifest migration checklist reads as complete after 3 attribute fixes, so the agent left background-task extensions in place; skill has no prose describing the WinUI 3 background-task manifest difference.",
+      "evidence": "MIGRATION-PATTERNS.md 'Manifest migration checklist' items 1-4 only; SKILL.md healthcheck bullet 5 listed only image refs/target/rescap/runFullTrust.",
+      "root_cause": "Skill-defect (absent content) + coverage-gap (checklist implied completeness). Tier 1 alone can catch it, but the agent needs the fix recipe to act on the FAIL.",
+      "tier": 3,
+      "change": "Added checklist item 5 'Reconcile UWP <Extension> blocks — especially windows.backgroundTasks' to MIGRATION-PATTERNS.md with the 0x80080204 error, the remove-by-default fix, and the inProcessServer full-fidelity option; extended SKILL.md healthcheck bullet 5 to name the background-task extension and link the checklist.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "The agent has a concrete recipe when the validator FAILs, and the checklist no longer implies completeness after only 3 attribute edits.",
+      "falsifiable_check": "On re-run, the agent removes/reconciles the background-task extension and the manifest passes Validate Section 5c; no 0x80080204 at launch."
+    }
+  ],
+  "deferred_to_human": []
+}

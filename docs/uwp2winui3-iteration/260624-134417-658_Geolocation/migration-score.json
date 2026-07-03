@@ -1,0 +1,25 @@
+{
+  "scenario": "Geolocation",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 8,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 8,
+  "uwp_capture_status": "ok (partial): original UWP app launched (Release, PID 17492, windowTitle 'Geolocation C# Sample'); default-view golden captured (parity/baseline/screenshots/00_launch.png). Per-scenario navigation/actuation of the ORIGINAL app could not be driven on this host - the legacy UWP CoreWindow does not expose its UIA content tree to external automation and synthetic Win32 input did not reach the session (GetCursorPos stayed 0,0). This did not affect scoring because the migrated app never launched.",
+  "winui_launchable": false,
+  "winui_launch_error": "winapp run / dotnet run failed to register package: error 0x80080204 - App manifest validation error, Package.appxmanifest line 31: EntryPoint='BackgroundTask.GeofenceBackgroundTask' without ActivatableClassId in windows.activatableClass.inProcessServer.",
+  "build_status": "builds clean (0 errors, 88 warnings)",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    { "name": "Track position", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/01_Track_position.png", "winui_screenshot": null, "note": "Migrated app failed to launch (invalid appxmanifest 0x80080204); scenario unreachable, coverage 0/2." },
+    { "name": "Get position", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/02_Get_position.png", "winui_screenshot": null, "note": "Migrated app failed to launch; scenario unreachable, coverage 0/3." },
+    { "name": "Background position", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/03_Background_position.png", "winui_screenshot": null, "note": "Migrated app failed to launch; scenario unreachable, coverage 0/2." },
+    { "name": "Foreground geofencing", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/04_Foreground_geofencing.png", "winui_screenshot": null, "note": "Migrated app failed to launch; scenario unreachable, coverage 0/15." },
+    { "name": "Background geofencing", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/05_Background_geofencing.png", "winui_screenshot": null, "note": "Migrated app failed to launch; scenario unreachable, coverage 0/2." },
+    { "name": "Get last visit", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/06_Get_last_visit.png", "winui_screenshot": null, "note": "Migrated app failed to launch; scenario unreachable, coverage 0/1." },
+    { "name": "Foreground visit monitoring", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/07_Foreground_visit_monitoring.png", "winui_screenshot": null, "note": "Migrated app failed to launch; scenario unreachable, coverage 0/2." },
+    { "name": "Background visit monitoring", "verdict": "fail", "uwp_responded": false, "winui_responded": false, "uwp_screenshot": "parity/baseline/screenshots/08_Background_visit_monitoring.png", "winui_screenshot": null, "note": "Migrated app failed to launch; scenario unreachable, coverage 0/2." }
+  ]
+}

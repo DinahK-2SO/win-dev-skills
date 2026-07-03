@@ -1,0 +1,32 @@
+{
+  "scenario": "Geolocation",
+  "index": 130,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied all .xaml/.cs/.resw/.appxmanifest and produced the mapping table (session-log lines 323-358); files landed correctly." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 (Section 5b manifest check)", "problem": "Passes a manifest that still carries UWP-only <Extension Category=\"windows.backgroundTasks\" EntryPoint=...> blocks, which then fail AppX registration at launch with 0x80080204. The validator only checks TargetDeviceFamily/rescap/runFullTrust, not background-task extensions.", "evidence": "migration-score.json winui_launch_error: 'error 0x80080204 - App manifest validation error, Package.appxmanifest line 31: EntryPoint=BackgroundTask.GeofenceBackgroundTask without ActivatableClassId in windows.activatableClass.inProcessServer'. Build was clean (0 errors) so no gate caught it." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 Section 7 runtime smoke launch", "limitation": "Did not run / did not catch the registration failure in the dev trial (build was clean, app never verified to launch), so the manifest defect reached scoring.", "suggested_tweak": "Add a static manifest check (Section 5c) for windows.backgroundTasks EntryPoint that fails before the smoke launch, since registration failure is deterministic and cheap to detect statically." }
+  ],
+  "failed_apis": [
+    { "api": "windows.backgroundTasks manifest extension (in-process EntryPoint)", "why_tried": "UWP sample declares 3 in-process background tasks (Geofence/Location/Visit) in Package.appxmanifest; the manifest was copied migrate-as-is.", "root_cause": "In a packaged WinUI 3 / Windows App SDK app, a non-audio background task declared with EntryPoint must have a matching windows.activatableClass.inProcessServer ActivatableClass registration; the UWP manifest has none, so AppX registration is rejected (0x80080204).", "fix": "Remove the windows.backgroundTasks <Extension> blocks from Package.appxmanifest (background tasks are not exercised by foreground parity and the C# BackgroundTaskBuilder code still compiles), OR add the matching windows.activatableClass.inProcessServer ActivatableClass entries." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md 'Manifest migration checklist' + Validate-UwpMigration.ps1 Section 5b", "wrong": "Both enumerate the manifest requirements (TargetDeviceFamily, rescap, runFullTrust) as if that is the complete set, but omit that copied windows.backgroundTasks EntryPoint extensions block registration.", "correct": "The checklist must also reconcile <Extension Category=\"windows.backgroundTasks\"> declarations, which fail with 0x80080204 unless removed or paired with an inProcessServer activatable class." }
+  ],
+  "special_apis": [
+    { "api": "IBackgroundTask / BackgroundTaskBuilder registration", "special_handling": "The C# code compiles under WinUI 3, but the manifest side is fundamentally different: a UWP in-process backgroundTasks EntryPoint is invalid in a packaged desktop manifest without an activatableClass.inProcessServer registration." }
+  ],
+  "errors_encountered": [
+    { "error": "0x80080204 App manifest validation error: EntryPoint='BackgroundTask.GeofenceBackgroundTask' without ActivatableClassId in windows.activatableClass.inProcessServer (Package.appxmanifest line 31)", "root_cause": "UWP windows.backgroundTasks extension copied verbatim into a packaged WinUI 3 manifest; the required in-process WinRT activatable-class registration is absent.", "fix": "Strip the windows.backgroundTasks <Extension> blocks (default for foreground parity) or add the matching windows.activatableClass.inProcessServer ActivatableClass entries." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Package.appxmanifest migration", "symptom": "Manifest copied 'migrate-as-is' with UWP background-task extensions intact; build was clean so the agent believed it was done, but the app never launched.", "turns_or_retries": "Single pass — the defect was never surfaced because build succeeded and no launch verification flagged it.", "root_cause": "No guidance or validator check tells the agent that windows.backgroundTasks EntryPoint declarations are invalid in a packaged WinUI 3 manifest.", "how_resolved": "Not resolved during the trial — reached scoring as a hard launch failure (score 0/100).", "preventable_by": "A Validate-UwpMigration.ps1 static check that FAILs on windows.backgroundTasks EntryPoint extensions, plus a manifest-checklist item in MIGRATION-PATTERNS.md prescribing removal or inProcessServer registration." }
+  ],
+  "missing_tooling": [
+    { "need": "Static detection of manifest extensions that block AppX registration (windows.backgroundTasks EntryPoint) before the smoke launch.", "would_have_saved": "The entire trial — a clean build masked a deterministic registration failure that zeroed the score." }
+  ],
+  "env_issues": []
+}

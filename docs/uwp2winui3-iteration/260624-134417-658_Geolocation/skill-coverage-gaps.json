@@ -1,0 +1,15 @@
+{
+  "scenario": "Geolocation",
+  "index": 130,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The Manifest migration checklist enumerates the manifest edits needed for a packaged WinUI 3 app but presents TargetDeviceFamily/rescap/runFullTrust as the complete set, so the agent believed a manifest passing those three was correct and copied the background-task extensions unchanged.",
+      "evidence": "MIGRATION-PATTERNS.md 'Manifest migration checklist (Windows.Desktop + runFullTrust)' items 1-4 make no mention of extensions that must be reconciled; the agent's manifest passed those checks yet still failed registration (migration-score.json 0x80080204).",
+      "covered_at": "MIGRATION-PATTERNS.md '### Manifest migration checklist (Windows.Desktop + runFullTrust)' and Validate-UwpMigration.ps1 Section 5b.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Extend the SAME checklist with an explicit item that UWP <Extension> blocks (esp. windows.backgroundTasks) must be reconciled or removed, so the list is understood as 'reconcile the whole manifest', not just three attributes.",
+      "generalizes": "Framing the checklist as complete when it omits extension reconciliation causes under-migration of any UWP manifest carrying extensions (background tasks, file-type associations, protocol handlers), across many scenarios."
+    }
+  ]
+}

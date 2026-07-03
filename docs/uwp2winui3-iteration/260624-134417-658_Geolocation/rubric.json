@@ -1,0 +1,16 @@
+{
+  "scenario": "Geolocation",
+  "feature": "Geolocation",
+  "source": "uwp-samples-standalone/Samples/Geolocation/cs",
+  "scenarios": [
+    { "index": 1, "title": "Track position", "controls": 2, "actions": ["Start Tracking", "Stop Tracking"] },
+    { "index": 2, "title": "Get position", "controls": 3, "actions": ["Get Geolocation", "Cancel"] },
+    { "index": 3, "title": "Background position", "controls": 2, "actions": ["Register", "Unregister"] },
+    { "index": 4, "title": "Foreground geofencing", "controls": 15, "actions": ["Set to Here", "StartImmediately", "StartAtSpecificTime", "Create Geofence", "Remove Geofence"] },
+    { "index": 5, "title": "Background geofencing", "controls": 2, "actions": ["Register", "Unregister"] },
+    { "index": 6, "title": "Get last visit", "controls": 1, "actions": ["Get last Visit"] },
+    { "index": 7, "title": "Foreground visit monitoring", "controls": 2, "actions": ["Start Monitoring", "Stop Monitoring"] },
+    { "index": 8, "title": "Background visit monitoring", "controls": 2, "actions": ["Register", "Unregister"] }
+  ],
+  "grading": "Each scenario passes if reachable (non-blank screenshot) and >=80% of baseline controls appear in the migrated app's UIA tree, with live controls also responding as in the UWP golden. partial at >=40% coverage; fail otherwise or if unreachable."
+}

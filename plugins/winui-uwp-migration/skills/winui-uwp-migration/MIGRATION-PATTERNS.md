@@ -620,6 +620,25 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
 
+5. **Reconcile UWP `<Extension>` blocks — especially `windows.backgroundTasks`.** The checklist above is *not* complete once items 1–4 pass: a copied UWP manifest often carries `<Extension>` declarations that are invalid in a packaged WinUI 3 manifest. The most common and most damaging is an in-process background task:
+   ```xml
+   <Extensions>
+     <Extension Category="windows.backgroundTasks" EntryPoint="BackgroundTask.GeofenceBackgroundTask">
+       <BackgroundTasks><Task Type="location" /></BackgroundTasks>
+     </Extension>
+   </Extensions>
+   ```
+   UWP auto-registered these WinRT classes; a **packaged WinUI 3 / Windows App SDK** app does not. At launch the AppX registrar rejects the *entire* package with:
+   ```
+   error 0x80080204: App manifest validation error … not allowed to have
+   EntryPoint="…" without ActivatableClassId in windows.activatableClass.inProcessServer
+   ```
+   The **build stays clean**, so this only appears at `winapp run` / `dotnet run` time and otherwise silently zeroes the score (the app never launches, every scenario is unreachable). Two fixes:
+   - **Default (recommended for foreground parity):** delete the `<Extension Category="windows.backgroundTasks">` block(s). The C# `BackgroundTaskBuilder` registration code still compiles; only the in-app `Register()` call is a no-op / throws (already inside a scenario handler), and every *foreground* scenario becomes reachable. Parity checking exercises the foreground UI, not the background trigger, so this restores a launchable app with no scenario loss.
+   - **Full fidelity (only if background triggers are in scope):** add a matching `<Extension Category="windows.activatableClass.inProcessServer">` with an `<ActivatableClass ActivatableClassId="…">` entry for each task's EntryPoint.
+
+   `Validate-UwpMigration.ps1` Section 5c flags this statically and FAILs before the smoke launch, since the registration failure is deterministic.
+
 ### WUI analyzer warnings (UWP API residue)
 
 The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
