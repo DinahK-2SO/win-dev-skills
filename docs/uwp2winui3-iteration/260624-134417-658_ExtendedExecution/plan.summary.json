@@ -1,0 +1,15 @@
+{
+  "scenario": "ExtendedExecution",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: expand #notifications with AppNotificationManager Register()/Unregister() lifecycle, builder+Show snippet, required manifest COM-activator extensions, and a 'do not revert to UWP ToastNotificationManager' warning — a swap-only migration compiled but crashed at startup and was reverted to a latent-buggy UWP API",
+    "MIGRATION-PATTERNS.md: name the AppNotificationManager.Register()-without-manifest-activator case on the 0xC000027B startup-crash row so agents fix the manifest instead of deferring/reverting the notification API"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Optionally teach Validate-UwpMigration.ps1 / unsupported-api-inventory.json to flag AppNotificationManager use without the manifest toast activator, or a residual ToastNotificationManager.CreateToastNotifier() left after migration."
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "scenario": "ExtendedExecution",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Unspecified Reason scenario: Begin/End extended execution + status", "status": "pass", "reason": "Controls present; Begin invoked live -> 'Extended execution denied.' matching UWP Denied path.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Saving Data Reason scenario: description-only page", "status": "pass", "reason": "Description present, no Begin/End buttons (matches source).", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Location Tracking Reason scenario: Begin/End + status", "status": "pass", "reason": "Begin invoked live -> 'Extended execution denied.' matching UWP.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Using Multiple Tasks scenario: Begin/End (Tasks) + status", "status": "pass", "reason": "Correct verbatim label; Begin invoked live -> 'Extended execution denied.'", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No fidelity discrepancies — all 4 scenarios reproduced. The only substantive finding is not visible in the score: the toast-notification path was migrated to the correct WinAppSDK AppNotificationManager, crashed at startup for lack of a manifest COM activator, and was reverted to the UWP ToastNotificationManager (a latent runtime defect for unpackaged targets). It scored 100 only because the Allowed/toast path is unreachable when ExtendedExecution is Denied on a dev box."
+}

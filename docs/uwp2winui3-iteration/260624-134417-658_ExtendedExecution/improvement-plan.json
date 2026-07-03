@@ -1,0 +1,30 @@
+{
+  "scenario": "ExtendedExecution",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "UWP toast migration to AppNotificationManager crashed at startup (0xc000027b) for lack of the Register() lifecycle + manifest COM activator, so the agent reverted to the UWP ToastNotificationManager (latent runtime defect for unpackaged desktop).",
+      "evidence": "lessons.json dev_agent_struggles[0] + errors_encountered[0]; session-log turns 40-46 (add AppNotificationManager.Default.Register() -> Test-AppLaunch FAIL 0xc000027b -> revert DisplayToast to Windows.UI.Notifications.ToastNotificationManager).",
+      "root_cause": "MIGRATION-PATTERNS.md#notifications gave only a 2-row mapping table + doc link: no registration lifecycle, no manifest activator requirement, no warning against reverting to the UWP API.",
+      "tier": 3,
+      "change": "Strengthened the #notifications section with (1) the Register()/Unregister() startup lifecycle, (2) an AppNotificationBuilder + Show before/after snippet, (3) the required windows.toastNotificationActivation + windows.comServer manifest extensions, and (4) an explicit 'do not revert to ToastNotificationManager (parameterless CreateToastNotifier() throws unpackaged)' callout.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On re-run, an agent migrating toasts uses AppNotificationManager with correct Register() + manifest and does not revert to the UWP API.",
+      "falsifiable_check": "A UWP-toast scenario builds AND launches without 0xc000027b while using Microsoft.Windows.AppNotifications (no residual Windows.UI.Notifications.ToastNotificationManager.CreateToastNotifier in migrated source)."
+    },
+    {
+      "problem": "The 0xC000027B startup-crash guidance nudged the agent to defer/remove the startup API rather than fix its registration, reinforcing the revert.",
+      "evidence": "MIGRATION-PATTERNS.md#startup-crashes line 387 ('if unsupported ... defer it'); Test-AppLaunch hint at session-log turn 42; agent removed Register() at turn 45.",
+      "root_cause": "The 0xC000027B row named only the generic 'legacy projection/activation incompatibility -> defer' path, not the common concrete COM-activator-registration cause.",
+      "tier": 3,
+      "change": "Extended the 0xC000027B row: name AppNotificationManager.Default.Register() with a missing manifest activator as a common concrete cause; declare the extension and keep the API rather than deferring/reverting.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents triaging 0xC000027B after adding notification/COM-activator registration fix the manifest instead of reflexively deferring the API.",
+      "falsifiable_check": "On re-run of a notification scenario, crash triage resolves to a manifest fix (activator extensions added) and the WinAppSDK notification API is retained."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-1 idea (out of scope for auto-apply): teach Validate-UwpMigration.ps1 / unsupported-api-inventory.json to warn when Microsoft.Windows.AppNotifications is used but no windows.toastNotificationActivation extension is declared in the manifest, and/or flag a residual adaptable ToastNotificationManager.CreateToastNotifier() left post-migration."
+  ]
+}

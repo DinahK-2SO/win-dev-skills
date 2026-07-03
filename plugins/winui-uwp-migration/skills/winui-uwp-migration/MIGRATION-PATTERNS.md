@@ -384,7 +384,7 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | `0x80004003` | `E_POINTER` | Static-window **init-order race** — a `Page` read `App.MainWindow` (or another static window reference) before `OnLaunched` assigned it. Keep `MainWindow`'s constructor inert and navigate after `Activate`. See [Initialization order](#windowing). |
 | `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
-| `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
+| `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. **Common concrete cause:** `AppNotificationManager.Default.Register()` (or another COM-activator registration) called at startup while the required manifest extension is missing — declare `windows.toastNotificationActivation` + `windows.comServer` (see [Notifications](#notifications)) and keep the API; do **not** revert to the UWP notification API. Only if the API/contract is genuinely unsupported on the current OS, defer it. |
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 
@@ -461,7 +461,65 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 | `ToastNotificationManager` (Windows.UI.Notifications) | `AppNotificationManager` (Microsoft.Windows.AppNotifications) |
 | WNS push via `PushNotificationChannelManager` | `PushNotificationManager` (Microsoft.Windows.PushNotifications) |
 
-See the [toast notifications guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/toast-notifications) and [push notifications guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/notifications).
+`AppNotificationManager` is **not a drop-in for the constructor** — it has a mandatory
+registration lifecycle and a manifest requirement. Swapping only the `Show(...)` call
+compiles but **crashes the app at startup** (see the trap below).
+
+**1. Register once at startup, unregister at exit** (in `App.xaml.cs`):
+
+```csharp
+protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+{
+    AppNotificationManager.Default.Register();   // BEFORE showing any notification
+    _window = new MainWindow();
+    _window.Activate();
+}
+// call AppNotificationManager.Default.Unregister(); on app exit
+```
+
+**2. Build + show** (replaces the UWP XML `ToastNotification` string):
+
+```csharp
+using Microsoft.Windows.AppNotifications;
+using Microsoft.Windows.AppNotifications.Builder;
+
+var notification = new AppNotificationBuilder()
+    .AddText("Title")
+    .AddText(content)
+    .BuildNotification();
+AppNotificationManager.Default.Show(notification);
+```
+
+**3. Packaged apps: declare the COM activator in `Package.appxmanifest`.**
+`Register()` registers a COM activation server; without the manifest extensions it
+throws a native stowed exception (`0xC000027B`) at startup. Add both:
+
+```xml
+<Package xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+         xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10" ...>
+  ...
+  <Extensions>
+    <desktop:Extension Category="windows.toastNotificationActivation">
+      <desktop:ToastNotificationActivation ToastActivatorCLSID="<your-guid>" />
+    </desktop:Extension>
+    <com:Extension Category="windows.comServer">
+      <com:ComServer>
+        <com:ExeServer Executable="YourApp.exe" DisplayName="YourApp"
+                       Arguments="----AppNotificationActivated:">
+          <com:Class Id="<same-guid>" />
+        </com:ExeServer>
+      </com:ComServer>
+    </com:Extension>
+  </Extensions>
+```
+
+> **Do NOT "fix" a startup crash by reverting to `Windows.UI.Notifications.ToastNotificationManager`.**
+> The parameterless `ToastNotificationManager.CreateToastNotifier()` needs an AppUserModelId /
+> package identity and **throws at runtime in an unpackaged WinUI 3 desktop app** — it only
+> appears to work when the app happens to be packaged, leaving a latent defect. `AppNotificationManager`
+> with the registration above is the correct target for both packaged and unpackaged apps.
+
+See the [toast notifications guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/toast-notifications), the [app notifications quickstart](https://learn.microsoft.com/windows/apps/windows-app-sdk/notifications/app-notifications/app-notifications-quickstart), and the [push notifications guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/notifications).
 
 ## Resources: MRT → MRT Core
 

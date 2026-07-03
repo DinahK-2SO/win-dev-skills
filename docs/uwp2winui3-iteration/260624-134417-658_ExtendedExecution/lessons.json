@@ -1,0 +1,35 @@
+{
+  "scenario": "ExtendedExecution",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrapped project, rewrote 5/11 namespaces, injected TODO[migrate-001..005] markers routing to PATTERNS.md#notifications and #threading (session-log turns ~ lines 1746, 1885, 2013, 2205, 2405)." },
+    { "tool": "Test-AppLaunch.ps1", "evidence": "Caught the startup crash (status=crashed code=0xc000027b module=Microsoft.UI.Xaml.dll) that the clean build hid, and later confirmed status=running after the fix (log turns 43/48)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Final gate PASS with 0 WUI warnings + smoke launch alive (log turn 49)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 residue grep", "limitation": "Only greps 'unsupported' + 'residueOnly' inventory patterns, NOT 'adaptable' ones, so a reverted-to-UWP ToastNotificationManager.CreateToastNotifier() call passes residue grep clean.", "suggested_tweak": "N/A here (runtime-only, path unreachable at startup); handled via prose guidance instead." },
+    { "tool": "Test-AppLaunch.ps1 smoke launch", "limitation": "Only proves the process stayed alive 10s after launch; the toast code path fires on a later button click that is Denied on a dev box, so a latent notification bug never executes and never fails the gate.", "suggested_tweak": "Prose guidance so the agent migrates notifications correctly the first time rather than relying on a runtime gate that cannot reach the path." }
+  ],
+  "failed_apis": [
+    { "api": "AppNotificationManager.Default.Register()", "why_tried": "Correct WinAppSDK replacement for UWP ToastNotificationManager, applied per TODO[migrate-001] -> PATTERNS.md#notifications", "root_cause": "Register() was called in the App constructor but the app's Package.appxmanifest declared no windows.toastNotificationActivation / windows.comServer COM activator extension, so activation-server registration failed and crashed startup with native stowed exception 0xc000027b in Microsoft.UI.Xaml.dll.", "fix": "Correct fix is to declare the toast activator COM extension in the manifest and Register()/Unregister() around app lifetime. The agent instead REVERTED to the UWP ToastNotificationManager (see doc_errors)." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#notifications", "wrong": "Bare 2-row mapping table + doc link. It says ToastNotificationManager -> AppNotificationManager but gives no registration lifecycle, no manifest activator requirement, and no warning that a naive AppNotificationManager.Default.Register() crashes at startup. This under-specification led the agent to migrate, crash, misattribute, and revert to the UWP API.", "correct": "Must state: (1) call AppNotificationManager.Default.Register() at startup + Unregister() at exit; (2) packaged apps must declare the windows.toastNotificationActivation + windows.comServer extensions in the manifest; (3) do NOT fall back to Windows.UI.Notifications.ToastNotificationManager - its parameterless CreateToastNotifier() throws at runtime in unpackaged WinUI 3 desktop apps." },
+    { "where": "MIGRATION-PATTERNS.md#startup-crashes (0xC000027B row)", "wrong": "Generic guidance 'legacy projection/activation incompatibility ... if unsupported on the current OS, defer it' nudged the agent to remove/defer the API rather than fix its registration.", "correct": "Add the specific cause: 0xC000027B right after adding AppNotificationManager.Default.Register() means the toast activator COM extension is missing from the manifest - fix the manifest, do not revert to the UWP API." }
+  ],
+  "special_apis": [
+    { "api": "Windows.ApplicationModel.ExtendedExecution.ExtendedExecutionSession", "special_handling": "WinRT API is used as-is in WinUI 3 desktop; compiles and returns Denied at runtime on a desktop dev box (expected). No bespoke handling needed - migrated cleanly." },
+    { "api": "Windows.UI.Notifications.ToastNotificationManager", "special_handling": "Parameterless CreateToastNotifier() requires an AppUserModelId / package identity; it only worked here because the final app was packaged. In an unpackaged WinUI 3 desktop app it throws. Correct target is Microsoft.Windows.AppNotifications.AppNotificationManager." }
+  ],
+  "errors_encountered": [
+    { "error": "Startup crash 0xc000027b (native stowed exception) in Microsoft.UI.Xaml.dll, Test-AppLaunch FAIL", "root_cause": "AppNotificationManager.Default.Register() called with no windows.toastNotificationActivation/comServer extension declared in Package.appxmanifest.", "fix": "Agent removed Register() and reverted the toast to UWP ToastNotificationManager (works only because app is packaged); the correct fix is to declare the manifest activator and keep the WinAppSDK API." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "App.xaml.cs + SampleConfiguration.cs notification migration (log turns 42-48)", "symptom": "Migrated toast to AppNotificationManager, app crashed at startup 0xc000027b; ~3 turns of crash triage (Test-AppLaunch, event-log inspection) then removed Register() and reverted the whole toast to the UWP ToastNotificationManager.", "turns_or_retries": "~4 turns (43-48)", "root_cause": "Skill's notifications guidance omitted the mandatory Register/Unregister lifecycle and the manifest COM activator extension, so the agent could not connect the crash to the missing registration and gave up on the correct API.", "how_resolved": "Reverted to UWP ToastNotificationManager.CreateToastNotifier() - green build + alive smoke launch, but a latent runtime defect for unpackaged targets.", "preventable_by": "Strengthening MIGRATION-PATTERNS.md#notifications with the registration lifecycle + manifest activator requirement + an explicit 'do not revert to ToastNotificationManager' warning, and a startup-crashes cross-reference for 0xC000027B after Register()." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "ExtendedExecutionSession.RequestExtensionAsync() returns Denied on a headless desktop dev box; toast (allowed) path never executes.", "workaround": "Behavioral parity was scored on the Denied path, which matches UWP behavior on the same host; the latent toast bug never ran." }
+  ]
+}

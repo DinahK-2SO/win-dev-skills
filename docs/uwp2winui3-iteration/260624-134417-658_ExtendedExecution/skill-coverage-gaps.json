@@ -1,0 +1,23 @@
+{
+  "scenario": "ExtendedExecution",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Migrating UWP toast notifications to WinAppSDK AppNotificationManager: the agent applied the correct API replacement but the app crashed at startup with 0xc000027b, and lacking lifecycle/manifest guidance it reverted to the UWP ToastNotificationManager (a latent runtime defect for unpackaged desktop apps).",
+      "evidence": "session-log turns 40-46: added AppNotificationManager.Default.Register() -> Test-AppLaunch FAIL code=0xc000027b module=Microsoft.UI.Xaml.dll (turn 43) -> removed Register() (turn 45) -> reverted DisplayToast to Windows.UI.Notifications.ToastNotificationManager.CreateToastNotifier().Show(...) (turn 46). Final SampleConfiguration.cs still uses the UWP API.",
+      "covered_at": "MIGRATION-PATTERNS.md#notifications (lines 456-464): 2-row mapping table `ToastNotificationManager -> AppNotificationManager` + a doc link, no code and no lifecycle/manifest detail.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Sharpen the existing #notifications section: (1) mandatory lifecycle — call AppNotificationManager.Default.Register() once at App startup and Unregister() at exit; (2) packaged apps must declare the windows.toastNotificationActivation + windows.comServer COM activator extensions in Package.appxmanifest (Register() crashes with 0xc000027b at startup without them); (3) an explicit DO-NOT: never fall back to Windows.UI.Notifications.ToastNotificationManager — its parameterless CreateToastNotifier() throws at runtime in unpackaged WinUI 3 desktop apps; (4) a minimal before/after snippet.",
+      "generalizes": "Toast notifications appear in a large fraction of UWP apps/samples. The exact 'migrate to AppNotificationManager -> Register() crashes at startup -> revert to UWP API' trap will recur on any of them; the fix is API-general, not scenario-specific."
+    },
+    {
+      "problem": "The 0xC000027B startup-crash guidance points the agent toward deferring/removing the offending startup API rather than fixing its registration, which contributed to the revert above.",
+      "evidence": "session-log turn 42: Test-AppLaunch Hint 'Native stowed exception ... If a UWP API/contract used at startup is unsupported on this OS, defer it', and turn 45 where the agent removed Register(). MIGRATION-PATTERNS.md#startup-crashes line 387 0xC000027B row: 'If the API/contract is unsupported on the current OS, defer it.'",
+      "covered_at": "MIGRATION-PATTERNS.md#startup-crashes, 0xC000027B row (line 387).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Extend the 0xC000027B row with the specific, common cause: a 0xC000027B immediately after adding AppNotificationManager.Default.Register() means the toast activator COM extension is missing from the manifest — declare it (see #notifications) rather than deferring/reverting the notification API.",
+      "generalizes": "Any WinAppSDK migration that adds notification (or other COM-activator) registration at startup can hit this exact native stowed exception; naming the cause prevents the reflexive 'defer the API' misfix across scenarios."
+    }
+  ]
+}

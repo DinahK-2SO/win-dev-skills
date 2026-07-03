@@ -1,0 +1,14 @@
+{
+  "scenario": "ExtendedExecution",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Left the final DisplayToast on the UWP ToastNotificationManager rather than the WinAppSDK API — arguably an agent judgement call under time pressure.",
+      "evidence": "session-log turn 46 revert comment 'works for packaged apps and avoids registration issues'.",
+      "covered_clearly_at": "N/A — the skill did NOT clearly cover the registration lifecycle/manifest requirement, so this is NOT a pure slip.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "Re-classified: because the skill's #notifications section lacked the lifecycle/manifest guidance that would have let the agent fix rather than revert, this is a skill-coverage-gap (see skill-coverage-gaps.md item 1), not a dev-agent-slip. Listed here only for traceability; no separate slip is claimed."
+    }
+  ]
+}

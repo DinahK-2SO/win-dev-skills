@@ -1,0 +1,95 @@
+{
+  "scenario": "ExtendedExecution",
+  "created_at": "2026-07-04T01:20:00+08:00",
+  "uwp_capture_status": "partial: UWP launched (Release, PID 25316) and scenario-1 initial frame captured; per-scenario navigation and control actuation of the UWP could not be driven because (a) the UWP CoreWindow exposes no content to UI Automation on this host and (b) the agent shell has no interactive desktop, so synthetic mouse input to the CoreWindow did not land. Scenarios 2-4 golden state derived from source (pages are structurally identical to scenario 1, differing only in description text).",
+  "features": [
+    {
+      "id": "nav-scenario-list",
+      "area": "Shell",
+      "name": "Scenario navigation list",
+      "description": "A left-hand list ('Extended Execution' header) offers the four scenarios: 1) Unspecified Reason, 2) Saving Data Reason, 3) Location Tracking Reason, 4) Using Multiple Tasks. Selecting an item navigates the content frame to that scenario page.",
+      "expected_behaviour": [
+        "List shows exactly 4 items with the verbatim '1) '..'4) ' prefixed titles",
+        "Clicking an item navigates the right-hand content to the matching page"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Unspecified_Reason.png",
+      "weight": 2
+    },
+    {
+      "id": "s1-unspecified-page",
+      "area": "Scenario 1",
+      "name": "Unspecified Reason page content",
+      "description": "Description header, the text 'Unspecified reason', an explanatory paragraph, a 'Begin extended execution' button, a disabled 'End extended execution' button, and 'Extended execution: Not requested' status.",
+      "expected_behaviour": [
+        "RequestButton labelled 'Begin extended execution' is enabled",
+        "CloseButton labelled 'End extended execution' is disabled",
+        "Status text reads 'Extended execution: Not requested'"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Unspecified_Reason.png",
+      "weight": 2
+    },
+    {
+      "id": "s1-begin-behavior",
+      "area": "Scenario 1",
+      "name": "Begin extended execution request",
+      "description": "Clicking 'Begin extended execution' requests an ExtendedExecutionSession (Reason=Unspecified). On a desktop the request is Denied, so the status message area shows 'Extended execution denied.' and the buttons remain in their initial state.",
+      "expected_behaviour": [
+        "Clicking RequestButton triggers RequestExtensionAsync",
+        "On Denied result the notification status shows 'Extended execution denied.'",
+        "RequestButton stays enabled and CloseButton stays disabled (session not held)"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Unspecified_Reason.png",
+      "weight": 1
+    },
+    {
+      "id": "s2-savingdata-page",
+      "area": "Scenario 2",
+      "name": "Saving Data Reason page content",
+      "description": "Description-only page for the 'SavingData' reason. There are NO Begin/End buttons in the source - just the description header, 'Saving Data Reason' text, an explanatory paragraph, and README instructions.",
+      "expected_behaviour": [
+        "Page shows the SavingData description paragraph",
+        "No Begin/End buttons are present (matches source)"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s3-location-page",
+      "area": "Scenario 3",
+      "name": "Location Tracking Reason page content",
+      "description": "Description header, 'Location Tracking Reason' text, explanatory paragraph, 'Begin extended execution' button, disabled 'End extended execution' button, and 'Extended execution: Not requested' status.",
+      "expected_behaviour": [
+        "RequestButton 'Begin extended execution' enabled; CloseButton disabled",
+        "Status reads 'Extended execution: Not requested'",
+        "Clicking Begin yields the correct Allowed/Denied status update"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s4-multipletasks-page",
+      "area": "Scenario 4",
+      "name": "Using Multiple Tasks page content",
+      "description": "Description header, 'Using Extended Execution with Multiple Tasks' text, explanatory paragraph, a 'Begin extended execution and Tasks' button, a disabled 'End extended execution and Tasks' button, and status.",
+      "expected_behaviour": [
+        "RequestButton labelled 'Begin extended execution and Tasks' enabled",
+        "CloseButton labelled 'End extended execution and Tasks' disabled",
+        "Status reads 'Extended execution: Not requested'"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "status-notification-bar",
+      "area": "Shell",
+      "name": "Status notification bar (NotifyUser)",
+      "description": "A shared StatusBlock/StatusBorder at the bottom of the shell displays messages raised by scenario handlers (e.g. 'Extended execution denied.').",
+      "expected_behaviour": [
+        "StatusBlock text updates when a scenario calls NotifyUser",
+        "After a denied request it reads 'Extended execution denied.'"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Unspecified_Reason.png",
+      "weight": 1
+    }
+  ]
+}
