@@ -1,0 +1,70 @@
+{
+  "scenario": "BackgroundTask",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 6,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 6,
+  "uwp_capture_status": "partial: UWP app launched (Release, PID 24284, window 'Background Tasks C# Sample') and screenshotted; per-scenario nav could not be automated because the legacy UWP CoreWindow exposes no UIA subtree (only a top-level Pane) and coordinate clicks did not advance selection. All six scenarios visible in the list; Scenario 1 controls captured as functional ground truth.",
+  "winui_build_status": "success (dotnet build: 0 warnings, 0 errors)",
+  "winui_launch_status": "failed: MSIX registration error 0x80080204 (manifest line 37 declares background task EntryPoint='Tasks.SampleBackgroundTask' without ActivatableClassId in windows.activatableClass.inProcessServer). Both winapp run and dotnet run fail identically; the app never renders.",
+  "parity_result": null,
+  "behavioral_regressions": 6,
+  "features": [
+    {
+      "name": "Scenario 1 - Background Task",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Background_Task.png",
+      "winui_screenshot": null,
+      "note": "Works in UWP (Register/Unregister, status). WinUI app fails to launch (manifest 0x80080204) so scenario is unreachable."
+    },
+    {
+      "name": "Scenario 2 - Background Task with Condition",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Background_Task_with_Condition.png",
+      "winui_screenshot": null,
+      "note": "Unreachable in WinUI (app will not launch)."
+    },
+    {
+      "name": "Scenario 3 - Servicing Complete Task",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Servicing_Complete_Task.png",
+      "winui_screenshot": null,
+      "note": "Unreachable in WinUI (app will not launch)."
+    },
+    {
+      "name": "Scenario 4 - Background Task with Time Trigger",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Background_Task_with_Time_Trigger.png",
+      "winui_screenshot": null,
+      "note": "Unreachable in WinUI (app will not launch)."
+    },
+    {
+      "name": "Scenario 5 - Background Task with Application Trigger",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/05_Background_Task_with_Application_Trigger.png",
+      "winui_screenshot": null,
+      "note": "Unreachable in WinUI (app will not launch)."
+    },
+    {
+      "name": "Scenario 6 - Grouped Background Task",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/06_Grouped_Background_Task.png",
+      "winui_screenshot": null,
+      "note": "Unreachable in WinUI (app will not launch)."
+    }
+  ]
+}

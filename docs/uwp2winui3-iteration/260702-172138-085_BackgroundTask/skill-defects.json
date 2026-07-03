@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 19,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 package fails registration with 0x80080204 because the manifest retained UWP out-of-process windows.backgroundTasks Extensions (EntryPoint without ActivatableClassId). Build is green; the app never launches; score 0.",
+      "evidence": "migration-score.json winui_launch_status = 'failed: MSIX registration error 0x80080204 (manifest line 37 declares background task EntryPoint=Tasks.SampleBackgroundTask without ActivatableClassId)'; generated Package.appxmanifest lines 49-61 contain two <Extension Category=\"windows.backgroundTasks\" EntryPoint=...> elements.",
+      "skill_search": "grepped winui-uwp-migration for 'background|BackgroundTask|activatableClass|inProcessServer|windows.backgroundTasks|EntryPoint' and 'Manifest migration checklist'",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The Background Tasks pattern (MIGRATION-PATTERNS.md anchor background-tasks) only covers the code API swap (IBackgroundTask -> BackgroundTaskBuilder). Neither it nor the Manifest migration checklist mentions the manifest-side windows.backgroundTasks Extension, which is invalid for packaged WinUI 3 desktop. Validate-UwpMigration.ps1 section 5b checks TargetDeviceFamily/rescap/runFullTrust but has no check for this Extension, and the Step 7 smoke launch downgrades a registration failure (no AUMID/PID) to WARN, so nothing flags it.",
+      "proposed_fix": "1) Tier 1: add a static manifest check in Validate-UwpMigration.ps1 section 5b that FAILs when a <Extension Category=\"windows.backgroundTasks\" ... EntryPoint=...> remains, with a fix pointer. 2) Tier 3: extend MIGRATION-PATTERNS.md Background Tasks section and add a Manifest checklist item instructing removal/rework of the windows.backgroundTasks Extension (cite 0x80080204).",
+      "generalizes": "The standard UWP background-task pattern declares tasks in-manifest via windows.backgroundTasks Extension pointing at a separate WinRT Component. This is common across UWP samples/apps; every one migrated to WinUI 3 desktop hits 0x80080204 unless the Extension is removed. Not scenario-specific."
+    }
+  ]
+}

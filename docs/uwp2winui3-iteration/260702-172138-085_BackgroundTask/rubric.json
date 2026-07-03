@@ -1,0 +1,82 @@
+{
+  "scenario": "BackgroundTask",
+  "created_at": "2026-07-03T23:55:00+08:00",
+  "uwp_capture_status": "partial: UWP app launched successfully (Release, PID 24284, window 'Background Tasks C# Sample') and was screenshotted. Per-scenario navigation could not be automated: the legacy UWP CoreWindow exposes no UIA subtree (winapp ui inspect returns only a top-level Pane), and coordinate-driven clicks did not advance the ListBox selection, so every saved frame shows the scenario-list landing view with Scenario 1 selected. All six scenarios are visible in the list; Scenario 1's controls (Register enabled, Unregister disabled, status 'Unregistered') are captured as functional ground truth.",
+  "features": [
+    {
+      "id": "scenario-1-background-task",
+      "area": "Background Task",
+      "name": "Background Task (system event)",
+      "description": "Registers/unregisters a background task for the Time Zone Change system event. Register enables the task; Unregister removes it; a status line reflects Registered/Unregistered plus progress/completion.",
+      "expected_behaviour": [
+        "Selecting scenario 1 shows a Description, a Register button (enabled), an Unregister button (disabled), and a status TextBlock reading 'Unregistered'.",
+        "Clicking Register registers the task, enables Unregister, disables Register, and updates status to 'Registered'.",
+        "Clicking Unregister reverses the state back to 'Unregistered'."
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Background_Task.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario-2-background-task-with-condition",
+      "area": "Background Task with Condition",
+      "name": "Background Task with Condition",
+      "description": "Registers a background task that runs on the Time Zone Change event only while an internet-available condition holds.",
+      "expected_behaviour": [
+        "Register button registers the conditional task and updates the status to 'Registered'.",
+        "Unregister button removes it and returns status to 'Unregistered'."
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Background_Task_with_Condition.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario-3-servicing-complete-task",
+      "area": "Servicing Complete Task",
+      "name": "Servicing Complete Task",
+      "description": "Registers a task triggered by the ServicingComplete maintenance trigger.",
+      "expected_behaviour": [
+        "Register registers the ServicingComplete task and updates status to 'Registered'.",
+        "Unregister removes it and returns status to 'Unregistered'."
+      ],
+      "screenshot": "parity/baseline/screenshots/03_Servicing_Complete_Task.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario-4-time-triggered-task",
+      "area": "Background Task with Time Trigger",
+      "name": "Background Task with Time Trigger",
+      "description": "Requests background access then registers a task on a 15-minute TimeTrigger.",
+      "expected_behaviour": [
+        "Register requests background access and registers a TimeTrigger task, updating status to 'Registered'.",
+        "Unregister removes it and returns status to 'Unregistered'."
+      ],
+      "screenshot": "parity/baseline/screenshots/04_Background_Task_with_Time_Trigger.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario-5-application-trigger-task",
+      "area": "Background Task with Application Trigger",
+      "name": "Background Task with Application Trigger",
+      "description": "Registers an ApplicationTrigger task and lets the app signal it on demand, showing the task result.",
+      "expected_behaviour": [
+        "Register registers the ApplicationTrigger task; status becomes 'Registered'.",
+        "A 'Signal Background Task' action triggers the task and the result/progress is displayed.",
+        "Unregister removes it and returns status to 'Unregistered'."
+      ],
+      "screenshot": "parity/baseline/screenshots/05_Background_Task_with_Application_Trigger.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario-6-grouped-background-task",
+      "area": "Grouped Background Task",
+      "name": "Grouped Background Task",
+      "description": "Registers a task inside a BackgroundTaskRegistrationGroup and offers separate unregister of grouped vs ungrouped tasks.",
+      "expected_behaviour": [
+        "Register registers a grouped task; status becomes 'Registered'.",
+        "Unregister (grouped) removes the grouped task; a separate action unregisters ungrouped tasks.",
+        "Status reflects the registration state."
+      ],
+      "screenshot": "parity/baseline/screenshots/06_Grouped_Background_Task.png",
+      "weight": 1
+    }
+  ]
+}

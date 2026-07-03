@@ -1,0 +1,32 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 19,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 + namespace rewrite", "evidence": "dotnet build succeeded with 0 warnings / 0 errors; namespace migration and manifest Windows.Desktop/rescap/runFullTrust edits were all applied correctly (score notes: winui_build_status success)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 (manifest check 5b)", "problem": "Passed the manifest even though it still contained a UWP out-of-process windows.backgroundTasks Extension that blocks package registration (0x80080204). The static manifest check only verifies TargetDeviceFamily/rescap/runFullTrust, not background-task extensions.", "evidence": "migration-score.json winui_launch_status: MSIX registration error 0x80080204 at Package.appxmanifest line 37, yet build+validator reported success." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 Step 7 runtime smoke launch", "limitation": "A 0x80080204 manifest-validation failure never registers the app (no AUMID, no PID), so Test-AppLaunch classifies it as status=unavailable (env issue) and the smoke launch only WARNs — it cannot fail a manifest-registration defect.", "suggested_tweak": "Catch invalid windows.backgroundTasks Extensions with a deterministic static manifest check in section 5b, before launch." }
+  ],
+  "failed_apis": [
+    { "api": "windows.backgroundTasks manifest Extension (out-of-process EntryPoint)", "why_tried": "Carried over verbatim from the UWP Package.appxmanifest (EntryPoint=\"Tasks.SampleBackgroundTask\" / \"Tasks.ServicingComplete\").", "root_cause": "A packaged WinUI 3 desktop (Win32) app cannot host an out-of-process WinRT background-task server declared with EntryPoint alone; the registrar requires an ActivatableClassId under windows.activatableClass.inProcessServer, otherwise it rejects the package with 0x80080204.", "fix": "Remove the <Extension Category=\"windows.backgroundTasks\" EntryPoint=...> elements from the manifest and migrate the task code to the WinAppSDK model (BackgroundTaskBuilder / Task Scheduler / push activation)." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md > Background Tasks (anchor background-tasks)", "wrong": "Covers only the code API swap (IBackgroundTask -> BackgroundTaskBuilder). Says nothing about the manifest, so the agent left the invalid UWP windows.backgroundTasks Extension in place.", "correct": "Must also instruct removal/rework of the <Extension Category=\"windows.backgroundTasks\"> manifest declaration, which fails packaged-desktop registration with 0x80080204." }
+  ],
+  "special_apis": [
+    { "api": "windows.backgroundTasks Extension", "special_handling": "UWP declares background tasks in-manifest pointing at a separate WinRT Component project; this out-of-process model is invalid for packaged WinUI 3 desktop and must be dropped from the manifest, not just the code." }
+  ],
+  "errors_encountered": [
+    { "error": "0x80080204 App manifest validation error at Package.appxmanifest line 37: 'not allowed to have EntryPoint=\"Tasks.SampleBackgroundTask\" without ActivatableClassId in windows.activatableClass.inProcessServer'", "root_cause": "Leftover UWP windows.backgroundTasks Extension with out-of-process EntryPoint in the migrated manifest.", "fix": "Delete the windows.backgroundTasks Extension(s); migrate task code per the WinAppSDK background-task strategy." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Package.appxmanifest merge", "symptom": "App builds cleanly but every scenario is dead — package never registers.", "turns_or_retries": "not caught during the trial (build+validator both green)", "root_cause": "Agent migrated code namespaces and the Windows.Desktop/rescap/runFullTrust manifest bits but copied the windows.backgroundTasks Extension verbatim from UWP.", "how_resolved": "unresolved in trial (score 0, 6/6 fail)", "preventable_by": "A static manifest check in Validate-UwpMigration.ps1 that FAILs on a leftover windows.backgroundTasks Extension, plus explicit prose in the Background Tasks section + Manifest checklist to remove it." }
+  ],
+  "missing_tooling": [
+    { "need": "Static manifest lint for UWP-only Extensions (windows.backgroundTasks) that break packaged-desktop registration.", "would_have_saved": "The entire score — the defect is invisible to the build and to the runtime smoke launch (which downgrades registration failures to WARN)." }
+  ],
+  "env_issues": []
+}

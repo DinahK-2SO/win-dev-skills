@@ -322,6 +322,27 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 
 `IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK [`BackgroundTaskBuilder`](https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.windows.applicationmodel.background.backgroundtaskbuilder) (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler. See the [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy).
 
+**Also fix the manifest — this is the part that kills the app at launch.** UWP declares its
+background tasks *in the manifest* with an out-of-process WinRT entry point (a separate `Tasks`
+WinRT Component project):
+
+```xml
+<!-- UWP — DELETE this from the migrated Package.appxmanifest -->
+<Extensions>
+  <Extension Category="windows.backgroundTasks" EntryPoint="Tasks.SampleBackgroundTask">
+    <BackgroundTasks><Task Type="systemEvent" /></BackgroundTasks>
+  </Extension>
+</Extensions>
+```
+
+A packaged WinUI 3 **desktop** (Win32) app cannot host that out-of-process server. Leaving the
+`<Extension Category="windows.backgroundTasks" EntryPoint="…">` in place makes package
+registration fail with **`0x80080204`** — *"not allowed to have EntryPoint … without
+ActivatableClassId in `windows.activatableClass.inProcessServer`."* The build still succeeds, so
+this is easy to miss: **remove the `windows.backgroundTasks` Extension element(s) entirely** and
+move the task logic to the WinAppSDK model above (in-process `BackgroundTaskBuilder`, Task
+Scheduler, or push activation). `Validate-UwpMigration.ps1` FAILs on a leftover extension.
+
 <a id="notifications"></a>
 ## Notifications
 
@@ -488,6 +509,12 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
    Packaged WinUI 3 desktop apps run outside the UWP AppContainer sandbox and must declare this. Keep any UWP `<Capability>` entries you actually use (e.g. `<DeviceCapability Name="webcam" />`) but add the `runFullTrust` line above no matter what.
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
+
+5. **No leftover `windows.backgroundTasks` Extension** — UWP declares background tasks in-manifest with an out-of-process WinRT `EntryPoint`:
+   ```xml
+   <Extension Category="windows.backgroundTasks" EntryPoint="Tasks.SampleBackgroundTask"> … </Extension>
+   ```
+   A packaged WinUI 3 desktop app cannot register this — deployment fails with **`0x80080204`** ("EntryPoint without ActivatableClassId in `windows.activatableClass.inProcessServer`") and the app never launches even though it builds. **Delete these `<Extension>` element(s)** and migrate the task code per the [Background Tasks](#background-tasks) section.
 
 ### WUI analyzer warnings (UWP API residue)
 

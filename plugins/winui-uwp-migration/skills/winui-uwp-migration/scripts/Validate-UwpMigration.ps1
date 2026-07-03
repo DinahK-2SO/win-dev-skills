@@ -330,7 +330,7 @@ if (Test-Path -LiteralPath $manifestPath) {
 
     # ─── 5b. Package.appxmanifest WinUI 3 packaging requirements ──────────────
     # `winapp run` refuses to register the AppX when the manifest still looks
-    # UWP-shaped. Three things must be true for the packaged desktop app to
+    # UWP-shaped. Four things must be true for the packaged desktop app to
     # deploy and activate on Windows 10/11:
     #   1) <TargetDeviceFamily Name="Windows.Desktop"> (Windows.Universal is
     #      UWP-only; the registrar rejects it for a Win32 entrypoint).
@@ -364,8 +364,30 @@ if (Test-Path -LiteralPath $manifestPath) {
         Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
         $manifestFailures++
     }
+    #   4) No leftover UWP <Extension Category="windows.backgroundTasks" EntryPoint="…">.
+    #      UWP declares background tasks in-manifest, pointing EntryPoint at an
+    #      out-of-process WinRT Component (a separate "Tasks" project). A packaged
+    #      WinUI 3 desktop (Win32) app cannot host that out-of-process server: the
+    #      registrar rejects the package with 0x80080204 — "not allowed to have
+    #      EntryPoint … without ActivatableClassId in
+    #      windows.activatableClass.inProcessServer." This defect is invisible to the
+    #      build (it compiles) AND to the Step 7 smoke launch (the app never registers,
+    #      so Test-AppLaunch reports status=unavailable → WARN, not FAIL). Only a static
+    #      manifest check catches it. Real-world impact: run19 BackgroundTask built
+    #      cleanly, then scored 0 because every scenario was unreachable.
+    if ($manifestText -match '<Extension\b[^>]*Category\s*=\s*"windows\.backgroundTasks"[^>]*\bEntryPoint\s*=') {
+        Write-Host "[FAIL] Package.appxmanifest declares a UWP out-of-process background task:"
+        Write-Host "       <Extension Category=`"windows.backgroundTasks`" EntryPoint=`"…`">."
+        Write-Host "       A packaged WinUI 3 desktop app cannot register this — `winapp run` fails"
+        Write-Host "       with 0x80080204 (EntryPoint without ActivatableClassId in inProcessServer),"
+        Write-Host "       so the app never launches even though the build succeeds."
+        Write-Host "       Fix: remove the windows.backgroundTasks <Extension> element(s) from the"
+        Write-Host "       manifest and migrate the task code per MIGRATION-PATTERNS.md > 'Background Tasks'"
+        Write-Host "       (BackgroundTaskBuilder / Task Scheduler / push activation)."
+        $manifestFailures++
+    }
     if ($manifestFailures -eq 0) {
-        Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared"
+        Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability + no UWP background-task extension"
     } else {
         $failures += $manifestFailures
     }

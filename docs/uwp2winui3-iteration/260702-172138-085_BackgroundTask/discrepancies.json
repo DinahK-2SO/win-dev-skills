@@ -1,0 +1,20 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 19,
+  "score": 0,
+  "builds": true,
+  "runs": false,
+  "requirements": [
+    { "id": 1, "text": "Scenario 1 - Background Task (system event) register/unregister", "status": "fail", "reason": "App fails package registration (0x80080204); scenario unreachable.", "suspected_skill_gap": "Manifest still contains UWP windows.backgroundTasks Extension — skill never says to remove it." },
+    { "id": 2, "text": "Scenario 2 - Background Task with Condition", "status": "fail", "reason": "Unreachable — app will not launch.", "suspected_skill_gap": "same manifest defect" },
+    { "id": 3, "text": "Scenario 3 - Servicing Complete Task", "status": "fail", "reason": "Unreachable — app will not launch.", "suspected_skill_gap": "same manifest defect" },
+    { "id": 4, "text": "Scenario 4 - Time Trigger Task", "status": "fail", "reason": "Unreachable — app will not launch.", "suspected_skill_gap": "same manifest defect" },
+    { "id": 5, "text": "Scenario 5 - Application Trigger Task", "status": "fail", "reason": "Unreachable — app will not launch.", "suspected_skill_gap": "same manifest defect" },
+    { "id": 6, "text": "Scenario 6 - Grouped Background Task", "status": "fail", "reason": "Unreachable — app will not launch.", "suspected_skill_gap": "same manifest defect" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "ALL scenarios", "uwp": "UWP app launches and shows the scenario list + Scenario 1 controls (Register enabled, Unregister disabled, status 'Unregistered').", "winui": "WinUI app never renders — package registration fails at launch.", "screenshot_ref": "parity/baseline/screenshots/01_Background_Task.png (UWP only; no WinUI capture)" }
+  ],
+  "missing_features": ["All six scenarios (dead app)"],
+  "summary": "Migration compiled cleanly but the WinUI 3 package cannot register because the manifest retained UWP out-of-process windows.backgroundTasks Extensions (EntryPoint without ActivatableClassId), causing 0x80080204. Every feature is dead. Single root cause, fully generalizable."
+}

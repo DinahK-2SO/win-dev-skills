@@ -1,0 +1,14 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 19,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: FAIL when the manifest keeps a UWP windows.backgroundTasks <Extension EntryPoint=...>, which breaks packaged WinUI 3 registration with 0x80080204 (invisible to build and to the smoke launch).",
+    "MIGRATION-PATTERNS.md: document removing the windows.backgroundTasks manifest Extension in the Background Tasks section and add it as Manifest-checklist item 5, since UWP declares background tasks in-manifest and every such app fails desktop registration otherwise."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

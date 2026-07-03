@@ -1,0 +1,28 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 19,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 package fails registration with 0x80080204 because the manifest kept UWP out-of-process windows.backgroundTasks Extensions (EntryPoint without ActivatableClassId). Build is green, app never launches, score 0.",
+      "evidence": "migration-score.json winui_launch_status (0x80080204 at manifest line 37); generated Package.appxmanifest lines 49-61 hold two <Extension Category=\"windows.backgroundTasks\" EntryPoint=...> elements.",
+      "root_cause": "Skill covered only the code-side background-task API swap; no guidance or tooling check for the invalid manifest Extension. The build passes and the Step 7 smoke launch downgrades a registration failure (no AUMID/PID) to WARN, so nothing flagged it.",
+      "tier": 1,
+      "change": "Added a static manifest check to Validate-UwpMigration.ps1 section 5b that FAILs when a <Extension Category=\"windows.backgroundTasks\" ... EntryPoint=...> remains, printing the 0x80080204 root cause and the remove-and-migrate fix. Updated the section comment (three->four checks) and the PASS message.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Validator FAILs before the agent declares done, forcing removal of the extension; app registers and launches on re-run.",
+      "falsifiable_check": "On a re-run, Validate-UwpMigration.ps1 prints '[FAIL] Package.appxmanifest declares a UWP out-of-process background task' until the extension is removed; once removed, package registration no longer errors 0x80080204 and the smoke launch reaches 'running'."
+    },
+    {
+      "problem": "Same root cause — the prose gave the agent no signal to touch the manifest.",
+      "evidence": "MIGRATION-PATTERNS.md Background Tasks section covered only IBackgroundTask->BackgroundTaskBuilder; Manifest checklist listed only TargetDeviceFamily/rescap/runFullTrust.",
+      "root_cause": "Manifest-side background-task guidance absent.",
+      "tier": 3,
+      "change": "Expanded the Background Tasks section with the exact <Extension> to delete and the 0x80080204 explanation, and added item 5 to the Manifest migration checklist instructing removal of the windows.backgroundTasks Extension. Prose backs the Tier 1 check for agents that read docs first.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent removes the extension during the manifest merge, before validation.",
+      "falsifiable_check": "Migrated Package.appxmanifest contains no <Extension Category=\"windows.backgroundTasks\"> and the app launches."
+    }
+  ],
+  "deferred_to_human": []
+}
