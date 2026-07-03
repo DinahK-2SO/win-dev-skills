@@ -1,0 +1,20 @@
+{
+  "scenario": "DpiScaling",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "DPI-aware UWP samples read DisplayInformation.LogicalDpi / RawPixelsPerViewPixel and subscribe to DisplayInformation.DpiChanged, and read display scale during page init. The skill maps DisplayInformation->XamlRoot.RasterizationScale but omits the LogicalDpi formula, the DpiChanged event mapping, and the read-after-Loaded timing, so the driver had to derive all three.",
+      "evidence": "Migrated Scenario1.xaml.cs: 'logicalDpi = 96.0 * XamlRoot.RasterizationScale', 'XamlRoot.Changed += OnXamlRootChanged', read from OnLoaded with 'if (XamlRoot != null)' guard in OnNavigatedTo. Sub-agent summary items 10-11. notes/skill-coverage-gaps.json item 1.",
+      "root_cause": "The '### DisplayInformation is view-bound' subsection states the GetForCurrentView row 'only covers the DPI use case' but then expands orientation members only; the XamlRoot-null-until-loaded rule lived only in the ContentDialog context.",
+      "tier": 3,
+      "change": "Added a small DPI mapping table (RawPixelsPerViewPixel/ResolutionScale -> XamlRoot.RasterizationScale; LogicalDpi -> 96.0 * RasterizationScale; DpiChanged -> XamlRoot.Changed) plus a timing paragraph (RasterizationScale is null in the ctor/OnNavigatedTo; read from Loaded, refresh on XamlRoot.Changed) to the existing DisplayInformation section.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "A migration agent handling any DPI-aware sample reads the scale safely (no null XamlRoot), reproduces the logical-DPI readout, and wires live DPI updates without self-deriving them.",
+      "falsifiable_check": "On a re-run of a DPI-aware scenario, the generated page reads XamlRoot.RasterizationScale from Loaded (not the ctor/OnNavigatedTo), computes logical DPI as 96*scale, and subscribes to XamlRoot.Changed — with no null-XamlRoot runtime trap and no blank DPI readout. Tier-3 justified: this is a mapping/knowledge gap (which API + formula + timing), not something a script can rewrite; Get-MigrationPattern already surfaces this section's anchor, so the prose is delivered on demand rather than ignorable bulk."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-instrument limits (NOT migration-skill): winapp 'ui screenshot' returns blank frames for the WinUI 3 swap-chain surface in headless sessions, and the UWP Scenario-2 golden was not capturable (opaque CoreWindow UIA + no mouse injection). These belong to winui3-parity-check / uwp-app-runner and must not be changed here."
+  ]
+}

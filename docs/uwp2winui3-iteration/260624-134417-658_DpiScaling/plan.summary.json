@@ -1,0 +1,15 @@
+{
+  "scenario": "DpiScaling",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: fill in the DisplayInformation DPI path (LogicalDpi=96*RasterizationScale, RawPixelsPerViewPixel/ResolutionScale->RasterizationScale, DpiChanged->XamlRoot.Changed) so DPI-aware migrations don't self-derive it",
+    "MIGRATION-PATTERNS.md: add the read-after-Loaded timing rule for RasterizationScale/XamlRoot (null in ctor/OnNavigatedTo) to prevent silent null-XamlRoot blank-page traps"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Eval-instrument limits (out of scope): blank WinUI 3 swap-chain screenshots and non-capturable UWP Scenario-2 golden in headless sessions belong to winui3-parity-check / uwp-app-runner."
+  ]
+}

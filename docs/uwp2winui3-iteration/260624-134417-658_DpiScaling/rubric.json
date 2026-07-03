@@ -1,0 +1,114 @@
+{
+  "scenario": "DpiScaling",
+  "created_at": "2026-07-03T23:59:00+08:00",
+  "uwp_capture_status": "partial: UWP app launched (PID 2504, window 'DPI Scaling C# Sample') and Scenario 1 golden captured; Scenario 2 golden not captured because the legacy UWP CoreWindow exposes no child UIA tree (winapp invoke-by-title finds 0 elements) and mouse injection is unavailable in this headless session (SetCursorPos clamps to 0,0), so the scenario ListBox could not be actuated.",
+  "features": [
+    {
+      "id": "scenario-navigation",
+      "area": "Shell",
+      "name": "Scenario navigation list",
+      "description": "Left-hand ListBox lets the user switch between the two DPI scaling scenarios. Selecting an item loads that scenario's page on the right.",
+      "expected_behaviour": [
+        "A list with exactly two items: '1) Load images for different scales' and '2) Override default scaling of UI elements'.",
+        "Selecting an item navigates the content frame to the corresponding scenario page."
+      ],
+      "screenshot": "parity/baseline/screenshots/00_launch.png",
+      "weight": 2
+    },
+    {
+      "id": "s1-scale-readout",
+      "area": "Scenario 1 - Load images for different scales",
+      "name": "Current scale and logical DPI readout",
+      "description": "Scenario 1 displays the current display scale factor and the logical DPI derived from it.",
+      "expected_behaviour": [
+        "Shows 'Current scale:' with the live scale percentage (e.g. 150%).",
+        "Shows 'Logical DPI for this scale:' with the matching DPI value (e.g. 144 DPI)."
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Load_images_for_different_scales.png",
+      "weight": 1
+    },
+    {
+      "id": "s1-not-scaling-aware",
+      "area": "Scenario 1 - Load images for different scales",
+      "name": "Not scaling aware image demo",
+      "description": "Shows an image loaded without multiple scale assets to demonstrate non-scaling-aware behaviour.",
+      "expected_behaviour": [
+        "A projector image is shown beside the 'Not scaling aware (not recommended)' label.",
+        "Explanatory text notes the asset is distorted at scales other than 100%."
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Load_images_for_different_scales.png",
+      "weight": 1
+    },
+    {
+      "id": "s1-scaled-packaged",
+      "area": "Scenario 1 - Load images for different scales",
+      "name": "Scaled packaged assets demo",
+      "description": "Shows a packaged image whose correct scale variant (e.g. 1.8x) is auto-selected by the framework based on current DPI.",
+      "expected_behaviour": [
+        "A projector image with a scale badge (e.g. '1.8x') beside the 'Scaled packaged assets' label.",
+        "Explanatory text describes the image.scale-100/140/180 naming convention."
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Load_images_for_different_scales.png",
+      "weight": 1
+    },
+    {
+      "id": "s1-vector-xaml-path",
+      "area": "Scenario 1 - Load images for different scales",
+      "name": "Vector graphics (XAML path) demo",
+      "description": "Shows a vector image encoded directly in XAML markup that resizes automatically with scale.",
+      "expected_behaviour": [
+        "A projector graphic rendered from XAML path data beside the 'Vector Graphics Using XAML Path' label."
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Load_images_for_different_scales.png",
+      "weight": 1
+    },
+    {
+      "id": "s1-scaled-external",
+      "area": "Scenario 1 - Load images for different scales",
+      "name": "Scaled external assets demo",
+      "description": "Loads a scale-appropriate asset from an external/URL source and reports the URL used.",
+      "expected_behaviour": [
+        "A 'Scaled external assets' section with a projector image and a status/URL readout."
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Load_images_for_different_scales.png",
+      "weight": 1
+    },
+    {
+      "id": "s2-resolution-readout",
+      "area": "Scenario 2 - Override default scaling of UI elements",
+      "name": "Resolution / scaling header readout",
+      "description": "Scenario 2 shows a header describing the current overriding-scaling state (ResolutionTextBlock).",
+      "expected_behaviour": [
+        "An 'Overriding scaling' header / resolution readout is shown at the top of the scenario."
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "s2-default-scaling",
+      "area": "Scenario 2 - Override default scaling of UI elements",
+      "name": "Default scaling UI element measurements",
+      "description": "Shows a UI element under default scaling with its relative (view) px, physical (raw) px, and layout text size.",
+      "expected_behaviour": [
+        "DefaultRelativePx shows a 'view px' value (e.g. 100.0 view px).",
+        "DefaultPhysicalPx shows a 'raw px' value (e.g. 150 raw px).",
+        "DefaultLayoutText shows the default point size (e.g. 20pt)."
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "s2-override-scaling",
+      "area": "Scenario 2 - Override default scaling of UI elements",
+      "name": "Override scaling UI element measurements",
+      "description": "Shows the same UI element with an overridden (RasterizationScale) scale, reporting relative px, physical px, and layout text size.",
+      "expected_behaviour": [
+        "OverrideRelativePx shows a reduced 'view px' value (e.g. 66.7 view px).",
+        "OverridePhysicalPx shows a 'raw px' value (e.g. 100 raw px).",
+        "OverrideLayoutText shows the overridden point size (e.g. 13pt)."
+      ],
+      "screenshot": null,
+      "weight": 2
+    }
+  ]
+}

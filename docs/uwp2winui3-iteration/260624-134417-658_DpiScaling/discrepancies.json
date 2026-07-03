@@ -1,0 +1,15 @@
+{
+  "scenario": "DpiScaling",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Scenario navigation list (two scenarios)", "status": "pass", "reason": "UIA tree has ScenarioControl list with both items; navigation works.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Load images for different scales (Scenario 1)", "status": "pass", "reason": "Scale/logical-DPI readout, scaled assets, vector path, external assets all present.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Override default scaling of UI elements (Scenario 2)", "status": "pass", "reason": "DefaultRelativePx/PhysicalPx/LayoutText and Override* all show correct DPI-computed values.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No structural or behavioral discrepancies. Both scenarios pass with correct DPI-computed values. Two measurement caveats (blank WinUI 3 swap-chain screenshots; UWP Scenario-2 golden not capturable) are eval-instrument limits, not migration defects. The only skill-relevant finding is that the driver self-derived the DPI-specific DisplayInformation mappings (LogicalDpi formula, DpiChanged->XamlRoot.Changed, read-after-Loaded timing) because the skill documents only the orientation path of DisplayInformation."
+}

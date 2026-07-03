@@ -1,0 +1,15 @@
+{
+  "scenario": "DpiScaling",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "DPI-scaling migrations must reproduce (a) a logical-DPI readout, (b) a live update when display scale changes, and (c) a safe read of the current scale. The skill maps DisplayInformation.GetForCurrentView() -> XamlRoot.RasterizationScale but gives no LogicalDpi formula, no DpiChanged event mapping, and does not tie RasterizationScale reads to the 'read after Loaded' timing rule. The driver derived all three itself.",
+      "evidence": "Migrated Scenario1.xaml.cs: 'double logicalDpi = 96.0 * XamlRoot.RasterizationScale;', 'XamlRoot.Changed += OnXamlRootChanged;', read from OnLoaded with 'if (XamlRoot != null)' guard in OnNavigatedTo. Sub-agent summary items 10-11. lessons.json failed_apis + dev_agent_struggles.",
+      "covered_at": "MIGRATION-PATTERNS.md #getforcurrentview table row 'DisplayInformation.GetForCurrentView() -> XamlRoot.RasterizationScale or Win32 GetDpiForWindow' and the '### DisplayInformation is view-bound' subsection (lines ~325-340), which explicitly states 'The GetForCurrentView() row above only covers the DPI use case' then expands orientation members only. The XamlRoot-null-until-loaded rule exists but only in the ContentDialog context (line ~167).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "In the existing '### DisplayInformation is view-bound' subsection, add a small DPI mapping table alongside the orientation one: DisplayInformation.LogicalDpi -> 96.0 * XamlRoot.RasterizationScale; DisplayInformation.RawPixelsPerViewPixel/ResolutionScale -> XamlRoot.RasterizationScale; DisplayInformation.DpiChanged -> XamlRoot.Changed. Add one timing line noting RasterizationScale/XamlRoot is null in the constructor and OnNavigatedTo, so read it from Loaded and refresh on XamlRoot.Changed (generalizing the XamlRoot-null rule already stated for ContentDialog).",
+      "generalizes": "Every DPI-aware UWP sample (image scaling, custom rendering, print/measurement, per-monitor DPI) uses DisplayInformation.LogicalDpi/RawPixelsPerViewPixel and subscribes to DpiChanged, and reads scale during page init. Documenting the formula, the event, and the read-after-Loaded timing prevents a recurring class of silent blank-page/null-XamlRoot runtime traps across scenarios, not just this one."
+    }
+  ]
+}

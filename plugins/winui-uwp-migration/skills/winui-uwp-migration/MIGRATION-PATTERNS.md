@@ -339,6 +339,22 @@ orientation/rotation samples:
 These are **runtime traps**: the build is clean and the analyzer is silent, so treat any
 `DisplayInformation` reference as adaptable and resolve it before shipping.
 
+**DPI members (the use case the `GetForCurrentView()` row only names):** map these to
+`XamlRoot`, not `DisplayInformation`.
+
+| UWP `DisplayInformation` member | WinUI 3 desktop replacement |
+|---------------------------------|-----------------------------|
+| `.RawPixelsPerViewPixel` / `.ResolutionScale` | `XamlRoot.RasterizationScale` (e.g. `1.5` at 150%). |
+| `.LogicalDpi` | Compute: `96.0 * XamlRoot.RasterizationScale`. There is no direct property. |
+| `.DpiChanged` (event) | `XamlRoot.Changed` — re-read `RasterizationScale` in the handler. |
+
+**Timing (same trap as the ContentDialog `XamlRoot` note above):** `XamlRoot` — and
+therefore `RasterizationScale` — is **`null` in the constructor and in `OnNavigatedTo`**.
+Read it from the `Loaded` handler (guard other entry points with `if (XamlRoot != null)`)
+and subscribe to `XamlRoot.Changed` there to keep DPI-derived values live. Reading it too
+early throws or yields a blank/zero scale — a silent failure a screenshot reviewer sees as
+an empty page.
+
 
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces

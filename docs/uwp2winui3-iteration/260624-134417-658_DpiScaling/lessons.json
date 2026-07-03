@@ -1,0 +1,27 @@
+{
+  "scenario": "DpiScaling",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied 4 source files, rewrote Windows.UI.Xaml->Microsoft.UI.Xaml in 3/9 files, seeded MIGRATION-MAPPING.md + .fidelity-snapshot.json (toolResult 5)." },
+    { "tool": "Get-MigrationPattern.ps1 (getforcurrentview / windowing anchors)", "evidence": "Agent fetched the GetForCurrentView and Windowing pattern text before migrating Scenario1/2 (toolResults 27-28)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Reported PASS after migration; final build succeeded with only 4 nullable warnings (sub-agent summary)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [
+    { "api": "DisplayInformation.GetForCurrentView().LogicalDpi", "why_tried": "Scenario 1 shows 'Logical DPI for this scale'.", "root_cause": "DisplayInformation is view-bound and unavailable in WinUI 3 desktop; skill maps it to RasterizationScale but gives no LogicalDpi formula.", "fix": "Agent derived logicalDpi = 96.0 * XamlRoot.RasterizationScale itself." },
+    { "api": "DisplayInformation.DpiChanged event", "why_tried": "Scenario 1 must refresh the scale/DPI readout when display scale changes.", "root_cause": "No WinUI 3 event mapping in the skill for the DPI-change notification (only orientation's OrientationChanged->AppWindow.Changed is mapped).", "fix": "Agent used XamlRoot.Changed += OnXamlRootChanged." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "XamlRoot.RasterizationScale", "special_handling": "Null/invalid until the element is loaded. Agent read it from Loaded and guarded OnNavigatedTo with 'if (XamlRoot != null)'; navigation was deferred to Window.Activated so App.MainWindow/XamlRoot exist first." }
+  ],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    { "where": "Scenario1/Scenario2 DPI readouts", "symptom": "No direct skill mapping for LogicalDpi, the DpiChanged event, or when RasterizationScale is readable.", "turns_or_retries": "Derived inline; no build/runtime failure (score 100).", "root_cause": "DisplayInformation section explicitly says the GetForCurrentView row 'only covers the DPI use case' but then expands orientation only, leaving the DPI path (LogicalDpi formula, DpiChanged event, read-after-Loaded timing) undocumented.", "how_resolved": "Capable driver model derived logicalDpi=96*scale, XamlRoot.Changed, and Loaded-timing on its own.", "preventable_by": "Add a DPI mini-mapping (LogicalDpi=96*RasterizationScale, DpiChanged->XamlRoot.Changed) plus the read-after-Loaded timing rule to the DisplayInformation section of MIGRATION-PATTERNS.md." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "winapp 'ui screenshot' returns blank frames for the WinUI 3 swap-chain surface in the headless session; UWP scenario-2 golden not capturable (opaque CoreWindow UIA + no mouse injection).", "workaround": "Eval verified fidelity via UIA tree. These are measurement-instrument limits, not migration defects." }
+  ]
+}
