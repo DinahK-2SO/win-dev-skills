@@ -1,0 +1,21 @@
+{
+  "scenario": "AudioCategory",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "On the first Validate-UwpMigration run, all 13 MIGRATION-MAPPING.md rows were still Status=copied, failing the validator.",
+      "evidence": "session-log turns 1-4: '[FAIL] MIGRATION-MAPPING.md — 13 row(s) still Status=copied' then the agent flipped them to done/deferred and re-ran to PASS.",
+      "covered_clearly_at": "MIGRATION-MAPPING.md header ('only refine the Triage label and flip the Status') + Validate-UwpMigration.ps1 emits an explicit, itemized FAIL naming every unflipped row.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The workflow is already clearly specified and the validator gives a precise, self-correcting error; the agent fixed it in one pass. Adding more prose would just restate an already-explicit gate."
+    },
+    {
+      "problem": "Initialize-UwpMigration.ps1 failed with 'Source not found' on the correct prompt path; agent spent ~40 web_fetch calls reconstructing the sample from GitHub.",
+      "evidence": "session-log lines 236-266; Test-Path False at migration start though the path exists now.",
+      "covered_clearly_at": "N/A — this is a Tier-0 harness/environment race (local sample tree not materialized at start), not a migration-skill topic.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Root cause is outside the migration skill (source materialization is the harness's job). Recorded under deferred_to_human in the improvement plan; a skill edit cannot fix an absent source tree."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "scenario": "AudioCategory",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "MediaElement -> MediaPlayerElement documented as a trivial namespace/element swap ('minor renames'), but MediaPlayerElement exposes none of MediaElement's element-level playback API; playback must move to a Windows.Media.Playback.MediaPlayer.",
+      "evidence": "notes/skill-defects.json item 1; migrated app PlaybackControl.xaml.cs uses SetMediaPlayer/MediaPlayer.Play/Pause, Stop=Pause+Position, MediaSource.CreateFromStream, MediaPlayerAudioCategory vs UWP source calling those on the MediaElement (MIGRATION-PATTERNS.md:362,569).",
+      "root_cause": "The 'controls' anchor (destination for a routed MediaElement TODO) understated the required MediaElement->MediaPlayer re-architecture.",
+      "tier": 3,
+      "change": "Corrected the two MediaElement rows and added a dedicated <a id=mediaelement> 'MediaElement -> MediaPlayerElement (not a drop-in swap)' mapping table: SetMediaPlayer, playback on element.MediaPlayer, Stop pattern, MediaSource.CreateFromStream/Uri, AudioCategory enum type change, CurrentState/MediaElementState -> PlaybackSession.PlaybackState/MediaPlaybackState, AudioDeviceType, SMTC.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "A migration agent routed to anchor 'controls' for a MediaElement hit gets the correct, complete conversion instead of a misleading 'minor renames' note.",
+      "falsifiable_check": "On a re-run of any UWP media-playback sample, the agent produces element.SetMediaPlayer(...) + element.MediaPlayer.Play()/Pause() and MediaSource.CreateFromStream(...) without web research, and the build has 0 warnings. Tier-3 prose can't be a script because there is no single mechanical rewrite (the split is member-by-member)."
+    },
+    {
+      "problem": "SystemMediaTransportControls.GetForCurrentView() had no row in the GetForCurrentView() replacements table, so the SMTC-on-MediaPlayer replacement had to be derived.",
+      "evidence": "notes/skill-coverage-gaps.json item 1; UWP PlaybackControl uses SystemMediaTransportControls.GetForCurrentView(), migrated app uses mediaPlayer.SystemMediaTransportControls; table at MIGRATION-PATTERNS.md:243-249 omitted it.",
+      "root_cause": "Existing prominent GetForCurrentView() table was incomplete for the media case.",
+      "tier": 3,
+      "change": "Added a row: SystemMediaTransportControls.GetForCurrentView() -> mediaPlayer.SystemMediaTransportControls (SMTC owned per MediaPlayer on desktop). Cross-linked from the MediaElement section.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The getforcurrentview anchor (already the routed destination for GetForCurrentView() hits) now covers the SMTC case directly.",
+      "falsifiable_check": "On a re-run of a media sample wiring SMTC, the agent emits mediaPlayer.SystemMediaTransportControls without trial-and-error; residue grep shows 0 GetForCurrentView() hits."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0 harness: the local UWP sample source tree was absent at migration start (Initialize-UwpMigration.ps1 'Source not found' on the correct prompt path), forcing ~40 GitHub web_fetch calls. Ensure the source is materialized before the migration agent starts."
+  ]
+}

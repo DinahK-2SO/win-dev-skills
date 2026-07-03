@@ -1,0 +1,38 @@
+{
+  "scenario": "AudioCategory",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "Dev-agent invoked it 25x to fetch anchored patterns (windowing, getforcurrentview, controls) instead of guessing." },
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Seeded MIGRATION-MAPPING.md with 13 rows + namespace rewrites once the source path was located." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught 13 rows still Status=copied and 0-warning build; forced the agent to finish the mapping before declaring done (session-log turns 1-4)." },
+    { "tool": "Test-AppLaunch.ps1", "evidence": "Confirmed the migrated app launched and stayed alive (pid 14968/24020), giving a runtime smoke gate." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1", "problem": "Threw 'Source not found' on the exact -Source path the build prompt supplied (…/Samples/AudioCategory/cs).", "evidence": "session-log lines 236-240; Test-Path returned False at that moment though the path exists now — harness materialization race, not a script bug." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Requires the agent to manually flip every mapping Status from 'copied' to 'done'/'deferred'; a fresh migration always trips this on first run.", "suggested_tweak": "None needed — behaviour is intended and the failure message is explicit." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md — 'Controls and Features' table (line 362) and 'Controls that need element-level swaps' (line 569)", "wrong": "Presents MediaElement -> MediaPlayerElement as a namespace/element swap where 'Source and transport-control properties carry over with minor renames'.", "correct": "MediaPlayerElement has NO Play/Pause/Stop/SetSource/AudioCategory/AutoPlay/CurrentState members. Playback moves to a Windows.Media.Playback.MediaPlayer set via element.SetMediaPlayer(new MediaPlayer()); drive via element.MediaPlayer.Play()/Pause(); Stop() = Pause()+PlaybackSession.Position=TimeSpan.Zero; source via MediaPlayer.Source = MediaSource.CreateFromStream/Uri(...); AudioCategory enum type changes from Windows.UI.Xaml.Media.AudioCategory to Windows.Media.Playback.MediaPlayerAudioCategory; MediaElementState -> MediaPlaybackState on PlaybackSession." }
+  ],
+  "special_apis": [
+    { "api": "MediaElement", "special_handling": "Re-architect to MediaPlayerElement + MediaPlayer (SetMediaPlayer); element-level Play/Pause/Stop/SetSource/AudioCategory move onto the MediaPlayer instance." },
+    { "api": "SystemMediaTransportControls.GetForCurrentView()", "special_handling": "No per-view singleton on desktop; obtain SMTC from the MediaPlayer instance: mediaPlayer.SystemMediaTransportControls." },
+    { "api": "AudioCategory enum", "special_handling": "Windows.UI.Xaml.Media.AudioCategory -> Windows.Media.Playback.MediaPlayerAudioCategory (member names carry over: Movie, Media, GameChat, ...)." },
+    { "api": "MediaElement.AudioDeviceType", "special_handling": "No MediaPlayerElement/MediaPlayer property equivalent; rely on AudioCategory or set MediaPlayer.AudioDevice. In this sample the setter was unused so it was safely dropped." }
+  ],
+  "errors_encountered": [
+    { "error": "Initialize-UwpMigration.ps1: 'Source not found: …/Samples/AudioCategory/cs'", "root_cause": "Local UWP sample tree was not present at migration start (harness materialization race); the supplied path was correct.", "fix": "Agent verified the tree, then reconstructed the source by fetching it from the microsoft/Windows-universal-samples GitHub repo (~40 web_fetch calls) before re-running the bootstrap." },
+    { "error": "Validate-UwpMigration.ps1 FAIL: 13 rows still Status=copied", "root_cause": "Agent left MIGRATION-MAPPING.md Status column at the seeded 'copied' value after migrating the files.", "fix": "Flipped each row to 'done' (or 'deferred' for PlaybackControl.xaml.cs) and re-ran validation to PASS (session-log turns 2-4)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Source acquisition (turns 2-8+)", "symptom": "Bootstrap failed on 'Source not found'; agent pivoted to ~40 GitHub web_fetch calls to rebuild the sample source before it could migrate.", "turns_or_retries": "several turns / ~40 web_fetch", "root_cause": "Local sample tree absent at start (harness race).", "how_resolved": "Fetched source from GitHub, then re-ran Initialize-UwpMigration once the local path resolved.", "preventable_by": "HARNESS: guarantee the UWP source tree exists before the migration agent starts (Tier-0, out of skill scope)." },
+    { "where": "PlaybackControl media re-architecture", "symptom": "Had to reconstruct the full MediaElement->MediaPlayer surface (SetMediaPlayer, Play/Pause, Stop=Pause+Position, MediaSource.CreateFromStream, MediaPlayerAudioCategory, mediaPlayer.SystemMediaTransportControls) from first principles.", "turns_or_retries": "N/A (capable model succeeded)", "root_cause": "controls/getforcurrentview anchors under-specify the MediaElement and SMTC conversions (see doc_errors).", "how_resolved": "Model applied its own API knowledge; build clean, 0 warnings.", "preventable_by": "Correct the MediaElement mapping and add a SystemMediaTransportControls.GetForCurrentView() row so the routed anchor content is sufficient." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "UWP sample source directory missing at migration start though the prompt path was correct.", "workaround": "Agent fetched the sample from microsoft/Windows-universal-samples on GitHub, then re-ran the bootstrap." }
+  ]
+}

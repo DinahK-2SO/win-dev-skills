@@ -1,0 +1,24 @@
+{
+  "feature": "Audio Category Sample",
+  "scenario": "AudioCategory",
+  "scenarios_total": 10,
+  "shared_control_set": ["Select Audio File", "Play", "Pause", "Stop", "Description", "Status"],
+  "grading": {
+    "pass": "reachable and >=80% baseline controls present and action control wired",
+    "partial": "reachable but a control missing or present-but-dead",
+    "fail": "unreachable/blank or <40% coverage"
+  },
+  "scenarios": [
+    { "number": 1, "title": "Movie", "action": "Select Audio File" },
+    { "number": 2, "title": "Media", "action": "Select Audio File" },
+    { "number": 3, "title": "Game Chat", "action": "Select Audio File" },
+    { "number": 4, "title": "Speech", "action": "Select Audio File" },
+    { "number": 5, "title": "Communications", "action": "Select Audio File" },
+    { "number": 6, "title": "Alerts", "action": "Select Audio File" },
+    { "number": 7, "title": "Sound Effects", "action": "Select Audio File" },
+    { "number": 8, "title": "Game Effects", "action": "Select Audio File" },
+    { "number": 9, "title": "Game Media", "action": "Select Audio File" },
+    { "number": 10, "title": "Other", "action": "Select Audio File" }
+  ],
+  "notes": "Original UWP launched (Release) and a visual golden frame was captured; CoreWindow UIA is opaque on this host so UWP per-scenario nav/actuation could not be driven. All 10 scenarios share the same PlaybackControl per source."
+}

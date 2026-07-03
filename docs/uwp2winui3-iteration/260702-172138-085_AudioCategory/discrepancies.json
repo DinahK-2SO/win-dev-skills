@@ -1,0 +1,16 @@
+{
+  "scenario": "AudioCategory",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "10 audio-category scenarios (Movie..Other) present with verbatim titles", "status": "pass", "reason": "UIA enumerated nav '1) Movie'..'10) Other'.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Per-scenario Description label renders and updates on selection", "status": "pass", "reason": "Description text observed updating (e.g. Game Chat).", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Select Audio File / Play / Pause / Stop buttons on every scenario via shared PlaybackControl", "status": "pass", "reason": "Present on all scenarios; Select Audio File opened the file picker on Scenario 1 (+65 tokens).", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Status text element + copyright footer", "status": "pass", "reason": "Both present via UIA.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No parity-blocking discrepancies (structural parity 10/10, 100%). WinUI 3 app reproduces every scenario, nav item, and the shared PlaybackControl set. 'actions 0/1 live' on scenarios 2-10 and blank WinUI screenshots are capture-methodology artifacts (modal FileOpenPicker pileup + DirectComposition capture limitation), not migration defects. The reusable findings come from the build log, not the score: the MediaElement->MediaPlayerElement conversion and SystemMediaTransportControls.GetForCurrentView() replacement are under-documented in the migration skill."
+}

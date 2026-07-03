@@ -1,0 +1,15 @@
+{
+  "scenario": "AudioCategory",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Correct MediaElement->MediaPlayerElement guidance: replace the misleading 'minor renames' note with a dedicated mapping (SetMediaPlayer, playback on element.MediaPlayer, Stop=Pause+Position, MediaSource.CreateFromStream/Uri, AudioCategory->MediaPlayerAudioCategory, MediaElementState->MediaPlaybackState) so every UWP media sample gets the real re-architecture, not a false 1:1 swap.",
+    "Add SystemMediaTransportControls.GetForCurrentView() -> mediaPlayer.SystemMediaTransportControls to the GetForCurrentView() table so media apps wiring the system transport controls have the correct desktop replacement."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Tier-0 harness: ensure the local UWP sample source tree exists before the migration agent starts (Initialize-UwpMigration.ps1 hit 'Source not found' on the correct path, causing ~40 GitHub web_fetch calls)."
+  ]
+}

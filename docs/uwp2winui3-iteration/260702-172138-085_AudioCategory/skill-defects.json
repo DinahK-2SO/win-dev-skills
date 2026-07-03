@@ -1,0 +1,17 @@
+{
+  "scenario": "AudioCategory",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "MediaElement -> MediaPlayerElement is documented as a trivial namespace/element swap, but the two controls have different API surfaces. MediaPlayerElement exposes no Play/Pause/Stop/SetSource/AudioCategory/AutoPlay/CurrentState members; all playback moves to a Windows.Media.Playback.MediaPlayer.",
+      "evidence": "Migrated PlaybackControl.xaml.cs (app) re-architects to OutputMedia.SetMediaPlayer(new MediaPlayer()), OutputMedia.MediaPlayer.Play()/Pause(), Stop()=Pause()+PlaybackSession.Position=TimeSpan.Zero, MediaPlayer.Source=MediaSource.CreateFromStream(stream, contentType), SetAudioCategory(MediaPlayerAudioCategory), mediaPlayer.SystemMediaTransportControls. UWP source PlaybackControl.xaml.cs used OutputMedia.Play()/Pause()/Stop()/SetSource()/AudioCategory directly on the MediaElement.",
+      "skill_search": "grep 'MediaElement' MIGRATION-PATTERNS.md + unsupported-api-inventory.json (anchor=controls)",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "line 362 '| `MediaElement` | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) |' and line 569 '| `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. |'",
+      "root_cause": "The 'controls' anchor (the destination Initialize-UwpMigration routes a MediaElement TODO to) implies a 1:1 element swap, so the guidance actively understates the required MediaElement->MediaPlayer split.",
+      "proposed_fix": "Correct both rows and add a focused MediaElement->MediaPlayerElement mapping in the 'controls' section: SetMediaPlayer(new MediaPlayer()); playback methods on element.MediaPlayer; Stop() = Pause()+PlaybackSession.Position=TimeSpan.Zero; MediaPlayer.Source = MediaSource.CreateFromStream/Uri(...); AudioCategory enum Windows.UI.Xaml.Media.AudioCategory -> Windows.Media.Playback.MediaPlayerAudioCategory; MediaElementState -> MediaPlaybackState.",
+      "generalizes": "Every UWP media-playback sample drives a MediaElement with element-level Play/Pause/Stop/Source/AudioCategory; all of them must perform this same re-architecture on WinUI 3, so the corrected mapping applies broadly (not specific to AudioCategory)."
+    }
+  ]
+}

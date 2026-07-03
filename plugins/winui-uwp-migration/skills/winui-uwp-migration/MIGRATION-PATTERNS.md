@@ -247,6 +247,7 @@ None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is 
 | `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+| `SystemMediaTransportControls.GetForCurrentView()` | `mediaPlayer.SystemMediaTransportControls` — SMTC is owned by each `Windows.Media.Playback.MediaPlayer` on desktop, not by the view |
 
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces
@@ -359,13 +360,32 @@ If you do custom text rendering with DirectWrite, switch to **DWriteCore** — t
 
 | UWP | WinUI 3 / WinAppSDK |
 |-----|---------------------|
-| `MediaElement` | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) |
+| `MediaElement` | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) — **not a drop-in swap**, see [MediaElement → MediaPlayerElement](#mediaelement) below |
 | `MediaPlayerElement` (Windows.UI.Xaml) | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) — namespace change only |
 | `MapControl` (Windows.UI.Xaml.Controls.Maps) | `MapControl` (Microsoft.UI.Xaml.Controls) — WinAppSDK 1.5+ |
 | `CameraCaptureUI` (Windows.Media.Capture) | `CameraCaptureUI` (Microsoft.Windows.Media.Capture) — WinAppSDK 1.7+ |
 | `WebAuthenticationBroker` | `Microsoft.Security.Authentication.OAuth` — WinAppSDK 1.7+ |
 | Background acrylic via `AcrylicBrush` BackgroundSource | `DesktopAcrylicController` (Microsoft.UI.Composition.SystemBackdrops) |
 | `InkCanvas` | Not yet supported |
+
+<a id="mediaelement"></a>
+### MediaElement → MediaPlayerElement (not a drop-in swap)
+
+`MediaElement` was a self-contained control: playback methods, source, and audio properties all
+lived on the element. `MediaPlayerElement` is only a **view** — playback moves onto a
+`Windows.Media.Playback.MediaPlayer` you attach with `element.SetMediaPlayer(new MediaPlayer())`.
+Translate the members that no longer exist on the element:
+
+| UWP `MediaElement` member | WinUI 3 replacement |
+|---|---|
+| `element.Play()` / `element.Pause()` | `element.MediaPlayer.Play()` / `.Pause()` |
+| `element.Stop()` | `element.MediaPlayer.Pause();` then `element.MediaPlayer.PlaybackSession.Position = TimeSpan.Zero;` (there is no `Stop()`) |
+| `element.SetSource(stream, contentType)` | `element.MediaPlayer.Source = MediaSource.CreateFromStream(stream, contentType);` (URIs: `MediaSource.CreateFromUri(uri)`) |
+| `element.AudioCategory` (`Windows.UI.Xaml.Media.AudioCategory`) | `element.MediaPlayer.AudioCategory` (`Windows.Media.Playback.MediaPlayerAudioCategory` — member names carry over: `Movie`, `Media`, `GameChat`, …) |
+| `element.AutoPlay` | `mediaPlayer.AutoPlay` (set on the `MediaPlayer`, not the element) |
+| `element.CurrentState` (`MediaElementState`) | `element.MediaPlayer.PlaybackSession.PlaybackState` (`MediaPlaybackState`) |
+| `element.AudioDeviceType` (`AudioDeviceType`) | No direct property — set `mediaPlayer.AudioDevice` or rely on `AudioCategory`; drop if unused |
+| `SystemMediaTransportControls.GetForCurrentView()` | `element.MediaPlayer.SystemMediaTransportControls` (SMTC is per-`MediaPlayer`; see [GetForCurrentView()](#getforcurrentview)) |
 
 <a id="storage"></a>
 ## Storage and Settings
@@ -566,7 +586,7 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 | UWP element | WinUI 3 element | Notes |
 |---|---|---|
-| `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. |
+| `<MediaElement … />` | `<MediaPlayerElement … />` | **Element swap only covers markup.** Code-behind must move playback to a `MediaPlayer` — see [MediaElement → MediaPlayerElement](#mediaelement). |
 | `<InkCanvas … />` | _(none — defer)_ | Not supported. |
 | `<Pivot>` / `<PivotItem>` | `<TabView>` / `<TabViewItem>`, or `<controls:Pivot>` from `CommunityToolkit.WinUI.UI.Controls` | Pick based on the source's intent (top-tab vs swipe pivot). |
 | `<Hub>` / `<HubSection>` | Hand-rolled `<NavigationView>` with section grouping, or `<ScrollViewer>` with stacked sections. | No drop-in equivalent. |

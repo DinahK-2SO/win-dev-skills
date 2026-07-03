@@ -1,0 +1,15 @@
+{
+  "scenario": "AudioCategory",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "SystemMediaTransportControls.GetForCurrentView() has no row in the GetForCurrentView() replacements table, so the agent had to derive that in WinUI 3 desktop the SMTC is owned by the MediaPlayer instance (mediaPlayer.SystemMediaTransportControls) rather than a per-view singleton.",
+      "evidence": "UWP PlaybackControl.xaml.cs: 'systemMediaControls = SystemMediaTransportControls.GetForCurrentView();'. Migrated app: 'systemMediaControls = mediaPlayer.SystemMediaTransportControls;'. unsupported-api-inventory.json routes any GetForCurrentView() hit to anchor 'getforcurrentview', whose table (MIGRATION-PATTERNS.md lines 243-249) lists 5 patterns but omits SMTC.",
+      "covered_at": "MIGRATION-PATTERNS.md '## GetForCurrentView() Replacements' (line 239, anchor id=getforcurrentview) — the general principle 'no implicit per-view singleton' is stated prominently, but the SMTC row is missing from the table.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add a row to the existing GetForCurrentView() table: 'SystemMediaTransportControls.GetForCurrentView()' -> 'mediaPlayer.SystemMediaTransportControls (SMTC is owned by each MediaPlayer in WinUI 3 desktop)'. Keeps the existing prominent section; just completes the table.",
+      "generalizes": "Any migrated media app that wires SMTC (play/pause/stop from system transport, SoundLevel handling) uses SystemMediaTransportControls.GetForCurrentView() in UWP; the MediaPlayer-owned SMTC replacement is the same everywhere."
+    }
+  ]
+}
