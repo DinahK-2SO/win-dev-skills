@@ -1,0 +1,17 @@
+{
+  "scenario": "Geotag",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 window renders completely blank white even though its visual/UIA tree is fully populated and hit-testable ('Choose file' opens the file picker). Scored the single requirement FAIL (0/1).",
+      "evidence": "notes/winui-live-recheck.png + score notes discrepancies.json id 'blank-render' (severity critical, type rendering); migration MainWindow.xaml declares <Window.SystemBackdrop><MicaBackdrop/></Window.SystemBackdrop> (session-log.txt lines 1120-1122).",
+      "skill_search": "grepped SKILL.md + MIGRATION-PATTERNS.md for: Mica, Backdrop, SystemBackdrop, blank, ApplicationPageBackground, render, composite.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The 'dotnet new winui' scaffold places a <Window.SystemBackdrop> (Mica/Acrylic) in MainWindow.xaml. System backdrops require DWM composition, which is unavailable in headless/VM/RDP capture environments (where parity screenshots are taken), so the whole window fails to present and paints blank — regardless of an opaque page background (ApplicationPageBackgroundThemeBrush was already set here and did not help). Every existing 'blank page' section in the skill addresses content that is MISSING from the tree (navigation/init throws, deferred hero controls); none addresses content PRESENT with the whole window unpainted, so the agent had no guidance and the process-alive smoke gate passed it.",
+      "proposed_fix": "Add a MIGRATION-PATTERNS.md anchor (#system-backdrop-blank) documenting the mechanism and the fix (remove the scaffold's <Window.SystemBackdrop>; ship an opaque window/page background matching the opaque UWP original); link it from SKILL.md's blank-frame guidance; add a WARN section to Validate-UwpMigration.ps1 that flags any .xaml declaring Window.SystemBackdrop / MicaBackdrop / DesktopAcrylicBackdrop.",
+      "generalizes": "EVERY UWP->WinUI 3 migration scaffolded with 'dotnet new winui' inherits the same <Window.SystemBackdrop>, and EVERY parity/automation capture runs in a headless/VM/RDP context where the backdrop cannot composite. UWP originals had no backdrop (opaque surfaces), so removing it is both a reliability fix and a parity fix. This recurs across all scenarios, not just Geotag."
+    }
+  ]
+}

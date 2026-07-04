@@ -74,6 +74,51 @@ loads — do **not** rely on `OnNavigatedTo`/`Loaded` code-behind to populate th
 visible content (that text can end up in the UIA tree but never render, leaving the page
 blank). See **Defensive UI for init-heavy and device-dependent pages** in SKILL.md.
 
+<a id="system-backdrop-blank"></a>
+## Blank window despite a fully populated visual tree — the scaffold's system backdrop
+
+This is a **different** blank-window mechanism from the two above. Here the content is
+**not** missing: navigation succeeded, every control is present in the UIA/visual tree, and
+controls even respond to input — yet the **entire window paints blank white** (title bar,
+nav pane, text, buttons all invisible). An opaque page background (e.g.
+`ApplicationPageBackgroundThemeBrush` on the root `Grid`) does **not** fix it.
+
+**Root cause:** `dotnet new winui` scaffolds a **system backdrop** into `MainWindow.xaml`:
+
+```xml
+<Window.SystemBackdrop>
+    <MicaBackdrop />
+</Window.SystemBackdrop>
+```
+
+`MicaBackdrop` / `DesktopAcrylicBackdrop` require live **DWM composition of backdrop
+materials**. In a **headless / VM / RDP / automated-capture** session (exactly where
+migration parity screenshots are taken, and common on CI and remote dev boxes) that
+composition is unavailable, the backdrop fails to present, and the whole window is left
+unpainted — indistinguishable from a crash to a screenshot reviewer. The process stays
+alive, so the runtime smoke launch (`Validate-UwpMigration.ps1` Section 7) still reports
+green.
+
+**Fix — remove the scaffold backdrop.** Delete the `<Window.SystemBackdrop>` block from
+`MainWindow.xaml` and let the window use its normal opaque background. This is also the
+**faithful-parity** choice: UWP apps had no Mica/Acrylic backdrop, so removing it matches
+the opaque original with zero visual loss in the environments that matter. Do **not** try
+to "fix" a blank window by only adding a page/Grid `Background` — if a `<Window.SystemBackdrop>`
+is present, the backdrop composition failure blanks the window regardless.
+
+```xml
+<!-- Delete this block from the scaffolded MainWindow.xaml for reliable rendering + UWP parity -->
+<!--
+<Window.SystemBackdrop>
+    <MicaBackdrop />
+</Window.SystemBackdrop>
+-->
+```
+
+Only keep a system backdrop if the original app deliberately used Mica/Acrylic **and** the
+target will always run in a full desktop composition session — never as the default carried
+over from the scaffold.
+
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
 Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding files in `MIGRATION-MAPPING.md` get `Triage label = defer`; cite the specific API in `MIGRATION-DEFERRED.md`.

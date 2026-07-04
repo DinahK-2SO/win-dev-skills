@@ -1,0 +1,18 @@
+{
+  "scenario": "Geotag",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: add WARN Section 9 flagging scaffold <Window.SystemBackdrop>/Mica/Acrylic in XAML — system backdrops blank the whole window in headless/VM/RDP capture (root cause of Geotag's blank-render FAIL); process-alive smoke gate can't catch it.",
+    "MIGRATION-PATTERNS.md: add #system-backdrop-blank documenting blank-window-despite-populated-tree; opaque background doesn't help, fix is to delete the scaffold backdrop (also matches the opaque UWP original).",
+    "SKILL.md: add pointer distinguishing this backdrop-composition blank from the existing navigation/init-failure blank guidance."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Consider making the scaffold/template omit <Window.SystemBackdrop> by default for capture environments (Tier-0 harness change, not auto-applied)."
+  ]
+}

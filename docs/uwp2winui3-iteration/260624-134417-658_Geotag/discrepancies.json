@@ -1,0 +1,33 @@
+{
+  "scenario": "Geotag",
+  "feature": "Geotag C# Sample",
+  "uwp_launchable": true,
+  "discrepancies": [
+    {
+      "scenario": "Geotag a file",
+      "id": "blank-render",
+      "severity": "critical",
+      "type": "rendering",
+      "description": "Migrated WinUI 3 window renders completely blank white; nav pane, sample title, description text and Choose file button do not paint, though they exist in the UIA/visual tree. UWP golden renders all of these correctly.",
+      "uwp_screenshot": "parity/baseline/screenshots/01_Geotag_a_file.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Geotag_a_file.png"
+    },
+    {
+      "scenario": "Geotag a file",
+      "id": "coverage-1-of-4",
+      "severity": "info",
+      "type": "structural-capture-limitation",
+      "description": "Only 1/4 controls present in initial-state UIA capture; the other three buttons are file-gated in both UWP and WinUI and appear only after a file is chosen, so not evaluable in the initial frame.",
+      "missing": [
+        "Button \"Read geotag from file\"",
+        "Button \"Set geotag from geolocator\"",
+        "Button \"Set geotag to Seattle Space Needle\""
+      ]
+    }
+  ],
+  "behavioral_notes": {
+    "winui_choose_file_responded": true,
+    "uwp_button_baseline_available": false,
+    "uwp_baseline_note": "UWP CoreWindow hosted by ApplicationFrameHost exposes no child controls via UIA; no button behavioral baseline captured. Not a defect signal."
+  }
+}

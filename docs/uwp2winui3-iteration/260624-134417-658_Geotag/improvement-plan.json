@@ -1,0 +1,30 @@
+{
+  "scenario": "Geotag",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 app renders a completely blank white window (whole window unpainted) despite a fully populated, hit-testable visual/UIA tree; scored the sole requirement FAIL (0/1).",
+      "evidence": "score notes discrepancies.json id 'blank-render' (critical, rendering); notes/winui-live-recheck.png; MainWindow.xaml has <Window.SystemBackdrop><MicaBackdrop/> (session-log.txt 1120-1122); build+smoke were green.",
+      "root_cause": "The 'dotnet new winui' scaffold puts a <Window.SystemBackdrop> (Mica/Acrylic) in MainWindow.xaml. System backdrops need live DWM composition, which is unavailable in headless/VM/RDP/automated-capture sessions (where parity screenshots are taken), so the whole window fails to present and paints blank. An opaque page background does not rescue it. The skill's existing 'blank page' guidance only covers content MISSING from the tree (nav/init throws, deferred hero controls), not this content-present/window-unpainted mechanism.",
+      "tier": 1,
+      "change": "Added Validate-UwpMigration.ps1 Section 9 (WARN-only): scans non-deferred .xaml for <Window.SystemBackdrop>/MicaBackdrop/DesktopAcrylicBackdrop and warns that system backdrops blank the whole window in headless/VM/RDP capture, pointing to the remove-the-backdrop fix. Un-missable in the validator output the agent already reads; the process-alive smoke gate cannot catch this.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "On re-run the validator prints the SystemBackdrop WARN, prompting the agent to delete the scaffold <Window.SystemBackdrop> so the window renders in the capture environment.",
+      "falsifiable_check": "Validator emits '[WARN] ... system backdrop ...' for MainWindow.xaml when the backdrop is present, and '[PASS] No <Window.SystemBackdrop>...' once removed; parity capture is no longer blank and the requirement goes FAIL->PASS."
+    },
+    {
+      "problem": "Same as above — the skill had no documentation of the blank-window-despite-populated-tree mechanism, so the agent had no reason to remove the scaffold backdrop.",
+      "evidence": "grep of SKILL.md + MIGRATION-PATTERNS.md for Mica/Backdrop/SystemBackdrop returned no guidance; all 'blank' sections concern missing content.",
+      "root_cause": "Missing conceptual coverage: agents treat a green build + smoke launch as done and cannot see the rendered pixels.",
+      "tier": 3,
+      "change": "Added MIGRATION-PATTERNS.md anchor #system-backdrop-blank documenting the mechanism (content present, whole window blank), why an opaque background does not help, and the fix (delete <Window.SystemBackdrop>; it also restores UWP parity). Added a pointer subsection in SKILL.md's blank-frame guidance linking to it.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent recognizes the scaffold backdrop as a blank-render risk and removes it during migration, independent of the validator.",
+      "falsifiable_check": "Migrated MainWindow.xaml contains no <Window.SystemBackdrop>; parity capture renders content instead of blank white."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/harness idea (out of scope for auto-apply): consider having the migration scaffold step (or the 'dotnet new winui' template used by the harness) omit <Window.SystemBackdrop> by default, since parity capture always runs in a non-composited environment."
+  ]
+}

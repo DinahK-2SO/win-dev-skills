@@ -1,0 +1,18 @@
+{
+  "scenario": "Geotag",
+  "feature": "Geotag C# Sample",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Geotag a file",
+      "controls": [
+        { "label": "Choose file", "type": "Button", "role": "opens file picker; gates the other buttons" },
+        { "label": "Read geotag from file", "type": "Button", "role": "reads geolocation from chosen file", "gated": true },
+        { "label": "Set geotag from geolocator", "type": "Button", "role": "writes device geolocation to file", "gated": true },
+        { "label": "Set geotag to Seattle Space Needle", "type": "Button", "role": "writes fixed coordinate to file", "gated": true }
+      ],
+      "outputs": ["FileDisplayName", "StatusBorder", "StatusBlock"],
+      "passCriteria": "Nav pane, title, description and Choose file button render; Choose file opens a picker; file-gated buttons read/write geotag and update status."
+    }
+  ]
+}

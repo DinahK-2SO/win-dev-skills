@@ -22,6 +22,7 @@ Checks (numbering matches the `# ─── N.` sections in the code):
 6. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
 7. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
 8. Visible-text fidelity (WARN-only) — compares each non-deferred XAML to the bootstrap's verbatim visible-text snapshot (.fidelity-snapshot.json) and WARNs about labels/captions/descriptions that vanished (regenerated/paraphrased page); never fails the gate
+9. System backdrop blank-window risk (WARN-only) — WARNs when MainWindow.xaml (or any XAML) still carries the scaffold's <Window.SystemBackdrop> (Mica/Acrylic), which blanks the whole window in headless/VM/RDP capture; never fails the gate
 
 .PARAMETER Target
 Migrated WinUI 3 project root (same folder used as -Target for
@@ -689,6 +690,38 @@ if (Test-Path -LiteralPath $snapPath) {
             Add-Diag 'Visible-text fidelity (WARN)' (($diagBlock) -join "`r`n")
         }
     }
+}
+
+# ─── 9. System backdrop blank-window risk (WARN-only) ──────────────────────────
+# The 'dotnet new winui' scaffold drops a <Window.SystemBackdrop> (Mica/Acrylic)
+# into MainWindow.xaml. System backdrops need live DWM composition, which is
+# absent in headless / VM / RDP / automated-capture sessions (exactly where the
+# parity screenshots are taken). There the backdrop fails to present and the WHOLE
+# window renders blank white even though the visual tree is fully populated and the
+# process stays alive (Section 7 still passes). UWP originals had no backdrop, so
+# removing it restores reliable rendering AND matches the opaque original.
+$backdropHits = New-Object System.Collections.Generic.List[object]
+$xamlFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.xaml -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' }
+foreach ($xf in $xamlFiles) {
+    $rel = $xf.FullName.Substring($Target.Length).TrimStart('\','/')
+    $leaf = $xf.Name
+    if ($deferredFiles.ContainsKey($rel) -or $deferredFiles.ContainsKey($leaf)) { continue }
+    $txt = [System.IO.File]::ReadAllText($xf.FullName)
+    if ($txt -match '<Window\.SystemBackdrop>' -or $txt -match '<MicaBackdrop\b' -or $txt -match '<DesktopAcrylicBackdrop\b') {
+        [void]$backdropHits.Add($rel)
+    }
+}
+if ($backdropHits.Count -eq 0) {
+    Write-Host "[PASS] No <Window.SystemBackdrop> (Mica/Acrylic) — window will not blank in headless/VM capture"
+} else {
+    Write-Host "[WARN] $($backdropHits.Count) XAML file(s) declare a system backdrop (Mica/Acrylic). System backdrops need live DWM composition and render the WHOLE window BLANK in headless/VM/RDP/automated-capture sessions (where parity screenshots are taken), even though the visual tree is populated and the smoke launch passes. UWP originals had no backdrop — delete the <Window.SystemBackdrop> block for reliable rendering + parity. See MIGRATION-PATTERNS.md#system-backdrop-blank:"
+    $bdBlock = New-Object System.Collections.Generic.List[string]
+    foreach ($h in $backdropHits) {
+        Write-Host "       $h"
+        [void]$bdBlock.Add("[$h] declares <Window.SystemBackdrop>/MicaBackdrop/DesktopAcrylicBackdrop — remove it (MIGRATION-PATTERNS.md#system-backdrop-blank)")
+    }
+    Add-Diag 'System backdrop blank-window risk (WARN)' (($bdBlock) -join "`r`n")
 }
 
 # ─── Summary ───────────────────────────────────────────────────────────────────

@@ -1,0 +1,31 @@
+{
+  "scenario": "Geotag",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 / MIGRATION-MAPPING.md bootstrap", "evidence": "Migration produced a clean x64 Debug build (BUILD SUCCEEDED, only CS8618 nullable warnings) with the scaffold + mapping workflow." },
+    { "tool": "Validate-UwpMigration.ps1 smoke launch (Section 7)", "evidence": "Process-alive gate passed; app registered and launched. It could not, however, detect that the window rendered blank." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 Section 7 smoke launch", "problem": "Proves only that the process stays alive; a fully blank (unpainted) window passes green.", "evidence": "Build+smoke were green yet the scored parity capture is a blank white window (notes/winui-live-recheck.png)." }
+  ],
+  "tool_limitations": [
+    { "tool": "Migration agent (no screenshot capability)", "limitation": "The migration agent cannot see the rendered window, so a blank-render regression is invisible to it and it declares done on a green build.", "suggested_tweak": "Give the validator a static signal for the most common blank-render cause (scaffold system backdrop) so the agent is warned without needing to see pixels." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Window.SystemBackdrop / MicaBackdrop (Microsoft.UI.Xaml.Media)", "special_handling": "Scaffolded by 'dotnet new winui' into MainWindow.xaml. Requires DWM composition; in headless/VM/RDP capture environments the backdrop fails to present and the ENTIRE window renders blank white even though the visual tree is populated and hit-testable. UWP originals had no backdrop (opaque page). Remove the <Window.SystemBackdrop> for reliable rendering + faithful parity." }
+  ],
+  "errors_encountered": [
+    { "error": "Migrated WinUI 3 window renders completely blank white; nav pane, title, description, and Choose file button do not paint though they exist in the UIA/visual tree.", "root_cause": "MainWindow.xaml (from the 'dotnet new winui' scaffold) declares <Window.SystemBackdrop><MicaBackdrop/></Window.SystemBackdrop>. The system backdrop cannot composite in the automated/VM parity-capture environment, so the whole window fails to present. An opaque page background (ApplicationPageBackgroundThemeBrush was already set) does NOT rescue it — the backdrop itself must be removed.", "fix": "Delete the <Window.SystemBackdrop> block from MainWindow.xaml (leave a normal opaque window/page background). App then renders identically everywhere, matching the opaque UWP original." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Final verification before declaring done", "symptom": "Agent shipped an app that renders blank white in the capture environment.", "turns_or_retries": "n/a — not detected; build + smoke launch were green so the agent stopped.", "root_cause": "The blank-render cause (scaffold MicaBackdrop not compositing in headless/VM capture) is not covered by the skill and not detectable by the process-alive smoke gate, and the migration agent cannot screenshot.", "how_resolved": "Not resolved in-trial; surfaced only by the independent parity capture.", "preventable_by": "A validator WARN that flags a <Window.SystemBackdrop> in MainWindow.xaml + a MIGRATION-PATTERNS anchor documenting the blank-window-despite-populated-tree mechanism and the remove-the-backdrop fix." }
+  ],
+  "missing_tooling": [
+    { "need": "Static detection of the scaffold system backdrop as a blank-render risk.", "would_have_saved": "The single decisive FAIL — a blank window scored 0/1." }
+  ],
+  "env_issues": [
+    { "issue": "Parity screenshots are captured in an automated/VM/headless context where Mica/Acrylic system backdrops do not composite.", "workaround": "Do not rely on a system backdrop for content visibility; ship an opaque window/page background (matches the opaque UWP original)." }
+  ]
+}

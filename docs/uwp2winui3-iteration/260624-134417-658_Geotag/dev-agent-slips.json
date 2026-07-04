@@ -1,0 +1,14 @@
+{
+  "scenario": "Geotag",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Initial-state structural control coverage was 1/4: only 'Choose file' present; the other three buttons ('Read geotag from file', 'Set geotag from geolocator', 'Set geotag to Seattle Space Needle') were absent from the capture.",
+      "evidence": "score notes discrepancies.json id 'coverage-1-of-4' (severity info, type structural-capture-limitation): the three buttons are file-gated in BOTH the UWP and WinUI apps and appear only after a file is chosen.",
+      "covered_clearly_at": "N/A — this is not a migration behavior at all; it is an evaluation capture limitation (the buttons are correctly file-gated in both apps, matching the UWP original).",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Not a migration defect and not a dev-agent mistake — the WinUI app faithfully reproduces the UWP file-gating. It is a limitation of initial-state structural capture and would recur identically on any re-run. No migration-skill edit applies (and touching the eval capture is out of scope)."
+    }
+  ]
+}

@@ -240,6 +240,19 @@ Section 7) still passes the process-alive gate, but the scenario silently render
 benchmark's per-scenario / screenshot check penalises the trial. A few lines of guard prevent a
 large score loss.
 
+### Blank window even though the visual tree is fully populated (scaffold system backdrop)
+
+A distinct blank-window cause where the content is **not** missing: navigation succeeded,
+every control is in the UIA/visual tree and even responds to input, yet the **whole window
+paints blank white**. This is **not** fixed by an opaque page/`Grid` `Background`. The cause
+is the `<Window.SystemBackdrop><MicaBackdrop/></Window.SystemBackdrop>` that `dotnet new winui`
+scaffolds into `MainWindow.xaml`: system backdrops need live DWM composition, which is absent
+in headless / VM / RDP / automated-capture sessions (where parity screenshots are taken), so
+the backdrop fails to present and blanks the window while the process stays alive (smoke gate
+still green). **Delete the `<Window.SystemBackdrop>` block from `MainWindow.xaml`** — UWP
+originals had no backdrop, so removing it both restores reliable rendering and matches the
+opaque original. See [Blank window despite a fully populated visual tree](./MIGRATION-PATTERNS.md#system-backdrop-blank).
+
 ## Post-Migration
 
 ### Restore sandboxing (if needed)

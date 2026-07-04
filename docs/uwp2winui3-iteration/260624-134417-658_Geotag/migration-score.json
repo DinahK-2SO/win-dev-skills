@@ -1,0 +1,23 @@
+{
+  "scenario": "Geotag",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 1,
+  "uwp_capture_status": "ok (golden captured live: process GeotagCSSample, windowTitle 'Geotag C# sample'). Note: uwp-app-runner's verify stage returned ok:false on a launch-timing race, but manual shell activation launched the app and it was screenshotted. Button-level behavioral baseline unavailable: UWP CoreWindow is hosted by ApplicationFrameHost and exposes no child controls via UIA.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Geotag a file",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Geotag_a_file.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Geotag_a_file.png",
+      "note": "Migrated WinUI 3 window renders completely BLANK WHITE - nav pane, 'Geotag C# Sample' title, scenario list, description text and 'Choose file' button do not paint, though all exist in the UIA/visual tree. The UWP golden renders all of these. A blank page is FAIL per the parity rule. Structural coverage was 1/4 (the other three buttons are file-gated and appear only after a file is chosen, in both apps). Behaviorally, WinUI 'Choose file' did respond (opened a file picker, +68 text tokens), so the control is logically wired - but the app is not a faithful visual replica because it displays nothing. uwp_responded is false only because the UWP CoreWindow exposes no controls via UIA (ApplicationFrameHost limitation), so no UWP button baseline could be captured - not evidence the UWP button is dead."
+    }
+  ]
+}
