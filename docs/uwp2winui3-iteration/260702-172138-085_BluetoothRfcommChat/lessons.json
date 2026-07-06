@@ -1,0 +1,34 @@
+{
+  "scenario": "BluetoothRfcommChat",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Turn 22: once the source path resolved, one call copied 9 files, rewrote 4 namespaces, seeded MIGRATION-MAPPING.md + 17 TODOs. The bootstrap did the mechanical bulk correctly." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Final turn: reported PASS (dotnet build succeeded, 0 WUI warnings, smoke launch pid 9804 stayed alive), confirming the migration was actually complete and correct." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1", "problem": "Threw 'Source not found' on the first invocation (Turn 2) with the correct prompt-supplied path, because the UWP source directory had not yet materialized on disk at that moment; the same path succeeded at Turn 22.", "evidence": "session-log.txt L268-273 (throw) vs L736-765 (same path, success)." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "On a missing -Source it throws immediately with no hint that the source is expected to be the local prompt-supplied path and must not be reconstructed from the internet.", "suggested_tweak": "Skill Step 0 should state the source is always local (path given in the task prompt), never fetched from the web, and a transient 'Source not found' should be retried against the same path." }
+  ],
+  "failed_apis": [
+    { "api": "Application.Suspending / App.Current.Suspending", "why_tried": "The UWP page Scenario1_ChatClient.xaml.cs (and MainPage.xaml.cs) subscribe to App.Current.Suspending += App_Suspending to persist chat state.", "root_cause": "Microsoft.UI.Xaml.Application has no Suspending event; WinUI 3 desktop apps are not OS-suspended.", "fix": "Agent settled on Windows.ApplicationModel.Core.CoreApplication.Suspending (compiles); faithful migration is to remove the subscription/handler or move state-save to normal desktop close." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Application.Suspending / Resuming / OnSuspending", "special_handling": "No Microsoft.UI.Xaml.Application equivalent. Remove the subscription (desktop apps aren't suspended by the OS) or use the compile-compatible Windows.ApplicationModel.Core.CoreApplication.Suspending only for packaged suspend/resume scenarios." }
+  ],
+  "errors_encountered": [
+    { "error": "CS1061: 'Application' does not contain a definition for 'Suspending'", "root_cause": "Microsoft.UI.Xaml.Application dropped the UWP Suspending event.", "fix": "Rewire to Windows.ApplicationModel.Core.CoreApplication.Suspending, or remove the handler." },
+    { "error": "CS0103: The name 'App' does not exist in the current context (Scenario1_ChatClient.xaml.cs, MainPage.xaml.cs)", "root_cause": "Copied page referenced the App class unqualified while resolving the Suspending line; same App/lifecycle cluster.", "fix": "Reference Application.Current / the scaffold App type in the project namespace; resolved together with the Suspending fix." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turns 2-22 (source discovery)", "symptom": "Initialize threw 'Source not found' for the correct prompt path; agent then ran ~18 turns of directory hunting and SIX web_fetch calls to github.com/microsoft/Windows-universal-samples trying to reconstruct the sample from the internet before retrying the local path successfully at Turn 22.", "turns_or_retries": "~20 turns, 6 web_fetch", "root_cause": "UWP source materialized on disk after the first Initialize call (harness timing); the skill offers no guidance that the source is always local and must not be fetched from the web, so the agent defaulted to online reconstruction.", "how_resolved": "Retried the same local path at Turn 22; Initialize succeeded.", "preventable_by": "SKILL.md Step 0 rule: the UWP source is always the local prompt-supplied path; never fetch it from GitHub/learn; on a transient 'Source not found' re-verify the prompt path and retry." },
+    { "where": "Turns ~74-76 (final build loop)", "symptom": "CS1061 on Application.Suspending and CS0103 on App forced extra build-fix iterations at the very end of the budget.", "turns_or_retries": "2-3 build iterations", "root_cause": "MIGRATION-PATTERNS.md has zero coverage of the near-universal UWP Application.Suspending pattern, so the agent had to discover the fix by trial during the final (timeout-adjacent) turns.", "how_resolved": "Rewired to CoreApplication.Suspending.", "preventable_by": "Add an Application.Suspending pattern to the lifecycle section so it is fixed mechanically/early instead of in the final loop." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "The prompt-supplied UWP source directory was not present on disk at Turn 2 but appeared by Turn 22 (source-extraction race).", "workaround": "Retry the same local path; it materializes shortly after." },
+    { "issue": "Trial recorded builds:false/runs:false/timeout:true even though the app built, launched, and scored 100% parity in the scoring trial.", "workaround": "Reduce wasted early turns so the migration completes within budget." }
+  ]
+}

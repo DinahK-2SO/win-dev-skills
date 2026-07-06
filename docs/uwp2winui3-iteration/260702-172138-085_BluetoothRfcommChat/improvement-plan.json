@@ -1,0 +1,31 @@
+{
+  "scenario": "BluetoothRfcommChat",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migration trial timed out (score 0, builds:false) despite a correct, 100%-parity app, because ~20 early turns and 6 web_fetch calls were spent reconstructing the UWP source from github.com after Initialize-UwpMigration.ps1 transiently threw 'Source not found' for the correct prompt-supplied local path.",
+      "evidence": "lessons.json dev_agent_struggles[0]; session-log.txt L268-273 (throw) + 6 github web_fetch URLs + L736 (same path OK at Turn 22); results.json metrics.timeout:true.",
+      "root_cause": "SKILL.md Step 0 never states the UWP source is always the local prompt path, must not be fetched from the web, and that a transient 'Source not found' should be retried against the same path (source can materialize slightly late).",
+      "tier": 3,
+      "change": "Added a prominent blockquote rule to SKILL.md Step 0 Hard rules: source is always local (prompt path), never fetch from the internet or reconstruct from memory, and on 'Source not found' re-verify the prompt path and retry the SAME path.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent uses the local path and retries on transient failure instead of pulling the sample from GitHub, eliminating ~20 wasted turns and keeping the migration within the time budget.",
+      "falsifiable_check": "On re-run, 0 web_fetch calls to github/learn for source and source-discovery completes in <3 turns; trial no longer times out."
+    },
+    {
+      "problem": "UWP Application.Suspending (App.Current.Suspending += ...) has no Microsoft.UI.Xaml.Application equivalent, producing CS1061 (+ CS0103 on App). The skill had zero coverage, so the agent resolved it by trial in the final, timeout-adjacent turns.",
+      "evidence": "skill-defects.json item 2; session-log.txt L4689/L4694 (CS1061), L4563 (CS0103), L4720/L4785 (agent fix). Grep for 'Suspend' in the whole skill = 0 hits.",
+      "root_cause": "MIGRATION-PATTERNS.md lifecycle section covered OnLaunched/activation but omitted the near-universal Suspending/Resuming/OnSuspending events.",
+      "tier": 3,
+      "change": "Added a 'Suspending / Resuming / OnSuspending' subsection under the lifecycle anchor: no Microsoft.UI.Xaml.Application event exists; remove the subscription (desktop apps aren't OS-suspended) and move real state-save to window Closed; CoreApplication.Suspending as a compile-compatible fallback for packaged suspend/resume.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent fixes the Suspending error mechanically/early via Get-MigrationPattern.ps1 -Anchor lifecycle instead of discovering it in the final build loop, removing 2-3 end-of-run iterations.",
+      "falsifiable_check": "On re-run of any UWP app that subscribes to Suspending, no CS1061 'Application does not contain Suspending' survives to the final build loop; the fix is applied before the first build completes."
+    }
+  ],
+  "deferred_to_human": [
+    "TIER-0 (harness): the prompt-supplied UWP source directory was not present on disk at the migration trial's first Initialize call (Turn 2) but materialized by Turn 22 — a source-extraction race. Consider having the harness guarantee the source is fully materialized before the migration agent starts, so no retry is needed at all.",
+    "TIER-0 (harness/eval): the migration trial recorded builds:false/timeout:true while the scoring trial confirmed a clean build + 100% parity — the wall-clock budget may be too tight for larger multi-scenario samples; consider budget/telemetry review (out of scope for the migration skill)."
+  ]
+}

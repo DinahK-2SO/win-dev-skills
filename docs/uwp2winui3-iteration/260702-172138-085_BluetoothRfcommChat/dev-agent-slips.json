@@ -1,0 +1,28 @@
+{
+  "scenario": "BluetoothRfcommChat",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Used the Unix 'head' command in PowerShell (Turn 3), which errored ('head is not recognized').",
+      "evidence": "session-log.txt L282-287.",
+      "covered_clearly_at": "Environment/runtime instructions already tell the agent it is on Windows PowerShell (use Get-ChildizeItem etc.); this is a generic shell slip, not a UWP-migration concern.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable model re-run would use PowerShell idioms; the migration skill should not carry generic shell tips."
+    },
+    {
+      "problem": "Structural gate marked Scenario 1 as 3/8 coverage (false negative) because 5 controls are Visibility=Collapsed until a Bluetooth connection.",
+      "evidence": "migration-score.json (Chat Client note: 'Tool 3/8 = false negative; adjusted to pass'), discrepancies.json structural_false_negatives.",
+      "covered_clearly_at": "This is an EVALUATION-tool (winui3-parity-check) measurement artifact, not a migration-skill issue — the migration preserved all 5 controls with wired handlers, identical to the UWP source.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The migration was correct and scored pass; the caveat belongs to the eval skill, which is out of scope for changes."
+    },
+    {
+      "problem": "All edits were made before the first dotnet build (first build ~Turn 70 of 78), leaving several build errors to resolve at the very end near the timeout.",
+      "evidence": "session-log.txt: first 'dotnet build' at L4157; only 3 builds total, all near the end.",
+      "covered_clearly_at": "SKILL.md Step 3 already prescribes a tight 'build -> fix the first error -> launch -> repeat' loop and per-file BATCH/SEQUENTIAL modes with 'build immediately after each'. The build-early discipline is already prominent.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already clearly instructs an incremental build loop; a re-run following Step 3 would build earlier without any skill edit."
+    }
+  ]
+}

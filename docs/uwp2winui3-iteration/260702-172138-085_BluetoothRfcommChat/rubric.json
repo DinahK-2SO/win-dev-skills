@@ -1,0 +1,26 @@
+{
+  "scenario": "BluetoothRfcommChat",
+  "featureName": "Bluetooth Rfcomm Chat Sample",
+  "features": [
+    {
+      "number": 1,
+      "name": "Chat Client",
+      "controls": ["RunButton", "ConnectButton", "RequestAccessButton", "resultsListView", "DisconnectButton", "MessageTextBox", "SendButton", "ConversationList"],
+      "visibilityGated": ["RequestAccessButton", "DisconnectButton", "MessageTextBox", "SendButton", "ConversationList"],
+      "passCriteria": "Page renders; Start enumerates devices; Connect validates selection; collapsed chat controls present and wired identically to UWP."
+    },
+    {
+      "number": 2,
+      "name": "Foreground Chat Server",
+      "controls": ["DisconnectButton", "MessageTextBox", "SendButton", "ConversationListBox"],
+      "passCriteria": "Page renders with Start Listening + message UI; controls present; Send/Disconnect hardware-gated."
+    },
+    {
+      "number": 3,
+      "name": "Background Chat Server",
+      "controls": ["DisconnectButton", "MessageTextBox", "SendButton", "ConversationListBox"],
+      "passCriteria": "Page renders; message controls present; Send handler fires."
+    }
+  ],
+  "scoring": "round(100 * (pass + 0.5*partial) / features_total)"
+}

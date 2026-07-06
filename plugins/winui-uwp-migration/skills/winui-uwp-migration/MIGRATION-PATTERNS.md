@@ -317,6 +317,38 @@ switch (args.Kind)
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
 
+### `Suspending` / `Resuming` / `OnSuspending` — no `Microsoft.UI.Xaml.Application` event
+
+`Microsoft.UI.Xaml.Application` has **no** `Suspending`, `Resuming`, `EnteredBackground`,
+or `LeavingBackground` events. Any UWP `this.Suspending += OnSuspending;` /
+`App.Current.Suspending += ...` (in `App.xaml.cs` or a page) produces
+`CS1061: 'Application' does not contain a definition for 'Suspending'` (and often a
+`CS0103` on `App` on the same line). This pattern appears in the large majority of UWP
+apps.
+
+WinUI 3 **desktop** apps are not suspended/resumed by the OS the way UWP apps are, so the
+faithful migration is to **remove the subscription** (and its handler if it only persisted
+transient/session state) and move any genuine state-save to normal desktop shutdown (e.g.
+the window `Closed` event):
+
+```csharp
+// UWP — DELETE this subscription (and OnSuspending if it only saved session state):
+//   this.Suspending += OnSuspending;
+// Persist real state on window close instead:
+mainWindow.Closed += (s, e) => SaveState();
+```
+
+If the app is **packaged** and genuinely needs suspend/resume semantics, the
+`Windows.ApplicationModel.Core.CoreApplication.Suspending` event remains available in the
+Windows SDK projection and is compile-compatible:
+
+```csharp
+Windows.ApplicationModel.Core.CoreApplication.Suspending += OnSuspending;
+```
+
+Do not silently drop state-saving logic — either preserve it at a valid lifecycle point or
+note it in `MIGRATION-DEFERRED.md`.
+
 <a id="background-tasks"></a>
 ## Background Tasks
 

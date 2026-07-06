@@ -1,0 +1,27 @@
+{
+  "scenario": "BluetoothRfcommChat",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Agent burned ~20 turns and 6 web_fetch calls to github.com/microsoft/Windows-universal-samples trying to reconstruct the UWP source from the internet after Initialize-UwpMigration.ps1 threw 'Source not found' for the correct, prompt-supplied local path. This early waste is a primary contributor to the trial timeout.",
+      "evidence": "session-log.txt L268-273 (Initialize throw), web_fetch URLs to github Windows-universal-samples (Turns 11-21), L736 (same local path succeeds at Turn 22); results.json metrics.timeout:true.",
+      "skill_search": "Grepped SKILL.md + MIGRATION-PATTERNS.md for guidance on where the UWP source lives and on fetching source from the web ('source', 'internet', 'github', 'fetch', 'prompt').",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Step 0 tells the agent to pass '-Source <absolute-path-to-uwp-cs-folder>' but never states that the source is ALWAYS the local path given in the task prompt, must never be fetched from the internet, and that a transient 'Source not found' should be retried against the same path (the source can materialize on disk slightly after the trial starts).",
+      "proposed_fix": "Add a short rule to SKILL.md Step 0: the UWP source is the local absolute path provided in the task prompt; never fetch sample source from GitHub/learn.microsoft.com; if Initialize reports 'Source not found', re-verify the prompt path and retry the SAME path rather than reconstructing the app from the web.",
+      "generalizes": "Every UWP->WinUI 3 migration is driven from a local source path in the task prompt, and these samples all exist publicly on GitHub. Any agent that hits a transient/uncertain source path is prone to waste large budget fetching from the web instead of using the local copy. A one-line 'source is local, never fetch, retry the given path' rule prevents this class of budget waste across all scenarios."
+    },
+    {
+      "problem": "UWP pages/App subscribe to Application.Suspending (App.Current.Suspending += ...). Microsoft.UI.Xaml.Application has no Suspending event, producing CS1061 (and a related CS0103 on App). The skill has no pattern for this, so the agent had to discover the fix by trial during the final, timeout-adjacent turns.",
+      "evidence": "session-log.txt L4689/L4694 (CS1061 'Application' does not contain 'Suspending'), L4563/L4579 (CS0103 'App'), L4720 (agent's CoreApplication.Suspending fix), L4785 (agent note 'Application.Suspending -> CoreApplication.Suspending').",
+      "skill_search": "Grepped the entire winui-uwp-migration skill (SKILL.md, MIGRATION-PATTERNS.md, scripts/*, unsupported-api-inventory.json) for 'Suspend' — 0 matches.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "MIGRATION-PATTERNS.md's Application Lifecycle section covers OnLaunched/activation but omits the Suspending/Resuming/OnSuspending events, which nearly every UWP app subscribes to.",
+      "proposed_fix": "Add a 'Suspending / Resuming' subsection under the existing lifecycle anchor in MIGRATION-PATTERNS.md: Microsoft.UI.Xaml.Application has no Suspending/Resuming event; WinUI 3 desktop apps are not OS-suspended, so remove the subscription and (if it only persisted transient/session state) its handler, moving any genuine state-save to normal desktop close; as a compile-compatible fallback for packaged suspend/resume scenarios, Windows.ApplicationModel.Core.CoreApplication.Suspending remains available.",
+      "generalizes": "Application.Suspending / OnSuspending appears in the App.xaml.cs (and often pages) of the large majority of UWP SDK samples and real apps. Covering it once turns a near-universal end-of-run build error into a mechanical early fix, saving build-loop turns on essentially every UWP->WinUI 3 migration."
+    }
+  ]
+}

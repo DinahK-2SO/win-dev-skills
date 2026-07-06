@@ -1,0 +1,44 @@
+{
+  "scenario": "BluetoothRfcommChat",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 3,
+  "features_pass": 3,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok: original UWP app built (after adding the missing boilerplate Tasks/Properties/AssemblyInfo.cs that the source-extraction dropped) and launched Release (window 'Bluetooth Rfcomm Chat C# Sample', pid 28640). Scenario 1 (Chat Client) golden captured visually. Per-scenario UIA navigation and behavioral actuation of the legacy CoreWindow were not reachable via winapp on this host, so there is no UWP behavioral baseline; WinUI verdicts rest on structural coverage + WinUI behavioral/textual evidence.",
+  "winui_build_status": "ok: dotnet build succeeded (exit 0); subject results.json builds:false was a migration-trial timeout, not an actual build failure.",
+  "winui_render_capture_status": "blank: WinUI screenshots captured white in this non-interactive session (GDI capture fails, PrintWindow cannot grab DirectComposition). Rendering confirmed via UIA tree text in capture-manifest.json.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_tool_score": 66.7,
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Chat Client",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Chat_Client.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Chat_Client.png",
+      "note": "Renders and functions: Start ran device enumeration ('0 devices found. Enumeration completed. Watching for updates...'); Connect validated selection ('Please select an item to connect to'). The 5 controls the structural gate flagged missing (RequestAccessButton + ChatBox: DisconnectButton/MessageTextBox/SendButton/ConversationList) are Visibility=Collapsed until connection — identical to the UWP source (RequestAccessButton L80, ChatBox L94) and to the UWP golden which also shows only Start+Connect at rest. All controls present with wired handlers. Tool 3/8 = false negative; adjusted to pass."
+    },
+    {
+      "name": "Foreground Chat Server",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Foreground_Chat_Server.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Foreground_Chat_Server.png",
+      "note": "Full 4/4 structural coverage. Page renders complete server UI ('Start Listening', 'Enter a message to send:', 'Once a client is connected to the Bluetooth Rfcomm server...'). Disconnect/Send require a connected client (hardware-gated, equal in both apps)."
+    },
+    {
+      "name": "Background Chat Server",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Background_Chat_Server.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Background_Chat_Server.png",
+      "note": "Full 4/4 coverage. Send handler fired ('Sent:'). Background-server page renders complete UI. Uses RfcommServerTask background task as in UWP."
+    }
+  ]
+}

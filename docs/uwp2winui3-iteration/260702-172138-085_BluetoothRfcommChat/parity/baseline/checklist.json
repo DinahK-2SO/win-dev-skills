@@ -1,0 +1,298 @@
+{
+  "featureName": "Bluetooth Rfcomm Chat Sample",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\BluetoothRfcommChat\\cs",
+  "generated": "2026-07-07T00:41:51.9026837+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Chat Client",
+      "class": "Scenario1_ChatClient",
+      "slug": "Chat_Client",
+      "screenshot": "01_Chat_Client.png",
+      "controls": [
+        {
+          "name": "RunButton",
+          "type": "Button",
+          "label": "Start",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ConnectButton",
+          "type": "Button",
+          "label": "Connect to Selected Device",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "RequestAccessButton",
+          "type": "Button",
+          "label": "Request Access to Trusted Device",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "resultsListView",
+          "type": "ListView",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "DisconnectButton",
+          "type": "Button",
+          "label": "Disconnect",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "MessageTextBox",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "SendButton",
+          "type": "Button",
+          "label": "Send",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ConversationList",
+          "type": "ListBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Start",
+          "alt": "RunButton",
+          "type": "Button",
+          "label": "Start",
+          "name": "RunButton",
+          "event": "Click"
+        },
+        {
+          "target": "Connect to Selected Device",
+          "alt": "ConnectButton",
+          "type": "Button",
+          "label": "Connect to Selected Device",
+          "name": "ConnectButton",
+          "event": "Click"
+        },
+        {
+          "target": "Request Access to Trusted Device",
+          "alt": "RequestAccessButton",
+          "type": "Button",
+          "label": "Request Access to Trusted Device",
+          "name": "RequestAccessButton",
+          "event": "Click"
+        },
+        {
+          "target": "Disconnect",
+          "alt": "DisconnectButton",
+          "type": "Button",
+          "label": "Disconnect",
+          "name": "DisconnectButton",
+          "event": "Click"
+        },
+        {
+          "target": "Send",
+          "alt": "SendButton",
+          "type": "Button",
+          "label": "Send",
+          "name": "SendButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "DeviceName",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ServiceName",
+            "type": "TextBlock"
+          },
+          {
+            "name": "MessageTextBox",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Foreground Chat Server",
+      "class": "Scenario2_ChatServer",
+      "slug": "Foreground_Chat_Server",
+      "screenshot": "02_Foreground_Chat_Server.png",
+      "controls": [
+        {
+          "name": "DisconnectButton",
+          "type": "Button",
+          "label": "Disconnect",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "MessageTextBox",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "SendButton",
+          "type": "Button",
+          "label": "Send",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ConversationListBox",
+          "type": "ListBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Disconnect",
+          "alt": "DisconnectButton",
+          "type": "Button",
+          "label": "Disconnect",
+          "name": "DisconnectButton",
+          "event": "Click"
+        },
+        {
+          "target": "Send",
+          "alt": "SendButton",
+          "type": "Button",
+          "label": "Send",
+          "name": "SendButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "MessageTextBox",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Background Chat Server",
+      "class": "Scenario3_BgChatServer",
+      "slug": "Background_Chat_Server",
+      "screenshot": "03_Background_Chat_Server.png",
+      "controls": [
+        {
+          "name": "DisconnectButton",
+          "type": "Button",
+          "label": "Disconnect",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "MessageTextBox",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "SendButton",
+          "type": "Button",
+          "label": "Send",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ConversationListBox",
+          "type": "ListBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Disconnect",
+          "alt": "DisconnectButton",
+          "type": "Button",
+          "label": "Disconnect",
+          "name": "DisconnectButton",
+          "event": "Click"
+        },
+        {
+          "target": "Send",
+          "alt": "SendButton",
+          "type": "Button",
+          "label": "Send",
+          "name": "SendButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock1",
+            "type": "TextBlock"
+          },
+          {
+            "name": "MessageTextBox",
+            "type": "TextBox"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "BluetoothRfcommChat",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Chat Client scenario (device enumeration, connect, chat UI)", "status": "pass", "reason": "Start ran device enumeration ('0 devices found...'); Connect validated selection; the 5 collapsed controls match the UWP source at rest. Adjusted from tool 3/8 false-negative to pass.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Foreground Chat Server scenario", "status": "pass", "reason": "Full 4/4 structural coverage; renders 'Start Listening', message entry UI. Disconnect/Send hardware-gated equally in both apps.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Background Chat Server scenario (RfcommServerTask background task)", "status": "pass", "reason": "Send handler fired ('Sent:'); background-server page renders full UI; uses RfcommServerTask as in UWP.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No genuine feature-level parity defects: the migrated WinUI 3 app faithfully reproduces all three UWP scenarios and scored 100. The only trial-level failure was that the MIGRATION trial timed out (score 0 / builds false), caused by ~20 turns lost to a transient 'Source not found' + 6 GitHub web fetches, plus a late build-loop on the uncovered Application.Suspending API. Both are generalizable, skill-addressable process problems rather than parity discrepancies."
+}

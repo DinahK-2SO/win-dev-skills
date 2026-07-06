@@ -1,0 +1,17 @@
+{
+  "scenario": "BluetoothRfcommChat",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "SKILL.md Step 0: state UWP source is always the local prompt path — never fetch from the web, retry the same path on transient 'Source not found' (avoids ~20 wasted turns / timeout).",
+    "MIGRATION-PATTERNS.md lifecycle: add Application.Suspending/Resuming/OnSuspending pattern (no Microsoft.UI.Xaml.Application event; remove subscription or use CoreApplication.Suspending) — a near-universal UWP build error."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "TIER-0 harness: guarantee the UWP source directory is fully materialized before the migration agent starts (avoid the source-extraction race that forced a retry).",
+    "TIER-0 harness/eval: migration trial timed out while the app actually built and scored 100% — review the wall-clock budget for larger multi-scenario samples."
+  ]
+}

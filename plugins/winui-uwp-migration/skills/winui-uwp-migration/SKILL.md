@@ -48,6 +48,15 @@ Test-Path "<winui3-project-root>/MIGRATION-MAPPING.md"
 
 **Hard rules:**
 
+> **The UWP source is always LOCAL.** The absolute path to the UWP `cs` folder is given
+> in the task prompt — pass it verbatim as `-Source`. **Never fetch the sample source
+> from the internet** (GitHub `Windows-universal-samples`, `learn.microsoft.com`, etc.) and
+> never reconstruct it from memory: a local copy always exists. If step 2 throws
+> `Source not found`, the source may not have finished materializing on disk yet —
+> **re-verify the path from the prompt and re-run the bootstrap against the SAME path**
+> (retry over the next turn or two); do not go hunting the tree or pull the app from the
+> web. Reconstructing source online is the single biggest budget sink in this phase.
+
 Don't:
 
 - Inventory the source first, then "decide" whether to run the bootstrap. The bootstrap *is* the inventory.
