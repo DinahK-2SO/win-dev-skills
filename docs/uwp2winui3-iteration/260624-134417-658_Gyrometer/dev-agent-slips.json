@@ -1,0 +1,14 @@
+{
+  "scenario": "Gyrometer",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 'DataTemplates containing x:Bind need a DataType' after the agent authored an x:Bind ItemTemplate with x:DataType=\"local:Scenario\".",
+      "evidence": "session-log.txt lines 2424-2425 (errors) and turn 24 (line 2480-2483) where the agent reverted the template to a plain {Binding Title} in the same turn.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md '### x:Bind and compiled bindings' (line 771) and '### XAML namespace mapping (recap)' (line 779): x:Bind is supported with the same syntax and stale/incorrect xmlns prefixes cause type-resolution errors.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The agent introduced this itself by converting a working {Binding} into an x:Bind with a DataType the local: xmlns didn't expose, then fixed it in the same turn. The skill already documents x:Bind and xmlns resolution; a capable model on re-run would either keep the original {Binding} or supply a valid x:DataType. No general gap."
+    }
+  ]
+}

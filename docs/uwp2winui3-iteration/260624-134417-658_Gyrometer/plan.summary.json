@@ -1,0 +1,15 @@
+{
+  "scenario": "Gyrometer",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: add CS0118 'namespace but is used like a type' entry — projects named after a WinRT type (Gyrometer/Accelerometer/Compass/...) shadow the type; fix with a using-alias or non-colliding RootNamespace. Recurs across the whole Windows.Devices.Sensors sample family.",
+    "MIGRATION-PATTERNS.md: add CS0103 'The name App does not exist' entry — scaffold's App/MainWindow live in RootNamespace while SDKTemplate samples keep their own namespace; keep them consistent or fully-qualify global::<RootNamespace>.App. Makes the guide's existing App.MainWindow examples resolve."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Consider a scaffold/Initialize-UwpMigration.ps1 check that picks a non-colliding <RootNamespace> (or warns) when the project name matches a WinRT type or differs from the sample's C# namespace — prevents both errors before the first build."
+  ]
+}

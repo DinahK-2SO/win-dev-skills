@@ -1,0 +1,30 @@
+{
+  "scenario": "Gyrometer",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0118 'X is a namespace but is used like a type' whenever the WinUI 3 project (RootNamespace) is named after the WinRT type the sample demonstrates (Gyrometer, Accelerometer, Compass, ...). Cost ~3 build cycles.",
+      "evidence": "session-log.txt 2419-2422 & 2920-2922; csproj <RootNamespace>Gyrometer</RootNamespace> line 1708; skill-defects.json item 1.",
+      "root_cause": "Project name / RootNamespace equals a WinRT type name, creating an implicit namespace that shadows the type; bare references bind to the namespace.",
+      "tier": 3,
+      "change": "Added a 'CS0118 — project named after a WinRT type' subsection under 'Common build errors after the namespace rewrite' with the using-alias fix and the RootNamespace-rename alternative.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent aliases/qualifies the type across all files in one pass instead of discovering it by trial, eliminating the CS0118 build cycles.",
+      "falsifiable_check": "On a re-run of any sensor/device sample named after its WinRT type, 0 CS0118 errors and the type-collision fix lands in a single edit pass (no repeated CS0118 across builds)."
+    },
+    {
+      "problem": "CS0103 'The name App does not exist' from unqualified App/MainWindow references in migrated sample files whose namespace differs from the scaffold's RootNamespace. Cost 1 extra build cycle.",
+      "evidence": "session-log.txt 3669-3676; fix at turn 39 (global::Gyrometer.App.MainWindow); skill-defects.json item 2.",
+      "root_cause": "Scaffold generates App/MainWindow in the project RootNamespace; SDKTemplate samples keep their own namespace, so bare App.MainWindow doesn't resolve.",
+      "tier": 3,
+      "change": "Added a 'CS0103 — scaffold vs. sample namespace mismatch' subsection giving the align-namespaces-up-front fix and the global::<RootNamespace>.App qualification, wired to the guide's existing App.MainWindow examples.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The many App.MainWindow examples resolve because the agent keeps namespaces consistent (or qualifies), removing the CS0103 cycle.",
+      "falsifiable_check": "On re-run, 0 CS0103 'The name App does not exist' errors; App/MainWindow references compile without a follow-up qualification pass."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/1 option: teach Initialize-UwpMigration.ps1 / the scaffold step to detect when the chosen project name matches a WinRT type or differs from the sample's C# namespace, and either pick a non-colliding <RootNamespace> or emit a warning. Would prevent both errors before the first build, but touches scaffold/harness policy beyond a single skill doc edit."
+  ]
+}

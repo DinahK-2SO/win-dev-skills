@@ -1,0 +1,54 @@
+{
+  "scenario": "Gyrometer",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Get-MigrationPattern.ps1 (-Anchor csproj/manifest)", "evidence": "session-log turns ~1780-1900: agent pulled the csproj/manifest anchors and used them to reconcile PackageReferences and manifest assets without trial-and-error." },
+    { "tool": "dotnet build -p:Platform=$Platform loop", "evidence": "session-log lines 2036/2682/3419/3704: iterative build after each edit gave the agent the exact CS error list to drive fixes; final BUILD_EXIT=0 at line 4082." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Gyrometer", "special_handling": "Type name is identical to the sample/project name, so a bare 'Gyrometer' reference collides with the project's implicit RootNamespace. Needs a using-alias or full qualification." }
+  ],
+  "errors_encountered": [
+    {
+      "error": "CS0118: 'Gyrometer' is a namespace but is used like a type (Scenario1/2/3 .xaml.cs)",
+      "root_cause": "The WinUI 3 scaffold's project name / <RootNamespace>Gyrometer</RootNamespace> creates an implicit 'Gyrometer' namespace symbol that shadows the WinRT type Windows.Devices.Sensors.Gyrometer. Every bare 'Gyrometer' field/variable declaration resolved to the namespace, not the type.",
+      "fix": "Added 'using GyrometerSensor = Windows.Devices.Sensors.Gyrometer;' to each scenario file and replaced bare 'Gyrometer' type references with the alias (session-log turns 25-29)."
+    },
+    {
+      "error": "CS0103: The name 'App' does not exist in the current context (MainPage/Scenario1/Scenario2 .xaml.cs), 9 errors",
+      "root_cause": "The scaffold generated App/MainWindow in the project RootNamespace ('Gyrometer'), but the migrated SDK sample code files kept the sample's original namespaces ('GyrometerCS' / 'SDKTemplate'). A bare 'App.MainWindow' reference in a differently-namespaced file cannot see the scaffold's App class.",
+      "fix": "Fully-qualified the reference as 'global::Gyrometer.App.MainWindow' across the scenario/MainPage files (session-log turn 39)."
+    },
+    {
+      "error": "WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 x:Bind DataTemplate needs x:DataType",
+      "root_cause": "Agent authored a DataTemplate using x:Bind with x:DataType=\"local:Scenario\", but the Scenario type was not reachable under the 'local:' xmlns prefix at compile time.",
+      "fix": "Reverted the ItemTemplate to a plain {Binding Title} DataTemplate (session-log turn 24)."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Scenario1/2/3 code-behind, session-log turns 23-30",
+      "symptom": "Repeated CS0118 'namespace but is used like a type' build failures; alias applied one file at a time so the same error re-surfaced across 2-3 build cycles.",
+      "turns_or_retries": "~3 build cycles (turns 23, 28, then green)",
+      "root_cause": "Project/RootNamespace name equals the WinRT sensor type name; skill has no entry for this collision so the agent discovered the alias fix by trial and applied it piecemeal.",
+      "how_resolved": "using <X>Sensor = Windows.Devices.Sensors.<X>; alias in every affected file.",
+      "preventable_by": "A MIGRATION-PATTERNS.md 'Common build errors' entry for CS0118 telling the agent up-front to alias/fully-qualify (or rename RootNamespace) when the project is named after a WinRT type — apply across ALL files in one pass."
+    },
+    {
+      "where": "MainPage/Scenario code-behind, session-log turns 38-41",
+      "symptom": "CS0103 'The name App does not exist' (9 errors) after the type-collision fix, from unqualified App.MainWindow references.",
+      "turns_or_retries": "1 extra build cycle",
+      "root_cause": "Namespace mismatch between scaffold-generated App/MainWindow (RootNamespace) and migrated sample files (sample's own namespace).",
+      "how_resolved": "global::<RootNamespace>.App.MainWindow qualification.",
+      "preventable_by": "Skill guidance to keep the scaffold's App/MainWindow namespace consistent with the migrated code (set RootNamespace to the sample's namespace, or fully-qualify App references) — currently the skill's many 'App.MainWindow' examples silently assume same-namespace scope."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "winapp PrintWindow screenshots of the WinUI 3 app render blank white in this headless session (noted by score step, not a migration defect).", "workaround": "Score step judged fidelity from the UIA tree instead." }
+  ]
+}

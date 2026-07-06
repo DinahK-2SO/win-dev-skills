@@ -1,0 +1,27 @@
+{
+  "scenario": "Gyrometer",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0118 'X is a namespace but is used like a type' when the sample/project is named after a WinRT type (here Gyrometer). Cost ~3 build cycles (turns 23-30).",
+      "evidence": "session-log.txt lines 2419-2422 and 2920-2922: 'error CS0118: Gyrometer is a namespace but is used like a type' in Scenario1/2/3.xaml.cs; csproj had <RootNamespace>Gyrometer</RootNamespace> (line 1708).",
+      "skill_search": "grepped winui-uwp-migration for CS0118, 'namespace but is used like a type', RootNamespace, 'using alias', collision — no matches.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The scaffold's project name / <RootNamespace> equals the WinRT type name, creating an implicit namespace symbol that shadows the type. Bare type references bind to the namespace.",
+      "proposed_fix": "Add a 'Common build errors after the namespace rewrite' subsection in MIGRATION-PATTERNS.md for CS0118 that prescribes a using-alias (e.g. 'using GyrometerSensor = Windows.Devices.Sensors.Gyrometer;') or full qualification / RootNamespace rename, applied across ALL affected files in one pass.",
+      "generalizes": "The UWP SDK-sample catalog names each project after the API it demos. Windows.Devices.Sensors alone ships Accelerometer, Gyrometer, Compass, Inclinometer, Magnetometer, OrientationSensor, LightSensor, Barometer, Altimeter, Pedometer, ProximitySensor, SimpleOrientationSensor — every one of these will hit CS0118 the moment its code references the bare type name, and the same trap exists for any sample whose name matches a WinRT type."
+    },
+    {
+      "problem": "CS0103 'The name App does not exist in the current context' (9 errors) from unqualified App/MainWindow references in migrated code files. Cost 1 extra build cycle (turns 38-41).",
+      "evidence": "session-log.txt lines 3669-3676: 'error CS0103: The name App does not exist' in MainPage/Scenario1/Scenario2.xaml.cs; fix at turn 39 replaced App.MainWindow with global::Gyrometer.App.MainWindow.",
+      "skill_search": "grepped winui-uwp-migration for CS0103, RootNamespace, namespace consistency; the skill uses bare 'App.MainWindow' in ~6 examples (MIGRATION-PATTERNS.md lines 246/252/282/297/396) but never notes the namespace precondition.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The scaffold generates App/MainWindow in the project RootNamespace, while migrated SDK-sample files keep their original namespace (e.g. GyrometerCS / SDKTemplate). A bare 'App.MainWindow' in a differently-namespaced file cannot see the scaffold's App class.",
+      "proposed_fix": "In the same MIGRATION-PATTERNS.md subsection, tell the agent to keep the scaffold's App/MainWindow namespace consistent with the migrated code — either set <RootNamespace> to the sample's code namespace, or fully-qualify App references as global::<RootNamespace>.App — so the many 'App.MainWindow' examples resolve.",
+      "generalizes": "Every SDKTemplate-derived UWP sample keeps its own C# namespace (SDKTemplate plus a per-sample namespace) that differs from the WinUI scaffold's project-name RootNamespace, so any migration that references the scaffold's App/MainWindow from a sample file hits this cross-namespace CS0103."
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "scenario": "Gyrometer",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 3,
+  "features_pass": 3,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (with caveats): original UWP Release app built, deployed and launched (window title 'GyrometerCS'); a visible golden initial frame was captured. The uwp-app-runner verify stage reported a false-negative (ok:false, no crash signature) but the app was confirmed alive and rendering via screenshot. Deep UWP nav/actuation was unavailable because the UWP CoreWindow (ApplicationFrameHost) did not expose content to UI Automation. No gyrometer hardware present ('No gyrometer found').",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "notes": "WinUI 3 screenshots render blank white due to a PrintWindow/DirectComposition capture limitation in this headless session; fidelity judged from the full WinUI UIA tree, which matches the UWP source content exactly (all controls, outputs, and enabled/disabled states). Structural parity 100% (Compare-Parity PASS).",
+  "features": [
+    {
+      "name": "Data Events",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Data_Events.png",
+      "note": "All controls present (Enable enabled, Disable disabled) and outputs (X/Y/Z 'No data', StatusBlock 'No gyrometer found') match the UWP. Enable is hardware-gated (no gyrometer) so it is a no-op on both apps; not a regression. WinUI screenshot blank due to capture tooling limitation; verified via UIA tree."
+    },
+    {
+      "name": "Polling",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Polling.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Polling.png",
+      "note": "Controls (Enable enabled, Disable disabled) and outputs (X/Y/Z 'No data', StatusBlock) match the UWP, with the correct 'Polls for gyrometer data...' description. Hardware-gated; no behavioral regression. WinUI screenshot blank due to capture tooling; verified via UIA tree."
+    },
+    {
+      "name": "Cross-Platform Porting",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Cross_Platform_Porting.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Cross_Platform_Porting.png",
+      "note": "Get Sample button present and disabled (matches UWP when no gyrometer). Windows (raw sample) and WP (transformed) columns with all six outputs ('No data') present, plus the 'ReadingTransform' description. WinUI screenshot blank due to capture tooling; verified via UIA tree."
+    }
+  ]
+}

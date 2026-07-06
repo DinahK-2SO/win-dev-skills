@@ -27,6 +27,37 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0118: 'X' is a namespace but is used like a type` — the project is named after a WinRT type
+
+SDK samples are conventionally named after the API they demonstrate, so the WinUI 3 scaffold's project name (and thus its `<RootNamespace>`) frequently **equals a WinRT type name** — `Gyrometer`, `Accelerometer`, `Compass`, `Barometer`, `LightSensor`, `ProximitySensor`, `OrientationSensor`, `Pedometer`, `Altimeter`, `Magnetometer`, `Inclinometer`, `Battery`, etc. That name becomes an implicit namespace symbol that **shadows** the type of the same name (e.g. `Windows.Devices.Sensors.Gyrometer`), so every bare reference to the type fails:
+
+```
+error CS0118: 'Gyrometer' is a namespace but is used like a type
+```
+
+Fix by aliasing the WinRT type once per file (cheapest, most local), then use the alias for every declaration:
+
+```csharp
+using GyrometerSensor = Windows.Devices.Sensors.Gyrometer;   // add at the top
+// ...
+private GyrometerSensor? _gyrometer = GyrometerSensor.GetDefault();
+```
+
+Apply the alias in **every** file that references the type — the error re-appears file-by-file otherwise. (Full qualification `Windows.Devices.Sensors.Gyrometer` works too but is noisier.) The tidiest project-wide alternative is to make the project name / `<RootNamespace>` **not** collide with the type (e.g. keep the sample's own `<Sample>CS` namespace, or set `<RootNamespace>` to `<Sample>App`); do this once and no alias is needed.
+
+### `CS0103: The name 'App' (or 'MainWindow') does not exist in the current context` — scaffold vs. sample namespace mismatch
+
+The WinUI 3 scaffold puts `App`, `MainWindow`, and `MainPage` in the project's `<RootNamespace>` (usually the project name). SDKTemplate-derived samples keep their **own** C# namespaces (`SDKTemplate` plus a per-sample namespace such as `GyrometerCS`). When a migrated sample file in its original namespace references the scaffold's `App` (e.g. the `App.MainWindow` static this guide uses for HWND/AppWindow lookups), the name does not resolve:
+
+```
+error CS0103: The name 'App' does not exist in the current context
+```
+
+Every `App.MainWindow` (or `App.Window`) example in this document assumes the caller shares the `App` class's namespace. Keep them consistent one of two ways:
+
+- **Preferred — align namespaces up front:** set the scaffold's `<RootNamespace>` (and the `namespace` of `App.xaml.cs`/`MainWindow.xaml.cs`) to the sample's code namespace, so `App` is in scope everywhere. This also avoids `x:Class` mismatches in the paired `.xaml`.
+- **Local fix:** fully-qualify the reference, e.g. `global::<RootNamespace>.App.MainWindow`, in each file that keeps a different namespace.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:

@@ -1,0 +1,35 @@
+{
+  "scenario": "Gyrometer",
+  "feature": "Gyrometer",
+  "source": "uwp-samples-standalone/Samples/Gyrometer/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Data Events",
+      "mustHave": {
+        "controls": ["ScenarioEnableButton (Enable)", "ScenarioDisableButton (Disable)"],
+        "outputs": ["InputTextBlock (description)", "ScenarioOutput_X", "ScenarioOutput_Y", "ScenarioOutput_Z", "StatusBlock"],
+        "initialState": "Enable enabled, Disable disabled; X/Y/Z show 'No data'; status reflects gyrometer presence"
+      }
+    },
+    {
+      "number": 2,
+      "title": "Polling",
+      "mustHave": {
+        "controls": ["ScenarioEnableButton (Enable)", "ScenarioDisableButton (Disable)"],
+        "outputs": ["InputTextBlock (description)", "ScenarioOutput_X", "ScenarioOutput_Y", "ScenarioOutput_Z", "StatusBlock"],
+        "initialState": "Enable enabled, Disable disabled; X/Y/Z show 'No data'; status reflects gyrometer presence"
+      }
+    },
+    {
+      "number": 3,
+      "title": "Cross-Platform Porting",
+      "mustHave": {
+        "controls": ["GetSampleButton (Get Sample)"],
+        "outputs": ["InputTextBlock (description)", "ScenarioOutput_X_Windows", "ScenarioOutput_Y_Windows", "ScenarioOutput_Z_Windows", "ScenarioOutput_X_WP", "ScenarioOutput_Y_WP", "ScenarioOutput_Z_WP", "StatusBlock"],
+        "initialState": "Get Sample disabled when no gyrometer; Windows (raw sample) and WP (transformed) columns show 'No data'"
+      }
+    }
+  ],
+  "scoring": "Each scenario is pass if all controls/outputs present and behaviors match the UWP golden; partial if a control is present but dead relative to a responsive UWP control; fail if scenario is missing/blank or <40% coverage."
+}
