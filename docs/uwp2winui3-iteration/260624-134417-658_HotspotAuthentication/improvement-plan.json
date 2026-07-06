@@ -1,0 +1,28 @@
+{
+  "scenario": "HotspotAuthentication",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "First build of the migrated project failed with 12x 'error CS0579: Duplicate '...Attribute' attribute' from the copied UWP Properties\\AssemblyInfo.cs colliding with the SDK-style project's auto-generated assembly attributes.",
+      "evidence": "lessons.json errors_encountered / skill-defects.json item 1; build-events.jsonl ~L784-806 ('duplicate assembly attributes from ...\\Properties\\AssemblyInfo.cs' -> 'Fix by adding <GenerateAssemblyInfo>false</GenerateAssemblyInfo>'); build-output.txt shows GenerateAssemblyInfo=false in the final csproj.",
+      "root_cause": "Initialize-UwpMigration.ps1 copies every legacy .cs (incl. Properties\\AssemblyInfo.cs); SDK-style (Microsoft.NET.Sdk) projects default GenerateAssemblyInfo=true and emit the same assembly attributes, so each is declared twice -> CS0579.",
+      "tier": 1,
+      "change": "In Initialize-UwpMigration.ps1 copy filter, exclude any file named 'AssemblyInfo.cs' from the copied build sources (new $srcExcludeFiles guard), mirroring the existing ILC *.g.cs duplicate-source exclusion. Deterministic; cannot be ignored by the agent.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "The migrated tree no longer contains a legacy AssemblyInfo.cs, so the SDK's auto-generated assembly attributes are the only copy and CS0579 does not occur.",
+      "falsifiable_check": "On a re-run, `dotnet build` of the migrated project produces zero 'error CS0579: Duplicate ... attribute' diagnostics, and no AssemblyInfo.cs (outside .uwp-source/obj/bin) exists under the target."
+    },
+    {
+      "problem": "Same as above — backstop for the rare case where a non-standard AssemblyInfo.cs must be retained, or a legacy file slips in from a manual copy.",
+      "evidence": "skill-defects.json item 1: grep of the whole skill for AssemblyInfo/GenerateAssemblyInfo/CS0579 returned 0 matches — the 'Common build errors' section documents CS0104/CS0227/CS0101/CS0246 but not CS0579.",
+      "root_cause": "No documented root cause + fix for CS0579, so an agent hitting it must diagnose from scratch.",
+      "tier": 3,
+      "change": "Add a 'CS0579: Duplicate '...Attribute' attribute' subsection to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' explaining the SDK auto-generation clash and giving both fixes (delete the superseded file; or retain it + <GenerateAssemblyInfo>false</GenerateAssemblyInfo> when attributes like InternalsVisibleTo must be kept).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "If any AssemblyInfo.cs still reaches the build, the agent resolves CS0579 in one step from documented guidance instead of trial-and-error.",
+      "falsifiable_check": "On a re-run where an AssemblyInfo.cs is present, the agent applies the documented delete-or-GenerateAssemblyInfo-false fix and the build reaches 0 CS0579 errors."
+    }
+  ],
+  "deferred_to_human": []
+}

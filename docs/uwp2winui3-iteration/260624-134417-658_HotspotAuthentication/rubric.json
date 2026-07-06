@@ -1,0 +1,39 @@
+{
+  "scenario": "HotspotAuthentication",
+  "feature": "Hotspot Authentication",
+  "source": "uwp-samples-standalone/Samples/HotspotAuthentication/cs",
+  "uwp_launchable": true,
+  "uwp_window_title": "Hotspot Authentication C# sample",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Initialization",
+      "description": "Provision a WLAN profile and register/unregister the background task for the hotspot authentication event.",
+      "controls": [
+        { "name": "ProvisionButton", "label": "Provision", "type": "Button", "expected_initial_state": "enabled" },
+        { "name": "RegisterButton", "label": "Register", "type": "Button", "expected_initial_state": "enabled" },
+        { "name": "UnregisterButton", "label": "Unregister", "type": "Button", "expected_initial_state": "disabled (enabled only after a task is registered)" }
+      ],
+      "outputs": [ "StatusBlock (shared status text)", "StatusBorder (shared status color)" ]
+    },
+    {
+      "number": 2,
+      "title": "Authentication by background task",
+      "description": "Informational scenario: authentication handled by the registered background task. No interactive controls beyond the shared status area.",
+      "controls": [],
+      "outputs": [ "StatusBlock (shared status text)", "StatusBorder (shared status color)" ]
+    },
+    {
+      "number": 3,
+      "title": "Authentication by foreground app",
+      "description": "Foreground authentication of a hotspot event. Authenticate/Skip/Abort act on a live NetworkOperatorHotspotAuthenticationContext and are disabled until such an event fires.",
+      "controls": [
+        { "name": "AuthenticateButton", "label": "Authenticate", "type": "Button", "expected_initial_state": "disabled (hardware/event-gated)" },
+        { "name": "SkipButton", "label": "Skip", "type": "Button", "expected_initial_state": "disabled (hardware/event-gated)" },
+        { "name": "AbortButton", "label": "Abort", "type": "Button", "expected_initial_state": "disabled (hardware/event-gated)" }
+      ],
+      "outputs": [ "StatusBlock (shared status text)", "StatusBorder (shared status color)" ]
+    }
+  ],
+  "notes": "Button enabled/disabled states are the key behavioral signal for this sample because most actions require a real Wi-Fi hotspot authentication context (signed WLAN provisioning XML / a live auth event) that is unavailable on a dev box."
+}

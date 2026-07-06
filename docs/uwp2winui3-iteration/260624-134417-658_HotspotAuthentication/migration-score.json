@@ -1,0 +1,45 @@
+{
+  "scenario": "HotspotAuthentication",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 3,
+  "features_pass": 3,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (with limitations): UWP app built (Release), deployed and launched — process HotspotApp (PID 56852), window 'Hotspot Authentication C# sample'. Scenario-1 golden captured live (real UI: Provision/Register enabled, Unregister disabled). uwp-app-runner returned ok:false at the verify stage ONLY because it searched for a process named after the csproj (HotspotAuthenticationApp) while the executable is HotspotApp.exe — no crash signature; the app was confirmed running. UWP behavioral baseline could not be captured: winapp UIA cannot descend into the UWP CoreWindow (ApplicationFrameHost-hosted) and the session is non-interactive (no foreground desktop), so scenarios 2/3 nav and all UWP control actuation could not be driven; goldens for 2/3 fell back to the scenario-1 frame.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Initialization",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Initialization.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Initialization.png",
+      "note": "Structural coverage 3/3. WinUI control states match the UWP golden exactly: Provision=enabled, Register=enabled, Unregister=disabled. Register responds when invoked (+3 UIA text tokens). Provision invokes cleanly but is a no-op without signed WLAN provisioning XML (expected on a dev box)."
+    },
+    {
+      "name": "Authentication by background task",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Authentication_by_background_task.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Authentication_by_background_task.png",
+      "note": "Informational scenario with no interactive controls (coverage n/a). Reachable in WinUI; content (description + shared status area) present in the UIA tree."
+    },
+    {
+      "name": "Authentication by foreground app",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Authentication_by_foreground_app.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Authentication_by_foreground_app.png",
+      "note": "Structural coverage 3/3 (Authenticate/Skip/Abort present). All three are disabled initially, matching the UWP source behavior (enabled only during a live NetworkOperatorHotspotAuthenticationContext event). Correctly hardware/event-gated, not dead controls."
+    }
+  ],
+  "measurement_notes": {
+    "winui_screenshots_blank": "WinUI 3 client-area screenshots render blank because the headless session's DWM does not composite the hardware-accelerated WinUI 3 surface into the captured bitmap. Grading relies on the fully-populated WinUI UIA tree (correct geometry + enabled/disabled states), which matches the UWP checklist and scenario-1 golden.",
+    "score_formula": "round(100 * (pass + 0.5*partial) / features_total) = round(100 * (3 + 0) / 3) = 100"
+  }
+}

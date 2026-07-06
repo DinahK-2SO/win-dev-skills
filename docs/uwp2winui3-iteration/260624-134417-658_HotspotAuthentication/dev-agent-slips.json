@@ -1,0 +1,14 @@
+{
+  "scenario": "HotspotAuthentication",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Nullable-reference warnings (CS8618/CS8600/CS8601/CS8602/CS8604/CS8625) emitted from ported UWP code under the scaffold's <Nullable>enable</Nullable>.",
+      "evidence": "build-output.txt: 14x CS8618, 8x CS8600, etc. Build still succeeded ('The build succeeds with 0 errors (only warnings)').",
+      "covered_clearly_at": "N/A — these are non-blocking warnings inherent to enabling nullable on legacy code; not a fidelity or build defect and not a skill topic.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Warnings did not affect build success, runtime, or parity (100/100). Suppressing/annotating nullable on ported code is generic C# hygiene, not UWP->WinUI-specific guidance; a re-run would still pass regardless. Adding skill prose about it would be noise."
+    }
+  ]
+}

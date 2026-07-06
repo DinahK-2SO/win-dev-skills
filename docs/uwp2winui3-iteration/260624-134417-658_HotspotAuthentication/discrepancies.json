@@ -1,0 +1,15 @@
+{
+  "scenario": "HotspotAuthentication",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Initialization scenario: Provision / Register / Unregister with correct initial enabled states", "status": "pass", "reason": "Structural coverage 3/3; states match UWP golden exactly (Provision=enabled, Register=enabled, Unregister=disabled); Register responds when invoked.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Authentication by background task (informational scenario, shared status area)", "status": "pass", "reason": "Reachable in WinUI; description + shared status area present in the UIA tree.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Authentication by foreground app: Authenticate / Skip / Abort, hardware/event-gated", "status": "pass", "reason": "Structural coverage 3/3; all three disabled initially, matching UWP source (enabled only during a live NetworkOperatorHotspotAuthenticationContext event).", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No structural or behavioral parity defects. All 3 scenarios and every control are present in the WinUI 3 UIA tree, and scenario-1 enabled/disabled states match the live UWP golden exactly. The only migration friction was a build-time CS0579 duplicate assembly-attribute error from the copied legacy AssemblyInfo.cs (fixed with GenerateAssemblyInfo=false), which did not affect final parity."
+}

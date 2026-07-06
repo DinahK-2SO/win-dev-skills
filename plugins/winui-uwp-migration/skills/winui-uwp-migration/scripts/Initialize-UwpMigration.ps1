@@ -75,12 +75,22 @@ $patterns = @(
 $srcExcludeDirs = @('bin', 'obj', '.vs', '.git', '.github', '.copilot', 'packages', 'node_modules')
 $srcExcludePattern = '\\(' + ($srcExcludeDirs -join '|') + ')\\'
 
+# Never copy the UWP project's hand-authored AssemblyInfo.cs (typically Properties\AssemblyInfo.cs).
+# It carries assembly-level attributes ([assembly: AssemblyTitle/Company/Configuration/Version/...])
+# that the SDK-style WinUI csproj ALSO emits automatically (GenerateAssemblyInfo defaults to true),
+# so compiling the copied file produces "error CS0579: Duplicate '...Attribute' attribute" for every
+# such attribute. Excluding it lets the SDK own assembly metadata — same rationale as the ILC *.g.cs
+# skip above. Rare non-boilerplate attributes (e.g. [assembly: InternalsVisibleTo]) that must be kept
+# are handled in PATTERNS.md > 'Common build errors' (retain the file + <GenerateAssemblyInfo>false</GenerateAssemblyInfo>).
+$srcExcludeFiles = @('assemblyinfo.cs')
+
 $copied = New-Object System.Collections.Generic.List[string]
 
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     if (('\' + $rel) -match $srcExcludePattern) { return $false }
     $name = $_.Name.ToLowerInvariant()
+    if ($srcExcludeFiles -contains $name) { return $false }
     $match = $false
     foreach ($ext in $patterns) {
         if ($name.EndsWith($ext)) { $match = $true; break }

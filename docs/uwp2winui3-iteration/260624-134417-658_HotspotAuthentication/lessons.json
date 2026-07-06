@@ -1,0 +1,27 @@
+{
+  "scenario": "HotspotAuthentication",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 (bootstrap)", "evidence": "Copied source, rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml, preserved UWP .csproj at .uwp-source/; the dev-agent proceeded straight to file-by-file migration with no namespace churn." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Run after the build succeeded ('Now run the validator'); confirmed migration completeness before the agent declared done." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Copies every legacy .cs including the VS-generated Properties\\AssemblyInfo.cs, whose assembly-level attributes ([assembly: AssemblyTitle/Company/Configuration/Version/...]) collide with the SDK-style project's auto-generated attributes.", "suggested_tweak": "Exclude AssemblyInfo.cs from the copied build sources (same rationale as the existing ILC *.g.cs exclusion): SDK-style projects auto-generate these attributes." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "NetworkOperatorHotspotAuthenticationContext / background task registration", "special_handling": "Actions are hardware/event-gated; Authenticate/Skip/Abort stay disabled until a live hotspot auth event fires and Provision is a no-op without signed WLAN XML. Migrated as-is; no WinUI-specific API change required." }
+  ],
+  "errors_encountered": [
+    { "error": "error CS0579: Duplicate 'System.Reflection.AssemblyCompanyAttribute' (and AssemblyConfiguration/Description/Title/Version/... ) attribute — 12 occurrences", "root_cause": "The UWP project's hand-authored Properties\\AssemblyInfo.cs (standard VS boilerplate: AssemblyTitle/Description/Configuration/Company/Product/Copyright/Trademark/Culture/Version/FileVersion/ComVisible) was copied into the target and compiled by the SDK-style WinUI 3 csproj, which by default (GenerateAssemblyInfo=true) also emits the same assembly attributes into obj\\...\\<Project>.AssemblyInfo.cs.", "fix": "Dev-agent added <GenerateAssemblyInfo>false</GenerateAssemblyInfo> to the csproj so only the copied file supplies the attributes. Equivalent/cleaner fix: delete the superseded legacy AssemblyInfo.cs so the SDK generates them." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "First build of the migrated project (build-events.jsonl, GenerateAssemblyInfo discussion ~L784-806)", "symptom": "Build failed with 12x CS0579 duplicate assembly-attribute errors originating from obj\\...\\<Project>.AssemblyInfo.cs vs the copied Properties\\AssemblyInfo.cs.", "turns_or_retries": "Diagnosed and fixed in ~1-2 turns; not a long loop but the build was blocked until resolved.", "root_cause": "Legacy UWP AssemblyInfo.cs copied verbatim clashes with SDK-style auto-generated assembly attributes.", "how_resolved": "Added <GenerateAssemblyInfo>false</GenerateAssemblyInfo> to the migrated csproj.", "preventable_by": "Bootstrap script excluding AssemblyInfo.cs from the copied build sources (Tier 1), and/or MIGRATION-PATTERNS.md documenting CS0579 root cause + fix (Tier 3)." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Nullable warnings (CS8618/CS8600/CS8601/CS8602/CS8604/CS8625) from the scaffold's <Nullable>enable</Nullable> applied to legacy UWP code.", "workaround": "Non-blocking; build succeeded. Inherent to enabling nullable on ported code; not a fidelity defect." }
+  ]
+}

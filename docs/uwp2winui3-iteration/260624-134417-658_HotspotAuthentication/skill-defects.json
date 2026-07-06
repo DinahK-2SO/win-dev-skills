@@ -1,0 +1,17 @@
+{
+  "scenario": "HotspotAuthentication",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Build failed with 12x 'error CS0579: Duplicate ... attribute' (AssemblyCompany/Configuration/Description/Title/Version/FileVersion/...) on the first build of the migrated project.",
+      "evidence": "build-events.jsonl ~L784-806: assistant.message 'The build errors are duplicate assembly attributes from ...\\Properties\\AssemblyInfo.cs' then 'Fix by adding <GenerateAssemblyInfo>false</GenerateAssemblyInfo>'. Migrated csproj now contains GenerateAssemblyInfo=false; copied AssemblyInfo.cs is standard VS boilerplate.",
+      "skill_search": "grepped winui-uwp-migration for 'AssemblyInfo', 'GenerateAssemblyInfo', 'CS0579', 'Duplicate .* attribute' — 0 matches across SKILL.md, MIGRATION-PATTERNS.md, and all scripts.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap copies the UWP project's hand-authored Properties\\AssemblyInfo.cs verbatim into the target. SDK-style (Microsoft.NET.Sdk) projects default GenerateAssemblyInfo=true and auto-emit the same assembly-level attributes into obj\\...\\<Project>.AssemblyInfo.cs, so each attribute is declared twice => CS0579. The skill documents other 'common build errors' (CS0104, CS0227, CS0101/234, CS0246) but not this one, and the copy step excludes ILC *.g.cs for the analogous duplicate-type reason but not AssemblyInfo.cs.",
+      "proposed_fix": "Tier 1: in Initialize-UwpMigration.ps1, exclude legacy 'AssemblyInfo.cs' from the copied build sources (mirroring the existing ILC *.g.cs exclusion) because SDK-style projects auto-generate these attributes. Tier 3 backstop: add a 'CS0579 duplicate assembly attribute' entry to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' documenting root cause + both fixes (delete the file, or set <GenerateAssemblyInfo>false</GenerateAssemblyInfo> when the file must be retained, e.g. for InternalsVisibleTo).",
+      "generalizes": "EVERY classic UWP C# project ships a VS-generated Properties\\AssemblyInfo.cs full of assembly-level attributes, and every WinUI 3 target is an SDK-style project with GenerateAssemblyInfo=true by default. So any UWP->WinUI 3 migration that copies the source tree hits CS0579 unless AssemblyInfo.cs is dropped or GenerateAssemblyInfo is disabled — this recurs across essentially all scenarios."
+    }
+  ]
+}

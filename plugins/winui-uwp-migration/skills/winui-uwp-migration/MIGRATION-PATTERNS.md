@@ -50,6 +50,29 @@ Get-ChildItem -Path $Target -Recurse -Directory -Include bin,obj |
 
 Generated sources never belong in source control or the migrated tree — only `.xaml/.cs/.resw/.appxmanifest`/assets are real inputs.
 
+### `CS0579: Duplicate '…Attribute' attribute` (from a copied `AssemblyInfo.cs`)
+
+If the build fails with a cluster of `error CS0579: Duplicate 'System.Reflection.AssemblyCompanyAttribute' attribute` (and `AssemblyConfiguration`, `AssemblyTitle`, `AssemblyVersion`, `AssemblyFileVersion`, …), the cause is the UWP project's hand-authored `Properties\AssemblyInfo.cs`. That file declares assembly-level attributes that an **SDK-style** WinUI `.csproj` (`Microsoft.NET.Sdk`) **also auto-generates** — `GenerateAssemblyInfo` defaults to `true`, emitting the same attributes into `obj\…\<Project>.AssemblyInfo.cs`. Two copies of each ⇒ CS0579. This is why the current `Initialize-UwpMigration.ps1` **excludes `AssemblyInfo.cs` from the copy** (remove any that pre-date the fix or were added manually).
+
+Fix — pick one:
+
+```powershell
+# Preferred: delete the superseded legacy file and let the SDK own assembly metadata.
+Get-ChildItem -Path $Target -Recurse -File -Filter AssemblyInfo.cs |
+    Where-Object { $_.FullName -notmatch '\\(\.uwp-source|obj|bin)\\' } |
+    Remove-Item -Force
+```
+
+```xml
+<!-- Only if the file carries attributes you must keep (e.g. [assembly: InternalsVisibleTo]):
+     retain AssemblyInfo.cs and turn OFF auto-generation so it is the single source. -->
+<PropertyGroup>
+  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+</PropertyGroup>
+```
+
+Prefer deletion: standard VS `AssemblyInfo.cs` (`AssemblyTitle/Description/Company/Product/Copyright/Version/FileVersion/ComVisible`) is entirely superseded by the SDK, and its version fields map to csproj `<Version>`/`<AssemblyVersion>` properties if you need to set them.
+
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element of the **same type** — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
