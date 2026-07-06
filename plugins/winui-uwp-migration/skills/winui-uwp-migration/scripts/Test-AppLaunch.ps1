@@ -206,7 +206,7 @@ function Get-CrashSignature {
             $sig.anchor = 'startup-crashes'
         }
         '0xc000027b' {
-            $sig.hint   = "Native stowed exception - frequently a legacy projection/activation incompatibility. If a UWP API/contract used at startup is unsupported on this OS, defer it per MIGRATION-DEFERRED.md."
+            $sig.hint   = "Native stowed exception - two common causes: (1) the static-window init-order race - first navigation reached a Page that read App.MainWindow before OnLaunched assigned it, thrown out of Frame.Navigate during MainWindow construction; keep MainWindow's ctor inert and navigate after Activate (same fix as E_POINTER, see PATTERNS.md#windowing). (2) a legacy projection/activation incompatibility for a startup API; if unsupported on this OS, defer it per MIGRATION-DEFERRED.md. Read the .NET exception (event 1026) to tell them apart."
             $sig.anchor = 'startup-crashes'
         }
         default {

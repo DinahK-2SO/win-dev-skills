@@ -1,0 +1,15 @@
+{
+  "scenario": "Inclinometer",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Startup crash native code 0xC000027B was actually the static-window init-order navigation race (a Page read App.MainWindow before OnLaunched assigned it), but the skill's 0xC000027B guidance points only at 'legacy projection/activation incompatibility -> defer the API', so the agent did not immediately map it to the documented navigate-after-Activate fix.",
+      "evidence": "mig session-log turns ~70-80: Validate/Test-AppLaunch reported 0xC000027B (faulting module Microsoft.UI.Xaml.dll); the agent's first corrective attempt navigated from App.OnLaunched (hitting CS0122 on private RootFrame) before finally deferring navigation to MainWindow.Activated. Skill: MIGRATION-PATTERNS.md line 432 (0xC000027B row) and scripts/Test-AppLaunch.ps1 line 209 both name only the 'defer the unsupported API' cause.",
+      "covered_at": "MIGRATION-PATTERNS.md#windowing 'Initialization order — keep MainWindow's constructor inert' (lines ~291-334, the navigate-after-Activate recipe) and the #startup-crashes table row for 0x80004003 (E_POINTER) which DOES link to #windowing. The 0xC000027B row (line 432) and Test-AppLaunch.ps1's 0xc000027b hint (line 209) do NOT reference the init-order race.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Extend the existing 0xC000027B guidance (both the #startup-crashes table row and the Test-AppLaunch.ps1 0xc000027b hint) to add the init-order navigation race as a common cause and cross-link to #windowing, alongside the existing unsupported-API-defer cause — do not invent a new section, just make the already-documented E_POINTER/init-order fix reachable from the 0xC000027B code the validator actually reports.",
+      "generalizes": "A stowed exception (0xC000027B) surfacing from Frame.Navigate during MainWindow construction is a common WinUI 3 manifestation of the same init-order race that also shows as E_POINTER. Any multi-page SDK sample that navigates from the window constructor to a page touching App.MainWindow can hit 0xC000027B instead of 0x80004003, so the fix must be reachable from both codes."
+    }
+  ]
+}

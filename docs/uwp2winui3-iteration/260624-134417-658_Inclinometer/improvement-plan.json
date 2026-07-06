@@ -1,0 +1,30 @@
+{
+  "scenario": "Inclinometer",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0118 '<Name> is a namespace but is used like a type' when the project's root namespace (derived from the sample folder name) equals a WinRT type the sample uses bare — e.g. project 'Inclinometer' vs Windows.Devices.Sensors.Inclinometer.",
+      "evidence": "lessons.json errors_encountered[0]; skill-defects.json item 1; mig session-log turn ~57 (CS0118 in Scenario1_DataEvents.xaml.cs, fixed by fully qualifying Windows.Devices.Sensors.Inclinometer).",
+      "root_cause": "Root/assembly namespace shadows the identically-named WinRT type, so bare uses bind to the namespace. Only CS0104 (two competing usings) was documented; this distinct collision was absent.",
+      "tier": 3,
+      "change": "Added a 'CS0118: <Name> is a namespace but is used like a type' subsection under 'Common build errors after the namespace rewrite', explaining the project-namespace-vs-WinRT-type collision and the fully-qualify fix, with the general list of commonly-affected sensor/type sample names.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent recognizes CS0118 immediately and fully qualifies the type in one edit rather than treating it as a mysterious build error.",
+      "falsifiable_check": "On a re-run of any sample named after a WinRT type (Inclinometer/Accelerometer/etc.), the CS0118 field-declaration error is resolved in a single fully-qualify edit with no exploratory turns; grep of PATTERNS.md now matches 'CS0118'.",
+      "devils_advocate": "Tier 1/2 rejected: the collision depends on user code declaring a field of the shadowed type; a script rewrite can't safely disambiguate arbitrary bare identifiers without risking wrong rewrites, and renaming the namespace is more invasive. A targeted, ignorable-but-cheap doc entry mirroring the existing CS0104 entry is the right tier."
+    },
+    {
+      "problem": "0xC000027B startup crash guidance pointed only at 'unsupported API -> defer', omitting the static-window init-order navigation race that actually produced it, so the fix documented at #windowing was not reachable from the code the validator reports.",
+      "evidence": "lessons.json tool_limitations[0] + dev_agent_struggles[0]; skill-coverage-gaps.json item 1; mig turns ~70-80 (0xC000027B, wrong fix via App.OnLaunched -> CS0122, then Activated deferral). Skill: PATTERNS.md 0xC000027B row + Test-AppLaunch.ps1 0xc000027b hint.",
+      "root_cause": "0xC000027B (stowed exception) is a second face of the same init-order race that also surfaces as E_POINTER (0x80004003); the E_POINTER row links to #windowing but the 0xC000027B row/hint did not, steering toward deferral.",
+      "tier": 2,
+      "change": "Extended the existing 0xC000027B guidance in BOTH the #startup-crashes table row (PATTERNS.md) and the Test-AppLaunch.ps1 0xc000027b diagnostic hint to add the init-order navigation race as a primary cause and cross-link #windowing, alongside the retained unsupported-API-defer cause.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+      "expected_effect": "When the validator reports 0xC000027B, the agent is pointed straight at the navigate-after-Activate fix and lands on it on the first attempt instead of trying to defer an API or navigate from App.",
+      "falsifiable_check": "On a re-run where first navigation touches App.MainWindow, the Test-AppLaunch.ps1 0xc000027b hint and PATTERNS.md row now mention 'init-order' + link #windowing; the agent fixes via MainWindow.Activated without an intermediate wrong attempt.",
+      "devils_advocate": "This is a Tier 2 change to the tool-emitted hint (not ignorable — it is printed by the validator the agent already runs) plus the doc it links; it sharpens existing content rather than inventing a topic, and does not remove the still-valid defer cause."
+    }
+  ],
+  "deferred_to_human": []
+}

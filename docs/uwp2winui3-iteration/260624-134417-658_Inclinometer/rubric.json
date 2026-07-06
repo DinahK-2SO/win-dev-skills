@@ -1,0 +1,31 @@
+{
+  "scenario": "Inclinometer",
+  "feature": "Inclinometer",
+  "source": "uwp-samples-standalone/Samples/Inclinometer/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Data events",
+      "mustHave": ["Enable button (ScenarioEnableButton)", "Disable button (ScenarioDisableButton)", "Pitch/Roll/Yaw/YawAccuracy output (ScenarioOutput_X/Y/Z/YawAccuracy)", "description InputTextBlock", "shared status area"],
+      "behavior": "Enable registers an inclinometer ReadingChanged listener and streams pitch/roll/yaw; Disable stops it and is disabled until Enable succeeds. Hardware-gated: shows 'No inclinometer found' without a sensor."
+    },
+    {
+      "number": 2,
+      "title": "Polling",
+      "mustHave": ["Enable button", "Disable button", "Pitch/Roll/Yaw/YawAccuracy output", "description InputTextBlock", "shared status area"],
+      "behavior": "Enable starts a timer polling GetCurrentReading at a set interval; Disable stops it and is disabled until Enable succeeds. Hardware-gated identically."
+    },
+    {
+      "number": 3,
+      "title": "Calibration",
+      "mustHave": ["High radio", "Approximate radio", "Unreliable radio", "description InputTextBlock", "shared status area"],
+      "behavior": "Selecting an accuracy simulates sensor accuracy; 'Unreliable' invokes the calibration bar. Hardware-gated identically."
+    }
+  ],
+  "gradingRules": {
+    "pass": "reachable non-empty page AND >=80% baseline control coverage AND no behavioral regression vs UWP golden",
+    "partial": ">=40% coverage OR a control present but DEAD relative to a responding UWP control",
+    "fail": "blank/unreachable OR <40% coverage",
+    "scoreFormula": "round(100 * (pass + 0.5*partial) / features_total)"
+  }
+}

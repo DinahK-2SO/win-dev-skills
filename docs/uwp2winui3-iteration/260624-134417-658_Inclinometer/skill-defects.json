@@ -1,0 +1,17 @@
+{
+  "scenario": "Inclinometer",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0118: 'Inclinometer' is a namespace but is used like a type — a bare field declaration `private Inclinometer _inclinometer;` failed to compile because the project's root/assembly namespace equals the WinRT type name.",
+      "evidence": "mig session-log turn ~57: build error CS0118 in Scenario1_DataEvents.xaml.cs(27,17); fixed by changing to `private Windows.Devices.Sensors.Inclinometer _inclinometer;`.",
+      "skill_search": "Grepped MIGRATION-PATTERNS.md and SKILL.md for 'CS0118', 'is a namespace but is used like a type', 'RootNamespace', 'project name', 'root namespace' — no matches. Only CS0104 (ambiguous reference between two *usings*) is documented.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration derives RootNamespace/AssemblyName from the sample folder name. Many UWP SDK samples are named exactly after the WinRT type they demonstrate, so the namespace shadows the type and any bare use of that type name binds to the namespace (CS0118). This is distinct from CS0104 (two competing usings), which is the only collision the skill currently covers.",
+      "proposed_fix": "Add a short 'CS0118: <Name> is a namespace but is used like a type' subsection under 'Common build errors after the namespace rewrite' in MIGRATION-PATTERNS.md: explain the project-namespace == WinRT-type collision and the fix (fully qualify the type, e.g. Windows.Devices.Sensors.Inclinometer), with the general rule and example sensor/type names.",
+      "generalizes": "Recurs for every UWP sample whose folder/project name matches a WinRT type it uses as a bare identifier — Inclinometer, Accelerometer, Gyrometer, Compass, Barometer, Pedometer, Battery, Geolocator, etc. Any single-feature SDK sample named after its API hits this the moment it declares a field of that type."
+    }
+  ]
+}

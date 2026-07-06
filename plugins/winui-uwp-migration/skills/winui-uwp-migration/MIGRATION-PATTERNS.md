@@ -27,6 +27,22 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0118: '<Name>' is a namespace but is used like a type`
+
+The scaffold derives the project's **root/assembly namespace from the sample folder name**, and many single-feature UWP SDK samples are named exactly after the WinRT type they demonstrate (`Inclinometer`, `Accelerometer`, `Gyrometer`, `Compass`, `Barometer`, `Pedometer`, `Battery`, `Geolocator`, …). When the code then uses that type **bare** — e.g. `private Inclinometer _sensor;` — the namespace **shadows** the type and the bare name binds to the namespace, producing `CS0118`. (This differs from `CS0104` above, which is two competing `using`s; here the collision is the *project namespace* vs. the type.)
+
+Fix by fully qualifying the type:
+
+```csharp
+// Project namespace is 'Inclinometer' → the bare type is shadowed:
+private Inclinometer _sensor;                         // CS0118
+
+// Fully qualify the WinRT type:
+private Windows.Devices.Sensors.Inclinometer _sensor; // OK
+```
+
+Apply the same fully-qualified form everywhere that type name appears (event args, `GetDefault()`, casts). Renaming the project namespace also works but is more invasive and can churn every file — prefer qualification.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -429,7 +445,7 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | `0x80004003` | `E_POINTER` | Static-window **init-order race** — a `Page` read `App.MainWindow` (or another static window reference) before `OnLaunched` assigned it. Keep `MainWindow`'s constructor inert and navigate after `Activate`. See [Initialization order](#windowing). |
 | `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
-| `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
+| `0xC000027B` | Native stowed exception | Two common causes: (1) the static-window **init-order race** — a `Page` reached by first navigation read `App.MainWindow` (or another static window reference) before `OnLaunched` assigned it; the stowed exception is thrown out of `Frame.Navigate` during `MainWindow` construction. Keep `MainWindow`'s constructor inert and defer first navigation until after `Activate` (see [Initialization order](#windowing)) — this is the same fix as `0x80004003`. (2) A legacy projection/activation incompatibility for an API used at startup; if that API/contract is unsupported on the current OS, defer it. Check the .NET exception (event 1026) to tell them apart. |
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 

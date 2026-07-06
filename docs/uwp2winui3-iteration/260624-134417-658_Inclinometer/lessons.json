@@ -1,0 +1,35 @@
+{
+  "scenario": "Inclinometer",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Scaffolded the WinUI 3 project and did the bulk Windows.UI.Xaml -> Microsoft.UI.Xaml rewrite in one pass (mig turn ~2); DispatcherTimer and NotifyUser helper then compiled unchanged." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Section 7 smoke launch caught a clean-build/crash-at-startup (native code 0xC000027B) that neither the build nor the analyzer saw (mig turn ~70); also gated on MIGRATION-MAPPING.md rows still marked 'copied'." },
+    { "tool": "Test-AppLaunch.ps1", "evidence": "Captured the native exception code (0xC000027B) and faulting module (Microsoft.UI.Xaml.dll) from WER, which was the only signal that the app crashed at launch (mig turns ~70-73)." },
+    { "tool": "Get-MigrationPattern.ps1 (startup-crashes anchor)", "evidence": "Surfaced the startup-crash pattern text the agent used to reason about the init-order race (mig turn ~72)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Test-AppLaunch.ps1 / MIGRATION-PATTERNS.md#startup-crashes", "limitation": "The 0xC000027B hint only says 'legacy projection/activation incompatibility -> defer the API', but in this trial 0xC000027B was actually the static-window init-order navigation race (same root cause as E_POINTER). The guidance steered toward deferral rather than the navigate-after-Activate fix.", "suggested_tweak": "Add the init-order race (deferred first navigation) as a cause for 0xC000027B and cross-link to #windowing, alongside the unsupported-API-defer cause." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Inclinometer", "special_handling": "The project's root namespace (derived from the sample folder name 'Inclinometer') collides with the sensor type name, so a bare `Inclinometer` field resolves to the namespace and yields CS0118. Fully qualify as Windows.Devices.Sensors.Inclinometer." },
+    { "api": "Window.Current.VisibilityChanged", "special_handling": "No static Window.Current in WinUI 3 desktop; rewired to the tracked App.MainWindow instance. Covered by PATTERNS.md#windowing (WUI0002)." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0118: 'Inclinometer' is a namespace but is used like a type (Scenario1_DataEvents.xaml.cs)", "root_cause": "Assembly/root namespace equals a WinRT type used bare in code; the namespace shadows the type.", "fix": "Fully qualify the field/variable type as Windows.Devices.Sensors.Inclinometer (mig turn ~57)." },
+    { "error": "CS0122: 'MainWindow.RootFrame' is inaccessible due to its protection level (App.xaml.cs)", "root_cause": "Agent attempted to drive first navigation from App.OnLaunched via window.RootFrame, but RootFrame is private to MainWindow.", "fix": "Moved first navigation inside MainWindow (Activated handler), matching the documented pattern (mig turns ~77-79)." },
+    { "error": "Startup crash, native code 0xC000027B (stowed exception), faulting module Microsoft.UI.Xaml.dll", "root_cause": "MainWindow navigated to a Page whose OnNavigatedTo read App.MainWindow before OnLaunched assigned the static -> init-order race.", "fix": "Deferred first RootFrame.Navigate to the MainWindow.Activated event with a _navigated guard (mig turns ~70-80)." },
+    { "error": "Copy failed: SharedContent\\media\\mobius.png not found", "root_cause": "Asset lives under SharedContent\\media\\Samples\\, not SharedContent\\media\\.", "fix": "Corrected path and retried (mig turns ~23-24)." },
+    { "error": "Validate-UwpMigration FAIL: 10 MIGRATION-MAPPING.md rows still Status=copied", "root_cause": "Rows left at 'copied' instead of being flipped to done/deferred after adaptation.", "fix": "Flipped all rows to done (mig turn ~69)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Startup navigation / App.MainWindow init order", "symptom": "App built clean but crashed at launch (0xC000027B); first fix attempt (navigate from App.OnLaunched) then failed to compile (CS0122).", "turns_or_retries": "~5 turns (mig 70-80)", "root_cause": "First navigation happened before the static window reference was assigned, and the corrective attempt reached into MainWindow's private RootFrame from App.", "how_resolved": "Deferred first navigation to MainWindow.Activated with a guard flag.", "preventable_by": "The 0xC000027B startup-crash guidance pointing at the init-order race + navigate-after-Activate recipe (currently it only mentions 'defer the unsupported API'), so the agent lands on the documented #windowing fix on the first attempt." },
+    { "where": "Scenario1 sensor field declaration", "symptom": "CS0118 namespace-vs-type collision.", "turns_or_retries": "~1 turn (mig 57)", "root_cause": "Project namespace equals the WinRT sensor type name.", "preventable_by": "A build-errors entry for CS0118 telling the agent to fully qualify a Windows type whose name collides with the project namespace (the sample-folder-name == WinRT-type-name case)." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No inclinometer sensor and no accessible UWP UIA on the bench machine; both apps show 'No inclinometer found' and the UWP baseline could not be actuated.", "workaround": "Scoring relied on WinUI UIA trees + structural parity; measurement-tool artifact, not a migration defect." }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "scenario": "Inclinometer",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS0122: 'MainWindow.RootFrame' is inaccessible — the agent tried to drive the first navigation from App.OnLaunched via the private RootFrame instead of from inside MainWindow.",
+      "evidence": "mig session-log turn ~77: CS0122 in App.xaml.cs; resolved turns ~78-79 by moving navigation into MainWindow's Activated handler.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#windowing 'Initialization order — keep MainWindow's constructor inert' (lines ~319-334) shows the canonical MainWindow.xaml.cs pattern navigating from `this.Activated` inside MainWindow — exactly the code that avoids reaching into a private RootFrame from App.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The documented pattern already puts the navigation inside MainWindow (its own Activated handler); a re-run following that recipe never accesses RootFrame from App and never hits CS0122. This was a one-off deviation from clearly-shown guidance. (The related 0xC000027B->init-order mapping IS being improved separately as a coverage gap.)"
+    },
+    {
+      "problem": "Window.Current.VisibilityChanged had to be rewired to the tracked App.MainWindow instance.",
+      "evidence": "mig log: TODO markers pointing at PATTERNS.md#windowing on Scenario2/Scenario3; resolved by using App.MainWindow!.VisibilityChanged with no build friction.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#windowing (lines ~214-268) and the WUI0002 analyzer row ('Window.Current does not exist in WinUI 3 desktop apps' -> store the Window in App and pass it) at line 693.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Window.Current removal is prominently documented AND flagged by the WUI0002 analyzer; the agent resolved it with no real friction. No skill change warranted."
+    },
+    {
+      "problem": "MIGRATION-MAPPING.md rows left at Status=copied caused a validator FAIL; asset copied from wrong SharedContent subpath.",
+      "evidence": "mig turns ~68-69 (mapping flip to done) and ~23-24 (path corrected to SharedContent\\media\\Samples\\).",
+      "covered_clearly_at": "Validate-UwpMigration.ps1 emits the exact remediation ('flip to done or deferred'); the mapping-status workflow is part of the documented validate loop.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Both are trivial, self-correcting bookkeeping/path mistakes with clear validator messages; not generalizable skill defects."
+    }
+  ]
+}
