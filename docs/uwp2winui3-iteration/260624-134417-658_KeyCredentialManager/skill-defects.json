@@ -1,0 +1,17 @@
+{
+  "scenario": "KeyCredentialManager",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Project/root-namespace name equals a WinRT type name (project 'KeyCredentialManager' == Windows.Security.Credentials.KeyCredentialManager). Unqualified static calls (OpenAsync/DeleteAsync/IsSupportedAsync/RequestCreateAsync) bind to the app namespace, producing 5x CS0234 and a cascading WMC1509/WMC9999 XAML internal error.",
+      "evidence": "session-log.txt turns 39-50: 'error CS0234: The type or namespace name 'OpenAsync' does not exist in the namespace 'KeyCredentialManager''; build-output shows 'XamlCompiler warning WMC1509 ... No LocalAssembly parameter' and 'Xaml Internal Error error WMC9999: Object reference not set to an instance of an object'. Agent's own line: 'the main errors are a namespace clash - our project is named KeyCredentialManager which conflicts with Windows.Security.Credentials.KeyCredentialManager'.",
+      "skill_search": "Grepped MIGRATION-PATTERNS.md + scripts for: CS0234, namespace clash/collision, project name, root namespace, alias, fully-qualify, shadow, WMC9999. The only CS0234 coverage (MIGRATION-PATTERNS.md line 38) is about STALE bin/obj build output producing duplicate types; the CS0104 section covers Windows.UI.Xaml vs Microsoft.UI.Xaml type ambiguity. Neither covers project-name == WinRT-type-name collision, and WMC9999 is not mentioned anywhere.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "When the migrated project keeps the UWP sample's name and that name matches a WinRT class the code calls unqualified, C# resolves the identifier to the project namespace, not the WinRT type. The XAML markup compiler then fails secondarily (WMC1509/WMC9999) because the C# pass failed.",
+      "proposed_fix": "Add a MIGRATION-PATTERNS.md subsection under 'Common build errors after the namespace rewrite' documenting the project-name/WinRT-type-name collision: symptom (CS0234 'does not exist in the namespace <ProjectName>' + cascading WMC1509/WMC9999), root cause, and the fix (using-alias e.g. 'using FooWinRT = Windows.<...>.Foo;' or fully-qualify / global::). Explicitly note WMC9999 here is a downstream cascade, not a XAML bug.",
+      "generalizes": "Windows-universal-samples are conventionally named after the API they demonstrate (KeyCredentialManager, Clipboard, AppBar, Geolocator, DeviceEnumeration, etc.). Any such sample migrated with project-name == WinRT-type-name reproduces this exact CS0234 + WMC9999 pattern, so the guidance recurs broadly."
+    }
+  ]
+}

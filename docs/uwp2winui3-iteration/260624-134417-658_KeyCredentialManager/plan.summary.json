@@ -1,0 +1,17 @@
+{
+  "scenario": "KeyCredentialManager",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: document project-name/WinRT-type-name collision (CS0234 into your own namespace) with alias/qualify fix, since UWP samples are named after their API and this recurs",
+    "MIGRATION-PATTERNS.md: note WMC1509/WMC9999 XAML internal error is a downstream cascade of the CS0234 C# failure, not a separate XAML bug",
+    "Validate-UwpMigration.ps1: emit a targeted [HINT] when a CS0234 error's namespace token equals the project base name, naming the collision root cause instead of a generic pointer"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": [
+    "WinUI swapchain screenshot blank in non-interactive scoring session is an eval-environment capture limitation, not a migration-skill issue"
+  ]
+}

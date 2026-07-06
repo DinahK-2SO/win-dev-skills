@@ -1,0 +1,27 @@
+{
+  "scenario": "KeyCredentialManager",
+  "feature": "KeyCredentialManager C# sample",
+  "generatedFrom": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\KeyCredentialManager\\cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Sign In Scenario",
+      "startupState": "Contoso login page (SignIn/Content). UserSelect page is reached only AFTER a successful Microsoft Passport sign-in.",
+      "expectedControls": [
+        { "name": "Contoso", "type": "TextBlock", "note": "Header brand text" },
+        { "name": "textbox_Username", "type": "TextBox", "note": "Username entry" },
+        { "name": "passwordbox_Password", "type": "PasswordBox", "note": "Password entry" },
+        { "name": "Sign In", "type": "Button", "note": "Standard username/password sign-in" },
+        { "name": "button_PassportSignIn", "type": "Button", "note": "Sign In with Microsoft Passport; disabled when Passport not enrolled" },
+        { "name": "textblock_PassportStatusText", "type": "TextBlock", "note": "Status: 'Microsoft Passport is not set up. Please go to Windows Settings and connect an MSA account!' when hardware/enrollment unavailable" }
+      ],
+      "gatedControls": [
+        { "name": "listView_UserTileList", "type": "ListView", "note": "On UserSelect page, only shown after successful Passport sign-in; hardware-gated, unreachable without Passport enrollment" },
+        { "name": "+", "type": "Button", "note": "Add-user button on UserSelect page; hardware-gated, dead in both UWP golden and WinUI (Passport not set up)" }
+      ],
+      "actions": [
+        { "target": "+", "type": "Button", "event": "Click", "uwpResponded": false, "note": "Gated behind Passport enrollment; produced no visible response in the UWP golden either" }
+      ]
+    }
+  ]
+}

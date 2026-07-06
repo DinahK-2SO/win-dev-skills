@@ -516,6 +516,15 @@ if (-not $csproj) {
         }
         if ($distinct.Count -gt 15) { Write-Host "       ($($distinct.Count - 15) more distinct — see .validator-diagnostics.txt)" }
         Write-Host "       Common patterns: PATTERNS.md > 'Common build errors after the namespace rewrite'."
+        # Targeted hint: CS0234 whose namespace token equals the project's own name is
+        # the project-name/WinRT-type collision (e.g. project 'KeyCredentialManager' shadows
+        # Windows.Security.Credentials.KeyCredentialManager). The tell is that the namespace in
+        # the error is the project base name, not a Windows.* namespace. WMC1509/WMC9999 in the
+        # same build are a downstream cascade of this C# failure, not a separate XAML bug.
+        $projName = [System.IO.Path]::GetFileNameWithoutExtension($csproj)
+        if ($projName -and ($distinct | Where-Object { $_ -match "error CS0234:.*in the namespace '$([regex]::Escape($projName))'" })) {
+            Write-Host "       [HINT] CS0234 into namespace '$projName' = your project name collides with a WinRT type of the same name. Alias or fully-qualify the WinRT class; do NOT rename the project. See PATTERNS.md#project-name-collision (any WMC1509/WMC9999 is a cascade of this, not a XAML bug)."
+        }
         Add-Diag 'Build: dotnet build failed' (($diagBlock) -join "`r`n")
         $failures++
         }

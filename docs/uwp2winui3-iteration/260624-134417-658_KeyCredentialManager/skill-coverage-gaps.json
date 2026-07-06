@@ -1,0 +1,15 @@
+{
+  "scenario": "KeyCredentialManager",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The validator surfaces a generic hint on build failure ('Common build errors after the namespace rewrite') that does not distinguish the project-name/WinRT-type-name collision, even though the raw CS0234 message literally names the project's own namespace — a machine-detectable signal.",
+      "evidence": "Validate-UwpMigration.ps1 lines 507-518: it prints distinct 'error CSxxxx' lines then a single generic pointer. The dev-agent hit CS0234 into namespace 'KeyCredentialManager' (session-log turns 39-50) and had to reason out the collision itself.",
+      "covered_at": "MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' (the CS0104 / stale-bin-obj CS0234 subsections) and Validate-UwpMigration.ps1 build-fail branch (~line 500-519).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "In Validate-UwpMigration.ps1's build-fail branch, detect CS0234 errors whose namespace token equals the project base name ([IO.Path]::GetFileNameWithoutExtension($csproj)) and emit a targeted line pointing at the new namespace-collision pattern anchor, so the root cause is named rather than left to the agent to infer.",
+      "generalizes": "The detection keys only on 'CS0234 namespace == project name', which is exactly the recurring collision signature for any API-named UWP sample — it will fire on every such scenario without being sample-specific."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "scenario": "KeyCredentialManager",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Turn ~5 bootstrap did the bulk Windows.UI.Xaml -> Microsoft.UI.Xaml rewrite and scaffolded the project; no complaints in the log." },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "Agent pulled -Anchor manifest / manifest-migration-checklist / csproj / windowing patterns and applied them cleanly." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Run near the end to gate the migration; final build succeeded and app launched." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "When the build fails with CS0234 into the project's OWN namespace (project name equals a WinRT type name), the validator prints the generic 'Common build errors after the namespace rewrite' hint, which does not surface the true root cause (name collision).", "suggested_tweak": "Add a targeted diagnostic: when a CS0234 error's namespace token equals the project base name, point the agent at the namespace-collision pattern." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.Security.Credentials.KeyCredentialManager (unqualified static calls: OpenAsync/DeleteAsync/IsSupportedAsync/RequestCreateAsync)", "why_tried": "Sample calls KeyCredentialManager.OpenAsync(...) unqualified, as in the original UWP source.", "root_cause": "The WinUI project (and thus root namespace) is named 'KeyCredentialManager', identical to the WinRT class. Unqualified 'KeyCredentialManager.OpenAsync' binds to the project namespace, so the member (OpenAsync) is not found -> CS0234.", "fix": "Add a using-alias 'using KeyCredentialManagerWinRT = Windows.Security.Credentials.KeyCredentialManager;' and rewrite the calls to the alias (or fully qualify / use global::)." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "KeyCredentialManager (WinRT static class)", "special_handling": "Windows-universal-samples are commonly named after the API they demo; keeping the project name equal to the WinRT type shadows it. Alias or fully-qualify the WinRT class." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: The type or namespace name 'OpenAsync' does not exist in the namespace 'KeyCredentialManager' (x5, also DeleteAsync/IsSupportedAsync/RequestCreateAsync)", "root_cause": "Project/root namespace name collides with the WinRT class name; unqualified static calls resolve to the app namespace.", "fix": "using-alias to Windows.Security.Credentials.KeyCredentialManager, then call via the alias." },
+    { "error": "XamlCompiler warning WMC1509 + Xaml Internal Error WMC9999: Object reference not set to an instance of an object", "root_cause": "Cascade of the C# CS0234 failures: because the C# compile failed, MarkupCompilePass2 had no LocalAssembly and the markup compiler crashed. NOT an independent XAML bug.", "fix": "Resolving the CS0234 namespace collision made the WMC1509/WMC9999 disappear on the next build." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turns ~39-50 (after first full build)", "symptom": "Build failed with 6 errors / repeated CS0234 into namespace 'KeyCredentialManager' plus a scary WMC9999 XAML internal error.", "turns_or_retries": "~10 turns (diagnose collision, add alias to 2 files, rewrite each call site, rebuild).", "root_cause": "Project name equals the WinRT type name (KeyCredentialManager) so unqualified static calls collide with the app namespace; the accompanying WMC9999 was a red-herring cascade of the C# failure.", "how_resolved": "Agent correctly identified the clash, added 'using KeyCredentialManagerWinRT = Windows.Security.Credentials.KeyCredentialManager;' to Content.xaml.cs and SignIn.xaml.cs and rewrote each call.", "preventable_by": "A MIGRATION-PATTERNS.md subsection on project-name/WinRT-type-name collisions (with the alias fix and a note that WMC9999/WMC1509 is a downstream cascade, not a XAML bug), plus a Validate-UwpMigration.ps1 diagnostic that flags CS0234 into the project's own namespace." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 screenshot rendered blank in the non-interactive scoring session (swapchain/DesktopChildSiteBridge cannot be composited by PrintWindow/CopyFromScreen).", "workaround": "Scoring used the UIA tree (33 laid-out elements) as authoritative; this is an eval-environment artifact, not a migration defect." }
+  ]
+}

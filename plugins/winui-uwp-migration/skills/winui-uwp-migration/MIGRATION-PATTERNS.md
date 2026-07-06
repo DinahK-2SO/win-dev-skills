@@ -27,6 +27,40 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0234: … does not exist in the namespace '<YourProjectName>'` (project name collides with a WinRT type) {#project-name-collision}
+
+UWP SDK samples are conventionally **named after the WinRT API they demonstrate** (`KeyCredentialManager`, `Clipboard`, `Geolocator`, `AppBar`, `DeviceEnumeration`, …). When the migrated project keeps that name, the **root namespace equals the WinRT class name**, and any *unqualified* static call the sample makes (e.g. `KeyCredentialManager.OpenAsync(...)`, `Clipboard.SetContent(...)`) binds to **your project namespace** instead of the WinRT type. The member then isn't found:
+
+```
+error CS0234: The type or namespace name 'OpenAsync' does not exist in the namespace 'KeyCredentialManager'
+```
+
+The tell-tale sign is that the namespace named in the error is **your own project/assembly name**, not a `Windows.*` namespace. The same build usually also spits out a scary-looking pair:
+
+```
+XamlCompiler warning WMC1509: No LocalAssembly parameter given during MarkupCompilePass2 …
+Xaml Internal Error error WMC9999: Object reference not set to an instance of an object.
+```
+
+**`WMC1509`/`WMC9999` here is a downstream cascade of the failed C# compile, not a XAML bug** — do not chase it separately. Fix the `CS0234` and it disappears on the next build.
+
+Fix by disambiguating every colliding call. Pick one:
+
+```csharp
+// Option A — using-alias (cleanest when the class is used in many places):
+using KeyCredentialManagerWinRT = Windows.Security.Credentials.KeyCredentialManager;
+// … then:
+var r = await KeyCredentialManagerWinRT.OpenAsync(account);
+
+// Option B — fully qualify at the call site:
+var r = await Windows.Security.Credentials.KeyCredentialManager.OpenAsync(account);
+
+// Option C — global:: prefix (rarely needed, but unambiguous):
+var r = await global::Windows.Security.Credentials.KeyCredentialManager.OpenAsync(account);
+```
+
+Do **not** try to "fix" this by renaming the project — the project name is fixed by the scaffold and renaming it churns the manifest, `.csproj`, and `x:Class` references. Alias/qualify the WinRT type instead.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:

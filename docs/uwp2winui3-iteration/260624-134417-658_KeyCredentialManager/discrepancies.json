@@ -1,0 +1,34 @@
+{
+  "scenario": "KeyCredentialManager",
+  "comparedAt": "2026-07-07T05:30:00+08:00",
+  "method": "UWP golden screenshot + WinUI 3 UIA tree (WinUI screenshot could not be rasterized in this non-interactive session)",
+  "discrepancies": [
+    {
+      "id": "winui-screenshot-blank",
+      "severity": "environment",
+      "type": "capture-limitation",
+      "scenario": "Sign In Scenario",
+      "detail": "The WinUI 3 screenshot rendered blank white. This is NOT a blank/crashed page: the captured UIA tree contains 33 fully laid-out, on-screen elements with real text at real coordinates. The blank frame is because this is a non-interactive session that cannot composite WinUI 3 swapchain (DesktopChildSiteBridge) content; GDI PrintWindow and Graphics.CopyFromScreen ('handle is invalid') both fail for swapchain content. The UWP app captured fine because its CoreWindow uses a GDI-capturable render path. Environment artifact, not a migration defect."
+    },
+    {
+      "id": "checklist-page-mismatch",
+      "severity": "informational",
+      "type": "baseline-checklist",
+      "scenario": "Sign In Scenario",
+      "detail": "Extract-UwpFeatureChecklist derived the scenario's controls from the UserSelect class (listView_UserTileList + '+' button). Neither the UWP golden nor the WinUI app displays those at startup; both show the Contoso login page. UserSelect is only reached after a successful Passport sign-in, which is unavailable (Passport not enrolled). Hence Compare-Parity's 0/2 structural coverage is a false negative against the actually-rendered page."
+    },
+    {
+      "id": "plus-action-dead-both",
+      "severity": "none",
+      "type": "behavioral",
+      "scenario": "Sign In Scenario",
+      "detail": "The '+' action produced no visible response in BOTH the UWP golden (responded:false) and the WinUI app (responded:false). It is gated behind Passport enrollment (UserSelect page). Dead in both => no WinUI-specific behavioral regression."
+    }
+  ],
+  "realUiDiscrepanciesBetweenUwpAndWinui": [
+    {
+      "control": "none",
+      "detail": "The WinUI UIA tree matches the UWP golden screenshot control-for-control: Contoso header, Username label+TextBox, Password label+PasswordBox, 'Sign In' button, disabled 'Sign In with Microsoft Passport' button, and the identical status text 'Microsoft Passport is not set up. Please go to Windows Settings and connect an MSA account!'. No missing controls, no dead controls, no wrong output text, no layout differences detected."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "scenario": "KeyCredentialManager",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Project/root-namespace name equal to a WinRT type name (project 'KeyCredentialManager' == Windows.Security.Credentials.KeyCredentialManager) makes unqualified static calls fail with CS0234 and triggers a cascading WMC1509/WMC9999 XAML internal error. The skill covered neither this collision nor the WMC9999 cascade.",
+      "evidence": "session-log.txt turns 39-50 (5x CS0234 'does not exist in the namespace KeyCredentialManager'); build-output 'Xaml Internal Error error WMC9999'; agent quote 'our project is named KeyCredentialManager which conflicts with Windows.Security.Credentials.KeyCredentialManager'. lessons.json/skill-defects.json.",
+      "root_cause": "Root namespace equals the WinRT class name; identifier resolves to the app namespace instead of the WinRT type. WMC9999 is a downstream cascade of the failed C# pass.",
+      "tier": 3,
+      "change": "Added a new subsection 'CS0234 … does not exist in the namespace <YourProjectName> (project name collides with a WinRT type)' under 'Common build errors after the namespace rewrite', with the alias/fully-qualify/global:: fixes, an anchor {#project-name-collision}, and an explicit note that WMC1509/WMC9999 is a cascade not a XAML bug and that renaming the project is the wrong fix.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On the next API-named-sample migration the agent recognises CS0234-into-own-namespace immediately and applies the alias fix instead of spending ~10 turns, and does not chase WMC9999 as a separate XAML defect.",
+      "falsifiable_check": "On a re-run of an API-named sample, the build-fix loop resolves CS0234 in <=2 edit turns and no turns are spent investigating WMC9999 in isolation."
+    },
+    {
+      "problem": "When the build fails with CS0234 into the project's own namespace, the validator only printed a generic 'Common build errors' pointer, leaving the agent to infer the name collision itself.",
+      "evidence": "Validate-UwpMigration.ps1 lines 507-518 (generic hint only); dev-agent reasoned out the collision manually (session-log turns 39-50).",
+      "root_cause": "Validator did not exploit the machine-detectable signal that the CS0234 namespace token equals the project base name.",
+      "tier": 1,
+      "change": "Added a targeted [HINT] in the build-fail branch: if any distinct CS0234 error's namespace token equals [IO.Path]::GetFileNameWithoutExtension($csproj), print a pointer to PATTERNS.md#project-name-collision and note WMC1509/WMC9999 is a cascade.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The validator names the root cause (project-name/WinRT-type collision) directly whenever it occurs, so the agent goes straight to the alias fix.",
+      "falsifiable_check": "Re-running the validator against a project that has this collision prints the '[HINT] CS0234 into namespace <name> = your project name collides with a WinRT type' line; projects without the collision do not."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0 (harness/scaffold): the WinUI screenshot rendered blank in the non-interactive scoring session because swapchain/DesktopChildSiteBridge content cannot be composited by PrintWindow/CopyFromScreen. This is an eval-environment capture limitation, not a migration defect, and is out of scope for the migration skill."
+  ]
+}
