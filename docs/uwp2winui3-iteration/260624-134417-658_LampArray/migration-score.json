@@ -1,0 +1,37 @@
+{
+  "scenario": "LampArray",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 2,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 2,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_gate_verdict": "PASS (structural only, 100/100) — overridden by visual judgment: app renders blank",
+  "behavioral_regressions": 0,
+  "behavioral_note": "0 action controls responded in WinUI, but the UWP golden also recorded 0 responses (no LampArray hardware attached; 'Attached LampArrays: 0'), so action deadness is hardware-gated and not counted as a regression. The decisive defect is the blank render.",
+  "render_status": "blank: WinUI 3 client area paints nothing (10408-byte all-white frames); only caption buttons render. Confirmed a genuine app defect, not a capture artifact (same tool captured the live UWP app at 80947 bytes and an unrelated migrated WinUI 3 'Store' app at 72953 bytes on this machine).",
+  "features": [
+    {
+      "name": "LampArray Basics",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "structural_coverage": "6/6",
+      "uwp_screenshot": "parity/baseline/screenshots/01_LampArray_Basics.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_LampArray_Basics.png",
+      "note": "All 6 controls present in the UIA tree but the page renders completely blank white. UWP golden shows the full populated page (Off/All green/Gradient/Highlight WASD radios, Brightness slider, Apply, 'Attached LampArrays: 0'). Blank render = fail."
+    },
+    {
+      "name": "LampArray Effects",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "structural_coverage": "4/4",
+      "uwp_screenshot": "parity/baseline/screenshots/02_LampArray_Effects.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_LampArray_Effects.png",
+      "note": "Pause/Play/Stop buttons and ImageBitmap present in the UIA tree but the page renders completely blank white. Blank render = fail."
+    }
+  ]
+}

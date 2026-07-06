@@ -1,0 +1,26 @@
+{
+  "scenario": "LampArray",
+  "featureName": "LampArray C# Sample",
+  "source": "uwp-samples-standalone/Samples/LampArray/cs",
+  "uwp_window_title": "LampArray C# sample",
+  "features": [
+    {
+      "number": 1,
+      "title": "LampArray Basics",
+      "class": "Scenario1_Basics",
+      "controls": ["OffButton (RadioButton)", "SetColorButton (RadioButton)", "GradientButton (RadioButton)", "WasdButton (RadioButton)", "BrightnessSlider (Slider)", "Apply (Button)"],
+      "actions": ["OffButton", "SetColorButton", "GradientButton", "WasdButton", "Apply"],
+      "outputs": ["LampArraysSummary (TextBlock)", "StatusBlock (TextBlock)"],
+      "expected": "Radio buttons Off / All green / Gradient / Highlight WASD, a Brightness slider (0-100), an Apply button, and an 'Attached LampArrays: N' summary line. RGB lighting operations of Windows.Devices.Lights.LampArray."
+    },
+    {
+      "number": 2,
+      "title": "LampArray Effects",
+      "class": "Scenario2_Effects",
+      "controls": ["PauseButton (Button)", "PlayButton (Button)", "StopButton (Button)", "ImageBitmap (Image)"],
+      "actions": ["PauseButton", "PlayButton", "StopButton"],
+      "outputs": ["LampArraysSummary (TextBlock)", "StatusBlock (TextBlock)"],
+      "expected": "Effect-playback controls Pause / Play / Stop, an ImageBitmap image surface, and the 'Attached LampArrays: N' summary. Demonstrates RGB lighting effects via Windows.Devices.Lights.Effects APIs."
+    }
+  ]
+}

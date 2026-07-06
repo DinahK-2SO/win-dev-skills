@@ -1,0 +1,17 @@
+{
+  "scenario": "LampArray",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 window renders completely blank white in the automated-capture session despite a fully laid-out UIA tree, AFTER the agent already applied the skill's documented blank-window fix (deleting <Window.SystemBackdrop>). The remaining cause is the scaffold-added composition-dependent title-bar chrome: ExtendsContentIntoTitleBar=true + the dotnet-new-winui <TitleBar> control + SetTitleBar.",
+      "evidence": "score notes migration-score.json render_status='blank: WinUI 3 client area paints nothing (10408-byte all-white frames); only caption buttons render' and parity_gate_verdict '...overridden by visual judgment: app renders blank'. Migration session-log lines 3141/4895/4981 show the agent removed the Mica backdrop and validator printed '[PASS] No <Window.SystemBackdrop>'. UIA ui/01.json shows all controls laid out (x=774) yet screenshots are uniform white.",
+      "skill_search": "grepped winui-uwp-migration for 'Mica|SystemBackdrop|blank|render|TitleBar|ExtendsContentIntoTitleBar' — hits in SKILL.md (~243-254), MIGRATION-PATTERNS.md#system-backdrop-blank (~77-120), Validate-UwpMigration.ps1 Section 9 (~695-725). All three attribute the blank-in-headless-capture symptom SOLELY to <Window.SystemBackdrop>; none mention ExtendsContentIntoTitleBar or the <TitleBar> control.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md: 'Fix — remove the scaffold backdrop. ... let the window use its normal opaque background.' and SKILL.md: 'Delete the <Window.SystemBackdrop> block from MainWindow.xaml — ... removing it both restores reliable rendering and matches the opaque original.' — presents backdrop removal as sufficient to restore rendering.",
+      "root_cause": "The skill treats <Window.SystemBackdrop> as the ONLY composition-dependent scaffold feature that blanks the window in headless capture, and uses definitive 'restores reliable rendering' language. The dev agent followed it, removed Mica, saw validator PASS, and stopped — leaving the equally composition-dependent ExtendsContentIntoTitleBar + <TitleBar> control (also scaffold-added, also absent from the UWP source) that reproduces the identical blank symptom.",
+      "proposed_fix": "Broaden the blank-window section in MIGRATION-PATTERNS.md#system-backdrop-blank and the SKILL.md mirror from 'the backdrop' to 'all scaffold-added composition-dependent window chrome' — explicitly add ExtendsContentIntoTitleBar=true + the dotnet-new-winui <TitleBar> control + SetTitleBar as a sibling cause; instruct reverting them to the plain default title bar when the UWP original used the standard system title bar; and soften 'restores reliable rendering' to 'necessary but verify every scenario actually paints'. Also extend Validate-UwpMigration.ps1 Section 9 to WARN when code-behind sets ExtendsContentIntoTitleBar=true and/or a <TitleBar> control is present.",
+      "generalizes": "EVERY 'dotnet new winui' scaffold emits both <Window.SystemBackdrop> AND ExtendsContentIntoTitleBar=true + a <TitleBar> control in MainWindow. Parity screenshots for every UWP→WinUI 3 scenario are captured in the same headless/VM/automated session where composition-dependent chrome fails to present. Most UWP SDK samples use the standard title bar, so this scaffold chrome is non-faithful and a recurring blank-render risk across scenarios — not specific to LampArray."
+    }
+  ]
+}

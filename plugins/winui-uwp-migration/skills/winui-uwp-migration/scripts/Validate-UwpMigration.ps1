@@ -724,6 +724,48 @@ if ($backdropHits.Count -eq 0) {
     Add-Diag 'System backdrop blank-window risk (WARN)' (($bdBlock) -join "`r`n")
 }
 
+# ─── 9b. Extended/custom title-bar blank-window risk (WARN-only) ────────────────
+# Sibling of the backdrop check: the 'dotnet new winui' scaffold also emits an
+# extended/custom title bar (ExtendsContentIntoTitleBar = true + SetTitleBar(...) +
+# a <TitleBar> control). Like a system backdrop, these depend on live DWM
+# composition and can render the WHOLE window blank white in headless/VM/RDP/
+# automated-capture sessions even when the visual tree is fully populated and the
+# smoke launch passes. Most UWP originals used the standard system title bar, so
+# this chrome is a non-faithful scaffold addition. Removing <Window.SystemBackdrop>
+# alone does NOT fix it. See MIGRATION-PATTERNS.md#titlebar-blank.
+$titleBarHits = New-Object System.Collections.Generic.List[object]
+$codeFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.cs -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' }
+foreach ($cf in $codeFiles) {
+    $rel = $cf.FullName.Substring($Target.Length).TrimStart('\','/')
+    $leaf = $cf.Name
+    if ($deferredFiles.ContainsKey($rel) -or $deferredFiles.ContainsKey($leaf)) { continue }
+    $txt = [System.IO.File]::ReadAllText($cf.FullName)
+    if ($txt -match 'ExtendsContentIntoTitleBar\s*=\s*true') {
+        [void]$titleBarHits.Add($rel)
+    }
+}
+foreach ($xf in $xamlFiles) {
+    $rel = $xf.FullName.Substring($Target.Length).TrimStart('\','/')
+    $leaf = $xf.Name
+    if ($deferredFiles.ContainsKey($rel) -or $deferredFiles.ContainsKey($leaf)) { continue }
+    $txt = [System.IO.File]::ReadAllText($xf.FullName)
+    if ($txt -match '<TitleBar\b') {
+        [void]$titleBarHits.Add($rel)
+    }
+}
+if ($titleBarHits.Count -eq 0) {
+    Write-Host "[PASS] No scaffold extended/custom title bar (ExtendsContentIntoTitleBar / <TitleBar>) — window will not blank on that path"
+} else {
+    Write-Host "[WARN] $($titleBarHits.Count) file(s) use the scaffold's extended/custom title bar (ExtendsContentIntoTitleBar=true and/or a <TitleBar> control). Like a system backdrop, this needs live DWM composition and can render the WHOLE window BLANK white in headless/VM/RDP/automated-capture sessions even though the visual tree is populated and the smoke launch passes. Removing <Window.SystemBackdrop> alone does NOT fix it. If the UWP original used the standard system title bar, delete the <TitleBar> element and the ExtendsContentIntoTitleBar/SetTitleBar calls for reliable rendering + parity. See MIGRATION-PATTERNS.md#titlebar-blank:"
+    $tbBlock = New-Object System.Collections.Generic.List[string]
+    foreach ($h in ($titleBarHits | Select-Object -Unique)) {
+        Write-Host "       $h"
+        [void]$tbBlock.Add("[$h] uses ExtendsContentIntoTitleBar/<TitleBar> — revert to the default title bar unless the UWP original customized it (MIGRATION-PATTERNS.md#titlebar-blank)")
+    }
+    Add-Diag 'Extended/custom title-bar blank-window risk (WARN)' (($tbBlock) -join "`r`n")
+}
+
 # ─── Summary ───────────────────────────────────────────────────────────────────
 # Always write the diagnostics file (even when empty) so its presence is
 # predictable. The agent can grep / open it on FAIL without guessing.

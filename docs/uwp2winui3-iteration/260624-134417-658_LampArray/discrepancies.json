@@ -1,0 +1,17 @@
+{
+  "scenario": "LampArray",
+  "index": 1,
+  "score": 0,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "LampArray Basics: Off/All green/Gradient/Highlight WASD radios, Brightness slider, Apply, 'Attached LampArrays: N' summary", "status": "fail", "reason": "All 6 controls present in UIA tree with valid layout coords but the page renders completely blank white.", "suspected_skill_gap": "Blank-window guidance covers only <Window.SystemBackdrop>; the sibling scaffold-added composition-dependent chrome (ExtendsContentIntoTitleBar + TitleBar control) that also blanks in headless capture is not covered, so the agent removed Mica, saw validator PASS, and shipped a still-blank window." },
+    { "id": 2, "text": "LampArray Effects: Pause/Play/Stop buttons, ImageBitmap surface, 'Attached LampArrays: N' summary", "status": "fail", "reason": "Pause/Play/Stop + ImageBitmap present in UIA tree but the page renders completely blank white.", "suspected_skill_gap": "Same root cause as requirement 1 — the whole window is blank, not this page specifically." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "LampArray Basics", "uwp": "Full populated page: 4 pattern radios, Brightness slider, Apply button, 'Attached LampArrays: 0'.", "winui": "Uniform blank white client area; only OS caption buttons render.", "screenshot_ref": "parity/winui3/screenshots/01_LampArray_Basics.png vs parity/baseline/screenshots/01_LampArray_Basics.png" },
+    { "feature": "LampArray Effects", "uwp": "Pause/Play/Stop controls + image surface.", "winui": "Uniform blank white client area.", "screenshot_ref": "parity/winui3/screenshots/02_LampArray_Effects.png vs parity/baseline/screenshots/02_LampArray_Effects.png" }
+  ],
+  "missing_features": [],
+  "summary": "The app builds, launches, and populates the full UIA tree (structural coverage 6/6 and 4/4) but renders a completely blank white window in the automated-capture session. Root cause is scaffold-added composition-dependent chrome (ExtendsContentIntoTitleBar + the new TitleBar control) that survived the agent's Mica-backdrop removal. Action deadness is hardware-gated (0 LampArrays attached in both UWP and WinUI) and not a regression."
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "LampArray",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The skill tells the agent to 'confirm each scenario actually renders (controls present, not an empty page)' after launch, but gives no reliable way to distinguish a *painted* page from a *laid-out-but-blank* page. The agent's only in-loop signal is the UIA tree, which was fully populated (all controls present with real coordinates) even though the window painted pure white — so the guidance was satisfied yet the app was blank.",
+      "evidence": "SKILL.md ~132 and ~160 ('navigate to every migrated scenario ... confirm its content frame actually renders (controls present, not an empty page)'). UIA ui/01.json shows all controls present with layout coords; parity screenshots are uniform white. The agent declared done with validator PASS.",
+      "covered_at": "SKILL.md Step 3 note (~line 132) and Step 4 check #7 note (~line 160): 'Verify each scenario renders yourself'; MIGRATION-PATTERNS.md#silent-navigation-failures.",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "Sharpen the existing 'confirm it renders' wording to warn that 'controls present in the UIA tree' does NOT prove the page paints — a fully populated UIA/visual tree can still render blank white when composition-dependent window chrome (backdrop, extend-into-titlebar/TitleBar) fails to present. Point the reader to the broadened blank-window section and instruct proactively minimizing composition-dependent scaffold chrome rather than relying on a visual check the agent cannot perform headlessly.",
+      "generalizes": "Any migrated app can populate its UIA tree and still paint blank in the automated-capture environment; clarifying that UIA-present != pixels-painted, and steering toward reliably-composited default chrome, helps every scenario, not just LampArray."
+    }
+  ]
+}

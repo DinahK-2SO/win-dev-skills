@@ -129,7 +129,7 @@ winapp build                                                                # co
 
 A WinUI 3 app can build cleanly and still crash the instant it starts, so "it compiled" is not "it runs." `Test-AppLaunch.ps1` is your launch step *because* it answers both questions at once: it launches the built app and reports whether it stayed alive — and if it didn't, it captures the real reason from Windows Error Reporting (native exception **code** from event 1000 + managed .NET exception **type + stack** from event 1026) and points you at the matching cause in [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). Making this your normal launch command means a startup crash hands you its exception immediately — you never end up guessing.
 
-> **"Process alive" is not "every page works."** `Test-AppLaunch.ps1` (and Validator Section 7) only prove the **initial** surface survived startup. A content `Page` reached later via `Frame.Navigate` can throw in its constructor/`Loaded` **without crashing the process** — the content frame just goes blank while the app stays alive, so the smoke launch still reports green. After the app launches, **navigate to every migrated scenario / nav entry and confirm its content frame actually renders** (controls present, not an empty page); during bring-up, wire `Frame.NavigationFailed` on the shell content frame so a broken page is loud instead of silent. See [Silent navigation failures](./MIGRATION-PATTERNS.md#silent-navigation-failures).
+> **"Process alive" is not "every page works."** `Test-AppLaunch.ps1` (and Validator Section 7) only prove the **initial** surface survived startup. A content `Page` reached later via `Frame.Navigate` can throw in its constructor/`Loaded` **without crashing the process** — the content frame just goes blank while the app stays alive, so the smoke launch still reports green. After the app launches, **navigate to every migrated scenario / nav entry and confirm its content frame actually renders** (controls present, not an empty page); during bring-up, wire `Frame.NavigationFailed` on the shell content frame so a broken page is loud instead of silent. Note that a **fully populated UIA/visual tree does not prove the page paints** — a window whose tree is fully laid out can still render blank white when composition-dependent scaffold chrome (system backdrop, or the extended/custom title bar) fails to present in a headless/automated session; proactively strip that chrome (see [scaffold system backdrop and extended title bar](#blank-window-even-though-the-visual-tree-is-fully-populated-scaffold-system-backdrop-and-extended-title-bar)) rather than relying on a visual check you cannot perform headlessly. See [Silent navigation failures](./MIGRATION-PATTERNS.md#silent-navigation-failures).
 
 When a **build** error points at a UWP API, fetch the relevant anchor and apply the pattern. For example, a CS0246 on `Window.Current` → `Get-MigrationPattern.ps1 -Anchor windowing`; an analyzer warning about `CoreDispatcher` → `Get-MigrationPattern.ps1 -Anchor threading`. Open `MIGRATION-PATTERNS.md` directly only as a last resort — one anchor at a time keeps each turn small.
 
@@ -240,18 +240,29 @@ Section 7) still passes the process-alive gate, but the scenario silently render
 benchmark's per-scenario / screenshot check penalises the trial. A few lines of guard prevent a
 large score loss.
 
-### Blank window even though the visual tree is fully populated (scaffold system backdrop)
+### Blank window even though the visual tree is fully populated (scaffold system backdrop **and** extended title bar)
 
 A distinct blank-window cause where the content is **not** missing: navigation succeeded,
-every control is in the UIA/visual tree and even responds to input, yet the **whole window
-paints blank white**. This is **not** fixed by an opaque page/`Grid` `Background`. The cause
-is the `<Window.SystemBackdrop><MicaBackdrop/></Window.SystemBackdrop>` that `dotnet new winui`
-scaffolds into `MainWindow.xaml`: system backdrops need live DWM composition, which is absent
-in headless / VM / RDP / automated-capture sessions (where parity screenshots are taken), so
-the backdrop fails to present and blanks the window while the process stays alive (smoke gate
-still green). **Delete the `<Window.SystemBackdrop>` block from `MainWindow.xaml`** — UWP
-originals had no backdrop, so removing it both restores reliable rendering and matches the
-opaque original. See [Blank window despite a fully populated visual tree](./MIGRATION-PATTERNS.md#system-backdrop-blank).
+every control is in the UIA/visual tree (with real bounding rectangles) and even responds to
+input, yet the **whole window paints blank white**. This is **not** fixed by an opaque
+page/`Grid` `Background`. Two **scaffold-added, composition-dependent** features cause it,
+and both are absent from typical UWP originals:
+
+1. `<Window.SystemBackdrop><MicaBackdrop/></Window.SystemBackdrop>` in `MainWindow.xaml`.
+2. The scaffold's **extended/custom title bar** — `ExtendsContentIntoTitleBar = true` +
+   `SetTitleBar(...)` + the `<TitleBar>` control.
+
+Both need live DWM composition, which is absent in headless / VM / RDP / automated-capture
+sessions (where parity screenshots are taken), so they fail to present and blank the window
+while the process stays alive (smoke gate still green). **Delete the `<Window.SystemBackdrop>`
+block, and — for an app that used the standard system title bar (the UWP default) — also
+remove `ExtendsContentIntoTitleBar`/`SetTitleBar` and the `<TitleBar>` control** so the
+window falls back to reliably-composited default chrome. Removing the backdrop alone is
+**necessary but not sufficient**: if the window is still blank after that, the scaffold
+title-bar chrome is the remaining cause. UWP originals had neither, so removing both restores
+reliable rendering *and* matches the opaque original. See [Blank window despite a fully
+populated visual tree](./MIGRATION-PATTERNS.md#system-backdrop-blank) and
+[the scaffold's extended/custom title bar](./MIGRATION-PATTERNS.md#titlebar-blank).
 
 ## Post-Migration
 

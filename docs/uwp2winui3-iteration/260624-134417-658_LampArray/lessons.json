@@ -1,0 +1,31 @@
+{
+  "scenario": "LampArray",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Ran to PASS; its Section 9 backdrop check printed '[PASS] No <Window.SystemBackdrop> (Mica/Acrylic)' after the agent removed the scaffold Mica block (migration session-log line 4895)." },
+    { "tool": "MIGRATION-PATTERNS.md#system-backdrop-blank", "evidence": "Agent consulted the blank-window guidance and removed <Window.SystemBackdrop><MicaBackdrop/> from MainWindow.xaml (session-log lines 3141, 4981)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 Section 7 (smoke) + Section 9 (backdrop)", "problem": "Reported PASS on an app that renders a completely blank white client area. Section 7 only proves the process stayed alive; Section 9 only flags <Window.SystemBackdrop>, so it green-lit a window whose blank render came from a DIFFERENT composition-dependent scaffold feature (ExtendsContentIntoTitleBar + the new TitleBar control).", "evidence": "score notes: parity_gate_verdict 'PASS (structural only, 100/100) — overridden by visual judgment: app renders blank'; validator .validator-diagnostics.txt empty, build PASS." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 Section 9", "limitation": "Only detects <Window.SystemBackdrop>/MicaBackdrop/DesktopAcrylicBackdrop as the cause of the 'laid-out-but-blank-white in headless capture' symptom. It does not flag the sibling scaffold-added composition-dependent chrome — ExtendsContentIntoTitleBar=true + the dotnet-new-winui <TitleBar> control — which produces the identical symptom and survives backdrop removal.", "suggested_tweak": "Extend Section 9 to also WARN when code-behind sets ExtendsContentIntoTitleBar=true and/or a scaffold <TitleBar> control is present but the UWP original used the standard title bar." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#system-backdrop-blank / SKILL.md 'Blank window even though the visual tree is fully populated'", "wrong": "Presents <Window.SystemBackdrop> as THE cause of the blank-in-headless-capture symptom and states removing it 'restores reliable rendering'. This over-promises: the agent removed the backdrop yet the window still renders blank white.", "correct": "Backdrop removal is necessary but not sufficient. The same symptom is also produced by other scaffold-added composition-dependent chrome (ExtendsContentIntoTitleBar=true + the new TitleBar control + SetTitleBar), none of which exist in the UWP source. For a UWP app that used the standard system title bar, revert the scaffold to a plain window as well." }
+  ],
+  "special_apis": [
+    { "api": "Microsoft.UI.Xaml.Controls.TitleBar + ExtendsContentIntoTitleBar + SetTitleBar", "special_handling": "Scaffolded by dotnet new winui but NOT present in typical UWP SDK samples (which use the standard title bar). Composition-dependent; keep only if the UWP original deliberately customized/extended the title bar. Otherwise remove for reliable headless-capture rendering and UWP parity." }
+  ],
+  "errors_encountered": [
+    { "error": "Migrated WinUI 3 app builds, launches, keeps its process alive, and lays out every control (UIA tree has all 6 + 4 controls with real bounding rectangles, x=774), yet the entire client area paints uniform white (10408-byte all-white frame); only OS caption buttons render.", "root_cause": "A composition-dependent scaffold feature that survived the agent's Mica removal — ExtendsContentIntoTitleBar=true together with the dotnet-new-winui <TitleBar> control (added by the scaffold, absent from the UWP source) — fails to present the window content in the headless/VM/automated-capture session where parity screenshots are taken.", "fix": "Generalize the blank-window fix: in addition to deleting <Window.SystemBackdrop>, remove the scaffold's title-bar customization (ExtendsContentIntoTitleBar=true, SetTitleBar, the <TitleBar> control) when the UWP original used the standard system title bar, so the window falls back to reliably-composited default chrome." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainWindow.xaml / MainWindow.xaml.cs blank-render handling", "symptom": "Agent identified blank-render risk, removed the Mica backdrop, saw validator PASS, and declared done — but the app still rendered blank.", "turns_or_retries": "single pass; agent believed the documented backdrop removal fully resolved blank render (session-log lines 3141, 4895, 4981)", "root_cause": "The skill told the agent that removing <Window.SystemBackdrop> 'restores reliable rendering', so it stopped after that one fix and did not consider the other scaffold-added composition-dependent chrome it left in place (ExtendsContentIntoTitleBar + TitleBar control).", "how_resolved": "Not resolved in-trial; shipped blank (score 0).", "preventable_by": "Broadening the skill's blank-window section + validator Section 9 to cover all scaffold-added composition-dependent window chrome (backdrop AND extend-into-titlebar/TitleBar control), and softening the 'one fix restores rendering' language." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Parity screenshots are captured in a headless/VM/automated session where composition-dependent window chrome (Mica, and — per this trial — extend-into-titlebar/TitleBar) fails to present, blanking the whole window even though layout and process are healthy.", "workaround": "Keep the migrated window on plain, reliably-composited default chrome unless the UWP original explicitly used the composited feature." }
+  ]
+}

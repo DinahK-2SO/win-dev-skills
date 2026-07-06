@@ -1,0 +1,30 @@
+{
+  "scenario": "LampArray",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 window renders completely blank white in the automated-capture session despite a fully laid-out UIA tree, even AFTER the agent applied the skill's documented blank-window fix (deleting <Window.SystemBackdrop>). The remaining cause is the scaffold's extended/custom title bar (ExtendsContentIntoTitleBar=true + SetTitleBar + the <TitleBar> control), which is composition-dependent and absent from the UWP source.",
+      "evidence": "score notes migration-score.json render_status 'blank ... only caption buttons render' + parity_gate_verdict overridden by 'app renders blank'; migration session-log 3141/4895/4981 (Mica removed, validator '[PASS] No <Window.SystemBackdrop>'); UIA ui/01.json controls laid out at x=774 yet uniform-white screenshots; UWP source has no title-bar/backdrop customization.",
+      "root_cause": "The skill's blank-window guidance (MIGRATION-PATTERNS.md#system-backdrop-blank, SKILL.md, Validate-UwpMigration.ps1 Section 9) attributed the 'laid-out-but-blank-white in headless capture' symptom SOLELY to <Window.SystemBackdrop> and stated removing it 'restores reliable rendering', so the agent stopped after one fix and left the sibling composition-dependent title-bar chrome in place.",
+      "tier": 3,
+      "change": "Broadened the blank-window section in MIGRATION-PATTERNS.md (added anchor #titlebar-blank covering ExtendsContentIntoTitleBar + <TitleBar> as a sibling cause; softened 'restores reliable rendering' to 'necessary but not sufficient') and mirrored it in SKILL.md (retitled the section 'scaffold system backdrop AND extended title bar', added the revert-to-default-title-bar step, cross-links).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agents that hit a still-blank window after removing the backdrop will now also remove the scaffold's ExtendsContentIntoTitleBar/SetTitleBar/<TitleBar> chrome (which UWP originals didn't have), restoring reliable rendering + parity.",
+      "falsifiable_check": "On a re-run of a standard-title-bar UWP sample, the migrated MainWindow no longer sets ExtendsContentIntoTitleBar=true / carries a <TitleBar> control, and the parity capture shows a painted (non-blank) client area; requirements go fail->pass."
+    },
+    {
+      "problem": "The validator only flagged <Window.SystemBackdrop> as a blank-render risk; it green-lit a window blanked by the sibling extended/custom title bar. 'Confirm each scenario renders' is also satisfiable by a populated UIA tree even when the window paints blank.",
+      "evidence": "Validate-UwpMigration.ps1 Section 9 grep pattern only '<Window.SystemBackdrop>/MicaBackdrop/DesktopAcrylicBackdrop'; validator reported PASS on a blank app. SKILL.md ~132/~160 'confirm content renders (controls present)'.",
+      "root_cause": "Tooling and prose only covered the backdrop path; a prose-only fix (Tier 3) can be ignored, so the risk needs a tooling signal the agent cannot skip.",
+      "tier": 1,
+      "change": "Added Section 9b to Validate-UwpMigration.ps1: WARN when code-behind sets ExtendsContentIntoTitleBar=true and/or a XAML file declares a <TitleBar> control, pointing to MIGRATION-PATTERNS.md#titlebar-blank. Also sharpened SKILL.md Step 3 to state that a populated UIA/visual tree does not prove the page paints and to proactively strip composition-dependent scaffold chrome.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "The mandatory validator now surfaces the extended-title-bar blank-render risk on every migration, so the agent gets an un-ignorable signal even when it doesn't re-read the prose.",
+      "falsifiable_check": "On a re-run, Validate-UwpMigration.ps1 prints '[WARN] ... scaffold's extended/custom title bar' for a project that still sets ExtendsContentIntoTitleBar=true, and '[PASS] No scaffold extended/custom title bar' once reverted."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0: consider having the scaffold used by Initialize-UwpMigration emit a plain default-title-bar MainWindow (no ExtendsContentIntoTitleBar / <TitleBar> / SystemBackdrop) so migrations start from reliably-composited chrome rather than the composition-dependent dotnet-new-winui default."
+  ]
+}

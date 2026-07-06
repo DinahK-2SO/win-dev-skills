@@ -1,0 +1,18 @@
+{
+  "scenario": "LampArray",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Generalize blank-window guidance beyond the system backdrop: MIGRATION-PATTERNS.md + SKILL.md now cover the scaffold's extended/custom title bar (ExtendsContentIntoTitleBar + <TitleBar>) as a sibling composition-dependent cause and instruct reverting to the default title bar for standard-title-bar UWP originals — because removing <Window.SystemBackdrop> alone left LampArray still rendering blank.",
+    "Soften 'removing the backdrop restores reliable rendering' to 'necessary but not sufficient' and add that a populated UIA/visual tree does not prove a page paints, so agents keep looking when a window is still blank after the backdrop fix.",
+    "Add Validate-UwpMigration.ps1 Section 9b: WARN on ExtendsContentIntoTitleBar=true / <TitleBar> control (pointing to MIGRATION-PATTERNS.md#titlebar-blank) so the extended-title-bar blank-render risk is surfaced by the mandatory validator, not just prose."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": [
+    "Tier-0: consider having the migration scaffold emit a plain default-title-bar MainWindow (no ExtendsContentIntoTitleBar / <TitleBar> / SystemBackdrop) so migrations start from reliably-composited chrome."
+  ]
+}

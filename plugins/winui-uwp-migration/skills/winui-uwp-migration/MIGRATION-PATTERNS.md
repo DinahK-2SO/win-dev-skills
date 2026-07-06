@@ -119,6 +119,46 @@ Only keep a system backdrop if the original app deliberately used Mica/Acrylic *
 target will always run in a full desktop composition session — never as the default carried
 over from the scaffold.
 
+<a id="titlebar-blank"></a>
+### Removing the backdrop is necessary but **not always sufficient** — the scaffold's extended/custom title bar
+
+The `<Window.SystemBackdrop>` is not the *only* composition-dependent chrome the
+`dotnet new winui` scaffold adds. The same scaffold also emits an **extended / custom title
+bar** into `MainWindow`:
+
+```xml
+<!-- MainWindow.xaml (scaffold) -->
+<TitleBar x:Name="AppTitleBar" Title="..."> ... </TitleBar>
+```
+```csharp
+// MainWindow.xaml.cs (scaffold)
+ExtendsContentIntoTitleBar = true;
+SetTitleBar(AppTitleBar);
+```
+
+`ExtendsContentIntoTitleBar` and the `TitleBar` control also depend on **live DWM
+composition** and can leave the **whole window painting blank white** in the same
+headless / VM / RDP / automated-capture sessions where parity screenshots are taken — a
+window whose visual tree is fully laid out (every control present in the UIA tree with real
+bounding rectangles) yet paints nothing but the OS caption buttons. So a window that is
+**still blank after you deleted `<Window.SystemBackdrop>`** almost always still carries this
+scaffold title-bar chrome. Removing the backdrop is *necessary but not sufficient*; do not
+assume one edit "restores rendering" — confirm every scenario actually paints.
+
+**Fix — revert to the plain default title bar for standard-title-bar originals.** The vast
+majority of UWP apps (and virtually all Windows-universal SDK samples) use the **standard
+system title bar** and never call `ExtendViewIntoTitleBar`. That scaffold chrome is a WinUI
+scaffold addition, **not** carried over from the source, so removing it is the
+**faithful-parity** choice as well as the reliably-composited one:
+
+- delete the `<TitleBar>` element from `MainWindow.xaml` (leave the content `Grid`/`Frame`);
+- remove `ExtendsContentIntoTitleBar = true;` and `SetTitleBar(...);` from the code-behind.
+
+Only keep the extended/custom title bar if the **UWP original deliberately customized the
+title bar** (e.g. it called `CoreApplicationView.TitleBar.ExtendViewIntoTitleBar = true` or
+set title-bar colors) **and** the target will always run in a full desktop composition
+session.
+
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
 Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding files in `MIGRATION-MAPPING.md` get `Triage label = defer`; cite the specific API in `MIGRATION-DEFERRED.md`.
