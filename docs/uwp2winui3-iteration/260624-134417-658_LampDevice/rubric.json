@@ -1,0 +1,41 @@
+{
+  "scenario": "LampDevice",
+  "featureName": "Lamp device C# sample",
+  "source": "uwp-samples-standalone/Samples/LampDevice/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Get Lamp Instance",
+      "pageClass": "Scenario1_GetLamp",
+      "controls": [
+        { "type": "Button", "label": "Get Lamp Instance from DeviceInformation", "event": "Click" },
+        { "type": "Button", "label": "Get Default Lamp Instance", "event": "Click" },
+        { "type": "TextBox", "name": "outputBox" }
+      ],
+      "expectedBehavior": "Clicking either button attempts to acquire a Lamp instance (via DeviceInformation query or GetDefaultAsync) and writes progress/result text to outputBox. On a machine with no lamp device, the expected result is a 'No lamp device found' error message."
+    },
+    {
+      "number": 2,
+      "title": "Enable Lamp and Settings Adjustment",
+      "pageClass": "Scenario2_EnableSettings",
+      "controls": [
+        { "type": "Button", "label": "Adjust Brightness and turn on Lamp", "event": "Click" },
+        { "type": "Button", "label": "Adjust Color and turn on Lamp", "event": "Click" },
+        { "type": "TextBox", "name": "outputBox" }
+      ],
+      "expectedBehavior": "Clicking either button initializes the lamp and adjusts brightness/color then turns it on, writing progress to outputBox. With no lamp device, expected result is 'Initializing lamp' followed by 'No lamp device was found'."
+    },
+    {
+      "number": 3,
+      "title": "Lamp Device Change Events",
+      "pageClass": "Scenario3_AvailabilityChanged",
+      "controls": [
+        { "type": "Button", "label": "Register for AvailablityChanged Event", "event": "Click" },
+        { "type": "Button", "label": "Unregister for AvailablityChanged Event", "event": "Click" },
+        { "type": "ToggleSwitch", "name": "lampToggle", "onContent": "Lamp On", "offContent": "Lamp Off", "event": "Toggled" },
+        { "type": "TextBox", "name": "outputBox" }
+      ],
+      "expectedBehavior": "Register/Unregister subscribe to the lamp AvailabilityChanged event; the lampToggle turns the lamp on/off but stays DISABLED until a lamp instance is acquired. With no lamp device, Register/Unregister report 'No lamp device was found' and the toggle remains disabled (hardware-gated)."
+    }
+  ]
+}

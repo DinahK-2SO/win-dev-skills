@@ -1,0 +1,14 @@
+{
+  "scenario": "LampDevice",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: auto-rewrite Windows.UI.Colors/ColorHelper -> Microsoft.UI.* (boundary-guarded so the Windows.UI.Color struct is untouched), because the bulk Windows.UI.Xaml-only rewrite left these non-Xaml helper classes to fail as CS0234/CS0103 in nearly every UWP sample.",
+    "MIGRATION-PATTERNS.md: add a note under the namespace table that the Colors/ColorHelper classes move but the Color struct stays in Windows.UI, so agents fix remaining cases correctly instead of over-correcting 'using Windows.UI;'."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

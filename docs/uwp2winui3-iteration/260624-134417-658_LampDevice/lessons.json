@@ -1,0 +1,32 @@
+{
+  "scenario": "LampDevice",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied sources, preserved UWP csproj under .uwp-source, and mass-rewrote Windows.UI.Xaml->Microsoft.UI.Xaml; build reached a near-clean state quickly." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log.txt:3379-3380 '[PASS] dotnet build succeeded (56 warning(s), 0 WUI analyzer warning(s))' confirmed a clean build." },
+    { "tool": "dotnet build -p:Platform=$Platform", "evidence": "session-log.txt:2375 native dotnet build used throughout (no BuildAndRun wrapper); surfaced the real compiler errors." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1 namespace mass-rewrite", "problem": "Only rewrites Windows.UI.Xaml; leaves the non-Xaml Windows.UI helper classes (Colors/ColorHelper) that also moved to Microsoft.UI, so they surface later as build errors.", "evidence": "session-log.txt:2806-2813 CS0234/CS0103 for 'Colors' after bootstrap ran." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Bulk rewrite regex 'Windows\\.UI\\.Xaml' does not cover fully-qualified Windows.UI.Colors / Windows.UI.ColorHelper usages.", "suggested_tweak": "Add drop-in-safe -replace passes for Windows.UI.Colors and Windows.UI.ColorHelper, with a trailing boundary so the Windows.UI.Color struct is left alone." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.UI.Colors / Windows.UI.ColorHelper", "special_handling": "Classes moved to Microsoft.UI; the Windows.UI.Color STRUCT stayed in Windows.UI. Do not rewrite 'using Windows.UI;' wholesale." },
+    { "api": "Windows.Devices.Lights.Lamp", "special_handling": "Unchanged WinRT API; works as-is in WinUI 3. Hardware-gated: with no lamp present, acquisition returns null and the toggle stays disabled (faithful to UWP)." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: The type or namespace name 'Colors' does not exist in the namespace 'Windows.UI'", "root_cause": "Bootstrap rewrote only Windows.UI.Xaml; the fully-qualified Windows.UI.Colors.Green/Red references in MainPage.xaml.cs were left pointing at the old namespace where the Colors class no longer lives in WinUI 3.", "fix": "Retarget Windows.UI.Colors -> Microsoft.UI.Colors (add 'using Microsoft.UI;' or fully-qualify)." },
+    { "error": "CS0103: The name 'Colors' does not exist in the current context", "root_cause": "Scenario2 used 'using Windows.UI;' then unqualified Colors.Blue; after migration the named-color class is Microsoft.UI.Colors, so the unqualified name no longer resolves.", "fix": "Change the directive to 'using Microsoft.UI;' (or add it) so unqualified Colors resolves." },
+    { "error": "XamlCompiler WMC0909/WMC1111: Cannot resolve DataType local:Scenario / DataTemplates containing x:Bind need x:DataType", "root_cause": "Self-inflicted: the migrated MainPage.xaml used {x:Bind Title} with x:DataType=local:Scenario, but the ORIGINAL UWP used a plain {Binding Title} DataTemplate. The unnecessary x:Bind failed to resolve the type at MarkupCompilePass.", "fix": "Reverted the DataTemplate to plain {Binding Title}, matching the original UWP." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainPage.xaml.cs / Scenario2_EnableSettings.xaml.cs (Colors)", "symptom": "6-error build failure (CS0234 x2, CS0103) after the first full build", "turns_or_retries": "turns 36-38, 1 extra build cycle", "root_cause": "Bootstrap namespace rewrite did not cover Windows.UI.Colors/ColorHelper, which are non-Xaml helper classes that also relocated to Microsoft.UI.", "how_resolved": "Manually retargeted Windows.UI.Colors -> Microsoft.UI.Colors and switched 'using Windows.UI;' to 'using Microsoft.UI;'.", "preventable_by": "Extending Initialize-UwpMigration.ps1 to auto-rewrite Windows.UI.Colors/ColorHelper, and a MIGRATION-PATTERNS.md note clarifying the class-moved / struct-stayed distinction." },
+    { "where": "MainPage.xaml DataTemplate", "symptom": "XamlCompiler WMC0909/WMC1111 errors", "turns_or_retries": "turn 36, resolved same turn", "root_cause": "Agent introduced x:Bind + x:DataType that the original UWP did not use.", "how_resolved": "Reverted to plain {Binding Title} as in the original.", "preventable_by": "No skill change — a faithful copy of the original UWP DataTemplate avoids it (dev-agent slip)." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

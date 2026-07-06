@@ -1,0 +1,15 @@
+{
+  "scenario": "LampDevice",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "After the bootstrap namespace rewrite, fully-qualified Windows.UI.Colors / unqualified Colors usages still fail to build (CS0234 / CS0103) because only Windows.UI.Xaml is auto-rewritten.",
+      "evidence": "session-log.txt:2806-2807 'CS0234 ... Colors does not exist in the namespace Windows.UI'; :2813 'CS0103: The name Colors does not exist'; fix at turns 36-37 (:2837, :2847, :2859).",
+      "covered_at": "MIGRATION-PATTERNS.md Namespace Mapping table, row 'Windows.UI.Colors | Microsoft.UI.Colors' (line 157); Initialize-UwpMigration.ps1 step 3 rewrite (line 126).",
+      "why_missed": "under-emphasized — the mapping table lists the row, but (a) the bootstrap script does NOT auto-apply it (only Windows.UI.Xaml), and (b) nothing states the class-moved / struct-stayed distinction, so the agent only discovers it via a build error and risks over-correcting 'using Windows.UI;'.",
+      "proposed_improvement": "Make the existing mapping actionable: (Tier 1) extend Initialize-UwpMigration.ps1's rewrite to also cover the drop-in-safe Windows.UI.Colors and Windows.UI.ColorHelper (boundary-guarded so the Windows.UI.Color struct is untouched); (Tier 3) add a note under the mapping table stating the Colors/ColorHelper classes move but the Color struct stays, and that other Windows.UI.* rows need manual fixing.",
+      "generalizes": "Windows.UI.Colors is used for status-message coloring (SolidColorBrush(Colors.Red/Green)) in essentially every Windows-universal-sample MainPage/SampleConfiguration and countless real UWP apps; the bulk 'Windows.UI.Xaml only' rewrite misses it every time, so this recurs across virtually all UWP->WinUI 3 migrations."
+    }
+  ]
+}

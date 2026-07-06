@@ -1,0 +1,28 @@
+{
+  "scenario": "LampDevice",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Post-bootstrap build fails with CS0234/CS0103 on Windows.UI.Colors because the namespace mass-rewrite only handles Windows.UI.Xaml.",
+      "evidence": "lessons.json errors_encountered[0-1]; session-log.txt:2806-2813 (errors), :2837/:2847/:2859 (manual fix, +1 build cycle).",
+      "root_cause": "Initialize-UwpMigration.ps1 step 3 rewrites only 'Windows.UI.Xaml'; the non-Xaml helper classes Windows.UI.Colors / Windows.UI.ColorHelper (which also moved to Microsoft.UI) are left un-rewritten.",
+      "tier": 1,
+      "change": "Extended the script's mass-replace with two boundary-guarded passes: Windows.UI.ColorHelper -> Microsoft.UI.ColorHelper and Windows.UI.Colors\\b -> Microsoft.UI.Colors. The trailing 's'/'Helper' + \\b leave the Windows.UI.Color STRUCT untouched.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Fully-qualified Windows.UI.Colors/ColorHelper usages compile straight out of the bootstrap; no CS0234/CS0103 on Colors.",
+      "falsifiable_check": "On re-run of a sample using SolidColorBrush(Windows.UI.Colors.X), dotnet build emits ZERO 'CS0234 ... Colors does not exist in the namespace Windows.UI' errors without any manual edit; and Windows.UI.Color struct references still compile."
+    },
+    {
+      "problem": "The Colors mapping row is passive and lacks the class-moved / struct-stayed distinction, so agents discover the fix only via a build error and risk over-correcting 'using Windows.UI;'.",
+      "evidence": "skill-coverage-gaps.json item 1; MIGRATION-PATTERNS.md mapping table line 157.",
+      "root_cause": "Under-emphasized guidance: the mapping table lists Colors but does not say the Color struct stays, nor which rows the bootstrap auto-applies.",
+      "tier": 3,
+      "change": "Added a note under the Namespace Mapping table: Colors/ColorHelper classes move to Microsoft.UI but the Windows.UI.Color struct stays; do not blanket-rewrite 'using Windows.UI;'; the bootstrap auto-handles only Windows.UI.Xaml + Windows.UI.Colors/ColorHelper, other Windows.UI.* rows are manual. Includes the CS0234/CS0103 symptom.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "When an unqualified or non-auto-handled Windows.UI.* case remains, the agent fixes it correctly (retarget the class, keep the struct) without over-correcting.",
+      "falsifiable_check": "On re-run, agents do not rewrite Windows.UI.Color (struct) to a non-existent Microsoft.UI.Color, and resolve remaining Colors errors in-line without breaking Color usages."
+    }
+  ],
+  "deferred_to_human": []
+}

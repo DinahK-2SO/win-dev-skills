@@ -158,6 +158,19 @@ All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
 | `Windows.UI.Text` | `Microsoft.UI.Text` |
 | `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` |
 
+> **`Colors` class moved, `Color` struct did NOT.** The static helpers `Windows.UI.Colors`
+> and `Windows.UI.ColorHelper` relocate to `Microsoft.UI.*`, but the `Windows.UI.Color`
+> **struct itself stays in `Windows.UI`**. So keep `Windows.UI.Color` as-is, and only
+> retarget the named-color/helper classes — e.g. `new SolidColorBrush(Windows.UI.Colors.Red)`
+> → `Microsoft.UI.Colors.Red`. Do **not** rewrite a whole `using Windows.UI;` directive to
+> `using Microsoft.UI;` (that would break `Color`); instead add `using Microsoft.UI;`
+> alongside it, or fully-qualify. `Initialize-UwpMigration.ps1` auto-rewrites only
+> `Windows.UI.Xaml.*` plus the fully-qualified `Windows.UI.Colors` /
+> `Windows.UI.ColorHelper`; the remaining `Windows.UI.*` rows above (Text, Input,
+> Composition, Core-dispatcher) and any unqualified `Colors`/`ColorHelper` usages must be
+> fixed by hand. Symptom when missed: `CS0234: 'Colors' does not exist in the namespace
+> 'Windows.UI'` or `CS0103: The name 'Colors' does not exist`.
+
 <a id="threading"></a>
 ## Threading: CoreDispatcher → DispatcherQueue
 

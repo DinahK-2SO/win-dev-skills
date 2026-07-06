@@ -123,7 +123,14 @@ $nsFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.cs,*.xaml -Erro
 $nsChanged = 0
 foreach ($f in $nsFiles) {
     $orig = [System.IO.File]::ReadAllText($f.FullName)
-    $new = $orig -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml'
+    # Windows.UI.Xaml.* -> Microsoft.UI.Xaml.* (the bulk rewrite), plus the two
+    # non-Xaml Windows.UI helper *classes* that also relocated to Microsoft.UI and are
+    # 100% drop-in-safe. The trailing 's'/'Helper' keeps the Windows.UI.Color *struct*
+    # (which STAYS in Windows.UI) untouched. Other Windows.UI.* rows (Text, Input,
+    # Composition, Core/dispatcher) are NOT auto-rewritten — see MIGRATION-PATTERNS.md.
+    $new = $orig -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml' `
+                 -replace 'Windows\.UI\.ColorHelper', 'Microsoft.UI.ColorHelper' `
+                 -replace 'Windows\.UI\.Colors\b', 'Microsoft.UI.Colors'
     if ($new -ne $orig) {
         [System.IO.File]::WriteAllText($f.FullName, $new)
         $nsChanged++

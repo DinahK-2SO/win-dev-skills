@@ -1,0 +1,14 @@
+{
+  "scenario": "LampDevice",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "DataTemplate XamlCompiler errors WMC0909 (Cannot resolve DataType local:Scenario) and WMC1111 (x:Bind needs x:DataType).",
+      "evidence": "session-log.txt:2816-2818 (errors); the ORIGINAL UWP MainPage.xaml uses a plain {Binding Title} DataTemplate (obj/x64/Release/MainPage.xaml:35-38), but the migrated file used {x:Bind Title} + x:DataType; agent reverted to Binding at :2841.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md line ~773 'x:Bind is supported in WinUI 3 with the same syntax' — and the overarching skill directive to faithfully reproduce the original UWP markup. The original used Binding, not x:Bind.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Self-inflicted: the agent introduced x:Bind that was not in the source. A faithful copy of the original {Binding Title} DataTemplate never hits this. Adding x:DataType/x:Bind guidance would only paper over a deviation the agent should not have made; a capable model reproducing the source faithfully gets this right with no skill edit."
+    }
+  ]
+}
