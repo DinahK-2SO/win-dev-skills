@@ -1,0 +1,13 @@
+{
+  "scenario": "MIDI",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Get-MigrationPattern.ps1: add heading-slug fallback so anchorless sections (manifest checklist, appxmanifest, WUI analyzer, csproj cheat-sheet) are fetchable by name — the dev-agent hit 3 consecutive 'Anchor not found' failures for -Anchor manifest/appxmanifest and had to grep/open the whole patterns file",
+    "Get-MigrationPattern.ps1: on a miss, list every available anchor and heading slug so the agent self-corrects in one turn instead of opening the API-name-dense file wholesale (the content-filter/context risk the script exists to prevent)"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Get-MigrationPattern.ps1"
+  ],
+  "deferred_to_human": []
+}

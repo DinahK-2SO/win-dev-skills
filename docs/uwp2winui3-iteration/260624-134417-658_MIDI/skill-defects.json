@@ -1,0 +1,17 @@
+{
+  "scenario": "MIDI",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Get-MigrationPattern.ps1 -Anchor cannot fetch any MIGRATION-PATTERNS.md section that lacks an explicit <a id> anchor, and its not-found error lists no valid anchors, so the agent cannot self-correct and falls back to grepping/opening the whole file.",
+      "evidence": "session-log.txt turns 18-20: three consecutive failures — 'Anchor #manifest not found', 'Anchor #manifest-migration-checklist not found', 'Anchor #appxmanifest not found'. Turn 21-22: agent recovered only by grepping '^## |^### |<a id=' across the whole file and then opening it by line range.",
+      "skill_search": "Grepped scripts/Get-MigrationPattern.ps1 (only matches <a id=\"$Anchor\") and MIGRATION-PATTERNS.md <a id> anchors (15 total) vs. ##/### headings (40+). Sections with NO anchor include: '### Manifest migration checklist' (line 634), '### Package.appxmanifest — reconcile image references' (602), '### WUI analyzer warnings' (687), '### PackageReference reconciliation cheat-sheet' (587), '## Namespace Mapping' (142), '## Common build errors after the namespace rewrite' (5), '## Unsupported on WinUI 3 Desktop' (122).",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Get-MigrationPattern.ps1: $anchorPattern = \"<a\\s+id=`\"$([regex]::Escape($Anchor))`\"\" ; on miss: Write-Error \"Anchor '#$Anchor' not found in $PatternsPath\" ; exit 1",
+      "root_cause": "The retrieval tool indexes the patterns file by <a id> only, but the doc mixes anchored and unanchored sections. High-value manifest/csproj/analyzer guidance is thus unreachable via the sanctioned tool, and the error gives no discovery affordance — directly contradicting SKILL.md's instruction to 'Prefer this over opening MIGRATION-PATTERNS.md directly'.",
+      "proposed_fix": "In scripts/Get-MigrationPattern.ps1: after the <a id> match fails, fall back to matching a heading by slug (lowercased, punctuation->hyphen) so -Anchor manifest resolves '### Manifest migration checklist'; terminate a heading-started section at the next heading of equal-or-higher level. On a total miss, print the full list of available <a id> anchors AND heading slugs (to stderr) before exiting 1, so the agent recovers in one turn.",
+      "generalizes": "Manifest reconciliation, csproj/PackageReference merge, and WUI-analyzer fixes are needed in nearly EVERY packaged UWP->WinUI 3 migration, and agents routinely guess an anchor name that differs slightly from the 15 canonical ones. Any such guess currently dead-ends into wholesale file access (the content-filter/context risk the script was built to prevent). Fixing retrieval + adding a discovery list helps every scenario, not just MIDI."
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "scenario": "MIDI",
+  "created_at": "2026-07-07T12:04:00+08:00",
+  "uwp_capture_status": "ok",
+  "features": [
+    {
+      "id": "s1-device-enumeration-page",
+      "area": "Scenario 1 - MIDI Device Enumeration",
+      "name": "Device enumeration page renders",
+      "description": "Scenario 1 shows the MIDI title, description, an AUTO-DETECT INPUT toggle (default Off), a 'List all input devices' button, an input-device list, an 'OUTPUT' section with a 'List all output devices' button, an output-device list, and a status area.",
+      "expected_behaviour": [
+        "AUTO-DETECT INPUT toggle is present and defaults to Off",
+        "'List all input devices' and 'List all output devices' buttons are present",
+        "Input list shows 'No MIDI input devices found!' when no external MIDI device is attached",
+        "Status region shows the red 'Please connect at least one external MIDI device...' banner"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_MIDI_Device_Enumeration.png",
+      "weight": 2
+    },
+    {
+      "id": "s1-list-input-devices",
+      "area": "Scenario 1 - MIDI Device Enumeration",
+      "name": "List all input devices button",
+      "description": "Clicking 'List all input devices' enumerates MIDI input ports and populates the input list (or shows 'No MIDI input devices found!').",
+      "expected_behaviour": [
+        "Clicking the button produces a visible change in the input list / status text"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_MIDI_Device_Enumeration__a02_List_all_input_devices.png",
+      "weight": 1
+    },
+    {
+      "id": "s1-list-output-devices",
+      "area": "Scenario 1 - MIDI Device Enumeration",
+      "name": "List all output devices button",
+      "description": "Clicking 'List all output devices' enumerates MIDI output ports; the built-in 'Microsoft GS Wavetable Synth' appears in the output list.",
+      "expected_behaviour": [
+        "Clicking the button lists at least 'Microsoft GS Wavetable Synth' in the output list"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_MIDI_Device_Enumeration__a03_List_all_output_devices.png",
+      "weight": 1
+    },
+    {
+      "id": "s1-auto-detect-toggle",
+      "area": "Scenario 1 - MIDI Device Enumeration",
+      "name": "Auto-detect input toggle",
+      "description": "The AUTO-DETECT INPUT ToggleSwitch enables/disables the device watcher. With no MIDI hardware attached, toggling produces no new visible text (no-op) — same in UWP and WinUI.",
+      "expected_behaviour": [
+        "Toggle is interactive; state changes visually",
+        "With no hardware present, no new device text appears (parity no-op)"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_MIDI_Device_Enumeration__a01_deviceAutoDetectToggle.png",
+      "weight": 1
+    },
+    {
+      "id": "s2-receive-page",
+      "area": "Scenario 2 - Receive MIDI Messages",
+      "name": "Receive messages page renders",
+      "description": "Scenario 2 shows the description, an 'INPUT DEVICES' list ('No MIDI ports found' with no hardware), and a 'RECEIVED MESSAGES' list that displays incoming MIDI messages from the selected input device.",
+      "expected_behaviour": [
+        "INPUT DEVICES section present and shows 'No MIDI ports found' with no hardware",
+        "RECEIVED MESSAGES section present"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Receive_MIDI_Messages.png",
+      "weight": 2
+    },
+    {
+      "id": "s3-send-page",
+      "area": "Scenario 3 - Send MIDI Messages",
+      "name": "Send messages page renders",
+      "description": "Scenario 3 shows the description, an 'OUTPUT DEVICES' list (containing 'Microsoft GS Wavetable Synth'), a 'SEND MESSAGE' header, a Message Type combo (disabled until an output device is selected), and Reset/Send buttons (disabled until a valid message is composed).",
+      "expected_behaviour": [
+        "OUTPUT DEVICES list shows 'Microsoft GS Wavetable Synth'",
+        "SEND MESSAGE header and Message Type combo present",
+        "Reset and Send buttons present but disabled until an output device + message type are chosen"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_Send_MIDI_Messages.png",
+      "weight": 2
+    },
+    {
+      "id": "s3-parameter-controls",
+      "area": "Scenario 3 - Send MIDI Messages",
+      "name": "Message parameter controls (dynamic)",
+      "description": "Parameter 1/2/3 combos and the SysEx TextBox are Visibility=Collapsed by default and only appear after a message type is selected (which requires a selected output device / MIDI hardware). Identical XAML in UWP source and migrated app.",
+      "expected_behaviour": [
+        "parameter1/parameter2/parameter3 and sysExMessageContent exist in XAML, collapsed by default",
+        "They reveal only after a message type is chosen (hardware-gated; not observable without a MIDI device)"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_Send_MIDI_Messages.png",
+      "weight": 1
+    },
+    {
+      "id": "s3-send-reset",
+      "area": "Scenario 3 - Send MIDI Messages",
+      "name": "Send / Reset buttons",
+      "description": "Send and Reset actuate MIDI message sending. They are disabled (dead) until an output device and message type are selected; with no MIDI hardware they are non-responsive in the UWP golden as well.",
+      "expected_behaviour": [
+        "Buttons present",
+        "Non-responsive when no output device/message type selected (parity with UWP golden; hardware-gated)"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_Send_MIDI_Messages__a02_Send.png",
+      "weight": 1
+    }
+  ]
+}

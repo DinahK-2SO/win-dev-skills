@@ -1,0 +1,297 @@
+{
+  "featureName": "MIDI",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\MIDI\\cs",
+  "generated": "2026-07-07T11:55:49.7780418+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "MIDI Device Enumeration",
+      "class": "Scenario1_MIDIDeviceEnumeration",
+      "slug": "MIDI_Device_Enumeration",
+      "screenshot": "01_MIDI_Device_Enumeration.png",
+      "controls": [
+        {
+          "name": "deviceAutoDetectToggle",
+          "type": "ToggleSwitch",
+          "label": "",
+          "events": [
+            "Toggled"
+          ]
+        },
+        {
+          "name": "listInputDevicesButton",
+          "type": "Button",
+          "label": "List all input devices",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "inputDevices",
+          "type": "ListBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "inputDeviceProperties",
+          "type": "ListBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "listOutputDevicesButton",
+          "type": "Button",
+          "label": "List all output devices",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "outputDevices",
+          "type": "ListBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "outputDeviceProperties",
+          "type": "ListBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "deviceAutoDetectToggle",
+          "alt": "",
+          "type": "ToggleSwitch",
+          "label": "",
+          "name": "deviceAutoDetectToggle",
+          "event": "Toggled"
+        },
+        {
+          "target": "List all input devices",
+          "alt": "listInputDevicesButton",
+          "type": "Button",
+          "label": "List all input devices",
+          "name": "listInputDevicesButton",
+          "event": "Click"
+        },
+        {
+          "target": "List all output devices",
+          "alt": "listOutputDevicesButton",
+          "type": "Button",
+          "label": "List all output devices",
+          "name": "listOutputDevicesButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "deviceAutoDetectToggleLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "listInputDevicesButtonLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "listOutputDevicesButtonLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "statusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Receive MIDI Messages",
+      "class": "Scenario2_ReceiveMIDIMessages",
+      "slug": "Receive_MIDI_Messages",
+      "screenshot": "02_Receive_MIDI_Messages.png",
+      "controls": [
+        {
+          "name": "inputDevices",
+          "type": "ListBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "inputDeviceMessages",
+          "type": "ListBox",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [],
+      "outputs": [
+        [
+          {
+            "name": "inputDevicesLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "inputDeviceMessagesLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "statusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Send MIDI Messages",
+      "class": "Scenario3_SendMIDIMessages",
+      "slug": "Send_MIDI_Messages",
+      "screenshot": "03_Send_MIDI_Messages.png",
+      "controls": [
+        {
+          "name": "outputDevices",
+          "type": "ListBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "messageType",
+          "type": "ComboBox",
+          "label": "",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "parameter1",
+          "type": "ComboBox",
+          "label": "Parameter 1",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "parameter2",
+          "type": "ComboBox",
+          "label": "Parameter 2",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "parameter3",
+          "type": "ComboBox",
+          "label": "Parameter 3",
+          "events": [
+            "SelectionChanged"
+          ]
+        },
+        {
+          "name": "sysExMessageContent",
+          "type": "TextBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "resetButton",
+          "type": "Button",
+          "label": "Reset",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "sendButton",
+          "type": "Button",
+          "label": "Send",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Reset",
+          "alt": "resetButton",
+          "type": "Button",
+          "label": "Reset",
+          "name": "resetButton",
+          "event": "Click"
+        },
+        {
+          "target": "Send",
+          "alt": "sendButton",
+          "type": "Button",
+          "label": "Send",
+          "name": "sendButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "outputDevicesLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "messageTypeLabel",
+            "type": "TextBlock"
+          },
+          {
+            "name": "rawBufferHeader",
+            "type": "TextBlock"
+          },
+          {
+            "name": "sysExMessageContent",
+            "type": "TextBox"
+          },
+          {
+            "name": "statusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

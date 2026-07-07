@@ -1,0 +1,15 @@
+{
+  "scenario": "MIDI",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "SKILL.md tells the agent the anchor list 'lives in unsupported-api-inventory.json under each entry's anchor', but that JSON only enumerates the unsupported-API anchors — it does not list the manifest/csproj/analyzer anchors the agent needs, so the agent has no canonical list of fetchable anchors and resorts to guessing.",
+      "evidence": "session-log turns 18-20 show the agent guessing 'manifest', 'manifest-migration-checklist', 'appxmanifest' with no authoritative anchor list to consult. Get-MigrationPattern.ps1 header comment: 'The full list lives in unsupported-api-inventory.json under each entry's anchor.'",
+      "covered_at": "scripts/Get-MigrationPattern.ps1 .PARAMETER Anchor comment + SKILL.md references to -Anchor.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "This gap is fully absorbed by the skill-defect fix: once Get-MigrationPattern.ps1 prints the available anchors+headings on a miss, the agent always has a live, authoritative list and never needs the (incomplete) JSON pointer. No separate edit required beyond the defect fix.",
+      "generalizes": "Any scenario whose needed section isn't one of the unsupported-API anchors hits the same missing-list problem; the on-miss listing solves it universally."
+    }
+  ]
+}

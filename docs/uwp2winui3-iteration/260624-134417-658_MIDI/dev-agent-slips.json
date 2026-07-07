@@ -1,0 +1,21 @@
+{
+  "scenario": "MIDI",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS86xx nullable-reference warnings (28-56) left unresolved in the final build.",
+      "evidence": "build-output.txt: many CS8618/CS8625/CS8602/CS8600 warnings; BUILD SUCCEEDED. migration-score shows builds=true, runs=true, 0 WUI.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md '### WUI analyzer warnings (UWP API residue)' (line 687) makes clear only WUI000x analyzer warnings are defects; ordinary CSxxxx nullable warnings are benign build noise.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "These warnings are harmless (nullable annotations on un-annotated sample code) and did not affect build, run, or score. The agent correctly ignored them; no skill edit is warranted, and adding 'fix nullable warnings' guidance would be noise that could distract from real WUI defects."
+    },
+    {
+      "problem": "Send MIDI Messages scored partial (dynamic parameter controls / Send-Reset not exercised).",
+      "evidence": "migration-score.json: verdict 'partial'; discrepancies.json confirms identical collapsed XAML in UWP and WinUI and matched non-responsive buttons — hardware-gated, not a defect.",
+      "covered_clearly_at": "N/A — not a skill matter. The migration faithfully reproduced the UWP XAML and behavior; the partial is a measurement limitation (no MIDI hardware), not something any skill change could fix.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The behavior is faithful parity with the UWP golden; the only reason it isn't 'pass' is absence of MIDI hardware in the capture environment, which is out of scope for the migration skill."
+    }
+  ]
+}

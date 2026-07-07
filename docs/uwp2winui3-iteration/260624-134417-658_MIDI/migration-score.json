@@ -1,0 +1,44 @@
+{
+  "scenario": "MIDI",
+  "uwp_launchable": true,
+  "score": 83,
+  "features_total": 3,
+  "features_pass": 2,
+  "features_partial": 1,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "uwp_window_title": "MIDI",
+  "uwp_pid": 21380,
+  "winui_pid": 52424,
+  "features": [
+    {
+      "name": "MIDI Device Enumeration",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_MIDI_Device_Enumeration.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_MIDI_Device_Enumeration.png",
+      "note": "7/7 control coverage. List input/output devices respond identically (output shows 'Microsoft GS Wavetable Synth'); auto-detect toggle is a matched no-op with no hardware (2/3 actions live in both apps). Layout, headers and red status banner match the UWP golden."
+    },
+    {
+      "name": "Receive MIDI Messages",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Receive_MIDI_Messages.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Receive_MIDI_Messages.png",
+      "note": "2/2 control coverage. INPUT DEVICES ('No MIDI ports found') and RECEIVED MESSAGES sections render identically to the UWP golden. No actionable controls without hardware."
+    },
+    {
+      "name": "Send MIDI Messages",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Send_MIDI_Messages.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Send_MIDI_Messages.png",
+      "note": "Structural 4/8: parameter1/2/3 combos and sysExMessageContent are Visibility=Collapsed by default in BOTH the UWP source and migrated app (verified identical XAML), revealed only after selecting a message type (requires MIDI hardware). Reset/Send are non-responsive in the WinUI app AND in the UWP golden (hardware-gated), so no behavioral regression. Scored partial because the deeper send-message path could not be exercised without hardware; the visible state (OUTPUT DEVICES with 'Microsoft GS Wavetable Synth', SEND MESSAGE header, Message Type combo) matches the UWP golden."
+    }
+  ]
+}

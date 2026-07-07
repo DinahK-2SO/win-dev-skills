@@ -1,0 +1,18 @@
+{
+  "scenario": "MIDI",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Get-MigrationPattern.ps1 -Anchor hard-fails for MIGRATION-PATTERNS.md sections that lack an <a id> anchor (manifest checklist, appxmanifest, WUI analyzer, PackageReference cheat-sheet, namespace mapping, etc.) and its not-found error lists no valid anchors, so the agent cannot self-correct and falls back to grepping/opening the whole patterns file.",
+      "evidence": "session-log.txt turns 18-20: three consecutive 'Anchor not found' failures for -Anchor manifest / manifest-migration-checklist / appxmanifest; turns 21-22 recovered only by grepping every heading and opening the file by line range.",
+      "root_cause": "The retrieval helper indexes the doc by <a id> only, but the doc mixes anchored and unanchored sections; the miss path offers no discovery affordance, contradicting SKILL.md's 'prefer this over opening MIGRATION-PATTERNS.md directly'.",
+      "tier": 1,
+      "change": "Enhanced scripts/Get-MigrationPattern.ps1: (1) after the exact <a id> match fails, fall back to matching a ##/### heading by slug (exact, then substring), terminating a heading-started section at the next heading of equal-or-higher level; (2) on a total miss, Write-Error now lists every available <a id> anchor AND heading slug. Backward-compatible: existing <a id> anchors (threading, csproj, ...) behave exactly as before.",
+      "file": "skills/winui-uwp-migration/scripts/Get-MigrationPattern.ps1",
+      "expected_effect": "Every documented section is reachable by name, near-miss anchor guesses resolve, and a genuine miss self-corrects in one turn instead of pushing the agent to open the API-name-dense file wholesale (the content-filter/context risk the script exists to avoid).",
+      "falsifiable_check": "On re-run, `Get-MigrationPattern.ps1 -Anchor manifest` (and appxmanifest / manifest-migration-checklist) exits 0 and returns the manifest section; the build log shows zero 'Anchor not found' errors followed by a wholesale heading grep. Verified locally: all three previously-failing anchors now exit 0; a bogus anchor prints the full anchor+heading list."
+    }
+  ],
+  "deferred_to_human": []
+}

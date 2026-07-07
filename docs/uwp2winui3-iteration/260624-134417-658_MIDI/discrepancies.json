@@ -1,0 +1,20 @@
+{
+  "scenario": "MIDI",
+  "index": 0,
+  "score": 83,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": "s1-device-enumeration-page", "text": "Device enumeration page renders", "status": "pass", "reason": "7/7 control coverage; layout, headers and red status banner match UWP golden.", "suspected_skill_gap": "" },
+    { "id": "s1-list-input-devices", "text": "List all input devices button", "status": "pass", "reason": "Responds identically to UWP golden.", "suspected_skill_gap": "" },
+    { "id": "s1-list-output-devices", "text": "List all output devices button", "status": "pass", "reason": "Lists 'Microsoft GS Wavetable Synth' as in UWP.", "suspected_skill_gap": "" },
+    { "id": "s1-auto-detect-toggle", "text": "Auto-detect input toggle", "status": "pass", "reason": "Matched no-op with no hardware (2/3 actions live in both apps).", "suspected_skill_gap": "" },
+    { "id": "s2-receive-page", "text": "Receive messages page renders", "status": "pass", "reason": "2/2 coverage; INPUT DEVICES + RECEIVED MESSAGES render identically.", "suspected_skill_gap": "" },
+    { "id": "s3-send-page", "text": "Send messages page renders", "status": "partial", "reason": "Structural 4/8: parameter1/2/3 combos + sysExMessageContent are Visibility=Collapsed by default in BOTH UWP source and migrated app (verified identical XAML), revealed only after selecting a message type (requires MIDI hardware). Visible state matches UWP golden.", "suspected_skill_gap": "None — faithful parity. Hardware-gated dynamic reveal is not observable in either app's captured UIA tree." },
+    { "id": "s3-parameter-controls", "text": "Message parameter controls (dynamic)", "status": "partial", "reason": "Collapsed-by-default controls not observable without MIDI hardware; identical XAML in UWP and WinUI.", "suspected_skill_gap": "None — parity preserved." },
+    { "id": "s3-send-reset", "text": "Send / Reset buttons", "status": "partial", "reason": "Non-responsive in WinUI AND in the UWP golden (hardware-gated). No behavioral regression.", "suspected_skill_gap": "None — matched UWP behavior." }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Faithful migration. 2/3 features pass, 1 partial that is entirely hardware-gated (verified identical collapsed XAML and matched non-responsive buttons in both UWP and WinUI). Zero behavioral regressions. No parity discrepancy traces to a skill gap; the only actionable finding is dev-agent tooling friction (Get-MigrationPattern.ps1 anchor lookup), not a parity defect."
+}

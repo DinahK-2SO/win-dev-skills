@@ -1,0 +1,28 @@
+{
+  "scenario": "MIDI",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied 9 source files, rewrote Windows.UI.Xaml->Microsoft.UI.Xaml in 5 files, triaged each file (7 migrate-as-is, 2 migrate-with-adaptation) and injected 8 TODO[migrate-NNN] anchors. Migration proceeded cleanly from this scaffold." },
+    { "tool": "Get-MigrationPattern.ps1 -Anchor threading", "evidence": "Turn 6: returned the CoreDispatcher->DispatcherQueue section, which the agent applied to resolve TODO[migrate-001..007] in MidiDeviceWatcher.cs and Scenario1/2/3. Build succeeded first try with 0 WUI warnings." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Final validation reported [PASS] dotnet build succeeded (0 WUI analyzer warnings), no TODO residue, no rows stuck at Status=copied." }
+  ],
+  "tools_problematic": [
+    { "tool": "Get-MigrationPattern.ps1 -Anchor <manifest>", "problem": "Hard-fails for any MIGRATION-PATTERNS.md section that lacks an explicit <a id> anchor, even though the section exists in the file.", "evidence": "Turns 18-20: three consecutive failures for -Anchor manifest, -Anchor manifest-migration-checklist, -Anchor appxmanifest — all 'Anchor not found'. The manifest guidance IS in the file (### Manifest migration checklist, line 634) but has no <a id>, so it is unreachable via the intended tool." }
+  ],
+  "tool_limitations": [
+    { "tool": "Get-MigrationPattern.ps1", "limitation": "Only matches <a id=\"...\"> anchors (15 exist); the many ##/### sections without one (Manifest migration checklist, appxmanifest reconciliation, WUI analyzer warnings, PackageReference cheat-sheet, Namespace Mapping, Common build errors, Unsupported APIs) cannot be fetched. On a miss it prints only 'Anchor not found' with no list of valid anchors, so the agent cannot self-correct without grepping/opening the whole file — the exact behavior the script exists to prevent.", "suggested_tweak": "Add heading-slug fallback matching (so -Anchor manifest resolves the manifest heading) and, on total miss, print the list of available anchors AND heading slugs so the agent recovers in one turn." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Midi (MidiInPort/MidiOutPort/DeviceWatcher)", "special_handling": "No WinUI-3-specific handling needed — the only adaptation was the standard CoreDispatcher->DispatcherQueue threading swap in MidiDeviceWatcher.cs. Windows.Devices.Midi and Windows.Devices.Enumeration project unchanged." }
+  ],
+  "errors_encountered": [
+    { "error": "Get-MigrationPattern.ps1: Anchor '#manifest' / '#manifest-migration-checklist' / '#appxmanifest' not found", "root_cause": "The manifest reconciliation sections in MIGRATION-PATTERNS.md are ###/## headings with no <a id> anchor, and the fetch script only searches for <a id>. The agent naturally guessed the section name but the tool could not resolve headings.", "fix": "Agent fell back to grepping all headings (turn 21) then reading via view with an explicit line range (turn 22) — the wholesale-file access the script is meant to avoid." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turns 18-22, fetching manifest migration guidance", "symptom": "Three consecutive Get-MigrationPattern.ps1 -Anchor calls failed ('Anchor not found') before the agent abandoned the tool.", "turns_or_retries": "3 failed anchor guesses + 2 recovery turns (grep all headings, then view by line-range)", "root_cause": "Script matches only <a id> anchors; the Manifest migration checklist / appxmanifest / WUI-analyzer / PackageReference sections have none, and the not-found error lists no valid anchors.", "how_resolved": "Agent grepped '^## |^### |<a id=' across MIGRATION-PATTERNS.md to discover headings, then opened the file directly at the reported line range.", "preventable_by": "Enhance Get-MigrationPattern.ps1 to (a) match heading slugs when no <a id> matches and (b) on miss, print the full list of anchors + heading slugs. This makes every documented section reachable and lets the agent self-correct in one turn instead of opening the file wholesale." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

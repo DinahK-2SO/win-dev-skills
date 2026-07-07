@@ -1,0 +1,77 @@
+{
+  "featureName": "MIDI",
+  "parityScore": 83.3,
+  "counts": {
+    "partial": 1,
+    "pass": 2,
+    "fail": 0
+  },
+  "totalScenarios": 3,
+  "pass": true,
+  "thresholds": {
+    "partial": 0.4,
+    "pass": 0.8,
+    "strictPartial": false
+  },
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "MIDI Device Enumeration",
+      "verdict": "pass",
+      "coverage": 1.0,
+      "controlsTotal": 7,
+      "controlsFound": 7,
+      "reachable": true,
+      "screenshotBytes": 49983,
+      "actionsTotal": 3,
+      "actionsInvoked": 3,
+      "actionsResponded": 2,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [],
+      "reason": "",
+      "screenshot": "01_MIDI_Device_Enumeration.png"
+    },
+    {
+      "number": 2,
+      "title": "Receive MIDI Messages",
+      "verdict": "pass",
+      "coverage": 1.0,
+      "controlsTotal": 2,
+      "controlsFound": 2,
+      "reachable": true,
+      "screenshotBytes": 54100,
+      "actionsTotal": 0,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [],
+      "reason": "",
+      "screenshot": "02_Receive_MIDI_Messages.png"
+    },
+    {
+      "number": 3,
+      "title": "Send MIDI Messages",
+      "verdict": "partial",
+      "coverage": 0.5,
+      "controlsTotal": 8,
+      "controlsFound": 4,
+      "reachable": true,
+      "screenshotBytes": 57758,
+      "actionsTotal": 2,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "ComboBox \"Parameter 1\"",
+        "ComboBox \"Parameter 2\"",
+        "ComboBox \"Parameter 3\"",
+        "TextBox (sysExMessageContent)"
+      ],
+      "reason": "Missing 4/8 control(s): ComboBox \"Parameter 1\"; ComboBox \"Parameter 2\"; ComboBox \"Parameter 3\"; TextBox (sysExMessageContent)",
+      "screenshot": "03_Send_MIDI_Messages.png"
+    }
+  ]
+}
