@@ -1,0 +1,36 @@
+{
+  "scenario": "NetworkConnectivity",
+  "feature": "NetworkingConnectivity",
+  "source": "uwp-samples-standalone/Samples/NetworkConnectivity/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Query network connectivity",
+      "controls": [
+        { "name": "OptedInToNetworkUsageToggle", "type": "ToggleSwitch", "role": "input" },
+        { "name": "Check network connectivity", "type": "Button", "role": "action" }
+      ],
+      "output": "ResultsText",
+      "expected": "Clicking 'Check network connectivity' writes 'Current connectivity is <level>.' to ResultsText and, if connected, evaluates cost/connect; else 'Not attempting to connect to the Internet.'"
+    },
+    {
+      "number": 2,
+      "title": "Get network cost information",
+      "controls": [
+        { "name": "Get network cost", "type": "Button", "role": "action" }
+      ],
+      "output": "ResultsText",
+      "expected": "Clicking 'Get network cost' writes 'Network cost is <type>.' plus an app-behavior recommendation, or 'No internet connection profile.'"
+    },
+    {
+      "number": 3,
+      "title": "Listen to connectivity changes",
+      "controls": [
+        { "name": "OptedInToNetworkUsageToggle", "type": "ToggleSwitch", "role": "input" },
+        { "name": "RegisterUnregisterButton", "type": "Button", "role": "action" }
+      ],
+      "output": "ResultsText",
+      "expected": "Clicking the register button subscribes to NetworkStatusChanged, toggles its label to Unregister, and logs registration + current connectivity to ResultsText."
+    }
+  ]
+}

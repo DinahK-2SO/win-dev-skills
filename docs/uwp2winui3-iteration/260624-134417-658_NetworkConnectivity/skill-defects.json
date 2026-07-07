@@ -1,0 +1,17 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0104: 'HttpClient' is an ambiguous reference between 'System.Net.Http.HttpClient' and 'Windows.Web.Http.HttpClient' — build failed until the WinRT type was fully qualified.",
+      "evidence": "session-log.txt line 4212-4213 (build errors), line 4221 'Build failed with 5 error(s)', fixed at line 4305 by qualifying 'Windows.Web.Http.HttpClient'. lessons.json errors_encountered[0].",
+      "skill_search": "Grepped MIGRATION-PATTERNS.md and SKILL.md for 'HttpClient', 'Windows.Web.Http', 'ImplicitUsings', 'ambiguous', 'CS0104'. Only hit: the CS0104 section (MIGRATION-PATTERNS.md line 9) which covers ONLY the Windows.UI.Xaml/Microsoft.UI.Xaml family (LaunchActivatedEventArgs, Application, RoutedEventArgs).",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The WinUI 3 SDK-style csproj enables <ImplicitUsings>enable</ImplicitUsings>, which adds a global 'using System.Net.Http;'. UWP samples that use the WinRT 'Windows.Web.Http.HttpClient' via an unqualified name then get two 'HttpClient' types in scope. This is a .NET-BCL-vs-WinRT collision, a different mechanism from the Windows.UI.Xaml/Microsoft.UI.Xaml collision the existing CS0104 section describes.",
+      "proposed_fix": "Add a subsection to the 'Common build errors after the namespace rewrite' area of MIGRATION-PATTERNS.md covering CS0104 caused by ImplicitUsings importing a BCL type whose simple name collides with a WinRT type. Use HttpClient (System.Net.Http vs Windows.Web.Http) as the canonical example; fix = fully-qualify (or alias) the WinRT type. Also note the follow-on x:Bind/WMC markup errors are a cascade of the failed C# compile (WMC1509 'No LocalAssembly'), not a separate XAML defect.",
+      "generalizes": "ImplicitUsings=enable is in every WinUI 3 SDK-style scaffold, and many UWP samples use Windows.Web.Http.HttpClient (and other WinRT types whose simple name matches a BCL type imported by the implicit global usings). This CS0104 mechanism recurs across any HTTP/networking/streams sample, independent of this scenario."
+    }
+  ]
+}

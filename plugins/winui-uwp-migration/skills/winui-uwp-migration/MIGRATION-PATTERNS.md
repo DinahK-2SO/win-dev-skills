@@ -27,6 +27,23 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0104: 'HttpClient' is an ambiguous reference` (WinRT type vs a BCL type from `ImplicitUsings`)
+
+This is a **different** CS0104 mechanism from the one above — it has nothing to do with the `Windows.UI.Xaml → Microsoft.UI.Xaml` rewrite. The scaffold `.csproj` sets `<ImplicitUsings>enable</ImplicitUsings>`, which adds a global `using System.Net.Http;` (among others). A UWP sample that used the **WinRT** `Windows.Web.Http.HttpClient` via its unqualified name (`HttpClient`) now has two `HttpClient` types in scope — `System.Net.Http.HttpClient` and `Windows.Web.Http.HttpClient` — so every unqualified use fails with CS0104.
+
+Fix by fully qualifying the **WinRT** type at each use site (do not "fix" it by switching to `System.Net.Http` — that silently changes the API surface, e.g. `HttpGetStringResult`/`TryGetStringAsync` are WinRT-only):
+
+```csharp
+// was: HttpClient httpClient = new HttpClient();
+Windows.Web.Http.HttpClient httpClient = new Windows.Web.Http.HttpClient();
+```
+
+Or add a file-scoped alias if the type is used many times: `using HttpClient = Windows.Web.Http.HttpClient;`.
+
+The same collision hits any WinRT type whose **simple name** matches a BCL type pulled in by the implicit global usings (`HttpClient` is by far the most common; watch also for `Windows.Web.Http.*` header/response types used unqualified). Rule: when `ImplicitUsings` is on, prefer fully-qualified names for `Windows.Web.Http.*` and any other WinRT API that shares a name with a `System.*` type.
+
+> **Cascade note:** a CS0104 (or any C# compile) failure often also emits XAML markup errors in the same build — e.g. `WMC1509 "No LocalAssembly parameter given during MarkupCompilePass2"` followed by `WMC0909 "Cannot resolve DataType local:…"` / `WMC1111` on a perfectly valid `x:Bind`. Those are a **cascade** of the failed C# compile (the project assembly never built, so `x:Bind` can't resolve project-local types), **not** an `x:Bind` incompatibility. Fix the C# error and rebuild before touching the XAML — do **not** downgrade working `x:Bind`/`x:DataType` to classic `{Binding}`.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -807,7 +824,7 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 ### `x:Bind` and compiled bindings
 
-`x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+`x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML. If instead the build emits `WMC0909 "Cannot resolve DataType"` / `WMC1111` / `WMC1509 "No LocalAssembly …"` on XAML that looks correct, that is almost always a **cascade of a C# compile error** — fix the C# first (see the CS0104 `HttpClient` note above), don't rewrite the `x:Bind`.
 
 ### Page root element
 

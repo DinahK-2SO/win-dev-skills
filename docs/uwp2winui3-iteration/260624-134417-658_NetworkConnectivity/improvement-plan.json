@@ -1,0 +1,18 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0104: 'HttpClient' ambiguous between System.Net.Http.HttpClient (imported by ImplicitUsings) and Windows.Web.Http.HttpClient (the WinRT API the UWP sample used). Not covered by the skill's existing CS0104 section (which only handles Windows.UI.Xaml vs Microsoft.UI.Xaml).",
+      "evidence": "session-log.txt 4212-4213 (errors), 4221 (build failed), 4305 (fix); skill-defects.json item 1.",
+      "root_cause": "Scaffold csproj enables <ImplicitUsings>enable</ImplicitUsings> → global 'using System.Net.Http;', colliding with the unqualified WinRT 'HttpClient'. Different mechanism from the XAML-namespace CS0104 already documented.",
+      "tier": 3,
+      "change": "Added a new CS0104 subsection to MIGRATION-PATTERNS.md for ImplicitUsings/BCL-vs-WinRT simple-name collisions (canonical: HttpClient). Fix = fully-qualify or alias the WinRT type; warned against silently switching to System.Net.Http (loses WinRT API surface). Included a cascade note that follow-on WMC1509/WMC0909/WMC1111 x:Bind markup errors are a byproduct of the failed C# compile, and added a cross-pointer from the existing 'x:Bind and compiled bindings' section.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On future HTTP/networking/streams UWP samples that use Windows.Web.Http.HttpClient, the agent fully-qualifies the WinRT type on the first pass and does not downgrade valid x:Bind to Binding when reacting to cascaded markup errors.",
+      "falsifiable_check": "On a re-run of an HTTP-using scenario: the build has 0 CS0104 errors on the first dotnet build attempt (no HttpClient-ambiguity fix cycle), and MainPage.xaml keeps x:Bind/x:DataType (no unnecessary Binding downgrade)."
+    }
+  ],
+  "deferred_to_human": []
+}

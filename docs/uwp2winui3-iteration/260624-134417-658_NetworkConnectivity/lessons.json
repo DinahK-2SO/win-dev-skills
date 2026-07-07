@@ -1,0 +1,27 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrapped the WinUI 3 scaffold and Windows.UI.Xaml->Microsoft.UI.Xaml rewrite; the only remaining fixes were code-level API adaptations." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log.txt lines 4776/4833: '[PASS] dotnet build succeeded (28 warning(s), 0 WUI analyzer warning(s))' gated the agent's done-check on a clean build." },
+    { "tool": "dotnet build (native CLI)", "evidence": "session-log.txt line 4221 surfaced the CS0104 + XAML errors, line 4752 confirmed 'Build succeeded with 14 warning(s)'." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [
+    { "api": "Windows.Web.Http.HttpClient", "why_tried": "UWP source Helpers.cs uses Windows.Web.Http.HttpClient for the connectivity/metered check", "root_cause": "The WinUI 3 SDK-style csproj sets <ImplicitUsings>enable</ImplicitUsings>, which globally imports System.Net.Http; the unqualified 'HttpClient' in the migrated code then collides with Windows.Web.Http.HttpClient -> CS0104 ambiguous reference", "fix": "Fully qualify the WinRT type: 'Windows.Web.Http.HttpClient httpClient = new Windows.Web.Http.HttpClient();' (session-log.txt line 4305)" }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Web.Http.*", "special_handling": "In a WinUI 3 project with ImplicitUsings enabled, WinRT types whose simple name matches a BCL type imported by the implicit global usings (HttpClient is the canonical case) must be fully qualified or aliased to avoid CS0104." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0104: 'HttpClient' is an ambiguous reference between 'System.Net.Http.HttpClient' and 'Windows.Web.Http.HttpClient' (Helpers.cs 47,13 and 47,41)", "root_cause": "ImplicitUsings=enable imports System.Net.Http globally; UWP code used the unqualified WinRT Windows.Web.Http.HttpClient", "fix": "Fully qualify to Windows.Web.Http.HttpClient (session-log.txt line 4305)" },
+    { "error": "WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 'DataTemplates containing x:Bind need a DataType' + WMC9999 internal error in MainPage.xaml", "root_cause": "Cascade from the CS0104 failure: MarkupCompilePass2 warned WMC1509 'No LocalAssembly parameter given' because the C# compile failed, so x:Bind against the project-local Scenario type could not resolve. These XAML errors disappear once the project compiles.", "fix": "Agent changed the ItemTemplate from x:Bind to classic Binding, but the real fix was the CS0104 correction that let the local assembly build; the x:Bind change was likely unnecessary." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "First full build (session-log.txt lines 4212-4221)", "symptom": "Build failed with 5 errors: 2x CS0104 HttpClient + 3 XAML markup errors (WMC0909/WMC1111/WMC9999)", "turns_or_retries": "1 build-fix-rebuild cycle; resolved on the next build (line 4752)", "root_cause": "ImplicitUsings/System.Net.Http vs Windows.Web.Http.HttpClient collision; the XAML errors cascaded from the same failed C# compile (WMC1509 'No LocalAssembly')", "how_resolved": "Fully qualified Windows.Web.Http.HttpClient (necessary) and switched a DataTemplate x:Bind->Binding (probably a redundant reaction to the cascade)", "preventable_by": "A MIGRATION-PATTERNS.md CS0104 entry for .NET-vs-WinRT simple-name collisions under ImplicitUsings (HttpClient being the canonical case) so the agent fully-qualifies the WinRT type on the first pass and recognizes the XAML errors as a cascade, not a separate defect." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

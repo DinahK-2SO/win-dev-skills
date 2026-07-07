@@ -1,0 +1,14 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Agent changed the MainPage.xaml ItemTemplate from x:Bind (with x:DataType=\"local:Scenario\") to classic {Binding Title}, reacting to WMC0909/WMC1111/WMC9999 markup errors.",
+      "evidence": "session-log.txt line 4308 (edit) — done in the same fix batch as the CS0104 correction (line 4305).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'x:Bind and compiled bindings' (line 808): 'x:Bind is supported in WinUI 3 with the same syntax.' The WMC1509 warning ('No LocalAssembly parameter given during MarkupCompilePass2') in the same build output signals the XAML errors were a cascade of the failed C# compile, not an x:Bind incompatibility.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "x:Bind is already documented as supported. The markup errors were a byproduct of the CS0104 compile failure and would have cleared once the C# compiled; switching to Binding was an unnecessary reaction. A capable model that fixed CS0104 first and re-read the WMC1509 cascade note would keep x:Bind. No skill edit needed beyond the one-line cascade note already folded into the CS0104 defect fix."
+    }
+  ]
+}

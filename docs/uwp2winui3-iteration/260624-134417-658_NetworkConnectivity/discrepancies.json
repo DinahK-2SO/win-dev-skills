@@ -1,0 +1,15 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Query network connectivity (Check network connectivity writes 'Current connectivity is <level>.')", "status": "pass", "reason": "Responded live; code-behind byte-identical to UWP.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Get network cost information ('Network cost is Unrestricted. ...')", "status": "pass", "reason": "Fully functional; auto-invoke's FAIL was a 4-way UIA name ambiguity (capture artifact), not a migration defect.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Listen to connectivity changes (register/unregister NetworkStatusChanged, log to ResultsText)", "status": "pass", "reason": "Responded live; code-behind byte-identical to UWP.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No functional or structural discrepancies; 3/3 features pass, score 100. The only build friction was a CS0104 HttpClient ambiguity (System.Net.Http vs Windows.Web.Http under ImplicitUsings), fixed inline. WinUI 3 screenshots render blank client area (known PrintWindow/XAML-island capture artifact) but UIA + live actuation confirm rendering and function."
+}
