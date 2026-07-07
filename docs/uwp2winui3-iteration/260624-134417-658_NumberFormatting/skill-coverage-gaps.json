@@ -1,0 +1,15 @@
+{
+  "scenario": "NumberFormatting",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "After the namespace rewrite, the first build produced a cluster of nullable warnings (CS8601 on 'MainPage rootPage = MainPage.Current;' in Scenario6; CS8629 x9 on 'INumberParser.ParseDouble(...).Value' in Scenario4). The agent had to spend a dedicated post-build cleanup pass fixing them.",
+      "evidence": "session-log.txt:3443-3462 (warnings), :3491 'Build succeeded! Let me fix the nullable warnings', :3494 (MainPage? fix), :3559-3565 ('.Value' -> '?? 0' fixes across percent/decimal/currency); lessons.json errors_encountered + dev_agent_struggles.",
+      "covered_at": "MIGRATION-PATTERNS.md:268 — a single inline comment inside the Windowing section: 'With <Nullable>enable</Nullable>, declare as nullable since the assignment only happens during OnLaunched.' (applies only to the App.MainWindow static).",
+      "why_missed": "buried / under-emphasized — the nullable-enabled-template mismatch is mentioned once, deep in the Windowing section, tied to one specific property (App.MainWindow). The 'Common build errors after the namespace rewrite' section (where an agent triaging build output actually looks) has entries for CS0104/CS0227/CS0101/CS0246 but NOTHING for the CS86xx nullable class or its two dominant recurring patterns.",
+      "proposed_improvement": "Add a short, prominent subsection under 'Common build errors after the namespace rewrite' titled for the nullable warning class (CS8600/CS8601/CS8602/CS8629). State the root cause (scaffold csproj ships <Nullable>enable</Nullable> vs nullable-oblivious UWP code), that these are warnings (build still succeeds, they do NOT fail the Validate gate) so the agent should fix them inline without burning turns, and give the two dominant patterns with fixes: (A) the Windows-universal-samples 'MainPage.Current' static accessor -> declare the local nullable ('MainPage? rootPage = MainPage.Current;'); (B) WinRT nullable-returning methods (INumberParser.ParseDouble/ParseInt/ParseUInt return double?/long?/ulong?; any IReference<T>-returning API) -> never call '.Value' unchecked, use '?? <default>' or a null check.",
+      "generalizes": "The WinUI 3 project template always enables <Nullable>enable</Nullable>, and every Windows-universal-sample ships the nullable 'MainPage.Current'/'Current' static accessor plus commonly uses nullable-returning WinRT APIs (parsers, IReference<T>, TryGet* patterns). So this exact warning cluster recurs on essentially every UWP->WinUI 3 sample migration, independent of the specific feature area (formatting, storage, sensors, etc.)."
+    }
+  ]
+}

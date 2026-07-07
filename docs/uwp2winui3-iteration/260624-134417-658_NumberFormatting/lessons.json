@@ -1,0 +1,30 @@
+{
+  "scenario": "NumberFormatting",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log.txt:132 'Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in 8 of 14 .cs/.xaml files'; copied 9 files, generated MIGRATION-MAPPING.md, 0 neutralized/deferred. Clean bootstrap." },
+    { "tool": "Validate-UwpMigration.ps1 / winapp build", "evidence": "Final validation reported clean build (0 WUI analyzer warnings) and smoke launch success; score 100/100." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1 namespace rewrite", "limitation": "Only rewrites the literal string 'Windows.UI.Xaml'; the other Windows.UI.* renames in the MIGRATION-PATTERNS Namespace Mapping table (Windows.UI.Colors/Text/Input/Composition) are NOT auto-applied, so they must be fixed by hand.", "suggested_tweak": "Namespace Mapping table already lists Windows.UI.Colors -> Microsoft.UI.Colors; the agent applied it manually during the shell rewrite (session-log.txt:1859 'using Microsoft.UI;' + Colors.Green/Colors.Red). Low impact here." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Globalization.NumberFormatting.* (DecimalFormatter, PercentFormatter, PermilleFormatter, CurrencyFormatter, NumeralSystemTranslator, IncrementNumberRounder)", "special_handling": "None needed — these WinRT APIs are fully supported in WinUI 3 unchanged; only the INumberParser.Parse* return type (nullable) requires care (see errors_encountered)." },
+    { "api": "GlobalizationPreferences.Currencies[0]", "special_handling": "Still available in WinUI 3; used to pick the user's home currency in Scenario3. No change." }
+  ],
+  "errors_encountered": [
+    { "error": "CS8629 'Nullable value type may be null' x9 in Scenario4_NumberParsing.xaml.cs (lines 68-108)", "root_cause": "INumberParser.ParseDouble()/ParseInt()/ParseUInt() return double?/long?/ulong? (WinRT IReference). Nullable-oblivious UWP code calls .Value directly; under the WinUI 3 scaffold's <Nullable>enable</Nullable> this warns.", "fix": "Replace unchecked .Value with the null-coalescing operator: 'percentFormat.ParseDouble(percent1) ?? 0' (session-log.txt:3559-3565, three edits covering percent/decimal/currency)." },
+    { "error": "CS8601 'Possible null reference assignment' in Scenario6_NumeralSystemTranslation.xaml.cs(23)", "root_cause": "The Windows-universal-samples static accessor 'MainPage.Current' is nullable (MainPage? Current), but the UWP code assigns it into a non-nullable local 'MainPage rootPage = MainPage.Current;'. Warns under <Nullable>enable</Nullable>.", "fix": "Declare the local nullable: 'MainPage? rootPage = MainPage.Current;' (session-log.txt:3494)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Post-first-build cleanup (turns ~42-44, session-log.txt:3443-3664)", "symptom": "First build succeeded with 20 nullable warnings (CS8601 + 9x CS8629 shown twice); agent then spent a dedicated fix-up pass rewriting .Value -> ?? 0 across three parse groups and declaring MainPage.Current nullable.", "turns_or_retries": "~3 edits in one cleanup pass (no loop; single pass)", "root_cause": "WinUI 3 scaffold csproj ships <Nullable>enable</Nullable>; UWP source is nullable-oblivious. The two dominant recurring patterns are the SampleConfiguration 'MainPage.Current' static and WinRT nullable-returning Parse*/IReference<T> methods accessed via .Value.", "how_resolved": "Applied '?? <default>' to nullable-returning WinRT calls and nullable local declaration for MainPage.Current; rebuild clean (0 warnings).", "preventable_by": "A prominent 'nullable warnings after the namespace rewrite' entry in MIGRATION-PATTERNS.md 'Common build errors' section naming both dominant patterns, so the agent writes null-safe code on first pass instead of a separate cleanup pass." },
+    { "where": "Exploration (turns 0-17)", "symptom": "17 turns reading UWP source + WinUI template before first edit.", "turns_or_retries": "17", "root_cause": "Thorough reconnaissance of both UWP shell (ListBox+Frame) and WinUI template before rebuilding the NavigationView shell. Not a defect — matches the skill's recommended read-then-map workflow.", "how_resolved": "Proceeded to a clean shell rewrite with no build errors.", "preventable_by": "N/A — expected/healthy behavior; no skill change warranted." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 candidate screenshots capture blank (~13KB) via PrintWindow (DirectComposition/swapchain limitation); UWP CoreWindow exposes no traversable UIA tree to winapp.", "workaround": "Parity confirmed via UIA tree + live actuation instead of pixels. Instrument caveat only — NOT a migration defect and NOT in scope for the migration skill." }
+  ]
+}

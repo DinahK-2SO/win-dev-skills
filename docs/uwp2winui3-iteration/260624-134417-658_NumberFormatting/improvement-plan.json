@@ -1,0 +1,20 @@
+{
+  "scenario": "NumberFormatting",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "First build after the namespace rewrite emitted a predictable cluster of nullable warnings (CS8601 on 'MainPage rootPage = MainPage.Current;'; CS8629 x9 on 'INumberParser.ParseDouble(...).Value'), forcing a dedicated post-build cleanup pass.",
+      "evidence": "session-log.txt:3443-3462 (warnings), :3491 ('Build succeeded! Let me fix the nullable warnings'), :3494 (MainPage? fix), :3559-3565 ('.Value' -> '?? 0'). Cross-ref lessons.json errors_encountered + skill-coverage-gaps.json item 1.",
+      "root_cause": "The WinUI 3 scaffold csproj ships <Nullable>enable</Nullable> while UWP sample code is nullable-oblivious. The nullable concept was only mentioned once (MIGRATION-PATTERNS.md:268, buried in the Windowing section, scoped to App.MainWindow); the 'Common build errors after the namespace rewrite' triage section had no entry for the CS86xx class or its two dominant patterns.",
+      "tier": 3,
+      "change": "Added a subsection '### CS8600/CS8601/CS8602/CS8629 nullable warnings' under 'Common build errors after the namespace rewrite' in MIGRATION-PATTERNS.md: states the root cause, that these are non-fatal warnings that do NOT fail Validate-UwpMigration.ps1 (fix inline, don't burn a late pass, don't disable nullability), and gives the two dominant fix patterns (A: MainPage.Current -> nullable local; B: nullable-returning WinRT Parse*/IReference<T> -> '?? default', never unchecked '.Value').",
+      "file": "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The agent writes null-safe code on first pass (nullable locals for *.Current; '?? default' for nullable-returning parse/IReference calls), eliminating the separate nullable cleanup pass.",
+      "falsifiable_check": "On a re-run of any UWP sample migration, the build log shows 0 CS8600/CS8601/CS8602/CS8629 warnings without a dedicated post-build fix-up turn (the '.Value' -> '?? 0' and 'MainPage?' edits no longer appear as a distinct cleanup step)."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/1 idea (not auto-applied): Initialize-UwpMigration.ps1 only rewrites the literal 'Windows.UI.Xaml'; the other pure-rename rows in the Namespace Mapping table (Windows.UI.Colors/Text/Composition/Input) are left for manual fixup. A guarded script extension could apply the unambiguous subset, but it must avoid non-rename namespaces (Windows.UI.Core/Popups/Notifications/ViewManagement) and the still-valid Windows.UI.Color struct, so it is risky and low-impact (agent handled it inline here). Left for human judgement."
+  ]
+}

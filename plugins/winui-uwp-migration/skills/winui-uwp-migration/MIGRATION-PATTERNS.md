@@ -74,6 +74,24 @@ loads — do **not** rely on `OnNavigatedTo`/`Loaded` code-behind to populate th
 visible content (that text can end up in the UIA tree but never render, leaving the page
 blank). See **Defensive UI for init-heavy and device-dependent pages** in SKILL.md.
 
+### `CS8600` / `CS8601` / `CS8602` / `CS8629` nullable warnings (nullable-enabled scaffold vs nullable-oblivious UWP code)
+
+The WinUI 3 scaffold's `.csproj` ships `<Nullable>enable</Nullable>`, but UWP sample code is nullable-oblivious. After the namespace rewrite the first build therefore emits a **predictable cluster of nullable warnings** — even when nothing is functionally wrong. These are **warnings, not errors**: the build still succeeds and they do **not** fail `Validate-UwpMigration.ps1` (only `WUI000x` analyzer warnings do). So fix them inline as you touch each file — don't spend a separate late cleanup pass, and don't disable nullability. Two patterns dominate on almost every migration:
+
+**Pattern A — the `Current` static accessor (`CS8600`/`CS8601`).** Every Windows-universal-sample ships a nullable static accessor (`public static MainPage? Current { get; }`). UWP code assigns it into a non-nullable local. Declare the local nullable:
+
+```csharp
+MainPage rootPage = MainPage.Current;    // CS8601: Possible null reference assignment
+MainPage? rootPage = MainPage.Current;   // fixed
+```
+
+**Pattern B — nullable-returning WinRT methods accessed via `.Value` (`CS8629`).** Many WinRT APIs return an `IReference<T>` projected as `T?` — e.g. `INumberParser.ParseDouble`/`ParseInt`/`ParseUInt` return `double?`/`long?`/`ulong?`. UWP code calls `.Value` unchecked. Use the null-coalescing operator (or a real null check) instead of `.Value`:
+
+```csharp
+double d = formatter.ParseDouble(text).Value;   // CS8629: Nullable value type may be null
+double d = formatter.ParseDouble(text) ?? 0;    // fixed (or: if (formatter.ParseDouble(text) is double v) { ... })
+```
+
 <a id="system-backdrop-blank"></a>
 ## Blank window despite a fully populated visual tree — the scaffold's system backdrop
 

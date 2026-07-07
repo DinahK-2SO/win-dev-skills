@@ -1,0 +1,12 @@
+{
+  "scenario": "NumberFormatting",
+  "summary": "No functional discrepancies found. All 7 scenarios migrated with full structural control coverage (1/1 each) and correct behavioral output. Only instrument/capture caveats noted below.",
+  "missing_controls": [],
+  "dead_controls": [],
+  "wrong_output_text": [],
+  "layout_differences": [],
+  "instrument_caveats": [
+    "UWP per-scenario golden capture unavailable: the original UWP app launched (ok:true, pid 44468) and its initial frame was captured (109KB, correct), but its CoreWindow (hosted by ApplicationFrameHost) exposes no traversable UIA tree to winapp on this host, so title-driven navigation and per-scenario/behavioral golden capture could not run. Not a uwp-app-runner failure.",
+    "WinUI 3 candidate screenshots capture as blank (~13KB) due to a known WinUI3/DirectComposition PrintWindow limitation; the same instrument captured the UWP CoreWindow fine. Rendering was confirmed present via the UIA tree (32 elements, NavigationView + all 7 scenarios, Description, Display, output — all on-screen, none offscreen) and live actuation (OutputTextBlock at real bounds 625,607 1379x391 with correct formatted output). Visual-layout parity could therefore not be pixel-verified, but content/behavioral parity is confirmed."
+  ]
+}

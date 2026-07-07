@@ -1,0 +1,14 @@
+{
+  "scenario": "NumberFormatting",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: add a 'Common build errors' subsection for the CS8600/CS8601/CS8602/CS8629 nullable-warning cluster (nullable-enabled scaffold vs nullable-oblivious UWP code), with the two dominant fix patterns (MainPage.Current -> nullable local; WinRT nullable-returning Parse*/IReference<T> -> '?? default', never unchecked '.Value') so agents write null-safe code on the first pass instead of a late cleanup pass"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Optionally extend Initialize-UwpMigration.ps1 to auto-apply the unambiguous non-Xaml Windows.UI.* renames (Colors/Text/Composition/Input) while excluding non-rename namespaces and the still-valid Windows.UI.Color struct — risky and low-impact, so left for human judgement."
+  ]
+}
