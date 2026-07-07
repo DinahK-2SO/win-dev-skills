@@ -1,0 +1,25 @@
+{
+  "scenario": "NfcProvisioner",
+  "featureName": "NfcProvisioner",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\NfcProvisioner\\cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Provision Peer Device",
+      "class": "Scenario1",
+      "controls": [
+        { "name": "BrowseButton", "type": "Button", "label": "Browse", "initialVisibility": "Visible", "event": "Click", "expectation": "Opens a file picker filtered to .ppkg provisioning packages; selected path shown in ProvisioningPackagePathText." },
+        { "name": "TransferButton", "type": "Button", "label": "Transfer", "initialVisibility": "Collapsed", "event": "Click", "expectation": "Revealed only after a package is selected and an NFC/proximity peer is available; initiates NFC transfer." },
+        { "name": "CancelTransferButton", "type": "Button", "label": "Cancel Transfer", "initialVisibility": "Collapsed", "event": "Click", "expectation": "Revealed during an active transfer; cancels the publish." }
+      ],
+      "inputs": [
+        { "name": "ProvisioningPackagePathText", "type": "TextBox", "readOnly": true }
+      ],
+      "outputs": [
+        { "name": "StatusBlock", "type": "TextBlock", "role": "user status messages" },
+        { "name": "ErrorBorder", "type": "Border", "role": "error background" }
+      ]
+    }
+  ],
+  "notes": "Transfer and Cancel Transfer are Visibility=Collapsed in the source XAML and are hardware/state gated (require a selected package plus an NFC proximity device). They are not expected to be present in an initial-state capture of either the UWP golden or the WinUI candidate."
+}

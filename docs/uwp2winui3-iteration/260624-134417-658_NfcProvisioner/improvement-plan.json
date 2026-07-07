@@ -1,0 +1,21 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated app builds clean but crashes at launch with 0x802B000A (E_XAMLPARSEFAILED) because MainPage.xaml / Scenario1.xaml reference shared sample styles (SampleHeaderTextStyle, ScenarioDescriptionTextStyle, …) whose definitions from the UWP sample's StandardStyles.xaml / sample App.xaml were not migrated into the scaffold.",
+      "evidence": "session-log.txt L2943-3040 (validator crash + WER P8=802b000a); L424-425/L975 (style references); L3206-3211 (fix = define styles in App.xaml). Dev-agent spent ~10 turns bisecting because the startup-crash table had no 0x802B000A entry.",
+      "root_cause": "MIGRATION-PATTERNS.md's startup-crash native-code table omitted 0x802B000A, and no pattern warned that UWP samples reference shared style keys from resource dictionaries the WinUI 3 scaffold does not ship. Such {StaticResource}/{ThemeResource} keys compile clean and throw only when the XAML is parsed at launch.",
+      "tier": 3,
+      "change": "Added a 0x802B000A row to the startup-crash native-code table (cause = missing StaticResource/ThemeResource key from un-migrated shared dictionaries; fix = carry the style/brush definitions into target App.xaml Application.Resources) and added a 'Missing resource keys crash at launch (SDK-sample shared styles)' subsection with a concrete pre-build key-audit procedure (list referenced keys, confirm each is a WinUI built-in or project-defined, migrate the definition otherwise).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On a re-run, an agent hitting the 0x802B000A launch crash reads the enriched startup-crashes anchor (the crash tooling already routes it there via 'Get-MigrationPattern.ps1 -Anchor startup-crashes'), immediately identifies the missing resource key, and defines it in App.xaml instead of hand-bisecting the page.",
+      "falsifiable_check": "On a re-run of any SDK-sample migration that references StandardStyles/App.xaml style keys: no 0x802B000A launch crash reaches the final validator, or if it does the agent resolves it in <=2 turns by defining the missing key in App.xaml (vs ~10 turns of manual MainPage bisection here)."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-1 tooling: extend Validate-UwpMigration.ps1 (or Initialize-UwpMigration.ps1 TODO injection) with a resource-key audit — collect every {StaticResource}/{ThemeResource} key referenced in migrated XAML, subtract project-defined x:Key definitions, and WARN on the remainder. Deferred because a low-false-positive version needs a bundled allow-list of WinUI 3 built-in resource keys, which must be curated deliberately rather than in a surgical prose edit.",
+    "Eval-instrument: the blank/white WinUI screenshot (DirectComposition surface not captured by winapp GDI screenshotting) capped the score at partial despite faithful behavior. This lives in the winui3-parity-check / uwp-app-runner eval skills (out of scope); a non-GDI capture path (PrintWindow with PW_RENDERFULLCONTENT, or a DirectComposition-aware grab) would let visual parity be positively confirmed."
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Test-AppLaunch.ps1 / Validate-UwpMigration.ps1 Section 7", "evidence": "session-log.txt L2943-2978: the validator reported '[FAIL] App crashed at startup', captured pid/exit, and printed 'Fix pattern: Get-MigrationPattern.ps1 -Anchor startup-crashes' — correctly routing the agent to the crash-diagnosis anchor." },
+    { "tool": "Get-WinEvent (Application log, events 1000/1026)", "evidence": "session-log.txt L2997-3040: surfaced MoAppCrash with P8=802b000a, the native XAML-parse exception code that identified the crash class." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "MIGRATION-PATTERNS.md startup-crash native-code table", "limitation": "The table (0x80004003 / 0x8001010E / 0xE0434352 / 0xC000027B) did not list 0x802B000A (E_XAMLPARSEFAILED), the very code the crash tooling surfaced.", "suggested_tweak": "Add a 0x802B000A row mapping it to missing StaticResource/ThemeResource keys (SDK-sample shared styles) with the App.xaml fix." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Networking.Proximity.ProximityDevice", "special_handling": "Compiles and works under WinUI 3 desktop (no adaptation needed for the NFC transfer path); it triggered SEQUENTIAL per-file edit mode because the API-name family trips the model output-safety filter." }
+  ],
+  "errors_encountered": [
+    { "error": "Runtime startup crash 0x802B000A (E_XAMLPARSEFAILED)", "root_cause": "MainPage.xaml and Scenario1.xaml reference shared sample styles ({StaticResource SampleHeaderTextStyle}, {StaticResource ScenarioDescriptionTextStyle}, etc.) that in the UWP sample came from StandardStyles.xaml / the sample-template App.xaml. Those dictionaries were not migrated into the WinUI 3 scaffold, so the references resolve at build time but throw when XAML is parsed at launch.", "fix": "Defined SampleHeaderTextStyle / ScenarioDescriptionTextStyle in App.xaml Application.Resources (session-log.txt L3206-3211) and removed unresolved template chrome; app then launched." },
+    { "error": "Build errors CS8803 / CS0106 (top-level statements; 'private' modifier not valid) in Scenario1.xaml.cs", "root_cause": "A SEQUENTIAL edit on the ProximityDevice file misplaced a closing brace, dropping several methods outside the class body.", "fix": "Corrected the class braces on the following edit; build recovered." },
+    { "error": "XamlCompiler WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 in MainPage.xaml", "root_cause": "DataTemplate x:DataType/x:Bind against the sample's Scenario class while other build errors kept the project from a clean compile; resolved once the type compiled and MainPage was rebuilt.", "fix": "Rebuild after fixing the class-structure and resource errors." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Startup crash diagnosis (turns ~33-42)", "symptom": "App built clean but died within 10s at launch; native code 0x802B000A.", "turns_or_retries": "~10 turns: read WER, decoded the HRESULT, then bisected by hand-simplifying MainPage.xaml and moving styles into App.xaml.", "root_cause": "Missing shared-style resource dictionaries (StandardStyles.xaml / sample App.xaml) not migrated; the startup-crash table had no 0x802B000A entry to name the cause.", "how_resolved": "Manually simplified MainPage.xaml and defined the referenced styles in App.xaml Application.Resources.", "preventable_by": "A 0x802B000A row in the startup-crash native-code table plus a 'migrate/define referenced non-system resource keys' pattern — both now added to MIGRATION-PATTERNS.md." }
+  ],
+  "missing_tooling": [
+    { "need": "A pre-build check that lists every {StaticResource}/{ThemeResource} key the migrated XAML references and flags any not defined in the project and not a WinUI 3 system key.", "would_have_saved": "The ~10-turn manual bisection of the 0x802B000A launch crash." }
+  ],
+  "env_issues": []
+}

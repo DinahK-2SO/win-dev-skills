@@ -1,0 +1,23 @@
+{
+  "scenario": "NfcProvisioner",
+  "uwp_launchable": true,
+  "score": 50,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 1,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Provision Peer Device",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Provision_Peer_Device.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Provision_Peer_Device.png",
+      "note": "Migrated Scenario1.xaml is byte-identical to the UWP source. Structural coverage 2/3: Browse present & functional (opens the .ppkg file picker; +81 text tokens), Transfer matched, Cancel Transfer absent. Transfer and Cancel Transfer are Visibility=Collapsed / NFC-hardware-gated in BOTH the UWP golden and the WinUI app, so their absence from the initial-state capture is not a migration regression and there are no dead controls (0 behavioral regressions). Verdict held at partial rather than pass because the WinUI window screenshots blank/white (a WinUI 3 DirectComposition GDI-capture limitation) so full visual parity could not be positively confirmed, even though the UIA tree shows all controls laid out on-screen and Browse works."
+    }
+  ]
+}

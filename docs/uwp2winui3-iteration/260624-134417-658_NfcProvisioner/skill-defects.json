@@ -1,0 +1,17 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated app builds clean but crashes at launch with native code 0x802B000A (E_XAMLPARSEFAILED) because MainPage.xaml / Scenario1.xaml reference shared sample styles (SampleHeaderTextStyle, ScenarioDescriptionTextStyle, …) whose definitions — from the UWP sample's Common/StandardStyles.xaml and sample-template App.xaml — were never migrated into the WinUI 3 scaffold.",
+      "evidence": "session-log.txt L2943-3040 (validator '[FAIL] App crashed at startup' + WER MoAppCrash P8=802b000a); L424-425/L975 (Scenario1.xaml/MainPage.xaml use {StaticResource SampleHeaderTextStyle} / ScenarioDescriptionTextStyle); L3206-3211 (fix = define those styles in App.xaml Application.Resources).",
+      "skill_search": "grep of winui-uwp-migration for 802B000A, StaticResource, StandardStyles, ResourceDictionary, SampleHeaderTextStyle, XamlParse across SKILL.md, MIGRATION-PATTERNS.md, scripts/",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The startup-crash native-code table in MIGRATION-PATTERNS.md enumerated 0x80004003 / 0x8001010E / 0xE0434352 / 0xC000027B but not 0x802B000A, and no pattern explained that UWP SDK samples reference shared style keys from resource dictionaries the scaffold does not ship. A {StaticResource}/{ThemeResource} key undefined in the project compiles clean and throws only at XAML parse time.",
+      "proposed_fix": "Add a 0x802B000A row to the startup-crash native-code table (cause = missing StaticResource/ThemeResource key from un-migrated shared dictionaries; fix = carry the style/brush definitions into target App.xaml Application.Resources) AND add a 'Missing resource keys crash at launch (SDK-sample shared styles)' subsection with a concrete pre-build key-audit procedure.",
+      "generalizes": "Every Windows-universal-sample (and most real UWP apps) centralizes styles in StandardStyles.xaml / App.xaml and references them by key from multiple pages. The WinUI 3 scaffold never provides those dictionaries, so this exact clean-build-then-launch-crash recurs across essentially all UWP->WinUI 3 sample migrations."
+    }
+  ]
+}

@@ -467,6 +467,7 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
 | `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
+| `0x802B000A` | `E_XAMLPARSEFAILED` — XAML failed to parse at load | A `{StaticResource X}` / `{ThemeResource X}` key referenced in XAML is **not defined** in the migrated project. UWP SDK samples pull shared styles (`SampleHeaderTextStyle`, `ScenarioDescriptionTextStyle`, `CopyrightTextStyle`, `HyperlinkStyle`, `TagLineTextStyle`, …) from a `Common/StandardStyles.xaml` or the sample-template `App.xaml` that the WinUI scaffold does **not** ship — so the reference compiles clean but throws when the page's XAML is parsed at launch. **Fix:** carry the referenced style/brush definitions into the target `App.xaml` `Application.Resources` (or delete references you don't use). See **Missing resource keys crash at launch** below. |
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 
@@ -793,6 +794,18 @@ WinUI 3 ships Fluent theme resources under `ThemeResource`. UWP code that used `
 ```
 
 The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-reference with the [Fluent Design colour palette](https://learn.microsoft.com/windows/apps/design/style/xaml-theme-resources).
+
+### Missing resource keys crash at launch (SDK-sample shared styles)
+
+A `{StaticResource X}` / `{ThemeResource X}` reference to a key that is **not defined anywhere in the target project** compiles cleanly but throws `0x802B000A` (`E_XAMLPARSEFAILED`) the moment that page's XAML is parsed at runtime — a clean build, then an instant startup crash (or a blank scenario frame if it's a navigated `Page`; see [Silent navigation failures](#silent-navigation-failures)).
+
+This is a **systematic** trap for UWP SDK-sample migrations. Those samples define shared styles once in a `Common/StandardStyles.xaml` merged dictionary and/or in the sample-template `App.xaml` `Application.Resources`, then reference them by key from `MainPage.xaml` and every `ScenarioN.xaml` — e.g. `SampleHeaderTextStyle`, `ScenarioDescriptionTextStyle`, `CopyrightTextStyle`, `HyperlinkStyle`, `TagLineTextStyle`. The WinUI 3 scaffold does not provide these dictionaries, so every reference to them is a runtime landmine.
+
+**Before building, resolve every non-system resource key the migrated XAML references:**
+
+1. List the keys used: `Select-String -Path *.xaml -Pattern '(Static|Theme)Resource\s+(\w+)' -AllMatches` under the target.
+2. For each key, confirm it is **either** a WinUI 3 built-in (system brush/style, resolved by the framework theme dictionary) **or** defined in a project XAML (`x:Key=` in `App.xaml`, a `Page.Resources`, or a merged dictionary you migrated).
+3. For any key that is neither — i.e. it came from the UWP sample's `StandardStyles.xaml` / sample `App.xaml` — **migrate the `<Style x:Key="…">` definition into the target `App.xaml` `Application.Resources`** so it is visible to every page (or delete the reference if the element does not need it). Do not leave the reference dangling.
 
 ### Controls that need element-level swaps
 

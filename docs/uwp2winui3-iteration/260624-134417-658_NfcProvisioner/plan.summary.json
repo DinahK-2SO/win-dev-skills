@@ -1,0 +1,16 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add 0x802B000A (E_XAMLPARSEFAILED) to the startup-crash native-code table in MIGRATION-PATTERNS.md — a clean-build/launch-crash caused by {StaticResource}/{ThemeResource} keys referenced but not defined in the migrated project",
+    "Add 'Missing resource keys crash at launch (SDK-sample shared styles)' subsection documenting that UWP samples reference shared styles (SampleHeaderTextStyle, etc.) from StandardStyles.xaml / sample App.xaml the scaffold omits, with a pre-build key-audit + migrate-into-App.xaml fix"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Tier-1 resource-key audit in Validate-UwpMigration.ps1 (needs a curated WinUI 3 built-in resource-key allow-list to avoid false positives)",
+    "Eval-instrument: blank WinUI screenshot from DirectComposition surface not captured by GDI screenshotting (winui3-parity-check / uwp-app-runner, out of scope)"
+  ]
+}

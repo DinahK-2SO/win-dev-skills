@@ -1,0 +1,28 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Build errors CS8803 (top-level statements must precede type declarations) and CS0106 ('private' modifier not valid) in Scenario1.xaml.cs — several methods ended up outside the class after a bad edit dropped a closing brace.",
+      "evidence": "session-log.txt L2176-2185 (13 errors); the file was under SEQUENTIAL edit mode because ProximityDevice trips the output-safety filter; recovered on the next edit (L2443+).",
+      "covered_clearly_at": "SKILL.md Step 1 'Per-file execution mode' — SEQUENTIAL bullet: 'fix one TODO at a time, build immediately after each' and the wholesale-overwrite prohibition ('keep editing the bootstrap copy in place'). The guidance to pace edits and build after each is prominent and adequate.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A misplaced brace in a large in-place edit is a mechanical editing slip, not a knowledge gap; the skill already prescribes small SEQUENTIAL edits with a build after each, and a capable model on re-run would catch/repair it without any skill change."
+    },
+    {
+      "problem": "XamlCompiler WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 in MainPage.xaml during an intermediate build.",
+      "evidence": "session-log.txt L2187-2188; cleared once the project compiled cleanly and MainPage was rebuilt (no dedicated fix was needed beyond resolving the other errors).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'x:Bind and compiled bindings' section — explains x:Bind/x:DataType resolution and that type-resolution errors trace to namespace/type availability.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Transient error tied to the concurrent class-structure breakage; it resolved itself once the project compiled. No generalizable gap and the x:Bind/DataType behavior is already documented."
+    },
+    {
+      "problem": "Final WinUI screenshot is blank/white so visual parity could not be positively confirmed (score capped at partial).",
+      "evidence": "migration-score.json / discrepancies.json: 'WinUI 3 DirectComposition surface that GDI-based screenshotting cannot grab'; UIA reports all controls on-screen and Browse works.",
+      "covered_clearly_at": "N/A — this is a limitation of the evaluation harness's GDI screenshot capture (winui3-parity-check / uwp-app-runner), which are the measurement instruments and out of scope for the migration skill.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Not a migration behavior at all; it is an eval-instrument capture limitation. Recorded under improvement-plan deferred_to_human; the migration skill must not add parity/capture logic."
+    }
+  ]
+}

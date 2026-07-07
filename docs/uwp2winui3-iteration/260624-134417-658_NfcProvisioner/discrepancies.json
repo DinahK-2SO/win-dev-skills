@@ -1,0 +1,15 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 0,
+  "score": 50,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Provision Peer Device — Browse opens .ppkg picker; Transfer/Cancel Transfer are Collapsed/NFC-gated", "status": "partial", "reason": "Structural coverage 2/3: Browse present & functional (opens the .ppkg file picker), Transfer matched, Cancel Transfer absent. Transfer and Cancel Transfer are Visibility=Collapsed / NFC-hardware-gated in BOTH the UWP golden and the WinUI app, so their absence is not a regression. Held at partial only because the WinUI window screenshots blank/white (DirectComposition GDI-capture limitation) so visual parity could not be positively confirmed.", "suspected_skill_gap": "None on the migration side — Scenario1.xaml is byte-identical to source and behaves. The residual gap is the eval harness's GDI screenshot of a DirectComposition surface (measurement instrument), not the migration skill." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Page render", "uwp": "Scenario content visible in golden capture", "winui": "Blank/white frame via winapp GDI capture despite UIA reporting all controls on-screen (isOffscreen=false) and Browse behaviorally live", "screenshot_ref": "parity/winui3/screenshots/01_Provision_Peer_Device.png" }
+  ],
+  "missing_features": [],
+  "summary": "Migration is faithful (byte-identical Scenario1.xaml, working Browse picker, 0 behavioral regressions). Score capped at 50 by a WinUI 3 DirectComposition GDI-capture limitation in the eval harness, not a migration defect. The high-value skill lesson comes from the dev-agent's build/runtime journey: a 0x802B000A launch crash caused by shared sample-style resource keys (StandardStyles.xaml / sample App.xaml) not migrated into the scaffold."
+}
