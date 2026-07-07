@@ -1,0 +1,17 @@
+{
+  "scenario": "LinguisticServices",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Unqualified references to a source helper type whose name equals the WinUI 3 project/root-namespace fail to compile (CS0234), and the natural using-alias fix fails too (CS0576). Cost the dev-agent ~3 build/edit cycles.",
+      "evidence": "build-events / session-log lines 4116-4118 (CS0234 '... does not exist in the namespace \\'LinguisticServices\\''), 4343-4345 (CS0576 'conflicting with alias \\'LinguisticServices\\'' after adding 'using LinguisticServices = Sample.LinguisticServices;'), 4508-4523 (final fix: 'using static Sample.LinguisticServices;' + drop the prefix). Cascade into XAML at 4126/4353 (WMC1509 -> WMC0909 'Cannot resolve DataType local:Scenario').",
+      "skill_search": "grepped winui-uwp-migration for: namespace, CS0234, CS0576, RootNamespace, global::, 'using static', collision. Only hit: MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' > 'Thousands of CS0101/CS0227/CS0234' — that entry is about STALE bin/obj build output (duplicate types), a different root cause. No entry covers project-name / root-namespace vs source-type collision, and CS0576 is not mentioned anywhere.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "UWP SDK samples routinely place feature logic in a helper class named after the sample (here 'class LinguisticServices' in 'namespace Sample'), referenced with a bare 'LinguisticServices.' prefix. Agents scaffold the WinUI 3 project with the sample's name, so the assembly/root namespace equals that helper-type name. The bare identifier then binds to the root namespace, not the class (CS0234); aliasing to the same name is illegal (CS0576).",
+      "proposed_fix": "Add a subsection under MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' titled '`CS0234` / `CS0576` — project name collides with a source type or namespace'. Map the exact error text to the collision, and give the deterministic fix: fully-qualify with `global::<SourceNs>.<Type>` OR add `using static <SourceNs>.<Type>;` and drop the prefix; NEVER add a `using Alias = ...;` whose alias equals the project's root namespace (that is what triggers CS0576). Note the XAML cascade (WMC1509 -> WMC0909 'Cannot resolve DataType' -> WMC1111) clears once the C# collision is resolved, so fix C# first.",
+      "generalizes": "Naming the WinUI 3 project after the UWP sample is the default, and UWP SDK samples very commonly ship a same-named helper class (often in namespace 'Sample'). Any sample whose feature class name equals the sample/project name reproduces this collision (CS0234 + the CS0576 alias trap), independent of the specific APIs involved."
+    }
+  ]
+}

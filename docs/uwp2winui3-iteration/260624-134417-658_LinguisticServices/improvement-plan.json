@@ -1,0 +1,20 @@
+{
+  "scenario": "LinguisticServices",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Unqualified references to a source helper type whose name equals the WinUI 3 project's root namespace fail (CS0234), and the natural using-alias fix fails too (CS0576); the XAML compiler then cascades (WMC1509 -> WMC0909/WMC1111). The dev-agent lost ~3 build cycles guessing the fix.",
+      "evidence": "session-log 4116-4118 (CS0234 '...does not exist in the namespace LinguisticServices'), 4343-4345 (CS0576 alias conflict), 4508-4523 (final fix 'using static Sample.LinguisticServices;'); XAML cascade 4126/4353. lessons.json errors_encountered + dev_agent_struggles.",
+      "root_cause": "Project scaffolded with the sample's name -> root namespace == a source helper type name (Sample.LinguisticServices). Bare identifier binds to the namespace, not the class; aliasing to that name is illegal.",
+      "tier": 3,
+      "change": "Added a new subsection to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite': 'CS0234 (a handful) / CS0576 — the project name collides with a source type or namespace'. Explains the collision, warns against the using-alias trap (CS0576), gives two deterministic fixes (using static / global:: qualification), and notes the XAML WMC1509->WMC0909/WMC1111 cascade clears once C# compiles.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On a re-run, an agent hitting CS0234 '...in the namespace <ProjectName>' or CS0576 recognises the root-namespace/type collision immediately and applies global::/using static in one edit instead of trying an illegal alias.",
+      "falsifiable_check": "Re-run a sample whose feature class name equals the project name: the collision is resolved in a single edit (no CS0576 detour), and MIGRATION-PATTERNS.md now contains a 'CS0576' entry (previously absent)."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/harness option: have the scaffold set the WinUI 3 project <RootNamespace> to the source's code-behind namespace (e.g. SDKTemplate) instead of the sample name, which would prevent the root-namespace/type collision at its source. Not auto-applied because project naming is owned by the scaffold/driver, not the winui-uwp-migration skill."
+  ]
+}

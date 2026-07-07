@@ -1,0 +1,16 @@
+{
+  "scenario": "LinguisticServices",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Language Detection (TextInput + Detect Languages)", "status": "pass", "reason": "Controls 2/2 present; button invokes without error.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Script Detection (TextInput + Detect Scripts)", "status": "pass", "reason": "Controls 2/2 present; UIA tree correct.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Transliteration (TextInput + Transliterate)", "status": "pass", "reason": "Controls 2/2 present; UIA tree correct.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Character Grouping (ComboBoxes + Get groups + Assign group + GridView)", "status": "pass", "reason": "Controls 5/5 present; behaviourally verified: Get groups -> 24 pinyin groups, Assign group -> Group H.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Perfect parity: all 4 scenarios pass, build and run clean. No migration defects found by the scorer. The only actionable evidence is the dev-agent's build-time struggle with a project-name / root-namespace collision (CS0234 then CS0576) documented in lessons.json."
+}

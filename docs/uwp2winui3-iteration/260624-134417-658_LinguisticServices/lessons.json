@@ -1,0 +1,25 @@
+{
+  "scenario": "LinguisticServices",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 namespace rewrite", "evidence": "Windows.UI.Xaml -> Microsoft.UI.Xaml rewrite landed cleanly; only code-level adaptations remained. Build ultimately succeeded with 0 errors." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Sample.LinguisticServices (static helper class RecognizeTextLanguages/RecognizeTextScripts/TransliterateFromCyrillicToLatin)", "special_handling": "Helper class name equals the WinUI 3 project/assembly name, so unqualified references (LinguisticServices.RecognizeTextLanguages) bind to the project's root namespace instead of the Sample class. Must fully-qualify (global::Sample.LinguisticServices) or use 'using static Sample.LinguisticServices;'." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: The type or namespace name 'RecognizeTextLanguages'/'RecognizeTextScripts'/'TransliterateFromCyrillicToLatin' does not exist in the namespace 'LinguisticServices'", "root_cause": "The WinUI 3 project was named 'LinguisticServices', making its root namespace 'LinguisticServices'. The source calls the static helper class Sample.LinguisticServices via an unqualified 'LinguisticServices.' prefix (with 'using Sample;'). The compiler resolves the bare 'LinguisticServices' identifier to the project's own root namespace (which has no such method), not the Sample class. Same collision cascaded into XAML (WMC1509 'No LocalAssembly parameter' -> WMC0909 'Cannot resolve DataType local:Scenario' -> WMC1111).", "fix": "Replace the unqualified call with 'using static Sample.LinguisticServices;' + bare method calls (RecognizeTextLanguages(...)), or fully-qualify as global::Sample.LinguisticServices.RecognizeTextLanguages(...)." },
+    { "error": "CS0576: Namespace '<global namespace>' contains a definition conflicting with alias 'LinguisticServices'", "root_cause": "First fix attempt added 'using LinguisticServices = Sample.LinguisticServices;'. A using-alias whose name equals the project's root namespace ('LinguisticServices') is illegal — the alias collides with the namespace of the same name.", "fix": "Do not alias to a name equal to the root namespace. Use 'using static Sample.LinguisticServices;' (drop the qualifier at call sites) or global:: qualification instead." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario1/2/3 *.xaml.cs call sites + MainPage.xaml x:DataType", "symptom": "3 consecutive failed build cycles: first CS0234 (unqualified helper reference), then CS0576 after a wrong alias fix, before landing on 'using static'.", "turns_or_retries": "~3 build/edit cycles", "root_cause": "WinUI 3 project/assembly name ('LinguisticServices') collides with a source helper type of the same name in namespace 'Sample'; no skill guidance existed for name-vs-root-namespace collision, so the agent guessed (alias) and hit a second error (CS0576).", "how_resolved": "Switched to 'using static Sample.LinguisticServices;' and removed the 'LinguisticServices.' prefix from every call site.", "preventable_by": "A documented pattern under MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' that maps CS0234 'does not exist in the namespace <ProjectName>' + CS0576 'conflicting with alias' to the root-namespace/type collision, with the deterministic fix (global:: fully-qualify OR using static; never a using-alias equal to the root namespace)." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 screenshots capture only the title bar (blank client area) because the run-host session is disconnected; UIA tree is correct.", "workaround": "Scored via UIA tree + behavioural exercise of Character Grouping. Environment artifact, not a migration defect." }
+  ]
+}

@@ -50,6 +50,46 @@ Get-ChildItem -Path $Target -Recurse -Directory -Include bin,obj |
 
 Generated sources never belong in source control or the migrated tree — only `.xaml/.cs/.resw/.appxmanifest`/assets are real inputs.
 
+### `CS0234` (a handful) / `CS0576` — the project name collides with a source type or namespace
+
+Distinct from the stale-`bin/obj` flood above: this is a **small, deterministic** set of
+`CS0234` errors of the form *"The type or namespace name `Foo` does not exist in the
+namespace `<ProjectName>`"*, where `<ProjectName>` is your own WinUI 3 project. It happens
+because the project was scaffolded with the **sample's name**, so its root namespace equals
+that name — and UWP SDK samples routinely put the feature's logic in a **helper class of the
+same name** (commonly `class <SampleName>` in `namespace Sample`), called with a bare
+`<SampleName>.` prefix (via `using Sample;`). The unqualified identifier now binds to your
+project's **root namespace** instead of the helper class:
+
+```
+// project named "LinguisticServices"; helper is Sample.LinguisticServices
+foreach (string s in LinguisticServices.RecognizeTextLanguages(TextInput.Text)) // CS0234
+```
+
+**Do NOT "fix" it with a using-alias equal to the root namespace** — that trades CS0234 for
+`CS0576: Namespace '<global namespace>' contains a definition conflicting with alias '…'`:
+
+```csharp
+using LinguisticServices = Sample.LinguisticServices; // ❌ CS0576 — alias == root namespace
+```
+
+Fix by disambiguating the reference instead:
+
+```csharp
+// Option A — bring the static members into scope, drop the prefix at every call site:
+using static Sample.LinguisticServices;
+...
+foreach (string s in RecognizeTextLanguages(TextInput.Text)) { ... }
+
+// Option B — fully qualify with global:: (no prefix removal needed):
+foreach (string s in global::Sample.LinguisticServices.RecognizeTextLanguages(TextInput.Text)) { ... }
+```
+
+The same collision cascades into the XAML compiler: a failed C# pass leaves
+`WMC1509: No LocalAssembly parameter …`, which surfaces as
+`WMC0909: Cannot resolve DataType local:<Type>` / `WMC1111`. **Fix the C# collision first** —
+those XAML errors clear once the assembly compiles; don't chase them separately.
+
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element of the **same type** — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
