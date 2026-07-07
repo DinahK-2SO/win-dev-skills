@@ -1,0 +1,23 @@
+{
+  "scenario": "MobileHotspot",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Migrated ApplyChanges_Click dropped 'configuration.Ssid = SsidTextBox.Text;' (D1) — a real behavioral fidelity defect that took requirement #1 from pass to partial (score 75).",
+      "evidence": "session-log.txt L2563 edit: old_str included '...GetCurrentAccessPointConfiguration();\\n\\n    configuration.Ssid = SsidTextBox.Text;', new_str reproduced only '...GetCurrentAccessPointConfiguration();' — the assignment was deleted while the intended change was merely adding a '!' null-forgiving operator to m_tetheringManager. discrepancies.json d1-apply-drops-ssid; migration-score.json feature 'Configure Mobile Hotspot' verdict partial.",
+      "covered_at": "SKILL.md > Critical Rules > Fidelity (highest priority), bullet at line 181 ('edit that copy in place, changing only the lines an API/namespace transform requires' and 'the validator's verbatim-text check ... inspects XAML only, so a wholesale .cs rewrite is unguarded').",
+      "why_missed": "grey-zone / under-emphasized — the Fidelity rule targets *wholesale* .cs overwrites (Set-Content/here-strings) and *visible text*, but does not call out the subtler and more common failure: a targeted string-replace whose old_str is widened to include an adjacent statement that the new_str then silently drops. The dev-agent was doing exactly the endorsed 'edit in place' path, so it did not read this as a warning that applied to it.",
+      "proposed_improvement": "Add one Fidelity bullet on surgical-edit hygiene: every line in an edit's match window except the single line being transformed must be reproduced verbatim in the replacement; the classic silent defect is a one-token change (e.g. adding '!') whose old_str swept in a following statement dropped from new_str; after any in-place .cs edit, re-read the replaced block and confirm the only diff is the intended transform (compiler + XAML-only verbatim check will not catch a dropped statement).",
+      "generalizes": "UWP→WinUI migration is overwhelmingly done via many targeted string-replace edits (namespace rewrites, null-forgiving operators, API swaps). Collateral deletion of an adjacent statement is a model-agnostic edit hazard that recurs on any code-behind that sets several properties before an async call (ConfigureAsync/SaveAsync/etc.), independent of this scenario's APIs."
+    },
+    {
+      "problem": "On the gated machine the WinUI app shows the generic 'This sample could not initialize on this machine. <ex>' where the UWP shows the specific 'This app is not configured to access Wi-Fi devices on this machine.' (D2, minor).",
+      "evidence": "session-log.txt L1640 edit wraps OnNavigatedTo init in try/catch whose catch does NotifyUser('This sample could not initialize on this machine. {ex.Message}'); the source Helpers path still contains the specific capability message. discrepancies.json d2-gated-status-text.",
+      "covered_at": "SKILL.md > Critical Rules > Defensive UI for init-heavy and device-dependent pages, the 'Rule:' paragraph (lines 224-227) which prescribes the generic 'This sample could not initialize on this machine.' fallback.",
+      "why_missed": "under-emphasized — the Defensive-UI rule tells the agent to add the generic fallback but does not say to preserve a source-specific failure message when the source already surfaces one, so a blanket catch masks the precise message.",
+      "proposed_improvement": "Add a short clause to the Defensive-UI Rule: if the source's own init/helper path already surfaces a specific user-facing message on the failure it expects (e.g. a capability-gated NotifyUser that returns gracefully), let that path run and catch only genuinely unexpected exceptions; use the generic fallback text only when the source had none.",
+      "generalizes": "SDK samples and device-dependent apps frequently carry precise capability/error messages on their degradation paths; a reflexive blanket try/catch that always emits the generic text erodes text parity across any such migration, not just this one."
+    }
+  ]
+}

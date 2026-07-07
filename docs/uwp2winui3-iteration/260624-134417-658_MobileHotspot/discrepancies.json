@@ -1,0 +1,33 @@
+{
+  "scenario": "MobileHotspot",
+  "uwp_launchable": true,
+  "uwp_window_title": "MobileHotspot C# Sample",
+  "notes": "Both apps launched and were driven on a machine WITHOUT Wi-Fi tethering capability, so HotspotPanel stays collapsed in both. Discrepancies below are found from live inspection + source review.",
+  "discrepancies": [
+    {
+      "id": "d1-apply-drops-ssid",
+      "scenario": "Configure Mobile Hotspot",
+      "severity": "major",
+      "type": "wrong-behavior / dropped logic",
+      "detail": "The UWP ApplyChanges_Click sets both configuration.Ssid = SsidTextBox.Text AND configuration.Passphrase = PassphraseTextBox.Text before ConfigureAccessPointAsync. The migrated WinUI ApplyChanges_Click OMITS the 'configuration.Ssid = SsidTextBox.Text;' assignment (only Passphrase/Band/AuthenticationKind are set). Applying changes would therefore fail to persist an edited SSID. Not observable at runtime here because the scenario is hardware-gated, but it is a genuine behavioral fidelity defect found by code review.",
+      "uwp_ref": "cs/Scenario1_ConfigureMobileHotspot.xaml.cs:100-101",
+      "winui_ref": "app/MobileHotspot/Scenario1_ConfigureMobileHotspot.xaml.cs:106-107"
+    },
+    {
+      "id": "d2-gated-status-text",
+      "scenario": "both",
+      "severity": "minor",
+      "type": "wrong-output-text",
+      "detail": "On this machine the UWP app shows the capability-specific status 'This app is not configured to access Wi-Fi devices on this machine.' (SampleConfiguration.cs DisabledBySystemCapability path, graceful null return). The WinUI migration instead shows the generic 'This sample could not initialize on this machine. <ex>' from the OnNavigatedTo try/catch, i.e. the migrated Helpers threw before reaching the graceful capability-check path. Both display a red error status indicating the feature is unavailable, so the behavioral outcome (gated) is equivalent, but the exact message differs. The migrated Helpers preserves the correct message string in source; the difference is a runtime code-path/robustness change (defensive try/catch was added).",
+      "uwp_ref": "cs/SampleConfiguration.cs:76,82",
+      "winui_ref": "app/MobileHotspot/Scenario2_ToggleMobileHotspot.xaml.cs:53-57"
+    },
+    {
+      "id": "d3-winui-screenshot-blank",
+      "scenario": "both",
+      "severity": "instrument-limitation",
+      "type": "capture-artifact",
+      "detail": "winapp screenshots of the WinUI 3 window render blank/white in every mode (window BitBlt and --capture-screen), a known WinUI3 DirectX-swapchain vs GDI-capture incompatibility in this environment. NOT a migration defect: the live UIA tree (29 elements) confirms the full SDK frame, nav list with correct titles, 'Description:' text, and gated status are all present and laid out at real screen coordinates. The UWP CoreWindow conversely is not UIA-traversable (golden UIA trees contain only a single CoreWindow Pane), so per-scenario nav could not be driven in the UWP app and its golden frames are the same launch frame."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "scenario": "MobileHotspot",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated ApplyChanges_Click silently dropped 'configuration.Ssid = SsidTextBox.Text;' (D1), taking requirement #1 pass->partial (score 75). Root cause: a targeted string-replace to add a '!' null-forgiving operator widened its old_str to include the Ssid assignment and the new_str omitted it — collateral deletion that builds clean.",
+      "evidence": "session-log.txt L2563 (old_str/new_str diff); discrepancies.json d1-apply-drops-ssid; migration-score.json feature 'Configure Mobile Hotspot' verdict partial.",
+      "root_cause": "Fidelity guidance warns against wholesale .cs overwrites and protects visible text, but does not warn against adjacent-statement deletion inside an endorsed surgical in-place edit — the exact path the dev-agent was on. Compiler + XAML-only verbatim check cannot catch a dropped .cs statement.",
+      "tier": 3,
+      "change": "Added a Fidelity bullet on surgical-edit hygiene: every line in an edit's match window except the one transformed line must be reproduced verbatim; the classic silent defect is a one-token change whose old_str swept in a following statement dropped from new_str; re-read the replaced block after each in-place edit.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent preserves all in-handler statements when making targeted edits; dropped assignments/calls avoided.",
+      "falsifiable_check": "On re-run, ApplyChanges_Click retains 'configuration.Ssid = SsidTextBox.Text;' and requirement #1 goes partial->pass; more generally, no code-behind statement is deleted by a namespace/null-forgiving edit."
+    },
+    {
+      "problem": "Blanket defensive try/catch emitted the generic 'could not initialize' status, masking the UWP's specific capability message 'This app is not configured to access Wi-Fi devices on this machine.' (D2, minor).",
+      "evidence": "session-log.txt L1640 (OnNavigatedTo try/catch); discrepancies.json d2-gated-status-text.",
+      "root_cause": "Defensive-UI Rule prescribes the generic fallback but does not tell the agent to preserve a source-specific failure message when the source already surfaces one.",
+      "tier": 3,
+      "change": "Added a clause to the Defensive-UI Rule: preserve the source's specific failure message when it has one (catch only unexpected exceptions); use the generic fallback text only when the source had no message of its own.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Capability/error message text parity preserved on gated/device-dependent pages while still avoiding blank frames.",
+      "falsifiable_check": "On re-run, a page whose source surfaces a specific capability message shows that exact message on the gated machine rather than the generic 'could not initialize' text."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier 1 idea (harness/tooling): extend Validate-UwpMigration.ps1 to diff each migrated .cs against its bootstrap-copied original and flag deleted non-comment statements — would catch surgical-edit collateral deletions (D1) mechanically instead of relying on prose. Left to human: needs a robust statement-level diff to avoid false positives on legitimate API transforms."
+  ]
+}

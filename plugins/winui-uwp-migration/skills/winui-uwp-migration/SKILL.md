@@ -179,6 +179,7 @@ After PASS, do a final `winapp build` to confirm the build is still clean. Only 
 - Every page, UserControl, helper class, and XAML element in the source must appear in the target — unless explicitly deferred with a cited unsupported API.
 - Silent omission is a defect. If `MIGRATION-MAPPING.md` is missing a file you expected, the bootstrap input was wrong — fix the `-Source` path and re-run, do not patch by hand.
 - Do not regenerate any source from scratch, and **never overwrite a whole bootstrap-copied file** — `*.xaml` **or** its `*.xaml.cs` code-behind and helper `*.cs` classes — with freshly authored content (e.g. a scripted `Set-Content` / here-string block, or hand-retyping the file). The bootstrap already copied each source file **verbatim** into the target — your job is to **edit that copy in place**, changing only the lines an API/namespace transform requires. This matters as much for `.cs` as for `.xaml`: the validator's verbatim-text check (Step 4, check #8) inspects XAML only, so a wholesale `.cs` rewrite is **unguarded** and silently risks dropping or paraphrasing user-visible strings that live in code-behind (e.g. status/`NotifyUser` messages). The temptation is highest on SEQUENTIAL files — resist it there too.
+- **A targeted edit must not delete adjacent logic — reproduce the whole match window verbatim except the one line you transform.** The most common silent fidelity defect is *not* a wholesale rewrite but a surgical string-replace whose match window was widened for context: you change one token (e.g. add a `!` null-forgiving operator, or swap a namespace) and, in doing so, drop a neighbouring statement that was swept into the `old_str` but never reproduced in the `new_str`. A dropped assignment or method call (e.g. `configuration.Ssid = SsidTextBox.Text;` before a `ConfigureAsync` call) **still builds clean** — the compiler is happy and the XAML-only verbatim check never sees it — but real behaviour is gone. Rule: in every in-place `.cs`/`.xaml` edit, each line inside the replacement window other than the single line you intend to transform must appear **unchanged** in the replacement. After the edit, re-read the replaced block and confirm the only difference from the original is the transform you meant to make.
 - **Preserve all user-visible and static text verbatim — not just the parts that affect compilation.** Keeping `x:Class`, control types, `x:Name`s, and event handlers wired is necessary but **not sufficient**: a page that compiles with the right handlers can still fail parity if you reword a control's `Content`/`Text`, change a `Header`/`Title`, or drop a descriptive `TextBlock`/`RichTextBlock` paragraph. Carry every label, caption, header, and description block across **word-for-word**. Do **not** paraphrase button/label text, and do **not** omit "Description"-style explanatory text blocks (common in SDK samples). Visible-text fidelity is scored even though the compiler never checks it. The `Status=copied`→`done` flip means *transformed in place*, never *re-authored*.
 
 ### API-level
@@ -225,6 +226,14 @@ or `OnNavigatedTo`**, not only hardware pages. Common triggers:
 fallback** (don't only log and return). The fallback can be as simple as a centred `TextBlock`
 saying *"This sample could not initialize on this machine."* plus the exception's `Message`
 underneath (for hardware, name the missing device kind).
+
+**But don't let the generic fallback clobber a source-specific message.** If the source's own
+init/helper path already surfaces a *specific* user-facing message for the failure it expects —
+e.g. a capability-gated `NotifyUser("This app is not configured to access Wi-Fi devices on this
+machine.")` that returns gracefully instead of throwing — leave that path intact and catch only
+genuinely *unexpected* exceptions. Reach for the generic *"could not initialize"* text **only when
+the source had no message of its own**; otherwise a blanket `try/catch` around the whole init
+overwrites the source's precise wording and costs text parity.
 
 **This applies equally to a page whose hero control was *deferred* (not just one that *throws*).**
 A page does not have to throw to render blank: if its primary visible surface was an

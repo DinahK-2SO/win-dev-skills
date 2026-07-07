@@ -1,0 +1,39 @@
+{
+  "scenario": "MobileHotspot",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 bootstrap", "evidence": "Source files copied verbatim into target with TODO anchors; both scenario pages, SampleConfiguration/Helpers, and XAML present in migrated app with full visible text and control fidelity (score 75, feature 2 pass)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 verbatim check", "limitation": "The verbatim-text check inspects XAML only (SKILL.md Fidelity bullet, line 181), so a dropped logic statement in a .cs code-behind edit is unguarded.", "suggested_tweak": "Sharpen the Fidelity guidance so the agent self-verifies .cs surgical edits (compiler + XAML check cannot catch a dropped assignment)." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "NetworkOperatorTetheringManager / GetInternetConnectionProfile", "special_handling": "Capability-gated: on a box without Wi-Fi tethering the helper path surfaces a specific NotifyUser message and returns null gracefully. In the desktop/unpackaged target this path threw, so the added defensive try/catch caught it and showed the generic message instead (D2)." }
+  ],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    {
+      "where": "Scenario1_ConfigureMobileHotspot.xaml.cs ApplyChanges_Click (edit at session-log L2563)",
+      "symptom": "Migrated ApplyChanges_Click is missing 'configuration.Ssid = SsidTextBox.Text;' present in the UWP original; an edited SSID would silently not persist.",
+      "turns_or_retries": "single edit",
+      "root_cause": "Surgical string-replace intended only to add a '!' null-forgiving operator to m_tetheringManager. The old_str widened to include the following statement 'configuration.Ssid = SsidTextBox.Text;' but the new_str omitted it — collateral deletion of real logic. Clean build, so neither compiler nor the XAML-only verbatim check flagged it.",
+      "how_resolved": "Not resolved by the agent; caught later by parity code review (D1). Cost requirement #1 pass->partial (score 75).",
+      "preventable_by": "Fidelity rule: in a targeted .cs edit, reproduce every line of the match window verbatim except the single transformed line; re-read the replaced block to confirm the only diff is the intended transform."
+    },
+    {
+      "where": "Scenario2_ToggleMobileHotspot.xaml.cs OnNavigatedTo (edit at session-log L1640)",
+      "symptom": "On the gated machine the WinUI app shows generic 'This sample could not initialize on this machine. <ex>' instead of the UWP's specific 'This app is not configured to access Wi-Fi devices on this machine.' (D2, minor).",
+      "turns_or_retries": "single edit",
+      "root_cause": "Agent correctly added the skill's Defensive-UI try/catch around init, but the blanket catch's generic fallback masked the source's own capability-specific NotifyUser message (which the Helpers path still contains).",
+      "how_resolved": "Not resolved; behaviorally equivalent (both show red error), verdict pass, minor.",
+      "preventable_by": "Defensive-UI guidance: preserve a source-specific failure message when the source already surfaces one; use the generic fallback only when the source had none."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Both scenarios hardware-gated (no Wi-Fi tethering capability), HotspotPanel collapsed in UWP and WinUI alike.", "workaround": "Grade against gated ground-truth state + source-level control/handler fidelity." }
+  ]
+}

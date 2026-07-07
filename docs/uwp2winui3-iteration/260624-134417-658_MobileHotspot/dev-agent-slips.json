@@ -1,0 +1,14 @@
+{
+  "scenario": "MobileHotspot",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "D3 — WinUI window screenshots capture blank/white.",
+      "evidence": "discrepancies.json d3-winui-screenshot-blank; migration-score.json scoring_note (29-element live UIA tree confirms the frame renders).",
+      "covered_clearly_at": "N/A — instrument limitation (WinUI3 DirectX-swapchain vs GDI-capture), not a migration defect and not addressable in the migration skill.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Capture artifact of the eval/environment; the migrated app renders correctly per UIA. No migration-skill edit could change this, and editing eval skills is out of scope."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "scenario": "MobileHotspot",
+  "feature": "MobileHotspot C# Sample",
+  "source": "uwp-samples-standalone/Samples/MobileHotspot/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Configure Mobile Hotspot",
+      "controls": [
+        "SsidTextBox (TextBox)",
+        "PassphraseTextBox (TextBox)",
+        "BandComboBox (ComboBox)",
+        "AuthenticationComboBox (ComboBox)",
+        "Apply changes (Button)",
+        "Discard changes (Button)"
+      ],
+      "actions": ["Apply changes", "Discard changes"],
+      "outputs": ["StatusBlock", "SsidTextBox/PassphraseTextBox/combos reflect current config"],
+      "gating": "All controls live inside HotspotPanel (Visibility=Collapsed by default); shown only when a NetworkOperatorTetheringManager is available on the machine."
+    },
+    {
+      "number": 2,
+      "title": "Toggle Mobile Hotspot",
+      "controls": ["MobileHotspotToggle (ToggleSwitch)"],
+      "actions": ["MobileHotspotToggle"],
+      "outputs": ["SsidRun", "PasswordRun", "BandRun", "AuthenticationRun", "StatusBlock"],
+      "gating": "HotspotPanel (Visibility=Collapsed) shown only when a tethering manager is available."
+    }
+  ],
+  "grading_notes": "Both scenarios are hardware-gated. On a machine without Wi-Fi tethering capability, HotspotPanel stays collapsed in BOTH the UWP original and the WinUI migration, so no feature control is exposed or actuable. Score fidelity of the migrated app against what the live UWP app actually presents on this machine (gated frame + nav + description + red error status), plus source-level control/handler fidelity."
+}
