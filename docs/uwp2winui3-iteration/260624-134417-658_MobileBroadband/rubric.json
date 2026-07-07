@@ -1,0 +1,94 @@
+{
+  "scenario": "MobileBroadband",
+  "created_at": "2026-07-07T13:11:16+08:00",
+  "uwp_capture_status": "partial: original UWP app launched (Release, pid 34936, windowTitle 'MobileBroadband') and rendered its full dark-themed UI, but its CoreWindow exposed no child UIA elements to external automation (winapp ui inspect/search returned only a top-level Pane, 0 interactive elements). Title-driven navigation therefore could not switch scenarios, so only the initial frame (Scenario 1) is a true per-scenario golden; screenshots 02-07 are the same initial frame, not their own state.",
+  "features": [
+    {
+      "id": "mobile-broadband-device",
+      "area": "Scenario 1",
+      "name": "Mobile Broadband Device",
+      "description": "Shows current mobile broadband device + account information; account picker button 'Get Next Device Information'.",
+      "expected_behaviour": [
+        "Page renders a device/account information panel with labeled fields (Account Provider Name, Network Account ID, Manufacturer, Model, etc.)",
+        "A 'No available accounts detected' button / account selector is visible",
+        "Content is visibly painted (dark theme, white text) matching the UWP sample"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Mobile_Broadband_Device.png",
+      "weight": 2
+    },
+    {
+      "id": "network-account-watcher",
+      "area": "Scenario 2",
+      "name": "Network Account Watcher",
+      "description": "Start/Stop a network account watcher and display device information events.",
+      "expected_behaviour": [
+        "Start and Stop buttons are visible and enabled",
+        "Clicking Start begins watching and updates status text",
+        "Clicking Stop halts the watcher"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Network_Account_Watcher.png",
+      "weight": 1
+    },
+    {
+      "id": "connection-ui",
+      "area": "Scenario 3",
+      "name": "Connection UI",
+      "description": "Requests the system connection UI for the mobile broadband account.",
+      "expected_behaviour": [
+        "A control to trigger the connection UI is visible",
+        "Invoking it attempts to show connection UI / status text"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_Connection_UI.png",
+      "weight": 1
+    },
+    {
+      "id": "get-connection-profiles",
+      "area": "Scenario 4",
+      "name": "Get Connection Profiles",
+      "description": "Enumerates mobile broadband connection profiles.",
+      "expected_behaviour": [
+        "'Get Connection Profiles' button is visible",
+        "Invoking it lists available profiles or a status message"
+      ],
+      "screenshot": "parity/baseline/screenshots/04_Get_Connection_Profiles.png",
+      "weight": 1
+    },
+    {
+      "id": "modem-information",
+      "area": "Scenario 5",
+      "name": "Modem information (New)",
+      "description": "Refreshes and displays modem information.",
+      "expected_behaviour": [
+        "'Refresh Modem Information' button is visible",
+        "Invoking it populates modem info fields or a status message"
+      ],
+      "screenshot": "parity/baseline/screenshots/05_Modem_information_New.png",
+      "weight": 1
+    },
+    {
+      "id": "device-services",
+      "area": "Scenario 6",
+      "name": "Device Services (New)",
+      "description": "Queries mobile broadband device services.",
+      "expected_behaviour": [
+        "'Get DeviceService' button is visible",
+        "Invoking it lists device services or a status message"
+      ],
+      "screenshot": "parity/baseline/screenshots/06_Device_Services_New.png",
+      "weight": 1
+    },
+    {
+      "id": "sim-card",
+      "area": "Scenario 7",
+      "name": "SIM Card (New)",
+      "description": "Reads SIM card information and ICCID record.",
+      "expected_behaviour": [
+        "'Get SIM Card Information' and 'Get Iccid Record Information' buttons are visible",
+        "Invoking 'Get SIM Card Information' populates SIM fields or a status message",
+        "'Get Iccid Record Information' becomes enabled/usable after SIM info is retrieved"
+      ],
+      "screenshot": "parity/baseline/screenshots/07_SIM_Card_New.png",
+      "weight": 1
+    }
+  ]
+}

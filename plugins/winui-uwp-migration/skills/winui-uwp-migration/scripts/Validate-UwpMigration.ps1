@@ -22,7 +22,7 @@ Checks (numbering matches the `# ─── N.` sections in the code):
 6. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
 7. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
 8. Visible-text fidelity (WARN-only) — compares each non-deferred XAML to the bootstrap's verbatim visible-text snapshot (.fidelity-snapshot.json) and WARNs about labels/captions/descriptions that vanished (regenerated/paraphrased page); never fails the gate
-9. System backdrop blank-window risk (WARN-only) — WARNs when MainWindow.xaml (or any XAML) still carries the scaffold's <Window.SystemBackdrop> (Mica/Acrylic), which blanks the whole window in headless/VM/RDP capture; never fails the gate
+9. Composition-dependent blank-window risk (WARN-only) — WARNs when a window keeps any transparent, DWM-composition-dependent trigger the scaffold emits: <Window.SystemBackdrop> (Mica/Acrylic), the <TitleBar> control, or ExtendsContentIntoTitleBar=true. Each blanks the whole window in headless/VM/RDP capture even with the visual tree populated; never fails the gate
 
 .PARAMETER Target
 Migrated WinUI 3 project root (same folder used as -Target for
@@ -711,15 +711,30 @@ foreach ($xf in $xamlFiles) {
     if ($txt -match '<Window\.SystemBackdrop>' -or $txt -match '<MicaBackdrop\b' -or $txt -match '<DesktopAcrylicBackdrop\b') {
         [void]$backdropHits.Add($rel)
     }
+    if ($txt -match '<TitleBar\b') {
+        [void]$backdropHits.Add("$rel (scaffold <TitleBar> control)")
+    }
+}
+# Second trigger on the same window: ExtendsContentIntoTitleBar=true in code-behind makes
+# the window frame transparent (same DWM-composition dependency as a system backdrop), so
+# it blanks in headless/VM capture even after the backdrop is removed.
+$csFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.xaml.cs,*.cs -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' }
+foreach ($cf in $csFiles) {
+    $ctxt = [System.IO.File]::ReadAllText($cf.FullName)
+    if ($ctxt -match 'ExtendsContentIntoTitleBar\s*=\s*true') {
+        $crel = $cf.FullName.Substring($Target.Length).TrimStart('\','/')
+        [void]$backdropHits.Add("$crel (ExtendsContentIntoTitleBar = true)")
+    }
 }
 if ($backdropHits.Count -eq 0) {
-    Write-Host "[PASS] No <Window.SystemBackdrop> (Mica/Acrylic) — window will not blank in headless/VM capture"
+    Write-Host "[PASS] No system backdrop / ExtendsContentIntoTitleBar — window will not blank in headless/VM capture"
 } else {
-    Write-Host "[WARN] $($backdropHits.Count) XAML file(s) declare a system backdrop (Mica/Acrylic). System backdrops need live DWM composition and render the WHOLE window BLANK in headless/VM/RDP/automated-capture sessions (where parity screenshots are taken), even though the visual tree is populated and the smoke launch passes. UWP originals had no backdrop — delete the <Window.SystemBackdrop> block for reliable rendering + parity. See MIGRATION-PATTERNS.md#system-backdrop-blank:"
+    Write-Host "[WARN] $($backdropHits.Count) composition-dependent window trigger(s) found (system backdrop Mica/Acrylic, scaffold <TitleBar>, and/or ExtendsContentIntoTitleBar=true). These make the window frame transparent and need live DWM composition, so the WHOLE window renders BLANK in headless/VM/RDP/automated-capture sessions (where parity screenshots are taken), even though the visual tree is populated and the smoke launch passes. UWP originals had no backdrop and used the standard title bar — remove the <Window.SystemBackdrop> block, delete the <TitleBar> block, and drop ExtendsContentIntoTitleBar=true / SetTitleBar(...) for reliable rendering + parity. See MIGRATION-PATTERNS.md#system-backdrop-blank and #extend-titlebar-blank:"
     $bdBlock = New-Object System.Collections.Generic.List[string]
     foreach ($h in $backdropHits) {
         Write-Host "       $h"
-        [void]$bdBlock.Add("[$h] declares <Window.SystemBackdrop>/MicaBackdrop/DesktopAcrylicBackdrop — remove it (MIGRATION-PATTERNS.md#system-backdrop-blank)")
+        [void]$bdBlock.Add("[$h] composition-dependent transparent-window trigger — remove it (MIGRATION-PATTERNS.md#system-backdrop-blank / #extend-titlebar-blank)")
     }
     Add-Diag 'System backdrop blank-window risk (WARN)' (($bdBlock) -join "`r`n")
 }

@@ -1,0 +1,17 @@
+{
+  "scenario": "MobileBroadband",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 window renders fully blank white for all 7 scenarios (score 0) even though the agent followed the skill and removed the scaffold's <Window.SystemBackdrop>. The current 'dotnet new winui' scaffold has a SECOND composition-dependent transparent-window trigger — ExtendsContentIntoTitleBar=true + the <TitleBar> control — that the skill does not mention, so the window still fails to present in the headless/VM capture session.",
+      "evidence": "score notes parity/winui3/screenshots/00_launch.png (blank white) vs baseline (full dark UI); migration-score.json features_fail=7, verdict_basis 'window chrome renders while all content paints invisibly despite being present in the UIA tree'; session-log lines 2249 (agent removed <Window.SystemBackdrop>), 3135/3200 (validator [PASS] 'window will not blank'); migrated MainWindow.xaml still has <TitleBar> + MainWindow.xaml.cs sets ExtendsContentIntoTitleBar=true; SetTitleBar(AppTitleBar).",
+      "skill_search": "grepped SKILL.md, MIGRATION-PATTERNS.md and Validate-UwpMigration.ps1 for 'SystemBackdrop|Backdrop|blank|ExtendsContent|TitleBar'",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "SKILL.md: 'Delete the <Window.SystemBackdrop> block from MainWindow.xaml — UWP originals had no backdrop, so removing it both restores reliable rendering and matches the opaque original.' MIGRATION-PATTERNS.md#system-backdrop-blank: 'Fix — remove the scaffold backdrop. Delete the <Window.SystemBackdrop> block ... and let the window use its normal opaque background.'",
+      "root_cause": "The blank-window guidance treats <Window.SystemBackdrop> as the sole cause of a composition-dependent (transparent) window. The current scaffold also emits ExtendsContentIntoTitleBar=true + a <TitleBar> control, which independently keeps the window transparent/composition-dependent. Removing only the backdrop leaves this second trigger, so the window still blanks in headless/VM/RDP/automated-capture sessions. The guidance is therefore incomplete/misleading ('restores reliable rendering' is false when extend-into-title-bar remains).",
+      "proposed_fix": "Broaden the blank-window guidance in SKILL.md and MIGRATION-PATTERNS.md#system-backdrop-blank to cover BOTH composition-dependent triggers: when de-composing the window for reliable headless-capture rendering, remove the system backdrop AND revert the scaffold custom title bar (delete the <TitleBar> block, drop ExtendsContentIntoTitleBar=true / SetTitleBar(...)), leaving a plain opaque window with the standard system title bar (matches the UWP original). Also extend Validate-UwpMigration.ps1 Section 9 to WARN when a window keeps ExtendsContentIntoTitleBar=true / the scaffold <TitleBar>, so the second trigger cannot pass as a false [PASS].",
+      "generalizes": "EVERY UWP->WinUI 3 migration scaffolded with the current 'dotnet new winui' template inherits the same <TitleBar> + ExtendsContentIntoTitleBar=true chrome and the same <Window.SystemBackdrop>. Any of them captured in a headless/VM/CI parity environment will blank unless BOTH composition-dependent triggers are neutralized — this is a template-wide, environment-wide recurrence, not specific to MobileBroadband."
+    }
+  ]
+}

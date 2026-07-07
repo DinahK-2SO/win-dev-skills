@@ -245,13 +245,28 @@ large score loss.
 A distinct blank-window cause where the content is **not** missing: navigation succeeded,
 every control is in the UIA/visual tree and even responds to input, yet the **whole window
 paints blank white**. This is **not** fixed by an opaque page/`Grid` `Background`. The cause
-is the `<Window.SystemBackdrop><MicaBackdrop/></Window.SystemBackdrop>` that `dotnet new winui`
-scaffolds into `MainWindow.xaml`: system backdrops need live DWM composition, which is absent
-in headless / VM / RDP / automated-capture sessions (where parity screenshots are taken), so
-the backdrop fails to present and blanks the window while the process stays alive (smoke gate
-still green). **Delete the `<Window.SystemBackdrop>` block from `MainWindow.xaml`** — UWP
-originals had no backdrop, so removing it both restores reliable rendering and matches the
-opaque original. See [Blank window despite a fully populated visual tree](./MIGRATION-PATTERNS.md#system-backdrop-blank).
+is **composition-dependent, transparent window chrome that the `dotnet new winui` scaffold
+adds** — and there are **two** triggers on the same `MainWindow`, so fixing one alone is not
+enough:
+
+1. `<Window.SystemBackdrop><MicaBackdrop/></Window.SystemBackdrop>` in `MainWindow.xaml`.
+2. `ExtendsContentIntoTitleBar = true` + `SetTitleBar(AppTitleBar)` in `MainWindow.xaml.cs`,
+   driving the scaffold's `<TitleBar>` control in `MainWindow.xaml`.
+
+Both make the window frame transparent and rely on live DWM composition, which is absent in
+headless / VM / RDP / automated-capture sessions (where parity screenshots are taken), so the
+window blanks while the process stays alive (smoke gate still green). **Removing only the
+backdrop leaves trigger #2 and the window still blanks** — a validator `[PASS]` on "no
+`<Window.SystemBackdrop>`" is not proof the window renders.
+
+**Fix — de-compose the window fully:** delete the `<Window.SystemBackdrop>` block **and** the
+`<TitleBar>` block from `MainWindow.xaml`, and remove `ExtendsContentIntoTitleBar = true;` /
+`SetTitleBar(...)` from `MainWindow.xaml.cs`, leaving a plain opaque window with the standard
+system title bar. (If an extended title bar is genuinely required for parity, instead give the
+`Window`'s root panel an explicit opaque `Background`.) UWP originals had no backdrop and used
+the standard title bar, so this both restores reliable rendering and matches the opaque
+original. See [Blank window despite a fully populated visual tree](./MIGRATION-PATTERNS.md#system-backdrop-blank)
+and [the extended-title-bar trigger](./MIGRATION-PATTERNS.md#extend-titlebar-blank).
 
 ## Post-Migration
 

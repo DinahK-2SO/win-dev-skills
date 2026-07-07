@@ -1,0 +1,15 @@
+{
+  "scenario": "MobileBroadband",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "winui-uwp-migration: broaden the blank-window guidance (SKILL.md + MIGRATION-PATTERNS.md) to cover the second composition-dependent trigger — ExtendsContentIntoTitleBar=true + the scaffold <TitleBar> — not just <Window.SystemBackdrop>, because removing only the backdrop still leaves the window transparent and it blanks in headless/VM/automated-capture parity runs",
+    "winui-uwp-migration: extend Validate-UwpMigration.ps1 Section 9 to also detect the <TitleBar> control and ExtendsContentIntoTitleBar=true so the extended-title-bar trigger can no longer pass as a false [PASS] 'window will not blank'"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": []
+}

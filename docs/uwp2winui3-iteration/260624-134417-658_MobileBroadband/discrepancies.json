@@ -1,0 +1,21 @@
+{
+  "scenario": "MobileBroadband",
+  "index": 1,
+  "score": 0,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Mobile Broadband Device", "status": "fail", "reason": "Control present in UIA tree but window renders blank white.", "suspected_skill_gap": "Blank-window guidance covers only <Window.SystemBackdrop>, not ExtendsContentIntoTitleBar/<TitleBar>; window stayed composition-dependent and blanked." },
+    { "id": 1, "text": "Network Account Watcher", "status": "fail", "reason": "Start/Stop respond in UIA tree (+3/+2 tokens) but nothing renders.", "suspected_skill_gap": "Same composition-dependent blank-window root cause." },
+    { "id": 2, "text": "Connection UI", "status": "fail", "reason": "Control present but window blank white.", "suspected_skill_gap": "Same composition-dependent blank-window root cause." },
+    { "id": 3, "text": "Get Connection Profiles", "status": "fail", "reason": "Action invoked, no visible response; blank window.", "suspected_skill_gap": "Same composition-dependent blank-window root cause." },
+    { "id": 4, "text": "Modem information (New)", "status": "fail", "reason": "Action invoked, no visible response; blank window.", "suspected_skill_gap": "Same composition-dependent blank-window root cause." },
+    { "id": 5, "text": "Device Services (New)", "status": "fail", "reason": "Control present but window blank white.", "suspected_skill_gap": "Same composition-dependent blank-window root cause." },
+    { "id": 6, "text": "SIM Card (New)", "status": "fail", "reason": "3/3 controls present, Get SIM Card Information responds (+2 tokens) but nothing renders.", "suspected_skill_gap": "Same composition-dependent blank-window root cause." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Whole window (all scenarios)", "uwp": "Full dark-themed UI: 7-item nav list + rich per-scenario labelled fields", "winui": "Pure blank white client area; only the caption/min-max-close chrome renders", "screenshot_ref": "parity/winui3/screenshots/00_launch.png vs parity/baseline/screenshots/00_launch.png" }
+  ],
+  "missing_features": [],
+  "summary": "Structural parity 100% (all controls present, several respond behaviorally) but total visual-fidelity failure: the window paints blank white because ExtendsContentIntoTitleBar=true + the scaffold <TitleBar> keep it in a DWM-composition-dependent transparent mode that does not present in the headless capture VM, even after the agent removed the (separately-covered) system backdrop."
+}

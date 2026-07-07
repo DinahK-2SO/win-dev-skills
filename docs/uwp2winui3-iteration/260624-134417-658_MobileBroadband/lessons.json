@@ -1,0 +1,31 @@
+{
+  "scenario": "MobileBroadband",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap seeded MIGRATION-MAPPING.md + TODO markers; all 11 source files copied verbatim and migrated in place." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Ran to PASS incl. Section 9 'No <Window.SystemBackdrop>' after the agent removed the scaffold backdrop (session-log lines 3135, 3200)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 Section 9", "problem": "Prints '[PASS] No <Window.SystemBackdrop> — window will not blank in headless/VM capture', a FALSE assurance: the app still renders fully blank white because ExtendsContentIntoTitleBar=true + the scaffold <TitleBar> keep the window in the same composition-dependent transparent mode.", "evidence": "session-log line 3135/3200 [PASS]; score screenshots parity/winui3/00_launch.png is pure blank white." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Blank-window (Section 9) check only detects <Window.SystemBackdrop>/MicaBackdrop/DesktopAcrylicBackdrop; it does not detect the other composition-dependent transparent-window trigger the current scaffold emits (ExtendsContentIntoTitleBar=true + <TitleBar>).", "suggested_tweak": "Extend Section 9 to also WARN when a MainWindow sets ExtendsContentIntoTitleBar=true / uses the scaffold <TitleBar> control without reverting to an opaque standard title bar." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "SKILL.md 'Blank window even though the visual tree is fully populated (scaffold system backdrop)' + MIGRATION-PATTERNS.md#system-backdrop-blank", "wrong": "States that deleting the <Window.SystemBackdrop> block 'both restores reliable rendering and matches the opaque original' — implying that is the complete fix.", "correct": "Removing the backdrop is necessary but NOT sufficient on the current scaffold: ExtendsContentIntoTitleBar=true + the <TitleBar> control keep the window transparent/composition-dependent and it still blanks in headless/VM capture. The window must also be made opaque (revert to the standard title bar or give the Window root an opaque Background)." }
+  ],
+  "special_apis": [
+    { "api": "Microsoft.UI.Xaml.Controls.TitleBar + Window.ExtendsContentIntoTitleBar", "special_handling": "Scaffold-only chrome (not from the UWP source). Puts the window into a DWM-composition-dependent transparent mode that renders blank in headless/VM/RDP/automated-capture sessions. For faithful UWP parity, revert to the default opaque system title bar." }
+  ],
+  "errors_encountered": [
+    { "error": "Migrated WinUI 3 window renders fully blank white for all 7 scenarios despite a fully populated UIA tree and responsive controls.", "root_cause": "Current 'dotnet new winui' scaffold makes the window composition-dependent in TWO ways: <Window.SystemBackdrop><MicaBackdrop/> AND ExtendsContentIntoTitleBar=true (+ the <TitleBar> control). The agent removed the backdrop (per skill) but left ExtendsContentIntoTitleBar=true, so the window stayed transparent and DWM composition (absent in the capture VM) never presented it.", "fix": "Also neutralize the extend-into-title-bar path: remove the scaffold <TitleBar> block, drop ExtendsContentIntoTitleBar=true / SetTitleBar(...) in MainWindow.xaml.cs, and let the window use its standard opaque title bar (matches the UWP original)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Final rendering verification", "symptom": "Agent declared done with a clean build + validator PASS, but every scenario renders blank white.", "turns_or_retries": "n/a (no visual feedback available to the migration agent)", "root_cause": "Skill guidance told the agent that removing <Window.SystemBackdrop> is the blank-window fix; it followed that and had no signal that ExtendsContentIntoTitleBar=true is a second, equally-fatal composition-dependent trigger.", "how_resolved": "Not resolved in-trial (scored 0).", "preventable_by": "Broadening the blank-window guidance + validator check to cover ExtendsContentIntoTitleBar/<TitleBar>, not just the backdrop." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Parity screenshots are captured in a headless/VM session with no live DWM composition of transparent/backdrop window surfaces.", "workaround": "Migrate to a plain opaque window (no system backdrop, standard opaque title bar) so rendering does not depend on DWM composition." }
+  ]
+}

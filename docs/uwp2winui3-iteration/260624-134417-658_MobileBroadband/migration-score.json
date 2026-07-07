@@ -1,0 +1,79 @@
+{
+  "scenario": "MobileBroadband",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 7,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 7,
+  "uwp_capture_status": "partial: UWP app launched (Release, pid 34936, windowTitle 'MobileBroadband') and rendered its full dark-themed UI, but its CoreWindow exposed no child UIA elements to external automation (winapp ui inspect/search returned only a top-level Pane, 0 interactive elements). Title-driven navigation could not switch scenarios, so only the initial frame (Scenario 1) is a true per-scenario golden.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_structural_score": 100,
+  "behavioral_regressions": 0,
+  "verdict_basis": "Structural parity is 100% (7/7 controls present, several respond behaviorally), but the migrated WinUI 3 window renders BLANK WHITE for every scenario (confirmed via :root and --capture-screen; window chrome renders while all content paints invisibly despite being present in the UIA tree). Per the parity skill's explicit rule 'Blank screenshot = fail', visual judgment overrides the structural gate: every scenario fails.",
+  "features": [
+    {
+      "name": "Mobile Broadband Device",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Mobile_Broadband_Device.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Mobile_Broadband_Device.png",
+      "note": "Control present in UIA tree (coverage 1/1) but WinUI window renders blank white; UWP shows full device/account info panel. Visual fail."
+    },
+    {
+      "name": "Network Account Watcher",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Network_Account_Watcher.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Network_Account_Watcher.png",
+      "note": "Start/Stop respond in the UIA tree (+3/+2 tokens) but nothing renders visibly; blank white window. Visual fail despite working logic."
+    },
+    {
+      "name": "Connection UI",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Connection_UI.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Connection_UI.png",
+      "note": "Control present (coverage 1/1) but window renders blank white. Visual fail."
+    },
+    {
+      "name": "Get Connection Profiles",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Get_Connection_Profiles.png",
+      "winui_screenshot": "parity/winui3/screenshots/04_Get_Connection_Profiles.png",
+      "note": "Control present (coverage 1/1), action invoked but no visible response; window blank white. Visual fail."
+    },
+    {
+      "name": "Modem information (New)",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/05_Modem_information_New.png",
+      "winui_screenshot": "parity/winui3/screenshots/05_Modem_information_New.png",
+      "note": "Control present (coverage 1/1), action invoked but no visible response; window blank white. Visual fail."
+    },
+    {
+      "name": "Device Services (New)",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/06_Device_Services_New.png",
+      "winui_screenshot": "parity/winui3/screenshots/06_Device_Services_New.png",
+      "note": "Control present (coverage 1/1) but window renders blank white. Visual fail."
+    },
+    {
+      "name": "SIM Card (New)",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/07_SIM_Card_New.png",
+      "winui_screenshot": "parity/winui3/screenshots/07_SIM_Card_New.png",
+      "note": "3/3 controls present; 'Get SIM Card Information' responds in the tree (+2 tokens) but nothing renders visibly; window blank white. Visual fail despite partial working logic."
+    }
+  ]
+}

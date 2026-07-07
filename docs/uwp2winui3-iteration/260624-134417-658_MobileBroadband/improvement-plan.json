@@ -1,0 +1,28 @@
+{
+  "scenario": "MobileBroadband",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 window renders fully blank white (score 0/7) even after the agent removed the scaffold's <Window.SystemBackdrop>, because the current scaffold's ExtendsContentIntoTitleBar=true + <TitleBar> control is a SECOND composition-dependent transparent-window trigger the skill never mentions.",
+      "evidence": "score parity/winui3/screenshots/00_launch.png blank vs baseline full-dark UI; migration-score.json features_fail=7; session-log 2249 (agent removed backdrop) + 3135/3200 validator [PASS] while app still blank; final MainWindow.xaml.cs sets ExtendsContentIntoTitleBar=true; SetTitleBar(AppTitleBar).",
+      "root_cause": "Blank-window guidance treats <Window.SystemBackdrop> as the sole composition-dependent trigger. ExtendsContentIntoTitleBar=true also makes the window frame transparent and DWM-dependent, so removing only the backdrop still leaves a window that blanks in headless/VM/automated-capture sessions.",
+      "tier": 1,
+      "change": "Extend Validate-UwpMigration.ps1 Section 9 to also detect the scaffold <TitleBar> control and ExtendsContentIntoTitleBar=true (code-behind) and fold them into the existing blank-window WARN, so the second trigger can no longer pass as a false [PASS].",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Validator no longer emits a bare [PASS] 'window will not blank' when ExtendsContentIntoTitleBar=true / <TitleBar> remain; the agent is told to remove them before declaring done.",
+      "falsifiable_check": "On re-run, Section 9 emits a WARN listing 'ExtendsContentIntoTitleBar = true' / '<TitleBar>' until the agent neutralizes them; once removed it prints the new [PASS] line and parity screenshot 00_launch renders content instead of blank white."
+    },
+    {
+      "problem": "Same as above — the prose guidance the agent read stopped at 'delete <Window.SystemBackdrop>' and claimed that 'restores reliable rendering'.",
+      "evidence": "SKILL.md blank-window section + MIGRATION-PATTERNS.md#system-backdrop-blank both frame the backdrop as the whole fix; agent followed it and app still blanked.",
+      "root_cause": "Incomplete/misleading guidance: does not cover ExtendsContentIntoTitleBar / the <TitleBar> control.",
+      "tier": 3,
+      "change": "Broaden the SKILL.md blank-window section and add a new MIGRATION-PATTERNS.md#extend-titlebar-blank subsection: de-compose the window fully — remove the backdrop AND the <TitleBar> block AND ExtendsContentIntoTitleBar=true/SetTitleBar(...), leaving a plain opaque window with the standard system title bar (or give the Window root an explicit opaque Background).",
+      "file": "skills/winui-uwp-migration/SKILL.md , skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents remove both triggers in one pass, so the window renders opaquely in headless capture and matches the UWP original's standard title bar.",
+      "falsifiable_check": "On re-run, MainWindow.xaml has no <TitleBar>/<Window.SystemBackdrop> and MainWindow.xaml.cs has no ExtendsContentIntoTitleBar=true; parity screenshots render the NavigationView + text (requirements move fail->pass)."
+    }
+  ],
+  "deferred_to_human": []
+}

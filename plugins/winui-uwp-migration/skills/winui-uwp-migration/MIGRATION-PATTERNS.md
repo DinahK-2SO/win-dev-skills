@@ -119,6 +119,43 @@ Only keep a system backdrop if the original app deliberately used Mica/Acrylic *
 target will always run in a full desktop composition session — never as the default carried
 over from the scaffold.
 
+<a id="extend-titlebar-blank"></a>
+### Second trigger on the same window: `ExtendsContentIntoTitleBar` + the scaffold `<TitleBar>`
+
+Removing the backdrop is **necessary but not sufficient** on the current `dotnet new winui`
+scaffold. The same `MainWindow` also emits a **custom title bar** that puts the window into
+the *same* DWM-composition-dependent, transparent mode — so the window can still paint blank
+white after the backdrop is gone:
+
+```xml
+<!-- MainWindow.xaml -->
+<TitleBar x:Name="AppTitleBar" Title="..."> ... </TitleBar>
+```
+```csharp
+// MainWindow.xaml.cs
+ExtendsContentIntoTitleBar = true;
+SetTitleBar(AppTitleBar);
+```
+
+`ExtendsContentIntoTitleBar = true` makes the window frame transparent so content can extend
+under it; presenting it relies on live DWM composition, which is absent in headless / VM /
+RDP / automated-capture sessions — exactly the failure mode of the backdrop above. A validator
+`[PASS]` on "no `<Window.SystemBackdrop>`" is therefore **not** proof the window will render.
+
+**Fix — revert to a plain opaque window (both triggers, together).** In addition to deleting
+the `<Window.SystemBackdrop>` block:
+
+1. Delete the `<TitleBar>…</TitleBar>` block from `MainWindow.xaml`.
+2. Remove `ExtendsContentIntoTitleBar = true;` and `SetTitleBar(...);` from `MainWindow.xaml.cs`.
+3. Give the window a normal opaque frame — the standard system title bar. If you must keep an
+   extended title bar for parity with the original, give the `Window`'s root panel an explicit
+   opaque `Background` (e.g. `{ThemeResource ApplicationPageBackgroundThemeBrush}`) so rendering
+   never depends on DWM composition.
+
+This is also the faithful-parity choice: UWP samples used the standard system title bar, not a
+transparent extended one. Treat the backdrop and the extended title bar as **one** decision —
+de-compose the window fully or not at all.
+
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
 Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding files in `MIGRATION-MAPPING.md` get `Triage label = defer`; cite the specific API in `MIGRATION-DEFERRED.md`.
