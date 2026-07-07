@@ -1,0 +1,14 @@
+{
+  "scenario": "LanguageFont",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS8618 nullable warnings on the SDK-sample idiom (Scenario.Title/ClassType, MainPage.Current) required a small fix pass.",
+      "evidence": "session-log.txt TURN 29-31: agent made the properties/field nullable and null-guarded scenarios.Find / ScenarioFrame.Navigate, then rebuilt to 0 warnings (TURN 32).",
+      "covered_clearly_at": "General C#/nullable competence, not migration-specific guidance; the agent diagnosed and fixed it in one pass with no looping.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "This is routine nullable-reference-type hygiene a capable model handles unaided; it is not a UWP→WinUI 3 pattern and does not recur as a skill gap. It was fully resolved within the trial."
+    }
+  ]
+}

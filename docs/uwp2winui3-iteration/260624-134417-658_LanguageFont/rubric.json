@@ -1,0 +1,23 @@
+{
+  "scenario": "LanguageFont",
+  "feature": "Language Font CS Sample",
+  "source": "uwp-samples-standalone/Samples/LanguageFont/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Fonts for UI",
+      "controls": [
+        { "type": "Button", "label": "Apply Recommended Fonts", "expected": "Applies LanguageFontGroup ja-JP UIHeadingFont/UITextFont to HeadingTextBlock and BodyTextBlock (changes font family/weight/style, not text content)." }
+      ],
+      "outputs": [ "HeadingTextBlock", "BodyTextBlock" ]
+    },
+    {
+      "number": 2,
+      "title": "Fonts for Documents",
+      "controls": [
+        { "type": "Button", "label": "Apply Recommended Fonts", "expected": "Applies LanguageFontGroup ja-JP DocumentHeadingFont/DocumentTextFont/DocumentAlternate2Font to HeadingTextBlock and DocumentTextBlock." }
+      ],
+      "outputs": [ "HeadingTextBlock", "DocumentTextBlock" ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "scenario": "LanguageFont",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Zero-deferral migrations always trip a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency' at the final validation gate.",
+      "evidence": "session-log.txt TURN 33 and TURN 35 both emit the WARN on a 100/100 run with no defer rows; skill-defects.json item 1.",
+      "root_cause": "Initialize-UwpMigration.ps1 writes '| (none) | — |' for the empty-deferral case but never the literal sentinel 'No items deferred' that Validate-UwpMigration.ps1's PASS branch (line 268) requires, so the validator's success path is unreachable via the bootstrap's own output.",
+      "tier": 1,
+      "change": "In Initialize-UwpMigration.ps1's empty-deferral branch, additionally emit the sentinel line '_No items deferred._' so the validator reports [PASS] instead of [WARN].",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "No-deferral migrations pass the DEFERRED.md consistency check cleanly; no false warning to distract agents/reviewers at the gate.",
+      "falsifiable_check": "On re-run of any scenario with zero deferrals, Validate-UwpMigration.ps1 prints \"[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes 'No items deferred.'\" instead of the [WARN] line."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-tool limitations (NOT migration-skill): WinUI 3 blank screenshots in headless capture (composition-surface limitation), behavioral heuristic cannot observe font-only changes (false-negative on 'Apply Recommended Fonts'), and legacy UWP CoreWindow not UIA-enumerable so scenario-2 golden baseline was unavailable. These live in winui3-parity-check / uwp-app-runner and are out of scope for the migration skill."
+  ]
+}

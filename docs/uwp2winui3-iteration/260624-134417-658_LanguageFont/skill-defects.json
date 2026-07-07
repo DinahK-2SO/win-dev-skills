@@ -1,0 +1,17 @@
+{
+  "scenario": "LanguageFont",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Every zero-deferral migration trips a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency' from Validate-UwpMigration.ps1, even when the migration is otherwise fully PASS.",
+      "evidence": "session-log.txt TURN 33 and TURN 35 both print the WARN; there are zero defer rows (all 4 mapping rows are migrate-as-is) and the run scores 100/100.",
+      "skill_search": "Grepped both migration scripts for 'DEFERRED' / 'No items deferred'. Validate-UwpMigration.ps1 line 268 gates the PASS on `$deferText -notmatch 'No items deferred'`; Initialize-UwpMigration.ps1 lines 479-481 write `| (none) | — |` for the empty case and never emit that sentinel.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize-UwpMigration.ps1: `if ($deferredKeys.Count -eq 0) { [void]$dlines.Add('| (none) | — |') }`  vs  Validate-UwpMigration.ps1: `if ($deferText -notmatch 'No items deferred') { Write-Host \"[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency\" }`",
+      "root_cause": "The bootstrap and the validator disagree on the empty-deferral sentinel. The validator's success branch is effectively unreachable via the bootstrap's own output, so the WARN fires on every no-deferral scenario.",
+      "proposed_fix": "In Initialize-UwpMigration.ps1's empty-deferral branch, also emit the literal sentinel `_No items deferred._` that the validator recognizes, so the empty case reports [PASS] instead of [WARN].",
+      "generalizes": "Deferrals only happen when a source file touches an unsupported API. Many UWP samples touch none, so a large fraction of migrations hit the zero-deferral path and get this false warning. Removing it stops misleading agents (and human reviewers) into chasing a phantom inconsistency at the final gate on otherwise-perfect migrations."
+    }
+  ]
+}

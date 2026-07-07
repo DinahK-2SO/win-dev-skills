@@ -1,0 +1,24 @@
+{
+  "scenario": "LanguageFont",
+  "summary": "Faithful migration. Full structural parity (100/100). No missing or dead controls detected. One measurement caveat about WinUI 3 screenshot capture (see below) — not a migration defect.",
+  "discrepancies": [
+    {
+      "scenario": "Fonts for UI",
+      "type": "measurement-caveat",
+      "severity": "none",
+      "detail": "WinUI 3 screenshots captured blank white (both PrintWindow and screen-region capture), while the UIA tree shows all content laid out on-screen with real values (NavView + both items, 'Apply Recommended Fonts' button, description text, HeadingTextBlock and BodyTextBlock containing Japanese sample text). This is a WinUI 3 composition-surface capture limitation in this headless session, not blank rendering. The UWP CoreWindow captured normally (different composition path)."
+    },
+    {
+      "scenario": "Fonts for UI / Fonts for Documents",
+      "type": "behavioral-heuristic-false-negative",
+      "severity": "none",
+      "detail": "'Apply Recommended Fonts' reported 0/1 live in the behavioral overlay. The handler changes FontFamily/Weight/Style (verified identical to UWP source), not text content, so the text-token heuristic cannot observe the effect. The control is genuinely wired and functional."
+    },
+    {
+      "scenario": "Fonts for Documents",
+      "type": "golden-baseline-gap",
+      "severity": "low",
+      "detail": "UWP golden navigation could not reach scenario 2: the legacy UWP CoreWindow (hosted by ApplicationFrameHost) does not expose its XAML tree to UI Automation on this box, so title-driven nav and control actuation failed on the golden. UWP visual ground truth is available for scenario 1 (initial frame) only. WinUI scenario 2 content was verified present via UIA (DocumentTextBlock + button)."
+    }
+  ]
+}

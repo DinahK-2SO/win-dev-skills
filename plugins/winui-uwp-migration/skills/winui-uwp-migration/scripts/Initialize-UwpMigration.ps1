@@ -478,6 +478,11 @@ foreach ($rel in $deferredKeys) {
 }
 if ($deferredKeys.Count -eq 0) {
     [void]$dlines.Add('| (none) | — |')
+    [void]$dlines.Add('')
+    # Sentinel line the validator's "no defer rows" branch looks for. Without it,
+    # every zero-deferral migration trips a spurious [WARN] about DEFERRED.md
+    # consistency even though nothing is wrong.
+    [void]$dlines.Add('_No items deferred._')
 }
 Set-Content -LiteralPath $deferredPath -Value $dlines -Encoding UTF8
 

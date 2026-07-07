@@ -1,0 +1,30 @@
+{
+  "scenario": "LanguageFont",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied source, rewrote namespaces, seeded MIGRATION-MAPPING.md (4 rows) and injected TODOs; Test-Path MIGRATION-MAPPING.md returned True (session-log TURN ~ bootstrap)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught the last outstanding item (4 rows stuck at Status=copied) and confirmed clean build + smoke launch on re-run (session-log TURN 33/35 → PASS, pid 43496)." },
+    { "tool": "dotnet build -p:Platform=$Platform", "evidence": "Clean build after nullable fixes: 0 Warning(s) 0 Error(s) (session-log TURN 32)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 / Initialize-UwpMigration.ps1", "problem": "Spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency' on a zero-deferral migration.", "evidence": "session-log TURN 33 and TURN 35 both print the WARN even though there are no defer rows and the migration is otherwise fully PASS." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Its 'no defer rows' PASS branch only fires when MIGRATION-DEFERRED.md contains the literal string 'No items deferred', but the bootstrap that writes the file never emits that string (it writes '| (none) | — |').", "suggested_tweak": "Make the bootstrap emit the sentinel the validator recognizes so the empty-deferral case PASSes instead of WARNing." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Globalization.Fonts.LanguageFontGroup", "special_handling": "Non-XAML WinRT API; usable as-is from WinUI 3 desktop. Agent kept it verbatim (Scenario1 ja-JP, Scenario2 hi) and it built + ran — correct. Only Windows.UI.Xaml.* and the unsupported-api-inventory entries need rewriting; other Windows.* WinRT namespaces are kept." }
+  ],
+  "errors_encountered": [
+    { "error": "CS8618 non-nullable property/field warnings (Scenario Title/ClassType, MainPage.Current)", "root_cause": "SDK-sample idiom uses non-nullable auto-properties/static fields initialized outside the constructor; net10 nullable context flags them.", "fix": "Made Title/ClassType/Current nullable and null-guarded the scenarios.Find + Navigate calls (session-log TURN 29-31); rebuild went 0/0." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Final validation (TURN 33-35)", "symptom": "Validator FAILed once on 4 rows at Status=copied, and emitted a DEFERRED.md-consistency WARN.", "turns_or_retries": "1 retry to flip statuses; the WARN was never resolvable by the agent (it is a script contradiction, not an agent action).", "root_cause": "Bootstrap writes MIGRATION-DEFERRED.md without the 'No items deferred' sentinel that the validator's empty-case PASS branch requires.", "how_resolved": "Status FAIL fixed by flipping copied→done; the WARN persisted harmlessly.", "preventable_by": "Aligning Initialize-UwpMigration.ps1's empty-deferral output with the validator's expected sentinel." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 screenshots captured blank in the headless scoring session (composition-surface capture limitation); behavioral heuristic can't observe font-only changes; legacy UWP CoreWindow not UIA-enumerable for scenario-2 golden.", "workaround": "Scoring relied on the WinUI UIA tree, which showed all content present. These are EVAL-tool limitations, out of scope for the migration skill." }
+  ]
+}
