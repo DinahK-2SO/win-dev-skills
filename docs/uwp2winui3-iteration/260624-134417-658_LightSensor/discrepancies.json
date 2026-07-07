@@ -1,0 +1,14 @@
+{
+  "scenario": "LightSensor",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Data Events scenario: Enable/Disable controls present; sensor LUX output + status text", "status": "pass", "reason": "All controls present (Enable, Disable[disabled]); 2/2 coverage; output text matches UWP ('No data', 'No light sensor found'). Enable/Disable hardware-gated no-ops in both apps.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Polling scenario: Enable/Disable controls present; scenario description + LUX output", "status": "pass", "reason": "All controls present; scenario description text present ('Polls for light sensor data...'); output text matches UWP.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No functional or structural discrepancies. Parity gate 100/100, both scenarios pass with identical output text and full control coverage. WinUI pixel capture unavailable (swapchain limitation) — fidelity confirmed via live UIA tree. Build-time churn (CS0103 'App', WMC0909 x:DataType local:Scenario) was recovered from and did not affect the final score, but reflects a recurring SDK-sample multi-namespace pitfall worth a skill clarification."
+}

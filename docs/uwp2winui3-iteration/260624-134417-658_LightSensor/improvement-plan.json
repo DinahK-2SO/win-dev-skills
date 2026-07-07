@@ -1,0 +1,31 @@
+{
+  "scenario": "LightSensor",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0103 'The name App does not exist' when SDK-sample scenario pages (in their own namespace) reference the scaffold's static App.MainWindow (the Window.Current replacement).",
+      "evidence": "session-log.txt 2631-2642 (CS0103 x4); final code workaround 'LightSensor.App.MainWindow!'; sample pages 'namespace LightSensorCS' vs App 'namespace LightSensor'. notes/skill-coverage-gaps.json item 1.",
+      "root_cause": "SDK-sample multi-namespace layout: scaffold App/MainWindow are in the new project root namespace while sample pages keep their original namespace; unqualified 'App' does not resolve cross-namespace.",
+      "tier": 3,
+      "change": "Added a build-error subsection in the prominent 'Common build errors after the namespace rewrite' triage section mapping CS0103 on 'App' to the multi-namespace split, with the fix 'reference <RootNamespace>.App.MainWindow or add using <RootNamespace>;'. Added a one-line cross-reference beside the Windowing consumer example where Window.Current is replaced.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On re-run the agent qualifies the static-window reference on first write instead of churning through repeated CS0103 build failures.",
+      "falsifiable_check": "Re-run migration of any Windows-universal-sample that replaces Window.Current from a scenario page: zero CS0103 'The name App does not exist' occurrences in build-events.jsonl."
+    },
+    {
+      "problem": "WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 on the converted MainPage DataTemplate x:Bind.",
+      "evidence": "session-log.txt 2645-2646 (WMC0909/WMC1111 on MainPage.xaml); sample keeps MainPage + Scenario model in 'namespace SDKTemplate'. notes/skill-coverage-gaps.json item 2.",
+      "root_cause": "The shell page's x:Class/xmlns:local was not kept consistent with the .NET namespace holding the Scenario model that x:DataType binds to, so 'local:Scenario' failed to resolve.",
+      "tier": 3,
+      "change": "Same added subsection covers the XAML half: keep the page's x:Class and xmlns:local consistent with the namespace of the model types x:Bind/x:DataType reference; maps WMC0909/WMC1111 to the xmlns:local <-> model-namespace mismatch and distinguishes it from the stale-UWP-prefix case.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent aligns the shell namespace with the model namespace during conversion, so compiled bindings resolve on first build.",
+      "falsifiable_check": "Re-run a sample whose MainPage x:Binds a Scenario model: zero WMC0909/WMC1111 occurrences in build-events.jsonl."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/1 idea (not auto-applied): Initialize-UwpMigration.ps1 could optionally scaffold App/MainWindow into the SAME namespace as the sample's MainPage (e.g. SDKTemplate) instead of the project root namespace, eliminating the cross-namespace split at the source. Left to a human because it changes bootstrap scaffolding conventions and could interact with x:Class expectations across many samples.",
+    "WinUI 3 parity screenshots render blank due to a swapchain PrintWindow capture limitation in the non-interactive eval session — an evaluation-tool constraint, out of scope for the migration skill."
+  ]
+}

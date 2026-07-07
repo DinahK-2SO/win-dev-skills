@@ -1,0 +1,21 @@
+{
+  "scenario": "LightSensor",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS8618/CS8602/CS8622 nullability warnings across scenario files after enabling <Nullable>enable</Nullable>.",
+      "evidence": "session-log.txt lines 2627-2643 (CS8618/CS8602/CS8622); agent fixed them with _sensor!. / _dispatcherTimer!. / 'object? sender' in one scripted pass (session-log ~3167).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md #windowing note (line ~231) already tells the agent to declare statics nullable under <Nullable>enable</Nullable>; nullability handling is standard C# the agent applied without difficulty.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "These are ordinary nullable-reference warnings any capable model resolves inline (null-forgiving / nullable signatures). They did not block the build outcome and need no migration-specific guidance."
+    },
+    {
+      "problem": "WinUI 3 parity screenshots render blank.",
+      "evidence": "migration-score.json capture_environment_note; discrepancies.md notes.",
+      "covered_clearly_at": "SKILL.md #system-backdrop-blank already instructs deleting <Window.SystemBackdrop><MicaBackdrop/> for headless/capture sessions; here it is purely a swapchain PrintWindow capture limitation on the eval side.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "This is an evaluation-capture (swapchain) limitation, not a migration defect; the migrated app renders correctly (live UIA tree). Nothing in the migration skill can or should change it."
+    }
+  ]
+}

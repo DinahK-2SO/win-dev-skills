@@ -1,0 +1,23 @@
+{
+  "feature": "Light Sensor",
+  "uwpSource": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\LightSensor\\cs",
+  "uwpWindowTitle": "LightSensorCS",
+  "hardwareGated": true,
+  "hardwareGateNote": "No light sensor on this machine; original UWP shows 'No light sensor found' and 'LUX: No data'. Enable/Disable are no-ops here in BOTH apps.",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Data Events",
+      "controls": ["ScenarioEnableButton (Enable)", "ScenarioDisableButton (Disable)"],
+      "actions": ["Click Enable", "Click Disable"],
+      "outputs": ["InputTextBlock", "ScenarioOutput_LUX", "StatusBlock"]
+    },
+    {
+      "number": 2,
+      "title": "Polling",
+      "controls": ["ScenarioEnableButton (Enable)", "ScenarioDisableButton (Disable)"],
+      "actions": ["Click Enable", "Click Disable"],
+      "outputs": ["InputTextBlock", "ScenarioOutput_LUX", "StatusBlock"]
+    }
+  ]
+}

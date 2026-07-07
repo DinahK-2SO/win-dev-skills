@@ -1,0 +1,23 @@
+{
+  "scenario": "LightSensor",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "CS0103 'The name App does not exist in the current context' when sample page code-behind references the scaffold's static App.MainWindow (the Window.Current replacement). Occurred 4x on Scenario1_DataEvents.xaml.cs / Scenario2_Polling.xaml.cs.",
+      "evidence": "session-log.txt lines 2631-2642 (repeated CS0103 'The name App does not exist'); final code uses the fully-qualified workaround 'LightSensor.App.MainWindow!' (Scenario*.xaml.cs). Sample pages are 'namespace LightSensorCS' (session-log 381,551) while App is 'namespace LightSensor' (App.xaml.cs).",
+      "covered_at": "MIGRATION-PATTERNS.md #windowing — the 'expose MainWindow from App' pattern and the consumer example 'var hwnd = ...GetWindowHandle(App.MainWindow!)' (lines ~226-247).",
+      "why_missed": "under-emphasized — every windowing example writes 'App.MainWindow' unqualified, implicitly assuming the consumer shares the scaffold App's namespace. Windows-universal-samples keep scenario pages in their OWN namespace (SDKTemplate and/or a per-project namespace), so the unqualified reference does not resolve and yields CS0103. The pitfall is never stated.",
+      "proposed_improvement": "Add a short, prominent caveat (in the top 'Common build errors after the namespace rewrite' section and/or beside the windowing consumer example) that in SDK samples the scaffold App/MainWindow live in the new project ROOT namespace while sample pages keep their own namespace, so references to the static window must be fully qualified as <RootNamespace>.App.MainWindow (or add 'using <RootNamespace>;'). Map the symptom CS0103 on 'App' explicitly.",
+      "generalizes": "Windows-universal-samples universally use a split-namespace layout (SDKTemplate for MainPage/model + a per-sample namespace for scenario pages) distinct from the scaffold's project namespace. Any sample that replaces Window.Current from a scenario page (extremely common) hits this exact CS0103."
+    },
+    {
+      "problem": "XamlCompiler WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 'DataTemplates containing x:Bind need a DataType' on the converted MainPage shell.",
+      "evidence": "session-log.txt lines 2645-2646 (WMC0909/WMC1111 on MainPage.xaml). Sample keeps MainPage + Scenario model in 'namespace SDKTemplate' (MainPage.xaml.cs, SampleConfiguration.cs) with xmlns:local='using:SDKTemplate'; error occurs while these are inconsistent during shell conversion.",
+      "covered_at": "MIGRATION-PATTERNS.md #x:Bind-and-compiled-bindings ('If the build emits XLS0414/MC3074 type not found, look for stale UWP namespace prefixes', line ~773) and SKILL.md Step 3 'Shell conversion'.",
+      "why_missed": "ambiguous / under-emphasized — existing text only mentions stale UWP prefixes, not the .NET-namespace split introduced when the scaffold reparents MainPage into the project root namespace while the x:Bind DataType model (Scenario) stays in SDKTemplate. x:Bind resolution failures (WMC0909/WMC1111) from a same-project namespace mismatch are not called out.",
+      "proposed_improvement": "Extend the same cross-namespace caveat to XAML: when converting the shell, keep the page's x:Class + xmlns:local consistent with the namespace of the model types its x:DataType/x:Bind reference, so 'local:Scenario' resolves. Note WMC0909/WMC1111 as the symptom of an xmlns:local ↔ model-namespace mismatch.",
+      "generalizes": "Every SDK-sample MainPage uses a DataTemplate x:Bind over a Scenario model in the SDKTemplate namespace. Reparenting the shell during conversion without aligning xmlns:local reproduces WMC0909 across scenarios."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "scenario": "LightSensor",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: document the SDK-sample multi-namespace split — scaffold App/MainWindow live in the project root namespace while sample pages keep their own, so map CS0103 'The name App does not exist' to fully-qualifying <RootNamespace>.App.MainWindow when replacing Window.Current.",
+    "MIGRATION-PATTERNS.md: same subsection maps WMC0909/WMC1111 'Cannot resolve DataType local:Scenario' to an xmlns:local <-> model-namespace mismatch during shell conversion, telling the agent to keep the page x:Class/xmlns:local consistent with the model namespace.",
+    "MIGRATION-PATTERNS.md: added a one-line cross-reference at the Windowing consumer example so the namespace caveat is seen exactly where Window.Current is replaced."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Optionally scaffold App/MainWindow into the sample's MainPage namespace in Initialize-UwpMigration.ps1 to remove the split at the source.",
+    "Blank WinUI parity screenshots are an eval-side swapchain capture limitation, not a migration defect."
+  ]
+}

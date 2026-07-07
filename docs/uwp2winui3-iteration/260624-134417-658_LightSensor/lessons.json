@@ -1,0 +1,30 @@
+{
+  "scenario": "LightSensor",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bulk Windows.UI.Xaml -> Microsoft.UI.Xaml rewrite + verbatim copy of source files landed the project skeleton; the remaining work was code-level adaptation only." },
+    { "tool": "Validate-UwpMigration.ps1 + dotnet build", "evidence": "Final build BUILD SUCCEEDED; validator gate drove the agent to a clean build with zero WUI warnings (session-log build tail)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [
+    { "api": "Window.Current.Activated (UWP suspend/resume + activation hookup)", "why_tried": "Scenario1/Scenario2 code-behind wired Window.Current.Activated to pause/resume the light sensor.", "root_cause": "Window.Current does not exist in WinUI 3 desktop; needs a static App-held Window reference.", "fix": "Exposed public static Window? MainWindow on App and referenced App.MainWindow!.Activated -= / += (skill windowing pattern)." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.LightSensor", "special_handling": "Hardware-gated: with no light sensor present both UWP and WinUI show 'No light sensor found' / 'LUX: No data'; Enable/Disable are no-ops. Not a regression - correct parity." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0103: The name 'App' does not exist in the current context (Scenario1_DataEvents.xaml.cs, Scenario2_Polling.xaml.cs; 4 occurrences)", "root_cause": "Scenario page code-behind is in the UWP sample's own namespace (namespace LightSensorCS) while the scaffolded App class is in the new project root namespace (namespace LightSensor). An unqualified 'App.MainWindow' therefore does not resolve from the sample namespace.", "fix": "Fully qualified the static window reference as LightSensor.App.MainWindow!.Activated -= / += (a 'using LightSensor;' would work equally)." },
+    { "error": "XamlCompiler WMC0909: Cannot resolve DataType local:Scenario + WMC1111: DataTemplates containing x:Bind need x:DataType (MainPage.xaml)", "root_cause": "MainPage.xaml's DataTemplate x:DataType='local:Scenario' with xmlns:local pointing at a namespace that did not (yet) contain the Scenario model class. The sample keeps MainPage + the Scenario model (SampleConfiguration.cs) in namespace SDKTemplate while the scaffold defaulted x:Class/xmlns:local toward the project root namespace, so 'local:Scenario' failed to resolve until xmlns:local and the class namespace were made consistent (both SDKTemplate).", "fix": "Kept MainPage x:Class/xmlns:local and SampleConfiguration Scenario class in the same namespace (SDKTemplate) so x:DataType='local:Scenario' resolves." },
+    { "error": "CS8618 / CS8602 / CS8622 nullability warnings across scenario files", "root_cause": "Scaffold enables <Nullable>enable</Nullable>; UWP sample fields (_sensor, _dispatcherTimer, event-handler sender params) were written pre-nullable.", "fix": "Null-forgiving operators (_sensor!., _dispatcherTimer!.) and object? sender signatures; cosmetic, not blocking." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario1_DataEvents.xaml.cs / Scenario2_Polling.xaml.cs (Window.Current replacement)", "symptom": "Repeated CS0103 'The name App does not exist' after replacing Window.Current with the App.MainWindow static", "turns_or_retries": "surfaced across multiple build attempts (16 BUILD SUCCEEDED / 22 BUILD result lines total; CS0103 x4)", "root_cause": "SDK-sample multi-namespace layout: scaffold App is in the project root namespace, sample pages are in their own (LightSensorCS) namespace; unqualified App does not resolve cross-namespace.", "how_resolved": "Fully qualified as <RootNamespace>.App.MainWindow.", "preventable_by": "A note in the windowing / common-build-errors sections warning that in Windows-universal-samples the scaffold App/MainWindow sit in a DIFFERENT namespace than the sample's pages, so references to App.MainWindow must be fully qualified (or a using added)." },
+    { "where": "MainPage.xaml DataTemplate (shell conversion)", "symptom": "WMC0909/WMC1111 - x:Bind DataTemplate could not resolve local:Scenario", "turns_or_retries": "WMC0909 x4 / WMC1111 x2 across build attempts", "root_cause": "xmlns:local / x:Class namespace of the converted shell did not match the namespace of the Scenario model class the DataTemplate x:Bind targets.", "how_resolved": "Aligned MainPage x:Class + xmlns:local + the Scenario model class on one namespace (SDKTemplate).", "preventable_by": "Same note: keep the converted shell's namespace consistent with the sample model namespace so x:DataType/xmlns:local resolve; do not let the scaffold silently reparent MainPage into the project root namespace." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 parity screenshots render blank (PrintWindow/DWM cannot capture the DirectX swapchain in a non-interactive session)", "workaround": "Fidelity confirmed via live UIA tree instead of pixels; this is an eval-capture limitation, not a migration defect (NOT actionable in the migration skill)." }
+  ]
+}

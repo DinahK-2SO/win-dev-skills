@@ -1,0 +1,33 @@
+{
+  "scenario": "LightSensor",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok: original UWP built Release and launched live (window title 'LightSensorCS', PID 55096); golden screenshot captured. Note: the uwp-app-runner skill reported ok:false only because its verify stage matched process name 'LightSensor' while the real process/window is 'LightSensorCS' — the app itself launched and rendered correctly (confirmed by screenshot). UWP UIA subtree is not traversable through ApplicationFrameHost, so UWP per-control actuation could not be scripted; visual golden used as ground truth.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "capture_environment_note": "WinUI 3 screenshots render blank because PrintWindow/DWM cannot capture the DirectX swapchain surface in this non-interactive session (GDI CopyFromScreen returned 'handle is invalid'); the UWP CoreWindow captured fine. The migrated app is NOT blank — its live UIA tree exposes a complete, laid-out replica with correct text ('LUX: No data', 'No light sensor found'). Verdicts are therefore based on structural coverage + live UIA content + behavioral parity, with pixel comparison unavailable for the WinUI side.",
+  "features": [
+    {
+      "name": "Data Events",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Data_Events.png",
+      "note": "All controls present (Enable, Disable[disabled]); 2/2 coverage. Enable/Disable are hardware-gated no-ops in both apps (no light sensor) -> not a regression. Output text matches UWP ('No data', 'No light sensor found'). WinUI pixel capture unavailable (swapchain limitation); fidelity confirmed via live UIA tree."
+    },
+    {
+      "name": "Polling",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Polling.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Polling.png",
+      "note": "All controls present (Enable, Disable[disabled]); 2/2 coverage. Scenario description text present ('Polls for light sensor data...'). Enable/Disable hardware-gated no-ops in both apps -> not a regression. Output text matches UWP. WinUI pixel capture unavailable (swapchain limitation); fidelity confirmed via live UIA tree."
+    }
+  ]
+}

@@ -27,6 +27,15 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0103: The name 'App' does not exist` / `WMC0909: Cannot resolve DataType local:X` — SDK-sample **multi-namespace** split
+
+Windows-universal-samples do **not** put all code in one namespace. The classic layout is `namespace SDKTemplate` for `MainPage` + the `Scenario` model (`SampleConfiguration.cs`) **and** a per-project namespace (e.g. `namespace LightSensorCS`) for the scenario `Page`s. But the WinUI 3 **scaffold** creates `App`/`MainWindow` in the **new project's root namespace** (e.g. `namespace LightSensor`). This split breaks two kinds of cross-reference:
+
+- **Code-behind → the static window.** When you replace `Window.Current` with the static `App.MainWindow` (see [Windowing](#windowing)), sample scenario pages sit in *their* namespace, not the scaffold's, so an **unqualified `App`** does not resolve → `CS0103: The name 'App' does not exist in the current context`. Fix: reference it **fully qualified** as `<RootNamespace>.App.MainWindow` (or add `using <RootNamespace>;` to the file). Do not "fix" it by moving the scaffold `App` — qualify the reference.
+- **XAML `x:Bind`/`x:DataType` → a sample model type.** A `MainPage` `DataTemplate` with `x:DataType="local:Scenario"` resolves `local:` via `xmlns:local`. If the converted shell's `x:Class`/`xmlns:local` no longer matches the namespace that actually holds `Scenario`, the XAML compiler emits `WMC0909: Cannot resolve DataType local:Scenario` (often with `WMC1111: DataTemplates containing x:Bind need a DataType`). Fix: keep the page's `x:Class` **and** `xmlns:local` consistent with the `.NET` namespace of the model types its `x:Bind`/`x:DataType` reference (for SDK samples that is normally `SDKTemplate`).
+
+**General rule:** the scaffold introduces one *new* root namespace while the sample keeps its *original* namespace(s); every cross-namespace reference — code-behind to `App.MainWindow`, and XAML `xmlns:local`/`x:DataType` to sample types — must be kept namespace-consistent or fully qualified. This is a same-project `.NET`-namespace mismatch, distinct from the stale-UWP-prefix case in [x:Bind and compiled bindings](#xbind-and-compiled-bindings).
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -245,6 +254,8 @@ Consumers running after `OnLaunched` can safely null-forgive:
 ```csharp
 var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow!);
 ```
+
+> **In SDK samples `App` is usually in a *different* namespace than the consumer.** The scaffold puts `App` in the project root namespace, while sample pages keep their own (e.g. `SDKTemplate`, `LightSensorCS`). From those pages, an unqualified `App.MainWindow` fails with `CS0103: The name 'App' does not exist` — reference it as `<RootNamespace>.App.MainWindow` or add `using <RootNamespace>;`. See [SDK-sample multi-namespace split](#cs0103-the-name-app-does-not-exist--wmc0909-cannot-resolve-datatype-localx--sdk-sample-multi-namespace-split).
 
 Resize via `AppWindow`:
 
