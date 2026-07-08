@@ -1,0 +1,95 @@
+{
+  "featureName": "Pedometer",
+  "parityScore": 87.5,
+  "counts": {
+    "fail": 0,
+    "partial": 1,
+    "pass": 3
+  },
+  "totalScenarios": 4,
+  "pass": true,
+  "thresholds": {
+    "partial": 0.4,
+    "strictPartial": false,
+    "pass": 0.8
+  },
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Events",
+      "verdict": "pass",
+      "coverage": 1.0,
+      "controlsTotal": 1,
+      "controlsFound": 1,
+      "reachable": true,
+      "screenshotBytes": 71390,
+      "actionsTotal": 1,
+      "actionsInvoked": 1,
+      "actionsResponded": 1,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [],
+      "reason": "",
+      "screenshot": "01_Events.png"
+    },
+    {
+      "number": 2,
+      "title": "History",
+      "verdict": "partial",
+      "coverage": 0.5,
+      "controlsTotal": 8,
+      "controlsFound": 4,
+      "reachable": true,
+      "screenshotBytes": 71375,
+      "actionsTotal": 3,
+      "actionsInvoked": 3,
+      "actionsResponded": 2,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "DatePicker (FromDate)",
+        "TimePicker (FromTime)",
+        "DatePicker (ToDate)",
+        "TimePicker (ToTime)"
+      ],
+      "reason": "Missing 4/8 control(s): DatePicker (FromDate); TimePicker (FromTime); DatePicker (ToDate); TimePicker (ToTime)",
+      "screenshot": "02_History.png"
+    },
+    {
+      "number": 3,
+      "title": "Current step count",
+      "verdict": "pass",
+      "coverage": 1.0,
+      "controlsTotal": 1,
+      "controlsFound": 1,
+      "reachable": true,
+      "screenshotBytes": 56498,
+      "actionsTotal": 1,
+      "actionsInvoked": 1,
+      "actionsResponded": 1,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [],
+      "reason": "",
+      "screenshot": "03_Current_step_count.png"
+    },
+    {
+      "number": 4,
+      "title": "Background Pedometer",
+      "verdict": "pass",
+      "coverage": 1.0,
+      "controlsTotal": 0,
+      "controlsFound": 0,
+      "reachable": true,
+      "screenshotBytes": 78954,
+      "actionsTotal": 0,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [],
+      "reason": "",
+      "screenshot": "04_Background_Pedometer.png"
+    }
+  ]
+}

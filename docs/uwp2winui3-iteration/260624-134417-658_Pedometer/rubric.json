@@ -1,0 +1,35 @@
+{
+  "scenario": "Pedometer",
+  "scenarios_total": 4,
+  "scoring": "round(100 * (pass + 0.5*partial) / features_total)",
+  "criteria": [
+    {
+      "number": 1,
+      "title": "Events",
+      "controls": ["RegisterButton", "ScenarioOutput_Timestamp", "ScenarioOutput_TotalStepCount", "step-type table (Unknown/Walking/Running counts+durations)"],
+      "actions": ["Register ReadingChanged"],
+      "pass_criteria": "Register button present and responds; outputs and step-type table render."
+    },
+    {
+      "number": 2,
+      "title": "History",
+      "controls": ["AllHistory", "SpecificHistory", "FromDate", "FromTime", "ToDate", "ToTime", "GetHistory", "historyRecordsList"],
+      "actions": ["AllHistory", "SpecificHistory", "Get History"],
+      "pass_criteria": "Radios toggle; selecting specific range reveals From/To date+time pickers; Get History updates status/results."
+    },
+    {
+      "number": 3,
+      "title": "Current step count",
+      "controls": ["GetCurrentButton", "ScenarioOutput_Timestamp", "ScenarioOutput_TotalStepCount"],
+      "actions": ["Get steps count"],
+      "pass_criteria": "Button present and responds; outputs + status render (device-gated fallback acceptable)."
+    },
+    {
+      "number": 4,
+      "title": "Background Pedometer",
+      "controls": ["Register Task", "Unregister Task", "status fields"],
+      "actions": [],
+      "pass_criteria": "Register/Unregister buttons and status fields render (device-gated)."
+    }
+  ]
+}

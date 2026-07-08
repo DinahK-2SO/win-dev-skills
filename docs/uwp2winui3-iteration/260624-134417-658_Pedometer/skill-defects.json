@@ -1,0 +1,27 @@
+{
+  "scenario": "Pedometer",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0118/CS0234 when the migrated project references a WinRT type whose name equals the project/RootNamespace name (here 'Pedometer.GetDefaultAsync()' / 'Pedometer.GetReadingsFromTriggerDetails()').",
+      "evidence": "session-log.txt lines 3248-3250 (CS0118 in Scenario1_Events.xaml.cs and Scenario4_BackgroundTask.xaml.cs); final Scenario1_Events.xaml.cs line 22 shows the applied fix 'using SensorPedometer = Windows.Devices.Sensors.Pedometer;'.",
+      "skill_search": "Grepped winui-uwp-migration for CS0118, 'namespace but', collision, RootNamespace, alias, GetDefaultAsync — no hits. MIGRATION-PATTERNS covers only CS0104 (Windows.UI.Xaml vs Microsoft.UI.Xaml ambiguity) and CS0101/CS0234 stale-bin/obj duplicates, not a project-name==WinRT-type collision.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "SDK-style WinUI project keeps the original UWP app name as RootNamespace/assembly. Many UWP SDK samples are named after the exact WinRT feature type they demonstrate, so a bare type reference binds to the project namespace instead of the WinRT type.",
+      "proposed_fix": "Add a 'Common build errors' subsection to MIGRATION-PATTERNS.md documenting CS0118 'namespace but is used like a type' / CS0234 caused by project-name==WinRT-type-name, with the fix: a 'using Alias = Windows.<...>.<Type>;' alias or global:: qualification.",
+      "generalizes": "UWP SDK feature-sample apps are routinely named after the WinRT type they showcase (Pedometer, Compass, Accelerometer, Gyrometer, Barometer, Altimeter, ProximitySensor, Camera, Geolocation). Any such migration hits the identical collision the moment sensor/device code is compiled."
+    },
+    {
+      "problem": "CS0579 duplicate assembly attributes because legacy Properties\\AssemblyInfo.cs (and nested Tasks\\Properties\\AssemblyInfo.cs) is copied into an SDK-style project that auto-generates the same attributes.",
+      "evidence": "session-log.txt lines 3733-3758 (CS0579 Duplicate AssemblyCompany/Configuration/FileVersion/Product/Title/Version); fix applied at turn 37 (line 3824) adding <GenerateAssemblyInfo>false</GenerateAssemblyInfo>; copied file listed at line 255 (Tasks\\Properties\\AssemblyInfo.cs migrate-as-is).",
+      "skill_search": "Grepped for GenerateAssemblyInfo, AssemblyInfo, CS0579 — no hits in SKILL.md, MIGRATION-PATTERNS.md, or scripts. Initialize-UwpMigration.ps1 copies all '.cs' files (patterns list, line 62) with no AssemblyInfo exclusion.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "UWP projects ship a hand-written Properties\\AssemblyInfo.cs with [assembly: AssemblyTitle/Company/Version/...]. SDK-style projects set GenerateAssemblyInfo=true by default and emit the same attributes, so the copied file duplicates them.",
+      "proposed_fix": "Tier-1: exclude *AssemblyInfo.cs from the copied .cs set in Initialize-UwpMigration.ps1 (attributes are auto-generated). Tier-3 companion: document CS0579 + the GenerateAssemblyInfo=false / delete-legacy-AssemblyInfo fix in MIGRATION-PATTERNS.md.",
+      "generalizes": "Virtually every UWP project carries Properties\\AssemblyInfo.cs (multi-project samples carry one per sub-project). SDK-style migration always auto-generates these attributes, so the duplicate collision recurs across essentially all UWP→WinUI 3 migrations."
+    }
+  ]
+}

@@ -81,6 +81,12 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     if (('\' + $rel) -match $srcExcludePattern) { return $false }
     $name = $_.Name.ToLowerInvariant()
+    # Never copy legacy AssemblyInfo.cs. UWP projects hand-write Properties\AssemblyInfo.cs
+    # (multi-project samples: one per sub-project) with [assembly: AssemblyTitle/Company/
+    # Version/...]. SDK-style projects set GenerateAssemblyInfo=true by default and emit the
+    # same attributes, so a copied-in AssemblyInfo.cs causes CS0579 duplicate-attribute
+    # errors. The auto-generated attributes are correct for the new assembly.
+    if ($name -eq 'assemblyinfo.cs' -or $name.EndsWith('.assemblyinfo.cs')) { return $false }
     $match = $false
     foreach ($ext in $patterns) {
         if ($name.EndsWith($ext)) { $match = $true; break }

@@ -1,0 +1,14 @@
+{
+  "scenario": "Pedometer",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CA1416 platform-compatibility warnings on DatePicker/TimePicker/Calendar/Pedometer history APIs.",
+      "evidence": "build-output.txt tail: dozens of CA1416 warnings; BUILD SUCCEEDED; app ran and scored 100/100.",
+      "covered_clearly_at": "N/A — not an error and not a defect: warnings are non-blocking, the build succeeds and the app runs. No skill change warranted.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "CA1416 are advisory warnings inherent to targeting a min platform below an API's introduced version; they do not affect build success, runtime, or parity. Documenting them would add noise without changing any outcome."
+    }
+  ]
+}

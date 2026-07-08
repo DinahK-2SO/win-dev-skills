@@ -1,0 +1,18 @@
+{
+  "scenario": "Pedometer",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Events: Register ReadingChanged; step-type table + outputs render", "status": "pass", "reason": "Faithful replica; button responded in both.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "History: All/Specific radios, From/To pickers, Get History", "status": "pass", "reason": "Pickers present/functional (collapsed at initial UIA dump).", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Current step count: Get steps count + outputs", "status": "pass", "reason": "Button responded; only no-hardware fallback text differs.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Background Pedometer: Register/Unregister task + status", "status": "pass", "reason": "Renders identically; device-gated actions.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Navigation pane", "uwp": "scenario list expanded", "winui": "NavigationView collapsed (hamburger) by default", "screenshot_ref": "parity/winui3/screenshots/00_*" }
+  ],
+  "missing_features": [],
+  "summary": "Full parity (100/100). No functional gaps. The only skill-relevant signal is in the build log: two generalizable build-error classes (CS0118 namespace/type collision; CS0579 duplicate assembly attributes) that the agent fixed unaided but the skill does not document."
+}

@@ -1,0 +1,266 @@
+{
+  "featureName": "Pedometer",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Pedometer\\cs",
+  "generated": "2026-07-08T12:20:48.0141363+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Events",
+      "class": "Scenario1_Events",
+      "slug": "Events",
+      "screenshot": "01_Events.png",
+      "controls": [
+        {
+          "name": "RegisterButton",
+          "type": "Button",
+          "label": "Register ReadingChanged",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Register ReadingChanged",
+          "alt": "RegisterButton",
+          "type": "Button",
+          "label": "Register ReadingChanged",
+          "name": "RegisterButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "ScenarioOutput_Timestamp",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_TotalStepCount",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_UnknownCount",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_WalkingCount",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_RunningCount",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_UnknownDuration",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_WalkingDuration",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_RunningDuration",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "History",
+      "class": "Scenario2_History",
+      "slug": "History",
+      "screenshot": "02_History.png",
+      "controls": [
+        {
+          "name": "AllHistory",
+          "type": "RadioButton",
+          "label": "",
+          "events": [
+            "Checked"
+          ]
+        },
+        {
+          "name": "SpecificHistory",
+          "type": "RadioButton",
+          "label": "",
+          "events": [
+            "Checked"
+          ]
+        },
+        {
+          "name": "FromDate",
+          "type": "DatePicker",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "FromTime",
+          "type": "TimePicker",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "ToDate",
+          "type": "DatePicker",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "ToTime",
+          "type": "TimePicker",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "GetHistory",
+          "type": "Button",
+          "label": "Get History",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "historyRecordsList",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "AllHistory",
+          "alt": "",
+          "type": "RadioButton",
+          "label": "",
+          "name": "AllHistory",
+          "event": "Checked"
+        },
+        {
+          "target": "SpecificHistory",
+          "alt": "",
+          "type": "RadioButton",
+          "label": "",
+          "name": "SpecificHistory",
+          "event": "Checked"
+        },
+        {
+          "target": "Get History",
+          "alt": "GetHistory",
+          "type": "Button",
+          "label": "Get History",
+          "name": "GetHistory",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Current step count",
+      "class": "Scenario3_CurrentStepCount",
+      "slug": "Current_step_count",
+      "screenshot": "03_Current_step_count.png",
+      "controls": [
+        {
+          "name": "GetCurrentButton",
+          "type": "Button",
+          "label": "Get steps count",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get steps count",
+          "alt": "GetCurrentButton",
+          "type": "Button",
+          "label": "Get steps count",
+          "name": "GetCurrentButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "ScenarioOutput_Timestamp",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_TotalStepCount",
+            "type": "TextBlock"
+          },
+          {
+            "name": "StatusBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Background Pedometer",
+      "class": "Scenario4_BackgroundPedometer",
+      "slug": "Background_Pedometer",
+      "screenshot": "04_Background_Pedometer.png",
+      "controls": [],
+      "actions": [],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

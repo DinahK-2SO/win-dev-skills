@@ -50,6 +50,31 @@ Get-ChildItem -Path $Target -Recurse -Directory -Include bin,obj |
 
 Generated sources never belong in source control or the migrated tree — only `.xaml/.cs/.resw/.appxmanifest`/assets are real inputs.
 
+### `CS0118: '<Name>' is a namespace but is used like a type` / `CS0234` on a bare WinRT type reference
+
+UWP SDK feature samples are routinely **named after the very WinRT type they demonstrate** (e.g. `Pedometer`, `Compass`, `Accelerometer`, `Gyrometer`, `Barometer`, `Altimeter`, `ProximitySensor`, `Camera`). After migration the WinUI project keeps that name as its `<RootNamespace>`/assembly name, so a **bare** reference like `Pedometer.GetDefaultAsync()` no longer binds to the WinRT type — C# resolves `Pedometer` to the **project's own namespace**, producing `CS0118: 'Pedometer' is a namespace but is used like a type` (and `CS0234: '<Member>' does not exist in the namespace 'Pedometer'` for its static members).
+
+Fix by disambiguating every bare reference with a **using alias** (cleanest, one line per file):
+
+```csharp
+using SensorPedometer = Windows.Devices.Sensors.Pedometer;   // alias away the collision
+// ...
+sensor = await SensorPedometer.GetDefaultAsync();
+private void OnReadingChanged(SensorPedometer sender, PedometerReadingChangedEventArgs args) { ... }
+```
+
+or `global::`-qualify at each use site (`global::Windows.Devices.Sensors.Pedometer.GetDefaultAsync()`). This applies to **any** identifier that names both the project namespace and a referenced WinRT/`.NET` type — not just sensors. Do **not** rename the project/`RootNamespace` to dodge it (that breaks `x:Class`, resource lookups, and the `MIGRATION-MAPPING` audit); alias at the reference instead.
+
+### `CS0579: Duplicate 'System.Reflection.AssemblyXxxAttribute'`
+
+UWP projects ship a hand-written `Properties\AssemblyInfo.cs` (multi-project samples ship one **per sub-project**, e.g. `Tasks\Properties\AssemblyInfo.cs`) containing `[assembly: AssemblyTitle/Company/Configuration/Product/Version/FileVersion(...)]`. SDK-style WinUI projects set `GenerateAssemblyInfo` **true by default** and emit those same attributes, so a copied-in `AssemblyInfo.cs` collides → `CS0579` duplicate-attribute errors. `Initialize-UwpMigration.ps1` now skips `*AssemblyInfo.cs` at copy time; if a legacy one still slipped in (manual copy, unusual name), either **delete it** or add to the `<PropertyGroup>`:
+
+```xml
+<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+```
+
+Prefer deleting the legacy file — the auto-generated attributes are correct for the new assembly, and the UWP copyright/version boilerplate carries no value forward.
+
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element of the **same type** — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
