@@ -322,13 +322,23 @@ foreach ($rel in $sortedFiles) {
     }
     $text = [System.IO.File]::ReadAllText($full)
 
-    # 1. Unsupported scan → any hit collapses the file to `defer`.
-    $unsupHits = @()
+    # 1. Unsupported scan.
+    #    A "hard" unsupported hit (no `uiPlaceholder`) collapses the file to `defer`.
+    #    A file whose ONLY unsupported hits are hero UI controls that carry a
+    #    `uiPlaceholder` anchor (e.g. InkCanvas / CaptureElement) is NOT deferred:
+    #    the scenario page stays in the build and navigation, and the control is
+    #    swapped for a visible declarative placeholder (planned as a TODO below).
+    #    Dropping such a whole scenario would regress the app's scenario count vs
+    #    the source; keeping it with a placeholder preserves parity.
+    $hardUnsupHits = @()
+    $softUiCtrls   = @()   # unsupported hero controls with a placeholder path
     foreach ($e in $inv.unsupported) {
-        if ($text -match $e.pattern) { $unsupHits += $e.name }
+        if ($text -match $e.pattern) {
+            if ($e.uiPlaceholder) { $softUiCtrls += $e } else { $hardUnsupHits += $e.name }
+        }
     }
 
-    if ($unsupHits.Count -gt 0) {
+    if ($hardUnsupHits.Count -gt 0) {
         $fileTriage[$rel] = @{ Label = 'defer' }
         # Collect generic anchor categories from any adaptable hits the same
         # file also has — gives DEFERRED.md a meaningful (but API-name-free)
@@ -353,6 +363,24 @@ foreach ($rel in $sortedFiles) {
     $injections = @()  # list of @{ LineIndex; Anchor }
     $lines = $text -split "`r?`n"
     $isXaml = $ext -eq '.xaml'
+
+    # Unsupported hero controls with a placeholder path: inject a placeholder TODO
+    # (routes to the PATTERNS.md anchor named by `uiPlaceholder`) so the scenario
+    # page is kept and the control is replaced with a visible declarative
+    # placeholder rather than the whole scenario being deferred.
+    foreach ($uc in $softUiCtrls) {
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            $line = $lines[$i]
+            if ($line -notmatch $uc.pattern) { continue }
+            if ($isXaml) {
+                if ($line.TrimStart() -notmatch '^<') { continue }
+                if ($line.TrimStart() -match '^<!--\s*TODO\[migrate-') { continue }
+            } else {
+                if ($line.TrimStart() -match '^//') { continue }
+            }
+            $injections += [PSCustomObject]@{ LineIndex = $i; Anchor = $uc.uiPlaceholder }
+        }
+    }
 
     foreach ($ae in $adaptableEntries) {
         for ($i = 0; $i -lt $lines.Count; $i++) {

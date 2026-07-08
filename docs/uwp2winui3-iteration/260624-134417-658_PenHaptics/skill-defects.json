@@ -1,0 +1,17 @@
+{
+  "scenario": "PenHaptics",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "A scenario page whose ONLY unsupported dependency is a hero UI control (InkCanvas) was auto-collapsed to Triage=defer and the whole scenario was dropped from navigation, so the migrated app shows 4 of the source's 5 scenarios (feature FAIL, score 80).",
+      "evidence": "session-log.txt L303 'Scenario1_InkCanvasTactileFeedback.xaml.cs | defer | copied'; .bootstrap-meta.json deferredCount:1; migration-score.json feature 'Ink Canvas Tactile Feedback' verdict=fail; Initialize-UwpMigration.ps1 L325 comment 'Unsupported scan -> any hit collapses the file to defer'.",
+      "skill_search": "grep 'unsupported', 'defer', 'InkCanvas', 'placeholder' across SKILL.md, MIGRATION-PATTERNS.md, Initialize-UwpMigration.ps1, unsupported-api-inventory.json",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize-UwpMigration.ps1 L325: '# 1. Unsupported scan -> any hit collapses the file to defer.' (unconditional — no exception for a hero UI control that has a documented XAML-placeholder path).",
+      "root_cause": "The bootstrap tooling cannot distinguish a whole-file-killing unsupported API (CoreWindow, phone-only, kiosk — no UI to show) from a single unsupported *visual* control on an otherwise-migratable scenario page. It defers both, and a deferred page is later omitted from navigation, deleting a whole scenario the source has.",
+      "proposed_fix": "In unsupported-api-inventory.json, tag the hero visual controls that have a placeholder path (InkCanvas, CaptureElement) with a `uiPlaceholder` anchor. In Initialize-UwpMigration.ps1, only collapse a file to `defer` when it has a non-placeholder ('hard') unsupported hit; when the sole unsupported hits are `uiPlaceholder` controls, keep the file as `migrate-with-adaptation` and inject a placeholder TODO so the scenario page stays in the build and navigation.",
+      "generalizes": "UWP SDK samples (the dominant migration target here) enumerate scenarios in SampleConfiguration.cs. ANY such app with a scenario built around an unsupported hero control (InkCanvas, CaptureElement, and future entries) would lose that whole scenario from navigation and fail parity. Keeping the scenario with a placeholder is the general-correct behavior for every unsupported-hero-control page."
+    }
+  ]
+}

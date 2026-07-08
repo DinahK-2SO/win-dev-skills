@@ -1,0 +1,14 @@
+{
+  "scenario": "PenHaptics",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Compare-Parity marked Scenario 4 (Interaction Feedback) FAIL, but the button is present and wired and the UWP golden behaves identically (hardware-gated). The scorer re-verified it as PASS.",
+      "evidence": "migration-score.json feature 'Interaction Feedback' verdict=pass, note: 'Compare-Parity marked FAIL only due to title-ambiguous nav (Interaction Feedback also matches Inking and Interaction Feedback), a capture artifact.'",
+      "covered_clearly_at": "N/A — this is an artifact of the winui3-parity-check EVAL tool's title-driven navigation, not a migration-skill issue. The migrated control is correct.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The migration output is correct (button present/wired, parity with UWP). The FAIL originates in the evaluation instrument's ambiguous title-based navigation, which is out of scope for migration-skill edits. No migration-skill change would affect it."
+    }
+  ]
+}

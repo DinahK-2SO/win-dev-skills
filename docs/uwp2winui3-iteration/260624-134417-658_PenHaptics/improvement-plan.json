@@ -1,0 +1,30 @@
+{
+  "scenario": "PenHaptics",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "A scenario page whose only unsupported dependency is a hero UI control (InkCanvas) was auto-collapsed to Triage=defer and dropped from the WinUI navigation, so the migrated app shows 4 of the source's 5 scenarios (feature FAIL, score 80).",
+      "evidence": "session-log.txt L303 'Scenario1_InkCanvasTactileFeedback.xaml.cs | defer'; .bootstrap-meta.json deferredCount:1; migration-score.json feature 'Ink Canvas Tactile Feedback' verdict=fail; Initialize-UwpMigration.ps1 old L325 'any hit collapses the file to defer'.",
+      "root_cause": "The bootstrap unsupported-scan could not distinguish a whole-file-killing unsupported API (CoreWindow/phone/kiosk — no UI to show) from a single unsupported *visual* hero control on an otherwise-migratable scenario page; it deferred both, and deferred pages are omitted from navigation.",
+      "tier": 1,
+      "change": "Tagged the placeholder-capable hero controls (InkCanvas, CaptureElement) with a `uiPlaceholder` anchor in unsupported-api-inventory.json, and changed Initialize-UwpMigration.ps1 to defer a file only on a 'hard' (non-placeholder) unsupported hit. A file whose only unsupported hits are `uiPlaceholder` controls is kept as migrate-with-adaptation with a placeholder TODO routed to PATTERNS.md#deferred-control-placeholder, so the scenario page stays in the build and navigation.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1 + skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+      "expected_effect": "The InkCanvas scenario page is no longer deferred; it stays registered in SampleConfiguration.cs with a placeholder, matching the source's scenario count.",
+      "falsifiable_check": "On re-run, MIGRATION-MAPPING.md labels the InkCanvas page 'migrate-with-adaptation' (not 'defer'), .bootstrap-meta.json deferredCount is 0, SampleConfiguration.cs registers all 5 scenarios, and requirement #1 goes fail->pass."
+    },
+    {
+      "problem": "SKILL.md navigation invariant #4 ('Deferred items are omitted from the navigation surface') contradicts the skill's own placeholder guidance, so the agent dropped the whole InkCanvas scenario instead of keeping it with a placeholder.",
+      "evidence": "SKILL.md L109 vs SKILL.md L229-236 / MIGRATION-PATTERNS.md L57-65; only 4 scenarios registered in the build.",
+      "root_cause": "No stated tie-break between 'defer the file' and 'keep the page with a placeholder' for a scenario page whose hero control is unsupported.",
+      "tier": 3,
+      "change": "Sharpened SKILL.md invariant #4 and the `defer` triage bullet, and MIGRATION-PATTERNS.md (added a #deferred-control-placeholder anchor; moved InkCanvas/CaptureElement/early-MapControl from 'defer the file' into a 'keep the scenario, placeholder the control' bucket; fixed the two controls-table cells). A scenario is omitted from nav only when it has no representable UI; a scenario whose only blocker is an unsupported hero control stays in nav with a placeholder.",
+      "file": "skills/winui-uwp-migration/SKILL.md + skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Removes the contradiction that misled the agent; even if the tooling label is overridden, the prose now points the same way (keep + placeholder).",
+      "falsifiable_check": "On re-run, the agent keeps every source scenario reachable from the nav; no scenario-count regression vs the UWP source."
+    }
+  ],
+  "deferred_to_human": [
+    "winui3-parity-check (eval skill): Scenario 4 got a spurious FAIL because title-driven navigation treats 'Interaction Feedback' as a substring of 'Inking and Interaction Feedback'. Out of scope for the migration skill; noted for the eval-tool owners."
+  ]
+}

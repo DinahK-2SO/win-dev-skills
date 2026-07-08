@@ -1,0 +1,19 @@
+{
+  "scenario": "PenHaptics",
+  "index": 0,
+  "score": 80,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Ink Canvas Tactile Feedback", "status": "fail", "reason": "Scenario entirely dropped from the WinUI nav (SampleConfiguration.cs registers only 4 scenarios; page labeled defer/unsupported-only). UWP shows an InkCanvas + pen toolbar; WinUI has no such page.", "suspected_skill_gap": "Initialize-UwpMigration.ps1 collapses any file with an unsupported hit to defer; SKILL.md invariant #4 then omits deferred scenarios from navigation — so a page whose only blocker is an unsupported hero control loses its whole nav entry instead of keeping a placeholder." },
+    { "id": 2, "text": "Query Tactile Feedback Support", "status": "pass", "reason": "Renders faithfully; description text matches UWP.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Inking Feedback", "status": "pass", "reason": "Waveform ComboBox, Intensity slider, inking area present and match.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Interaction Feedback", "status": "pass", "reason": "Send Interaction Feedback button present and wired (verified via UIA). Compare-Parity's FAIL was a title-ambiguous-nav capture artifact of the eval tool, not a defect; button is hardware-gated and inert in both UWP and WinUI.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Inking and Interaction Feedback", "status": "pass", "reason": "Draggable blue square on a grid matches UWP golden.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Ink Canvas Tactile Feedback", "uwp": "InkCanvas + pen-type toolbar page", "winui": "No such page; nav lands on Query Tactile Feedback Support", "screenshot_ref": "parity/winui3/screenshots/01_Ink_Canvas_Tactile_Feedback.png" }
+  ],
+  "missing_features": ["Ink Canvas Tactile Feedback scenario (scenario 1)"],
+  "summary": "One of five scenarios (InkCanvas hero page) was dropped from navigation because the bootstrap tooling collapsed the file to 'defer' and the skill omits deferred scenarios from nav — instead of keeping the scenario with a placeholder. All other scenarios match the UWP golden."
+}

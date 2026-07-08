@@ -1,0 +1,19 @@
+{
+  "scenario": "PenHaptics",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration: stop deferring a whole scenario when its only unsupported dependency is a hero UI control — such files (InkCanvas/CaptureElement) now stay migrate-with-adaptation with a placeholder TODO so the scenario keeps its navigation entry",
+    "unsupported-api-inventory: tag InkCanvas and CaptureElement with a `uiPlaceholder` anchor so the bootstrap can tell a placeholder-capable visual control from a whole-file-killing API",
+    "SKILL.md + MIGRATION-PATTERNS.md: resolve the defer-vs-placeholder contradiction — a scenario is dropped from nav only when it has no representable UI; an unsupported hero control keeps its scenario with a visible placeholder (new #deferred-control-placeholder anchor)"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "winui3-parity-check eval skill: title-substring navigation ambiguity gave Scenario 4 a spurious FAIL ('Interaction Feedback' vs 'Inking and Interaction Feedback') — out of scope for the migration skill."
+  ]
+}

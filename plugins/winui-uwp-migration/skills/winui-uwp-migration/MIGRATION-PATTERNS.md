@@ -54,11 +54,14 @@ Generated sources never belong in source control or the migrated tree — only `
 
 `<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element of the **same type** — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
 
-**But do not just delete it and leave a hole.** When the deferred control is the page's
-**primary/hero visible surface** (a full-bleed `CaptureElement`, `InkCanvas`, `MapControl`,
-etc.), removing it with no substitute leaves the page **rendering blank** — a byte-uniform
-screenshot that fails the parity check even though the build and smoke launch are green.
-Replace it with a **visible declarative placeholder in XAML** that fills the same cell:
+<a id="deferred-control-placeholder"></a>
+**But do not just delete it and leave a hole — and do not drop the whole scenario.** When the
+deferred control is the page's **primary/hero visible surface** (a full-bleed `CaptureElement`,
+`InkCanvas`, `MapControl`, etc.), the **scenario/page stays in the app and in the navigation**
+(so the migrated app keeps the same scenario count as the source) — only the unsupported
+*control* is replaced. Removing it with no substitute leaves the page **rendering blank** — a
+byte-uniform screenshot that fails the parity check even though the build and smoke launch are
+green. Replace it with a **visible declarative placeholder in XAML** that fills the same cell:
 
 ```xml
 <!-- was the hero camera preview; deferred (no WinUI 3 desktop equivalent) -->
@@ -163,11 +166,18 @@ Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding fi
 No equivalent (defer the file):
 
 - `CoreWindow` and related view-scoped APIs (use `AppWindow` + HWND APIs)
-- `InkCanvas`
 - Virtual key support for gamepad input (`Windows.Gaming.Input.*` VK paths)
 - Single-app kiosk mode
 - Xbox / HoloLens-specific surfaces (`Windows.System.Profile` device-family branching)
 - Phone-only APIs (`Windows.Phone.*`, `Windows.ApplicationModel.Calls.*`)
+
+No equivalent, but the control is only a **visual surface** — **keep the scenario/page in
+navigation** and swap the control for a [visible placeholder](#deferred-control-placeholder)
+(do **not** defer the whole file — that would drop a scenario the source has):
+
+- `InkCanvas` / `InkToolbar` (no stable WinUI 3 equivalent)
+- `CaptureElement` (no XAML camera-preview element)
+- `MapControl` on WinAppSDK &lt; 1.5
 
 Conditional support:
 
@@ -578,7 +588,7 @@ If you do custom text rendering with DirectWrite, switch to **DWriteCore** — t
 | `CameraCaptureUI` (Windows.Media.Capture) | `CameraCaptureUI` (Microsoft.Windows.Media.Capture) — WinAppSDK 1.7+ |
 | `WebAuthenticationBroker` | `Microsoft.Security.Authentication.OAuth` — WinAppSDK 1.7+ |
 | Background acrylic via `AcrylicBrush` BackgroundSource | `DesktopAcrylicController` (Microsoft.UI.Composition.SystemBackdrops) |
-| `InkCanvas` | Not yet supported |
+| `InkCanvas` | No stable equivalent — keep the scenario, [placeholder the control](#deferred-control-placeholder) |
 
 <a id="storage"></a>
 ## Storage and Settings
@@ -799,7 +809,7 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 | UWP element | WinUI 3 element | Notes |
 |---|---|---|
 | `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. |
-| `<InkCanvas … />` | _(none — defer)_ | Not supported. |
+| `<InkCanvas … />` | _(no equivalent — [keep scenario, placeholder the control](#deferred-control-placeholder))_ | Not supported in the stable channel. Keep the scenario page in navigation; swap the control for a visible placeholder. |
 | `<Pivot>` / `<PivotItem>` | `<TabView>` / `<TabViewItem>`, or `<controls:Pivot>` from `CommunityToolkit.WinUI.UI.Controls` | Pick based on the source's intent (top-tab vs swipe pivot). |
 | `<Hub>` / `<HubSection>` | Hand-rolled `<NavigationView>` with section grouping, or `<ScrollViewer>` with stacked sections. | No drop-in equivalent. |
 | `<AppBarButton Icon="…">` system icons | Most identifiers carry over | A handful of glyphs were renamed; verify visually. |

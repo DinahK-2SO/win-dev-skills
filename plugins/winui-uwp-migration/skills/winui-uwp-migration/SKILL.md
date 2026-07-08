@@ -85,7 +85,7 @@ Walk each row by its Triage label:
 
 - **`migrate-as-is`** — namespace rewrite is already done; flip `Status` to `done` once the file appears in your final build.
 - **`migrate-with-adaptation`** — work through its TODOs in the mode above.
-- **`defer`** — exclude from build and navigation. The row is already pre-seeded in `MIGRATION-DEFERRED.md`; refine the rationale only if the anchor list is wrong.
+- **`defer`** — exclude from build and navigation. The row is already pre-seeded in `MIGRATION-DEFERRED.md`; refine the rationale only if the anchor list is wrong. **Exception — a scenario page whose *only* blocker is an unsupported hero *control* (e.g. `InkCanvas`/`CaptureElement`) is NOT a defer:** keep the page in the build and navigation and swap the control for a [visible placeholder](./MIGRATION-PATTERNS.md#deferred-control-placeholder), so the migrated app keeps the same scenario count as the source. The bootstrap already labels these `migrate-with-adaptation` (placeholder TODO), not `defer`.
 
 Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 
@@ -106,7 +106,7 @@ If the source shell doesn't match anything above, preserve its structure as fait
 1. Every non-deferred source scenario / page is reachable from the target's primary navigation surface.
 2. Order matches the source.
 3. Titles match the source (modulo trivial wording cleanup — capitalization, punctuation).
-4. Deferred items are **omitted** from the navigation surface — do not include disabled or broken entries. They are accounted for in `MIGRATION-DEFERRED.md`.
+4. Deferred items are **omitted** from the navigation surface — do not include disabled or broken entries. They are accounted for in `MIGRATION-DEFERRED.md`. **Only omit a scenario that has no representable UI at all** (a headless/background item, or a page built entirely on an unsupported non-visual API). A scenario whose only blocker is an unsupported hero *control* **stays in navigation** with a [visible placeholder](./MIGRATION-PATTERNS.md#deferred-control-placeholder) — dropping it would give the migrated app fewer scenarios than the source and fail parity.
 
 ### Step 2 — Reconcile the project file
 

@@ -1,0 +1,15 @@
+{
+  "scenario": "PenHaptics",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "SKILL.md's navigation invariant #4 ('Deferred items are omitted from the navigation surface') directly contradicts the skill's own placeholder guidance (SKILL.md L229-236, MIGRATION-PATTERNS.md L57-65), which says a page whose hero control is unsupported must be KEPT with a visible placeholder. Facing the contradiction, the agent applied invariant #4 to the whole InkCanvas scenario page and dropped it.",
+      "evidence": "SKILL.md L109 'Deferred items are omitted from the navigation surface'; SKILL.md L229-236 'This applies equally to a page whose hero control was deferred ... Leave a visible declarative placeholder'; session-log.txt only 4 scenarios registered.",
+      "covered_at": "SKILL.md Step 1 'Navigation invariants' (L104-109), bullet #4; cross-referenced placeholder guidance at SKILL.md L229-236 and MIGRATION-PATTERNS.md #cs0246 (L57-65).",
+      "why_missed": "grey-zone / ambiguous — 'defer the file' and 'keep the page with a placeholder' both plausibly apply to a scenario page whose hero control is unsupported, with no rule stating which wins.",
+      "proposed_improvement": "Sharpen invariant #4 (and the `defer` triage bullet at L88) to state the tie-break explicitly: only omit a scenario from navigation when it has NO representable UI at all; a scenario whose only blocker is an unsupported hero control STAYS in navigation with a placeholder, so the migrated app keeps the same scenario count as the source.",
+      "generalizes": "Every sample-style UWP app maps scenarios 1:1 to nav entries; a clear 'keep the scenario, placeholder the control' rule prevents scenario-count regressions across all of them, not just InkCanvas."
+    }
+  ]
+}
