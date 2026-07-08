@@ -1,0 +1,16 @@
+{
+  "scenario": "PlayReady",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Fix MediaElement->MediaPlayerElement mapping in MIGRATION-PATTERNS.md: it is not a rename — MediaPlayerElement.MediaPlayer is null until SetMediaPlayer, and Source/Stop()/CurrentStateChanged/ProtectionManager move onto MediaPlayer/PlaybackSession (prevents clean-build runtime NullReferenceException in every media/DRM sample).",
+    "Extend the 0xE0434352 startup-crash row to name the XamlParseException from an App.xaml Style BasedOn={StaticResource TitleTextBlockStyle} copied from UWP SharedContent Styles.xaml, with the inline-setters fix (recurs across UWP SDK sample migrations)."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Secure Stop is environment-gated (no provisioned PlayReady DRM stack); not fixable in the migration skill.",
+    "winapp cannot screenshot the WinUI 3 DirectComposition surface; eval/harness limitation."
+  ]
+}

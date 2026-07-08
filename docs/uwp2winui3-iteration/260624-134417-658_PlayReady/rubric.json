@@ -1,0 +1,61 @@
+{
+  "scenario": "PlayReady",
+  "created_at": "2026-07-08T23:59:00+08:00",
+  "uwp_capture_status": "partial: UWP app launched OK (Release, pid 45100, window 'PlayReady C# sample'). Scenario 1 captured as a true visual golden. The UWP CoreWindow exposes only an opaque root Pane to UI Automation, so title-driven navigation to Scenarios 2-4 failed and no golden frame/behavioral data could be captured for them; their baseline PNGs are duplicates of the Scenario 1 frame.",
+  "features": [
+    {
+      "id": "reactive-license-request",
+      "area": "Scenario 1",
+      "name": "Reactive License Request",
+      "description": "Enter a protected media manifest URL and press Play to trigger an automatic (reactive) PlayReady license + individualization request through the ProtectionManager, then Stop to end playback.",
+      "expected_behaviour": [
+        "A description block explains reactive license requests",
+        "A movie-path TextBox is pre-filled with a tears-of-steel manifest URL",
+        "Play and Stop buttons are present",
+        "A shared PlayReady Info panel (Security Level / Version / Has Hardware DRM / Has HEVC) and an Output Log are visible"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Reactive_License_Request.png",
+      "weight": 2
+    },
+    {
+      "id": "proactive-license-request",
+      "area": "Scenario 2",
+      "name": "Proactive License Request",
+      "description": "Acquire a PlayReady license ahead of playback for a given KeyId (Get License), then Play the associated content.",
+      "expected_behaviour": [
+        "A Get License button is present",
+        "A KeyId TextBox pre-filled with a GUID is present",
+        "A movie-path TextBox is present",
+        "Play and Stop buttons are present (disabled until a license is acquired)"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "manage-hw-sw-drm",
+      "area": "Scenario 3",
+      "name": "Manage HW/SW DRM",
+      "description": "Choose between hardware and software DRM before playback, then Play the protected content.",
+      "expected_behaviour": [
+        "Use Hardware DRM and Use Software DRM buttons are present",
+        "A movie-path TextBox is present",
+        "Play and Stop buttons are present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "secure-stop",
+      "area": "Scenario 4",
+      "name": "Secure Stop",
+      "description": "Obtain a publisher certificate and renew a license to exercise the PlayReady Secure Stop reporting flow.",
+      "expected_behaviour": [
+        "Get Publisher Cert and Renew License buttons are present",
+        "A movie-path TextBox is present",
+        "Play and Stop buttons are present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

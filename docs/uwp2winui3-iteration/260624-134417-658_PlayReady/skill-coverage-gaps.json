@@ -1,0 +1,15 @@
+{
+  "scenario": "PlayReady",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "An App.xaml-level Style with BasedOn={StaticResource TitleTextBlockStyle} (copied from a UWP sample's SharedContent/xaml/Styles.xaml) crashes the app at startup with a XamlParseException; the crash was hard to attribute because the startup-crash table did not name this cause.",
+      "evidence": "session-log.txt lines 7694 ('startup crash in Microsoft.UI.Xaml.dll'), 7931 ('The BasedOn={StaticResource TitleTextBlockStyle} can fail in App.xaml if those built-in WinUI 3 styles aren't resolved at Application level'), 7959 ('App launched but exited within 10s - startup crash'). Fixed by inlining setters and dropping BasedOn.",
+      "covered_at": "MIGRATION-PATTERNS.md#startup-crashes — 'Known native codes' table, row 0xE0434352 (Managed CLR exception).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Extend the existing 0xE0434352 row to name XamlParseException from an unresolvable App.xaml resource — specifically a Style BasedOn={StaticResource <system text style>} carried over from UWP SharedContent/Styles.xaml — and give the fix (inline the setters / move into a ResourceDictionary that merges the theme dictionaries).",
+      "generalizes": "UWP SDK samples almost universally ship SharedContent/xaml/Styles.xaml with BasedOn on system text styles; migrating those into App.xaml resources produces this exact startup XamlParseException across many scenarios."
+    }
+  ]
+}

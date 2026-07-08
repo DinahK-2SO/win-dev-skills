@@ -1,0 +1,37 @@
+{
+  "scenario": "PlayReady",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Mechanically rewrote using/xmlns to Microsoft.UI.Xaml across 20 files; MIGRATION-MAPPING.md seeded with 20 rows (session-log.txt lines 388-422)." },
+    { "tool": "Test-AppLaunch.ps1", "evidence": "Caught the two startup crashes by launching the built app and reporting 'exited within 10s - startup crash' with the WER exception (session-log.txt lines 7959, 8766)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Final PASS gate: 0 UWP residue, manifest runFullTrust present, smoke launch alive, WUI=0 (session-log.txt lines 8775-8791)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Test-AppLaunch.ps1 / Validate-UwpMigration.ps1", "limitation": "Smoke launch only proves the process stays alive; it does not navigate the shell, so a scenario page that throws in its constructor (blank content frame) still passes.", "suggested_tweak": "Already documented in MIGRATION-PATTERNS.md#silent-navigation-failures; no change needed." }
+  ],
+  "failed_apis": [
+    { "api": "MediaPlayerElement.MediaPlayer (member access after type rename from MediaElement)", "why_tried": "Straight rename of UWP MediaElement to MediaPlayerElement, then reading MediaPlayer/PlaybackSession/ProtectionManager.", "root_cause": "MediaPlayerElement.MediaPlayer is null until SetMediaPlayer(new MediaPlayer()) is called; UWP MediaElement owned the player itself. Builds clean, NullReferenceException at runtime on the scenario page.", "fix": "Call mediaElement.SetMediaPlayer(new MediaPlayer()) before ViewModel creation and remap Source/Stop()/CurrentStateChanged/ProtectionManager onto MediaPlayer/PlaybackSession (session-log.txt TURN 16, line 8627)." },
+    { "api": "PlayReadySecureStopServiceRequest / PlayReadyStatics (Scenario 4 Secure Stop)", "why_tried": "Migrated Secure Stop scenario 1:1 from UWP.", "root_cause": "Environment-gated: machine has no provisioned PlayReady hardware/software DRM stack (Security Level 0, Has Hardware DRM False); a PlayReady interface throws E_NOINTERFACE ('The object does not support this interface') during ViewModel construction.", "fix": "Not a code fix — defensive try/catch in the page constructor swaps content for a visible fallback so the page degrades gracefully instead of blanking/crashing (Scenario4_SecureStop.xaml.cs)." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md 'Controls that need element-level swaps' table (MediaElement row)", "wrong": "'Source and transport-control properties carry over with minor renames.'", "correct": "MediaPlayerElement has no built-in player; SetMediaPlayer(new MediaPlayer()) is required and Source/Stop()/CurrentStateChanged/ProtectionManager move onto MediaPlayer/PlaybackSession. Omitting this compiles but throws NullReferenceException at runtime." },
+    { "where": "MIGRATION-PATTERNS.md#startup-crashes 0xE0434352 row", "wrong": "Only listed TypeLoadException/FileNotFoundException (missing package) as causes.", "correct": "XamlParseException from an App.xaml-level Style with BasedOn={StaticResource TitleTextBlockStyle} (copied from UWP SharedContent Styles.xaml) also throws here at startup." }
+  ],
+  "special_apis": [
+    { "api": "CoreApplication.MainView.CoreWindow.Dispatcher", "special_handling": "Replaced with DispatcherQueue.TryEnqueue captured on the UI thread (already covered by the skill; done cleanly)." },
+    { "api": "MediaElement", "special_handling": "Requires SetMediaPlayer + member remap onto MediaPlayer/PlaybackSession — see doc_errors." }
+  ],
+  "errors_encountered": [
+    { "error": "Startup crash in Microsoft.UI.Xaml.dll at launch (app exits within 10s)", "root_cause": "App.xaml Style used BasedOn={StaticResource TitleTextBlockStyle}; the system text styles aren't resolvable from Application.Resources at parse time -> XamlParseException.", "fix": "Defined SampleHeaderTextStyle/ScenarioDescriptionTextStyle inline without BasedOn (session-log.txt lines 7931-7959)." },
+    { "error": "NullReferenceException on scenario pages after MediaElement->MediaPlayerElement rename", "root_cause": "MediaPlayerElement.MediaPlayer null until SetMediaPlayer is called.", "fix": "Added mediaElement.SetMediaPlayer(new MediaPlayer()) in all 4 page constructors (session-log.txt TURN 16-18)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MediaElement -> MediaPlayerElement conversion", "symptom": "Clean build but scenario pages threw NullReferenceException; agent had to reason 'MediaPlayerElement.MediaPlayer is null until explicitly set (unlike UWP's MediaElement)'.", "turns_or_retries": "Discovered at TURN 16 after a launch failure, then retrofitted all 4 pages (TURN 16-18).", "root_cause": "Mapping table treated MediaElement->MediaPlayerElement as a near-rename ('properties carry over with minor renames'), hiding the null-player requirement and member remap.", "how_resolved": "SetMediaPlayer + remap Source/Stop/CurrentStateChanged/ProtectionManager.", "preventable_by": "Correcting the MediaElement mapping rows in MIGRATION-PATTERNS.md to state the null-player rule and member remap up front." },
+    { "where": "App.xaml resource styles", "symptom": "Startup crash in Microsoft.UI.Xaml.dll; app exited within 10s of launch.", "turns_or_retries": "Diagnosed at lines 7694-7959 after Test-AppLaunch flagged the crash.", "root_cause": "Style BasedOn={StaticResource TitleTextBlockStyle} at Application level does not resolve at parse time -> XamlParseException (0xE0434352).", "how_resolved": "Inlined the style setters and dropped BasedOn.", "preventable_by": "Listing this XamlParseException/BasedOn cause under the 0xE0434352 row in the Diagnosing Startup Crashes table." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No provisioned PlayReady DRM stack on the build machine (Security Level 0, Has Hardware DRM False); Secure Stop scenario cannot initialize.", "workaround": "Defensive try/catch fallback in the page constructor renders a visible message instead of a blank/crashing frame; scenario graded partial (env-gated, not a migration defect)." }
+  ]
+}

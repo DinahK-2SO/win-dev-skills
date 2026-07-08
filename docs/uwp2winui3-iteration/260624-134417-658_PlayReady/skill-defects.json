@@ -1,0 +1,17 @@
+{
+  "scenario": "PlayReady",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Renaming UWP MediaElement to WinUI 3 MediaPlayerElement builds clean but throws NullReferenceException at runtime, and the UWP MediaElement members (Source, Stop(), CurrentStateChanged, ProtectionManager) do not exist on the element.",
+      "evidence": "session-log.txt TURN 16 (line 8627): 'MediaPlayerElement.MediaPlayer is null until explicitly set (unlike UWP's MediaElement). I need to call SetMediaPlayer before passing it to ViewModels'; retrofit of all 4 pages TURN 16-18.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md / SKILL.md for MediaElement, MediaPlayerElement, SetMediaPlayer, PlaybackSession, CurrentStateChanged",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md 'Controls that need element-level swaps': '| <MediaElement … /> | <MediaPlayerElement … /> | Source and transport-control properties carry over with minor renames. |' and the bare mapping row '| MediaElement | MediaPlayerElement (Microsoft.UI.Xaml.Controls) |'.",
+      "root_cause": "The mapping presents MediaElement->MediaPlayerElement as a near-rename, hiding two runtime-breaking facts: (1) MediaPlayerElement.MediaPlayer is null until SetMediaPlayer(new MediaPlayer()) is called; (2) playback members move onto MediaPlayer/PlaybackSession. The dev-agent followed the reassuring text and hit a null-ref.",
+      "proposed_fix": "Correct both MediaElement rows in MIGRATION-PATTERNS.md and add a '#mediaelement-to-mediaplayerelement' subsection under Controls giving the SetMediaPlayer rule and a member-remap table (Source->MediaSource.CreateFromUri, Stop()->Source=null, CurrentStateChanged->PlaybackSession.PlaybackStateChanged, CurrentState->PlaybackSession.PlaybackState, ProtectionManager->MediaPlayer.ProtectionManager).",
+      "generalizes": "Every UWP media/video/DRM sample uses MediaElement; the null-MediaPlayer trap and member relocation are a fixed, well-known WinUI 3 breaking change that recurs in all of them, always as a clean-build/runtime-crash."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "scenario": "PlayReady",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Scenario 4 (Secure Stop) failed to initialize and rendered a fallback instead of its controls (graded partial).",
+      "evidence": "migration-score.json feature 'Secure Stop' verdict partial; Scenario4_SecureStop.xaml.cs shows try/catch fallback; UWP Scenario 1 reports Security Level 0 / Has Hardware DRM False.",
+      "covered_clearly_at": "SKILL.md 'Defensive UI for init-heavy and device-dependent pages' (line ~200) — the dev-agent applied exactly this pattern to all 4 pages.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "This is not a slip nor a skill defect: the failure is environment-gated (no provisioned PlayReady DRM stack on this machine), and the skill's defensive-UI guidance was followed correctly, producing graceful degradation. No skill edit could make DRM hardware appear; a re-run on the same machine gets the same partial. Recorded here to confirm no skill change is planned for it."
+    },
+    {
+      "problem": "Defensive try/catch fallback was retrofitted to the scenario pages near the end of the run rather than written on first pass.",
+      "evidence": "session-log.txt TURN 16-18 (lines 8627-8746) added the try/catch after a launch failure.",
+      "covered_clearly_at": "SKILL.md 'Defensive UI for init-heavy and device-dependent pages' + MIGRATION-PATTERNS.md#silent-navigation-failures.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The guidance is already prominent and correct; the agent ultimately applied it. The reason it was late was the separate MediaElement/SetMediaPlayer defect (addressed as a skill-defect), not a gap in the defensive-UI guidance itself."
+    }
+  ]
+}

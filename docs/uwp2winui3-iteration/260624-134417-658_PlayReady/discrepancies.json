@@ -1,0 +1,18 @@
+{
+  "scenario": "PlayReady",
+  "index": 0,
+  "score": 88,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Reactive License Request", "status": "pass", "reason": "All 3 controls present (movie-path TextBox, Play, Stop) + shared PlayReady Info + Output Log; matches UWP golden.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Proactive License Request", "status": "pass", "reason": "All 5 controls (Get License, KeyId TextBox, movie-path, Play, Stop); Play/Stop disabled until license acquired.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Manage HW/SW DRM", "status": "pass", "reason": "All 5 controls (Use Hardware DRM, Use Software DRM, movie-path, Play, Stop).", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Secure Stop", "status": "partial", "reason": "Page fails to initialize and shows a defensive fallback; none of the 5 expected controls render.", "suspected_skill_gap": "Environment-gated (no provisioned PlayReady stack) — the defensive-UI fallback the skill prescribes is what made this degrade gracefully rather than crash. Not a fixable skill gap for this machine." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Secure Stop", "uwp": "Get Publisher Cert / Renew License / movie-path / Play / Stop controls (per UWP source)", "winui": "Fallback TextBlock: 'This sample could not initialize on this machine. The object does not support this interface...'", "screenshot_ref": "parity/winui3/screenshots/04_Secure_Stop.png" }
+  ],
+  "missing_features": ["Secure Stop functional controls (environment-gated)"],
+  "summary": "Migrated WinUI 3 app builds, launches, and renders 3 of 4 scenarios with full control parity. Scenario 4 (Secure Stop) is environment-gated by the absent PlayReady DRM stack and degrades gracefully via the defensive-UI fallback. The two crash-causing struggles during the build (MediaElement->MediaPlayerElement null player; App.xaml BasedOn XamlParseException) are generalizable skill improvements."
+}

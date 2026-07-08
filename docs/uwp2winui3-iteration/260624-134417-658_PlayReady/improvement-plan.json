@@ -1,0 +1,31 @@
+{
+  "scenario": "PlayReady",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Renaming UWP MediaElement to WinUI 3 MediaPlayerElement builds clean but crashes at runtime (NullReferenceException) because MediaPlayerElement.MediaPlayer is null until SetMediaPlayer is called, and playback members moved onto MediaPlayer/PlaybackSession.",
+      "evidence": "lessons.json errors_encountered + dev_agent_struggles; session-log.txt TURN 16 line 8627 ('MediaPlayerElement.MediaPlayer is null until explicitly set').",
+      "root_cause": "MIGRATION-PATTERNS.md mapping rows treated MediaElement->MediaPlayerElement as a near-rename ('properties carry over with minor renames'), which is wrong and led the agent into a runtime null-ref.",
+      "tier": 3,
+      "change": "Corrected both MediaElement mapping rows and added a '#mediaelement-to-mediaplayerelement' subsection under Controls with the SetMediaPlayer rule and a member-remap table (Source->MediaSource.CreateFromUri, Stop()->Source=null, CurrentStateChanged->PlaybackSession.PlaybackStateChanged, CurrentState->PlaybackSession.PlaybackState, ProtectionManager->MediaPlayer.ProtectionManager).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents call SetMediaPlayer and remap members on first pass; no clean-build/runtime null-ref on media pages.",
+      "falsifiable_check": "On re-run of any UWP media/DRM sample: media scenario pages render without a NullReferenceException at construction, and there is no mid-migration 'MediaPlayer is null' discovery turn. Tier 1 (script) rejected: rewriting MediaElement member access is a semantic transform no residue-grep/regex script can do safely; the mapping table is where the agent already looks."
+    },
+    {
+      "problem": "App.xaml Style with BasedOn={StaticResource TitleTextBlockStyle} (from UWP SharedContent Styles.xaml) crashes at startup with XamlParseException; the startup-crash table did not name this cause.",
+      "evidence": "lessons.json errors_encountered; session-log.txt lines 7931/7959.",
+      "root_cause": "The 0xE0434352 row in Diagnosing Startup Crashes only listed missing-package causes, so the agent spent turns attributing the XAML crash.",
+      "tier": 3,
+      "change": "Extended the 0xE0434352 row to name the XamlParseException from an unresolvable App.xaml-level Style BasedOn={StaticResource <system text style>} carried from UWP SharedContent/Styles.xaml, with the fix (inline setters / move into a theme-merging ResourceDictionary).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents recognize and pre-empt the BasedOn App.xaml startup crash instead of diagnosing it live.",
+      "falsifiable_check": "On re-run: no startup crash traced to App.xaml BasedOn; if event 1026 shows XamlParseException the agent maps it directly to this row. Tier 1 rejected: this is a runtime parse-order issue, not a static residue pattern a script can flag reliably."
+    }
+  ],
+  "deferred_to_human": [
+    "Secure Stop (Scenario 4) is environment-gated by the absent PlayReady DRM stack (Security Level 0 / Has Hardware DRM False) — a provisioned DRM host would be needed to reach full parity; not auto-fixable in the migration skill.",
+    "winapp screenshot cannot capture the WinUI 3 DirectComposition surface (blank frames); this is an eval/harness limitation, out of scope for the migration skill."
+  ]
+}

@@ -465,7 +465,7 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 |---|---|---|
 | `0x80004003` | `E_POINTER` | Static-window **init-order race** — a `Page` read `App.MainWindow` (or another static window reference) before `OnLaunched` assigned it. Keep `MainWindow`'s constructor inert and navigate after `Activate`. See [Initialization order](#windowing). |
 | `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
-| `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
+| `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. A `XamlParseException` here is usually an **`App.xaml`-level resource that can't resolve** — most often a `<Style … BasedOn="{StaticResource TitleTextBlockStyle}">` (or `BodyTextBlockStyle`, etc.) copied from a UWP sample's `SharedContent/xaml/Styles.xaml`: those system styles aren't resolvable from `Application.Resources` at parse time and kill startup. Define the style's setters inline (drop the `BasedOn`) or move it into a page/`ResourceDictionary` that merges the theme dictionaries. |
 | `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
@@ -572,13 +572,41 @@ If you do custom text rendering with DirectWrite, switch to **DWriteCore** — t
 
 | UWP | WinUI 3 / WinAppSDK |
 |-----|---------------------|
-| `MediaElement` | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) |
+| `MediaElement` | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) — **not a drop-in rename**, see [MediaElement → MediaPlayerElement](#mediaelement-to-mediaplayerelement) |
 | `MediaPlayerElement` (Windows.UI.Xaml) | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) — namespace change only |
 | `MapControl` (Windows.UI.Xaml.Controls.Maps) | `MapControl` (Microsoft.UI.Xaml.Controls) — WinAppSDK 1.5+ |
 | `CameraCaptureUI` (Windows.Media.Capture) | `CameraCaptureUI` (Microsoft.Windows.Media.Capture) — WinAppSDK 1.7+ |
 | `WebAuthenticationBroker` | `Microsoft.Security.Authentication.OAuth` — WinAppSDK 1.7+ |
 | Background acrylic via `AcrylicBrush` BackgroundSource | `DesktopAcrylicController` (Microsoft.UI.Composition.SystemBackdrops) |
 | `InkCanvas` | Not yet supported |
+
+<a id="mediaelement-to-mediaplayerelement"></a>
+### `MediaElement` → `MediaPlayerElement` (not a drop-in rename)
+
+UWP's `MediaElement` is a self-contained player: it owns playback state and exposes
+`Source`, `Stop()`, `CurrentState`/`CurrentStateChanged`, and `ProtectionManager` **directly on
+the element**. WinUI 3's `MediaPlayerElement` is only a *display surface* — the playback engine
+lives on a separate `MediaPlayer`. Just renaming the type builds cleanly but **crashes at
+runtime with a `NullReferenceException`** the moment any code touches playback, because
+`MediaPlayerElement.MediaPlayer` is **`null` until you call `SetMediaPlayer(new MediaPlayer())`**.
+This is why the crash surfaces on the scenario page, not at compile time.
+
+Apply the full remap (do this whenever you convert a `MediaElement`):
+
+- **Attach a player first:** in the page constructor (or `Loaded`), call
+  `mediaElement.SetMediaPlayer(new MediaPlayer());` before any code reads `MediaPlayer.*`.
+  Because this init can throw on capability-gated machines, wrap it per
+  [Defensive UI for init-heavy and device-dependent pages](./SKILL.md) (`SetMediaPlayer` is a
+  named trigger there).
+- **Move members off the element onto `MediaPlayer` / `PlaybackSession`:**
+
+  | UWP `MediaElement` member | WinUI 3 equivalent |
+  |---|---|
+  | `mediaElement.Source = uri` | `mediaElement.Source = MediaSource.CreateFromUri(uri)` (or set `MediaPlayer.Source`) |
+  | `mediaElement.Stop()` | `mediaElement.MediaPlayer.Source = null` (there is no `Stop()`) |
+  | `mediaElement.CurrentStateChanged` | `mediaElement.MediaPlayer.PlaybackSession.PlaybackStateChanged` |
+  | `mediaElement.CurrentState` (`MediaElementState`) | `mediaElement.MediaPlayer.PlaybackSession.PlaybackState` (`MediaPlaybackState`) |
+  | `mediaElement.ProtectionManager` | `mediaElement.MediaPlayer.ProtectionManager` |
 
 <a id="storage"></a>
 ## Storage and Settings
@@ -798,7 +826,7 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 | UWP element | WinUI 3 element | Notes |
 |---|---|---|
-| `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. |
+| `<MediaElement … />` | `<MediaPlayerElement … />` | **Not a drop-in.** The element has no built-in player: call `SetMediaPlayer(new MediaPlayer())` in code-behind and move `Source`/`Stop()`/`CurrentStateChanged`/`ProtectionManager` onto `MediaPlayer`/`PlaybackSession`, or the page throws `NullReferenceException` at runtime. See [MediaElement → MediaPlayerElement](#mediaelement-to-mediaplayerelement). |
 | `<InkCanvas … />` | _(none — defer)_ | Not supported. |
 | `<Pivot>` / `<PivotItem>` | `<TabView>` / `<TabViewItem>`, or `<controls:Pivot>` from `CommunityToolkit.WinUI.UI.Controls` | Pick based on the source's intent (top-tab vs swipe pivot). |
 | `<Hub>` / `<HubSection>` | Hand-rolled `<NavigationView>` with section grouping, or `<ScrollViewer>` with stacked sections. | No drop-in equivalent. |
