@@ -1,0 +1,37 @@
+{
+  "scenario": "OnDemandHotspot",
+  "created_at": "2026-07-08T09:34:00+08:00",
+  "uwp_capture_status": "partial: visual golden captured for scenario 1, but the UWP CoreWindow (hosted by ApplicationFrameHost) exposed no UIA subtree, so individual controls could not be actuated (all invokes returned invokeOk:false). Post-registration controls are not visible in the initial frame.",
+  "features": [
+    {
+      "id": "manage-hotspot-register",
+      "area": "Manage Hotspot",
+      "name": "Register / Unregister background tasks",
+      "description": "The scenario page shows a Description block and two buttons: 'Register tasks' (enabled) and 'Unregister tasks' (disabled until registered). Registering wires up the on-demand hotspot background tasks and reveals the hotspot property editor.",
+      "expected_behaviour": [
+        "Page renders a Description paragraph explaining the on-demand hotspot sample",
+        "'Register tasks' button is present and enabled",
+        "'Unregister tasks' button is present and initially disabled",
+        "Clicking 'Register tasks' enables 'Unregister tasks' and exposes the hotspot property controls"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Manage_Hotspot.png",
+      "weight": 2
+    },
+    {
+      "id": "manage-hotspot-properties",
+      "area": "Manage Hotspot",
+      "name": "Hotspot property editor (name, availability, cellular, battery, ssid, password)",
+      "description": "After registering, the page presents controls to edit the simulated hotspot: DisplayNameText, AvailableToggle, CellularBarsToggle + CellularBarsSlider, BatteryPercentageToggle + BatteryPercentageSlider, SsidText, PasswordText, and 'Update now' / 'Update when user opens Wi-Fi network list' buttons, plus a status area.",
+      "expected_behaviour": [
+        "Text box for hotspot display name is present",
+        "AvailableToggle, CellularBarsToggle, BatteryPercentageToggle switches are present",
+        "CellularBarsSlider and BatteryPercentageSlider are present",
+        "SsidText textbox and PasswordText passwordbox are present",
+        "'Update now' and 'Update when user opens Wi-Fi network list' buttons are present",
+        "Status text block reflects the result of update actions"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

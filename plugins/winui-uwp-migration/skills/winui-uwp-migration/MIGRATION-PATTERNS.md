@@ -698,7 +698,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
      <rescap:Capability Name="runFullTrust" />
    </Capabilities>
    ```
-   Packaged WinUI 3 desktop apps run outside the UWP AppContainer sandbox and must declare this. Keep any UWP `<Capability>` entries you actually use (e.g. `<DeviceCapability Name="webcam" />`) but add the `runFullTrust` line above no matter what.
+   Packaged WinUI 3 desktop apps run outside the UWP AppContainer sandbox and must declare this. Keep any UWP `<Capability>` entries you actually use (e.g. `<DeviceCapability Name="webcam" />`) but add the `runFullTrust` line above no matter what. **Exception:** strip `uap4:CustomCapability` and other SCCD-gated restricted capabilities (see item 6) — a sideloaded package cannot honor them and registration fails.
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
 
@@ -720,6 +720,26 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
    - **Full fidelity (only if background triggers are in scope):** add a matching `<Extension Category="windows.activatableClass.inProcessServer">` with an `<ActivatableClass ActivatableClassId="…">` entry for each task's EntryPoint.
 
    `Validate-UwpMigration.ps1` Section 5c flags this statically and FAILs before the smoke launch, since the registration failure is deterministic.
+
+6. **Remove SCCD-gated custom / restricted capabilities.** UWP SDK samples for privileged hardware or enterprise features often declare a **custom capability**:
+   ```xml
+   <Package xmlns:uap4="http://schemas.microsoft.com/appx/manifest/uap/windows10/4" IgnorableNamespaces="uap uap4 rescap">
+     …
+     <Capabilities>
+       <rescap:Capability Name="runFullTrust" />
+       <uap4:CustomCapability Name="Microsoft.onDemandHotspotControl_8wekyb3d8bbwe" />
+     </Capabilities>
+   </Package>
+   ```
+   A `uap4:CustomCapability` (and other SCCD-gated restricted capabilities) requires a **Signed Custom Capability Descriptor (SCCD)** provisioned on the machine. A **sideloaded** WinUI 3 package ships no SCCD, so the AppX registrar rejects the *entire* package at launch with:
+   ```
+   Failed to register package … 0x80073CF6
+   error 0x80070002 … failed to register the windows.capability extension
+   ```
+   Like item 5, the **build stays clean** — this only appears at `winapp run` / `dotnet run` time and otherwise silently zeroes the score (the app never launches, every scenario unreachable).
+   - **Default (recommended for foreground parity):** delete the `<uap4:CustomCapability …/>` element (and drop the now-unused `uap4` namespace declaration + `IgnorableNamespaces` token). The migrated C# still compiles; only the privileged-hardware API is unavailable, and every foreground scenario becomes reachable — parity checking exercises the foreground UI, not the gated hardware. Do **not** keep a capability just because the original UWP app "used" it (contradicting item 3's general "keep what you use" rule): capabilities that need an SCCD cannot be honored by a sideloaded package and must go.
+
+   `Validate-UwpMigration.ps1` Section 5d flags this statically and FAILs before the smoke launch, since the registration failure is deterministic.
 
 ### WUI analyzer warnings (UWP API residue)
 

@@ -1,0 +1,22 @@
+{
+  "scenario": "OnDemandHotspot",
+  "generated_at": "2026-07-08T09:34:00+08:00",
+  "summary": "The migrated WinUI 3 app builds cleanly but cannot be launched. Package registration fails, so no scenario is reachable. Every feature is a FAIL relative to the working UWP original.",
+  "discrepancies": [
+    {
+      "severity": "blocker",
+      "type": "app-does-not-launch",
+      "scenario": "Manage Hotspot",
+      "detail": "Both 'dotnet run' and 'winapp run <build-output>' fail to register the package: error 0x80073CF6 with inner 'error 0x80070002: the system failed to register the windows.capability extension ... The system cannot find the file specified.'",
+      "root_cause": "Package.appxmanifest declares <uap4:CustomCapability Name=\"Microsoft.onDemandHotspotControl_8wekyb3d8bbwe\" />. A CustomCapability requires a signed custom capability descriptor (SCCD) provisioned on the machine; the sideloaded WinUI 3 package has none, so registration of the windows.capability extension fails and the app never starts.",
+      "impact": "No UI can be captured or driven; all scenarios/controls are unverifiable and score as FAIL."
+    },
+    {
+      "severity": "info",
+      "type": "uwp-baseline-limited",
+      "scenario": "Manage Hotspot",
+      "detail": "The original UWP app launched (ok:true, windowTitle 'OnDemandHotspot C# Sample') and a visual golden was captured, but its CoreWindow exposed no UIA subtree via ApplicationFrameHost, so control-level actuation returned invokeOk:false for all 7 actions. Behavioral baseline is therefore unavailable; scoring relies on build/launch status and the visual golden.",
+      "impact": "No behavioral regression can be computed, but it is moot because the WinUI app does not launch at all."
+    }
+  ]
+}

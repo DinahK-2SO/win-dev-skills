@@ -1,0 +1,28 @@
+{
+  "scenario": "OnDemandHotspot",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "dotnet new winui / dotnet build", "evidence": "session-log.txt: scaffold + package restore + clean build (metrics.builds=true, code_changes +359 -212)" }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Section 5 manifest checks flag TargetDeviceFamily, rescap namespace, runFullTrust, and windows.backgroundTasks extensions, but do NOT flag uap4:CustomCapability / SCCD-gated restricted capabilities, which also break package registration for a sideloaded WinUI 3 app.", "suggested_tweak": "Add a 5d check that fails when the manifest declares uap4:CustomCapability (or other SCCD-gated capabilities) and tells the agent to remove it." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md > Manifest migration checklist, item 3", "wrong": "'Keep any UWP <Capability> entries you actually use' — unconditional, with no exception for custom/restricted SCCD-gated capabilities.", "correct": "Keep ordinary capabilities, but strip uap4:CustomCapability and other capabilities that require a signed custom capability descriptor (SCCD); a sideloaded WinUI 3 package has no SCCD and registration of the windows.capability extension fails with 0x80073CF6 / inner 0x80070002." }
+  ],
+  "special_apis": [
+    { "api": "uap4:CustomCapability (e.g. Microsoft.onDemandHotspotControl_8wekyb3d8bbwe)", "special_handling": "Requires an SCCD provisioned on the machine. Not available for a sideloaded WinUI 3 migration target, so it must be removed from Package.appxmanifest or the app cannot be registered/launched." }
+  ],
+  "errors_encountered": [
+    { "error": "Package registration failed: error 0x80073CF6 / inner 0x80070002 registering the windows.capability extension (both 'dotnet run' and 'winapp run').", "root_cause": "Package.appxmanifest retained the UWP sample's uap4:CustomCapability Name='Microsoft.onDemandHotspotControl_8wekyb3d8bbwe', which requires a signed custom capability descriptor (SCCD) that is absent for the sideloaded WinUI 3 package.", "fix": "Remove the uap4:CustomCapability element (and any SCCD-gated restricted capability) from the migrated manifest; the build stays clean and every foreground scenario becomes reachable." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Package.appxmanifest capability merge", "symptom": "App builds cleanly but never launches; score 0. The manifest kept uap4:CustomCapability.", "turns_or_retries": "not retried — the agent never ran the app (migration agent does not launch), so the failure was invisible during the trial; results.json runs=false.", "root_cause": "The manifest checklist told the agent to add runFullTrust and reconcile background-task extensions, but said nothing about SCCD-gated custom/restricted capabilities, and item 3 explicitly said to keep capabilities the app uses — so the agent copied uap4:CustomCapability verbatim.", "how_resolved": "not resolved in trial", "preventable_by": "A Validate-UwpMigration.ps1 check (5d) that flags uap4:CustomCapability / SCCD-gated capabilities, plus a checklist item in MIGRATION-PATTERNS.md and SKILL.md directing removal." }
+  ],
+  "missing_tooling": [
+    { "need": "Manifest validation for SCCD-gated custom/restricted capabilities.", "would_have_saved": "The entire score — the sole blocker was an unremoved uap4:CustomCapability that a manifest check would have caught before launch." }
+  ],
+  "env_issues": []
+}

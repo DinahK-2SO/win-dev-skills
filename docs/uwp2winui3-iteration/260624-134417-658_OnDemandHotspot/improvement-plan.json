@@ -1,0 +1,18 @@
+{
+  "scenario": "OnDemandHotspot",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 app builds cleanly but fails package registration (0x80073CF6 / inner 0x80070002 on the windows.capability extension) and never launches, because Package.appxmanifest kept the UWP sample's uap4:CustomCapability, which needs an SCCD absent for a sideloaded package.",
+      "evidence": "migration-score.json.winui_launch_error; discrepancies.md 'Blocker'; results.json runs=false; final Package.appxmanifest <Capabilities> retains <uap4:CustomCapability Name='Microsoft.onDemandHotspotControl_8wekyb3d8bbwe'/>.",
+      "root_cause": "The manifest checklist + validator cover Windows.Desktop, rescap, runFullTrust, and windows.backgroundTasks but never address SCCD-gated custom/restricted capabilities; item 3 even told the agent to keep capabilities the app uses, so it copied the custom capability verbatim. The failure is invisible at build time and the migration agent never launches the app.",
+      "tier": 1,
+      "change": "Added Validate-UwpMigration.ps1 Section 5d that statically FAILs when the manifest declares uap4:CustomCapability (or <CustomCapability>), explaining the 0x80073CF6/0x80070002 windows.capability registration failure and instructing removal for foreground parity. Backed by MIGRATION-PATTERNS.md checklist item 6, an item-3 carve-out, and a SKILL.md item-5 note (Tier 3) so the agent removes it proactively.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "On any UWP sample declaring a custom/SCCD-gated capability, the validator FAILs before the smoke launch and the checklist tells the agent to delete the element, so the migrated package registers and launches instead of silently scoring 0.",
+      "falsifiable_check": "On a re-run of OnDemandHotspot (or any sample with uap4:CustomCapability): Validate-UwpMigration.ps1 emits '[FAIL] ... uap4:CustomCapability', the agent removes it, and the app launches (runs=true) with foreground scenarios reachable instead of runs=false/score=0."
+    }
+  ],
+  "deferred_to_human": []
+}

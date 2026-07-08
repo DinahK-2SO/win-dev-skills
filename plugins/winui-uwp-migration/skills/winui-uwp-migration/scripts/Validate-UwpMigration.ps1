@@ -18,7 +18,7 @@ Checks (numbering matches the `# ─── N.` sections in the code):
 2. TODO[migrate-NNN] residue — every injected marker must be resolved
 3. MIGRATION-MAPPING.md integrity — .bootstrap-meta.json present, row count, labels filled, no row stuck at Status=copied
 4. MIGRATION-DEFERRED.md consistency — every defer row in mapping has a row here, and vice versa
-5. Package.appxmanifest image refs + WinAppSDK packaging (TargetDeviceFamily=Windows.Desktop, rescap, runFullTrust)
+5. Package.appxmanifest image refs + WinAppSDK packaging (TargetDeviceFamily=Windows.Desktop, rescap, runFullTrust); no orphaned windows.backgroundTasks extension; no SCCD-gated uap4:CustomCapability
 6. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
 7. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
 8. Visible-text fidelity (WARN-only) — compares each non-deferred XAML to the bootstrap's verbatim visible-text snapshot (.fidelity-snapshot.json) and WARNs about labels/captions/descriptions that vanished (regenerated/paraphrased page); never fails the gate
@@ -383,6 +383,25 @@ if (Test-Path -LiteralPath $manifestPath) {
         Write-Host "       Fix (default, foreground parity): delete the <Extension Category=`"windows.backgroundTasks`"> block(s). The C# BackgroundTaskBuilder code still compiles; only in-app registration is skipped, and every foreground scenario becomes reachable."
         Write-Host "       Fix (full fidelity): add a matching <Extension Category=`"windows.activatableClass.inProcessServer`"> ActivatableClass entry for each task."
         Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist' item 5 (background tasks)."
+        $manifestFailures++
+    }
+    # ─── 5d. Package.appxmanifest SCCD-gated custom / restricted capabilities ──
+    # UWP SDK samples often declare a <uap4:CustomCapability Name="..."/> (or another
+    # SCCD-gated restricted capability) for privileged hardware / enterprise features.
+    # A CUSTOM capability requires a Signed Custom Capability Descriptor (SCCD)
+    # provisioned on the machine. A sideloaded WinUI 3 package ships NO SCCD, so the
+    # AppX registrar fails to register the windows.capability extension:
+    #   Failed to register package ... 0x80073CF6
+    #   error 0x80070002 ... failed to register the windows.capability extension
+    # Both 'dotnet run' and 'winapp run' fail identically. The build stays CLEAN, so
+    # this only surfaces at registration time and otherwise zeroes the score
+    # (OnDemandHotspot: app never launches, every scenario unreachable → 0/100).
+    if ($manifestText -match '<uap4:CustomCapability\b' -or
+        $manifestText -match '<CustomCapability\b') {
+        Write-Host "[FAIL] Package.appxmanifest declares a uap4:CustomCapability (SCCD-gated custom capability)."
+        Write-Host "       Impact: `winapp run` / `dotnet run` fails AppX registration with 0x80073CF6 / inner 0x80070002 on the windows.capability extension — a sideloaded package has no signed custom capability descriptor (SCCD), so the app never launches (build stays clean, so nothing else catches it)."
+        Write-Host "       Fix (default, foreground parity): delete the <uap4:CustomCapability .../> element (and drop the uap4 namespace if now unused). The C# code still compiles; only the privileged-hardware API is unavailable, and every foreground scenario becomes reachable."
+        Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist' item 6 (custom / restricted capabilities)."
         $manifestFailures++
     }
     if ($manifestFailures -eq 0) {

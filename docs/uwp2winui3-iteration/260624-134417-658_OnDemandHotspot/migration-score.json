@@ -1,0 +1,34 @@
+{
+  "scenario": "OnDemandHotspot",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 2,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 2,
+  "uwp_capture_status": "partial: original UWP app launched (windowTitle 'OnDemandHotspot C# Sample') and a visual golden of scenario 1 was captured, but the CoreWindow (hosted by ApplicationFrameHost) exposed no UIA subtree, so controls could not be actuated (all 7 invokes invokeOk:false); no behavioral baseline available",
+  "winui_launchable": false,
+  "winui_launch_error": "Package registration failed: error 0x80073CF6 / inner 0x80070002 registering the windows.capability extension. Package.appxmanifest declares uap4:CustomCapability 'Microsoft.onDemandHotspotControl_8wekyb3d8bbwe' which needs a signed custom capability descriptor (SCCD) absent for the sideloaded WinUI 3 package. Both 'dotnet run' and 'winapp run' fail identically. App builds but never starts.",
+  "parity_result": "parity/winui3/capture-manifest.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Manage Hotspot - Register / Unregister background tasks",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Manage_Hotspot.png",
+      "winui_screenshot": null,
+      "note": "UWP renders the page (Description + Register/Unregister buttons). WinUI 3 app fails to launch (package registration error), so nothing is reachable. FAIL."
+    },
+    {
+      "name": "Manage Hotspot - Hotspot property editor (name/availability/cellular/battery/ssid/password/update)",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": null,
+      "note": "Post-registration controls; not reachable in the UWP golden (no UIA actuation) and completely unreachable in WinUI 3 since the app does not launch. FAIL."
+    }
+  ]
+}

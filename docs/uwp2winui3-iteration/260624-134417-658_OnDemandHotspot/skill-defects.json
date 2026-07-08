@@ -1,0 +1,17 @@
+{
+  "scenario": "OnDemandHotspot",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 app builds cleanly but fails package registration (0x80073CF6 / inner 0x80070002 on the windows.capability extension) and never launches, because Package.appxmanifest kept the UWP sample's uap4:CustomCapability 'Microsoft.onDemandHotspotControl_8wekyb3d8bbwe', which needs an SCCD absent for a sideloaded package.",
+      "evidence": "migration-score.json winui_launch_error; discrepancies.md 'Blocker'; results.json runs=false; final Package.appxmanifest <Capabilities> retains <uap4:CustomCapability .../>.",
+      "skill_search": "grep -i 'CustomCapability|custom capability|SCCD|restricted' across skills/winui-uwp-migration (SKILL.md, MIGRATION-PATTERNS.md, scripts/*.ps1).",
+      "skill_state": "absent",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md item 3: 'Keep any UWP <Capability> entries you actually use (e.g. <DeviceCapability Name=\"webcam\" />) but add the runFullTrust line above no matter what.' — no exception for SCCD-gated custom/restricted capabilities.",
+      "root_cause": "The manifest migration checklist and validator cover Windows.Desktop target, rescap namespace, runFullTrust, and windows.backgroundTasks extensions, but never address uap4:CustomCapability or other SCCD-gated capabilities. The agent copied the capability verbatim (item 3 even told it to keep capabilities), and the failure only surfaces at registration time, which the migration agent never reaches.",
+      "proposed_fix": "Add Validate-UwpMigration.ps1 check 5d that FAILs when the manifest declares uap4:CustomCapability (or other SCCD-gated restricted capabilities) and instructs removal; add MIGRATION-PATTERNS.md manifest-checklist item 6 documenting the 0x80073CF6/0x80070002 windows.capability failure and the remove-the-capability fix; extend SKILL.md pre-flight item 5 to name SCCD custom capabilities.",
+      "generalizes": "UWP SDK samples frequently declare uap4:CustomCapability / restricted SCCD-gated capabilities for privileged hardware and enterprise features. Every such sample migrated to a sideloaded WinUI 3 package hits the identical windows.capability registration failure (build clean, launch fatal) until the capability is stripped — the same invisible-at-build, fatal-at-registration class as the existing background-task checklist item."
+    }
+  ]
+}

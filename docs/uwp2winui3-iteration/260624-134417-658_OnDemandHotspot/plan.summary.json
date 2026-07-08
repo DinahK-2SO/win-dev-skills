@@ -1,0 +1,16 @@
+{
+  "scenario": "OnDemandHotspot",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Flag SCCD-gated uap4:CustomCapability in Validate-UwpMigration.ps1 (Section 5d): these fail sideloaded AppX registration with 0x80073CF6/0x80070002 on the windows.capability extension even on a clean build, so catch them statically before the smoke launch.",
+    "Document custom/restricted-capability removal as manifest checklist item 6 in MIGRATION-PATTERNS.md and add a carve-out to item 3's 'keep capabilities you use' rule, since a sideloaded WinUI 3 package cannot honor SCCD-gated capabilities.",
+    "Extend SKILL.md manifest pre-flight (item 5) to call out 'no SCCD-gated uap4:CustomCapability' alongside the existing background-task pitfall."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": []
+}
