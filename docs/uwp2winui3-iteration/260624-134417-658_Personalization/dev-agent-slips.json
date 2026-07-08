@@ -1,0 +1,14 @@
+{
+  "scenario": "Personalization",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "App.xaml.cs was corrupted by an in-place edit that duplicated the entire App class body, producing CS0102/CS0111 'App already contains a definition' errors.",
+      "evidence": "session-log.txt turn 34 view shows two identical 'public partial class App' blocks; turn 35 the agent notes 'The edit accidentally doubled the class' and removes the duplicate; turn 36 build succeeds.",
+      "covered_clearly_at": "SKILL.md line 181 (Fidelity): the 'never overwrite a whole bootstrap-copied file' / edit-in-place rule; and the general expectation that a class is defined once. This was a mechanical edit malfunction, not a knowledge gap — the agent self-diagnosed and fixed it in one turn.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable model on re-run would not reliably reproduce this specific botched edit; it self-corrected within one turn without any missing guidance. Adding 'do not duplicate your class' prose would be noise."
+    }
+  ]
+}

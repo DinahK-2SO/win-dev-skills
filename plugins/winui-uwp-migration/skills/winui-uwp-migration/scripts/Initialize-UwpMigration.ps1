@@ -12,7 +12,8 @@ build cleanliness, and runtime smoke.
 Steps:
 1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
-3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
+3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml,
+   then reconcile the sample's app root namespace (e.g. SDKTemplate) → the scaffold project namespace
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
 4b/4c. Per-file triage against unsupported-api-inventory.json + inline TODO injection
        (`// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — anchor-only, never an API name)
@@ -130,6 +131,59 @@ foreach ($f in $nsFiles) {
     }
 }
 Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+
+# ─── 3a. App root namespace reconciliation (SDKTemplate -> project namespace) ──
+# UWP samples (esp. the Windows-universal-samples family) ship their code under a
+# fixed root namespace — almost always `SDKTemplate` — while `dotnet new winui -n X`
+# scaffolds App/MainWindow under namespace `X`. Left unreconciled, the copied pages
+# stay in the old namespace, so App can't resolve them and, worse, XAML `x:Class` /
+# `xmlns:local="using:<old>"` point at a namespace the compiler can't find — yielding
+# misleading XamlCompiler `WMC0909 Cannot resolve DataType` / CS0246 errors that look
+# like control problems but are pure namespace drift. Do this mechanically here so the
+# agent never has to chase it file-by-file.
+$targetNs = $null
+$targetCsproj = Get-ChildItem -Path $Target -Filter '*.csproj' -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch $excludePattern } | Select-Object -First 1
+if ($targetCsproj) {
+    $csprojText = [System.IO.File]::ReadAllText($targetCsproj.FullName)
+    $m = [regex]::Match($csprojText, '<RootNamespace>\s*([^<\s]+)\s*</RootNamespace>')
+    if ($m.Success) { $targetNs = $m.Groups[1].Value }
+    if (-not $targetNs) { $targetNs = [System.IO.Path]::GetFileNameWithoutExtension($targetCsproj.Name) }
+}
+$rootNsChanged = 0
+if ($targetNs) {
+    # Detect the dominant base namespace among the COPIED source .cs files only.
+    $baseCounts = @{}
+    foreach ($rel in $copied) {
+        if (-not $rel.ToLowerInvariant().EndsWith('.cs')) { continue }
+        $full = Join-Path $Target $rel
+        if (-not (Test-Path -LiteralPath $full)) { continue }
+        $txt = [System.IO.File]::ReadAllText($full)
+        foreach ($nm in [regex]::Matches($txt, '(?m)^\s*namespace\s+([A-Za-z_][A-Za-z0-9_]*)')) {
+            $b = $nm.Groups[1].Value
+            if (-not $baseCounts.ContainsKey($b)) { $baseCounts[$b] = 0 }
+            $baseCounts[$b]++
+        }
+    }
+    $srcNs = ($baseCounts.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 1).Key
+    if ($srcNs -and $srcNs -ne $targetNs) {
+        # Whole-word rewrite of the base namespace token only. Keeps any `.SubNamespace`
+        # suffix intact and covers `namespace X`, `using X;`, `x:Class="X.Page"`,
+        # `xmlns:local="using:X"`, and `typeof(X.Thing)` uniformly across .cs and .xaml.
+        $reNs = '\b' + [regex]::Escape($srcNs) + '\b'
+        foreach ($f in $nsFiles) {
+            $orig = [System.IO.File]::ReadAllText($f.FullName)
+            $new = [regex]::Replace($orig, $reNs, $targetNs)
+            if ($new -ne $orig) {
+                [System.IO.File]::WriteAllText($f.FullName, $new)
+                $rootNsChanged++
+            }
+        }
+        Write-Host "    Reconciled root namespace $srcNs -> $targetNs in $rootNsChanged .cs/.xaml file(s)"
+    } else {
+        Write-Host "    Root namespace already matches project ($targetNs) — no reconciliation needed"
+    }
+}
 
 # ─── 3b. Visible-text fidelity snapshot ────────────────────────────────────────
 # Capture the user-visible/static text present in each copied XAML *now*, while it
@@ -506,6 +560,7 @@ Write-Host ""
 Write-Host "=== BOOTSTRAP COMPLETE ==="
 Write-Host "Source files copied   : $($copied.Count)"
 Write-Host "Namespace rewrites    : $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+Write-Host "Root namespace rewrites: $rootNsChanged .cs/.xaml file(s) ($srcNs -> $targetNs)"
 Write-Host "Neutralized classes   : $($neutralizedFiles.Count) file(s)"
 Write-Host "Triage breakdown      :"
 foreach ($lbl in $labelOrder) {

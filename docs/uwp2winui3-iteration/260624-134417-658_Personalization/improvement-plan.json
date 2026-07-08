@@ -1,0 +1,30 @@
+{
+  "scenario": "Personalization",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap does not reconcile the UWP sample's root namespace (SDKTemplate) to the scaffold project namespace, forcing manual namespace/x:Class/xmlns:local edits across every copied file.",
+      "evidence": "skill-defects.json item 1; session-log.txt bootstrap 'Rewrote ... in 2 of 8 files' + manual rewrites at log lines 1409-1432.",
+      "root_cause": "Initialize-UwpMigration.ps1 only rewrites Windows.UI.Xaml->Microsoft.UI.Xaml; no root-namespace reconciliation exists.",
+      "tier": 1,
+      "change": "Added step 3a to Initialize-UwpMigration.ps1: read target RootNamespace, detect dominant source base namespace, whole-word-rewrite it to the project namespace across all copied .cs/.xaml (namespace, using, x:Class, xmlns:local, typeof); report count in summary and .SYNOPSIS. Only rewrites when a single dominant source namespace differs from the target, so the scaffold's own App/MainWindow are untouched.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Copied sample pages compile under the project namespace immediately; no manual SDKTemplate reconciliation; no WMC0909/CS0246 caused by namespace drift.",
+      "falsifiable_check": "On re-run the BOOTSTRAP COMPLETE block prints 'Root namespace rewrites: N (SDKTemplate -> <Project>)' with N>0, and no file still contains 'namespace SDKTemplate' or 'using:SDKTemplate' after bootstrap."
+    },
+    {
+      "problem": "WMC0909/WMC1509/type-not-found XAML errors are frequently a cascade from an unrelated C# compile error, but the skill's only note points the agent at stale XAML namespaces.",
+      "evidence": "skill-coverage-gaps.json item 1; session-log.txt failed build lines 1908-1913 then clean build line 2074 after fixing only the C# duplicate class.",
+      "root_cause": "MarkupCompilePass2 needs the project's own assembly to resolve local: types; any C# compile failure emits misleading XAML type-resolution errors.",
+      "tier": 3,
+      "change": "Added a 'WMC0909 ... check for a C# compile error FIRST' subsection to MIGRATION-PATTERNS.md 'Common build errors': fix all CSxxxx errors and rebuild before editing XAML; only chase stale namespace prefixes if the WMC error survives a clean C# build.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent stops chasing XAML symptoms and fixes the underlying C# error first, resolving both in fewer turns.",
+      "falsifiable_check": "On a future trial that hits a C# error alongside WMC0909, the agent fixes the C# error before any x:DataType/xmlns:local edit (visible in build-events.jsonl)."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-side only: WinUI 3 DirectComposition client area screenshotted blank in the non-interactive scoring session (winapp/PrintWindow/CopyFromScreen limitation). Out of scope for the migration skill; note for the capture harness."
+  ]
+}

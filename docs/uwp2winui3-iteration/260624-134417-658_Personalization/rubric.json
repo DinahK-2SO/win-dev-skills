@@ -1,0 +1,20 @@
+{
+  "scenario": "Personalization",
+  "featureName": "Lock screen personalization C# sample",
+  "source": "uwp-samples-standalone/Samples/Personalization/cs",
+  "features": [
+    {
+      "number": 1,
+      "title": "Pick and set lock screen image",
+      "pageClass": "SetLockScreenImage",
+      "controls": [
+        { "name": "PickAndSetButton", "type": "Button", "label": "Pick and set lock screen image", "required": true },
+        { "name": "LockScreenImage", "type": "Image", "required": true }
+      ],
+      "actions": [
+        { "control": "PickAndSetButton", "expected": "Opens a file open picker; selecting an image sets it as the lock screen and shows the image + file name." }
+      ],
+      "outputs": [ "InputTextBlock1", "StatusBorder", "StatusBlock" ]
+    }
+  ]
+}

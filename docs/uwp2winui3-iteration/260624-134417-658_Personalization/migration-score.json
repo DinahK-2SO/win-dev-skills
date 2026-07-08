@@ -1,0 +1,28 @@
+{
+  "scenario": "Personalization",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 1,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "uwp_window_title": "Lock Screen Personalization C++ Sample",
+  "uwp_pid": 7352,
+  "winui_launchable": true,
+  "winui_pid": 44696,
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "capture_note": "WinUI 3 window client area screenshotted blank in this non-interactive desktop session (DirectComposition surface not captured by winapp/PrintWindow; independent CopyFromScreen failed with 'handle is invalid'). This is an environment capture limitation, not a blank/broken app: the UIA tree contains all controls with correct on-screen bounds and the primary button actually opened the Windows file picker (+74 filename tokens). The UWP golden captured fully.",
+  "features": [
+    {
+      "name": "Pick and set lock screen image",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Pick_and_set_lock_screen_image.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Pick_and_set_lock_screen_image.png",
+      "note": "Structural coverage 2/2 (InputTextBlock1, PickAndSetButton present in UIA tree with correct on-screen layout; description text matches UWP verbatim). Behaviorally alive: clicking the button opened the Windows file open picker (+74 filename tokens), matching the UWP LockScreen picker flow. In the UWP golden the invoke registered no token delta (uwp_responded=false) because the picker opened without a detectable text change, but the WinUI app demonstrably reproduces the same action with a stronger signal, so there is no behavioral regression. The blank WinUI screenshot is an environment capture artifact (see capture_note), not a defect."
+    }
+  ]
+}

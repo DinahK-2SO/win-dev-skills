@@ -1,0 +1,15 @@
+{
+  "scenario": "Personalization",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "XamlCompiler type-resolution errors (WMC0909 'Cannot resolve DataType', WMC1111, WMC1509 'No LocalAssembly parameter given during MarkupCompilePass2', XLS0414/MC3074 'type not found') are frequently a CASCADE from an unrelated C# compile error in the same project — but the skill's only guidance sends the agent hunting for stale UWP namespace prefixes in the XAML, which is a wild goose chase while a CSxxxx error is present.",
+      "evidence": "session-log.txt failed build (lines 1908-1913): CS0102/CS0111 duplicate App members AND WMC0909/WMC1111/WMC1509 appeared together; after fixing ONLY the duplicate App class (turn 35) the next build succeeded (turn 36, line 2074) with no XAML edit — proving the WMC errors were secondary.",
+      "covered_at": "MIGRATION-PATTERNS.md line 810: 'If the build emits XLS0414/MC3074 \"type was not found\", look for stale UWP namespace prefixes in the XAML.'",
+      "why_missed": "under-emphasized / ambiguous — the existing sentence names the symptom (type-not-found) but attributes it solely to stale XAML namespaces, and never mentions the very common case where the true root cause is a C# compile error that starves MarkupCompilePass2 of a local assembly.",
+      "proposed_improvement": "Add a dedicated 'Common build errors' subsection stating that WMC0909/WMC1509/type-not-found errors are often a cascade from CSxxxx errors: fix all C# errors first and rebuild before editing any XAML; only chase stale namespace prefixes if the WMC error survives a clean C# build.",
+      "generalizes": "The XAML markup compiler needs the project's own assembly to resolve local: types; ANY C# compile failure in the code-behind or a helper class produces these misleading WMC/type-not-found errors. This recurs across every migration that hits a transient C# error while XAML references project-local types (x:DataType, x:Bind, converters)."
+    }
+  ]
+}

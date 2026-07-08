@@ -1,6 +1,6 @@
 # UWP → WinUI 3 Replacement Patterns
 
-Reference for API replacements and patterns that the `Initialize-UwpMigration.ps1` bootstrap doesn't (and can't) handle automatically — the script only does the bulk `Windows.UI.Xaml → Microsoft.UI.Xaml` namespace rewrite. Everything below requires code-level adaptation: dialog shape changes, threading model, windowing, lifecycle, resources, controls, and storage. Use this file when fixing build errors or runtime issues during Step 4.
+Reference for API replacements and patterns that the `Initialize-UwpMigration.ps1` bootstrap doesn't (and can't) handle automatically — the script does the bulk `Windows.UI.Xaml → Microsoft.UI.Xaml` namespace rewrite **and** reconciles the sample's app root namespace (e.g. `SDKTemplate`) to the scaffold's project namespace. Everything below requires code-level adaptation: dialog shape changes, threading model, windowing, lifecycle, resources, controls, and storage. Use this file when fixing build errors or runtime issues during Step 4.
 
 ## Common build errors after the namespace rewrite
 
@@ -26,6 +26,17 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 ```
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
+
+### XamlCompiler `WMC0909 Cannot resolve DataType` / `WMC1509` / "type not found" — check for a C# compile error FIRST
+
+Before hunting through your XAML, look higher in the **same** build output for any `CSxxxx` C# error (e.g. `CS0102`/`CS0111` duplicate members, `CS0246` missing type, `CS0234`). XAML type-resolution failures — `WMC0909 Cannot resolve DataType`, `WMC1111`, `WMC1509 No LocalAssembly parameter given during MarkupCompilePass2`, or `XLS0414`/`MC3074` "type was not found" for a `local:` prefix — are **very often a cascade**: when the project's own C# fails to compile, `MarkupCompilePass2` has no local assembly to bind against, so it reports every project-local type (your `x:DataType`, `x:Bind` targets, converters) as unresolvable. These XAML errors are then **symptoms, not the root cause**.
+
+Diagnose in this order:
+
+1. **Fix all `CSxxxx` errors first**, then rebuild. The `WMC`/type-not-found errors usually vanish with no XAML edit at all.
+2. Only if the `WMC` error persists on an otherwise clean C# build is it a real XAML problem — then check for a stale UWP namespace prefix or a `xmlns:local="using:<old-namespace>"` that still points at the pre-reconciliation namespace (see [XAML namespace mapping](#xaml-namespace-mapping-recap)).
+
+Do **not** start rewriting `x:DataType`/`x:Bind`/`xmlns:local` while C# errors are still in the build — you will chase a symptom and risk corrupting correct XAML.
 
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 

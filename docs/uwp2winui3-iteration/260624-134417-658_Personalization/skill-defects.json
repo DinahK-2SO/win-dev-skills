@@ -1,0 +1,17 @@
+{
+  "scenario": "Personalization",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The bootstrap leaves the UWP sample's app root namespace (SDKTemplate) unchanged, so every copied .cs/.xaml keeps 'namespace SDKTemplate', 'x:Class=\"SDKTemplate.*\"', and 'xmlns:local=\"using:SDKTemplate\"', while the scaffold's App/MainWindow live in the project namespace (Personalization). The dev-agent had to hand-reconcile these across every file.",
+      "evidence": "session-log.txt: bootstrap reports 'Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in 2 of 8 files' only (turn 2); 'namespace SDKTemplate' at log lines 489,530,656,744,898; x:Class=\"SDKTemplate.MainPage\" (898) and xmlns:local=\"using:SDKTemplate\" (901); manual rewrite edits at log lines 1409-1432.",
+      "skill_search": "grepped SKILL.md + MIGRATION-PATTERNS.md + Initialize-UwpMigration.ps1 for 'SDKTemplate', 'RootNamespace', 'x:Class', 'xmlns:local' — the only namespace handling is the Windows.UI.Xaml->Microsoft.UI.Xaml rewrite (script line 126); no root-namespace reconciliation anywhere.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 only performs the Windows.UI.Xaml->Microsoft.UI.Xaml rewrite and never reconciles the app root namespace to the scaffold project namespace.",
+      "proposed_fix": "Extend Initialize-UwpMigration.ps1 (new step 3a): read the target project's RootNamespace, detect the dominant base namespace among copied .cs files, and if it differs, whole-word-rewrite that token to the project namespace across all copied .cs/.xaml (covers namespace decls, using, x:Class, xmlns:local, typeof). Report the count in the BOOTSTRAP COMPLETE block.",
+      "generalizes": "Every UWP Windows-universal-sample (the dominant migration input) ships under the fixed 'SDKTemplate' root namespace, whereas 'dotnet new winui -n X' always scaffolds under 'X'. Reconciling them is a mechanical, every-scenario step; missing any one file yields WMC0909 'Cannot resolve DataType'/CS0246 errors."
+    }
+  ]
+}

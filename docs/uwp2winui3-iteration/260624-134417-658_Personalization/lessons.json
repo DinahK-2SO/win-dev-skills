@@ -1,0 +1,30 @@
+{
+  "scenario": "Personalization",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Turn 2: bootstrap copied 3 source files, preserved UWP .csproj at .uwp-source/, seeded MIGRATION-MAPPING.md, triaged files (2 migrate-as-is, 1 migrate-with-adaptation). Test-Path check returned True (turn 3)." },
+    { "tool": "Get-MigrationPattern.ps1 -Anchor pickers", "evidence": "Turn ~ (log line 1194): agent fetched only the pickers pattern instead of loading the whole MIGRATION-PATTERNS.md." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Log lines 2152/2200: [PASS] dotnet build succeeded (28 warnings, 0 WUI analyzer warnings)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Rewrites only Windows.UI.Xaml -> Microsoft.UI.Xaml. It does NOT reconcile the sample's app root namespace (SDKTemplate) to the scaffold's project namespace (Personalization), leaving the agent to hand-edit namespace/x:Class/xmlns:local across every copied file.", "suggested_tweak": "Detect the dominant source base namespace and rewrite it to the target project's RootNamespace across all copied .cs/.xaml (namespace decls, using, x:Class, xmlns:local)." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.System.UserProfile.LockScreen.SetImageFileAsync", "special_handling": "Migrated as-is; LockScreen personalization API works unchanged under WinUI 3. The primary button opened the Windows file picker successfully (parity: +74 filename tokens)." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0102/CS0111: type 'App' already contains a definition for 'MainWindow'/'App'/'OnLaunched' (App.xaml.cs, build after turn 29)", "root_cause": "An in-place edit accidentally duplicated the entire App class body in App.xaml.cs (two identical partial class App blocks).", "fix": "Turn 35 edit removed the duplicated block, leaving a single App class; next build succeeded (turn 36)." },
+    { "error": "XamlCompiler WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 + WMC1509 'No LocalAssembly parameter given during MarkupCompilePass2' (MainPage.xaml, same failed build)", "root_cause": "Cascade from the C# compile errors above: because the project's own C# failed to compile, MarkupCompilePass2 had no local assembly, so every project-local type (x:DataType local:Scenario) reported as unresolvable. Not an actual XAML/namespace defect.", "fix": "Fixing only the duplicate App class made the WMC errors disappear on the next build with no XAML edit." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "App.xaml.cs after turn 29", "symptom": "Build failed with 6 errors: CS0102/CS0111 duplicate members + WMC0909/WMC1111/WMC1509 XAML type-resolution errors.", "turns_or_retries": "~turns 29-36 (one failed build, diagnosis, one fix, rebuild)", "root_cause": "A botched in-place edit doubled the App class; the XAML WMC errors were a misleading cascade from that C# failure.", "how_resolved": "Agent viewed App.xaml.cs (turn 34), recognized the accidental duplication (turn 35), removed the extra block, rebuilt clean (turn 36).", "preventable_by": "Diagnostic guidance that WMC0909/WMC1509/type-not-found XAML errors are frequently secondary to C# compile errors in the same project — fix all CSxxxx errors first, then rebuild before touching XAML." },
+    { "where": "SampleConfiguration.cs / MainPage.xaml / MainPage.xaml.cs / SetLockScreenImage.xaml", "symptom": "Agent had to manually change 'namespace SDKTemplate' -> 'namespace Personalization', x:Class prefix, and xmlns:local across multiple files.", "turns_or_retries": "spread across turns ~ (log 1409-1432)", "root_cause": "The bootstrap does not reconcile the sample's SDKTemplate root namespace to the scaffold project namespace; every UWP Windows-universal-sample ships as SDKTemplate.", "how_resolved": "Agent hand-edited each file's namespace and XAML prefixes.", "preventable_by": "Bootstrap auto-reconciling the source root namespace to the scaffold's RootNamespace across all copied .cs/.xaml." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 window client area screenshotted blank white in the non-interactive scoring session (DirectComposition surface not grabbed by winapp/PrintWindow; CopyFromScreen failed 'handle is invalid').", "workaround": "None needed for migration — this is an eval-side capture artifact. UIA tree + successful picker invocation confirmed the app renders and functions." }
+  ]
+}

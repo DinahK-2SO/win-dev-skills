@@ -1,0 +1,16 @@
+{
+  "scenario": "Personalization",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: auto-reconcile the sample's root namespace (e.g. SDKTemplate) to the scaffold project namespace across all copied .cs/.xaml (namespace, using, x:Class, xmlns:local) so pages compile without manual namespace fixes — recurs in every Windows-universal-sample migration.",
+    "MIGRATION-PATTERNS.md: document that WMC0909/WMC1509/type-not-found XAML errors are often a cascade from a C# compile error — fix all CSxxxx errors and rebuild before editing XAML, avoiding wasted namespace-hunting."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Eval-side WinUI 3 DirectComposition blank-screenshot capture limitation (winapp/PrintWindow) — not a migration-skill concern."
+  ]
+}

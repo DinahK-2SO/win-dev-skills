@@ -1,0 +1,15 @@
+{
+  "scenario": "Personalization",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Pick and set lock screen image", "status": "pass", "reason": "Structural coverage 2/2 (InputTextBlock1, PickAndSetButton present in UIA tree with correct on-screen layout; description text matches UWP verbatim). Behaviorally alive: clicking the button opened the Windows file open picker (+74 filename tokens), matching the UWP LockScreen picker flow.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Pick and set lock screen image", "uwp": "Full window captured", "winui": "Client area screenshotted blank white", "screenshot_ref": "parity/winui3/screenshots/01_Pick_and_set_lock_screen_image.png (eval-side DirectComposition capture artifact, not a migration defect — UIA tree + live picker confirm rendering)" }
+  ],
+  "missing_features": [],
+  "summary": "Perfect parity (100/100). No functional or structural discrepancies. The only observation is an eval-side screenshot-capture limitation. Improvement evidence therefore comes from the dev-agent's build struggles: a misleading WMC0909 XAML-error cascade from a C# compile error, and manual SDKTemplate->project namespace reconciliation the bootstrap does not automate."
+}
