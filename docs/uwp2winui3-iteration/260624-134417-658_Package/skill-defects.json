@@ -1,0 +1,17 @@
+{
+  "scenario": "Package",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Validate-UwpMigration.ps1 emits a false '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency' on every migration that defers nothing, even when everything is correct.",
+      "evidence": "session-log.txt Turn 31 (line 2245) and Turn 33 (line 2277): the WARN appears in both validator runs; the run still reaches 'Validate-UwpMigration: PASS'. MIGRATION-DEFERRED.md contains only the seeded '| (none) | — |' placeholder.",
+      "skill_search": "Grepped Validate-UwpMigration.ps1 and Initialize-UwpMigration.ps1 for 'DEFERRED', 'No items deferred', '(none)'.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Validate-UwpMigration.ps1 (~line 268): if ($deferText -notmatch 'No items deferred') { Write-Host \"[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency\" } else { Write-Host \"[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes 'No items deferred.'\" }",
+      "root_cause": "The validator's no-defer PASS path keys off the literal sentinel 'No items deferred', but Initialize-UwpMigration.ps1 (~line 480) seeds the empty state as a '| (none) | — |' table row and never writes that phrase. The two scripts are out of sync, so the PASS branch is unreachable and the WARN always fires when nothing is deferred.",
+      "proposed_fix": "In Validate-UwpMigration.ps1 §4 no-defer branch, decide PASS/WARN structurally: count real DEFERRED table data rows, excluding the header/separator and the seeded '| (none) |' placeholder. PASS when zero real rows; WARN only when the DEFERRED file lists actual files while the mapping has no defer rows (the genuine inconsistency).",
+      "generalizes": "Every UWP→WinUI 3 migration where no file touches an unsupported API defers nothing — a very common case across scenarios. Any such run currently gets a misleading WARN that can send the agent chasing a non-existent problem. Aligning the validator with the bootstrap's actual seed removes the false signal for all of them."
+    }
+  ]
+}

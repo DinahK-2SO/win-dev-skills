@@ -1,0 +1,31 @@
+{
+  "scenario": "Package",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Turn 1-14: bootstrap scaffolded the WinUI project, seeded MIGRATION-MAPPING.md (8 rows) + MIGRATION-DEFERRED.md, and injected the workflow the agent followed to a first-try clean build (Turn 30: 'Build succeeded in 18.5s')." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Turns 31/33: caught the one real workflow omission (mapping rows left at Status=copied) and, after the agent flipped them to done, reported 'Validate-UwpMigration: PASS' including a smoke launch." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1", "problem": "Emits a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency' on a fully-correct migration that defers nothing.", "evidence": "Turn 31 and Turn 33 validator output both show the WARN even after the run reaches 'Validate-UwpMigration: PASS'. The DEFERRED file only contains the seeded '| (none) | — |' placeholder." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Its 'no defer rows' branch recognizes only the literal sentinel phrase 'No items deferred', which neither Initialize-UwpMigration.ps1 nor the skill ever writes (the seed uses a '| (none) | — |' placeholder row). The PASS path is therefore dead and the WARN path always fires when nothing is deferred.", "suggested_tweak": "Detect the no-defer state structurally: PASS when the DEFERRED table has no real data rows (ignoring header/separator and the seeded '(none)' placeholder)." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "Validate-UwpMigration.ps1 §4 (line ~268)", "wrong": "Checks `if ($deferText -notmatch 'No items deferred')` to decide the no-defer PASS.", "correct": "Initialize-UwpMigration.ps1 seeds `| (none) | — |` (line ~480), never the phrase 'No items deferred'. The validator must key off the seeded placeholder / absence of real rows." }
+  ],
+  "special_apis": [
+    { "api": "Windows.ApplicationModel.Package.Current", "special_handling": "Works unchanged in a packaged WinUI 3 desktop app; the WinUI template is MSIX-packaged with identity, so Package.Current returns the WinUI package's own identity/dependencies (a legitimate superset/different framework deps vs the UWP original — not a regression)." }
+  ],
+  "errors_encountered": [
+    { "error": "Validate-UwpMigration [FAIL] — 8 rows still Status=copied", "root_cause": "Agent migrated the files but had not flipped the MIGRATION-MAPPING.md Status column from 'copied' to 'done'.", "fix": "Turn 32: bulk-edited the 8 rows copied→done; re-run passed (Turn 33)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turn 31 validator run", "symptom": "One [FAIL] (rows at Status=copied) plus a persistent [WARN] about MIGRATION-DEFERRED.md consistency.", "turns_or_retries": "1 extra edit+revalidate cycle (Turns 32-33)", "root_cause": "The [FAIL] was a real workflow step the agent missed; the [WARN] is a false positive baked into the validator (seed/validator sentinel mismatch) that no agent action can clear.", "how_resolved": "Agent flipped Status to done; the [WARN] remained but the gate still reached PASS.", "preventable_by": "Fix Validate-UwpMigration.ps1 so the no-defer case reports PASS instead of a misleading WARN, so agents are not sent chasing a non-existent consistency problem." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "UWP golden captured in dark theme; migrated WinUI 3 rendered light theme (cosmetic only, per score notes).", "workaround": "None needed — the UWP source set no RequestedTheme, so the difference is a capture-environment system default, not a migration defect. Forcing a theme would be wrong when the source didn't request one." }
+  ]
+}

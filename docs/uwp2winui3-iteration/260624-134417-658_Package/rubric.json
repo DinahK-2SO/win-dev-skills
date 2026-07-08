@@ -1,0 +1,24 @@
+{
+  "feature": "Package",
+  "uwp_ground_truth": { "pid": 4888, "windowTitle": "PackageSample C# sample" },
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Identity",
+      "action": { "control": "GetPackage", "label": "Get Package" },
+      "expected_output": "Package identity fields (Name, Version, Architecture, ResourceId, Publisher, PublisherId, FullName, FamilyName, IsFramework, ...)"
+    },
+    {
+      "number": 2,
+      "title": "Installed Location",
+      "action": { "control": "GetInstalledLocation", "label": "Get Installed Location" },
+      "expected_output": "Installed Location: <package AppX install path>"
+    },
+    {
+      "number": 3,
+      "title": "Dependencies",
+      "action": { "control": "GetDependencies", "label": "Get Dependencies" },
+      "expected_output": "Count: N and each dependency full name (values naturally differ per package)"
+    }
+  ]
+}

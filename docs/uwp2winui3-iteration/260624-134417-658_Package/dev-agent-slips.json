@@ -1,0 +1,21 @@
+{
+  "scenario": "Package",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Validator [FAIL]: 8 MIGRATION-MAPPING.md rows left at Status=copied after the files were migrated.",
+      "evidence": "session-log.txt Turn 31 (lines 2236-2244) [FAIL]; Turn 32 (line 2262) the agent bulk-flipped copied→done; Turn 33 PASS.",
+      "covered_clearly_at": "SKILL.md line 90: 'Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.' and the mapping header 'only refine the Triage label and flip the Status.'",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill states the Status-flip step prominently and the validator already catches it deterministically; the agent self-corrected in one cycle. A re-run would flip Status without any skill edit."
+    },
+    {
+      "problem": "Theme mismatch: UWP golden rendered dark, migrated WinUI 3 rendered light.",
+      "evidence": "score notes discrepancies.json (type 'theme', severity 'cosmetic'); UWP source set no RequestedTheme.",
+      "covered_clearly_at": "N/A — environment/capture default, not a migration action. The UWP source requested no theme, so there is nothing for the migration to preserve.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Cosmetic, driven by the capture host's system theme, not by any migration choice. Forcing a RequestedTheme the source never set would be incorrect. No skill change is warranted."
+    }
+  ]
+}

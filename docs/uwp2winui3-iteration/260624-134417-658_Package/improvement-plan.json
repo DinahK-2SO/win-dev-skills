@@ -1,0 +1,20 @@
+{
+  "scenario": "Package",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Validate-UwpMigration.ps1 emits a false '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency' on every correct migration that defers nothing.",
+      "evidence": "session-log.txt Turn 31 (line 2245) and Turn 33 (line 2277): WARN present in both validator runs despite an overall PASS; DEFERRED file holds only the seeded '| (none) | — |' placeholder.",
+      "root_cause": "The validator's no-defer PASS branch keyed off the literal phrase 'No items deferred', which Initialize-UwpMigration.ps1 never writes (it seeds a '| (none) | — |' table row). The two scripts were out of sync, making the PASS branch dead and the WARN branch always fire when nothing is deferred.",
+      "tier": 1,
+      "change": "Rewrote Validate-UwpMigration.ps1 §4 no-defer branch to classify structurally: count real DEFERRED table data rows (excluding header/separator and the seeded '| (none) |' placeholder). PASS when zero real rows; WARN only when the DEFERRED file lists actual files while the mapping has no defer rows.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Defer-nothing migrations report '[PASS] No defer rows; MIGRATION-DEFERRED.md correctly lists no deferred items' instead of a misleading WARN, while genuine mapping/DEFERRED inconsistencies still WARN.",
+      "falsifiable_check": "On a re-run of any scenario that defers no files, the validator prints the '[PASS] No defer rows...' line and no 'check consistency' WARN; a scenario with a real defer row still validates, and an orphaned DEFERRED entry still WARNs."
+    }
+  ],
+  "deferred_to_human": [
+    "Theme parity (UWP dark vs WinUI light) is a capture-environment/system-default difference; if consistent dark/light parity is desired it belongs to the eval capture harness (Tier 0), not the migration skill."
+  ]
+}

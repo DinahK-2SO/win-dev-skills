@@ -1,0 +1,41 @@
+{
+  "scenario": "Package",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 3,
+  "features_pass": 3,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Identity",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Identity__a01_GetPackage.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Identity__a01_GetPackage.png",
+      "note": "Get Package responds in both. WinUI renders full package identity (Name, Version, Architecture, ResourceId, Publisher, PublisherId, FullName, FamilyName, IsFramework) matching UWP, plus extra superset fields. Pass."
+    },
+    {
+      "name": "Installed Location",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Installed_Location__a01_GetInstalledLocation.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Installed_Location__a01_GetInstalledLocation.png",
+      "note": "Get Installed Location responds in both, rendering 'Installed Location: <path>'. Path naturally points at the WinUI package's own AppX folder. Correct API behavior. Pass."
+    },
+    {
+      "name": "Dependencies",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Dependencies__a01_GetDependencies.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Dependencies__a01_GetDependencies.png",
+      "note": "Get Dependencies responds in both, rendering 'Count: N' + list. UWP shows 3 .NET Native/VCLibs deps; WinUI shows 1 WindowsAppRuntime dep. Different framework deps are the correct, expected result for a WinUI 3 package; button is live and renders the real list. Pass."
+    }
+  ]
+}

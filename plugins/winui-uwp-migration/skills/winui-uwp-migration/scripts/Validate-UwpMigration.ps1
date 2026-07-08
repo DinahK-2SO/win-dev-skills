@@ -265,10 +265,23 @@ if (-not (Test-Path -LiteralPath $mapPath)) {
     } else {
         if (Test-Path -LiteralPath $deferPath) {
             $deferText = Get-Content -LiteralPath $deferPath -Raw
-            if ($deferText -notmatch 'No items deferred') {
-                Write-Host "[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency"
+            # Count real deferred-file rows only. Exclude the table header/separator and
+            # the '| (none) | — |' placeholder that Initialize-UwpMigration.ps1 seeds when
+            # nothing is deferred — that placeholder is the correct empty state, not a
+            # consistency problem.
+            $realDeferTextRows = @()
+            foreach ($line in ($deferText -split "`n")) {
+                if ($line -match '^\|' -and
+                    $line -notmatch '^\|\s*-+\s*\|' -and
+                    $line -notmatch '^\|\s*(Source file|File)\s*\|' -and
+                    $line -notmatch '^\|\s*\(none\)\s*\|') {
+                    $realDeferTextRows += $line
+                }
+            }
+            if ($realDeferTextRows.Count -eq 0) {
+                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md correctly lists no deferred items"
             } else {
-                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes 'No items deferred.'"
+                Write-Host "[WARN] MIGRATION-DEFERRED.md lists $($realDeferTextRows.Count) file(s) but MIGRATION-MAPPING.md has no defer rows — check consistency"
             }
         } else {
             Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md not required"
