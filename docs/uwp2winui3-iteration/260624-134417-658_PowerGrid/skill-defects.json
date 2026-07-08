@@ -1,0 +1,17 @@
+{
+  "scenario": "PowerGrid",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "SKILL.md instructs the migration agent to compile with `winapp build`, but the winapp CLI has no `build` subcommand. When the agent followed the 'do a final winapp build' instruction it hit a hard error and wasted a turn recovering.",
+      "evidence": "session-log.txt L3742-3773: `winapp build` -> \"'build' was not matched. ... Unrecognized command or argument 'build'\", winapp usage dump printed, WINAPP_BUILD_EXIT=1 (exit code 1). Agent then re-ran `dotnet build` at L3778, which succeeded. winapp's own help (L3744-3770) lists init/restore/update/package/sign/cert/manifest/create-external-catalog/create-debug-identity/store/tool/get-winapp-path/run/unregister/ui — no `build`.",
+      "skill_search": "grep 'winapp build' in winui-uwp-migration/ → SKILL.md L126, L140, L173; MIGRATION-PATTERNS.md L726; Validate-UwpMigration.ps1 L13-14 comment.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "SKILL.md L126: 'winapp build   # compile; never run the .exe directly'; L140: 'Prefer `winapp build` to compile and `Test-AppLaunch.ps1` to launch'; L173: 'After PASS, do a final `winapp build` to confirm the build is still clean.'",
+      "root_cause": "The skill hard-codes a nonexistent winapp verb for compilation. winapp is a packaging/identity/run/UI-automation CLI (SKILL.md L14 says exactly this); it does not compile. The plugin's own convention is native `dotnet build` (used successfully everywhere else in the same trial), so the `winapp build` text is internally inconsistent and actively wrong.",
+      "proposed_fix": "In SKILL.md replace every `winapp build` compile instruction with `dotnet build` (with an exit sentinel, matching the existing 'Build command discipline' block): `dotnet build -c Debug -p:Platform=<arch>; \"BUILD_EXIT=$LASTEXITCODE\"`. Reword MIGRATION-PATTERNS.md L726 to attribute analyzer injection to the WindowsAppSDK NuGet reference at `dotnet build` time. Update the Validate-UwpMigration.ps1 header comment (comment only) so it no longer tells the agent to run `winapp build` alongside it.",
+      "generalizes": "Every UWP→WinUI 3 migration using this skill reaches the same Step 3/Step 4 build step and will be told to run `winapp build`. Because winapp has no build verb, the instruction fails identically in every scenario, costing at least one recovery turn (and risking an agent declaring failure). Fixing the compile command to `dotnet build` removes a universal, guaranteed stall."
+    }
+  ]
+}

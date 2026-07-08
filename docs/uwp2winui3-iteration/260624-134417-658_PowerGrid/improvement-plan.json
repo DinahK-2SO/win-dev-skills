@@ -1,0 +1,18 @@
+{
+  "scenario": "PowerGrid",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "SKILL.md instructs the migration agent to compile with `winapp build`, a subcommand that does not exist in the winapp CLI. Following it produces a hard failure and a wasted recovery turn.",
+      "evidence": "session-log.txt L3742-3773: `winapp build` -> \"'build' was not matched ... Unrecognized command or argument 'build'\", WINAPP_BUILD_EXIT=1; agent recovered with `dotnet build` at L3778. winapp help (L3744-3770) has no `build` verb. Skill grep: SKILL.md L126/L140/L173, MIGRATION-PATTERNS.md L726, Validate-UwpMigration.ps1 L13-14.",
+      "root_cause": "The skill hard-codes a nonexistent winapp verb for compilation. winapp is a packaging/identity/run/UI CLI (SKILL.md L14); the plugin's real build command is native `dotnet build`, already used successfully elsewhere in the same trial — so the `winapp build` text is internally inconsistent and always fails.",
+      "tier": 3,
+      "change": "Replaced every `winapp build` compile instruction with `dotnet build -c Debug; \"BUILD_EXIT=$LASTEXITCODE\"` in SKILL.md (Step 3 code block, Build-command-discipline bullet, Step 4 final-build line); added an explicit note that winapp has no `build` verb. Reworded MIGRATION-PATTERNS.md analyzer paragraph to attribute analyzer injection to the WindowsAppSDK NuGet reference at `dotnet build` time. Fixed the Validate-UwpMigration.ps1 header comment to reference `dotnet build` (comment only).",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The migration agent compiles with a command that actually exists, eliminating the guaranteed `winapp build` failure and the recovery turn it costs.",
+      "falsifiable_check": "On a re-run, the build/close-out step issues `dotnet build` and there is no `winapp build` invocation (hence no \"'build' was not matched\" error, no WINAPP_BUILD_EXIT=1) in the session log."
+    }
+  ],
+  "deferred_to_human": []
+}

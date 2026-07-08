@@ -1,0 +1,34 @@
+{
+  "scenario": "PowerGrid",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log.txt L269-300: bootstrap ran once (BOOTSTRAP_EXIT=0), scaffolded the WinUI 3 project, seeded MIGRATION-MAPPING.md and TODO[migrate-] markers." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log.txt L3715-3734: one-shot gate reported PASS (residue grep, mapping consistency, manifest checks, dotnet build 0 WUI warnings, smoke launch pid 23840, visible-text fidelity)." },
+    { "tool": "dotnet build (with exit sentinel)", "evidence": "session-log.txt L2987 and L3778: clean builds (0 errors, only inherited nullable warnings); the `\"BUILD_EXIT=$LASTEXITCODE\"` sentinel gave an always-present final line." }
+  ],
+  "tools_problematic": [
+    { "tool": "winapp build", "problem": "Not a valid winapp CLI subcommand — it does not exist. Following the SKILL.md instruction to run a 'final winapp build' produced a hard failure.", "evidence": "session-log.txt L3742-3773: `winapp build` -> \"'build' was not matched\" + full winapp usage dump, WINAPP_BUILD_EXIT=1 (exit code 1). winapp's own help lists init/restore/update/package/sign/cert/manifest/create-debug-identity/run/ui — no `build`." }
+  ],
+  "tool_limitations": [
+    { "tool": "winapp CLI", "limitation": "winapp compiles nothing; it is a packaging/identity/run/UI-automation CLI (SKILL.md L14 even says so). There is no `winapp build`.", "suggested_tweak": "Change SKILL.md/MIGRATION-PATTERNS.md to instruct `dotnet build` (with an exit sentinel) for compilation and reserve `winapp` for run/packaging only." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "winui-uwp-migration/SKILL.md L126, L140, L173", "wrong": "Instructs the agent to run `winapp build` to compile the project ('compile; never run the .exe directly' / 'Prefer winapp build to compile' / 'do a final winapp build').", "correct": "Compilation is done with `dotnet build` (native SDK build). `winapp` has no `build` subcommand; use `dotnet build -c Debug -p:Platform=<arch>; \"BUILD_EXIT=$LASTEXITCODE\"`." },
+    { "where": "winui-uwp-migration/MIGRATION-PATTERNS.md L726", "wrong": "Refers to 'The benchmark's `winapp build` injects the Microsoft.WindowsAppSDK.Analyzers package'.", "correct": "The analyzer package is injected by the WindowsAppSDK NuGet reference at `dotnet build` time, not by a nonexistent `winapp build`." }
+  ],
+  "special_apis": [
+    { "api": "Windows.Devices.Power.PowerGridForecast", "special_handling": "Pure WinRT runtime API with no XAML surface; ported verbatim (GetForecast() on a background thread via Task.Run, ForecastUpdated event). No migration change needed — it is available to WinUI 3 desktop as-is. Empty forecast on the build machine is the genuine runtime outcome, not a defect." }
+  ],
+  "errors_encountered": [
+    { "error": "`winapp build` -> \"'build' was not matched. ... Unrecognized command or argument 'build'\", exit 1", "root_cause": "SKILL.md instructs a winapp subcommand that does not exist; winapp is a packaging/run/UI CLI, not a compiler.", "fix": "Agent fell back to `dotnet build -c Debug -p:Platform=<arch>; \"BUILD_EXIT=$LASTEXITCODE\"` (session-log.txt L3778), which built cleanly." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Final build step (Step 4 close-out), session-log.txt L3742-3778", "symptom": "Ran `winapp build` per SKILL.md; it errored out (exit 1) with a full usage dump.", "turns_or_retries": "1 wasted turn (TURN 22->23) before recovering", "root_cause": "SKILL.md hard-codes `winapp build` as the compile command in three places, but winapp has no build verb.", "how_resolved": "Agent recognized the invalid command and re-ran with `dotnet build`.", "preventable_by": "Fix SKILL.md/MIGRATION-PATTERNS.md to use `dotnet build` for compilation everywhere `winapp build` currently appears." },
+    { "where": "Validate step invocation, session-log.txt L3700-3715", "symptom": "First invocation of Validate-UwpMigration.ps1 used the path `<Target>\\.github\\skills\\...` (script located under the project subfolder) which did not exist; \"term ... is not recognized\".", "turns_or_retries": "1 retry (TURN 20->21) before finding the copy at `<app>\\.github\\skills\\...`", "root_cause": "The scaffold copies the skill into the app tree; the agent guessed the script sat under -Target rather than at the app root. SKILL.md uses a `<skill-root>` placeholder, so the general instruction is correct.", "how_resolved": "Agent corrected the path in one retry.", "preventable_by": "Minor; SKILL.md already uses `<skill-root>` distinct from `-Target`. Treated as a dev-agent slip, not a skill change." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "PowerGridForecast.GetForecast() returns an empty forecast on this build/VM, so both scenarios show their empty-state status strings.", "workaround": "None needed — this is the app's genuine runtime behaviour and the scoring task confirmed the WinUI output matches the UWP source-defined empty-state strings exactly." }
+  ]
+}

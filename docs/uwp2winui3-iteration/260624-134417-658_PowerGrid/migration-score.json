@@ -1,0 +1,33 @@
+{
+  "scenario": "PowerGrid",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: UWP launched (uwp-app-runner ok:true, pid 44344, window 'PowerGrid C# Sample') and Scenario 1 default view captured via winapp PrintWindow; per-scenario navigation and control actuation could not be automated because the .NET Native UWP CoreWindow exposes an empty UIA subtree and this session's window station cannot inject synthetic input. Expected per-control behaviour derived from UWP source and matched exactly by the WinUI app's live output.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "notes": "Migrated WinUI 3 app builds clean (0 errors) and launches (pid 43584). Structural control coverage is full (3/3 and 2/2). Both action controls respond when actuated and reproduce the exact UWP status strings ('Unable to find a good time to do work'; 'No forecast available. Try again later.'), which are the genuine empty-forecast outcomes of PowerGridForecast.GetForecast() on this machine. WinUI 3 window screenshots render blank due to a DirectComposition/PrintWindow capture limitation (not a defect); behaviour verified via live UIA tree + capture-manifest outputText. See discrepancies.md.",
+  "features": [
+    {
+      "name": "Find best time",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Find_best_time.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Find_best_time.png",
+      "note": "Coverage 3/3 (HoursAheadTextBox, LowUXImpactCheckBox, FindBest button). 'Find best time' button responded (+2 tokens) with status 'Unable to find a good time to do work' — matches UWP source behaviour for an empty forecast. UWP actuation not automatable (see uwp_capture_status), so uwp_responded is null; behaviour confirmed from source."
+    },
+    {
+      "name": "Display full forecast",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_Display_full_forecast.png",
+      "note": "Coverage 2/2 (Get forecast button, ForecastList). 'Get forecast' button responded (+2 tokens) with status 'No forecast available. Try again later.' — matches UWP source behaviour for an empty forecast. UWP Scenario 2 view not captured (app not navigable in this session); behaviour confirmed from source."
+    }
+  ]
+}

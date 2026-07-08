@@ -1,0 +1,14 @@
+{
+  "scenario": "PowerGrid",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "First invocation of Validate-UwpMigration.ps1 used a wrong script path (`<Target>\\.github\\skills\\...winui-uwp-migration\\scripts\\Validate-UwpMigration.ps1`, i.e. under the project subfolder) which did not exist; the agent then found the correct copy at `<app>\\.github\\skills\\...` on the next turn.",
+      "evidence": "session-log.txt L3700-3715: first run -> \"The term '...\\app\\PowerGrid\\.github\\skills\\...\\Validate-UwpMigration.ps1' is not recognized...\"; retry at '...\\app\\.github\\skills\\...' returned '==> Validate-UwpMigration ... PASS' (L3717-3734).",
+      "covered_clearly_at": "SKILL.md Step 4 (L148-150) shows the invocation as `& \"<skill-root>/scripts/Validate-UwpMigration.ps1\" -Target \"<winui3-project-root>\"` — the `<skill-root>` placeholder is explicitly distinct from `-Target`, and the same `<skill-root>/scripts/...` form is used consistently for every other script (Initialize L41, Get-MigrationPattern L79/L116, Test-AppLaunch L127).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already distinguishes `<skill-root>` from `-Target` and uses that form uniformly; the agent simply concatenated the script under -Target on the first try and self-corrected in one turn. A capable model on re-run would resolve the path correctly without any skill edit; hard-coding an absolute path would be scenario-specific."
+    }
+  ]
+}

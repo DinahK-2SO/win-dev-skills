@@ -1,0 +1,17 @@
+{
+  "scenario": "PowerGrid",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": "nav-scenario-list", "text": "Left navigation list exposing the two scenarios; selecting an item swaps the content pane.", "status": "pass", "reason": "Coverage full; both scenario titles present and navigation swaps the content pane (parity structural check 3/3).", "suspected_skill_gap": "" },
+    { "id": "find-best-time", "text": "Scenario 1: HoursAhead TextBox (default 12), low-impact CheckBox (checked), Find best time button, best time/severity output.", "status": "pass", "reason": "Coverage 3/3; 'Find best time' button responded with 'Unable to find a good time to do work' — matches UWP source behaviour for an empty forecast.", "suspected_skill_gap": "" },
+    { "id": "display-full-forecast", "text": "Scenario 2: Get forecast button and ForecastList; empty-state status 'No forecast available. Try again later.'", "status": "pass", "reason": "Coverage 2/2; 'Get forecast' button responded with 'No forecast available. Try again later.' — matches UWP source behaviour for an empty forecast.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "WinUI 3 window screenshots", "uwp": "UWP Scenario 1 default view captured via PrintWindow.", "winui": "WinUI 3 captures render blank white (DirectComposition/PrintWindow limitation, not a rendering defect).", "screenshot_ref": "parity/winui3/screenshots/*.png" }
+  ],
+  "missing_features": [],
+  "summary": "Faithful migration: all rubric features pass, both action controls respond and reproduce the exact UWP status strings. The only non-pass observations are measurement/tooling caveats (blank WinUI capture, non-automatable .NET Native UWP UIA tree), not migration defects."
+}

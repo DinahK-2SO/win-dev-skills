@@ -1,0 +1,123 @@
+{
+  "featureName": "PowerGrid",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\PowerGrid\\cs",
+  "generated": "2026-07-09T02:21:22.4233670+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Find best time",
+      "class": "Scenario1_FindBest",
+      "slug": "Find_best_time",
+      "screenshot": "01_Find_best_time.png",
+      "controls": [
+        {
+          "name": "HoursAheadTextBox",
+          "type": "TextBox",
+          "label": "12",
+          "events": []
+        },
+        {
+          "name": "LowUXImpactCheckBox",
+          "type": "CheckBox",
+          "label": "Restrict to low user experience impact",
+          "events": []
+        },
+        {
+          "name": "FindBest",
+          "type": "Button",
+          "label": "Find best time",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Find best time",
+          "alt": "FindBest",
+          "type": "Button",
+          "label": "Find best time",
+          "name": "FindBest",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "HoursAheadTextBox",
+            "type": "TextBox"
+          },
+          {
+            "name": "BestTimeRun",
+            "type": "Run"
+          },
+          {
+            "name": "LowestSeverityRun",
+            "type": "Run"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Display full forecast",
+      "class": "Scenario2_PrintFullForecast",
+      "slug": "Display_full_forecast",
+      "screenshot": "02_Display_full_forecast.png",
+      "controls": [
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Get forecast",
+          "events": []
+        },
+        {
+          "name": "ForecastList",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get forecast",
+          "alt": "",
+          "type": "Button",
+          "label": "Get forecast",
+          "name": "",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "ForecastStartTimeRun",
+            "type": "Run"
+          },
+          {
+            "name": "ForecastBlockDurationRun",
+            "type": "Run"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}
