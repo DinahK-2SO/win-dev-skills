@@ -1,0 +1,30 @@
+{
+  "scenario": "OrientationSensor",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0118 'namespace but is used like a type' — the project's root namespace equals the WinRT type name the sample demonstrates (namespace OrientationSensor vs type Windows.Devices.Sensors.OrientationSensor); unqualified references bind to the namespace and fail, cascading into a WMC9999 XAML compiler error.",
+      "evidence": "session-log.txt 3480-3482 (CS0118 + XamlCompiler WMC9999); fixed turns 50-51 by fully qualifying Windows.Devices.Sensors.OrientationSensor.",
+      "root_cause": "windows-universal-samples name each project after the WinRT API it demos, so the root namespace collides with that type.",
+      "tier": 3,
+      "change": "Added a 'CS0118: namespace-is-used-like-a-type' subsection to the 'Common build errors after the namespace rewrite' section of MIGRATION-PATTERNS.md: distinguishes it from CS0104, shows the collision, prescribes fully qualifying (or aliasing) the WinRT type at every use site, warns against renaming the project namespace, and explains the cascading WMC9999 XAML error clears once the C# ambiguity is fixed.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On a re-run of any sensor/device sample whose project name matches its WinRT type, the agent fully qualifies the type on the first build-fix pass instead of losing turns diagnosing CS0118 + WMC9999.",
+      "falsifiable_check": "Re-run build reaches zero CS0118 errors after the first fix pass with no separate WMC9999-chasing detour.",
+      "why_not_lower_tier": "A Tier 1 script cannot know which unqualified identifiers are types vs namespaces without full semantic analysis, and must not rewrite the project namespace (XAML x:Class depends on it). The compiler error CS0118 is itself the high-reliability trigger that sends the agent to this pattern, so prose keyed to the error code is the right tier."
+    },
+    {
+      "problem": "CS0103 'The name App does not exist' — the new WinUI 3 App/MainWindow entrypoint was placed in the project-name namespace while the migrated sample body stayed in the SDKTemplate namespace, so all App.* references failed.",
+      "evidence": "session-log.txt 4145-4165 (CS0103 'App' across MainPage/CalibrationBar/Scenario files); fixed turn 56 with 'using OrientationSensor;'. Namespaces: App/MainWindow = OrientationSensor; body = SDKTemplate.",
+      "root_cause": "windows-universal-samples keep shared/scenario code in the SDKTemplate namespace; the WinUI 3 entrypoint the agent adds naturally lands in the project namespace, splitting the two.",
+      "tier": 3,
+      "change": "Added a 'CS0103: The name App does not exist' subsection to the same build-errors section: instructs the agent to check an existing migrated file's namespace before writing App.xaml.cs/MainWindow.xaml.cs and to create the entrypoint in that SAME namespace (SDKTemplate), or otherwise bridge with a using directive.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The agent places the new entrypoint in the sample's namespace up front, avoiding a whole build cycle of CS0103 errors across every SDKTemplate file.",
+      "falsifiable_check": "Re-run build produces zero CS0103 'App does not exist' errors; App.xaml.cs namespace matches the migrated sample body's namespace.",
+      "why_not_lower_tier": "The entrypoint namespace is a code-authoring decision the agent makes when creating files that do not exist in the UWP source; the scaffold script does not synthesize App from the sample body, so a targeted prose rule at the exact error is the highest feasible tier."
+    }
+  ],
+  "deferred_to_human": []
+}

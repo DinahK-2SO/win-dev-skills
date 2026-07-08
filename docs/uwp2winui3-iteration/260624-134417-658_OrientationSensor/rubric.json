@@ -1,0 +1,39 @@
+{
+  "scenario": "OrientationSensor",
+  "feature": "Orientation Sensor C# Sample",
+  "source": "uwp-samples-standalone/Samples/OrientationSensor/cs",
+  "features": [
+    {
+      "number": 1,
+      "name": "Choose orientation sensor",
+      "class": "Scenario0_Choose",
+      "controls": ["ReadingTypeComboBox (ComboBox)", "OptimizationGoalComboBox (ComboBox)"],
+      "expected": "Two dropdowns let the user pick the reading type (Absolute/Relative) and optimization goal (Precision/Power) used by the other scenarios. Defaults: Absolute + Precision.",
+      "hardware_gated": false
+    },
+    {
+      "number": 2,
+      "name": "Data Events",
+      "class": "Scenario1_DataEvents",
+      "controls": ["ScenarioEnableButton (Enable)", "ScenarioDisableButton (Disable)", "ScenarioOutput (TextBlock)"],
+      "expected": "Enable registers a ReadingChanged listener and streams rotation data; Disable unregisters it. Enable is only enabled when an orientation sensor is present.",
+      "hardware_gated": true
+    },
+    {
+      "number": 3,
+      "name": "Polling",
+      "class": "Scenario2_Polling",
+      "controls": ["ScenarioEnableButton (Enable)", "ScenarioDisableButton (Disable)", "ScenarioOutput (TextBlock)"],
+      "expected": "Enable starts a DispatcherTimer that polls GetCurrentReading at an interval and displays rotation data; Disable stops it. Enable only enabled when a sensor is present.",
+      "hardware_gated": true
+    },
+    {
+      "number": 4,
+      "name": "Calibration",
+      "class": "Scenario3_Calibration",
+      "controls": ["High (RadioButton)", "Approximate (RadioButton)", "Unreliable (RadioButton)", "CalibrationBar"],
+      "expected": "Radio buttons simulate the current sensor accuracy. Selecting 'Unreliable' invokes the calibration bar (a popup prompting the user to calibrate). This is not hardware-gated.",
+      "hardware_gated": false
+    }
+  ]
+}

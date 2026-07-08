@@ -27,6 +27,30 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0118: 'Xxx' is a namespace but is used like a type`
+
+This is a **different** collision from CS0104. The windows-universal-samples name each project after the WinRT API it demonstrates (`OrientationSensor`, `Accelerometer`, `Compass`, `Gyrometer`, `Barometer`, `ProximitySensor`, `Battery`, `Geolocation`, …), so the project's **root namespace** ends up **identical to a WinRT type the sample uses** (e.g. namespace `OrientationSensor` vs. type `Windows.Devices.Sensors.OrientationSensor`). Every unqualified reference to that identifier then binds to the **namespace**, not the type, and fails to compile:
+
+```csharp
+private OrientationSensor _sensor;                 // CS0118 — resolves to the namespace
+_sensor = OrientationSensor.GetDefault(...);       // CS0118
+```
+
+Fix by **fully qualifying the WinRT type at every use site** — the field type, the `GetDefault(...)`/`GetForCurrentView(...)` factory call, and any related reading/args types (`OrientationSensorReading`, event-args types, etc.):
+
+```csharp
+private Windows.Devices.Sensors.OrientationSensor _sensor;
+_sensor = Windows.Devices.Sensors.OrientationSensor.GetDefault(...);
+```
+
+A `using` alias (`using WSensor = Windows.Devices.Sensors.OrientationSensor;`) is an equivalent fix if the type is referenced many times. Do **not** rename the project namespace to dodge this — other files and the `x:Class` in XAML depend on it. This ambiguity also commonly triggers a **cascading `Xaml Internal Error WMC9999` / `_OnXamlPreCompileError`** in the same build; that XAML error clears on its own once the C# CS0118 is resolved — fix the C# ambiguity first, don't chase the XAML error.
+
+### `CS0103: The name 'App' does not exist in the current context`
+
+WinUI 3 needs an `App` and a `MainWindow` that the UWP app never had, so you create them during migration. The windows-universal-samples keep **all** their shared and per-scenario code in the **`SDKTemplate`** namespace (`MainPage`, `SampleConfiguration`, `Scenario*`, etc.). If you place the new `App`/`MainWindow` in the **project-default** namespace (e.g. `namespace OrientationSensor;`), every `App.*` / `MainPage.Current` reference in the `SDKTemplate` body becomes unresolved (`CS0103`).
+
+**Before writing `App.xaml.cs`/`MainWindow.xaml.cs`, check the namespace an existing migrated sample file already uses** and create the entrypoint types in that **same namespace** (`SDKTemplate` for these samples). If you must keep the entrypoint in the project namespace, bridge it by adding `using <SampleNamespace>;` (e.g. `using SDKTemplate;`) to the entrypoint files **and** `using <ProjectNamespace>;` to the `SDKTemplate` files that reference `App`. Keeping one consistent namespace is the cleaner option.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:

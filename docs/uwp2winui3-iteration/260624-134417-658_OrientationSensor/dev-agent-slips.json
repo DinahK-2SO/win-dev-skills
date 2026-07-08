@@ -1,0 +1,14 @@
+{
+  "scenario": "OrientationSensor",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Nullable-reference warnings (CS8618/CS8600/CS8601/CS8602/CS8604/CS8622) across scenario and helper files after migration.",
+      "evidence": "session-log.txt lines 4146-4157 (18 warnings alongside the CS0103 errors). They did not block the final build and the app scored 100/100.",
+      "covered_clearly_at": "These are ordinary <Nullable>enable</Nullable> C# warnings, not migration-specific issues, and are non-fatal; MIGRATION-PATTERNS.md:268 already notes declaring members nullable under Nullable enable. The healthcheck only fails on WUIxxxx warnings, not CS8xxx.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Non-blocking standard C# nullability warnings that resolved without impacting the score; adding skill guidance to silence them would be noise and does not generalize to a migration failure mode."
+    }
+  ]
+}

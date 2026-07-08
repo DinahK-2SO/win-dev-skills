@@ -1,0 +1,16 @@
+{
+  "scenario": "OrientationSensor",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Choose orientation sensor (ReadingType + OptimizationGoal ComboBoxes, defaults Absolute/Precision)", "status": "pass", "reason": "Both ComboBoxes present with correct defaults.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Data Events (Enable/Disable + ScenarioOutput, ReadingChanged listener)", "status": "pass", "reason": "Controls + handlers present; Enable correctly hardware-gated (no sensor on box) exactly as UWP source.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Polling (Enable/Disable + ScenarioOutput, DispatcherTimer GetCurrentReading)", "status": "pass", "reason": "Controls + polling handler wired; same hardware gating as UWP.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Calibration (High/Approximate/Unreliable radios + calibration-bar popup)", "status": "pass", "reason": "All radios actuate; selecting Unreliable triggers the calibration-bar popup — exact UWP behavior.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No functional discrepancies. All 4 scenarios present with full control coverage; the one hardware-independent interactive behavior (Calibration bar) verified working. Remaining items are environment/measurement limitations (headless capture, sensorless box, UWP UIA unavailable), not migration defects. Note: the perfect final score masks two mid-build namespace failures (CS0118 type-vs-namespace collision, CS0103 App/SDKTemplate namespace mismatch) that cost build cycles and are the real improvement targets."
+}

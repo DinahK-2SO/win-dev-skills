@@ -1,0 +1,27 @@
+{
+  "scenario": "OrientationSensor",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0118 'OrientationSensor is a namespace but is used like a type': unqualified references to the WinRT type Windows.Devices.Sensors.OrientationSensor bound to the project's root namespace (also named OrientationSensor), failing the build and cascading into a WMC9999 XAML compiler internal error.",
+      "evidence": "session-log.txt lines 3480-3482 (CS0118 in Scenario1_DataEvents.xaml.cs:27 and Scenario2_Polling.xaml.cs:29 + XamlCompiler WMC9999); fix at turns 50-51 fully qualifying Windows.Devices.Sensors.OrientationSensor.",
+      "skill_search": "Grepped MIGRATION-PATTERNS.md and SKILL.md for 'CS0118', 'namespace but is used like a type', 'type collision', 'project name', 'RootNamespace'. The only ambiguity guidance is CS0104 (two Xaml namespaces, Windows.UI.Xaml vs Microsoft.UI.Xaml) at MIGRATION-PATTERNS.md:9-28. Nothing covers a project-namespace/WinRT-type-name collision.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "windows-universal-samples name the project after the WinRT API they demonstrate (OrientationSensor, Accelerometer, Compass, Gyrometer, Barometer, ProximitySensor, ...). The root namespace inherits that name, so unqualified uses of the identically-named WinRT type resolve to the namespace, not the type.",
+      "proposed_fix": "Add a 'CS0118: namespace-equals-type collision' subsection to MIGRATION-PATTERNS.md's 'Common build errors' section: explain that when the project name matches a WinRT type the sample uses, unqualified references bind to the namespace; fix by fully qualifying the type (e.g. Windows.Devices.Sensors.OrientationSensor) at every use site including .GetDefault(...) and the ...Reading type. Note the cascading WMC9999 XAML error clears once the C# ambiguity is resolved.",
+      "generalizes": "The windows-universal-samples corpus overwhelmingly names each project after the exact WinRT type it demonstrates, so this collision recurs for essentially every sensor/device sample. It is a structural, not scenario-specific, hazard."
+    },
+    {
+      "problem": "CS0103 'The name App does not exist in the current context': after the agent added the WinUI 3 entrypoint (App, MainWindow) in the project-name namespace, the migrated sample files (in the sample's SDKTemplate namespace) could not resolve App.* references.",
+      "evidence": "session-log.txt lines 4145-4165 (CS0103 'App' in MainPage.xaml.cs, CalibrationBar.xaml.cs, Scenario1/2 .xaml.cs); fix at turn 56 adding 'using OrientationSensor;'. Confirmed namespaces: App.xaml.cs/MainWindow.xaml.cs = 'OrientationSensor'; MainPage/SampleConfiguration/Scenario*/CalibrationBar = 'SDKTemplate'.",
+      "skill_search": "Grepped MIGRATION-PATTERNS.md and SKILL.md for 'SDKTemplate', 'CS0103', 'App does not exist', 'root namespace', 'RootNamespace'. Extensive App/MainWindow guidance exists (MIGRATION-PATTERNS.md:263-345, App.MainWindow static exposure) but none addresses which NAMESPACE the new App/MainWindow must live in relative to the migrated sample body.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "windows-universal-samples keep all shared/scenario code in the 'SDKTemplate' namespace. The WinUI 3 entrypoint the agent must add (App/MainWindow, which UWP lacks) is naturally placed in the project-default namespace, creating a cross-namespace break for every App.* / MainPage.Current reference in the SDKTemplate body.",
+      "proposed_fix": "Add a note in the App/MainWindow entrypoint guidance: create the new App and MainWindow in the SAME namespace the migrated sample code already uses (SDKTemplate for windows-universal-samples). If the entrypoint must live in the project namespace, add 'using <SampleNamespace>;' to the entrypoint or vice-versa so App/MainPage.Current resolve. Verify the namespace of an existing migrated file before writing App.xaml.cs.",
+      "generalizes": "Every windows-universal-samples migration must add a WinUI 3 App/MainWindow that UWP didn't have, and every one of them keeps the body in SDKTemplate — so the entrypoint/sample namespace split is a recurring, structural failure mode."
+    }
+  ]
+}

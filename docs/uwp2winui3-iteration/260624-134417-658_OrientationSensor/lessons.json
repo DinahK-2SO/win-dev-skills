@@ -1,0 +1,26 @@
+{
+  "scenario": "OrientationSensor",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrapped the WinUI 3 project and did the bulk Windows.UI.Xaml -> Microsoft.UI.Xaml namespace rewrite; migration reached a clean 100/100 after two build-fix cycles." },
+    { "tool": "dotnet build", "evidence": "Surfaced CS0118 and CS0103 errors with precise file/line pointers that let the agent fix the two namespace problems." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.OrientationSensor", "special_handling": "The WinRT type name collides with the project's root namespace (project was named 'OrientationSensor' after the API it demos). Unqualified 'OrientationSensor' references resolve to the namespace, not the type, causing CS0118. Must be fully qualified as Windows.Devices.Sensors.OrientationSensor." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0118: 'OrientationSensor' is a namespace but is used like a type (Scenario1_DataEvents.xaml.cs, Scenario2_Polling.xaml.cs)", "root_cause": "The migrated project's root namespace equals the sample name 'OrientationSensor', which is identical to the WinRT type Windows.Devices.Sensors.OrientationSensor the sample uses. Unqualified usage binds to the namespace.", "fix": "Fully qualify every usage: 'Windows.Devices.Sensors.OrientationSensor', including .GetDefault(...) and OrientationSensorReading." },
+    { "error": "CS0103: The name 'App' does not exist in the current context (MainPage/CalibrationBar/Scenario*.xaml.cs)", "root_cause": "The agent created the new WinUI 3 entrypoint types (App, MainWindow) in the project-name namespace 'OrientationSensor', while all migrated sample body files remained in the sample's 'SDKTemplate' namespace. Cross-namespace references to App (e.g. App.MainWindow/App.Window) were unresolved.", "fix": "Add 'using OrientationSensor;' to the SDKTemplate files (or place App/MainWindow in the same 'SDKTemplate' namespace as the sample body)." },
+    { "error": "Xaml Internal Error WMC9999 / _OnXamlPreCompileError", "root_cause": "Cascading failure from the CS0118 type-vs-namespace ambiguity; the XAML compiler could not resolve types while the C# ambiguity persisted.", "fix": "Resolved automatically once the CS0118 ambiguity was fixed." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "First build after bootstrap (turns ~49-51)", "symptom": "3 errors: CS0118 OrientationSensor ambiguity + a cascading XAML WMC9999 internal error", "turns_or_retries": "~2 turns to diagnose and fully-qualify the sensor type across files", "root_cause": "Project root namespace identical to the WinRT type name being demonstrated", "how_resolved": "Fully qualified Windows.Devices.Sensors.OrientationSensor everywhere it was used", "preventable_by": "A MIGRATION-PATTERNS entry for CS0118 'namespace-equals-type' collisions (very common in windows-universal-samples named after the API), advising full qualification." },
+    { "where": "Second build (turns ~55-56)", "symptom": "10 errors: CS0103 'App' does not exist across SDKTemplate files", "turns_or_retries": "~1 turn to add using directives", "root_cause": "New WinUI 3 App/MainWindow entrypoint placed in project-name namespace while sample body stayed in SDKTemplate namespace", "how_resolved": "Added 'using OrientationSensor;' to the SDKTemplate files", "preventable_by": "Guidance to create the new WinUI 3 entrypoint (App/MainWindow) in the SAME namespace the migrated sample code already uses (SDKTemplate for windows-universal-samples), or otherwise bridge with a using directive." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}
