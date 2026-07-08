@@ -1,0 +1,32 @@
+{
+  "scenario": "OCR",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 inline TODO injection", "evidence": "OcrCapturedImage.xaml.cs carried TODO[migrate-002..011] routing to PATTERNS.md#getforcurrentview and #threading; the dev-agent fixed each in place (session-log turns 43-48)." },
+    { "tool": "PATTERNS.md#getforcurrentview + #threading sections", "evidence": "DisplayInformation orientation code and CoreDispatcher.RunAsync were converted to no-op/DispatcherQueue per the documented tables (turns 46-48)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "unsupported-api-inventory.json", "limitation": "No entry for Application.Current.Suspending/Resuming (and EnteredBackground/LeavingBackground), so no inline TODO was injected at those call sites.", "suggested_tweak": "Add an 'adaptable' entry with anchor 'lifecycle' so the bootstrap flags each lifecycle-event subscription." }
+  ],
+  "failed_apis": [
+    { "api": "Application.Current.Suspending / Application.Current.Resuming", "why_tried": "UWP OcrCapturedImage subscribes to Suspending/Resuming to clean up / re-init the camera on app suspend.", "root_cause": "WinUI 3 desktop Microsoft.UI.Xaml.Application exposes no Suspending/Resuming events; the members simply do not exist.", "fix": "Removed the += / -= subscriptions and the Application_Suspending/Resuming handlers; camera cleanup kept in OnNavigatingFrom." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "CaptureElement", "special_handling": "Deferred (no WinUI 3 desktop equivalent); XAML element swapped to a visible Border placeholder per PATTERNS.md, but the code-behind that drove the old control (.Source = mediaCapture, .FlowDirection, PreviewControl.Source = null) had to be removed too or it fails to compile against a Border." }
+  ],
+  "errors_encountered": [
+    { "error": "CS1061: 'Application' does not contain a definition for 'Suspending' / 'Resuming' (OcrCapturedImage.xaml.cs 83,84,109,110)", "root_cause": "UWP app-lifecycle events removed in WinUI 3 desktop; not covered by the skill or the API inventory.", "fix": "Deleted the subscriptions and handlers; moved cleanup to OnNavigatingFrom (turns 43-45)." },
+    { "error": "CS1061: 'Border' does not contain a definition for 'Source' (OcrCapturedImage.xaml.cs 415,483)", "root_cause": "Hero CaptureElement was correctly swapped to a Border placeholder in XAML, but code-behind still assigned PreviewControl.Source = mediaCapture / null.", "fix": "Replaced the .Source assignments with Visibility toggling on the Border (turns 46-47)." },
+    { "error": "CS0103: The name 'displayInformation' does not exist (OcrCapturedImage.xaml.cs, many lines)", "root_cause": "DisplayInformation.GetForCurrentView() singleton removed on desktop.", "fix": "Followed PATTERNS.md#getforcurrentview: orientation code stubbed to landscape no-ops (turns 46-48)." },
+    { "error": "WMC0909/WMC1111: Cannot resolve DataType local:Scenario (MainPage.xaml)", "root_cause": "Scaffold project namespace (OCR) vs. ported SDK-sample namespace (SDKTemplate) mismatch; xmlns:local pointed at the wrong namespace.", "fix": "Reconciled MainPage to the SDKTemplate namespace so local:Scenario resolved (turn 42)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "OcrCapturedImage.xaml.cs lifecycle wiring", "symptom": "Build failed with CS1061 on Application.Suspending/Resuming after the mechanical namespace rewrite.", "turns_or_retries": "turns 42-45", "root_cause": "No TODO marker and no skill guidance for the removed UWP app-lifecycle events, so the agent only discovered them at build time.", "how_resolved": "Manually removed subscriptions and handlers, kept camera cleanup in OnNavigatingFrom.", "preventable_by": "An 'adaptable' inventory entry (anchor lifecycle) that injects a TODO at each Suspending/Resuming site, plus an explicit removal note in the PATTERNS.md lifecycle section." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 content not pixel-capturable (DirectComposition swapchain / no physical display) and legacy UWP CoreWindow UIA not enumerable.", "workaround": "Scoring graded on the accessible WinUI UIA tree + source checklist (documented in migration-score.json)." }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "scenario": "OCR",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "UWP Application.Current.Suspending/Resuming (and EnteredBackground/LeavingBackground) subscriptions compile-fail with CS1061 after the namespace rewrite; the skill neither inventories nor documents these removed events.",
+      "evidence": "session-log.txt turns 42-45: CS1061 'Application does not contain a definition for Suspending/Resuming' (OcrCapturedImage.xaml.cs 83,84,109,110); grep of the whole skill for Suspending|Resuming returned no matches.",
+      "root_cause": "These UWP app-lifecycle events do not exist on Microsoft.UI.Xaml.Application in WinUI 3 desktop; absent from unsupported-api-inventory.json (no TODO injected) and from PATTERNS.md#lifecycle (activation-only).",
+      "tier": 1,
+      "change": "Added an 'adaptable' entry to unsupported-api-inventory.json matching Application.Current.(Suspending|Resuming) / CoreApplication.(Suspending|Resuming|EnteredBackground|LeavingBackground) / SuspendingEventArgs with anchor 'lifecycle' (Initialize-UwpMigration.ps1 injects an inline TODO at each site). Also extended PATTERNS.md#lifecycle (Tier 3) with a removal + desktop-replacement table.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json ; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Migration agent sees a TODO[migrate-NNN]#lifecycle at each lifecycle-event subscription and removes it (relocating cleanup to window-close/OnNavigatingFrom) before the build, instead of discovering CS1061 at build time.",
+      "falsifiable_check": "On a re-run of any camera/media/sensor UWP app, Initialize-UwpMigration.ps1 emits a TODO at each Application.Suspending/Resuming line and the first build produces zero CS1061 errors for those members."
+    },
+    {
+      "problem": "After swapping a deferred hero CaptureElement to the recommended Border placeholder, the code-behind still drove the old control (.Source, .FlowDirection), causing CS1061 'Border does not contain a definition for Source'.",
+      "evidence": "session-log.txt turns 46-47: CS1061 on Border.Source (OcrCapturedImage.xaml.cs 415,483).",
+      "root_cause": "The CaptureElement section documents the XAML swap but is silent on removing the code-behind that manipulated the original control.",
+      "tier": 3,
+      "change": "Added a sentence to the existing CaptureElement section instructing removal/neutralization of the code-behind (.Source, preview Start/Stop, .FlowDirection) after the placeholder swap, generalized to any deferred hero surface.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent removes the stale code-behind alongside the XAML swap, avoiding the CS1061 cascade on Border/TextBlock placeholders.",
+      "falsifiable_check": "On a re-run migrating a page with a deferred hero surface, no CS1061 'does not contain a definition for Source/FlowDirection' errors appear against the placeholder element."
+    }
+  ],
+  "deferred_to_human": []
+}

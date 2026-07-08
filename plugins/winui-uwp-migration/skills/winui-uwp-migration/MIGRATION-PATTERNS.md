@@ -74,6 +74,13 @@ loads — do **not** rely on `OnNavigatedTo`/`Loaded` code-behind to populate th
 visible content (that text can end up in the UIA tree but never render, leaving the page
 blank). See **Defensive UI for init-heavy and device-dependent pages** in SKILL.md.
 
+After swapping the hero surface to the placeholder, also **remove or neutralize the
+code-behind that drove the original control** — e.g. `PreviewControl.Source = mediaCapture`,
+preview `Start`/`Stop`, `.FlowDirection`, transport-control wiring. Those members do not
+exist on the `Border`/`TextBlock` placeholder and will otherwise fail to build (e.g.
+`CS1061: 'Border' does not contain a definition for 'Source'`). This applies to any deferred
+hero surface (`CaptureElement`, `InkCanvas`, `MapControl`).
+
 <a id="system-backdrop-blank"></a>
 ## Blank window despite a fully populated visual tree — the scaffold's system backdrop
 
@@ -529,6 +536,29 @@ switch (args.Kind)
 ```
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
+
+### `Application.Suspending` / `Resuming` (and `EnteredBackground` / `LeavingBackground`) are removed
+
+`Microsoft.UI.Xaml.Application` (and `CoreApplication`) in WinUI 3 desktop expose **no**
+`Suspending`, `Resuming`, `EnteredBackground`, or `LeavingBackground` events — desktop apps
+are not suspended/resumed the way UWP apps are. Code that did
+`Application.Current.Suspending += …` compiles under UWP but fails to build after the
+namespace rewrite with `CS1061: 'Application' does not contain a definition for 'Suspending'`.
+This is extremely common in UWP samples that release a **camera / MediaCapture, sensor,
+or media** resource, or persist state, when the app suspends.
+
+Replacement:
+
+| UWP lifecycle hook | WinUI 3 desktop replacement |
+|---|---|
+| `Application.Current.Suspending` (release device/save state) | Do the cleanup on the owning `Window.Closed` / `AppWindow.Closing`, or per-page in `OnNavigatingFrom` / `Page.Unloaded`. |
+| `Application.Current.Resuming` (re-acquire device) | Re-acquire lazily on next use, or in the page's `OnNavigatedTo` / `Loaded`. |
+| `EnteredBackground` / `LeavingBackground` | No desktop analog — remove; there is no background/foreground transition. |
+
+Delete the `+=` / `-=` subscriptions **and** the handler bodies (`Application_Suspending`,
+`Application_Resuming`), dropping the `SuspendingOperation.GetDeferral()` / `Complete()`
+plumbing. Move any real resource cleanup those handlers performed into the window-close or
+page-navigation hook above so the resource is still released.
 
 <a id="background-tasks"></a>
 ## Background Tasks

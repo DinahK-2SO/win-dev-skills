@@ -17,6 +17,7 @@
     { "pattern": "\\bDisplayInformation\\b",                                   "name": "DisplayInformation (orientation / AutoRotationPreferences)", "anchor": "getforcurrentview","tier": "safe" },
     { "pattern": "<MediaElement\\b|\\bMediaElement\\b",                        "name": "MediaElement",               "anchor": "controls",         "tier": "safe" },
     { "pattern": "\\bWindow\\.Current\\b",                                     "name": "Window.Current",             "anchor": "windowing",        "tier": "safe" },
+    { "pattern": "Application\\.Current\\.(Suspending|Resuming)|\\bCoreApplication\\.(Suspending|Resuming|EnteredBackground|LeavingBackground)|\\bSuspendingEventArgs\\b", "name": "App lifecycle events (Suspending/Resuming/EnteredBackground/LeavingBackground)", "anchor": "lifecycle", "tier": "safe" },
     { "pattern": "Windows\\.UI\\.ViewManagement\\.ApplicationView|\\bApplicationView\\b", "name": "ApplicationView", "anchor": "windowing",        "tier": "safe" },
     { "pattern": "\\bIBackgroundTask\\b|BackgroundTaskBuilder",                "name": "IBackgroundTask",            "anchor": "background-tasks", "tier": "safe" },
     { "pattern": "\\bWebAuthenticationBroker\\b",                              "name": "WebAuthenticationBroker",    "anchor": "controls",         "tier": "safe" },

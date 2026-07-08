@@ -1,0 +1,15 @@
+{
+  "scenario": "OCR",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add App.Suspending/Resuming (+EnteredBackground/LeavingBackground) to the unsupported-API inventory (anchor 'lifecycle') so the bootstrap injects an inline TODO at each removed-lifecycle-event site — these don't exist in WinUI 3 desktop and otherwise fail with CS1061 only at build time",
+    "Document the removed app-lifecycle events in PATTERNS.md#lifecycle with a UWP->desktop replacement table (move resource cleanup to Window.Closed/AppWindow.Closing or page OnNavigatingFrom)",
+    "Sharpen the CaptureElement deferral guidance: after swapping the hero surface to a Border placeholder, also remove the code-behind (.Source/.FlowDirection/preview Start-Stop) that drove the original control, which otherwise fails with CS1061 on the placeholder"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

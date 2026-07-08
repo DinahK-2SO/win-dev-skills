@@ -1,0 +1,32 @@
+{
+  "scenario": "OCR",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (partial): original UWP app built Release and launched (pid 35008, windowTitle 'OCR C# sample'); scenario-1 golden screenshot captured and rendered fully. Scenario-2 navigation and UserLanguageToggle actuation could NOT be driven in the UWP app because the legacy CoreWindow (hosted by ApplicationFrameHost) exposes no enumerable UIA subtree and this non-interactive session delivers no synthetic mouse input; therefore no UWP behavioral baseline. Grading used the source-derived checklist plus the fully-accessible WinUI 3 UIA tree (structural + behavioral). WinUI content is not pixel-capturable here (DirectComposition swapchain / no physical display -> blank frames), so visual pixel-diff was unavailable; UIA structural + behavioral evidence used instead.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "OCR image file",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_OCR_image_file.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_OCR_image_file.png",
+      "note": "All checklist controls present in WinUI UIA tree (UserLanguageToggle, PreviewImage; plus LanguageList combobox and Sample/Load/Extract command-bar actions). Coverage 2/2. UserLanguageToggle responded when actuated (+3 tokens). UWP scenario-1 golden shows the same control set. UWP toggle could not be actuated (CoreWindow UIA inaccessible), so uwp_responded is unknown, not a regression."
+    },
+    {
+      "name": "OCR captured image",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": "parity/baseline/screenshots/02_OCR_captured_image.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_OCR_captured_image.png",
+      "note": "Checklist control PreviewImage present; page renders CameraButton + defensive fallback StatusBlock 'No camera device!' (non-blank). Coverage 1/1. Camera capture is hardware-gated; original UWP scenario 2 is equally camera-dependent, so no migration-attributable regression. UWP scenario-2 golden unavailable (CoreWindow could not be navigated); UWP baseline screenshot is the default landing frame."
+    }
+  ]
+}

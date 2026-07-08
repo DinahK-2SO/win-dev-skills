@@ -1,0 +1,14 @@
+{
+  "scenario": "OCR",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "OCR image file", "status": "pass", "reason": "All checklist controls present in WinUI UIA tree; UserLanguageToggle responded when actuated.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "OCR captured image", "status": "pass", "reason": "PreviewImage present; defensive 'No camera device!' fallback rendered; camera is hardware-gated in both apps.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Both scenarios PASS (100/100). No parity discrepancies. Improvement value comes from build-log friction, not from a scored regression: the migration hit CS1061 errors on the removed UWP Application.Suspending/Resuming lifecycle events, which the skill neither inventories nor documents."
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "OCR",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "After swapping a deferred hero CaptureElement to the recommended Border placeholder, the build failed with CS1061 'Border does not contain a definition for Source' because the code-behind still drove the old control (PreviewControl.Source = mediaCapture / null, .FlowDirection).",
+      "evidence": "session-log.txt turns 46-47: 'CS1061: Border does not contain a definition for Source' (OcrCapturedImage.xaml.cs 415,483); agent replaced .Source assignments with Visibility toggling.",
+      "covered_at": "MIGRATION-PATTERNS.md, section 'CS0246 / WMC0001: CaptureElement could not be found' (lines 53-75) — recommends swapping the hero surface to a visible Border placeholder.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add one sentence to that existing section noting that after the XAML swap the code-behind that drove the original control (`.Source`, preview Start/Stop, `.FlowDirection`, transport-control wiring) must also be removed/neutralized, since those members do not exist on the Border placeholder and will not compile.",
+      "generalizes": "The XAML-swap-to-placeholder pattern applies to any deferred hero surface (CaptureElement, InkCanvas, MapControl). Every one has code-behind that manipulates the original control, so the same CS1061 cascade recurs unless the doc reminds the agent to clean up the code-behind."
+    }
+  ]
+}

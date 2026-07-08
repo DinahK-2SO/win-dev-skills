@@ -1,0 +1,17 @@
+{
+  "scenario": "OCR",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migration failed to build with CS1061 because Microsoft.UI.Xaml.Application has no Suspending/Resuming events; the UWP camera page subscribed to Application.Current.Suspending/Resuming for camera cleanup.",
+      "evidence": "session-log.txt turns 42-45: 'CS1061: Application does not contain a definition for Suspending ... Resuming' (OcrCapturedImage.xaml.cs 83,84,109,110); agent deleted the subscriptions and handlers.",
+      "skill_search": "grep for Suspending|Resuming|EnteredBackground|LeavingBackground across skills/winui-uwp-migration (SKILL.md, MIGRATION-PATTERNS.md, scripts, unsupported-api-inventory.json)",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "UWP app-lifecycle events (Application/CoreApplication Suspending, Resuming, EnteredBackground, LeavingBackground) were removed in WinUI 3 desktop. They are not in unsupported-api-inventory.json (so no TODO is injected) and the PATTERNS.md#lifecycle section only covers OnLaunched/activation, not these events.",
+      "proposed_fix": "Add an 'adaptable' entry to scripts/unsupported-api-inventory.json matching Application.Current.(Suspending|Resuming) / CoreApplication.(Suspending|Resuming|EnteredBackground|LeavingBackground) / SuspendingEventArgs with anchor 'lifecycle', so Initialize-UwpMigration.ps1 injects an inline TODO at each call site; AND extend the PATTERNS.md#lifecycle section to state the events are gone and give the desktop replacement (remove, or hook AppWindow.Closing / window Closed / page OnNavigatingFrom for cleanup).",
+      "generalizes": "Nearly every non-trivial UWP app subscribes to Suspending/Resuming (or EnteredBackground/LeavingBackground) to release cameras, media, sensors, or persist state on suspend. These events do not exist in WinUI 3 desktop, so any such app hits the same CS1061 at build time. A Tier-1 inventory pattern + a Tier-3 note fixes it once for all scenarios."
+    }
+  ]
+}

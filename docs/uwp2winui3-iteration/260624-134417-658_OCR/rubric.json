@@ -1,0 +1,27 @@
+{
+  "scenario": "OCR",
+  "featureName": "OCR C# sample",
+  "source": "uwp-samples-standalone/Samples/OCR/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "OCR image file",
+      "class": "OcrFileImage",
+      "controls": ["UserLanguageToggle (ToggleSwitch)", "PreviewImage (Image)"],
+      "actions": ["UserLanguageToggle (toggle)"],
+      "outputs": ["StatusBorder/StatusBlock (status text)"],
+      "weight": 1
+    },
+    {
+      "number": 2,
+      "title": "OCR captured image",
+      "class": "OcrCapturedImage",
+      "controls": ["PreviewImage (Image)"],
+      "actions": [],
+      "outputs": ["StatusBlock (status text)"],
+      "notes": "Camera-capture scenario; hardware-gated. Requires a visible defensive fallback when no camera is present.",
+      "weight": 1
+    }
+  ],
+  "gradingRule": "score = round(100 * (pass + 0.5*partial) / features_total)"
+}

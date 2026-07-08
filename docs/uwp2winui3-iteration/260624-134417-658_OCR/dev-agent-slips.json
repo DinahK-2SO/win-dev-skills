@@ -1,0 +1,21 @@
+{
+  "scenario": "OCR",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "WMC0909/WMC1111: Cannot resolve DataType local:Scenario in MainPage.xaml — scaffold project namespace (OCR) vs. ported SDK-sample namespace (SDKTemplate) mismatch in the xmlns:local prefix.",
+      "evidence": "session-log.txt turn 42: 'WMC0909: Cannot resolve DataType local:Scenario' / 'WMC1111: DataTemplates containing x:Bind need a DataType'; agent reconciled MainPage to the SDKTemplate namespace and the build proceeded.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'x:Bind and compiled bindings' (line 808) — 'look for stale UWP namespace prefixes in the XAML'; SKILL.md Fidelity guidance to preserve x:Class and reconcile namespaces during shell conversion.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Reconciling an xmlns:local prefix to the class's actual namespace is standard XAML knowledge already flagged by the x:Bind section; a capable model resolves it from the compiler error alone on any re-run. Adding scaffold-vs-SDKTemplate-specific prose would be a one-off, not a general rule."
+    },
+    {
+      "problem": "DisplayInformation.GetForCurrentView() / orientation members caused CS0103 'displayInformation does not exist'.",
+      "evidence": "session-log.txt turns 46-48; the file already carried TODO[migrate-002..010]: see PATTERNS.md#getforcurrentview injected by the bootstrap.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#getforcurrentview (lines 394-422), including a dedicated 'DisplayInformation is view-bound' subsection and a member-by-member replacement table; plus the injected inline TODOs.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill covers this prominently and the bootstrap injected TODOs at each site; the agent did ultimately fix it. No skill change needed."
+    }
+  ]
+}
