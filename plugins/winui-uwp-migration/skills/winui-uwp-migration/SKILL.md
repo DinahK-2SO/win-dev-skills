@@ -268,6 +268,15 @@ the standard title bar, so this both restores reliable rendering and matches the
 original. See [Blank window despite a fully populated visual tree](./MIGRATION-PATTERNS.md#system-backdrop-blank)
 and [the extended-title-bar trigger](./MIGRATION-PATTERNS.md#extend-titlebar-blank).
 
+**A third blank cause survives a fully de-composed window:** a WinUI 3 `Window` has **no page
+background of its own**, so if the content root paints no opaque `Background` the window still
+renders blank white — even with no backdrop, no `<TitleBar>`, and no `ExtendsContentIntoTitleBar`.
+The usual trigger is inherited from the UWP source: the default page template roots each page in
+`Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"`, and that key is **UWP-only —
+not defined in WinUI 3**, so it resolves to null. Remap it to an existing WinUI 3 brush (e.g.
+`{ThemeResource SolidBackgroundFillColorBaseBrush}`) on the shell page's root panel. The validator
+Section 9 WARNs on this brush. See [Non-resolving page-background brush](./MIGRATION-PATTERNS.md#page-background-brush-blank).
+
 ## Post-Migration
 
 ### Restore sandboxing (if needed)

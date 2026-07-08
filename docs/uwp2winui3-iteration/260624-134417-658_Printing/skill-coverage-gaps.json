@@ -1,0 +1,15 @@
+{
+  "scenario": "Printing",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The blank-window guidance is framed almost entirely around the scaffold's composition-dependent triggers (SystemBackdrop / <TitleBar> / ExtendsContentIntoTitleBar). An agent that correctly removes all of those still ships a blank window because the missing-opaque-background cause is not surfaced as a co-equal, checkable cause.",
+      "evidence": "MainWindow.xaml in the migrated app has none of the three triggers, yet migration-score.json reports blank on all 6 scenarios. Validate-UwpMigration.ps1 Section 9 only scans for backdrop/TitleBar/ExtendsContentIntoTitleBar and would PASS this app while it renders blank.",
+      "covered_at": "MIGRATION-PATTERNS.md#system-backdrop-blank and SKILL.md 'Blank window even though the visual tree is fully populated (scaffold system backdrop)'; Validate-UwpMigration.ps1 Section 9.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Sharpen the existing blank-window sections so 'content root has no opaque background' is listed as a distinct blank-window cause alongside the backdrop/title-bar triggers (not merely a footnote), and extend Validate-UwpMigration.ps1 Section 9 to also warn on the non-resolving `ApplicationPageBackgroundThemeBrush` so the check that already exists for the sibling cause covers this one too.",
+      "generalizes": "Makes the one place agents already look for blank-window causes cover the most common blank cause (default page background brush) too, benefiting every migration whose window has no explicit opaque root background."
+    }
+  ]
+}

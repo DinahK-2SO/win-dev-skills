@@ -1,0 +1,15 @@
+{
+  "feature": "Printing C# Sample",
+  "source": "uwp-samples-standalone/Samples/Printing/cs",
+  "dimensions": ["structural", "visual", "behavioral"],
+  "blankScreenshotRule": "A scenario that renders a blank/empty frame is FAIL regardless of structural coverage.",
+  "sharedOutput": ["StatusBlock", "StatusBorder"],
+  "scenarios": [
+    { "number": 1, "title": "Basic", "controls": ["Print"], "action": "Click Print", "expected": "Print preview / print contract; StatusBlock updates" },
+    { "number": 2, "title": "Standard Options", "controls": [], "action": null, "expected": "Prints via standard options; StatusBlock updates" },
+    { "number": 3, "title": "Custom Options", "controls": ["Print"], "action": "Click Print", "expected": "Print preview with custom options; StatusBlock updates" },
+    { "number": 4, "title": "Page Range", "controls": ["Print"], "action": "Click Print", "expected": "Print preview with page-range option; StatusBlock updates" },
+    { "number": 5, "title": "Photos", "controls": ["Print"], "action": "Click Print", "expected": "Photo print preview; StatusBlock updates" },
+    { "number": 6, "title": "Disable Preview", "controls": ["Print"], "action": "Click Print", "expected": "Direct print (no preview); StatusBlock updates" }
+  ]
+}

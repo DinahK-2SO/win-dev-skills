@@ -1,0 +1,36 @@
+{
+  "scenario": "Printing",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1 / Test-AppLaunch.ps1", "evidence": "Agent used the process-alive smoke gate and it reported green; build succeeded (metrics.builds=true, metrics.runs=true)." },
+    { "tool": "Get-WinEvent (Application log)", "evidence": "build-events L996 — agent read Event IDs 1000/1026 to diagnose the Microsoft.UI.Xaml.dll startup crash." }
+  ],
+  "tools_problematic": [
+    { "tool": "Test-AppLaunch.ps1 / Validator Section 7 (process-alive smoke)", "problem": "Reports green on a window that renders completely blank; UIA tree is fully populated so 'controls present' also passes while nothing paints.", "evidence": "migration-score.json verdict_basis: structural gate 83.3 pass=5 yet every scenario frame is blank white." }
+  ],
+  "tool_limitations": [
+    { "tool": "migration agent runtime verification", "limitation": "The migration agent has no screenshot/pixel capability (parity + uwp-app-runner skills are disabled for it), so it cannot detect a blank-but-populated window; it can only see the UIA tree, which passes.", "suggested_tweak": "Give the agent a deterministic, ignore-proof static signal (validator check) for the known blank-window causes rather than relying on a visual check it cannot perform." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#system-backdrop-blank (lines ~84 and ~152) and SKILL.md blank-window section", "wrong": "Recommends `{ThemeResource ApplicationPageBackgroundThemeBrush}` as the opaque root Background and states a de-composed WinUI 3 window 'uses its normal opaque background'.", "correct": "`ApplicationPageBackgroundThemeBrush` is a UWP-only theme resource; it is NOT defined in WinUI 3, so it resolves to null and leaves the root transparent. A WinUI 3 Window has no page background of its own — the content root must paint an opaque brush that EXISTS in WinUI 3 (e.g. `SolidBackgroundFillColorBaseBrush`)." }
+  ],
+  "special_apis": [
+    { "api": "PrintManagerInterop.GetForWindow(hwnd) / ShowPrintUIForWindowAsync(hwnd)", "special_handling": "Correctly applied by the agent (PrintHelper.cs) per MIGRATION-PATTERNS.md:336 — printing interop is already covered by the skill." }
+  ],
+  "errors_encountered": [
+    { "error": "Startup crash in Microsoft.UI.Xaml.dll during app launch", "root_cause": "Invalid `{StaticResource}` theme-brush references in Styles.xaml that must be `{ThemeResource}` in WinUI 3.", "fix": "Agent rewrote the offending Styles.xaml references to `{ThemeResource}` (build-events L959-L1012) and rebuilt; crash resolved." },
+    { "error": "Every scenario renders a blank white window despite a fully populated UIA tree; MainWindow.xaml is clean (no SystemBackdrop, no TitleBar, no ExtendsContentIntoTitleBar).", "root_cause": "The root Grid's `Background=\"{ThemeResource ApplicationPageBackgroundThemeBrush}\"` does not resolve in WinUI 3 (UWP-only brush) and the WinUI 3 Window has no default opaque page background, so nothing paints an opaque surface -> transparent root -> blank white capture.", "fix": "NOT fixed by the agent (undetected). General fix: remap `ApplicationPageBackgroundThemeBrush` to a WinUI 3 brush that exists and ensure the window content root paints an opaque background." },
+    { "error": "App crashes when Printing the Photos scenario (Scenario 5), making Disable Preview (Scenario 6) unreachable.", "root_cause": "Not captured — the migration agent never exercised the print path; the scorer observed the crash but no .NET exception type was recorded. Photos uses an async `GetPrintPreviewPage`/`AddPrintPages` path that loads BitmapImages from files.", "fix": "Unknown — insufficient evidence to root-cause to a generalizable skill gap; printing interop itself is already correct." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Startup crash triage", "symptom": "App crashed at launch in Microsoft.UI.Xaml.dll", "turns_or_retries": "~build-events L959-L1200 (many powershell probes into AppX/xbf output)", "root_cause": "StaticResource theme-brush references invalid under WinUI 3.", "how_resolved": "Switched them to ThemeResource, rebuilt.", "preventable_by": "Already covered by the DynamicResource/StaticResource->ThemeResource guidance; a slip, not a gap." },
+    { "where": "Final render verification", "symptom": "Agent shipped a window that renders 100% blank white on every scenario without noticing.", "turns_or_retries": "n/a — never took a screenshot (no such tool in build-events)", "root_cause": "Blank caused by non-resolving UWP background brush + WinUI 3 window having no default opaque background; the only verification available (UIA/process-alive) passes on a blank window.", "how_resolved": "Not resolved.", "preventable_by": "A validator check that flags `ApplicationPageBackgroundThemeBrush` usage / a window content root with no opaque Background, plus corrected docs that a de-composed WinUI 3 window still needs an explicit opaque background brush that exists in WinUI 3." }
+  ],
+  "missing_tooling": [
+    { "need": "Static detection of 'window content root paints no opaque background' / UWP-only non-resolving theme brush keys.", "would_have_saved": "The entire blank-render failure (0/6 features) — the dominant score loss." }
+  ],
+  "env_issues": [
+    { "issue": "Parity screenshots are taken in an automated-capture session where any non-opaque/transparent window root renders blank white.", "workaround": "Ensure the migrated window content root paints an opaque background with a brush that exists in WinUI 3." }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "scenario": "Printing",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 6,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 6,
+  "uwp_capture_status": "ok: original UWP app launched (window 'Printing C# Sample', PID 54136) and its initial 'Basic' frame was captured as the golden reference (notes/uwp_golden_basic.png). Per-scenario navigation and per-control actuation of the UWP app could NOT be automated on this box: the UWP CoreWindow is hosted by ApplicationFrameHost and exposes an opaque UIA tree (only a Pane), and synthetic mouse input was non-functional in this session (SetCursorPos/mouse_event no-op). So the UWP behavioral baseline is limited to the visual golden of the initial page.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "structural_gate_score": 83.3,
+  "behavioral_regressions": 2,
+  "verdict_basis": "Structural gate (83.3, pass=5/fail=1) reflects only the UIA tree, which is fully populated. Eyes-on visual judgment is decisive here: the migrated WinUI 3 app renders a COMPLETELY BLANK white window on every scenario (confirmed by two independent capture methods: window-bitmap and screen-region GDI). By the parity skill's own definitions, pass and partial both require a NON-BLANK screenshot; every WinUI scenario frame is blank, so each scenario is fail. Additionally the app crashes when Printing the Photos scenario, which also makes Disable Preview unreachable. User-visible fidelity to the UWP original is zero.",
+  "notes": "The migration did real work (all 6 nav scenarios present in the UIA tree; Print handlers on Basic/Custom Options/Page Range fire and open the print experience; runtime status text is set). But none of it is visible to a user because the pages do not paint, and the Photos print path is fatal. A future skill fix that makes the pages render should move this score sharply upward.",
+  "features": [
+    {
+      "name": "Basic",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "uwp_golden_basic.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Basic.png",
+      "note": "Structural cov 1/1; Print invoke opened the print experience (behaviorally alive), BUT the page renders blank white. Blank render = fail."
+    },
+    {
+      "name": "Standard Options",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Standard_Options.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Standard_Options.png",
+      "note": "No interactive control expected (matches UWP). Page renders blank white. Blank render = fail. (UWP baseline frame is a copy of the initial page; UWP per-scenario nav could not be automated.)"
+    },
+    {
+      "name": "Custom Options",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Custom_Options.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Custom_Options.png",
+      "note": "Structural cov 1/1; Print invoke opened the print experience, BUT the page renders blank white. Blank render = fail."
+    },
+    {
+      "name": "Page Range",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Page_Range.png",
+      "winui_screenshot": "parity/winui3/screenshots/04_Page_Range.png",
+      "note": "Structural cov 1/1; Print invoke opened the print experience, BUT the page renders blank white. Blank render = fail."
+    },
+    {
+      "name": "Photos",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/05_Photos.png",
+      "winui_screenshot": "parity/winui3/screenshots/05_Photos.png",
+      "note": "Page renders blank white AND Print is dead (0 tokens, noop) and CRASHES the app process. Blank + dead control + crash = fail."
+    },
+    {
+      "name": "Disable Preview",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/06_Disable_Preview.png",
+      "winui_screenshot": null,
+      "note": "No WinUI frame was saved (0-byte capture). Unreachable— the app had already crashed after the Photos Print. 0-byte screenshot, control not captured (cov 0/1). Structural gate also marks this fail."
+    }
+  ]
+}

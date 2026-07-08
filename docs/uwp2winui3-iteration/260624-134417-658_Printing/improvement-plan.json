@@ -1,0 +1,30 @@
+{
+  "scenario": "Printing",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated app renders a blank white window on every scenario despite a clean MainWindow (no backdrop / title-bar triggers) and a fully populated UIA tree; score 0/6.",
+      "evidence": "migration-score.json (score 0, all 6 fail 'renders blank white'); discrepancies.json blank-render/all-scenarios; migrated MainWindow.xaml has no backdrop and MainPage.xaml root Grid uses Background=\"{ThemeResource ApplicationPageBackgroundThemeBrush}\".",
+      "root_cause": "`ApplicationPageBackgroundThemeBrush` is a UWP-only theme brush not defined in WinUI 3 -> resolves to null -> transparent content root. A WinUI 3 Window has no page background of its own, so nothing opaque paints -> blank white in automated capture. The skill previously RECOMMENDED this brush as the opaque fallback and asserted a de-composed window 'uses its normal opaque background' (both wrong).",
+      "tier": 1,
+      "change": "Added a Tier-1 WARN in Validate-UwpMigration.ps1 (new Section 9b) that scans migrated XAML for `ApplicationPageBackgroundThemeBrush` and instructs remapping to an existing WinUI 3 opaque brush. Ignore-proof, runs in the validation gate. Verified it fires on all 8 offending files in this trial.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The migration gate flags the non-resolving brush before the app is scored, prompting an opaque-background remap.",
+      "falsifiable_check": "On a re-run, Validate-UwpMigration.ps1 emits '[WARN] ... reference ApplicationPageBackgroundThemeBrush ...'; after the agent remaps the brush, the WARN clears and parity screenshots are non-blank (features move fail->pass)."
+    },
+    {
+      "problem": "Skill docs actively recommended the non-resolving `ApplicationPageBackgroundThemeBrush` and framed blank-window purely around backdrop/title-bar triggers, so an agent that removed those still shipped a blank window.",
+      "evidence": "MIGRATION-PATTERNS.md ~line 152 recommended '{ThemeResource ApplicationPageBackgroundThemeBrush}'; blank-window sections implied a de-composed window auto-gets an opaque background.",
+      "root_cause": "Wrong guidance + under-emphasis of the 'no opaque content-root background' cause.",
+      "tier": 3,
+      "change": "Corrected the wrong recommendation; added a new distinct-cause section 'Third blank-window cause: no opaque content-root background' (#page-background-brush-blank) in MIGRATION-PATTERNS.md; added a UWP-only-brush-keys note to the DynamicResource->ThemeResource resource section; surfaced the third cause as co-equal in SKILL.md's blank-window section.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agents remap the brush and give the content root an opaque WinUI 3 background even on a fully de-composed window.",
+      "falsifiable_check": "grep of the migration skill returns explicit 'ApplicationPageBackgroundThemeBrush is UWP-only / not defined in WinUI 3' guidance and a remap to SolidBackgroundFillColorBaseBrush; re-run produces non-blank parity screenshots."
+    }
+  ],
+  "deferred_to_human": [
+    "Photos-scenario Print crash root cause was never captured (async photo-preview path); if it recurs across scenarios, capture the .NET exception in the eval harness so a generalizable fix can be evidenced."
+  ]
+}

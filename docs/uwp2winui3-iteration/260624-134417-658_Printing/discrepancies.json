@@ -1,0 +1,34 @@
+{
+  "feature": "Printing C# Sample",
+  "discrepancies": [
+    {
+      "severity": "critical",
+      "type": "blank-render",
+      "scope": "all-scenarios",
+      "summary": "Every scenario renders a blank white window; no content paints. UIA tree is fully populated but nothing is visible. Confirmed by both window-bitmap and screen-region capture.",
+      "evidence": ["notes/winui_fresh.png", "notes/winui_screencap.png", "parity/winui3/screenshots/01_Basic.png", "parity/winui3/screenshots/05_Photos.png"]
+    },
+    {
+      "severity": "critical",
+      "type": "crash",
+      "scenario": "Photos",
+      "summary": "Invoking Print on the Photos scenario produced no response then crashed the app process, making Disable Preview unreachable.",
+      "evidence": ["parity/winui3/capture-manifest.json"]
+    },
+    {
+      "severity": "high",
+      "type": "dead-control",
+      "scenario": "Photos",
+      "control": "Print",
+      "summary": "Print button invoked with 0 new tokens (noop) and fatal crash."
+    },
+    {
+      "severity": "high",
+      "type": "unreachable",
+      "scenario": "Disable Preview",
+      "summary": "Scenario not reachable after the Photos crash; 0-byte screenshot, control not captured (coverage 0/1)."
+    }
+  ],
+  "workedButBlank": ["Basic", "Custom Options", "Page Range"],
+  "structuralGate": { "score": 83.3, "pass": 5, "partial": 0, "fail": 1, "note": "structural-only; cannot see that pages render blank" }
+}

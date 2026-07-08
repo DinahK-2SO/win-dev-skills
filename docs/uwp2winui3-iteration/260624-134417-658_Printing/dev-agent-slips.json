@@ -1,0 +1,21 @@
+{
+  "scenario": "Printing",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Startup crash in Microsoft.UI.Xaml.dll caused by invalid `{StaticResource}` theme-brush references in Styles.xaml.",
+      "evidence": "build-events.jsonl L959 ('The crash is in Microsoft.UI.Xaml.dll at startup. Let me check the Styles.xaml for invalid {StaticResource} references that should be {ThemeResource}') through L1012 (rebuild after fixing Styles.xaml).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'Resource references: DynamicResource -> ThemeResource' (line ~779), which explicitly says to migrate system-brush/style references to {ThemeResource}.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already prominently documents the StaticResource/DynamicResource -> ThemeResource rule and the agent itself recalled and applied it within a couple of turns. A capable re-run resolves this without any skill edit."
+    },
+    {
+      "problem": "App crashes when Printing the Photos scenario (Scenario 5), making Disable Preview (Scenario 6) unreachable.",
+      "evidence": "discrepancies.json crash/Photos and unreachable/Disable Preview; migration-score.json Photos note 'Print is dead (0 tokens, noop) and CRASHES the app process'. No .NET exception type was captured anywhere; the migration agent never exercised the print path (no print run in build-events.jsonl).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md:336 documents the WinUI 3 printing interop (`PrintManagerInterop.GetForWindow(hwnd)` / `ShowPrintUIForWindowAsync(hwnd)`), which PrintHelper.cs applied correctly.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Printing interop — the only clearly generalizable printing concern — is already covered and was applied correctly. The crash has no captured root cause and is confined to one scenario's async photo-preview path, so there is no falsifiable, general skill change to make. Treat as scenario-specific; do not edit the skill on speculation."
+    }
+  ]
+}

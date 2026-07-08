@@ -1,0 +1,18 @@
+{
+  "scenario": "Printing",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add Validate-UwpMigration.ps1 WARN for UWP-only ApplicationPageBackgroundThemeBrush (not defined in WinUI 3 -> null -> blank window); verified it fires on all 8 offending XAML files in this trial",
+    "Fix MIGRATION-PATTERNS.md: stop recommending the non-resolving ApplicationPageBackgroundThemeBrush; add 'no opaque content-root background' as a distinct third blank-window cause and a UWP-only-brush-keys remap note (-> SolidBackgroundFillColorBaseBrush)",
+    "Surface the third blank-window cause co-equally in SKILL.md so a fully de-composed window still gets an explicit opaque background"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Photos-scenario Print crash: no .NET exception captured; needs harness-level crash diagnostics before a generalizable skill fix can be justified"
+  ]
+}

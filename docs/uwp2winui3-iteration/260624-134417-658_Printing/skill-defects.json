@@ -1,0 +1,17 @@
+{
+  "scenario": "Printing",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated app renders a completely blank white window on every scenario even though MainWindow.xaml is clean (no SystemBackdrop, no <TitleBar>, no ExtendsContentIntoTitleBar) and the UIA tree is fully populated.",
+      "evidence": "migration-score.json: score 0, all 6 features fail with note 'page renders blank white'; discrepancies.json blank-render/all-scenarios. Migrated MainWindow.xaml has only `<Frame x:Name=\"RootFrame\" />` (no backdrop). Migrated MainPage.xaml root is `<Grid Background=\"{ThemeResource ApplicationPageBackgroundThemeBrush}\">`.",
+      "skill_search": "grep 'ApplicationPageBackgroundThemeBrush', 'blank', 'opaque background' in winui-uwp-migration (SKILL.md, MIGRATION-PATTERNS.md, Validate-UwpMigration.ps1)",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md ~line 152: 'give the Window's root panel an explicit opaque Background (e.g. {ThemeResource ApplicationPageBackgroundThemeBrush}) so rendering never depends on DWM composition.' and ~line 103/266 claim removing the backdrop lets 'the window use its normal opaque background'.",
+      "root_cause": "`ApplicationPageBackgroundThemeBrush` is a UWP-only theme resource that is NOT defined in WinUI 3, so it resolves to null and the content root is transparent. A WinUI 3 Window has no default page background of its own, so a transparent content root paints nothing -> blank white in automated capture. The skill both recommends the non-resolving brush AND asserts a false 'normal opaque background' default, so an agent that correctly removed the backdrop still ships a blank window.",
+      "proposed_fix": "Correct the guidance in MIGRATION-PATTERNS.md and SKILL.md: (a) state that a WinUI 3 Window has no default page background, so after de-composing the window you MUST give the content root an explicit opaque Background; (b) state that `ApplicationPageBackgroundThemeBrush` (and other UWP-only theme brush keys) do NOT exist in WinUI 3 and must be remapped to a brush that does (e.g. `{ThemeResource SolidBackgroundFillColorBaseBrush}`); add this to the DynamicResource->ThemeResource resource section. Add a Tier-1 validator WARN that flags `ApplicationPageBackgroundThemeBrush` usage in migrated XAML with the remap.",
+      "generalizes": "Nearly every UWP Page sets `Grid Background=\"{ThemeResource ApplicationPageBackgroundThemeBrush}\"` (it is the default in the UWP page template), and every migrated app hosts pages in a WinUI 3 Window that has no default opaque background. So this exact non-resolving-brush-> blank-window failure recurs across essentially all UWP->WinUI 3 migrations whose original pages used the default page background brush."
+    }
+  ]
+}

@@ -149,12 +149,46 @@ the `<Window.SystemBackdrop>` block:
 2. Remove `ExtendsContentIntoTitleBar = true;` and `SetTitleBar(...);` from `MainWindow.xaml.cs`.
 3. Give the window a normal opaque frame — the standard system title bar. If you must keep an
    extended title bar for parity with the original, give the `Window`'s root panel an explicit
-   opaque `Background` (e.g. `{ThemeResource ApplicationPageBackgroundThemeBrush}`) so rendering
-   never depends on DWM composition.
+   opaque `Background` **using a brush that exists in WinUI 3** so rendering never depends on DWM
+   composition. Do **not** use `{ThemeResource ApplicationPageBackgroundThemeBrush}` — that key is
+   UWP-only and is **not defined in WinUI 3**, so it resolves to null and leaves the root
+   transparent (see [Non-resolving page-background brush](#page-background-brush-blank) below). Use
+   an existing WinUI 3 brush such as `{ThemeResource SolidBackgroundFillColorBaseBrush}`.
 
 This is also the faithful-parity choice: UWP samples used the standard system title bar, not a
 transparent extended one. Treat the backdrop and the extended title bar as **one** decision —
 de-compose the window fully or not at all.
+
+<a id="page-background-brush-blank"></a>
+### Third blank-window cause on a clean window: no opaque content-root background
+
+De-composing the window (no backdrop, no extended title bar) is **necessary but still not
+sufficient**. A WinUI 3 `Window` has **no page background of its own** — unlike a UWP `Page`,
+the framework does not paint an opaque surface behind your content. If the window's content root
+does not itself paint an opaque `Background`, the whole window renders **blank white** in
+headless / VM / RDP / automated-capture sessions, even with a fully populated visual tree and a
+green smoke launch. This fires on a completely clean `MainWindow` (no `<Window.SystemBackdrop>`,
+no `<TitleBar>`, no `ExtendsContentIntoTitleBar`), so it is easy to miss after you have removed
+the two triggers above.
+
+The most common trigger is carried straight over from the UWP source: the default UWP page
+template roots each page in
+`<Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">`. **`ApplicationPageBackgroundThemeBrush`
+is UWP-only and is not defined in WinUI 3**, so it resolves to null and the root stays
+transparent → blank window. `Validate-UwpMigration.ps1` Section 9 WARNs when it finds this brush.
+
+**Fix — ensure the content root paints an opaque background with a brush that exists in WinUI 3.**
+Remap the UWP-only key to a WinUI 3 Fluent brush:
+
+```xml
+<!-- was: Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" (UWP-only, resolves to null) -->
+<Grid Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
+```
+
+Any opaque WinUI 3 theme brush works (`SolidBackgroundFillColorBaseBrush`,
+`LayerFillColorDefaultBrush`, `ApplicationPageBackgroundThemeBrush` has **no** substitute key —
+pick a real one). Applying it on the shell page's root panel (the element hosting the content
+`Frame`) covers every navigated scenario at once.
 
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
@@ -793,6 +827,8 @@ WinUI 3 ships Fluent theme resources under `ThemeResource`. UWP code that used `
 ```
 
 The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-reference with the [Fluent Design colour palette](https://learn.microsoft.com/windows/apps/design/style/xaml-theme-resources).
+
+**Some UWP theme-brush keys were removed entirely — they resolve to `null` in WinUI 3, not to a default.** The most impactful is `ApplicationPageBackgroundThemeBrush`, the default root-`Grid` background in the UWP page template: it is **not defined in WinUI 3**, so carrying it over leaves the content root transparent and — because a WinUI 3 `Window` has no page background of its own — the whole window renders blank white in automated capture. Remap it (and any other non-resolving `*ThemeBrush` key) to an existing WinUI 3 Fluent brush, e.g. `{ThemeResource SolidBackgroundFillColorBaseBrush}`. See [Non-resolving page-background brush](#page-background-brush-blank).
 
 ### Controls that need element-level swaps
 
