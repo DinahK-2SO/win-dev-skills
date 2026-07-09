@@ -1,0 +1,21 @@
+{
+  "scenario": "RadioManager",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Radio enumeration list is empty in the WinUI app (no per-radio ToggleSwitch rows).",
+      "evidence": "migration-score.json feature 'Radio enumeration list with per-radio toggle' verdict=pass, uwp_responded=false, winui_responded=false — the list is empty in BOTH apps because radio access is denied / no controllable radios on this machine.",
+      "covered_clearly_at": "SKILL.md Step 1 fidelity rules (preserve OnNavigatedTo / code-behind verbatim) — the WinUI OnNavigatedTo mirrors the UWP handler; the empty state is correct ground truth, not a defect.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Not a defect at all: the empty radio list matches the UWP golden on this hardware. Nothing to change; the behavior is hardware/permission-gated and equivalent in both apps."
+    },
+    {
+      "problem": "Theme differs (WinUI light vs UWP dark) and the Microsoft footer logo image is absent from the WinUI tree.",
+      "evidence": "discrepancies.json 'theme-and-logo' severity=cosmetic; rubric has no theme/logo feature; not a scored requirement.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'Resource references: DynamicResource -> ThemeResource' and the theme-brush remapping guidance already cover theming; assets are covered by the Package.appxmanifest asset-reconciliation section.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Cosmetic and scenario-specific; theming and asset handling are already documented. A capable re-run would not change the scored outcome, so no skill edit is warranted."
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "scenario": "RadioManager",
+  "uwp_launchable": true,
+  "score": 75,
+  "features_total": 4,
+  "features_pass": 3,
+  "features_partial": 0,
+  "features_fail": 1,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "notes": "UWP app launched via uwp-app-runner (window 'RadioManager C# SDK Sample'); the runner's verify stage was impatient (ok:false, no crash signature) but the app genuinely ran and was captured. WinUI app built and ran (PID 38584). Structural gate (Compare-Parity) returned PASS 100/100, but the checklist had 0 controls/0 actions (radio rows are runtime-generated), so it did not catch the missing Status area — found by direct UIA + visual comparison. Radio toggles are hardware/permission-gated and empty in both apps, so per-radio ToggleSwitch behavior is unverifiable on this machine.",
+  "features": [
+    {
+      "name": "Toggle Radios navigation item",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Toggle_Radios.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Toggle_Radios.png",
+      "note": "Both apps show the '1) Toggle Radios' navigation entry and open the scenario page when selected."
+    },
+    {
+      "name": "Scenario description text",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Toggle_Radios.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Toggle_Radios.png",
+      "note": "Both show the 'Description:' header and 'Enumerate Radios, and display toggles for each one'."
+    },
+    {
+      "name": "Radio enumeration list with per-radio toggle",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Toggle_Radios.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Toggle_Radios.png",
+      "note": "Radio list content area is empty in both apps (no controllable radios / access not granted). WinUI OnNavigatedTo code mirrors the UWP handler. Per-radio ToggleSwitch behavior is hardware-gated and cannot be exercised on this machine, so the empty state matches the UWP ground truth."
+    },
+    {
+      "name": "Status notification area",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Toggle_Radios.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Toggle_Radios.png",
+      "note": "UWP shows a static 'Status:' label plus the error banner 'App is not allowed to control radios.'. In WinUI the StatusPanel (StatusLabel + StatusBorder + StatusBlock) is defined in MainPage.xaml but does not render — absent from both the UIA capture and a live depth-8 inspect. The status feedback area is missing entirely."
+    }
+  ]
+}

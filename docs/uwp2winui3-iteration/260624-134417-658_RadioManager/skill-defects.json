@@ -1,0 +1,17 @@
+{
+  "scenario": "RadioManager",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The SDK-sample shell content region places a persistent bottom Status/NotifyUser bar with a RelativePanel fill-graph (Frame = RelativePanel.AlignTopWithPanel + RelativePanel.Above=StatusPanel; StatusPanel = RelativePanel.AlignBottomWithPanel). Migrated verbatim, this graph does not reliably lay out the StatusPanel in WinUI 3, so the entire Status area (StatusLabel 'Status:' + StatusBorder + StatusBlock) is absent from the render and UIA tree while the app builds clean and stays alive.",
+      "evidence": "migration-score.json feature 'Status notification area' verdict=fail; parity/baseline/ui/01.json has StatusLabel 'Status:' (line 298), parity/winui3/ui/01.json has no 'Status' node; MainPage.xaml lines 43-55 (Frame Above=StatusPanel + StatusPanel AlignBottomWithPanel).",
+      "skill_search": "grepped winui-uwp-migration for 'RelativePanel', 'StatusPanel', 'NotifyUser', 'Status', 'Controls that need element-level swaps'",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "MIGRATION-PATTERNS.md documents element-level control swaps and blank-page/blank-window causes, but has no pattern for the RelativePanel 'fill above a bottom bar' layout the Windows-universal-samples shell uses for its persistent Status/NotifyUser area. The agent (correctly following fidelity rules) copies it verbatim, and it silently fails to place the status bar in WinUI 3.",
+      "proposed_fix": "Add a MIGRATION-PATTERNS.md subsection under XAML Migration documenting the SDK-sample Status/NotifyUser area layout: the content-region RelativePanel fill-graph can fail to place the bottom StatusPanel in WinUI 3; the robust WinUI 3 equivalent is a Grid with a '*' row for the Frame and an 'Auto' row for the StatusPanel (same controls/text, container swap only). Cross-link it from the Silent-navigation-failures section.",
+      "generalizes": "Almost every Windows-universal-samples UWP app ships this identical MainPage shell with a persistent Status/NotifyUser area laid out by exactly this RelativePanel graph. The status bar is a scored parity surface, so any sample in this family will lose the same feature unless the pattern is documented."
+    }
+  ]
+}

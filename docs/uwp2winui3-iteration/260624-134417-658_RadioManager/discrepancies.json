@@ -1,0 +1,19 @@
+{
+  "scenario": "RadioManager",
+  "index": 0,
+  "score": 75,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Toggle Radios navigation item is listed and opens the scenario page", "status": "pass", "reason": "Both apps show '1) Toggle Radios' and open the scenario page.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Scenario description text ('Enumerate Radios, and display toggles for each one')", "status": "pass", "reason": "Both show the 'Description:' header and text.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Radio enumeration list with per-radio ToggleSwitch", "status": "pass", "reason": "Empty in both apps (radio access denied on this machine); WinUI OnNavigatedTo mirrors the UWP handler. Empty state matches ground truth.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Status notification area ('Status:' label + error banner)", "status": "fail", "reason": "The StatusPanel (StatusLabel + StatusBorder + StatusBlock) is defined in MainPage.xaml but absent from the WinUI render and UIA tree; renders in the UWP golden.", "suspected_skill_gap": "The SDK-sample content-region shell uses a RelativePanel fill-graph (Frame Above=StatusPanel + StatusPanel AlignBottomWithPanel) to place a persistent bottom status bar. This graph does not reliably place the status panel in WinUI 3, and neither the skill's layout guidance nor its render-verification guidance calls out persistent shell chrome, so the missing surface went uncaught." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "status-notification", "uwp": "Static 'Status:' label + error banner 'App is not allowed to control radios.' at the shell bottom", "winui": "No Status label, no StatusBorder/StatusBlock, no status message anywhere", "screenshot_ref": "parity/baseline/screenshots/01_Toggle_Radios.png vs parity/winui3/screenshots/01_Toggle_Radios.png; UIA parity/baseline/ui/01.json (StatusLabel present) vs parity/winui3/ui/01.json (absent)" },
+    { "feature": "shell theme/logo", "uwp": "Dark theme; Microsoft logo image in left-pane footer", "winui": "Light theme; logo image absent from tree", "screenshot_ref": "parity/*/screenshots/01_Toggle_Radios.png (cosmetic)" }
+  ],
+  "missing_features": ["Persistent Status/NotifyUser area (status-notification)"],
+  "summary": "The migration faithfully reproduced navigation, scenario selection, and the scenario description. The sole failure is the persistent shell Status area, which renders in UWP but is absent in WinUI 3 due to the SDK-sample content-region RelativePanel fill-graph not placing the bottom status bar. Radio-toggle emptiness and theme/logo differences are ground-truth/cosmetic, not defects."
+}

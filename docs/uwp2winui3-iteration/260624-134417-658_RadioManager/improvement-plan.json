@@ -1,0 +1,30 @@
+{
+  "scenario": "RadioManager",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "The SDK-sample shell content region places a persistent bottom Status/NotifyUser bar with a RelativePanel fill-graph (Frame.Above=StatusPanel + StatusPanel.AlignBottomWithPanel). Migrated verbatim, WinUI 3 does not reliably place the StatusPanel, so the whole Status area (StatusLabel 'Status:' + StatusBlock) is absent from the render/UIA tree while the app builds clean and stays alive.",
+      "evidence": "migration-score.json feature 'Status notification area' = fail; parity/baseline/ui/01.json StatusLabel 'Status:' present (line 298) vs parity/winui3/ui/01.json absent; MainPage.xaml lines 43-55.",
+      "root_cause": "No skill pattern documents the RelativePanel 'fill above a bottom bar' layout the Windows-universal-samples shell uses for its Status/NotifyUser area, and this graph fails to lay out the bottom bar in WinUI 3.",
+      "tier": 2,
+      "change": "Added a MIGRATION-PATTERNS.md subsection (anchor #sdk-sample-status-area) documenting the fragile RelativePanel fill-graph and the robust WinUI 3 equivalent: a two-row Grid ('*' Frame row + 'Auto' StatusPanel row), a container swap that preserves every control/x:Name/string. Stated the general rule: X.Above=Y + Y.AlignBottomWithPanel -> two-row Grid.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On re-run of any SDK-sample-family app, the migrated shell's persistent Status/NotifyUser area renders.",
+      "falsifiable_check": "In the WinUI UIA capture, the 'Status:' label (StatusLabel) and StatusBlock appear; requirement 'Status notification area' goes fail->pass."
+    },
+    {
+      "problem": "Render-verification guidance directs the agent to check each scenario content frame, but never the persistent shell chrome (Status/NotifyUser area, title/header, footer). A per-frame check structurally cannot catch a missing shell surface, so the absent Status area went uncaught by every gate.",
+      "evidence": "SKILL.md Step 3 blockquote and MIGRATION-PATTERNS.md#silent-navigation-failures step 2 both scoped verification to 'each scenario content frame'; migration-score.json marks the shell-level Status area fail with no gate flagging it.",
+      "root_cause": "The existing verification wording under-emphasizes persistent shell surfaces vs per-scenario frames.",
+      "tier": 3,
+      "change": "Widened the render-verification wording in both SKILL.md Step 3 and MIGRATION-PATTERNS.md#silent-navigation-failures step 2 to require confirming the persistent shell chrome outside the frame (Status/NotifyUser area, title/header, footer), with a pointer to the new #sdk-sample-status-area pattern.",
+      "file": "skills/winui-uwp-migration/SKILL.md + skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent verifies persistent shell chrome after launch and catches a missing status/header/footer surface before declaring done.",
+      "falsifiable_check": "On re-run, the agent's post-launch verification notes explicitly check the Status area renders (or fixes it), and the shell status/header/footer surfaces are present in the WinUI capture."
+    }
+  ],
+  "deferred_to_human": [
+    "The structural parity gate (Compare-Parity) reported PASS 100/100 with 0 controls/0 actions because the sole scenario's rows are runtime-generated; it did not catch the missing Status area. This is an EVAL-skill (winui3-parity-check) limitation and was NOT edited here."
+  ]
+}

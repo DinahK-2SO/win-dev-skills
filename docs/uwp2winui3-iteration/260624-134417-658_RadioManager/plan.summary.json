@@ -1,0 +1,16 @@
+{
+  "scenario": "RadioManager",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add MIGRATION-PATTERNS.md pattern for the SDK-sample Status/NotifyUser area: the RelativePanel fill-graph (Frame.Above=StatusPanel + StatusPanel.AlignBottomWithPanel) silently drops the bottom bar in WinUI 3; convert to a two-row Grid (* + Auto) container swap. Fixes the whole Windows-universal-samples family's persistent status surface.",
+    "Widen render-verification in SKILL.md Step 3 and PATTERNS.md#silent-navigation-failures to require checking persistent shell chrome (Status/NotifyUser area, title/header, footer), not just per-scenario frames, so a missing shell surface is caught before declaring done."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Compare-Parity structural gate passed 100/100 with 0 controls/0 actions (runtime-generated rows) and missed the absent Status area — an eval-skill (winui3-parity-check) limitation, not edited here."
+  ]
+}

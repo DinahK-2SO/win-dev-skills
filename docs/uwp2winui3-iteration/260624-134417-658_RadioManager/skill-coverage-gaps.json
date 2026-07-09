@@ -1,0 +1,15 @@
+{
+  "scenario": "RadioManager",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The render-verification guidance tells the agent to navigate to each scenario and confirm the scenario Frame renders, but never directs it to verify PERSISTENT shell chrome (the SDK-sample Status/NotifyUser area, the title/header, the footer). The one missing surface here is shell-level, not per-scenario, so 'navigate each scenario and check the frame' structurally cannot catch it — and it wasn't caught.",
+      "evidence": "SKILL.md Step 3 note (lines ~132) and MIGRATION-PATTERNS.md Silent-navigation-failures step 2 (lines 537-540) both frame verification as 'navigate to every nav entry and confirm its content frame is non-empty'. The Status area is a persistent shell surface outside any scenario Frame; migration-score.json marks it fail and no gate/verification flagged it.",
+      "covered_at": "MIGRATION-PATTERNS.md#silent-navigation-failures step 2 ('Verify each scenario actually renders') and SKILL.md Step 3 blockquote ('navigate to every migrated scenario / nav entry and confirm its content frame actually renders')",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Broaden the existing verification wording from 'each scenario content frame' to 'each scenario content frame AND the persistent shell chrome that lives outside the frame — especially the SDK-sample Status/NotifyUser area (StatusBlock), the sample title/header, and the footer'. Same instruction, widened scope; add a one-line pointer to the new Status-area layout pattern.",
+      "generalizes": "Every migrated multi-page shell has persistent chrome (status/header/footer) that a per-scenario-frame check ignores by construction. Widening the check to shell chrome protects the whole SDK-sample family, not just this app."
+    }
+  ]
+}

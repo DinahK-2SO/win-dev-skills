@@ -534,10 +534,16 @@ Two defenses — apply both:
    };
    ```
 
-2. **Verify each scenario actually renders.** After the app launches, navigate to **every** nav
-   entry and confirm its content frame is non-empty (the scenario's named controls appear), not
-   just that the app is still running. A scenario whose frame stays blank is a regression even
-   though the process is alive.
+2. **Verify each scenario — and the persistent shell chrome — actually render.** After the
+   app launches, navigate to **every** nav entry and confirm its content frame is non-empty
+   (the scenario's named controls appear), not just that the app is still running. **Then
+   check the persistent shell chrome that lives *outside* the scenario frame** — especially
+   the SDK-sample **Status / `NotifyUser` area** (`StatusBlock`), the sample title/header, and
+   the footer. A per-scenario-frame check structurally cannot catch a missing shell surface:
+   the frame renders fine while a persistent bar is silently absent (a common WinUI 3 layout
+   regression — see [SDK-sample shell Status / NotifyUser area](#sdk-sample-status-area)). A
+   scenario frame *or* a persistent shell surface that stays blank is a regression even though
+   the process is alive.
 
 The usual root cause is a content page doing **non-trivial initialization in its constructor or
 `Loaded`** — creating a `MediaPlayer` / calling `SetMediaPlayer` / reading `PlaybackSession.*`,
@@ -840,6 +846,62 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 | `<Hub>` / `<HubSection>` | Hand-rolled `<NavigationView>` with section grouping, or `<ScrollViewer>` with stacked sections. | No drop-in equivalent. |
 | `<AppBarButton Icon="…">` system icons | Most identifiers carry over | A handful of glyphs were renamed; verify visually. |
 | `<CommandBar>` `LabelPosition` | unchanged | Behaviour parity. |
+
+<a id="sdk-sample-status-area"></a>
+### SDK-sample shell Status / NotifyUser area — the `RelativePanel` fill-graph drops the bottom bar
+
+Nearly every Windows-universal-samples app ships the same `MainPage` shell whose content
+region hosts a scenario `Frame` **above a persistent Status / `NotifyUser` bar** (`StatusPanel`
+→ `StatusBlock`), positioned with a `RelativePanel` "fill above a bottom bar" graph:
+
+```xml
+<!-- UWP source (renders in UWP, but the StatusPanel silently vanishes in WinUI 3) -->
+<RelativePanel>
+    <Frame x:Name="ScenarioFrame" RelativePanel.AlignTopWithPanel="True"
+           RelativePanel.Above="StatusPanel"
+           RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True"/>
+    <StackPanel x:Name="StatusPanel" RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True">
+        <TextBlock x:Name="StatusLabel" Text="Status:"/>
+        <Border x:Name="StatusBorder"><ScrollViewer MaxHeight="200">
+            <TextBlock x:Name="StatusBlock"/>
+        </ScrollViewer></Border>
+    </StackPanel>
+</RelativePanel>
+```
+
+This `Frame.Above=StatusPanel` + `StatusPanel.AlignBottomWithPanel` graph **does not reliably
+place the bottom `StatusPanel` in WinUI 3**: the app builds clean, stays alive, and the
+scenario `Frame` renders — but the whole Status area (the "Status:" label and every
+`NotifyUser` message) is **absent from the render and the UIA tree**. It is a silent
+parity loss of a scored surface, and the fidelity rules (correctly) copy the fragile XAML
+verbatim, so nothing flags it.
+
+**Fix — swap the container, keep every control and string.** A `Grid` with a `*` row for the
+`Frame` and an `Auto` row for the `StatusPanel` is the robust WinUI 3 equivalent (it is a
+container swap, not a re-author — preserve all `x:Name`s, text, and children verbatim):
+
+```xml
+<Grid>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="*"/>     <!-- scenario Frame -->
+        <RowDefinition Height="Auto"/>  <!-- persistent Status bar -->
+    </Grid.RowDefinitions>
+    <Frame x:Name="ScenarioFrame" Grid.Row="0"/>
+    <StackPanel x:Name="StatusPanel" Grid.Row="1">
+        <TextBlock x:Name="StatusLabel" Text="Status:"/>
+        <Border x:Name="StatusBorder"><ScrollViewer MaxHeight="200">
+            <TextBlock x:Name="StatusBlock"/>
+        </ScrollViewer></Border>
+    </StackPanel>
+</Grid>
+```
+
+The general rule: **when a UWP `RelativePanel` uses `X.Above=Y` + `Y.AlignBottomWithPanel` to
+fill a region above a persistent bottom bar, prefer a two-row `Grid` (`*` + `Auto`) in WinUI 3.**
+After the swap, confirm the "Status:" label appears in the UIA tree (see
+[Silent navigation failures](#silent-navigation-failures) — persistent shell chrome must be
+verified too, not just scenario frames).
 
 ### `x:Bind` and compiled bindings
 

@@ -1,0 +1,56 @@
+{
+  "scenario": "RadioManager",
+  "created_at": "2026-07-09T12:42:00+08:00",
+  "uwp_capture_status": "ok",
+  "features": [
+    {
+      "id": "nav-toggle-radios",
+      "area": "Navigation",
+      "name": "Toggle Radios navigation item",
+      "description": "The sample shell lists the single scenario '1) Toggle Radios' in the navigation list and selecting it shows the scenario page.",
+      "expected_behaviour": [
+        "A navigation entry titled 'Toggle Radios' (shown as '1) Toggle Radios') is visible in the left navigation list",
+        "Selecting it displays the Toggle Radios scenario page in the content area"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Toggle_Radios.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario-description",
+      "area": "Scenario page",
+      "name": "Scenario description text",
+      "description": "The scenario page shows a 'Description:' header and the descriptive text 'Enumerate Radios, and display toggles for each one'.",
+      "expected_behaviour": [
+        "A 'Description:' header is visible",
+        "The text 'Enumerate Radios, and display toggles for each one' is visible"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Toggle_Radios.png",
+      "weight": 1
+    },
+    {
+      "id": "radio-switch-list",
+      "area": "Scenario page",
+      "name": "Radio enumeration list with per-radio toggle",
+      "description": "On navigation the app calls Radio.RequestAccessAsync then Radio.GetRadiosAsync and adds one row (radio name + ToggleSwitch) per radio to the RadioSwitchList ItemsControl. On this machine radio access is not granted, so the list renders empty (no toggles) - the same ground-truth state must appear in the WinUI app.",
+      "expected_behaviour": [
+        "A scrollable radio list area (RadioSwitchList) is present in the scenario page",
+        "One row containing the radio name and a ToggleSwitch is shown per available radio",
+        "When radio access is denied / no radios present, the list is empty (matches the UWP golden on this machine)"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Toggle_Radios.png",
+      "weight": 2
+    },
+    {
+      "id": "status-notification",
+      "area": "Shell",
+      "name": "Status notification area",
+      "description": "The sample shell has a 'Status:' area that shows NotifyUser messages. On this machine access is denied so it shows the error banner 'App is not allowed to control radios.'",
+      "expected_behaviour": [
+        "A 'Status:' label/area is present at the bottom of the shell",
+        "When radio access is denied, an error message 'App is not allowed to control radios.' is shown"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Toggle_Radios.png",
+      "weight": 1
+    }
+  ]
+}

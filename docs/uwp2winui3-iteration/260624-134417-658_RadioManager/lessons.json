@@ -1,0 +1,31 @@
+{
+  "scenario": "RadioManager",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "verbatim in-place XAML transform (SKILL.md Step 1 fidelity rules)", "evidence": "MainPage.xaml migrated verbatim: RelativePanel shell, ScenarioControl ListBox, StatusPanel, and 'Description:' text all preserved word-for-word (session-log.txt lines 896-934); build clean apart from nullable warnings (build-output.txt)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 / Test-AppLaunch.ps1", "limitation": "Prove the process stayed alive and each scenario Frame can navigate, but never assert that PERSISTENT shell chrome (the SDK-sample Status/NotifyUser area) actually rendered. The Status area was silently absent while every gate passed green.", "suggested_tweak": "Extend the render-verification guidance to cover persistent shell surfaces, not only per-scenario content frames." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Radios.Radio.RequestAccessAsync / GetRadiosAsync", "special_handling": "Hardware/permission-gated; on this machine access was denied so the radio list is empty in BOTH the UWP golden and the WinUI app (matching ground truth). Not a migration defect." }
+  ],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    {
+      "where": "MainPage.xaml shell content region (SplitView.Content RelativePanel)",
+      "symptom": "The persistent Status area (StatusLabel 'Status:' + StatusBorder/StatusBlock) is defined in MainPage.xaml but does not appear in the WinUI 3 render or UIA tree, though it renders in the UWP golden. The sibling Pane RelativePanel (Copyright/Privacy footer, also AlignBottomWithPanel) DID render.",
+      "turns_or_retries": "not detected as a struggle — the agent migrated the XAML verbatim, built clean, and declared done without ever verifying the Status area rendered",
+      "root_cause": "The SDK-sample content region positions a bottom Status bar with a RelativePanel fill-graph: Frame has RelativePanel.AlignTopWithPanel + RelativePanel.Above=StatusPanel and StatusPanel has RelativePanel.AlignBottomWithPanel. This graph does not reliably place the StatusPanel in WinUI 3, so the persistent status surface silently collapses out of the tree.",
+      "how_resolved": "not resolved in-trial; surfaced only by the scorer's direct UIA + visual comparison against the UWP golden",
+      "preventable_by": "A MIGRATION-PATTERNS.md pattern documenting the SDK-sample Status/NotifyUser area layout (RelativePanel fill-graph -> Grid with an Auto bottom row), plus render-verification guidance that explicitly checks persistent shell chrome, not just scenario frames."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No controllable radios / radio access denied on the benchmark machine", "workaround": "Empty radio list is the correct ground-truth state in both apps; per-radio ToggleSwitch behavior is unverifiable here." }
+  ]
+}
