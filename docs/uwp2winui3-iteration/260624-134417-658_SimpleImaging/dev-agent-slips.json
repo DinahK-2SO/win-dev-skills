@@ -1,0 +1,21 @@
+{
+  "scenario": "SimpleImaging",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The agent ran the bare .exe directly (Start-Process ...SimpleImaging.exe) to try to capture output, which produced the misleading REGDB_E_CLASSNOTREG event that then poisoned diagnosis.",
+      "evidence": "Session-log turn ~4541 runs the exe directly; the skill explicitly says not to.",
+      "covered_clearly_at": "SKILL.md Step 3 code block: 'winapp build  # compile; never run the .exe directly' and the Diagnosing Startup Crashes section: 'The wrong way to chase it is to sprinkle File.WriteAllText traces ... run this once'.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already prominently says never to run the .exe directly and to use Test-AppLaunch. A capable model on re-run should follow it. (The tool's misattribution of the resulting artifact IS a defect and is fixed separately in skill-defects.json item 3 — but the act of running the bare exe is a slip, not a skill gap.)"
+    },
+    {
+      "problem": "The agent downgraded Microsoft.WindowsAppSDK from 2.2.0 to 1.7.x chasing the crash, which broke deployment (missing-framework 0x80073CF3) and did not fix anything.",
+      "evidence": "Session-log turns ~5585-5720: edits SimpleImaging.csproj to 1.7.260224002 then 1.7.250401001; Test-AppLaunch then reports 'package depends on a framework that could not be found'.",
+      "covered_clearly_at": "plan-and-apply/skill guidance keeps the scaffold's pinned WindowsAppSDK version; SKILL.md Step 2 says reconcile the csproj against the scaffold (which sets the SDK version), not to change the SDK version to chase a runtime crash.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Randomly swapping the SDK version is an exploratory misstep, not something the skill invites. With the correct 0xc0000409 guidance in place (added as a defect fix), a re-run would look at the startup XAML instead of the SDK version; no additional 'do not change the SDK version' prose is warranted."
+    }
+  ]
+}

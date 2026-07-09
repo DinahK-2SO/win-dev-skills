@@ -1,0 +1,16 @@
+{
+  "scenario": "SimpleImaging",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Document empty-string typed XAML placeholders (e.g. <Image Source=\"\"/>) as load-fatal in WinUI 3 (0xC0000409) and add a Validate-UwpMigration WARN that flags every Source=\"\" with file:line + fix — this was the undiagnosed root cause of a 0-score startup crash.",
+    "Add a 0xC0000409 (native fail-fast, no event 1026) case to Test-AppLaunch's crash-signature and to the startup-crashes table, pointing at a startup XAML-load failure instead of a nonexistent managed frame.",
+    "Make Get-CrashSignature ignore the unpackaged REGDB_E_CLASSNOTREG / DeploymentManager AutoInitialize artifact (from running the bare .exe without identity) and add a red-herring callout, so agents stop chasing SDK-version/runtime rabbit holes."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

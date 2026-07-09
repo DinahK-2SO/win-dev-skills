@@ -1,0 +1,16 @@
+{
+  "scenario": "SimpleImaging",
+  "index": 0,
+  "score": 0,
+  "builds": true,
+  "runs": false,
+  "requirements": [
+    { "id": 1, "text": "Image properties (FileProperties) scenario: Open/Save/Close + Title, Keywords, Latitude/Longitude, EXIF property fields", "status": "fail", "reason": "WinUI app crashed at startup; no window rendered. Blank screenshot, 0/14 controls found, 0/3 actions live.", "suspected_skill_gap": "Startup XAML-load fail-fast (0xc0000409) caused by the verbatim <Image Source=\"\" /> placeholder on the first page navigated at startup; the skill neither documents 0xc0000409/no-1026 crashes nor the empty-string typed-placeholder gotcha, and the crash-signature tool reported a red-herring managed exception." },
+    { "id": 2, "text": "Image transforms/encode (BitmapDecoder) scenario: Open/Left 90/Right 90/Save/Save as/Close + scale slider and dimension/orientation outputs", "status": "fail", "reason": "WinUI app crashed at startup; no window rendered. Blank screenshot, 0/8 controls found, 0/6 actions live.", "suspected_skill_gap": "Same startup crash — the whole app never rendered, so this scenario is unreachable too." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Whole app", "uwp": "UWP golden renders MainPage shell + Scenario1 controls", "winui": "Blank 0-byte screenshot (process fail-fasts at startup)", "screenshot_ref": "parity/winui3/screenshots/01_Image_properties_FileProperties.png (blank)" }
+  ],
+  "missing_features": ["Entire runtime UI (app never rendered a window)"],
+  "summary": "Migrated WinUI 3 app builds (0 errors) but fail-fasts at startup (0xc0000409, ucrtbase.dll) before any window renders, so both scenarios score fail. Root cause is a startup XAML-load failure — prime suspect the verbatim empty-string <Image Source=\"\" /> placeholder on the first-navigated page. Diagnosis was derailed by the crash-signature tool surfacing an unpackaged REGDB_E_CLASSNOTREG artifact and by the absence of any 0xc0000409 guidance."
+}

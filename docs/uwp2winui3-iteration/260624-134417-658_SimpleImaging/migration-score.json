@@ -1,0 +1,38 @@
+{
+  "scenario": "SimpleImaging",
+  "uwp_launchable": true,
+  "winui_launchable": false,
+  "score": 0,
+  "features_total": 2,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 2,
+  "uwp_capture_status": "ok",
+  "winui_capture_status": "failed: migrated app builds (0 errors) but crashes at startup (ucrtbase.dll, 0xc0000409 fail-fast) before rendering a window; all WinUI screenshots blank (0 bytes)",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Image properties (FileProperties)",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "coverage": "0/14",
+      "actions_live": "0/3",
+      "uwp_screenshot": "parity/baseline/screenshots/01_Image_properties_FileProperties.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Image_properties_FileProperties.png",
+      "note": "WinUI app crashed at startup; no window rendered. Blank screenshot, 0/14 controls found. UWP golden shows Open/Save/Close plus Title, Keywords, Latitude/Longitude and EXIF property fields. (UWP action-invoke did not register a visible response in the golden because buttons are disabled until an image is opened, but the scenario UI itself is fully present in the UWP; the WinUI side is entirely absent.)"
+    },
+    {
+      "name": "Image transforms/encode (BitmapDecoder)",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "coverage": "0/8",
+      "actions_live": "0/6",
+      "uwp_screenshot": "parity/baseline/screenshots/02_Image_transforms_encode_BitmapDecoder.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Image_transforms_encode_BitmapDecoder.png",
+      "note": "WinUI app crashed at startup; no window rendered. Blank screenshot, 0/8 controls found. UWP golden exposes Open/Left 90/Right 90/Save/Save as/Close plus scale slider and dimension/orientation outputs; WinUI side is entirely absent."
+    }
+  ]
+}

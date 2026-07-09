@@ -1,0 +1,37 @@
+{
+  "scenario": "SimpleImaging",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Empty-string typed XAML placeholder <Image Source=\"\" /> fail-fasts the app at XAML load in WinUI 3 (it was benign in UWP). It sits on the first page navigated at startup, so the whole app dies before rendering (0xc0000409). This is the root-cause of the 0-score.",
+      "evidence": "Scenario1.xaml:43 and Scenario2.xaml:53 both contain <Image ... Source=\"\" ... />; migration-score.json winui_launchable=false; first captured crash was in Microsoft.UI.Xaml.dll (session-log turn ~3876), confirming a XAML-layer failure.",
+      "skill_search": "grepped winui-uwp-migration for 'Source=', 'empty string', 'placeholder' in SKILL.md, MIGRATION-PATTERNS.md, scripts — no hits.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill's XAML migration guidance treats copied XAML as mechanically safe once xmlns/resources are rewritten, but does not cover value-level incompatibilities. An empty string for a typed property (ImageSource/MediaSource/Uri) runs the type converter at load; UWP tolerated it, WinUI 3 throws an invalid-URI and fail-fasts.",
+      "proposed_fix": "Add a XAML pitfall to MIGRATION-PATTERNS.md#xaml: empty-string typed placeholders such as <Image Source=\"\" /> are load-fatal in WinUI 3 — remove the attribute (leave Source unset) or bind it. Back it with a validator WARN in Validate-UwpMigration.ps1 that names each Source=\"\" hit and its fix.",
+      "generalizes": "The SDK sample template ships <Image Source=\"\" /> as a placeholder, and empty-string typed-property placeholders recur across many UWP samples (image viewers, media players, icon sources). Any sample that navigates such a page at startup will fail-fast identically."
+    },
+    {
+      "problem": "0xc0000409 (STATUS_STACK_BUFFER_OVERRUN / __fastfail) is not covered as a startup-crash class. For a packaged native fail-fast there is usually NO event 1026, yet all tooling/doc hints say 'read event 1026 to find the throwing frame' — a dead end for exactly this class. The agent had nothing pointing it at the startup XAML.",
+      "evidence": "Get-CrashSignature switch (Test-AppLaunch.ps1 L195-216) and the startup-crashes table (MIGRATION-PATTERNS.md L498-503) list 0x80004003/0x8001010E/0xE0434352/0xC000027B but not 0xc0000409; the packaged crash (session-log turns 4593-4603, 5420-5431, 7405-7411) is 0xc0000409 with no accompanying 1026.",
+      "skill_search": "grepped for '0xc0000409', 'fail-fast', 'STATUS_STACK_BUFFER_OVERRUN', 'no 1026' — no hits.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "default hint: 'Startup crash - read the captured exception (event 1026) to find the throwing frame.'",
+      "root_cause": "The crash-signature knowledge base was built around managed exceptions (event 1026). Native fail-fasts that write no 1026 (a XAML-core load failure is the common one) fall through to a default hint that sends the agent looking for a managed frame that does not exist.",
+      "proposed_fix": "Add a 0xc0000409 case to the Get-CrashSignature switch and a matching row to the startup-crashes table: native fail-fast, usually no 1026; most often a XAML load failure while activating the first page navigated at startup; bisect the startup XAML rather than chasing SDK/runtime plumbing.",
+      "generalizes": "0xc0000409 is the generic Windows fail-fast code; XAML-load failures (unresolved resource, unactivatable type, invalid typed value) at startup are a recurring WinUI-3 migration failure mode, not specific to this app."
+    },
+    {
+      "problem": "Get-CrashSignature misattributes an unpackaged-launch artifact as the crash cause. A REGDB_E_CLASSNOTREG in event 1026 whose stack is WindowsAppRuntime DeploymentManager AutoInitialize only appears when the bare .exe is run WITHOUT package identity; it is never the cause of a packaged startup crash — but the helper reports it as '.NET: COMException / Class not registered', steering agents into SDK/runtime rabbit holes.",
+      "evidence": "Test-AppLaunch.ps1 Get-CrashSignature (L173-190) selects the first 1026 by exe-name in a 3-minute window with no stack filtering. Session-log turn ~4664-4666 shows it reporting that managed exception alongside code=0xc0000409; the 1026 (turn 4563-4571) is the AutoInitialize/REGDB_E_CLASSNOTREG frame produced by the agent's direct .exe run (turn 4541). The agent then spent ~40 turns downgrading the SDK and inspecting the AutoInitializer.",
+      "skill_search": "grepped for 'REGDB', 'CLASSNOTREG', 'AutoInitialize', 'DeploymentManager' in the migration skill — only unrelated packaging notes; no filtering/guidance.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Get-CrashSignature returns managedType='System.Runtime.InteropServices.COMException', message='Class not registered (REGDB_E_CLASSNOTREG)' for a packaged 0xc0000409 crash.",
+      "root_cause": "The 1026 selection has no provenance check: a stale event from a prior unpackaged run of the same exe name is indistinguishable from the packaged crash's (absent) managed exception, so the tool presents the artifact as fact.",
+      "proposed_fix": "In Get-CrashSignature, exclude 1026 events whose stack matches the WindowsAppRuntime AutoInitialize / DeploymentManager (REGDB_E_CLASSNOTREG) frame; if that is the only 1026, treat managedType as unknown and let the 0xc0000409 hint explicitly discount the red herring.",
+      "generalizes": "Any migration where the agent (or a prior step) runs the bare .exe once will poison the WER window with this artifact. Making the shared diagnostic robust to it helps every startup-crash diagnosis, not just this app."
+    }
+  ]
+}

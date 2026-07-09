@@ -1,0 +1,30 @@
+{
+  "scenario": "SimpleImaging",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Test-AppLaunch.ps1", "evidence": "Immediately flagged the build-clean-but-crashes-at-startup state that the build log and analyzer cannot see (session-log turn ~3874 '==> Test-AppLaunch [FAIL] status=crashed')." },
+    { "tool": "Get-WinEvent 1000/1026 capture", "evidence": "Surfaced the native fault code 0xc0000409 in ucrtbase.dll for the packaged process (event 1000)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Test-AppLaunch.ps1 Get-CrashSignature", "problem": "Reported '.NET: System.Runtime.InteropServices.COMException / Class not registered (REGDB_E_CLASSNOTREG)' as the managed cause, but that event 1026 came from the agent's own direct/unpackaged run of the bare .exe (turn ~4541), NOT from the packaged crash (which produced no 1026). The helper matches any 1026 by exe-name within a 3-minute window, so it captured a stale unpackaged DeploymentManager AutoInitialize artifact and presented it as the crash.", "evidence": "Turn ~4664-4666: Test-AppLaunch printed '.NET: System.Runtime.InteropServices.COMException / Message: Class not registered' with code=0xc0000409; the 1026 stack (turn 4563-4571) is WindowsAppRuntime...DeploymentManagerCS.AutoInitialize / REGDB_E_CLASSNOTREG." }
+  ],
+  "tool_limitations": [
+    { "tool": "startup-crashes native-code table (PATTERNS.md + Get-CrashSignature switch)", "limitation": "Has no row for 0xc0000409 (STATUS_STACK_BUFFER_OVERRUN / __fastfail). The default hint says 'read event 1026 to find the throwing frame' — but a packaged native fail-fast writes no 1026, so the guidance is a dead end for exactly this class.", "suggested_tweak": "Add a 0xc0000409 case that says: native fail-fast, usually no 1026; most often a XAML load failure on the first startup page; bisect the startup XAML; ignore any REGDB_E_CLASSNOTREG/AutoInitialize frame (that is an unpackaged-launch artifact)." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Image.Source (empty string placeholder)", "special_handling": "The SDK sample ships <Image Source=\"\" /> in both scenario pages. UWP treats empty-string Source as 'no image'; WinUI 3 runs the ImageSource type converter at XAML load and an empty string is an invalid URI, fail-fasting the first page navigated at startup. Empty-string typed XAML placeholders must be removed (leave Source unset)." }
+  ],
+  "errors_encountered": [
+    { "error": "Packaged app crashes at startup with native fault 0xc0000409 in ucrtbase.dll, no window rendered, all WinUI screenshots blank (score 0).", "root_cause": "XAML load failure while activating the first page navigated at startup (Scenario1, reached via MainPage OnNavigatedTo -> SelectedIndex=0 -> ScenarioFrame.Navigate). Prime suspect is the verbatim <Image Source=\"\" /> placeholder, which UWP tolerated but WinUI 3 rejects at load. First observed crash was even in Microsoft.UI.Xaml.dll (0xc000027b, turn ~3876), confirming a XAML-layer failure.", "fix": "Remove the empty-string Source=\"\" from the Image elements (and any other empty-string typed placeholder); set no Source until an image is opened in code-behind." },
+    { "error": "REGDB_E_CLASSNOTREG (0x80040154) from WindowsAppRuntime DeploymentManager AutoInitialize", "root_cause": "The agent launched the bare .exe directly (without package identity). The framework-dependent auto-initializer requires identity to resolve its activation factory, so it fails REGDB_E_CLASSNOTREG when run unpackaged. This is expected and irrelevant to the packaged crash.", "fix": "Ignore it; relaunch with 'winapp run' (package identity). The skill already says never run the .exe directly." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Startup-crash diagnosis (session-log turns ~3874 to end ~7820)", "symptom": "Never identified the crash cause; burned the remainder of the session. Chased a downgrade of Microsoft.WindowsAppSDK from 2.2.0 to 1.7.x (turns ~5585-5720, which then broke deployment with a missing-framework error), investigated the DeploymentManager AutoInitializer source, removed MicaBackdrop, removed static Window.Current, changed Styles BasedOn, and deleted Styles.xaml — none touched the real cause.", "turns_or_retries": "~40+ turns / whole remaining budget; app still crashed at exit (score 0).", "root_cause": "Two skill gaps compounded: (1) the crash-signature tooling reported a red-herring managed exception (REGDB_E_CLASSNOTREG from the agent's own unpackaged run), steering the agent toward SDK/runtime plumbing; (2) no guidance existed for 0xc0000409 / no-1026, so the agent had nothing pointing it at the startup XAML. The actual cause (empty-string Image Source) is undocumented.", "how_resolved": "Not resolved.", "preventable_by": "Add 0xc0000409 handling that names the no-1026 XAML-load-failure class and explicitly discounts the REGDB_E_CLASSNOTREG/AutoInitialize red herring; make Get-CrashSignature drop the unpackaged AutoInitialize artifact; document + validator-flag the empty-string <Image Source=\"\"> gotcha." }
+  ],
+  "missing_tooling": [
+    { "need": "A validator/bootstrap signal that flags empty-string typed XAML placeholders (Source=\"\") which are load-fatal in WinUI 3.", "would_have_saved": "The entire remaining session — it would have named the fix directly." }
+  ],
+  "env_issues": []
+}

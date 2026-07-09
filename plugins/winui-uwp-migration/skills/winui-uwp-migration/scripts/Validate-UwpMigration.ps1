@@ -138,6 +138,36 @@ if ($residueHits.Count -eq 0) {
     $failures++
 }
 
+# ─── 1b. Empty-string typed XAML placeholders (WARN) ───────────────────────────
+# UWP tolerated Source="" (and other empty-string typed values); WinUI 3 runs the
+# type converter at XAML load and an empty string is an invalid URI, so the page
+# fail-fasts on InitializeComponent (0xC0000409). If it is the first page navigated
+# at startup the whole app dies before rendering. WARN-only: the Section 7 smoke
+# launch already FAILs on the resulting crash; this names the concrete fix.
+$emptySourceHits = New-Object System.Collections.Generic.List[object]
+foreach ($f in ($files | Where-Object { $_.Extension -eq '.xaml' })) {
+    $rel = [System.IO.Path]::GetRelativePath($Target, $f.FullName)
+    if ($deferredFiles.ContainsKey($rel)) { continue }
+    $fileLines = ([System.IO.File]::ReadAllText($f.FullName)) -split "`r?`n"
+    for ($i = 0; $i -lt $fileLines.Count; $i++) {
+        if ($fileLines[$i] -match 'Source\s*=\s*""') {
+            [void]$emptySourceHits.Add([PSCustomObject]@{ File = $rel; Line = $i + 1; Snippet = $fileLines[$i].Trim() })
+        }
+    }
+}
+if ($emptySourceHits.Count -eq 0) {
+    Write-Host "[PASS] No empty-string Source= placeholders in non-deferred XAML"
+} else {
+    Write-Host "[WARN] $($emptySourceHits.Count) empty-string Source= placeholder(s) in XAML - load-fatal in WinUI 3 (0xC0000409 fail-fast at startup); remove the attribute and set Source in code-behind. See PATTERNS.md#xaml:"
+    $diagBlock = New-Object System.Collections.Generic.List[string]
+    foreach ($h in ($emptySourceHits | Select-Object -First 20)) {
+        Write-Host "       $($h.File):$($h.Line)"
+        [void]$diagBlock.Add("  L$($h.Line)  $($h.File)  | $($h.Snippet)")
+    }
+    if ($emptySourceHits.Count -gt 20) { Write-Host "       ($($emptySourceHits.Count - 20) more; see .validator-diagnostics.txt)" }
+    Add-Diag 'Empty-string Source= placeholders (load-fatal in WinUI 3)' (($diagBlock) -join "`r`n")
+}
+
 # ─── 2. TODO[migrate-NNN] residue ──────────────────────────────────────────────
 # Initialize-UwpMigration.ps1 injects `TODO[migrate-NNN]: see PATTERNS.md#<anchor>`
 # markers above every adaptable API hit. Every one of them must be resolved

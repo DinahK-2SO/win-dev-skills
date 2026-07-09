@@ -501,6 +501,9 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
 | `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
+| `0xC0000409` | `STATUS_STACK_BUFFER_OVERRUN` / `__fastfail` | A **native fail-fast**, not a managed throw — so there is usually **no event 1026** to read. The common migration cause is a **XAML load failure while activating the first page navigated at startup**: an unresolved `{StaticResource}`/`{ThemeResource}`, a type the `XamlMetadataProvider` can't activate, or an **empty-string typed value** (e.g. `<Image Source="" />`) that UWP tolerated but WinUI 3 rejects at load. **Bisect the startup XAML** — temporarily blank the first-navigated page's content — instead of chasing the SDK/runtime. See [XAML pitfalls](#xaml). |
+
+> **Red herring — `REGDB_E_CLASSNOTREG` / `Class not registered` in event 1026.** If the captured managed stack is `Microsoft.Windows.ApplicationModel.WindowsAppRuntime…DeploymentManager…AutoInitialize` (a `REGDB_E_CLASSNOTREG` / `0x80040154`), that is **not** your crash — it is the signature of launching the **bare `.exe` without package identity** (the framework-dependent auto-initializer needs identity to resolve its activation factory). **Ignore it, do not downgrade or change the WindowsAppSDK version, and relaunch with `winapp run`** (which supplies identity). Only a signature from a launch *with* identity is real.
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 
@@ -836,7 +839,23 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 **Some UWP theme-brush keys were removed entirely — they resolve to `null` in WinUI 3, not to a default.** The most impactful is `ApplicationPageBackgroundThemeBrush`, the default root-`Grid` background in the UWP page template: it is **not defined in WinUI 3**, so carrying it over leaves the content root transparent and — because a WinUI 3 `Window` has no page background of its own — the whole window renders blank white in automated capture. Remap it (and any other non-resolving `*ThemeBrush` key) to an existing WinUI 3 Fluent brush, e.g. `{ThemeResource SolidBackgroundFillColorBaseBrush}`. See [Non-resolving page-background brush](#page-background-brush-blank).
 
-### Controls that need element-level swaps
+### Empty-string typed placeholders (`Source=""`) are load-fatal in WinUI 3
+
+UWP tolerated an **empty string** for a typed XAML property whose type converter builds an object from that string — most commonly `<Image Source="" />` (also `MediaPlayerElement.Source`, `ImageIcon.Source`, any `Uri`-typed attribute). UWP treated `""` as "no value"; **WinUI 3 runs the converter at XAML load and `""` is an invalid URI, so `InitializeComponent` throws and the app fail-fasts** (`0xC0000409`) — and if that page is the first one navigated at startup, the whole app dies before any window renders. The build is clean and the analyzer says nothing.
+
+```xml
+<!-- UWP source (benign there, fatal in WinUI 3) -->
+<Image x:Name="PreviewImage" Source="" Stretch="Uniform"/>
+```
+
+```xml
+<!-- WinUI 3: drop the empty attribute; set the Source later in code-behind (or bind it). -->
+<Image x:Name="PreviewImage" Stretch="Uniform"/>
+```
+
+These placeholders are common in SDK samples (an image/preview control that stays empty until the user opens a file). **Remove every `Source=""` (and other empty-string typed placeholders) during the mechanical XAML copy** — leave the attribute off and assign it in code when data is available. `Validate-UwpMigration.ps1` warns on any `Source=""` it finds.
+
+
 
 | UWP element | WinUI 3 element | Notes |
 |---|---|---|

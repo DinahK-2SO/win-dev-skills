@@ -1,0 +1,28 @@
+{
+  "scenario": "SimpleImaging",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Verbatim SDK-sample placeholder <Image Source=\"\" /> on the first page navigated at startup fail-fasts the app at XAML load in WinUI 3 (0xC0000409); UWP tolerated it. App never renders -> score 0. Undocumented in the skill.",
+      "evidence": "Scenario1.xaml:43 and Scenario2.xaml:53 contain Source=\"\"; migration-score.json winui_launchable=false, both features fail; lessons.json errors_encountered[0].",
+      "root_cause": "XAML migration guidance treats copied XAML as safe once xmlns/resources are rewritten, but does not cover value-level incompatibilities: an empty string for a typed property (ImageSource/Uri) runs the converter at load and is an invalid URI in WinUI 3.",
+      "tier": 2,
+      "change": "Added a WARN-only check to Validate-UwpMigration.ps1 (Section 1b) that flags every non-deferred XAML `Source=\"\"` with file:line and the fix; documented the empty-string typed-placeholder pitfall in MIGRATION-PATTERNS.md#xaml.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The validator names the exact load-fatal placeholder, so the agent removes it instead of chasing the SDK/runtime; the startup crash disappears.",
+      "falsifiable_check": "Re-run: Validate-UwpMigration prints '[WARN] N empty-string Source= placeholder(s)' listing Scenario1.xaml:43 / Scenario2.xaml:53 (verified against the trial's XAML: 2 hits, 0 false positives); after removal, Section 7 smoke launch goes crashed->running and requirements #1/#2 go fail->pass."
+    },
+    {
+      "problem": "0xC0000409 (native fail-fast, no event 1026) has no crash guidance, and Get-CrashSignature reported a red-herring managed exception (REGDB_E_CLASSNOTREG from the agent's own unpackaged .exe run) as the cause. The agent burned ~40 turns downgrading the WindowsAppSDK and inspecting the DeploymentManager AutoInitializer.",
+      "evidence": "Get-CrashSignature switch had no 0xc0000409 case (default hint 'read event 1026' is a dead end); session-log turns 4664-4666 report the stale REGDB_E_CLASSNOTREG as '.NET: COMException'; turns 5585-5720 show the SDK downgrade rabbit hole.",
+      "root_cause": "The crash-signature knowledge base assumed a managed 1026 always exists, and the 1026 selection had no provenance filter, so a stale unpackaged AutoInitialize artifact was presented as fact.",
+      "tier": 1,
+      "change": "Get-CrashSignature now (a) skips 1026 events whose stack is the WindowsAppRuntime DeploymentManager/AutoInitialize (REGDB_E_CLASSNOTREG) unpackaged artifact, and (b) has a 0xC0000409 case naming the no-1026 XAML-load-failure class and explicitly discounting the red herring. Matching startup-crashes table row + a red-herring callout added to MIGRATION-PATTERNS.md.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1, skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On any packaged startup fail-fast, the diagnostic points at the startup XAML and tells the agent to ignore the REGDB_E_CLASSNOTREG/AutoInitialize frame and not touch the SDK version.",
+      "falsifiable_check": "Re-run Test-AppLaunch on a 0xC0000409 crash: the crash hint reads 'native fail-fast ... XAML LOAD failure ... bisect the startup XAML ... Ignore any REGDB_E_CLASSNOTREG / DeploymentManager AutoInitialize frame'; managedType is no longer populated from the unpackaged artifact. Observable: no SDK-version downgrade attempts in the transcript."
+    }
+  ],
+  "deferred_to_human": []
+}

@@ -178,7 +178,13 @@ function Get-CrashSignature {
         if ($e1000.Message -match 'Faulting module name:\s*([^,]+)') { $sig.module = $matches[1].Trim() }
         if ($e1000.Message -match 'Exception code:\s*(0x[0-9a-fA-F]+)') { $sig.code = $matches[1].ToLower() }
     }
-    $e1026 = $events | Where-Object { $_.Id -eq 1026 } | Select-Object -First 1
+    # A 1026 whose stack is the WindowsAppRuntime DeploymentManager AutoInitializer
+    # (REGDB_E_CLASSNOTREG) is the signature of launching the bare .exe WITHOUT
+    # package identity - it is never the cause of a packaged startup crash. Skip it
+    # so we don't report a stale unpackaged-launch artifact as THE managed exception
+    # (doing so sends agents into SDK/runtime rabbit holes).
+    $unpackagedArtifact = 'DeploymentManager.*AutoInitialize|WindowsAppRuntime\.Common\.AutoInitialize|InitializeWindowsAppSDK|REGDB_E_CLASSNOTREG'
+    $e1026 = $events | Where-Object { $_.Id -eq 1026 -and $_.Message -notmatch $unpackagedArtifact } | Select-Object -First 1
     if ($e1026) {
         # ".NET Runtime" event: "Exception Info: <Type>: <message>"
         if ($e1026.Message -match 'Exception Info:\s*([A-Za-z0-9_.]+Exception)') { $sig.managedType = $matches[1].Trim() }
@@ -207,6 +213,10 @@ function Get-CrashSignature {
         }
         '0xc000027b' {
             $sig.hint   = "Native stowed exception - frequently a legacy projection/activation incompatibility. If a UWP API/contract used at startup is unsupported on this OS, defer it per MIGRATION-DEFERRED.md."
+            $sig.anchor = 'startup-crashes'
+        }
+        '0xc0000409' {
+            $sig.hint   = "STATUS_STACK_BUFFER_OVERRUN / __fastfail - a NATIVE fail-fast, not a managed throw, so there is usually NO event 1026 to read. The common migration cause is a XAML LOAD failure while activating the FIRST page navigated at startup - an unresolved StaticResource/ThemeResource, a type the XamlMetadataProvider cannot activate, or an empty-string typed value such as an empty Image Source= placeholder that UWP tolerated but WinUI 3 rejects at load. Bisect the startup XAML (temporarily blank the first-navigated page content) instead of chasing the SDK/runtime. Ignore any REGDB_E_CLASSNOTREG / DeploymentManager AutoInitialize frame - that only means the bare .exe was launched without package identity, never a packaged-startup cause."
             $sig.anchor = 'startup-crashes'
         }
         default {
