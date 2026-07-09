@@ -1,0 +1,35 @@
+{
+  "scenario": "ProximitySensor",
+  "featureName": "Proximity sensor",
+  "source": "uwp-samples-standalone/Samples/ProximitySensor/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Data Events",
+      "mustHave": ["Enable button", "Disable button (initially disabled)",
+                   "Detected / Distance (mm) / Timestamp output rows",
+                   "Status line for no-sensor / error reporting"],
+      "expectedBehavior": "Enable subscribes to ReadingChanged; with no sensor present it reports 'No proximity sensor(s) found' and leaves Disable disabled."
+    },
+    {
+      "number": 2,
+      "title": "Polling",
+      "mustHave": ["Get Data button", "Detected / Distance (mm) / Timestamp output rows",
+                   "Status line"],
+      "expectedBehavior": "Get Data polls GetCurrentReading; with no sensor it reports 'No proximity sensor found'."
+    },
+    {
+      "number": 3,
+      "title": "Display On/Off",
+      "mustHave": ["Enable button", "Disable button (initially disabled)", "Status line"],
+      "expectedBehavior": "Enable requests display-off on proximity; with no sensor it reports 'No proximity sensor(s) found'."
+    },
+    {
+      "number": 4,
+      "title": "Background Proximity Sensor",
+      "mustHave": ["Register Task button", "Unregister Task button (initially disabled)",
+                   "Task Registration / Task Status / Report Count / Last Report Timestamp / Detected output rows"],
+      "expectedBehavior": "Register Task registers a background task only when a sensor exists; with no sensor it reports 'No Proximity sensors found' and Task Registration stays 'Unregistered'."
+    }
+  ]
+}

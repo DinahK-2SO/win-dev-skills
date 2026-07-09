@@ -1,0 +1,28 @@
+{
+  "scenario": "ProximitySensor",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Legacy Properties/AssemblyInfo.cs copied from UWP source causes CS0579 duplicate-attribute build failures in SDK-style WinUI projects.",
+      "evidence": "session-log.txt ~4226-4234 'ProximitySensor.AssemblyInfo.cs(13,12): error CS0579: Duplicate System.Reflection.AssemblyCompanyAttribute'; hand-fixed at turns 63-65.",
+      "root_cause": "SDK-style csproj auto-generates assembly attributes (GenerateAssemblyInfo defaults true); the copied UWP AssemblyInfo.cs duplicates them. Present in every UWP project and sub-project.",
+      "tier": 1,
+      "change": "Initialize-UwpMigration.ps1: after the namespace rewrite, strip SDK-auto-generated assembly attribute lines (AssemblyTitle/Description/Configuration/Company/Product/Copyright/Trademark/Culture/Version/FileVersion/InformationalVersion) from every copied AssemblyInfo.cs, preserving ComVisible/InternalsVisibleTo/Guid. Added a backstop patterns entry documenting CS0579 + the GenerateAssemblyInfo=false alternative.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1 (+ MIGRATION-PATTERNS.md)",
+      "expected_effect": "Migrations that copy any AssemblyInfo.cs no longer fail with CS0579; the agent never has to hand-diagnose it.",
+      "falsifiable_check": "On re-run, dotnet build produces zero CS0579 errors and no manual AssemblyInfo edit turn appears in the log."
+    },
+    {
+      "problem": "When RootNamespace equals a WinRT type name, unqualified type use fails with CS0118 and a same-named using-alias fails with CS0576.",
+      "evidence": "session-log.txt ~2850 'CS0118: ProximitySensor is a namespace but is used like a type'; ~3243 'CS0576 ...conflicting with alias ProximitySensor' after a same-named alias attempt (turn 44); resolved with distinct alias WdsSensor.",
+      "root_cause": "Sensor/device SDK samples name the project after the feature; those names (ProximitySensor, Accelerometer, Gyrometer, Compass, ...) are types in Windows.Devices.Sensors, so RootNamespace shadows the type and a same-named alias collides.",
+      "tier": 3,
+      "change": "MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite': new CS0118/CS0576 entry — reference the WinRT type via a DISTINCT alias or global::, never a same-named alias; lists the common shadowing sensor names.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent resolves the namespace-vs-type collision in one pass (distinct alias / global::) instead of a two-cycle same-named-alias recovery.",
+      "falsifiable_check": "On a re-run of a sample whose name matches a WinRT type, no CS0118 or CS0576 error survives to a second build cycle."
+    }
+  ],
+  "deferred_to_human": []
+}

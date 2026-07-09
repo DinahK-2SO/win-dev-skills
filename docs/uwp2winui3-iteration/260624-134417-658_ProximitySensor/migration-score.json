@@ -1,0 +1,52 @@
+{
+  "scenario": "ProximitySensor",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 4,
+  "features_pass": 4,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok: original UWP app launched and rendered (window title 'ProximityCS', header 'Proximity sensor'); scenario-1 golden captured at parity/baseline/screenshots/01_Data_Events.png. NOTE: per-scenario UWP navigation/actuation could not be driven live — winapp's UIA tree for the UWP CoreWindow exposes only a top-level Pane (no children) and OS-level mouse injection is unavailable in this session (SetCursorPos clamps to 0,0). Scenarios 2-4 were compared via UWP source + WinUI UIA content.",
+  "winui_capture_status": "WinUI 3 app built (0 errors) and launched (PID 41228, window 'Proximity sensor'); full UIA tree accessible and all 4 scenarios navigable. NOTE: WinUI pixel screenshots are blank on this headless compositor, so per-scenario grading uses the UIA dumps in parity/winui3/ui/*.json plus live control actuation.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_structural_score": 100,
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Data Events",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Data_Events.png",
+      "note": "Enable + Disable present (Disable initially disabled). Enable -> StatusBlock 'No proximity sensors found', Disable stays disabled — correct no-sensor behavior matching UWP source. Detected/Distance/Timestamp output rows present. WinUI screenshot blank (compositor); graded from UIA tree ui/01.json. uwp_responded reflects source-confirmed handler (live UWP actuation blocked)."
+    },
+    {
+      "name": "Polling",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_Polling.png",
+      "note": "Get Data button present. Get Data -> StatusBlock 'No proximity sensor found' — correct. Output rows present. No live UWP frame (see uwp_capture_status); compared via source + WinUI UIA ui/02.json."
+    },
+    {
+      "name": "Display On/Off",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/03_Display_On_Off.png",
+      "note": "Enable + Disable present (Disable initially disabled). Enable -> StatusBlock 'No proximity sensors found', Disable stays disabled — correct. Compared via source + WinUI UIA ui/03.json."
+    },
+    {
+      "name": "Background Proximity Sensor",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/04_Background_Proximity_Sensor.png",
+      "note": "Register Task + Unregister Task present (Unregister initially disabled). Register Task -> StatusBlock 'No Proximity sensors found', Task Registration stays 'Unregistered' — correct no-sensor path matching UWP source. Task Registration/Status/Report Count/Last Timestamp/Detected output rows present. Compared via source + WinUI UIA ui/04.json."
+    }
+  ]
+}

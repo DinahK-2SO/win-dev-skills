@@ -1,0 +1,27 @@
+{
+  "scenario": "ProximitySensor",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Legacy Properties/AssemblyInfo.cs copied from the UWP source causes CS0579 duplicate-attribute build failures in the SDK-style WinUI project.",
+      "evidence": "session-log.txt lines ~4226-4234: 'ProximitySensor.AssemblyInfo.cs(13,12): error CS0579: Duplicate System.Reflection.AssemblyCompanyAttribute'; fix at turns 63-65 hand-stripping Tasks\\Properties\\AssemblyInfo.cs.",
+      "skill_search": "grep MIGRATION-PATTERNS.md + SKILL.md + Validate/Initialize scripts for 'AssemblyInfo', 'GenerateAssemblyInfo', 'CS0579', 'Duplicate.*attribute'",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "SDK-style projects auto-generate assembly attributes (GenerateAssemblyInfo defaults true). Every UWP project (and every sub-project, e.g. a background-task project) ships a Properties/AssemblyInfo.cs with [assembly: AssemblyTitle/Company/Product/Version/...]; copying it verbatim duplicates the auto-generated attributes.",
+      "proposed_fix": "Tier-1: Initialize-UwpMigration.ps1 strips the SDK-auto-generated assembly attribute lines from every copied AssemblyInfo.cs (keeping ComVisible/InternalsVisibleTo/Guid). Tier-3 backstop: a 'Common build errors' entry documenting CS0579 and the manual strip / GenerateAssemblyInfo=false fix.",
+      "generalizes": "AssemblyInfo.cs is boilerplate present in essentially every UWP project and sub-project; the CS0579 collision recurs on every migration that copies one into an SDK-style csproj, independent of the app's domain."
+    },
+    {
+      "problem": "When the app's RootNamespace equals a WinRT type name, unqualified references to that type fail with CS0118 ('namespace but used like a type'), and a same-named using-alias fails with CS0576.",
+      "evidence": "session-log.txt line ~2850 'error CS0118: ProximitySensor is a namespace but is used like a type' (Scenario1..4); line ~3243 'error CS0576: Namespace <global namespace> contains a definition conflicting with alias ProximitySensor' after the agent tried a same-named alias at turn 44; resolved with 'using WdsSensor = Windows.Devices.Sensors.ProximitySensor;'.",
+      "skill_search": "grep MIGRATION-PATTERNS.md + SKILL.md for 'CS0118', 'CS0576', 'namespace but is used', 'RootNamespace', 'alias', 'namespace collision'",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Device/sensor SDK samples name the project after the feature (ProximitySensor, Accelerometer, Gyrometer, Compass, Barometer, LightSensor, etc.), all of which are types in Windows.Devices.Sensors. RootNamespace then shadows the type; a using-alias with the same identifier collides with the project namespace.",
+      "proposed_fix": "Add a 'Common build errors after the namespace rewrite' entry: reference the WinRT type via a DISTINCT alias or global:: (never a same-named alias), with the CS0118/CS0576 signatures and the ProximitySensor example.",
+      "generalizes": "Naming a UWP sample/app after a Windows runtime type is common (whole families of sensor/device samples); the RootNamespace-vs-WinRT-type shadowing recurs whenever the project name matches any Windows.* type."
+    }
+  ]
+}

@@ -74,6 +74,57 @@ loads — do **not** rely on `OnNavigatedTo`/`Loaded` code-behind to populate th
 visible content (that text can end up in the UIA tree but never render, leaving the page
 blank). See **Defensive UI for init-heavy and device-dependent pages** in SKILL.md.
 
+### `CS0579: Duplicate '…Attribute'` — legacy `AssemblyInfo.cs`
+
+SDK-style projects **auto-generate** assembly attributes (`GenerateAssemblyInfo` defaults
+`true`). Almost every UWP project — and every *sub-project* it contains (e.g. a
+`Tasks\` background-task project) — ships a `Properties\AssemblyInfo.cs` with
+`[assembly: AssemblyTitle/Description/Configuration/Company/Product/Copyright/Trademark/Culture/Version/FileVersion]`.
+Copying it in verbatim duplicates the auto-generated set:
+
+```
+obj\...\<Proj>.AssemblyInfo.cs(13,12): error CS0579: Duplicate 'System.Reflection.AssemblyCompanyAttribute' attribute
+```
+
+`Initialize-UwpMigration.ps1` now strips these auto-generated attribute lines from every
+copied `AssemblyInfo.cs` (keeping `ComVisible` / `InternalsVisibleTo` / `Guid`). If you
+still hit CS0579 (a manually-added or later-copied file), either delete the offending
+attribute lines or add `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>` to the
+`<PropertyGroup>` — do **not** keep both the file's attributes and the auto-generated ones.
+
+### `CS0118` / `CS0576` — project namespace shadows a WinRT type
+
+When the app's `RootNamespace` **equals a WinRT type name**, unqualified references to the
+type resolve to your namespace, not the type. This is common because device/sensor SDK
+samples name the project after the feature — `ProximitySensor`, `Accelerometer`,
+`Gyrometer`, `Compass`, `Barometer`, `LightSensor`, `Pedometer`, `Altimeter`, etc. are all
+types in `Windows.Devices.Sensors`:
+
+```
+Scenario1.xaml.cs(171,37): error CS0118: 'ProximitySensor' is a namespace but is used like a type
+```
+
+Do **not** try to fix it with a **same-named** alias — that collides with your namespace:
+
+```csharp
+using ProximitySensor = Windows.Devices.Sensors.ProximitySensor;  // ← CS0576: conflicts with alias 'ProximitySensor'
+```
+
+Fix by referencing the WinRT type through a **distinct** alias, or fully-qualify with
+`global::`:
+
+```csharp
+// Option A — distinct alias, then use the alias everywhere the type appears
+using WdsSensor = Windows.Devices.Sensors.ProximitySensor;
+// ... TypedEventHandler<WdsSensor, ProximitySensorReadingChangedEventArgs> ...
+
+// Option B — fully qualify at the use site
+var sensor = global::Windows.Devices.Sensors.ProximitySensor.GetDefault();
+```
+
+Apply the same alias/`global::` treatment to every file and every event-handler signature
+that names the type.
+
 <a id="system-backdrop-blank"></a>
 ## Blank window despite a fully populated visual tree — the scaffold's system backdrop
 

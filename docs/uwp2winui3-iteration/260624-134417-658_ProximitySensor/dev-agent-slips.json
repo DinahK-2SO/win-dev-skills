@@ -1,0 +1,14 @@
+{
+  "scenario": "ProximitySensor",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Agent's first namespace-collision fix used a same-named using-alias, producing CS0576 and requiring a second pass.",
+      "evidence": "session-log turn 44 added 'using ProximitySensor = Windows.Devices.Sensors.ProximitySensor;' then hit CS0576, switched to 'using WdsSensor = ...' at turn ~46.",
+      "covered_clearly_at": "N/A — the underlying topic was ABSENT from the skill, so the retry is itself evidence for the skill-defect above, not an independent slip. Recorded here only to note the two-cycle recovery; no separate skill edit needed beyond defect #2.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Adding the distinct-alias / global:: guidance (skill-defect #2) already prevents this exact two-cycle recovery; no additional edit is warranted."
+    }
+  ]
+}

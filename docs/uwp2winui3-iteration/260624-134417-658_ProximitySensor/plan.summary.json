@@ -1,0 +1,15 @@
+{
+  "scenario": "ProximitySensor",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: strip SDK-auto-generated assembly attributes from copied AssemblyInfo.cs (keep ComVisible/InternalsVisibleTo) to prevent CS0579 duplicate-attribute build failures — recurs on every UWP project/sub-project.",
+    "MIGRATION-PATTERNS.md: document CS0579 (legacy AssemblyInfo.cs) with the strip / GenerateAssemblyInfo=false fix as a backstop to the tooling change.",
+    "MIGRATION-PATTERNS.md: document CS0118/CS0576 when RootNamespace shadows a WinRT type (sensor/device sample names) — fix with a distinct alias or global::, never a same-named alias."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

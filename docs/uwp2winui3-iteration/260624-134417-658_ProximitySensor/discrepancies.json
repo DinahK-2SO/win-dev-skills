@@ -1,0 +1,21 @@
+{
+  "scenario": "ProximitySensor",
+  "summary": "No functional discrepancies found. All 4 scenarios migrated with full control coverage; every primary action is behaviourally wired and produces the correct no-sensor response matching the UWP source.",
+  "functionalDiscrepancies": [],
+  "measurementCaveats": [
+    {
+      "kind": "uwp-live-capture",
+      "detail": "The original UWP app launched and rendered (scenario-1 golden captured at parity/baseline/screenshots/01_Data_Events.png). Per-scenario UWP navigation and control actuation could NOT be driven live: winapp's UIA tree for the UWP CoreWindow exposes only a top-level Pane (no child elements), and OS-level mouse injection is unavailable in this session (SetCursorPos clamps to 0,0, GetForegroundWindow returns 0). UWP scenarios 2-4 were therefore compared via source + WinUI UIA content rather than live UWP frames."
+    },
+    {
+      "kind": "winui-pixel-capture",
+      "detail": "The migrated WinUI 3 window renders logically (full UIA tree with all controls, text and state is accessible) but pixel screenshots come back blank/white (~13 KB) because the WinUI 3 Win32 content is not composited to a capturable surface on this headless desktop. Visual judgement therefore relies on the per-scenario UIA dumps (parity/winui3/ui/*.json) and observed control text/state, not on WinUI pixels. This is an environment limitation, not a migration defect."
+    }
+  ],
+  "perScenario": [
+    { "number": 1, "title": "Data Events", "controlsExpected": ["Enable","Disable"], "controlsFound": ["Enable","Disable"], "behavior": "Enable -> StatusBlock 'No proximity sensors found'; Disable stays disabled. Correct.", "verdict": "pass" },
+    { "number": 2, "title": "Polling", "controlsExpected": ["Get Data"], "controlsFound": ["Get Data"], "behavior": "Get Data -> StatusBlock 'No proximity sensor found'. Correct.", "verdict": "pass" },
+    { "number": 3, "title": "Display On/Off", "controlsExpected": ["Enable","Disable"], "controlsFound": ["Enable","Disable"], "behavior": "Enable -> StatusBlock 'No proximity sensors found'; Disable stays disabled. Correct.", "verdict": "pass" },
+    { "number": 4, "title": "Background Proximity Sensor", "controlsExpected": ["Register Task","Unregister Task"], "controlsFound": ["Register Task","Unregister Task"], "behavior": "Register Task -> StatusBlock 'No Proximity sensors found', Task Registration stays 'Unregistered' (correct no-sensor path); Unregister stays disabled.", "verdict": "pass" }
+  ]
+}

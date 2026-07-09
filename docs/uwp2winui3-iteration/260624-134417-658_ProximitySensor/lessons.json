@@ -1,0 +1,30 @@
+{
+  "scenario": "ProximitySensor",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Copied .xaml/.cs/assets, preserved UWP .csproj at .uwp-source/, and mass-rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml; agent started from a clean scaffold." },
+    { "tool": "dotnet build -c Debug -p:Platform=$Platform", "evidence": "Iterative native build surfaced each error class in turn; final build SUCCEEDED with 0 errors." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Copies legacy Properties/AssemblyInfo.cs (incl. sub-project Tasks/Properties/AssemblyInfo.cs) verbatim; these carry [assembly: AssemblyTitle/Company/Version/...] attributes that SDK-style projects auto-generate, causing CS0579 duplicate-attribute build failures.", "suggested_tweak": "After copy/namespace-rewrite, strip the SDK-auto-generated assembly attribute lines from every copied AssemblyInfo.cs (leave ComVisible/InternalsVisibleTo/Guid intact)." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.ProximitySensor", "special_handling": "The WinRT type name equals the app's RootNamespace (ProximitySensor), so unqualified use of the type resolves to the namespace (CS0118). A same-named using-alias also fails (CS0576). Must reference via a DISTINCT alias (e.g. using WdsSensor = Windows.Devices.Sensors.ProximitySensor;) or fully-qualify with global::." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0579: Duplicate 'System.Reflection.AssemblyCompanyAttribute' (and AssemblyConfiguration/Title/etc.) in obj\\...\\ProximitySensor.AssemblyInfo.cs", "root_cause": "Legacy UWP Tasks\\Properties\\AssemblyInfo.cs was copied in; SDK-style WinUI csproj auto-generates the same assembly attributes (GenerateAssemblyInfo defaults true), producing duplicates.", "fix": "Stripped the assembly attribute lines from Tasks\\Properties\\AssemblyInfo.cs, leaving only [assembly: ComVisible(false)]." },
+    { "error": "CS0118: 'ProximitySensor' is a namespace but is used like a type (Scenario1..4)", "root_cause": "App RootNamespace 'ProximitySensor' shadows the WinRT type Windows.Devices.Sensors.ProximitySensor; unqualified references bind to the namespace.", "fix": "Introduced a distinct type alias 'using WdsSensor = Windows.Devices.Sensors.ProximitySensor;' and used WdsSensor at every reference/handler signature." },
+    { "error": "CS0576: Namespace '<global namespace>' contains a definition conflicting with alias 'ProximitySensor'", "root_cause": "Agent first tried to alias with the SAME name: 'using ProximitySensor = Windows.Devices.Sensors.ProximitySensor;', which collides with the project's own ProximitySensor namespace.", "fix": "Replaced the same-named alias with a distinct alias name (WdsSensor)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turns ~44-46 (namespace collision)", "symptom": "Fixed CS0118 by adding 'using ProximitySensor = Windows.Devices.Sensors.ProximitySensor;' which then produced CS0576; needed a second edit pass to switch to a distinct alias.", "turns_or_retries": "2 build cycles", "root_cause": "RootNamespace equals a WinRT type name; a same-named alias cannot resolve the collision.", "how_resolved": "Distinct alias 'WdsSensor'.", "preventable_by": "A migration-patterns entry documenting the RootNamespace-vs-WinRT-type collision (CS0118/CS0576) with the distinct-alias / global:: fix." },
+    { "where": "Turns ~63-65 (AssemblyInfo)", "symptom": "Build failed with CS0579 duplicate-attribute after all code compiled; agent had to locate and hand-edit Tasks\\Properties\\AssemblyInfo.cs.", "turns_or_retries": "1 diagnose + 1 edit + rebuild", "root_cause": "Legacy AssemblyInfo.cs copied into an SDK-style project that auto-generates the same attributes.", "how_resolved": "Stripped the conflicting attribute lines.", "preventable_by": "Initialize-UwpMigration.ps1 neutralizing copied AssemblyInfo.cs (Tier-1), plus a patterns entry for CS0579." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI pixel screenshots blank and UWP per-scenario UIA/mouse actuation unavailable on the headless measurement host.", "workaround": "Scoring used UIA tree dumps + source comparison; not a migration defect." }
+  ]
+}

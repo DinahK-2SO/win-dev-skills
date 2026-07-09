@@ -131,6 +131,29 @@ foreach ($f in $nsFiles) {
 }
 Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 
+# ─── 3a. Neutralize legacy AssemblyInfo.cs (SDK-style projects auto-generate these) ─
+# UWP projects (and every sub-project, e.g. a background-task project) ship a
+# Properties/AssemblyInfo.cs carrying [assembly: AssemblyTitle/Company/Product/Version/...].
+# SDK-style WinUI csproj's GenerateAssemblyInfo (defaults true) emits the SAME attributes,
+# so copying the file verbatim yields CS0579 "Duplicate ...Attribute" build failures.
+# Strip only the SDK-auto-generated attribute lines; keep ComVisible / InternalsVisibleTo /
+# Guid and anything else the app actually relies on.
+$asmAttrPattern = '(?im)^\s*\[assembly:\s*Assembly(Title|Description|Configuration|Company|Product|Copyright|Trademark|Culture|Version|FileVersion|InformationalVersion)\s*\(.*?\)\s*\]\s*$\r?\n?'
+$asmFiles = Get-ChildItem -Path $Target -Recurse -File -Filter 'AssemblyInfo.cs' -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch $excludePattern }
+$asmCleaned = 0
+foreach ($f in $asmFiles) {
+    $orig = [System.IO.File]::ReadAllText($f.FullName)
+    $new = [System.Text.RegularExpressions.Regex]::Replace($orig, $asmAttrPattern, '')
+    if ($new -ne $orig) {
+        [System.IO.File]::WriteAllText($f.FullName, $new)
+        $asmCleaned++
+    }
+}
+if ($asmFiles.Count -gt 0) {
+    Write-Host "    Stripped SDK-auto-generated assembly attributes from $asmCleaned of $($asmFiles.Count) AssemblyInfo.cs (avoids CS0579 duplicate-attribute)"
+}
+
 # ─── 3b. Visible-text fidelity snapshot ────────────────────────────────────────
 # Capture the user-visible/static text present in each copied XAML *now*, while it
 # still matches the source verbatim. The validator later WARNs if any of these

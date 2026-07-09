@@ -1,0 +1,279 @@
+{
+  "featureName": "Proximity sensor",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\ProximitySensor\\cs",
+  "generated": "2026-07-09T11:14:46.4980427+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Data Events",
+      "class": "Scenario1_DataEvents",
+      "slug": "Data_Events",
+      "screenshot": "01_Data_Events.png",
+      "controls": [
+        {
+          "name": "ScenarioEnableButton",
+          "type": "Button",
+          "label": "Enable",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ScenarioDisableButton",
+          "type": "Button",
+          "label": "Disable",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Enable",
+          "alt": "ScenarioEnableButton",
+          "type": "Button",
+          "label": "Enable",
+          "name": "ScenarioEnableButton",
+          "event": "Click"
+        },
+        {
+          "target": "Disable",
+          "alt": "ScenarioDisableButton",
+          "type": "Button",
+          "label": "Disable",
+          "name": "ScenarioDisableButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_DetectionState",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_DetectionDistance",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Timestamp",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Polling",
+      "class": "Scenario2_Polling",
+      "slug": "Polling",
+      "screenshot": "02_Polling.png",
+      "controls": [
+        {
+          "name": "ScenarioGetDataButton",
+          "type": "Button",
+          "label": "Get Data",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get Data",
+          "alt": "ScenarioGetDataButton",
+          "type": "Button",
+          "label": "Get Data",
+          "name": "ScenarioGetDataButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_DetectionState",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_DetectionDistance",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Timestamp",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Display On/Off",
+      "class": "Scenario3_DisplayOnOff",
+      "slug": "Display_On_Off",
+      "screenshot": "03_Display_On_Off.png",
+      "controls": [
+        {
+          "name": "ScenarioEnableButton",
+          "type": "Button",
+          "label": "Enable",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ScenarioDisableButton",
+          "type": "Button",
+          "label": "Disable",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Enable",
+          "alt": "ScenarioEnableButton",
+          "type": "Button",
+          "label": "Enable",
+          "name": "ScenarioEnableButton",
+          "event": "Click"
+        },
+        {
+          "target": "Disable",
+          "alt": "ScenarioDisableButton",
+          "type": "Button",
+          "label": "Disable",
+          "name": "ScenarioDisableButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Background Proximity Sensor",
+      "class": "Scenario4_BackgroundProximitySensor",
+      "slug": "Background_Proximity_Sensor",
+      "screenshot": "04_Background_Proximity_Sensor.png",
+      "controls": [
+        {
+          "name": "ScenarioRegisterTaskButton",
+          "type": "Button",
+          "label": "Register Task",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ScenarioUnregisterTaskButton",
+          "type": "Button",
+          "label": "Unregister Task",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Register Task",
+          "alt": "ScenarioRegisterTaskButton",
+          "type": "Button",
+          "label": "Register Task",
+          "name": "ScenarioRegisterTaskButton",
+          "event": "Click"
+        },
+        {
+          "target": "Unregister Task",
+          "alt": "ScenarioUnregisterTaskButton",
+          "type": "Button",
+          "label": "Unregister Task",
+          "name": "ScenarioUnregisterTaskButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_TaskRegistration",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_TaskStatus",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_ReportCount",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_LastTimestamp",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Detected",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}
