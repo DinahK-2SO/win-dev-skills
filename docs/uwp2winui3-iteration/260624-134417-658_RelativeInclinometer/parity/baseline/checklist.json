@@ -1,0 +1,137 @@
+{
+  "featureName": "Relative Inclinometer",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\RelativeInclinometer\\cs",
+  "generated": "2026-07-10T05:31:07.5050050+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Data events",
+      "class": "Scenario1_DataEvents",
+      "slug": "Data_events",
+      "screenshot": "01_Data_events.png",
+      "controls": [
+        {
+          "name": "ScenarioEnableButton",
+          "type": "Button",
+          "label": "Enable",
+          "events": [
+            "Click"
+          ]
+        },
+        {
+          "name": "ScenarioDisableButton",
+          "type": "Button",
+          "label": "Disable",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Enable",
+          "alt": "ScenarioEnableButton",
+          "type": "Button",
+          "label": "Enable",
+          "name": "ScenarioEnableButton",
+          "event": "Click"
+        },
+        {
+          "target": "Disable",
+          "alt": "ScenarioDisableButton",
+          "type": "Button",
+          "label": "Disable",
+          "name": "ScenarioDisableButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_X",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Y",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Z",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Polling",
+      "class": "Scenario2_Polling",
+      "slug": "Polling",
+      "screenshot": "02_Polling.png",
+      "controls": [
+        {
+          "name": "GetDataButton",
+          "type": "Button",
+          "label": "Get Data",
+          "events": [
+            "Click"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get Data",
+          "alt": "GetDataButton",
+          "type": "Button",
+          "label": "Get Data",
+          "name": "GetDataButton",
+          "event": "Click"
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "InputTextBlock",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_X",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Y",
+            "type": "TextBlock"
+          },
+          {
+            "name": "ScenarioOutput_Z",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

@@ -27,6 +27,32 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0103: The name 'App' does not exist in the current context` (SDKTemplate namespace split)
+
+Most `Windows-universal-samples` apps put their shared scaffolding — `MainPage`, `SampleConfiguration`/`Scenario`, `SuspensionManager`, and often the pages themselves — in **`namespace SDKTemplate`**, and the code-behind references the `App` class unqualified (`App.Current`, `App.NavigationRoot`, `App.FEATURE_NAME`, etc.). But `dotnet new winui` scaffolds a fresh `App` in the project's **root namespace** (`x:Class="<ProjectName>.App"`, `namespace <ProjectName>;`). Because `App` now lives in a *different* namespace than the copied sample files, every `App.*` reference fails to resolve:
+
+```
+Scenario1_DataEvents.xaml.cs(79,17): error CS0103: The name 'App' does not exist in the current context
+MainPage.xaml.cs(48,29): error CS0103: The name 'App' does not exist in the current context
+```
+
+**Root cause:** namespace mismatch between the scaffold-generated `App` (root namespace) and the verbatim-copied sample sources (`SDKTemplate`). It is structural for *every* SDK-sample migration, not a one-off.
+
+Fix by reconciling the namespaces — pick one and apply it consistently:
+
+```csharp
+// Option A (fewest moving parts, per-file) — add the project root namespace to each
+// SDKTemplate file that references App:
+using <ProjectRootNamespace>;   // e.g. using RelativeInclinometer;
+
+// Option B — move the scaffold App into the sample's namespace so ALL sample
+// files resolve it with no per-file using. Edit both App.xaml and App.xaml.cs:
+//   App.xaml:     x:Class="SDKTemplate.App"
+//   App.xaml.cs:  namespace SDKTemplate;
+```
+
+Prefer Option B when many files reference `App` (it is a single, project-wide fix and also lets `xmlns:local="using:SDKTemplate"` resolve project types in XAML). Do not "fix" this by renaming the sample files' `namespace SDKTemplate` per-file — that fragments the shared namespace and breaks their cross-references to each other.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -906,6 +932,10 @@ verified too, not just scenario frames).
 ### `x:Bind` and compiled bindings
 
 `x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+
+**DataTemplate `x:DataType` resolution failures (`WMC0909` / `WMC1111` / `WMC9999`).** A `DataTemplate` that uses `{x:Bind ...}` must carry an `x:DataType` whose type the markup compiler can resolve **during the same build pass**. Two things commonly break this in SDK-sample migrations:
+- The `x:DataType` prefix (e.g. `xmlns:local="using:SDKTemplate"`) points at a namespace the compiler can't resolve because a **prior C# compile error** (very often the `App` CS0103 above) aborted MarkupCompilePass — you will see `WMC1509 "No LocalAssembly parameter given during MarkupCompilePass2"` alongside `WMC0909 Cannot resolve DataType`. **Fix the code-behind compile errors first; the XAML type-resolution errors usually clear on their own.**
+- If they persist because the item type genuinely lives in another namespace, either point `xmlns:local` at the correct `using:` namespace, or fall back to classic `Text="{Binding Title}"` (drop `x:DataType` and the `x:Bind`). `{Binding}` loses compile-time checking but is resolved at runtime and sidesteps cross-namespace compile ordering.
 
 ### Page root element
 

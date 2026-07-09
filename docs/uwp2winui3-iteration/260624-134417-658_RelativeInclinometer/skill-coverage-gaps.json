@@ -1,0 +1,15 @@
+{
+  "scenario": "RelativeInclinometer",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "MainPage.xaml scenarios ListBox failed to compile: 'WMC0909 Cannot resolve DataType local:Scenario', 'WMC1111 DataTemplates containing x:Bind need a DataType', 'WMC1509 No LocalAssembly parameter given during MarkupCompilePass2', 'WMC9999 Object reference not set'.",
+      "evidence": "session-log.txt lines 2370-2373 (XAML compile errors); fixed turn 32 by switching the DataTemplate from '{x:Bind Title}' + x:DataType='local:Scenario' to 'Text={Binding Title}'.",
+      "covered_at": "MIGRATION-PATTERNS.md '### x:Bind and compiled bindings' (was ~line 906) — mentions x:Bind is supported and points at XLS0414/MC3074 for stale UWP prefixes.",
+      "why_missed": "under-emphasized — the section covers namespace-prefix type-not-found errors but says nothing about DataTemplate x:DataType resolution failures, nor that they are frequently a CASCADE from a prior code-behind compile error (fix code-behind first), nor the {Binding} fallback.",
+      "proposed_improvement": "Extend the existing 'x:Bind and compiled bindings' section with a short paragraph on DataTemplate x:DataType failures (WMC0909/WMC1111/WMC1509): fix code-behind compile errors first (they abort MarkupCompilePass and cascade), then if needed point xmlns:local at the correct namespace or fall back to classic {Binding}.",
+      "generalizes": "Every SDK-sample MainPage uses a scenarios DataTemplate, and x:Bind DataTemplate compile errors cascade from any code-behind failure. Clarifying the cascade + fallback helps agents avoid chasing XAML errors that a code-behind fix would clear."
+    }
+  ]
+}

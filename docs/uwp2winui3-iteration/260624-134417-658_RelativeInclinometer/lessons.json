@@ -1,0 +1,29 @@
+{
+  "scenario": "RelativeInclinometer",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log: '==> Initialize-UwpMigration' bootstrap ran, seeded per-file TODOs and namespace rewrite." },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "Agent fetched -Anchor csproj/startup-crashes/threading/windowing sections to drive fixes." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Gated on clean build; '[PASS] No UWP-only ApplicationPageBackgroundThemeBrush references' and final PASS." },
+    { "tool": "Test-AppLaunch.ps1", "evidence": "session-log: '[INFO] Smoke-launching app via Test-AppLaunch.ps1' confirmed runs=true." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Inclinometer (ReadingType.Relative)", "special_handling": "Hardware-gated; on a machine with no relative inclinometer the app must degrade to 'No relative inclinometer found' + 'No data' and disable actions — migrated app preserved this, matching UWP golden." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0103: The name 'App' does not exist in the current context (Scenario1_DataEvents.xaml.cs, MainPage.xaml.cs)", "root_cause": "Windows-universal-samples sources use 'namespace SDKTemplate' and reference the App class unqualified, but 'dotnet new winui' scaffolds App in the project root namespace (RelativeInclinometer). Namespace split leaves App unresolved from SDKTemplate files.", "fix": "Added 'using RelativeInclinometer;' to the SDKTemplate files that reference App (turn 31)." },
+    { "error": "WMC0909 Cannot resolve DataType local:Scenario + WMC1111 DataTemplates containing x:Bind need a DataType + WMC1509 No LocalAssembly parameter during MarkupCompilePass2 (MainPage.xaml)", "root_cause": "Cascade of the CS0103 code-behind failure: the aborted C# compile broke MarkupCompilePass type resolution for the x:Bind DataTemplate over local:Scenario.", "fix": "Switched the scenarios ListBox DataTemplate from x:Bind Title / x:DataType=local:Scenario to Text={Binding Title} (turn 32)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turns 30-33 (first full build)", "symptom": "8 build errors: 5x CS0103 'App' across SDKTemplate files + XAML WMC0909/WMC1111/WMC9999 for the x:Bind DataTemplate.", "turns_or_retries": "~3 turns to diagnose and fix, then rebuild green.", "root_cause": "Scaffold-generated App (root namespace) vs verbatim-copied SDK-sample sources in namespace SDKTemplate; the App CS0103 also cascaded into XAML x:Bind type-resolution failures.", "how_resolved": "Added 'using <RootNamespace>;' to SDKTemplate files; replaced x:Bind DataTemplate with {Binding}.", "preventable_by": "A documented 'CS0103 App / SDKTemplate namespace split' entry in MIGRATION-PATTERNS.md 'Common build errors' so the agent applies the namespace reconciliation up front, plus an x:Bind DataTemplate note explaining the cascade so it fixes code-behind first." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 PNG screenshots captured blank/white on the virtual display (DirectComposition capture limitation); scoring fell back to the UIA tree.", "workaround": "Grade via authoritative UIA tree cross-referenced with UWP golden — eval-side only, not a migration defect." },
+    { "issue": "Legacy UWP CoreWindow exposes no inner UIA tree and session mouse injection is non-functional, so per-scenario UWP actuation could not be driven.", "workaround": "UWP golden = rendered default frame — eval-side only." }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "scenario": "RelativeInclinometer",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: document CS0103 'App does not exist' from the SDKTemplate-vs-root-namespace split (Windows-universal-samples put App refs in namespace SDKTemplate while dotnet new winui scaffolds App in the root namespace) with two reconciliation fixes — recurs on every SDK-sample migration.",
+    "MIGRATION-PATTERNS.md: extend the x:Bind section to cover DataTemplate x:DataType failures (WMC0909/WMC1111/WMC1509) — fix code-behind first (they cascade from a prior compile error), then correct xmlns:local or fall back to classic {Binding}."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Eval-side blank WinUI 3 screenshot capture (DirectComposition limitation) — parity-check harness, not the migration skill.",
+    "Possible Initialize-UwpMigration.ps1 auto-reconcile of the SDKTemplate/root-namespace App split (bootstrap enhancement to vet before auto-applying)."
+  ]
+}

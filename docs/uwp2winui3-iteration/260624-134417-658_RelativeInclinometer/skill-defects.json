@@ -1,0 +1,17 @@
+{
+  "scenario": "RelativeInclinometer",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "First full build failed with 5x 'CS0103: The name \\'App\\' does not exist in the current context' across MainPage.xaml.cs and Scenario1_DataEvents.xaml.cs.",
+      "evidence": "session-log.txt lines 2360-2364 (build errors); fixed turn 31 by adding 'using RelativeInclinometer;'. Confirmed: App.xaml.cs is 'namespace RelativeInclinometer;' (x:Class RelativeInclinometer.App) while MainPage.xaml.cs / SampleConfiguration.cs are 'namespace SDKTemplate'.",
+      "skill_search": "Grepped SKILL.md, MIGRATION-PATTERNS.md, scripts/* for 'SDKTemplate', 'CS0103', 'RootNamespace', 'App class' — zero hits.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Windows-universal-samples put shared scaffolding (App refs, MainPage, SampleConfiguration/Scenario) in 'namespace SDKTemplate', but 'dotnet new winui' scaffolds the App class in the project ROOT namespace. The namespace split leaves every unqualified 'App.*' reference in the SDKTemplate files unresolved.",
+      "proposed_fix": "Add a 'CS0103: The name App does not exist (SDKTemplate namespace split)' entry to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite', giving both fixes: (A) add 'using <RootNamespace>;' to SDKTemplate files, or (B, preferred for many refs) move the scaffold App into 'namespace SDKTemplate' (App.xaml x:Class + App.xaml.cs).",
+      "generalizes": "Nearly every UWP app in these scenarios derives from Windows-universal-samples, which universally use the 'namespace SDKTemplate' convention while the WinUI 3 scaffold uses the project root namespace. This CS0103 App failure will recur on essentially every SDK-sample migration."
+    }
+  ]
+}

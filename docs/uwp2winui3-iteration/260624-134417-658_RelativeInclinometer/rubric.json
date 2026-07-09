@@ -1,0 +1,24 @@
+{
+  "feature": "Relative Inclinometer",
+  "scenario": "RelativeInclinometer",
+  "source": "uwp-samples-standalone/Samples/RelativeInclinometer/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Data events",
+      "mustHaveControls": ["ScenarioEnableButton (Enable)", "ScenarioDisableButton (Disable)"],
+      "outputs": ["Pitch/Roll/Yaw (ScenarioOutput_X/Y/Z)", "StatusBlock"],
+      "expectedBehavior": "Enable registers a ReadingChanged listener and streams pitch/roll/yaw; Disable unregisters and re-enables Enable. With no sensor: status 'No relative inclinometer found', outputs 'No data', Disable disabled.",
+      "weight": 1
+    },
+    {
+      "number": 2,
+      "title": "Polling",
+      "mustHaveControls": ["GetDataButton (Get Data)"],
+      "outputs": ["Pitch/Roll/Yaw (ScenarioOutput_X/Y/Z)", "StatusBlock"],
+      "expectedBehavior": "Get Data polls the sensor once and shows current pitch/roll/yaw. With no sensor: button disabled, outputs 'No data', status 'No relative inclinometer found'.",
+      "weight": 1
+    }
+  ],
+  "scoring": "round(100 * (pass + 0.5*partial) / features_total). A control present but DEAD relative to a responsive UWP golden is at best partial. Controls inert in BOTH apps (hardware-gated) are parity, not regression."
+}

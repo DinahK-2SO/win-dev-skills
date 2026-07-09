@@ -1,0 +1,32 @@
+{
+  "scenario": "RelativeInclinometer",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (launched: RelativeInclinometerCS PID 14320, window 'RelativeInclinometerCS'); default frame captured. NOTE: legacy UWP CoreWindow exposes no inner UIA tree to winapp and session mouse injection is non-functional, so per-scenario nav/actuation of the UWP could not be driven; golden = rendered default frame. Machine has no relative inclinometer sensor, so the UWP itself shows 'No relative inclinometer found' and no action produces data.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Data events",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Data_events.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Data_events.png",
+      "note": "Full control coverage 2/2 (ScenarioEnableButton enabled, ScenarioDisableButton disabled) matching the UWP golden. Outputs 'No data', status 'No relative inclinometer found' match. Actions inert in BOTH apps (no sensor) -> parity, not regression. WinUI verified via authoritative UIA tree; WinUI PNG blank is a DirectComposition capture limitation, not a rendering defect."
+    },
+    {
+      "name": "Polling",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Polling.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Polling.png",
+      "note": "Full control coverage 1/1 (GetDataButton present, disabled because no sensor - matches UWP hardware-gated state). Outputs 'No data', status 'No relative inclinometer found' match. Action inert in BOTH apps -> parity, not regression."
+    }
+  ]
+}

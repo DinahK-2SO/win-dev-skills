@@ -1,0 +1,33 @@
+{
+  "scenario": "RelativeInclinometer",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0103: The name 'App' does not exist — SDK-sample 'namespace SDKTemplate' files reference App, but the WinUI 3 scaffold puts App in the project root namespace.",
+      "evidence": "session-log.txt L2360-2364; App.xaml.cs 'namespace RelativeInclinometer;' vs MainPage.xaml.cs/SampleConfiguration.cs 'namespace SDKTemplate'. Skill grep for 'SDKTemplate'/'CS0103' = 0 hits.",
+      "root_cause": "Structural namespace split between scaffold-generated App (root namespace) and verbatim-copied Windows-universal-samples sources (SDKTemplate).",
+      "tier": 3,
+      "change": "Added a 'CS0103: The name App does not exist (SDKTemplate namespace split)' entry to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite', with two reconciliation options (add 'using <RootNamespace>;' per file, or move scaffold App into 'namespace SDKTemplate').",
+      "file": "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent applies the namespace reconciliation up front (or fixes it in one pass on first build error) on every SDK-sample migration.",
+      "falsifiable_check": "On a re-run of any SDKTemplate-based scenario, the CS0103 'App' errors are resolved in a single edit (or avoided) rather than debugged from scratch; build reaches green without a stall on 'App'.",
+      "tier_justification": "Tier 1/2 rejected: the bootstrap does not own App generation (App comes from 'dotnet new winui' before Initialize-UwpMigration runs), and auto-rewriting namespaces across copied sources is risky/over-broad. The fix is knowledge the agent needs at build-error time, which is exactly what MIGRATION-PATTERNS.md 'Common build errors' delivers and Get-MigrationPattern.ps1 surfaces."
+    },
+    {
+      "problem": "MainPage.xaml x:Bind DataTemplate failed (WMC0909/WMC1111/WMC1509) — cascade from the CS0103 code-behind failure aborting MarkupCompilePass.",
+      "evidence": "session-log.txt L2370-2373; fixed turn 32 by switching to Text={Binding Title}.",
+      "root_cause": "x:Bind DataTemplate x:DataType could not resolve because a prior code-behind compile error aborted the markup compile pass; existing x:Bind section did not cover DataTemplate resolution or the cascade.",
+      "tier": 3,
+      "change": "Extended MIGRATION-PATTERNS.md '### x:Bind and compiled bindings' with a paragraph on DataTemplate x:DataType failures: fix code-behind first (cascade), then correct xmlns:local or fall back to classic {Binding}.",
+      "file": "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent stops chasing XAML type-resolution errors that clear once code-behind compiles, and knows the {Binding} fallback.",
+      "falsifiable_check": "On a re-run, the agent fixes code-behind before touching the DataTemplate, and WMC0909/WMC1111 clear without a separate debug loop.",
+      "tier_justification": "Prose-only sharpening of an existing section; no script/template can convey compile-ordering reasoning."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-side: WinUI 3 PNG screenshot capture returns blank on the virtual display (DirectComposition limitation); scoring already falls back to the UIA tree — belongs to the parity-check harness, not the migration skill.",
+    "Tier-0/harness idea: Initialize-UwpMigration.ps1 could optionally detect a 'namespace SDKTemplate' sample + root-namespace scaffold App and auto-reconcile, but that is a bootstrap/harness enhancement to evaluate carefully before auto-applying."
+  ]
+}

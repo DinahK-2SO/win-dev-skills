@@ -1,0 +1,14 @@
+{
+  "scenario": "RelativeInclinometer",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Data events scenario (Enable/Disable, Pitch/Roll/Yaw, status)", "status": "pass", "reason": "Full control coverage matching UWP golden; outputs 'No data', status 'No relative inclinometer found' (hardware-gated).", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Polling scenario (Get Data, Pitch/Roll/Yaw, status)", "status": "pass", "reason": "GetDataButton present/disabled matching UWP hardware-gated state; outputs match.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No structural or behavioral discrepancies. Both scenarios reproduce the original UWP app with full control coverage and matching text/state. Both apps are hardware-gated (no sensor), so action controls are equally inert -> parity, not regression. The only build-time friction (CS0103 App / SDKTemplate namespace split + cascading x:Bind DataTemplate errors) was self-resolved but is a general, recurring skill-defect worth documenting."
+}

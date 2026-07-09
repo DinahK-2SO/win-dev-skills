@@ -1,0 +1,14 @@
+{
+  "scenario": "RelativeInclinometer",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS8618/CS8600/CS8602/CS8604 nullable-reference warnings across MainPage.xaml.cs, Scenario*.xaml.cs, SampleConfiguration.cs.",
+      "evidence": "build-output.txt tail — 10 warnings; build still SUCCEEDED and score is 100.",
+      "covered_clearly_at": "N/A — these are non-blocking nullable warnings inherited from the verbatim-copied UWP sources; they do not affect build success, runs, or parity and require no skill change.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Warnings only; the app builds, runs, and passes 2/2. Chasing nullable-annotation cleanup is scenario noise, not a generalizable migration defect."
+    }
+  ]
+}
