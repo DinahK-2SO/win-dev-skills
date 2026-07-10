@@ -1,0 +1,33 @@
+{
+  "scenario": "TouchKeyboard",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Microsoft.WindowsAppSDK.Analyzers (WUI0004)", "evidence": "build-output.txt: 5 distinct WUI0004 warnings pinpointed every UWP-only GetForCurrentView() call site (InputPane in Scenario2/Scenario3, CoreInputView in Scenario4)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration inventory routing", "limitation": "The generic GetForCurrentView() inventory entry routed all call sites to the #getforcurrentview anchor, but that anchor's replacement table had no InputPane/CoreInputView row, so the agent reached correct guidance that was incomplete.", "suggested_tweak": "Complete the GetForCurrentView replacement table so every routed API has a concrete target." }
+  ],
+  "failed_apis": [
+    { "api": "InputPane.GetForCurrentView()", "why_tried": "Straight port of UWP touch-keyboard show/hide event + TryShow/TryHide code.", "root_cause": "GetForCurrentView() has no per-view singleton in WinUI 3 desktop; it returns null/throws, so the ported call is a runtime no-op.", "fix": "InputPaneInterop.GetForWindow(hwnd) (Windows.UI.ViewManagement.InputPaneInterop) using the window HWND." },
+    { "api": "CoreInputView.GetForCurrentView().TryShow(CoreInputViewKind.Emoji)", "why_tried": "Straight port of UWP emoji-keyboard trigger.", "root_cause": "CoreInputView has no *Interop.GetForWindow, and GetForUIContext needs a Windows.UI.UIContext that WinUI 3 elements no longer expose (UIElement.UIContext absent) — no supported desktop path.", "fix": "Accept as a known limitation and drop the dead call; do not silence it with an empty try/catch." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md #getforcurrentview table", "wrong": "Table lists only ApplicationView/UIViewSettings/DisplayInformation/CoreApplication/SystemNavigationManager.", "correct": "Also needs InputPane (-> InputPaneInterop.GetForWindow) and CoreInputView (no supported path)." },
+    { "where": "MIGRATION-PATTERNS.md WUI0004 row", "wrong": "Symptom/fix framed only around SystemNavigationManager back-button; implies a single API.", "correct": "WUI0004 fires for any *.GetForCurrentView() (InputPane, CoreInputView, DisplayInformation, etc.); fix is the interop mapping, not a back-button drop." }
+  ],
+  "special_apis": [
+    { "api": "InputPane / CoreInputView (soft/touch keyboard)", "special_handling": "View-bound UWP input surfaces; InputPane maps to HWND interop, CoreInputView has no desktop equivalent." }
+  ],
+  "errors_encountered": [
+    { "error": "warning WUI0004: InputPane.GetForCurrentView() is UWP-only (Scenario2 x2, Scenario3 x2)", "root_cause": "UWP view-bound API left unported.", "fix": "InputPaneInterop.GetForWindow(hwnd)." },
+    { "error": "warning WUI0004: CoreInputView.GetForCurrentView() is UWP-only (Scenario4)", "root_cause": "UWP view-bound API with no desktop equivalent left unported.", "fix": "Accept limitation; remove the dead call." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario2/3/4 *.xaml.cs", "symptom": "Every GetForCurrentView() call was wrapped in an empty try { ... } catch { } that swallows the runtime failure.", "turns_or_retries": "3 files converted identically", "root_cause": "The skill routed the agent to #getforcurrentview but the table had no InputPane/CoreInputView row, so the agent defensively swallowed the exception to keep the build green.", "how_resolved": "Not resolved — feature compiles with WUI0004 and silently no-ops at runtime.", "preventable_by": "Adding InputPane/CoreInputView rows to the replacement table plus an explicit 'do not silence WUI0004 with empty try/catch' rule." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 client area captured blank by PrintWindow despite populated UIA tree.", "workaround": "Score verified structure via UIA tree + source; capture limitation is in the eval tooling, out of migration-skill scope." }
+  ]
+}

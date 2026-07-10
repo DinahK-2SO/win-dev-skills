@@ -1,0 +1,17 @@
+{
+  "scenario": "TouchKeyboard",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CoreInputView.GetForCurrentView().TryShow(CoreInputViewKind.Emoji) was ported verbatim into Scenario4 and wrapped in an empty try/catch; it emits WUI0004 and no-ops at runtime.",
+      "evidence": "build-output.txt: 'Scenario4_ShowView.xaml.cs(29,19): warning WUI0004: CoreInputView.GetForCurrentView() is UWP-only'; Scenario4_ShowView.xaml.cs line 29 uses try{ CoreInputView.GetForCurrentView().TryShow(...) }catch{}.",
+      "skill_search": "grepped winui-uwp-migration for 'CoreInputView' and 'InputView' — zero hits in SKILL.md, MIGRATION-PATTERNS.md, scripts.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "CoreInputView is a view-bound UWP input surface with no *Interop.GetForWindow and no reachable Windows.UI.UIContext in WinUI 3 (UIElement.UIContext is absent), so GetForUIContext is unusable — there is no supported desktop path, and the skill says nothing, leaving the agent to guess (catch-and-ignore).",
+      "proposed_fix": "Add a CoreInputView row to the GetForCurrentView Replacements table in MIGRATION-PATTERNS.md stating there is no supported WinUI 3 desktop path (no GetForWindow interop; GetForUIContext needs a UIContext WinUI elements no longer expose) and that the correct action is to drop the dead call, not swallow it.",
+      "generalizes": "Soft/touch-keyboard and emoji/handwriting input samples across the Windows-universal-samples set use CoreInputView; any migration hitting a view-bound API with no desktop equivalent needs an explicit 'no supported path — remove, don't swallow' verdict instead of silent no-ops."
+    }
+  ]
+}

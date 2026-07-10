@@ -1,0 +1,55 @@
+{
+  "scenario": "TouchKeyboard",
+  "created_at": "2026-07-10T12:50:18.6623074+08:00",
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true (pid 28984, windowTitle 'Touch Keyboard C# Sample') and scenario 1 was captured live; per-scenario UIA navigation into the UWP CoreWindow (hosted by ApplicationFrameHost) failed, so the scenario 2-4 golden frames show the initial scenario-1 view rather than their own pages.",
+  "features": [
+    {
+      "id": "s1-display-auto",
+      "area": "Scenario 1",
+      "name": "Display touch keyboard automatically",
+      "description": "A TextBox and a custom-TextBox-derived control auto-show the touch keyboard on touch focus; a Button hides it.",
+      "expected_behaviour": [
+        "TextBox control and custom control are present and editable",
+        "Button present; tapping it hides the touch keyboard (hardware-gated)"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Display_touch_keyboard_automatically.png",
+      "weight": 1
+    },
+    {
+      "id": "s2-show-hide-events",
+      "area": "Scenario 2",
+      "name": "Listen for Show/Hide events",
+      "description": "Subscribes to InputPane Showing/Hiding and reflects the last event in a Run.",
+      "expected_behaviour": [
+        "TextBox present",
+        "LastInputPaneEventRun updates to 'Showing'/'Hiding' when the touch keyboard toggles (hardware-gated)"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Listen_for_Show_Hide_events.png",
+      "weight": 1
+    },
+    {
+      "id": "s3-programmatic",
+      "area": "Scenario 3",
+      "name": "Programmatically Show/Hide the touch keyboard",
+      "description": "WordListBox calls TryHide() on Enter and TryShow() programmatically; results shown in ResultsTextBlock.",
+      "expected_behaviour": [
+        "WordListBox ('Type a few words and hit Enter.') present",
+        "ResultsTextBlock output element present"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_Programmatically_Show_Hide_nthe_touch_keyboard.png",
+      "weight": 2
+    },
+    {
+      "id": "s4-emoji",
+      "area": "Scenario 4",
+      "name": "Showing the Emoji keyboard",
+      "description": "TextBox focus / Button calls CoreInputView.TryShow(Emoji).",
+      "expected_behaviour": [
+        "TextBox present",
+        "Button present; invokes the emoji keyboard (hardware-gated)"
+      ],
+      "screenshot": "parity/baseline/screenshots/04_Showing_the_Emoji_keyboard.png",
+      "weight": 1
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "scenario": "TouchKeyboard",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "InputPane.GetForCurrentView() left as UWP-only code (Scenario2 events, Scenario3 TryShow/TryHide) → WUI0004 + silent runtime no-op.",
+      "evidence": "notes/skill-coverage-gaps.json CG1; build-output.txt WUI0004 at Scenario2_ShowHideEvents.xaml.cs(21,46)/(34,46), Scenario3_ShowHideMethods.xaml.cs(53,19)/(43,27).",
+      "root_cause": "The prominent GetForCurrentView Replacements table (which the inventory routes to) had no InputPane row, so the agent had no concrete target.",
+      "tier": 3,
+      "change": "Added an InputPane row to the GetForCurrentView Replacements table: `InputPane.GetForCurrentView()` -> `InputPaneInterop.GetForWindow(hwnd)` (Windows.UI.ViewManagement.InputPaneInterop), with the Showing/Hiding + TryShow/TryHide wiring note.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent converts InputPane calls to HWND interop instead of leaving UWP residue; the touch-keyboard event + show/hide features work at runtime.",
+      "falsifiable_check": "Re-run migration of a touch-keyboard/text-input sample: 0 WUI0004 warnings for InputPane; InputPaneInterop.GetForWindow present in the migrated source."
+    },
+    {
+      "problem": "CoreInputView.GetForCurrentView().TryShow(Emoji) ported verbatim (Scenario4) with no skill coverage → WUI0004 + swallowed exception.",
+      "evidence": "notes/skill-defects.json SD1; build-output.txt WUI0004 at Scenario4_ShowView.xaml.cs(29,19); grep of skill returns zero CoreInputView hits.",
+      "root_cause": "CoreInputView is view-bound with no *Interop.GetForWindow and no reachable Windows.UI.UIContext in WinUI 3; the skill said nothing, so the agent guessed (catch-and-ignore).",
+      "tier": 3,
+      "change": "Added a CoreInputView row stating there is no supported WinUI 3 desktop path and to delete the dead call rather than keep/swallow it.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent recognizes CoreInputView as an accepted limitation and removes the dead call instead of masking it with an empty try/catch.",
+      "falsifiable_check": "Re-run a sample using CoreInputView: no empty try/catch masking the call and no residual CoreInputView.GetForCurrentView() left in place."
+    },
+    {
+      "problem": "All three files silenced WUI0004 GetForCurrentView failures with empty try/catch{} → green build, muted analyzer, dead features.",
+      "evidence": "notes/skill-coverage-gaps.json CG2; Scenario2/3/4 xaml.cs all use try{...GetForCurrentView()...}catch{}.",
+      "root_cause": "The skill flagged the APIs as UWP-only but never forbade catch-and-ignore as the wrong fix.",
+      "tier": 3,
+      "change": "Added a prominent blockquote rule under the replacement table AND generalized the WUI0004 row (was SystemNavigationManager-only) to name InputPane/CoreInputView/DisplayInformation and forbid empty try/catch muting.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents convert or delete GetForCurrentView residue instead of swallowing it, avoiding silent runtime no-ops across scenarios.",
+      "falsifiable_check": "Re-run any GetForCurrentView-heavy sample: migrated source contains no empty try/catch wrapping a GetForCurrentView() call."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval/tooling: WinUI 3 client-area screenshots came back blank (PrintWindow vs composition swapchain) despite a populated UIA tree — a capture limitation in the eval instruments, not the migration skill."
+  ]
+}

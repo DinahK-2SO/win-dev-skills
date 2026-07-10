@@ -437,6 +437,15 @@ None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is 
 | `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+| `InputPane.GetForCurrentView()` | `InputPaneInterop.GetForWindow(hwnd)` (`Windows.UI.ViewManagement.InputPaneInterop`) — pass the window HWND, then wire `Showing`/`Hiding` and call `TryShow()`/`TryHide()` on the returned instance. |
+| `CoreInputView.GetForCurrentView()` | **No supported WinUI 3 desktop path.** `CoreInputView` has no `*Interop.GetForWindow`, and `GetForUIContext` needs a `Windows.UI.UIContext` that WinUI 3 elements no longer expose (`UIElement.UIContext` is gone). Accept soft-view calls like `TryShow(CoreInputViewKind.Emoji)` as a known limitation and **delete the dead call** — do not keep it. |
+
+> **Never mute a `GetForCurrentView()` (WUI0004) call with an empty `try { … } catch { }`.**
+> These calls return `null`/throw in desktop, so catch-and-ignore compiles, leaves the
+> `WUI0004` warning in place, and turns the feature into a **silent runtime no-op** — a
+> green build hiding a dead feature. Convert to the HWND/interop replacement above; only
+> where the row says *no supported path* is a no-op acceptable, and even then **remove**
+> the dead call rather than swallowing its exception.
 
 ### `DisplayInformation` is view-bound — not just `GetForCurrentView()`
 
@@ -769,7 +778,7 @@ The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` p
 | --- | --- | --- |
 | `WUI0002` | `Window.Current does not exist in WinUI 3 desktop apps` | Store the `Window` reference in `App.xaml.cs` (`App.Window`) and pass it where needed; see "Windowing" above. |
 | `WUI0003` | `CoreDispatcher is UWP-only` | Use `DispatcherQueue.GetForCurrentThread()` and `TryEnqueue(...)`; see "Threading" above. |
-| `WUI0004` | `SystemNavigationManager.GetForCurrentView() is UWP-only` | Drop the system back button hookup, or use HWND-based COM interop; see "GetForCurrentView Replacements" above. |
+| `WUI0004` | `<Api>.GetForCurrentView() is UWP-only` — fires for any view-bound singleton (`SystemNavigationManager`, `InputPane`, `CoreInputView`, `DisplayInformation`, `ApplicationView`, …) | Replace via the HWND/interop mapping in "GetForCurrentView Replacements" above (e.g. `InputPaneInterop.GetForWindow(hwnd)`); where the table says *no supported path*, delete the dead call. **Do not** wrap it in an empty `try/catch` to mute the warning — that leaves a silent runtime no-op. |
 
 Treat every `warning WUI000\d` line in the build output as a defect — the analyzer does not produce false positives. Search for the API name in this document for the recommended replacement.
 

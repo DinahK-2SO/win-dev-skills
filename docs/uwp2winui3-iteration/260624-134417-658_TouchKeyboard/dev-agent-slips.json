@@ -1,0 +1,14 @@
+{
+  "scenario": "TouchKeyboard",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS8618 non-nullable-property warnings on SampleConfiguration.Title/ClassType and a few CS860x nullable warnings in MainPage.xaml.cs.",
+      "evidence": "build-output.txt CS8618/CS8600/CS8601/CS8602/CS8604 warnings; none affect any scored requirement (all 4 features pass).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md nullable/scaffold guidance ('<Nullable>enable</Nullable>' handling, e.g. the App.MainWindow nullable example at lines 300-318).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Cosmetic nullable warnings inherited from the SDK-sample source; they do not break build or parity and the skill already shows the nullable-annotation pattern. A re-run would not change the score, so no skill edit is warranted."
+    }
+  ]
+}

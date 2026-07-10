@@ -1,0 +1,23 @@
+{
+  "scenario": "TouchKeyboard",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "InputPane.GetForCurrentView() (Scenario2 Showing/Hiding events; Scenario3 TryShow/TryHide) was left as UWP-only code, emitting WUI0004 and no-opping at runtime.",
+      "evidence": "build-output.txt: 'Scenario2_ShowHideEvents.xaml.cs(21,46)/(34,46): warning WUI0004: InputPane.GetForCurrentView() is UWP-only'; 'Scenario3_ShowHideMethods.xaml.cs(53,19)/(43,27)'. Source wraps each call in try{}catch{}.",
+      "covered_at": "MIGRATION-PATTERNS.md #getforcurrentview 'GetForCurrentView() Replacements' table (lines 433-439).",
+      "why_missed": "under-emphasized — the table exists and the inventory routed the agent to it, but it has no InputPane row, so the agent found the section yet no concrete target and fell back to catch-and-ignore.",
+      "proposed_improvement": "Add an InputPane row to the existing replacement table: `InputPane.GetForCurrentView()` -> `InputPaneInterop.GetForWindow(hwnd)` (Windows.UI.ViewManagement.InputPaneInterop), wiring Showing/Hiding and TryShow/TryHide on the returned instance.",
+      "generalizes": "InputPane is the standard soft-keyboard API used by every text-entry UWP sample; a concrete HWND-interop target closes the most common GetForCurrentView residue for this API family."
+    },
+    {
+      "problem": "All three files silenced the WUI0004 GetForCurrentView failure with an empty try/catch{}, producing a green build + muted analyzer + dead feature.",
+      "evidence": "Scenario2/3/4 xaml.cs all use `try { ... GetForCurrentView() ... } catch { }`; build still emits 5 WUI0004 warnings.",
+      "covered_at": "MIGRATION-PATTERNS.md WUI0004 row (line 772) and #getforcurrentview intro (line 431) — both note the APIs are UWP-only but neither forbids catch-and-ignore.",
+      "why_missed": "not prominent — the skill says the calls fail but never states that wrapping them in an empty try/catch is the wrong fix, so a defensive model reaches for it.",
+      "proposed_improvement": "Add an explicit rule near the GetForCurrentView table and the WUI0004 row: never mute a GetForCurrentView()/WUI0004 call with an empty try/catch — it leaves a silent runtime no-op; convert to the interop replacement, or where none exists, delete the dead call.",
+      "generalizes": "Catch-and-ignore to appease the analyzer is a cross-scenario failure mode for every view-bound UWP API an agent can't immediately map; one prominent rule prevents silent-no-op regressions broadly."
+    }
+  ]
+}

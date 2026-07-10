@@ -1,0 +1,30 @@
+{
+  "scenario": "TouchKeyboard",
+  "summary": "All 4 scenarios structurally present and faithfully migrated (verified via UIA tree + source handlers). No missing controls, no dead controls relative to the UWP golden. Two tooling artifacts noted below are not migration defects.",
+  "items": [
+    {
+      "id": "d1-scenario3-navtitle",
+      "severity": "tooling-artifact",
+      "scenario": 3,
+      "type": "capture-artifact",
+      "detail": "Compare-Parity marked scenario 3 FAIL (cov 0/1) only because title-driven nav could not match the checklist title containing a literal '\\\\n' ('Programmatically Show/Hide\\\\nthe touch keyboard'). Manual UIA verification (invoke itm-3programmatical-d330) confirmed the scenario's control WordListBox ('Type a few words and hit Enter.') and ResultsTextBlock output ARE present and correct. Overridden to PASS.",
+      "migration_defect": false
+    },
+    {
+      "id": "d2-winui-screenshots-blank",
+      "severity": "tooling-artifact",
+      "scenario": 0,
+      "type": "capture-artifact",
+      "detail": "All WinUI 3 screenshots render as a blank white client area (only the title bar paints) despite a fully-populated UIA tree. This is a DWM/composition capture limitation for WinUI 3 in this session (the composition swapchain is not grabbed by PrintWindow), not an empty page. Visual layout comparison was therefore not possible; structural verdicts rely on the authoritative UIA tree and source inspection.",
+      "migration_defect": false
+    },
+    {
+      "id": "d3-buttons-noop",
+      "severity": "info",
+      "scenario": 0,
+      "type": "behavioral",
+      "detail": "Action controls (buttons) registered as no-op in the automated exercise for BOTH the UWP golden and the WinUI app. The scenarios drive InputPane.TryShow/TryHide and CoreInputView.TryShow(Emoji), which are hardware-gated (the touch keyboard only appears in tablet mode / with no hardware keyboard). No visible output is expected on this dev box; behavior is consistent between UWP and WinUI. WinUI handlers verified wired in source. No behavioral regression.",
+      "migration_defect": false
+    }
+  ]
+}

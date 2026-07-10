@@ -1,0 +1,16 @@
+{
+  "scenario": "TouchKeyboard",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Add InputPane.GetForCurrentView() -> InputPaneInterop.GetForWindow(hwnd) to the GetForCurrentView replacement table so soft-keyboard event/show-hide code migrates instead of leaving WUI0004 residue",
+    "Add a CoreInputView.GetForCurrentView() row documenting there is no supported WinUI 3 desktop path (no *Interop.GetForWindow; UIContext gone) and to delete the dead call rather than keep it",
+    "Add a prominent rule + generalize the WUI0004 row to forbid muting GetForCurrentView() failures with an empty try/catch (silent runtime no-op) across all view-bound UWP singletons"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Blank WinUI 3 client-area screenshots are an eval-tooling capture limitation (PrintWindow vs composition), not a migration-skill issue."
+  ]
+}
