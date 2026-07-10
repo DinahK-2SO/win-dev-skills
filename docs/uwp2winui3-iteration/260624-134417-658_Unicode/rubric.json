@@ -1,0 +1,22 @@
+{
+  "scenario": "Unicode",
+  "feature": "Unicode tokenization C# sample",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Tokenize lexical identifiers within a string",
+      "class": "Scenario1_FindId",
+      "controls": [
+        { "name": "TextInput", "type": "TextBox" },
+        { "name": "Extract Identifiers", "type": "Button" }
+      ],
+      "actions": [ { "target": "Extract Identifiers", "type": "Button" } ],
+      "outputs": [ "TextInput/TextOutput", "StatusBorder", "StatusBlock" ]
+    }
+  ],
+  "grading": {
+    "structural": "cov>=0.8 pass, >=0.4 partial, else fail",
+    "behavioral": "control live in UWP but dead in WinUI downgrades",
+    "visual": "blank frame = fail regardless of structural gate (governing)"
+  }
+}

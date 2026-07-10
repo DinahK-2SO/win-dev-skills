@@ -737,7 +737,7 @@ foreach ($cf in $csFiles) {
     }
 }
 if ($backdropHits.Count -eq 0) {
-    Write-Host "[PASS] No system backdrop / ExtendsContentIntoTitleBar — window will not blank in headless/VM capture"
+    Write-Host "[PASS] No system backdrop / <TitleBar> / ExtendsContentIntoTitleBar — the known composition-dependent blank triggers are absent. This does NOT prove the window renders: other (unenumerated) causes can still blank it. Rendering is UNVERIFIED until you capture a per-scenario screenshot and confirm it is not blank (SKILL.md 'Process alive is not every page works')."
 } else {
     Write-Host "[WARN] $($backdropHits.Count) composition-dependent window trigger(s) found (system backdrop Mica/Acrylic, scaffold <TitleBar>, and/or ExtendsContentIntoTitleBar=true). These make the window frame transparent and need live DWM composition, so the WHOLE window renders BLANK in headless/VM/RDP/automated-capture sessions (where parity screenshots are taken), even though the visual tree is populated and the smoke launch passes. UWP originals had no backdrop and used the standard title bar — remove the <Window.SystemBackdrop> block, delete the <TitleBar> block, and drop ExtendsContentIntoTitleBar=true / SetTitleBar(...) for reliable rendering + parity. See MIGRATION-PATTERNS.md#system-backdrop-blank and #extend-titlebar-blank:"
     $bdBlock = New-Object System.Collections.Generic.List[string]
@@ -755,7 +755,7 @@ if ($backdropHits.Count -eq 0) {
 # WHOLE window blank white in headless/VM/RDP/automated-capture sessions — a distinct cause
 # from the backdrop/title-bar triggers above (it fires even on a fully de-composed window).
 if ($bgBrushHits.Count -eq 0) {
-    Write-Host "[PASS] No UWP-only ApplicationPageBackgroundThemeBrush references — page background will resolve in WinUI 3"
+    Write-Host "[PASS] No UWP-only ApplicationPageBackgroundThemeBrush references — this known transparent-content-root trigger is absent. This alone does NOT guarantee the window paints; confirm each scenario renders (not blank) with a screenshot before declaring the migration done."
 } else {
     Write-Host "[WARN] $($bgBrushHits.Count) file(s) reference ApplicationPageBackgroundThemeBrush, a UWP-only brush that does NOT exist in WinUI 3. It resolves to null, leaving the content root transparent; because a WinUI 3 Window has no page background of its own, the WHOLE window renders BLANK white in automated-capture sessions even though the visual tree is populated and the smoke launch passes. Give the window's content root an explicit opaque Background using a brush that exists in WinUI 3, e.g. remap to {ThemeResource SolidBackgroundFillColorBaseBrush}. See MIGRATION-PATTERNS.md#system-backdrop-blank and the DynamicResource->ThemeResource resource section:"
     $bgBlock = New-Object System.Collections.Generic.List[string]

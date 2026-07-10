@@ -851,6 +851,10 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 **Some UWP theme-brush keys were removed entirely — they resolve to `null` in WinUI 3, not to a default.** The most impactful is `ApplicationPageBackgroundThemeBrush`, the default root-`Grid` background in the UWP page template: it is **not defined in WinUI 3**, so carrying it over leaves the content root transparent and — because a WinUI 3 `Window` has no page background of its own — the whole window renders blank white in automated capture. Remap it (and any other non-resolving `*ThemeBrush` key) to an existing WinUI 3 Fluent brush, e.g. `{ThemeResource SolidBackgroundFillColorBaseBrush}`. See [Non-resolving page-background brush](#page-background-brush-blank).
 
+<a id="app-requested-theme"></a>
+**Carry over the app-level `RequestedTheme` from the UWP `App.xaml`.** Many UWP SDK samples pin a theme on the application element — e.g. `<Application ... RequestedTheme="Dark">`. `RequestedTheme` exists on `Microsoft.UI.Xaml.Application` too, but when you rewrite `App.xaml` for WinUI 3 it is easy to drop the attribute. If you do, the migrated app silently falls back to the **system/light** theme: theme-aware brushes like `SolidBackgroundFillColorBaseBrush` then resolve to their light values (a white client area) while the UWP golden was dark, so the two no longer match visually. **Preserve the original `RequestedTheme` value verbatim on the `<Application>` root** (it is a per-app knob distinct from the individual theme-brush remaps above). This is a visual-parity fix, not a blank-window fix — the theme attribute does not affect *whether* content paints.
+
+
 ### Controls that need element-level swaps
 
 | UWP element | WinUI 3 element | Notes |

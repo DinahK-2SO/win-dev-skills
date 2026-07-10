@@ -1,0 +1,30 @@
+{
+  "scenario": "Unicode",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "The migrated app passed build + Test-AppLaunch + Validate-UwpMigration (all green) yet rendered a completely blank client area. The validator's Section 9/9b PASS lines promised 'window will not blank in headless/VM capture' and 'page background will resolve in WinUI 3' — false guarantees, since the app tripped none of the enumerated triggers and still blanked. That green read as 'rendering verified', so the agent never screenshotted.",
+      "evidence": "Validate-UwpMigration.ps1 L740/L758 printed at trial 000 session-log.txt L2994-2995; score parity/winui3/screenshots/01_*.png uniform ~9KB white while ui/01.json shows the tree at real coords; no 'winapp ui screenshot' in the migration log.",
+      "root_cause": "A static XAML/code scan can only rule out KNOWN composition/background blank triggers; it cannot prove the window paints. The PASS wording overstated that into an unconditional rendering guarantee, suppressing the mandatory per-scenario render check.",
+      "tier": 1,
+      "change": "Reworded both Section 9 and 9b PASS messages to scope the claim to 'known triggers absent' and, in the same line, state that rendering is UNVERIFIED until a per-scenario screenshot confirms non-blank. WARN branches unchanged.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Agents no longer read the validator PASS as proof of rendering; they proceed to the SKILL.md-mandated per-scenario screenshot and catch blank renders (including causes outside the three catalogued triggers) before declaring done.",
+      "falsifiable_check": "On a re-run of a scenario that blanks for a non-enumerated reason, the validator PASS line no longer contains 'will not blank'/'will resolve', and the agent captures a screenshot (a 'winapp ui screenshot' call appears in the log) rather than stopping at the green gate."
+    },
+    {
+      "problem": "The UWP source App.xaml declared <Application RequestedTheme=\"Dark\"> but the migrated App.xaml dropped it, so the WinUI app renders in the system/light theme (white) while the UWP golden is dark — a visual-parity regression. The skill's theme guidance covered per-brush key remaps but never the app-level RequestedTheme knob.",
+      "evidence": "uwp-samples-standalone/Samples/Unicode/cs App.xaml has RequestedTheme=\"Dark\"; trial 000 MyWinUIApp/App.xaml has none. Golden parity/baseline/screenshots/01_*.png is dark; candidate client is white.",
+      "root_cause": "App.xaml is rewritten in essentially every migration; the theme guidance only addressed individual brush keys, so the easy-to-drop <Application RequestedTheme> attribute was never surfaced and got lost.",
+      "tier": 3,
+      "change": "Added an anchored note in MIGRATION-PATTERNS.md (right after the theme-brush-key paragraph) instructing that the UWP <Application RequestedTheme=\"...\"> value be preserved verbatim on the WinUI <Application> root, explaining the light-vs-dark parity consequence and clarifying it is a parity fix, not a blank-window fix. Tier 3 (not 1/2) because the migration tooling preserves only the UWP .csproj at .uwp-source/ (Initialize-UwpMigration.ps1), so a script has no reliable ground-truth App.xaml to diff against; the rule must live where the agent rewrites App.xaml.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "When rewriting App.xaml the agent carries RequestedTheme over, so the migrated app matches the golden's theme.",
+      "falsifiable_check": "On re-run of a UWP sample whose App.xaml pins RequestedTheme=\"Dark\", the migrated App.xaml retains RequestedTheme=\"Dark\" and the captured client area is dark, matching the golden instead of rendering white."
+    }
+  ],
+  "deferred_to_human": [
+    "Root blank-render cause on a fully de-composed, opaque-background window is undetermined from logs alone (app trips none of the three documented triggers yet blanks). A contributing suspect is navigating the root Frame inside Window.Activated (MainWindow.xaml.cs) rather than before Activate(); confirming this needs an empirical build/run (out of scope for the improve step, which must not launch apps). If reproduced, a fourth static check / scaffold pattern could be added."
+  ]
+}

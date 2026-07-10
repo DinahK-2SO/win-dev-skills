@@ -1,0 +1,16 @@
+{
+  "scenario": "Unicode",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: reword Section 9/9b PASS lines to stop promising the window 'will not blank'/'will resolve' — scope to 'known triggers absent' and state rendering is unverified until a per-scenario screenshot confirms non-blank (a green static gate let a fully blank app ship).",
+    "MIGRATION-PATTERNS.md: add guidance to preserve <Application RequestedTheme=\"...\"> from the UWP App.xaml, since dropping it flips UWP SDK samples to the light theme and breaks visual parity with the dark golden."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Exact blank-render cause on a de-composed opaque-background window is undetermined (suspect: root Frame.Navigate inside Window.Activated); confirming needs an empirical build/run, out of scope for the improve step."
+  ]
+}

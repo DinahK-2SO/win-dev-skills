@@ -1,0 +1,29 @@
+{
+  "scenario": "Unicode",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log.txt L2976-2995: ran after build, correctly caught the scaffold MicaBackdrop/TitleBar earlier and reported 0 WUI warnings; agent used it as the final gate." },
+    { "tool": "Test-AppLaunch.ps1", "evidence": "session-log.txt L2991: '[INFO] Smoke-launching app via Test-AppLaunch.ps1' confirmed process stayed alive." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 (Section 9/9b)", "problem": "Prints absolute guarantees '[PASS] ... window will not blank in headless/VM capture' and '[PASS] ... page background will resolve in WinUI 3' after checking only the backdrop/TitleBar/ApplicationPageBackgroundThemeBrush triggers. The app tripped none of those and STILL rendered a fully blank client area, so the PASS message was false and gave the agent a false 'done' signal.", "evidence": "session-log.txt L2994-2995 (both PASS lines printed) vs score screenshots parity/winui3/screenshots/01_*.png (uniform white 9KB)." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Static XAML/code checks can only rule out the KNOWN, enumerable blank-window triggers; they cannot prove the window actually paints. Its PASS wording implied a rendering guarantee it cannot make.", "suggested_tweak": "Scope the PASS messages to 'known composition triggers absent' and explicitly tell the agent the render is still unverified until a per-scenario screenshot confirms non-blank." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "Validate-UwpMigration.ps1 L740 / L758", "wrong": "'[PASS] No system backdrop / ExtendsContentIntoTitleBar — window will not blank in headless/VM capture' and '[PASS] ... page background will resolve in WinUI 3'", "correct": "These over-promise. The candidate had neither backdrop/titlebar nor ApplicationPageBackgroundThemeBrush and still rendered blank. The message must not claim the window won't blank / will render." }
+  ],
+  "special_apis": [
+    { "api": "<Application RequestedTheme=\"Dark\">", "special_handling": "The UWP source App.xaml declares RequestedTheme=\"Dark\"; the migration dropped it, so the WinUI app followed the system/light theme (white client) while the UWP golden is dark. RequestedTheme on <Application> must be carried over to preserve visual parity." }
+  ],
+  "errors_encountered": [
+    { "error": "Migrated WinUI 3 app renders a completely blank client area (uniform ~9KB white) although the UIA tree is fully populated at correct on-screen coordinates (Splitter 169,241 1568x664; SampleTitle 234,259 335x140; isOffscreen=false) and the button handler works.", "root_cause": "A composition/first-paint failure that is NOT one of the three documented blank triggers (no SystemBackdrop, no <TitleBar>, no ExtendsContentIntoTitleBar, both root Grids paint an opaque SolidBackgroundFillColorBaseBrush). Exact GPU-composition cause undetermined from logs; the app navigates its root Frame inside Window.Activated (MainWindow.xaml.cs) rather than before Activate(), a non-standard pattern that can defer first composition. It went undetected because the agent never captured a screenshot.", "fix": "Detect at review time by capturing a per-scenario screenshot and confirming non-blank BEFORE declaring done; do not trust green build+smoke+validator as proof of rendering." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Final verification (session-log.txt end)", "symptom": "Agent declared the migration complete after build PASS + Test-AppLaunch PASS + Validate-UwpMigration PASS, without ever capturing a screenshot of the running app. No 'winapp ui screenshot' appears anywhere in the migration log.", "turns_or_retries": "0 render checks", "root_cause": "The validator's '[PASS] ... window will not blank' message reads as a rendering guarantee, so the agent reasonably concluded the visual surface was verified and skipped the manual per-scenario screenshot that SKILL.md L134 requires.", "how_resolved": "Not resolved in-trial — shipped a blank app; only the independent score step caught it.", "preventable_by": "Rewording the validator PASS lines so they cannot be read as a render guarantee, and re-stating in the same breath that a per-scenario screenshot is still mandatory." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

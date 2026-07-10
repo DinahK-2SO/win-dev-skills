@@ -1,0 +1,60 @@
+{
+  "featureName": "Unicode tokenization C# sample",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Unicode\\cs",
+  "generated": "2026-07-11T07:35:02.4516757+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Tokenize lexical identifiers within a string",
+      "class": "Scenario1_FindId",
+      "slug": "Tokenize_lexical_identifiers_within_a_string",
+      "screenshot": "01_Tokenize_lexical_identifiers_within_a_string.png",
+      "controls": [
+        {
+          "name": "TextInput",
+          "type": "TextBox",
+          "label": "Hello, how are you?  I hope you are ok!&#10;--&gt;id&lt;--&#10;1id 2id 3id&#10;id1 id2 id3&#10;𠀀_CJK_B_1 𠀁_CJK_B_2 𠀂_CJK_B_3",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Extract Identifiers",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Extract Identifiers",
+          "alt": "",
+          "type": "Button",
+          "label": "Extract Identifiers",
+          "name": "",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "TextInput",
+            "type": "TextBox"
+          },
+          {
+            "name": "TextOutput",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

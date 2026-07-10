@@ -1,0 +1,23 @@
+{
+  "scenario": "Unicode",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 1,
+  "uwp_capture_status": "ok (uwp-app-runner health-check returned ok:false/no-crash-signature, but the app actually launched — window 'Unicode Tokenization C# Sample' — and the golden was captured via windowTitle)",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Tokenize lexical identifiers within a string",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Tokenize_lexical_identifiers_within_a_string.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Tokenize_lexical_identifiers_within_a_string.png",
+      "note": "WinUI 3 renders a completely blank white client area (confirmed across 3 screenshots, ~9KB uniform vs 65KB UWP golden). UIA tree is populated (Description, nav pane, controls at real coords) and the Extract Identifiers handler produces an output token, but nothing paints — a user sees an empty page. Structural gate passed (cov 2/2, action 1/1 live) but visual judgment governs: blank frame = fail. UWP golden's button invoke was unreliable via the ApplicationFrameHost UIA peer (invokeOk=false), so uwp_responded is recorded false; not counted as a behavioral regression."
+    }
+  ]
+}

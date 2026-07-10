@@ -1,0 +1,14 @@
+{
+  "scenario": "Unicode",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The agent shipped the migration without capturing a single screenshot of the running app to confirm each scenario actually renders — it relied on build PASS + Test-AppLaunch PASS + Validate-UwpMigration PASS.",
+      "evidence": "No 'winapp ui screenshot' / render check anywhere in trial 000 session-log.txt; the agent's closing summary declared done after the validator PASS at L2994-2999.",
+      "covered_clearly_at": "SKILL.md L134 (prominent block-quote): '\"Process alive\" is not \"every page works.\" ... After the app launches, navigate to every migrated scenario / nav entry and confirm its content frame actually renders'; reinforced at SKILL.md L162 and MIGRATION-PATTERNS.md#silent-navigation-failures (L510).",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The requirement to visually verify each scenario is already stated prominently and repeatedly. The contributing factor that made it skippable — the validator's over-confident PASS wording — is handled as a separate skill-defect (Validate-UwpMigration message fix). Once that message no longer implies 'render verified', a capable model following the existing SKILL.md L134 guidance would screenshot and catch the blank without further prose changes. Adding yet another 'please screenshot' paragraph would just bloat the skill."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "scenario": "Unicode",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Validate-UwpMigration.ps1 Section 9/9b prints absolute guarantees that the window will render, after checking only the known composition triggers. The candidate tripped none of them and still rendered fully blank, so the PASS text was false and the agent treated the green gate as proof the app renders — and shipped a blank app without ever screenshotting.",
+      "evidence": "Validate-UwpMigration.ps1 L740 '[PASS] ... window will not blank in headless/VM capture' and L758 '[PASS] ... page background will resolve in WinUI 3'; both printed at session-log.txt L2994-2995. Score screenshots parity/winui3/screenshots/01_*.png are uniform ~9KB white; parity/winui3/ui/01.json shows the tree populated at real coords. No 'winapp ui screenshot' anywhere in the migration session-log.txt.",
+      "skill_search": "grepped winui-uwp-migration for 'will not blank', 'page background will resolve', 'PASS', Section 9/9b messaging.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "[PASS] No system backdrop / ExtendsContentIntoTitleBar — window will not blank in headless/VM capture  /  [PASS] No UWP-only ApplicationPageBackgroundThemeBrush references — page background will resolve in WinUI 3",
+      "root_cause": "The messages state an unconditional rendering guarantee that a static XAML/code scan cannot make — it can only confirm the enumerated triggers are absent. A blank window can (and here did) arise from an unenumerated cause, so 'will not blank' / 'will resolve' is incorrect and actively suppresses the mandatory visual check.",
+      "proposed_fix": "Reword both PASS lines to scope the claim to 'known composition/background triggers absent' and, in the same line, tell the agent the render is still UNVERIFIED until a per-scenario screenshot confirms non-blank. Keep the WARN branches unchanged.",
+      "generalizes": "Every UWP→WinUI 3 migration relies on this validator as the final gate. Blank-render causes are open-ended (composition/first-paint/GPU-less capture quirks beyond the three catalogued ones); any tool that promises 'won't blank' from a static scan will keep green-lighting blank apps across scenarios. Honest scoping + a screenshot directive generalizes to all of them."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "Unicode",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The migration dropped the UWP <Application RequestedTheme=\"Dark\"> declaration, so the WinUI 3 app renders in the system/light theme (white client) while the UWP golden is dark — a visual-parity regression. The skill's theme-migration guidance covers per-brush key remaps (ApplicationPageBackgroundThemeBrush → SolidBackgroundFillColorBaseBrush) and DynamicResource→ThemeResource, but never mentions carrying over the app-level RequestedTheme, so the agent didn't preserve it.",
+      "evidence": "UWP source App.xaml: '<Application ... RequestedTheme=\"Dark\">' (uwp-samples-standalone/Samples/Unicode/cs App.xaml). Migrated App.xaml (trial 000 MyWinUIApp/App.xaml) has no RequestedTheme. Golden screenshot parity/baseline/screenshots/01_*.png is dark; candidate parity/winui3/screenshots/01_*.png client is white.",
+      "covered_at": "MIGRATION-PATTERNS.md L850-852 (theme-brush key remaps / 'Some UWP theme-brush keys were removed entirely') and the DynamicResource→ThemeResource resource section.",
+      "why_missed": "under-emphasized — the existing theme section is entirely about individual brush keys; the app-level RequestedTheme attribute on <Application> is a different, easy-to-drop knob that is never called out, so a scan of the theme guidance doesn't surface it.",
+      "proposed_improvement": "Add a short, explicit note (one subsection + a pointer from the existing theme-brush paragraph) that <Application RequestedTheme=\"...\"> must be carried from the UWP App.xaml to the WinUI App.xaml, because many UWP SDK samples set RequestedTheme=\"Dark\" and dropping it silently flips the app to the system/light theme and breaks parity with the golden.",
+      "generalizes": "RequestedTheme=\"Dark\" (or \"Light\") on <Application> is a common UWP SDK-sample idiom; App.xaml is rewritten in essentially every migration, so this exact attribute is at risk of being dropped in any scenario whose original pins a non-system theme."
+    }
+  ]
+}

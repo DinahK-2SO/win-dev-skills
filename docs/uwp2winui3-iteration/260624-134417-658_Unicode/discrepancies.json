@@ -1,0 +1,17 @@
+{
+  "scenario": "Unicode",
+  "discrepancies": [
+    {
+      "feature": "Tokenize lexical identifiers within a string",
+      "type": "blank-render",
+      "severity": "critical",
+      "verdict": "fail",
+      "detail": "WinUI 3 app renders a completely blank white client area; no controls paint despite a populated UIA tree. Confirmed across 3 screenshots (~9KB uniform white) vs 65KB UWP golden showing full nav/description/input/button.",
+      "uwp_screenshot": "parity/baseline/screenshots/01_Tokenize_lexical_identifiers_within_a_string.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Tokenize_lexical_identifiers_within_a_string.png",
+      "structural_gate": "pass (cov 2/2)",
+      "behavioral": "WinUI button responded (+1 token in tree); UWP golden invoke unreliable via ApplicationFrameHost peer",
+      "governing_signal": "visual blank = fail"
+    }
+  ]
+}
