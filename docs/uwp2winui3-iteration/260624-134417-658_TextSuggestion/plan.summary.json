@@ -1,0 +1,17 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Harden Get-MigrationPattern.ps1: on an anchor miss, auto-resolve a unique bidirectional substring match and otherwise list all valid anchors — turns a wrong guess into a one-turn recovery instead of tool abandonment (agent hit two dead-end manifest lookups and stopped using the helper).",
+    "Add an `<a id=\"manifest\">` anchor to the Manifest migration checklist and fix the SKILL.md link to `Get-MigrationPattern.ps1 -Anchor manifest` — the manifest is the one artifact every UWP app carries and its 0x80080204 background-task fix was previously unreachable via the documented fetch mechanism."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Get-MigrationPattern.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Blank WinUI 3 screenshots + UWP CoreWindow not UIA-drivable are eval-skill (uwp-app-runner / winui3-parity-check) limitations — out of scope for the migration skill."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Get-MigrationPattern.ps1 fails hard on a near-miss anchor guess (no valid-anchor list, no fuzzy match), so the agent abandoned the tool after 2 failed manifest lookups and never fetched any pattern.",
+      "evidence": "session-log.txt turns 16-18 (lines 1914-1943): `-Anchor manifest-migration-checklist` and `-Anchor manifest` both error; only 2 Get-MigrationPattern invocations all migration, both failed.",
+      "root_cause": "The not-found branch printed a dead-end error; valid anchors are neither surfaced on failure nor fully enumerated anywhere (unsupported-api-inventory.json omits csproj/manifest/startup-crashes/etc.).",
+      "tier": 1,
+      "change": "In Get-MigrationPattern.ps1, parse all `<a id>` anchors up front; on an exact miss, auto-resolve a UNIQUE bidirectional case-insensitive substring match (guess-contains-anchor OR anchor-contains-guess); if still unresolved, error out listing every available anchor.",
+      "file": "skills/winui-uwp-migration/scripts/Get-MigrationPattern.ps1",
+      "expected_effect": "A wrong anchor guess resolves in one turn (unique match) or immediately shows the agent the exact valid set, eliminating tool abandonment.",
+      "falsifiable_check": "On re-run, `Get-MigrationPattern.ps1 -Anchor manifest-migration-checklist` returns the manifest section (WARNING: resolved to 'manifest'); any bogus anchor prints the full anchor list. Verified: tested manifest-migration-checklist -> resolves; zzz -> lists 19 anchors."
+    },
+    {
+      "problem": "The Manifest migration checklist (the one artifact every UWP app carries) was unreachable via the documented fetch mechanism: it had no `<a id>` anchor and SKILL.md linked to a non-resolvable markdown slug.",
+      "evidence": "grep '<a id=' MIGRATION-PATTERNS.md had no manifest anchor; SKILL.md L158 linked #manifest-migration-checklist-windowsdesktop--runfulltrust; agent's `-Anchor manifest` failed.",
+      "root_cause": "Anchor was never added when the manifest section was written; SKILL.md advertised a slug the tool cannot consume.",
+      "tier": 2,
+      "change": "Add `<a id=\"manifest\"></a>` above '### Manifest migration checklist' in MIGRATION-PATTERNS.md; change SKILL.md link to `Get-MigrationPattern.ps1 -Anchor manifest`.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md , skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agents can fetch the manifest checklist (incl. the 0x80080204 background-task-extension fix) via the standard mechanism, preventing launch-failure zero-scores in scenarios whose manifest carries such an extension.",
+      "falsifiable_check": "On re-run, `Get-MigrationPattern.ps1 -Anchor manifest` returns the checklist. Verified: returns the section heading + body."
+    }
+  ],
+  "deferred_to_human": [
+    "Blank WinUI 3 screenshots (composition/PrintWindow) and UWP CoreWindow not UIA-drivable are scorer/eval-side artifacts (uwp-app-runner / winui3-parity-check) — out of scope for the migration skill; note for harness owners only."
+  ]
+}

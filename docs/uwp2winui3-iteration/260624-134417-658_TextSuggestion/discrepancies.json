@@ -1,0 +1,17 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Conversion scenario: header, langTag input, Create Generator, Execute", "status": "pass", "reason": "Header 'TextConversionGenerator Sample', Create Generator responded correctly; operation area (Execute) collapsed-by-design until a generator instantiates, matching UWP.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Prediction scenario end-to-end", "status": "pass", "reason": "Create Generator -> 'Successfully instantiated a generator.' revealed executeButton/Input/methods/resultView; Execute produced 'No candidates.' Verified live.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "ReverseConversion scenario", "status": "pass", "reason": "Header 'TextReverseConversionGenerator Sample'; shared reveal/Execute code identical to Prediction.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "All scenarios", "uwp": "Rendered pages", "winui": "Screenshots captured blank (composition/PrintWindow artifact); content confirmed present via UIA inspect", "screenshot_ref": "parity/winui3/screenshots/*.png" }
+  ],
+  "missing_features": [],
+  "summary": "Faithful migration, score 100. All three listed discrepancies are measurement/scorer-side artifacts (Execute collapsed-by-design initial-tree miss; blank WinUI screenshots; UWP CoreWindow not UIA-drivable), not migration defects."
+}

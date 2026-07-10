@@ -1,0 +1,31 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 (bootstrap TODO/anchor injection)", "evidence": "Agent read injected TODO[migrate-NNN] + Triage labels and MIGRATION-MAPPING.md to drive the port; final app scored 100 (3/3 features pass)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Get-MigrationPattern.ps1", "problem": "Anchor lookup fails hard with no recovery hint. The two anchors the agent guessed for the manifest section ('manifest-migration-checklist', 'manifest') both returned only \"Anchor '#X' not found\" with no list of valid anchors, so the agent abandoned the tool entirely and never fetched any pattern.", "evidence": "session-log.txt turns 16-18 (lines 1914-1943): both -Anchor calls Write-Error not-found; agent then grep'd '## ' headings and hand-wrote the manifest changes." }
+  ],
+  "tool_limitations": [
+    { "tool": "Get-MigrationPattern.ps1", "limitation": "Resolves only exact explicit <a id=\"...\"> anchors; a near-miss guess yields no candidate list and no substring match, so the agent cannot self-correct in one turn.", "suggested_tweak": "On not-found, enumerate the available <a id> anchors and attempt a unique substring match before failing." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "SKILL.md line 158 link to the Manifest migration checklist", "wrong": "Links to MIGRATION-PATTERNS.md#manifest-migration-checklist-windowsdesktop--runfulltrust (a markdown-slug of the ### heading), but Get-MigrationPattern.ps1 only resolves explicit <a id=\"...\"> anchors and no such anchor exists — so the documented fetch mechanism cannot retrieve the manifest section.", "correct": "The manifest checklist needs an explicit <a id=\"manifest\"></a> anchor and SKILL.md should point at #manifest so `Get-MigrationPattern.ps1 -Anchor manifest` works." }
+  ],
+  "special_apis": [
+    { "api": "Windows.AI.Text TextConversionGenerator / TextPredictionGenerator / TextReverseConversionGenerator", "special_handling": "Ported as-is; APIs exist in Windows App SDK. GeneratorOperationArea kept Visibility=Collapsed until a generator instantiates (matches UWP) — no special migration handling required." }
+  ],
+  "errors_encountered": [
+    { "error": "Anchor '#manifest-migration-checklist' / '#manifest' not found in MIGRATION-PATTERNS.md", "root_cause": "The Manifest migration checklist section has no explicit <a id> anchor; Get-MigrationPattern.ps1 keys off <a id> anchors, and SKILL.md advertises a slug link the tool cannot consume.", "fix": "Add <a id=\"manifest\"></a> above the heading and correct the SKILL.md link; harden the script to list valid anchors on a miss." },
+    { "error": "Nullable-reference warnings (CS8600/CS8601/CS8602/CS8618) across ported .xaml.cs and SampleConfiguration.cs", "root_cause": "SDK-sample code assigns rootPage/generator/Title outside the constructor; scaffold enables nullable. Warnings only, build succeeded.", "fix": "None required for score; benign warnings." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Fetching manifest migration guidance (session-log turns 16-18)", "symptom": "Two consecutive Get-MigrationPattern.ps1 calls failed with 'Anchor not found'; agent gave up on the helper and grep'd headings instead, never retrieving the manifest checklist content.", "turns_or_retries": "2 failed tool calls + 1 grep fallback (~3 turns)", "root_cause": "Manifest section lacks an <a id> anchor and SKILL.md links to a non-resolvable slug; the not-found error gives no valid-anchor list to recover from.", "how_resolved": "Agent grep'd '## ' headings and hand-authored the manifest edits (this app had no background-task extension, so it still launched).", "preventable_by": "Add <a id=\"manifest\"> anchor + fix SKILL.md link; make Get-MigrationPattern.ps1 print available anchors (and try a unique substring match) on a miss." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 screenshots captured blank (composition/PrintWindow artifact) and UWP CoreWindow not drivable via UIA — both on the scoring side only.", "workaround": "Scorer verified via UIA inspect; not a migration-skill concern (eval instrument limitation)." }
+  ]
+}

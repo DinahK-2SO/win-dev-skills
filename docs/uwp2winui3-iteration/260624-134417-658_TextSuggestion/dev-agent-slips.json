@@ -1,0 +1,14 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Nullable-reference warnings (CS8600/CS8601/CS8602/CS8618) left in ported .xaml.cs and SampleConfiguration.cs.",
+      "evidence": "build-output.txt tail — many CS86xx warnings; BUILD SUCCEEDED. No functional impact; score 100.",
+      "covered_clearly_at": "N/A — these are benign nullable warnings on faithfully-ported SDK-sample code, not a build failure and not a parity requirement.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Warnings only; the build succeeds and all scenarios pass. Chasing nullable-annotation cleanup on ported sample code would be scenario-specific noise, not a generalizable skill rule."
+    }
+  ]
+}

@@ -708,6 +708,7 @@ Either way, before the first `winapp run`, sanity-check every asset reference in
 }
 ```
 
+<a id="manifest"></a>
 ### Manifest migration checklist (Windows.Desktop + runFullTrust)
 
 The default UWP `Package.appxmanifest` declares itself as a Universal app, but a packaged WinUI 3 desktop app is a Win32 process with package identity — it needs a different shape. `winapp run` will register the AppX but **fail to deploy** with `0x80073CF6` or "requires runFullTrust capability" if any of the following are missing.

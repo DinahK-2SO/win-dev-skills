@@ -1,0 +1,15 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Get-MigrationPattern.ps1 fails hard on a near-miss anchor: it prints only 'Anchor #X not found' with no list of the valid anchors and no substring/fuzzy fallback, so an agent that guesses a slightly-wrong anchor name cannot self-correct in the same turn and gives up on the tool.",
+      "evidence": "session-log.txt turns 16-18: two failed -Anchor calls in a row, then the agent stops using Get-MigrationPattern entirely for the rest of the migration (only 2 total invocations, both failed).",
+      "covered_at": "scripts/Get-MigrationPattern.ps1 lines 52-55 (the not-found branch) and its .SYNOPSIS which says 'The full list lives in unsupported-api-inventory.json' — but that inventory omits many real anchors (csproj, manifest, startup-crashes, silent-navigation-failures, system-backdrop-blank, sdk-sample-status-area).",
+      "why_missed": "not prominent / under-emphasized — the valid anchor set is neither printed on error nor fully listed anywhere the agent reliably reads; the error is a dead end.",
+      "proposed_improvement": "In the not-found branch, parse and print the actual `<a id>` anchors from MIGRATION-PATTERNS.md, and attempt a unique case-insensitive substring match (auto-resolve when exactly one anchor contains the query) before exiting non-zero. Sharpens the existing tool so a wrong guess becomes a one-turn recovery instead of an abandonment.",
+      "generalizes": "Anchor names are guessed by every migration agent across every scenario; a self-listing, substring-tolerant lookup turns any near-miss into an immediate recovery, reducing wasted turns and tool abandonment universally — independent of which anchor was missed."
+    }
+  ]
+}

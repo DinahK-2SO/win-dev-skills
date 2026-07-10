@@ -1,0 +1,17 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The manifest migration guidance cannot be retrieved through the documented fetch tool: `Get-MigrationPattern.ps1 -Anchor manifest` (and the slug the agent guessed from SKILL.md) both fail because the Manifest migration checklist section has no explicit <a id> anchor.",
+      "evidence": "session-log.txt turns 16-18 (lines 1914-1943): `-Anchor \"manifest-migration-checklist\"` and `-Anchor \"manifest\"` both Write-Error 'Anchor not found'; agent then abandons the helper and grep's '## ' headings.",
+      "skill_search": "grep '<a id=' MIGRATION-PATTERNS.md (18 anchors: threading, dialogs, windowing, csproj, xaml, ...) — no 'manifest'; grep 'manifest' SKILL.md line 158 links to #manifest-migration-checklist-windowsdesktop--runfulltrust",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "SKILL.md L158: '[Manifest migration checklist](./MIGRATION-PATTERNS.md#manifest-migration-checklist-windowsdesktop--runfulltrust)' — a markdown slug Get-MigrationPattern.ps1 cannot resolve; the section carries no <a id> anchor.",
+      "root_cause": "Anchor-fetch tool keys off explicit <a id> anchors, but the manifest section was never given one, and SKILL.md advertises a non-resolvable slug link. The manifest is the one artifact every UWP app carries, so the highest-stakes checklist (background-task extension removal that prevents 0x80080204 launch failure) is the least reachable via the intended mechanism.",
+      "proposed_fix": "Add `<a id=\"manifest\"></a>` immediately above '### Manifest migration checklist' in MIGRATION-PATTERNS.md, and change the SKILL.md link to `#manifest` (and note the fetch command `Get-MigrationPattern.ps1 -Anchor manifest`).",
+      "generalizes": "Every UWP→WinUI 3 migration must reconcile Package.appxmanifest (TargetDeviceFamily, rescap/runFullTrust, background-task extensions). Any scenario whose manifest carries a windows.backgroundTasks extension fails to launch (0x80080204) and scores 0 if the agent can't reach this checklist — a recurring, high-impact discoverability gap independent of this sample."
+    }
+  ]
+}

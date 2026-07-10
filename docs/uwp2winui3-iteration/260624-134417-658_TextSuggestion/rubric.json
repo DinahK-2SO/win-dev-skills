@@ -1,0 +1,106 @@
+{
+  "scenario": "TextSuggestion",
+  "created_at": "2026-07-10T11:36:42+08:00",
+  "uwp_capture_status": "partial: UWP app launched (Release, pid 53156, windowTitle 'TextSuggestion') and scenario 1 (Conversion) rendered and was screenshotted as ground truth; however UIA could not drill into the UWP CoreWindow (ApplicationFrameHost exposed only a single top-level Pane, 0 interactive elements), so title-driven navigation to scenarios 2/3 and behavioral actuation of the UWP controls could not be driven. Scenario-1 visual golden is faithful; scenarios 2/3 golden PNGs exist but still show the initial Conversion page.",
+  "features": [
+    {
+      "id": "nav-scenario-list",
+      "area": "Shell",
+      "name": "Scenario navigation list",
+      "description": "A left-hand navigation list exposes the three scenarios ('1) Conversion', '2) Prediction', '3) ReverseConversion') and switches the content frame when a scenario is selected.",
+      "expected_behaviour": [
+        "All three scenario items are visible in the nav list with their verbatim '1) '/'2) '/'3) ' prefixes",
+        "Selecting a scenario swaps the content area to that scenario's page (distinct sample header)"
+      ],
+      "screenshot": "parity/baseline/screenshots/00_launch.png",
+      "weight": 2
+    },
+    {
+      "id": "s1-conversion-create",
+      "area": "Conversion",
+      "name": "Conversion - Create Generator",
+      "description": "Scenario 1 shows the 'TextConversionGenerator Sample' header, a 'Set a language tag' TextBox (langTag) and a 'Create Generator' button. Clicking Create Generator instantiates a TextConversionGenerator for the entered language tag and reports status.",
+      "expected_behaviour": [
+        "Header reads 'TextConversionGenerator Sample'",
+        "langTag TextBox and 'Create Generator' button are present",
+        "Clicking Create Generator with an unsupported/empty tag shows 'Unsupported language.' and keeps the operation area collapsed",
+        "Clicking Create Generator with a valid installed language shows 'Successfully instantiated a generator.' and reveals the operation area (Execute, Input, method combo, Result)"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Conversion.png",
+      "weight": 2
+    },
+    {
+      "id": "s1-conversion-execute",
+      "area": "Conversion",
+      "name": "Conversion - Execute (candidates)",
+      "description": "After a generator is created, the Execute button (inside GeneratorOperationArea, Visibility=Collapsed until success) calls GetCandidatesAsync and lists conversion candidates in resultView, or reports 'No candidates.'",
+      "expected_behaviour": [
+        "Execute button and Input box are hidden until a generator is successfully created (by design, matches UWP)",
+        "With a generator and non-empty Input, Execute populates resultView with candidates or shows 'No candidates.'"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Conversion__a02_Execute.png",
+      "weight": 1
+    },
+    {
+      "id": "s2-prediction-create",
+      "area": "Prediction",
+      "name": "Prediction - Create Generator",
+      "description": "Scenario 2 shows the 'TextPredictionGenerator Sample' header and creates a TextPredictionGenerator, revealing the operation area on success.",
+      "expected_behaviour": [
+        "Header reads 'TextPredictionGenerator Sample'",
+        "Clicking Create Generator reports 'Successfully instantiated a generator.' and reveals Execute/Input/method combo/Result"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Prediction.png",
+      "weight": 2
+    },
+    {
+      "id": "s2-prediction-execute",
+      "area": "Prediction",
+      "name": "Prediction - Execute (candidates)",
+      "description": "Execute calls the prediction API for the Input text and lists candidates in resultView, or reports 'No candidates.'",
+      "expected_behaviour": [
+        "With a generator and Input text, Execute runs the prediction handler",
+        "resultView is populated with candidates or status shows 'No candidates.'"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Prediction__a02_Execute.png",
+      "weight": 1
+    },
+    {
+      "id": "s3-reverse-create",
+      "area": "ReverseConversion",
+      "name": "ReverseConversion - Create Generator",
+      "description": "Scenario 3 shows the 'TextReverseConversionGenerator Sample' header and creates a TextReverseConversionGenerator, revealing the operation area on success.",
+      "expected_behaviour": [
+        "Header reads 'TextReverseConversionGenerator Sample'",
+        "Clicking Create Generator with an unsupported/empty tag shows 'Unsupported language.' and keeps the operation area collapsed",
+        "With a valid language it reports success and reveals Execute/Input/Result"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_ReverseConversion.png",
+      "weight": 2
+    },
+    {
+      "id": "s3-reverse-execute",
+      "area": "ReverseConversion",
+      "name": "ReverseConversion - Execute (candidates)",
+      "description": "Execute calls the reverse-conversion API for the Input text and lists candidates in resultView, or reports 'No candidates.'",
+      "expected_behaviour": [
+        "Execute button hidden until generator created (by design)",
+        "With a generator and Input, Execute runs the reverse-conversion handler and updates resultView/status"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_ReverseConversion__a02_Execute.png",
+      "weight": 1
+    },
+    {
+      "id": "status-notification",
+      "area": "Shell",
+      "name": "Status notification area",
+      "description": "A shared StatusBlock at the bottom reports operation results ('Unsupported language.', 'Successfully instantiated a generator.', 'No candidates.') via NotifyUser.",
+      "expected_behaviour": [
+        "Status messages appear after Create Generator / Execute actions",
+        "Message text matches the code path taken (success vs error vs no candidates)"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Conversion__a01_Create_Generator.png",
+      "weight": 1
+    }
+  ]
+}
