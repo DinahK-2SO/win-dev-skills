@@ -1,0 +1,21 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "score": 93,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Trial-mode", "status": "pass", "reason": "Real UWP golden matches WinUI UIA text exactly.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "In-app purchase", "status": "pass", "reason": "Coverage 3/3.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Unmanaged consumable product", "status": "pass", "reason": "Coverage 5/5.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Managed consumable product", "status": "partial", "reason": "Scoring reported the QuantityComboBox missing (coverage 5/6).", "suspected_skill_gap": "None on the migration side: the migrated Scenario4_ConsumableProduct.xaml DOES contain the QuantityComboBox. The scenario-4 UIA capture shows scenario-3 (Unmanaged Consumables) content, so this is an eval-capture/navigation artifact, not a migration-skill gap." },
+    { "id": 5, "text": "User collection", "status": "pass", "reason": "Coverage 2/2.", "suspected_skill_gap": "" },
+    { "id": 6, "text": "App listing URI", "status": "pass", "reason": "Coverage 1/1.", "suspected_skill_gap": "" },
+    { "id": 7, "text": "Business to Business", "status": "pass", "reason": "Coverage 2/2; build initially failed on HttpClient ambiguity but was fixed.", "suspected_skill_gap": "CS0104 System.Net.Http vs Windows.Web.Http ambiguity not documented in the skill's CS0104 section (only the Xaml-namespace axis is)." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Managed consumable product", "uwp": "QuantityComboBox present", "winui": "Scenario-3 content captured under scenario-4 label; ComboBox present in XAML but absent from the scenario-4 capture", "screenshot_ref": "parity/winui3/ui/04.json (shows 'Unmanaged Consumables')" }
+  ],
+  "missing_features": [],
+  "summary": "High-fidelity migration (93/100). The only 'partial' is an eval-capture artifact (scenario-4 capture shows scenario-3 content); the ComboBox is actually present in the migrated XAML. The generalizable migration-skill signal comes from the build-fix loop: CS0104 Windows.Web.Http vs System.Net.Http ambiguity and a WMC0909/WMC1111 x:Bind DataType cascade triggered by the C# compile failure."
+}

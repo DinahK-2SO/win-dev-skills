@@ -1,0 +1,23 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "CS0104: 'HttpClient' / 'HttpResponseMessage' is an ambiguous reference between System.Net.Http.* and Windows.Web.Http.* after migrating UWP code that used `using Windows.Web.Http;` with unqualified HttpClient.",
+      "evidence": "session-log.txt Turn 38 build: 'error CS0104: HttpClient is an ambiguous reference between System.Net.Http.HttpClient and Windows.Web.Http.HttpClient' (Scenario7_B2B.xaml.cs 85-86); original cs\\Scenario7_B2B.xaml.cs line 18 `using Windows.Web.Http;`.",
+      "covered_at": "MIGRATION-PATTERNS.md > 'Common build errors after the namespace rewrite' > '### CS0104: LaunchActivatedEventArgs is an ambiguous reference' (line ~9, plus the generalization at line ~28).",
+      "why_missed": "under-emphasized / under-scoped: the existing CS0104 section only addresses the Windows.UI.Xaml vs Microsoft.UI.Xaml axis and its generalization explicitly limits itself to 'any type name that exists in both Windows.UI.Xaml.* and Microsoft.UI.Xaml.* namespaces', so an agent does not apply it to the System.Net.Http vs Windows.Web.Http collision.",
+      "proposed_improvement": "Extend the existing CS0104 section with a second ambiguity axis: types that exist in both System.Net.Http and Windows.Web.Http (HttpClient, HttpResponseMessage, HttpRequestMessage). UWP samples commonly `using Windows.Web.Http;` and use unqualified names; in a WinUI 3 .NET project System.Net.Http is also in scope. Fix = fully qualify (or alias) the Windows.Web.Http.* types to match the original UWP behaviour.",
+      "generalizes": "Windows.Web.Http is one of the most common UWP HTTP APIs; any UWP app doing HTTP will hit this exact CS0104 collision after migration to a WinUI 3 .NET project, independent of this scenario."
+    },
+    {
+      "problem": "XAML markup errors WMC0909 'Cannot resolve DataType local:<Type>' and WMC1111 'DataTemplates containing x:Bind need a DataType' appeared for a valid project-local type; the agent 'fixed' them by downgrading x:Bind/x:DataType to {Binding}.",
+      "evidence": "session-log.txt Turn 38: 'WMC1509: No LocalAssembly parameter given during MarkupCompilePass2 ... will likely cause type resolution errors for any types from the current project', then 'WMC0909: Cannot resolve DataType local:Scenario' and 'WMC1111'. Turn 39 edit replaced `<DataTemplate x:DataType=\"local:Scenario\"><TextBlock Text=\"{x:Bind Title}\"/>` with `<DataTemplate><TextBlock Text=\"{Binding Title}\"/>`.",
+      "covered_at": "MIGRATION-PATTERNS.md > '### x:Bind and compiled bindings' (line ~906), which currently only mentions XLS0414/MC3074 'type was not found' from stale UWP namespace prefixes.",
+      "why_missed": "not prominent / incomplete: the x:Bind section does not mention that WMC0909/WMC1111 (with WMC1509 'No LocalAssembly') are usually a downstream cascade of a failing C# compile, so the agent treated them as genuine binding errors and degraded compiled bindings.",
+      "proposed_improvement": "Add a short caveat to the x:Bind section: when WMC0909/WMC1111 'cannot resolve DataType / local type' errors appear alongside C# compile errors (and especially with WMC1509 'No LocalAssembly parameter given during MarkupCompilePass2'), fix the C# errors first and rebuild — the markup-pass errors are a cascade and clear on their own. Do NOT downgrade a valid x:Bind/x:DataType to {Binding} to silence them.",
+      "generalizes": "The scenario-list navigation DataTemplate (`x:Bind`/`x:DataType` to a project 'Scenario' model) is boilerplate in virtually every Windows Universal Samples app, and any migration that fixes C# and XAML in the same build cycle will see these cascade errors — the anti-pattern of degrading compiled bindings recurs broadly."
+    }
+  ]
+}

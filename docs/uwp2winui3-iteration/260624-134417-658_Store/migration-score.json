@@ -1,0 +1,79 @@
+{
+  "scenario": "Store",
+  "uwp_launchable": true,
+  "score": 93,
+  "features_total": 7,
+  "features_pass": 6,
+  "features_partial": 1,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: uwp-app-runner ok:true (pid 41224, windowTitle 'Store C# Sample', Release/.NET-Native, sdk 10.0.26100.0); scenario 1 (Trial-mode) captured as a real rendered golden. Scenarios 2-7 not navigable in the original UWP app (CoreWindow exposes no cross-process UIA tree; no interactive desktop for synthetic input), so parity was assessed structurally + behaviorally against the source checklist and the WinUI app's full UIA tree.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "score_formula": "round(100 * (pass + 0.5*partial) / total) = round(100 * (6 + 0.5) / 7) = 93",
+  "notes": "WinUI build clean (0 errors) and app launched (pid 55872) with a full UIA tree. Structural parity gate = 100 (all 7 pass, one at 83% coverage). Own verdict downgrades scenario 4 to partial due to the genuinely dropped QuantityComboBox. WinUI screenshots captured blank due to non-composed window in this headless session (environment artifact; UIA confirms per-scenario content). Store-API-gated buttons that were inert are flagged, not failed, because no UWP behavioral golden was obtainable.",
+  "features": [
+    {
+      "name": "Trial-mode",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Trial_mode.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Trial_mode.png",
+      "note": "Real UWP golden matches WinUI UIA text exactly; 'Show trial period information' responded. Coverage 1/1."
+    },
+    {
+      "name": "In-app purchase",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_In_app_purchase.png",
+      "note": "Coverage 3/3. 'Get Associated Add-Ons' responded; 'Purchase Selected Add-On' Store-gated. UWP behavior unmeasured (app not navigable)."
+    },
+    {
+      "name": "Unmanaged consumable product",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/03_Unmanaged_consumable_product.png",
+      "note": "Coverage 5/5. 'Get Associated Add-Ons' responded; Purchase/Balance/Fulfill Store-gated."
+    },
+    {
+      "name": "Managed consumable product",
+      "verdict": "partial",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/04_Managed_consumable_product.png",
+      "note": "Coverage 5/6 - the UWP QuantityComboBox (quantity selector) is DROPPED in WinUI. Remaining buttons Store-gated. Missing interactive control => partial."
+    },
+    {
+      "name": "User collection",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/05_User_collection.png",
+      "note": "Coverage 2/2. 'Get User Collection' responded."
+    },
+    {
+      "name": "App listing URI",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/06_App_listing_URI.png",
+      "note": "Coverage 1/1. 'Rate this app' responded."
+    },
+    {
+      "name": "Business to Business",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/07_Business_to_Business.png",
+      "note": "Coverage 2/2. 'Get Customer Collections Id' responded; 'Get Customer Purchase Id' Store-gated."
+    }
+  ]
+}

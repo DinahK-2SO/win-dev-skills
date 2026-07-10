@@ -1,0 +1,82 @@
+{
+  "scenario": "Store",
+  "created_at": "2026-07-10T08:38:14+08:00",
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true (pid 41224, windowTitle 'Store C# Sample', Release/.NET-Native, sdk 10.0.26100.0) and the app rendered; scenario 1 (Trial-mode) was captured as a real rendered golden via DWM. Scenarios 2-7 could NOT be navigated in the original UWP app: its CoreWindow exposes no cross-process UIA tree (winapp inspect returns a single empty Pane) AND the session has no interactive desktop (SetForegroundWindow/SetCursorPos fail, cursor pinned at 0,0), so neither UIA invoke nor synthetic-mouse navigation lands. Parity was therefore assessed structurally + behaviorally against the source-derived checklist and the WinUI app's full UIA tree.",
+  "features": [
+    {
+      "id": "trial-mode",
+      "name": "Trial-mode",
+      "description": "Shows current license mode and offers to show trial-period info and buy the app.",
+      "expected_behaviour": [
+        "'Show trial period information' button updates the license/trial text",
+        "'Buy app (Price unknown)' button is present"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Trial_mode.png",
+      "weight": 2
+    },
+    {
+      "id": "in-app-purchase",
+      "name": "In-app purchase",
+      "description": "Lists associated add-ons and lets the user purchase the selected add-on.",
+      "expected_behaviour": [
+        "'Get Associated Add-Ons' populates the add-on list",
+        "'Purchase Selected Add-On' initiates a purchase"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "unmanaged-consumable",
+      "name": "Unmanaged consumable product",
+      "description": "Get/purchase an unmanaged consumable, query its balance, and fulfill it.",
+      "expected_behaviour": [
+        "'Get Associated Add-Ons' populates the consumable list",
+        "Purchase / Get Balance / Fulfill buttons present and wired"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "managed-consumable",
+      "name": "Managed consumable product",
+      "description": "Get/purchase a managed consumable in a chosen QUANTITY, query balance, and fulfill.",
+      "expected_behaviour": [
+        "A QuantityComboBox lets the user choose the purchase quantity",
+        "Get / Purchase / Get Balance / Fulfill buttons present and wired"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "user-collection",
+      "name": "User collection",
+      "description": "Retrieves the user's product collection.",
+      "expected_behaviour": [
+        "'Get User Collection' retrieves and displays the collection"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "app-listing-uri",
+      "name": "App listing URI",
+      "description": "Launches the app's Store listing (rate this app).",
+      "expected_behaviour": [
+        "'Rate this app' launches/queries the app listing URI"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "b2b",
+      "name": "Business to Business",
+      "description": "Retrieves customer collections id and customer purchase id for B2B scenarios.",
+      "expected_behaviour": [
+        "'Get Customer Collections Id' returns an id",
+        "'Get Customer Purchase Id' returns an id"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0104 ambiguous HttpClient/HttpResponseMessage (System.Net.Http vs Windows.Web.Http) when migrating UWP code that used `using Windows.Web.Http;`.",
+      "evidence": "session-log.txt Turn 38: 'error CS0104: HttpClient is an ambiguous reference between System.Net.Http.HttpClient and Windows.Web.Http.HttpClient' (Scenario7_B2B.xaml.cs 85-86); original cs\\Scenario7_B2B.xaml.cs:18 `using Windows.Web.Http;`.",
+      "root_cause": "WinUI 3 .NET projects have System.Net.Http in scope, so UWP code using unqualified HttpClient resolved from Windows.Web.Http becomes ambiguous. The skill's CS0104 section only documented the Windows.UI.Xaml vs Microsoft.UI.Xaml axis.",
+      "tier": 3,
+      "change": "Extended the existing 'CS0104 ambiguous reference' section in MIGRATION-PATTERNS.md with a second axis (System.Net.Http vs Windows.Web.Http), showing the fully-qualified fix and a using-alias, and warning not to blindly switch to the System.Net.Http type (different API shape).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent qualifies Windows.Web.Http.* on first build instead of hitting CS0104 and iterating.",
+      "falsifiable_check": "On a re-run of any UWP app using Windows.Web.Http, the first `dotnet build` shows 0 CS0104 HttpClient/HttpResponseMessage errors."
+    },
+    {
+      "problem": "Agent downgraded a valid `x:Bind`/`x:DataType` DataTemplate to `{Binding}` to silence WMC0909/WMC1111 'cannot resolve DataType local:Scenario' errors that were actually a cascade of the C# compile failure.",
+      "evidence": "session-log.txt Turn 38 'WMC1509: No LocalAssembly parameter given during MarkupCompilePass2' + 'WMC0909: Cannot resolve DataType local:Scenario' + 'WMC1111'; Turn 39 edit replaced x:DataType/x:Bind with {Binding} in MainPage.xaml.",
+      "root_cause": "The 6 CS0104 C# errors kept the project assembly from compiling, so MarkupCompilePass2 had no LocalAssembly and could not resolve the valid project-local type; the WMC errors were downstream symptoms, not real binding errors.",
+      "tier": 3,
+      "change": "Added a caveat to the 'x:Bind and compiled bindings' section in MIGRATION-PATTERNS.md: WMC0909/WMC1111 (with WMC1509 'No LocalAssembly') that appear while C# is failing are a cascade — fix C# first and rebuild; do not downgrade x:Bind/x:DataType to {Binding}.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent fixes C# errors first, rebuilds, and keeps compiled bindings instead of degrading them.",
+      "falsifiable_check": "On a re-run, a migrated scenario-list DataTemplate retains `x:Bind`/`x:DataType` (no substitution to {Binding}) and builds clean once the C# errors are fixed."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-capture artifact: scenario-4 UIA capture (parity/winui3/ui/04.json) shows scenario-3 ('Unmanaged Consumables') content, causing a false 'missing QuantityComboBox' (the control is present in the migrated XAML). This is a winui3-parity-check capture/navigation timing issue in the measurement instrument, not a migration-skill defect — not editable here."
+  ]
+}

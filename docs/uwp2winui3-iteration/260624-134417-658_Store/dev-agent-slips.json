@@ -1,0 +1,14 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Nullable-reference warnings (CS8618/CS8625/CS8602/CS8604) after migration in SampleConfiguration.cs, MainPage.xaml.cs, Scenario1_TrialMode.xaml.cs.",
+      "evidence": "session-log.txt Turns 41-45: agent added `?` to properties/fields and null-guards; build went to 0 warnings without any skill lookup.",
+      "covered_clearly_at": "General C#/.NET nullable-reference behaviour; not a UWP->WinUI-specific concern and the agent resolved it trivially in-line.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "These are ordinary nullable-annotation warnings any capable model fixes without guidance; documenting them would bloat the skill with generic C# advice."
+    }
+  ]
+}

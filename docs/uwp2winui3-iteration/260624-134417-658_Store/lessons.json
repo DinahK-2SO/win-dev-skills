@@ -1,0 +1,30 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Turn 47: validator ran residue grep, mapping-consistency, dotnet build, smoke launch, visible-text fidelity and reported PASS, giving the agent a single go/no-go gate before finishing." },
+    { "tool": "Initialize-UwpMigration.ps1 namespace rewrite", "evidence": "Bulk Windows.UI.Xaml -> Microsoft.UI.Xaml rewrite left only a handful of code-level errors to fix by hand (Turns 38-45)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Runs only after the project already builds, so it cannot guide the build-fix loop where CS0104 / WMC cascade errors occur.", "suggested_tweak": "Keep the build-error interpretation guidance in MIGRATION-PATTERNS.md (prose), where the agent reads it during the fix loop." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.Web.Http.HttpClient / HttpResponseMessage", "why_tried": "UWP Scenario7_B2B.xaml.cs uses unqualified HttpClient from `using Windows.Web.Http;`", "root_cause": "In a WinUI 3 .NET project System.Net.Http is also in scope, so unqualified HttpClient/HttpResponseMessage become CS0104 ambiguous between System.Net.Http.* and Windows.Web.Http.*.", "fix": "Fully qualify to Windows.Web.Http.HttpClient / Windows.Web.Http.HttpResponseMessage (Turn 39)." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Web.Http", "special_handling": "Common UWP HTTP namespace; collides with System.Net.Http after migration. Fully qualify or alias." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0104: 'HttpClient' is an ambiguous reference between 'System.Net.Http.HttpClient' and 'Windows.Web.Http.HttpClient' (Scenario7_B2B.xaml.cs, Turn 38)", "root_cause": "UWP code used unqualified HttpClient resolved from `using Windows.Web.Http;`; WinUI 3 .NET also exposes System.Net.Http, creating the ambiguity.", "fix": "Fully qualify Windows.Web.Http.HttpClient / HttpResponseMessage." },
+    { "error": "WMC0909: Cannot resolve DataType local:Scenario + WMC1111 (DataTemplate x:Bind needs x:DataType) in MainPage.xaml (Turn 38), preceded by WMC1509 'No LocalAssembly parameter given during MarkupCompilePass2'.", "root_cause": "The 6 CS0104 C# errors prevented the project assembly from compiling, so the XAML markup pass 2 had no LocalAssembly (WMC1509) and could not resolve the perfectly-valid project-local type `Scenario` referenced by x:DataType -> spurious WMC0909/WMC1111.", "fix": "Agent downgraded x:Bind/x:DataType to {Binding} (Turn 39). This silenced the error but was unnecessary: fixing the C# CS0104 errors and rebuilding would have cleared the markup-pass errors too, keeping compiled bindings." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turn 38-40, first full build", "symptom": "6 build errors: CS0104 HttpClient/HttpResponseMessage ambiguity + WMC0909/WMC1111 x:Bind DataType resolution + WMC9999 internal error.", "turns_or_retries": "2 build cycles (Turn 38 fail -> Turn 39 fixes -> Turn 40 succeeds)", "root_cause": "CS0104 = System.Net.Http vs Windows.Web.Http ambiguity not documented in the skill's CS0104 section (which only covers the Windows.UI.Xaml vs Microsoft.UI.Xaml axis). The WMC errors were a cascade of the C# compile failure (WMC1509 LocalAssembly missing).", "how_resolved": "Fully qualified the Http types; separately switched the scenario-list DataTemplate from x:Bind to {Binding}.", "preventable_by": "Extend the CS0104 pattern to cover System.Net.Http vs Windows.Web.Http; add a note that XAML 'cannot resolve DataType/local type' (WMC0909/WMC1111 with WMC1509) errors are usually a cascade of C# compile errors — fix C# first, rebuild, do not downgrade x:Bind to {Binding}." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 window frames captured blank in the headless scoring session (title bar only).", "workaround": "Scoring fell back to per-scenario UIA trees; migration skill already avoids system backdrop / ExtendsContentIntoTitleBar to reduce blanking. No migration action needed." }
+  ]
+}

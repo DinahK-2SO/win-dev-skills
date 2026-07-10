@@ -1,0 +1,429 @@
+{
+  "featureName": "Store C# Sample",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\Store\\cs",
+  "generated": "2026-07-10T08:39:51.5164827+08:00",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Trial-mode",
+      "class": "Scenario1_TrialMode",
+      "slug": "Trial_mode",
+      "screenshot": "01_Trial_mode.png",
+      "controls": [
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Show trial period information",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Show trial period information",
+          "alt": "",
+          "type": "Button",
+          "label": "Show trial period information",
+          "name": "",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "LicenseMode",
+            "type": "Run"
+          },
+          {
+            "name": "PurchasePrice",
+            "type": "Run"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "In-app purchase",
+      "class": "Scenario2_InAppPurchase",
+      "slug": "In_app_purchase",
+      "screenshot": "02_In_app_purchase.png",
+      "controls": [
+        {
+          "name": "GetAssociatedProductsButton",
+          "type": "Button",
+          "label": "Get Associated Add-Ons",
+          "events": []
+        },
+        {
+          "name": "PurchaseAddOnButton",
+          "type": "Button",
+          "label": "Purchase Selected Add-On",
+          "events": []
+        },
+        {
+          "name": "ProductsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get Associated Add-Ons",
+          "alt": "GetAssociatedProductsButton",
+          "type": "Button",
+          "label": "Get Associated Add-Ons",
+          "name": "GetAssociatedProductsButton",
+          "event": ""
+        },
+        {
+          "target": "Purchase Selected Add-On",
+          "alt": "PurchaseAddOnButton",
+          "type": "Button",
+          "label": "Purchase Selected Add-On",
+          "name": "PurchaseAddOnButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Unmanaged consumable product",
+      "class": "Scenario3_UnmanagedConsumable",
+      "slug": "Unmanaged_consumable_product",
+      "screenshot": "03_Unmanaged_consumable_product.png",
+      "controls": [
+        {
+          "name": "GetUnManagedConsumablesButton",
+          "type": "Button",
+          "label": "Get Associated Add-Ons",
+          "events": []
+        },
+        {
+          "name": "PurchaseAddOnButton",
+          "type": "Button",
+          "label": "Purchase Selected Consumable",
+          "events": []
+        },
+        {
+          "name": "GetConsumableBalanceButton",
+          "type": "Button",
+          "label": "Get Consumable Balance",
+          "events": []
+        },
+        {
+          "name": "FulfillConsumableButton",
+          "type": "Button",
+          "label": "Fulfill Consumable",
+          "events": []
+        },
+        {
+          "name": "ProductsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get Associated Add-Ons",
+          "alt": "GetUnManagedConsumablesButton",
+          "type": "Button",
+          "label": "Get Associated Add-Ons",
+          "name": "GetUnManagedConsumablesButton",
+          "event": ""
+        },
+        {
+          "target": "Purchase Selected Consumable",
+          "alt": "PurchaseAddOnButton",
+          "type": "Button",
+          "label": "Purchase Selected Consumable",
+          "name": "PurchaseAddOnButton",
+          "event": ""
+        },
+        {
+          "target": "Get Consumable Balance",
+          "alt": "GetConsumableBalanceButton",
+          "type": "Button",
+          "label": "Get Consumable Balance",
+          "name": "GetConsumableBalanceButton",
+          "event": ""
+        },
+        {
+          "target": "Fulfill Consumable",
+          "alt": "FulfillConsumableButton",
+          "type": "Button",
+          "label": "Fulfill Consumable",
+          "name": "FulfillConsumableButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Managed consumable product",
+      "class": "Scenario4_ConsumableProduct",
+      "slug": "Managed_consumable_product",
+      "screenshot": "04_Managed_consumable_product.png",
+      "controls": [
+        {
+          "name": "GetManagedConsumablesButton",
+          "type": "Button",
+          "label": "Get Associated Add-Ons",
+          "events": []
+        },
+        {
+          "name": "PurchaseAddOnButton",
+          "type": "Button",
+          "label": "Purchase Selected Consumable",
+          "events": []
+        },
+        {
+          "name": "GetConsumableBalanceButton",
+          "type": "Button",
+          "label": "Get Consumable Balance",
+          "events": []
+        },
+        {
+          "name": "FulfillConsumableButton",
+          "type": "Button",
+          "label": "Fulfill Consumable",
+          "events": []
+        },
+        {
+          "name": "QuantityComboBox",
+          "type": "ComboBox",
+          "label": "",
+          "events": []
+        },
+        {
+          "name": "ProductsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get Associated Add-Ons",
+          "alt": "GetManagedConsumablesButton",
+          "type": "Button",
+          "label": "Get Associated Add-Ons",
+          "name": "GetManagedConsumablesButton",
+          "event": ""
+        },
+        {
+          "target": "Purchase Selected Consumable",
+          "alt": "PurchaseAddOnButton",
+          "type": "Button",
+          "label": "Purchase Selected Consumable",
+          "name": "PurchaseAddOnButton",
+          "event": ""
+        },
+        {
+          "target": "Get Consumable Balance",
+          "alt": "GetConsumableBalanceButton",
+          "type": "Button",
+          "label": "Get Consumable Balance",
+          "name": "GetConsumableBalanceButton",
+          "event": ""
+        },
+        {
+          "target": "Fulfill Consumable",
+          "alt": "FulfillConsumableButton",
+          "type": "Button",
+          "label": "Fulfill Consumable",
+          "name": "FulfillConsumableButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "User collection",
+      "class": "Scenario5_UserCollection",
+      "slug": "User_collection",
+      "screenshot": "05_User_collection.png",
+      "controls": [
+        {
+          "name": "GetUserCollectionButton",
+          "type": "Button",
+          "label": "Get User Collection",
+          "events": []
+        },
+        {
+          "name": "ProductsListView",
+          "type": "ListView",
+          "label": "",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get User Collection",
+          "alt": "GetUserCollectionButton",
+          "type": "Button",
+          "label": "Get User Collection",
+          "name": "GetUserCollectionButton",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "App listing URI",
+      "class": "Scenario6_AppListingURI",
+      "slug": "App_listing_URI",
+      "screenshot": "06_App_listing_URI.png",
+      "controls": [
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Rate this app",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Rate this app",
+          "alt": "",
+          "type": "Button",
+          "label": "Rate this app",
+          "name": "",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Business to Business",
+      "class": "Scenario7_B2B",
+      "slug": "Business_to_Business",
+      "screenshot": "07_Business_to_Business.png",
+      "controls": [
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Get Customer Collections Id",
+          "events": []
+        },
+        {
+          "name": "",
+          "type": "Button",
+          "label": "Get Customer Purchase Id",
+          "events": []
+        }
+      ],
+      "actions": [
+        {
+          "target": "Get Customer Collections Id",
+          "alt": "",
+          "type": "Button",
+          "label": "Get Customer Collections Id",
+          "name": "",
+          "event": ""
+        },
+        {
+          "target": "Get Customer Purchase Id",
+          "alt": "",
+          "type": "Button",
+          "label": "Get Customer Purchase Id",
+          "name": "",
+          "event": ""
+        }
+      ],
+      "outputs": [
+        [
+          {
+            "name": "Output",
+            "type": "TextBlock"
+          }
+        ],
+        {
+          "name": "StatusBorder",
+          "type": "TextBlock",
+          "shared": true
+        },
+        {
+          "name": "StatusBlock",
+          "type": "TextBlock",
+          "shared": true
+        }
+      ]
+    }
+  ]
+}

@@ -27,6 +27,24 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+**Second `CS0104` axis — `System.Net.Http` vs `Windows.Web.Http`.** This one is *not* caused by the Xaml namespace rewrite. UWP samples routinely do `using Windows.Web.Http;` and use unqualified `HttpClient` / `HttpResponseMessage` / `HttpRequestMessage`. In a WinUI 3 **.NET** project `System.Net.Http` is also reachable, so those same unqualified names become ambiguous:
+
+```
+error CS0104: 'HttpClient' is an ambiguous reference between
+  'System.Net.Http.HttpClient' and 'Windows.Web.Http.HttpClient'
+```
+
+Keep the **original UWP behaviour** by pinning the `Windows.Web.Http` types (their API shape — `IHttpContent`, `HttpResponseMessage.Content.ReadAsStringAsync()` — differs from `System.Net.Http`, so do **not** blindly switch to the `System.Net.Http` variant):
+
+```csharp
+// Fully qualify at the use site:
+Windows.Web.Http.HttpClient client = new Windows.Web.Http.HttpClient();
+Windows.Web.Http.HttpResponseMessage result = await client.PostAsync(uri, content);
+
+// …or add a file-scoped alias if the type is used often:
+using HttpClient = Windows.Web.Http.HttpClient;
+```
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -906,6 +924,8 @@ verified too, not just scenario frames).
 ### `x:Bind` and compiled bindings
 
 `x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+
+**Do not chase `WMC0909` / `WMC1111` "cannot resolve DataType" errors while the C# still fails to compile.** When you see `WMC0909: Cannot resolve DataType local:<Type>` or `WMC1111: DataTemplates containing x:Bind need a DataType` for a type that plainly exists in the project — especially alongside `WMC1509: No LocalAssembly parameter given during MarkupCompilePass2` — the markup compiler simply had **no compiled project assembly to resolve against** because the C# compile failed first. These are a *cascade*, not real binding errors. Fix the C# build errors (e.g. the `CS0104` ambiguities above) and rebuild — the `WMC` errors clear on their own. **Do not** "fix" them by downgrading a valid `<DataTemplate x:DataType="local:Foo"><... {x:Bind ...}>` to classic `{Binding}`; that silently drops compile-time-checked bindings for no reason. Only treat a `WMC0909`/`WMC1111` as genuine once the C# compiles cleanly and it still reproduces.
 
 ### Page root element
 
