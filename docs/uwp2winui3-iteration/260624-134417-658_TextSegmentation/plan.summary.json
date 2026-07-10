@@ -1,0 +1,17 @@
+{
+  "scenario": "TextSegmentation",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Add <a id=\"manifest\"> anchor to MIGRATION-PATTERNS.md so the mandatory Package.appxmanifest step is retrievable via Get-MigrationPattern.ps1 -Anchor manifest (agent previously burned 3 turns guessing non-existent anchors).",
+    "Add <a id=\"wui-warnings\"> anchor to bound the manifest section and make the universal WUI-residue guidance independently fetchable.",
+    "SKILL.md: project-file step now fetches -Anchor manifest and the manifest cross-link targets the fetchable #manifest anchor instead of a non-resolvable markdown slug."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Headless WinUI 3 screenshot capture is blank (DirectComposition/GDI limitation) — an eval-harness concern, not a migration-skill defect."
+  ]
+}

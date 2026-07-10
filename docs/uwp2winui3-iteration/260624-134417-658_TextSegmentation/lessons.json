@@ -1,0 +1,38 @@
+{
+  "scenario": "TextSegmentation",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log turn ~1 (line 206-235): bootstrapped scaffold, seeded MIGRATION-MAPPING.md rows and TODO[migrate-NNN] markers; migration proceeded cleanly from there." },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "session-log turns 17+ (lines 1733-1736): -Anchor windowing / -Anchor threading returned the needed sections; used repeatedly to resolve TODOs." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log line 2907-2922: final run reported PASS across residue/TODO/manifest/build/smoke checks." }
+  ],
+  "tools_problematic": [
+    { "tool": "Get-MigrationPattern.ps1", "problem": "Rejected the two anchor names the agent derived for the manifest step ('manifest', 'manifest-migration-checklist'); no manifest anchor exists.", "evidence": "session-log lines 1662-1690: two consecutive 'Anchor ... not found' errors before the agent gave up and grepped the file." }
+  ],
+  "tool_limitations": [
+    { "tool": "Get-MigrationPattern.ps1", "limitation": "Resolves ONLY explicit <a id=\"...\"> tags, not markdown heading slugs; the manifest guidance is a subsection under the 'csproj' anchor with no anchor of its own, so it is not directly fetchable even though it is a mandatory migration step referenced by SKILL.md.", "suggested_tweak": "Add an <a id=\"manifest\"> anchor to the manifest section and reference it (via -Anchor manifest) from the reconcile-project-file step and the validator manifest link." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "SKILL.md Step 4 item 5 (line 158)", "wrong": "Cross-links the manifest guidance as ./MIGRATION-PATTERNS.md#manifest-migration-checklist-windowsdesktop--runfulltrust (a rendered markdown slug).", "correct": "Get-MigrationPattern.ps1 resolves <a id> tags, not slugs; the slug is not a fetchable anchor. Should point at a real <a id=\"manifest\"> anchor so an agent copying the reference into the retrieval script succeeds." }
+  ],
+  "special_apis": [],
+  "errors_encountered": [
+    { "error": "Get-MigrationPattern.ps1 -Anchor manifest -> \"Anchor '#manifest' not found\"", "root_cause": "No <a id=\"manifest\"> exists; manifest content lives under the 'csproj' anchor as h3 subsections.", "fix": "Add an <a id=\"manifest\"> anchor before the 'Package.appxmanifest — reconcile...' heading." },
+    { "error": "Get-MigrationPattern.ps1 -Anchor manifest-migration-checklist -> \"Anchor '#manifest-migration-checklist' not found\"", "root_cause": "Agent derived the anchor from the h3 heading text / SKILL.md slug link; neither is a real <a id> anchor.", "fix": "Same anchor addition + make SKILL.md reference the fetchable anchor." }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Manifest reconciliation step (session-log turns 14-16, lines 1655-1702)",
+      "symptom": "Two failed Get-MigrationPattern.ps1 calls guessing the manifest anchor, then a fallback grep of MIGRATION-PATTERNS.md to discover the real heading names.",
+      "turns_or_retries": "3 turns (14, 15, 16) burned before recovering",
+      "root_cause": "The manifest migration guidance — a universal step every UWP->WinUI 3 conversion needs — has no retrievable <a id> anchor; it is buried as h3 subsections under the 'csproj' anchor, and SKILL.md points at a non-fetchable markdown slug.",
+      "how_resolved": "Agent grepped '^##' headings to enumerate sections, then read the file region directly.",
+      "preventable_by": "Add an <a id=\"manifest\"> anchor to the manifest section and reference -Anchor manifest from SKILL.md's project-file step and validator manifest note."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "winapp screenshots of the WinUI 3 app are blank (title-bar only) in the headless session; CopyFromScreen fails so DirectComposition content is not GDI-captured.", "workaround": "Scoring relied on the full UIA tree + functional output; not a migration defect. Out of scope for the migration skill (a capture/eval concern)." }
+  ]
+}

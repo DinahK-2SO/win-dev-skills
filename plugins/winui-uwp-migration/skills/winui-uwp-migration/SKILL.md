@@ -118,6 +118,12 @@ The scaffold's `.csproj` is wired for WinAppSDK; the UWP `.csproj` at `.uwp-sour
 
 Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are incompatible.
 
+Reconcile the **manifest** too — it is a separate, mandatory step in every migration. Fetch its guidance directly:
+
+```powershell
+& "<skill-root>/scripts/Get-MigrationPattern.ps1" -Anchor manifest
+```
+
 ### Step 3 — Build, fix what tooling missed
 
 Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
@@ -155,7 +161,7 @@ The validator covers:
 2. **TODO marker residue** — every `TODO[migrate-NNN]` from the bootstrap is resolved.
 3. **`MIGRATION-MAPPING.md` integrity** — `.bootstrap-meta.json` present + parses; row count matches the seeded count; every row has a resolved Triage label; no row stuck at `Status = copied`.
 4. **`MIGRATION-DEFERRED.md` consistency** — every defer row in mapping has a matching row in the deferred file.
-5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability; **no orphaned UWP `windows.backgroundTasks` EntryPoint extension** (these fail AppX registration with `0x80080204` even on a clean build — remove them or add a matching `windows.activatableClass.inProcessServer` class; see [Manifest migration checklist](./MIGRATION-PATTERNS.md#manifest-migration-checklist-windowsdesktop--runfulltrust) item 5).
+5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability; **no orphaned UWP `windows.backgroundTasks` EntryPoint extension** (these fail AppX registration with `0x80080204` even on a clean build — remove them or add a matching `windows.activatableClass.inProcessServer` class; see [Manifest migration checklist](./MIGRATION-PATTERNS.md#manifest) item 5).
 6. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
 7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL. **Note: this gate only proves the process stayed alive — it does NOT navigate the shell.** A scenario page that throws on `Frame.Navigate` leaves a blank content frame while the app keeps running, so this check passes green for it. Verify each scenario renders yourself — see [Silent navigation failures](./MIGRATION-PATTERNS.md#silent-navigation-failures).
 8. **Visible-text fidelity** — compares each non-deferred XAML against a snapshot of the user-visible/static text the bootstrap copied verbatim (control `Content`/`Text`, `Header`/`Title`, and descriptive `TextBlock`/`RichTextBlock` paragraphs). Reports a non-fatal **WARN** listing any label/caption/description that no longer appears in the migrated page — the signature of a page that was regenerated or paraphrased instead of edited in place. This does not fail the gate (legitimate text changes exist), but a WARN almost always means lost parity: restore the original wording verbatim unless you have a concrete reason it changed.

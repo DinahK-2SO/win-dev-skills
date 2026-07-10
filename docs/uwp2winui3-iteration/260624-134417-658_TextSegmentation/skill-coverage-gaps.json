@@ -1,0 +1,15 @@
+{
+  "scenario": "TextSegmentation",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The agent could not retrieve the Package.appxmanifest migration guidance through the documented mechanism. Get-MigrationPattern.ps1 -Anchor manifest and -Anchor manifest-migration-checklist both failed; it had to fall back to grepping heading names.",
+      "evidence": "session-log.txt lines 1662-1702: two consecutive 'Anchor ... not found' errors (turns 14-15) then a grep of '^##' headings (turn 16). Get-MigrationPattern.ps1 resolves only explicit <a id> tags (script lines 42-55).",
+      "covered_at": "MIGRATION-PATTERNS.md h3 subsections '### Package.appxmanifest — reconcile image references with the assets you actually have' (line 679) and '### Manifest migration checklist (Windows.Desktop + runFullTrust)' (line 711), which sit UNDER the '<a id=\"csproj\">' anchor (line 651) with no anchor of their own. SKILL.md Step 4 item 5 (line 158) links them via the non-fetchable markdown slug '#manifest-migration-checklist-windowsdesktop--runfulltrust'.",
+      "why_missed": "not prominent / under-emphasized — mandatory manifest guidance is only reachable by fetching the unrelated 'csproj' anchor or by reading the whole file; there is no <a id=\"manifest\"> anchor, and the one cross-link points at a slug the retrieval script cannot resolve.",
+      "proposed_improvement": "Add an <a id=\"manifest\"> anchor immediately before the 'Package.appxmanifest — reconcile...' heading so Get-MigrationPattern.ps1 -Anchor manifest returns the manifest guidance. Update SKILL.md: (a) Step 2 (Reconcile the project file) to also fetch -Anchor manifest, and (b) Step 4 item 5's cross-link to target the fetchable #manifest anchor. Sharpen existing content and make it retrievable — do not invent a new topic.",
+      "generalizes": "Reconciling Package.appxmanifest (image references, Windows.Desktop target, rescap/runFullTrust, orphaned background-task extensions) is a MANDATORY step in every UWP->WinUI 3 migration. Any agent will reach for a 'manifest' anchor; making that anchor exist prevents wasted turns and dead-end guesses on every future scenario."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "scenario": "TextSegmentation",
+  "feature": "Text segmentation C# sample",
+  "source": "uwp-samples-standalone/Samples/TextSegmentation/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Extract Text Segments",
+      "controls": [
+        "inputStringBox",
+        "languageTagBox",
+        "WordSegmentsButton",
+        "SelectionSegmentsButton"
+      ],
+      "actions": [
+        "Word Segments",
+        "Selection Segments"
+      ],
+      "outputs": [
+        "StatusBlock"
+      ],
+      "expectedBehavior": "Enter text + optional language tag; Word Segments / Selection Segments print segment bounds to the status area. Empty input yields \"Cannot compute word/selection segments: input string is empty.\""
+    },
+    {
+      "number": 2,
+      "title": "Get Current Text Segment From Index",
+      "controls": [
+        "inputStringBox",
+        "languageTagBox",
+        "indexBox",
+        "WordSegmentButton",
+        "SelectionSegmentButton"
+      ],
+      "actions": [
+        "Word Segment",
+        "Selection Segment"
+      ],
+      "outputs": [
+        "StatusBlock"
+      ],
+      "expectedBehavior": "Enter text, language tag, and an index; Word Segment / Selection Segment print the segment containing that index. Empty input yields the empty-input status message."
+    }
+  ]
+}

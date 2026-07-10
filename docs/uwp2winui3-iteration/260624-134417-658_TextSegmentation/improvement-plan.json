@@ -1,0 +1,30 @@
+{
+  "scenario": "TextSegmentation",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Manifest migration guidance is not retrievable via the documented anchor mechanism; the agent burned 3 turns guessing 'manifest'/'manifest-migration-checklist' anchors that don't exist, then fell back to grepping headings.",
+      "evidence": "session-log.txt lines 1662-1702 (turns 14-16): two 'Anchor ... not found' errors then a '^##' grep. Get-MigrationPattern.ps1 resolves only <a id> tags (script lines 42-55). Manifest content sits under <a id=\"csproj\"> with no anchor of its own; SKILL.md line 158 links a non-fetchable slug.",
+      "root_cause": "Package.appxmanifest reconciliation — a mandatory step in every migration — had no retrievable <a id> anchor and was only reachable by fetching the unrelated 'csproj' anchor or reading the whole file.",
+      "tier": 2,
+      "change": "Added <a id=\"manifest\"> before the 'Package.appxmanifest — reconcile...' heading in MIGRATION-PATTERNS.md so `Get-MigrationPattern.ps1 -Anchor manifest` returns the manifest guidance; added <a id=\"wui-warnings\"> before the 'WUI analyzer warnings' heading to keep the manifest fetch tightly scoped and make the universal WUI-residue section independently fetchable.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "A future agent that reaches for the manifest step retrieves it in one call instead of guessing anchors and grepping.",
+      "falsifiable_check": "`Get-MigrationPattern.ps1 -Anchor manifest` exits 0 and returns the two manifest subsections (verified); re-run migration logs show no 'Anchor ... not found' errors for the manifest step."
+    },
+    {
+      "problem": "SKILL.md pointed at the manifest guidance via a rendered markdown slug the retrieval script cannot resolve, and its project-file step fetched only the csproj anchor, so the agent had no correct path to the manifest anchor.",
+      "evidence": "SKILL.md Step 2 (only fetched -Anchor csproj) and Step 4 item 5 cross-link '#manifest-migration-checklist-windowsdesktop--runfulltrust' (line 158).",
+      "root_cause": "The skill referenced manifest work but never surfaced a fetchable anchor for it.",
+      "tier": 3,
+      "change": "Step 2 now also instructs `Get-MigrationPattern.ps1 -Anchor manifest`; Step 4 item 5 cross-link retargeted to the fetchable `#manifest` anchor.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "The documented references now match the retrieval mechanism, so copying them into Get-MigrationPattern.ps1 succeeds.",
+      "falsifiable_check": "The anchor referenced in SKILL.md (`manifest`) resolves via Get-MigrationPattern.ps1 with exit 0 (verified)."
+    }
+  ],
+  "deferred_to_human": [
+    "Headless-environment WinUI 3 screenshot capture is blank (CopyFromScreen/DirectComposition GDI-capture limitation). This is a scoring/eval-harness concern, not a migration-skill defect — out of scope for the migration skillset."
+  ]
+}

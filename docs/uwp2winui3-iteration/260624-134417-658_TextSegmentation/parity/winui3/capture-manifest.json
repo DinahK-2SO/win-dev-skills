@@ -1,0 +1,75 @@
+{
+  "app": "52692",
+  "capturedAt": "2026-07-10T10:02:12.5176776+08:00",
+  "checklist": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\results\\run223\\001_score-TextSegmentation\\notes\\parity\\baseline\\checklist.json",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Extract Text Segments",
+      "slug": "Extract_Text_Segments",
+      "navOk": true,
+      "navMsg": "",
+      "screenshot": "01_Extract_Text_Segments.png",
+      "screenshotBytes": 9109,
+      "screenshotOk": true,
+      "ui": "01.json",
+      "uiOk": true,
+      "interactions": [
+        {
+          "action": "Word Segments",
+          "type": "Button",
+          "invokeOk": true,
+          "responded": true,
+          "newTokens": 3,
+          "screenshot": "01_Extract_Text_Segments__a01_Word_Segments.png",
+          "screenshotOk": true,
+          "outputText": "\\u00A9 Microsoft Corporation. All rights reserved.|1) Extract Text Segments|2) Get Current Text Segment From Index|Both word and selection segments are language-specific and employ that language\\u0027s word breaking logic to identify these segments within the text. A language tag (e.g., en-US) specifies the language-behavior rules to use; if no language tag is provided, language-neutral word-breaking rules are used.|Cannot compute word segments: input string is empty.|Close|Description:|For any text, it is possible to find the bounds between segments in that text. The most commonly desired seg"
+        },
+        {
+          "action": "Selection Segments",
+          "type": "Button",
+          "invokeOk": true,
+          "responded": true,
+          "newTokens": 1,
+          "screenshot": "01_Extract_Text_Segments__a02_Selection_Segments.png",
+          "screenshotOk": true,
+          "outputText": "\\u00A9 Microsoft Corporation. All rights reserved.|1) Extract Text Segments|2) Get Current Text Segment From Index|Both word and selection segments are language-specific and employ that language\\u0027s word breaking logic to identify these segments within the text. A language tag (e.g., en-US) specifies the language-behavior rules to use; if no language tag is provided, language-neutral word-breaking rules are used.|Cannot compute selection segments: input string is empty.|Close|Description:|For any text, it is possible to find the bounds between segments in that text. The most commonly desire"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Get Current Text Segment From Index",
+      "slug": "Get_Current_Text_Segment_From_Index",
+      "navOk": true,
+      "navMsg": "",
+      "screenshot": "02_Get_Current_Text_Segment_From_Index.png",
+      "screenshotBytes": 9109,
+      "screenshotOk": true,
+      "ui": "02.json",
+      "uiOk": true,
+      "interactions": [
+        {
+          "action": "Word Segment",
+          "type": "Button",
+          "invokeOk": true,
+          "responded": true,
+          "newTokens": 3,
+          "screenshot": "02_Get_Current_Text_Segment_From_Index__a01_Word_Segment.png",
+          "screenshotOk": true,
+          "outputText": "\\u00A9 Microsoft Corporation. All rights reserved.|1) Extract Text Segments|2) Get Current Text Segment From Index|Cannot compute word segments: input string is empty.|Close|Description:|For any text, it is possible to find the bounds between segments in that text. The most commonly desired segments are \\u0027word\\u0027 and \\u0027selection\\u0027 segments. Word Segments represent language-specific words in the text. Selection segments are similar to word segments, but represent the bounds between active selections. (I.e., if you were actively selecting this text, the bounds would identify where"
+        },
+        {
+          "action": "Selection Segment",
+          "type": "Button",
+          "invokeOk": true,
+          "responded": true,
+          "newTokens": 1,
+          "screenshot": "02_Get_Current_Text_Segment_From_Index__a02_Selection_Segment.png",
+          "screenshotOk": true,
+          "outputText": "\\u00A9 Microsoft Corporation. All rights reserved.|1) Extract Text Segments|2) Get Current Text Segment From Index|Cannot compute selection segments: input string is empty.|Close|Description:|For any text, it is possible to find the bounds between segments in that text. The most commonly desired segments are \\u0027word\\u0027 and \\u0027selection\\u0027 segments. Word Segments represent language-specific words in the text. Selection segments are similar to word segments, but represent the bounds between active selections. (I.e., if you were actively selecting this text, the bounds would identify "
+        }
+      ]
+    }
+  ]
+}

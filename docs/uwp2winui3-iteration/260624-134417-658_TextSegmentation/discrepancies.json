@@ -1,0 +1,14 @@
+{
+  "scenario": "TextSegmentation",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Extract Text Segments (Word/Selection Segments buttons print segment bounds; empty input -> empty-input status)", "status": "pass", "reason": "Full 4/4 control coverage, both buttons live, correct output.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Get Current Text Segment From Index (Word/Selection Segment print segment containing index; empty input -> empty-input status)", "status": "pass", "reason": "Full 5/5 control coverage incl. indexBox, both buttons live, correct output.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No functional or structural discrepancies; both scenarios fully migrated and behave as the UWP source specifies. Blank WinUI screenshots are a headless capture artifact, not a migration defect. The only actionable, generalizable signal is a process-efficiency struggle: the agent could not retrieve the manifest migration guidance via the documented anchor mechanism (no <a id=\"manifest\"> anchor exists)."
+}

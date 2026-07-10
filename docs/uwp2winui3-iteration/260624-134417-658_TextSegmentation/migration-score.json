@@ -1,0 +1,37 @@
+{
+  "scenario": "TextSegmentation",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (visual golden captured for scenario 1). UWP app launched (pid 17980, window \"Text Segmentation C# Sample\"). Legacy UWP CoreWindow exposes only a top-level Pane to winapp UIA, so cross-scenario nav and control actuation of the ORIGINAL were unavailable; WinUI behavior graded against source-expected behavior, which it matches.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "notes": "WinUI 3 winapp screenshots are blank due to a headless-environment capture artifact (CopyFromScreen fails; DirectComposition surface not GDI-captured). Rendering fidelity confirmed via full UIA tree (all controls at real coordinates) and correct functional output on every action.",
+  "features": [
+    {
+      "name": "Extract Text Segments",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Extract_Text_Segments.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Extract_Text_Segments.png",
+      "coverage": "4/4",
+      "actions_live": "2/2",
+      "note": "Full control coverage; both buttons respond with correct segment/empty-input status output. uwp_responded=false only because the UWP CoreWindow was not UIA-actuable (tooling limit), not because the control is dead. WinUI screenshot blank due to headless capture artifact; UIA geometry + output confirm faithful render."
+    },
+    {
+      "name": "Get Current Text Segment From Index",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Get_Current_Text_Segment_From_Index.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Get_Current_Text_Segment_From_Index.png",
+      "coverage": "5/5",
+      "actions_live": "2/2",
+      "note": "Full control coverage incl. indexBox; both buttons respond with correct output. Same UWP-actuation and headless-capture limitations as scenario 1; functional fidelity confirmed via UIA tree + output text."
+    }
+  ]
+}
