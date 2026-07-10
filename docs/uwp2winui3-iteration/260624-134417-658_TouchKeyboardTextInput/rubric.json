@@ -1,0 +1,134 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "created_at": "2026-07-10T22:19:00+08:00",
+  "uwp_capture_status": "partial: app launched and initial frame captured; per-scenario nav via winapp ui invoke did not resolve list items, so both scenario frames show the default (Scenario 1) state",
+  "features": [
+    {
+      "id": "scenario1-spellcheck-off",
+      "area": "Spelling and Text Suggestions",
+      "name": "Spell-check/text-prediction disabled TextBox and RichEdit",
+      "description": "Scenario 1 shows a TextBox (TextBoxOff) and RichEditBox (RichEditOff) with IsSpellCheckEnabled and IsTextPredictionEnabled = false. Typing produces no red squiggles or suggestions.",
+      "expected_behaviour": [
+        "Two editable fields labelled 'TextBox' and 'RichEdit' appear under the 'IsSpellCheckEnabled and IsTextPredictionEnabled = false' heading",
+        "Both accept text input",
+        "No spell-check underline appears on misspelled words"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Spelling_and_Text_Suggestions.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario1-spellcheck-on",
+      "area": "Spelling and Text Suggestions",
+      "name": "Spell-check/text-prediction enabled TextBox and RichEdit",
+      "description": "Scenario 1 shows a TextBox (TextBoxOn) and RichEditBox (RichEditOn) with IsSpellCheckEnabled and IsTextPredictionEnabled = true.",
+      "expected_behaviour": [
+        "Two editable fields labelled 'TextBox' and 'RichEdit' appear under the 'IsSpellCheckEnabled and IsTextPredictionEnabled = true' heading",
+        "Both accept text input",
+        "Spell-check underline appears on misspelled words"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Spelling_and_Text_Suggestions.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario1-description",
+      "area": "Spelling and Text Suggestions",
+      "name": "Scenario 1 description text",
+      "description": "Explanatory text describing IsSpellCheckEnabled and IsTextPredictionEnabled properties is shown at the top of the scenario.",
+      "expected_behaviour": [
+        "A 'Description:' header is visible",
+        "Body text mentions IsSpellCheckEnabled and IsTextPredictionEnabled"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Spelling_and_Text_Suggestions.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario2-scoped-number",
+      "area": "Scoped Views",
+      "name": "Number InputScope TextBox",
+      "description": "NumberControl TextBox uses InputScope Number, presenting a numeric touch keyboard.",
+      "expected_behaviour": [
+        "A TextBox labelled for numeric input is present and editable"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Scoped_Views.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario2-scoped-search",
+      "area": "Scoped Views",
+      "name": "Search InputScope TextBox",
+      "description": "SearchControl TextBox uses InputScope Search.",
+      "expected_behaviour": [
+        "A TextBox for search input is present and editable"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Scoped_Views.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario2-scoped-url",
+      "area": "Scoped Views",
+      "name": "Url InputScope TextBox",
+      "description": "UrlControl TextBox uses InputScope Url.",
+      "expected_behaviour": [
+        "A TextBox for URL input is present and editable"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Scoped_Views.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario2-scoped-email",
+      "area": "Scoped Views",
+      "name": "Email InputScope TextBox",
+      "description": "EmailControl TextBox uses InputScope EmailSmtpAddress.",
+      "expected_behaviour": [
+        "A TextBox for email input is present and editable"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Scoped_Views.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario2-scoped-default",
+      "area": "Scoped Views",
+      "name": "Default InputScope TextBox",
+      "description": "DefaultControl TextBox uses InputScope Default.",
+      "expected_behaviour": [
+        "A TextBox with default input scope is present and editable"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Scoped_Views.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario2-scoped-telephone",
+      "area": "Scoped Views",
+      "name": "Telephone InputScope TextBox",
+      "description": "TelephoneControl TextBox uses InputScope TelephoneNumber.",
+      "expected_behaviour": [
+        "A TextBox for telephone input is present and editable"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Scoped_Views.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario2-scoped-formula",
+      "area": "Scoped Views",
+      "name": "Formula InputScope TextBox",
+      "description": "FormulaControl TextBox uses InputScope Formula.",
+      "expected_behaviour": [
+        "A TextBox for formula input is present and editable"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Scoped_Views.png",
+      "weight": 1
+    },
+    {
+      "id": "navigation-shell",
+      "area": "Shell",
+      "name": "Scenario navigation list",
+      "description": "The sample shell lists the two scenarios ('Spelling and Text Suggestions', 'Scoped Views') and lets the user switch between them.",
+      "expected_behaviour": [
+        "Both scenario titles are visible in the navigation list",
+        "Selecting a scenario switches the content pane"
+      ],
+      "screenshot": "parity/baseline/screenshots/00_launch.png",
+      "weight": 2
+    }
+  ]
+}

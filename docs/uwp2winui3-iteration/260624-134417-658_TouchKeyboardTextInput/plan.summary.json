@@ -1,0 +1,17 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: recover orphaned code-behind XAML (a *.xaml.cs copied without its sibling *.xaml) from the source build output (obj/bin), track it in the mapping, and flag any unrecoverable orphan — prevents the WMC0909/InitializeComponent build cascade that scored this migration 0/11.",
+    "MIGRATION-PATTERNS.md + SKILL.md: document the 'missing/orphaned source XAML' pattern (auto-recovery + author-it fallback preserving x:Class/x:Name/handlers) so the agent handles absent markup deterministically instead of stalling."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Optional Validate-UwpMigration.ps1 backstop check that every page *.xaml.cs has a sibling *.xaml."
+  ]
+}

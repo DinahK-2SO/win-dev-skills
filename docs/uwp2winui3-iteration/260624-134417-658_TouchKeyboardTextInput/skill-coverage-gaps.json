@@ -1,0 +1,15 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The skill tells the agent to copy/migrate existing .xaml verbatim and never re-author, but gives no procedure for the case where the authored .xaml is missing from the source. Faced with missing markup, the agent hand-rebuilt one page, mixed namespaces, and never reached a build.",
+      "evidence": "MIGRATION-PATTERNS.md#xaml line 799 'Copy each *.xaml from the source verbatim' — no missing-markup branch. session-log ends at turn 23 mid-edit with no build/validate; only MainPage.xaml re-authored, Scenario1/Scenario2 markup never created.",
+      "covered_at": "MIGRATION-PATTERNS.md#xaml ('XAML Migration' intro) and SKILL.md Step 1 (fidelity / no-regenerate rules).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add an anchored 'Missing or orphaned source XAML' subsection under XAML Migration explaining the failure signature, that the bootstrap now auto-recovers from obj/bin, and — if unresolved — how to author the page (keep x:Class, x:Name, event handlers). Add a one-line 'check for orphaned code-behind first' pointer in SKILL.md Step 1 tied to the bootstrap's orphanUnresolvedXaml report.",
+      "generalizes": "Any migration whose source lacks some authored .xaml (or where recovery fails) needs an explicit, safe author-it procedure so the agent doesn't improvise inconsistently or stall."
+    }
+  ]
+}

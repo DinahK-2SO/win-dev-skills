@@ -99,6 +99,49 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
 
 Write-Host "    Copied $($copied.Count) source files"
 
+# ─── 1b. Recover orphaned code-behind XAML ─────────────────────────────────────
+# A copied *.xaml.cs whose sibling *.xaml is absent is an "orphaned code-behind":
+# the partial class + InitializeComponent() have no markup, so the XAML compiler
+# fails (WMC0909 / WMC1111 / WMC9999, then a cascading CS0103/CS1061
+# "InitializeComponent does not exist") and the app cannot build. This happens
+# whenever the authored .xaml is missing from the source tree but a verbatim copy
+# survives under the source build output (obj\..., bin\...) — common in archived
+# or pre-built UWP checkouts, where the *.xaml.cs sit in the project root but the
+# *.xaml only remain under obj\<arch>\<config>\. Step 1's copy excludes bin/obj,
+# so those pages arrive as code-behind with no markup. Recover each such .xaml
+# from the build output so every code-behind has its markup; flag any that cannot
+# be recovered so the agent authors them before building (silent omission = a
+# guaranteed non-compiling migration).
+$orphanRecovered  = New-Object System.Collections.Generic.List[string]
+$orphanUnresolved = New-Object System.Collections.Generic.List[string]
+$copiedXamlCs = @($copied | Where-Object { $_.ToLowerInvariant().EndsWith('.xaml.cs') })
+foreach ($csRel in $copiedXamlCs) {
+    $xamlRel = $csRel.Substring(0, $csRel.Length - 3)     # strip trailing '.cs' -> '<name>.xaml'
+    if ($copied -contains $xamlRel) { continue }
+    $targetXaml = Join-Path $Target $xamlRel
+    if (Test-Path -LiteralPath $targetXaml) { continue }
+    # Search the whole source tree (incl. bin/obj build output) for the authored markup.
+    $leaf = Split-Path $xamlRel -Leaf
+    $found = Get-ChildItem -Path $Source -Recurse -File -Filter $leaf -ErrorAction SilentlyContinue |
+        Sort-Object @{ Expression = { $_.FullName -match '\\(obj|bin)\\' } } |   # prefer non-build-output copies
+        Select-Object -First 1
+    if ($found) {
+        $dstDir = [System.IO.Path]::GetDirectoryName($targetXaml)
+        if (-not (Test-Path -LiteralPath $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
+        Copy-Item -LiteralPath $found.FullName -Destination $targetXaml -Force
+        [void]$copied.Add($xamlRel)
+        [void]$orphanRecovered.Add($xamlRel)
+    } else {
+        [void]$orphanUnresolved.Add($xamlRel)
+    }
+}
+if ($orphanRecovered.Count -gt 0) {
+    Write-Host "    Recovered $($orphanRecovered.Count) orphaned code-behind XAML from source build output: $($orphanRecovered -join ', ')"
+}
+foreach ($u in $orphanUnresolved) {
+    Write-Warning "    Orphaned code-behind: $u.cs has no sibling $u and none was found in the source tree. The app will NOT build until you author $u (keep the class name, x:Class, and every x:Name/event handler the code-behind references)."
+}
+
 # ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
 $uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
 $refDir = Join-Path $Target '.uwp-source'
@@ -497,6 +540,8 @@ $meta = [ordered]@{
     deferredCount       = $deferredKeys.Count
     perFileMode         = $perFileModeObj
     neutralizedClasses  = @($neutralizedFiles.Keys | Sort-Object)
+    orphanRecoveredXaml  = @($orphanRecovered)
+    orphanUnresolvedXaml = @($orphanUnresolved)
 } | ConvertTo-Json -Depth 6
 Set-Content -LiteralPath $metaPath -Value $meta -Encoding UTF8
 
@@ -507,6 +552,12 @@ Write-Host "=== BOOTSTRAP COMPLETE ==="
 Write-Host "Source files copied   : $($copied.Count)"
 Write-Host "Namespace rewrites    : $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 Write-Host "Neutralized classes   : $($neutralizedFiles.Count) file(s)"
+if ($orphanRecovered.Count -gt 0) {
+    Write-Host "Orphaned XAML recovered : $($orphanRecovered.Count) (from source build output)"
+}
+if ($orphanUnresolved.Count -gt 0) {
+    Write-Host "Orphaned XAML UNRESOLVED : $($orphanUnresolved.Count)  <-- author these before building: $($orphanUnresolved -join ', ')"
+}
 Write-Host "Triage breakdown      :"
 foreach ($lbl in $labelOrder) {
     if ($counts.ContainsKey($lbl)) {

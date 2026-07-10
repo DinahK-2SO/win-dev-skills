@@ -1,0 +1,17 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap copies a *.xaml.cs whose sibling *.xaml is absent from the source root (the markup survives only under the source build output obj\\/bin\\), producing orphaned code-behind. The whole app then fails to compile (WMC0909/WMC1111/WMC9999, cascading InitializeComponent CS0103/CS1061). No signal is given to the agent.",
+      "evidence": "session-log turn 2 BOOTSTRAP: 'Copied 4 source files'; MIGRATION-MAPPING.md lists only manifest + 3 .cs, zero .xaml rows; source .xaml exist only at obj\\x64\\Release\\; migration-score.json winui_build_status = failed with exactly these error codes.",
+      "skill_search": "grepped winui-uwp-migration for: xaml.cs, orphan, InitializeComponent, sibling, recover — no orphan-detection or recovery logic in Initialize-UwpMigration.ps1 or Validate-UwpMigration.ps1; MIGRATION-PATTERNS.md only says 'Copy each *.xaml from the source verbatim' assuming they exist.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The copy step (Initialize-UwpMigration.ps1 step 1) excludes bin/obj and has no post-copy check that every page code-behind has matching markup, nor any recovery path when the authored .xaml is only in the build output.",
+      "proposed_fix": "Add step 1b to Initialize-UwpMigration.ps1: for each copied *.xaml.cs lacking a sibling *.xaml in the target, recover the .xaml from the source build output (obj/bin) by base-name match, add it to the copied set (so it gets namespace-rewritten, snapshotted, and a mapping row), and warn loudly for any that cannot be found (recorded in .bootstrap-meta.json orphanUnresolvedXaml). Document the pattern + author-it fallback in MIGRATION-PATTERNS.md#missing-xaml and point to it from SKILL.md Step 1.",
+      "generalizes": "Orphaned code-behind (page .cs with InitializeComponent but no .xaml) ALWAYS fails the WinUI 3 build. Archived/pre-built UWP checkouts frequently ship .xaml.cs in root but .xaml only under obj/bin, so this recurs across scenarios independent of the specific controls involved."
+    }
+  ]
+}

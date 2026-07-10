@@ -1,0 +1,30 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap copies page *.xaml.cs without the sibling *.xaml when the authored markup lives only under the source build output (obj/bin), leaving orphaned code-behind that fails the whole XAML compile (WMC0909/WMC1111/WMC9999 + cascading InitializeComponent CS0103/CS1061). App scored 0/11 — never built.",
+      "evidence": "session-log turn 2 'Copied 4 source files'; MIGRATION-MAPPING.md has zero .xaml rows; source .xaml only at obj\\x64\\Release\\; migration-score.json winui_build_status failed with those codes.",
+      "root_cause": "Copy step excludes bin/obj and never checks that each page code-behind has matching markup, nor recovers markup that survives in the build output.",
+      "tier": 1,
+      "change": "Added step 1b to Initialize-UwpMigration.ps1: detect every copied *.xaml.cs whose sibling *.xaml is absent, recover the .xaml from the source build output (obj/bin) by base-name match, add it to the copied set (so it is namespace-rewritten, fidelity-snapshotted, and gets a MIGRATION-MAPPING row), and warn + record any unrecoverable orphan in .bootstrap-meta.json (orphanUnresolvedXaml) and the BOOTSTRAP COMPLETE summary.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Every page code-behind arrives with its markup; the orphaned-XAML build cascade disappears for this class of source layout.",
+      "falsifiable_check": "Re-run bootstrap on this source: target now contains Scenario1_SpellingTextSuggestions.xaml and Scenario2_ScopedViews.xaml as mapping rows (VERIFIED: 'Recovered 2 orphaned code-behind XAML'), and a subsequent build no longer emits WMC0909/CS0103 InitializeComponent for those pages."
+    },
+    {
+      "problem": "The skill assumes each *.xaml exists in source and is bootstrap-copied; it has no procedure for missing/orphaned markup, so the agent improvised (hand-rebuilt one page, mixed namespaces) and never reached a build.",
+      "evidence": "MIGRATION-PATTERNS.md#xaml line 799 'Copy each *.xaml from the source verbatim'; session-log ends turn 23 with only MainPage re-authored and no build.",
+      "root_cause": "No documented author-it fallback when recovery is impossible or markup is absent.",
+      "tier": 3,
+      "change": "Added anchored 'Missing or orphaned source XAML' subsection to MIGRATION-PATTERNS.md (#missing-xaml) describing the failure signature, the bootstrap auto-recovery, and how to author the page if unresolved (preserve x:Class/x:Name/handlers); added a 'check for orphaned code-behind first' pointer in SKILL.md Step 1 tied to the bootstrap's orphanUnresolvedXaml report.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "When markup cannot be auto-recovered, the agent authors it correctly and consistently instead of stalling.",
+      "falsifiable_check": "On a source with an unrecoverable orphan, the agent authors the missing page (matching x:Class/x:Name) and the build compiles rather than ending mid-migration."
+    }
+  ],
+  "deferred_to_human": [
+    "Consider a Validate-UwpMigration.ps1 assertion that every *.xaml.cs page has a sibling *.xaml in the build set, as a final backstop (Tier 1, not applied to keep this change minimal)."
+  ]
+}

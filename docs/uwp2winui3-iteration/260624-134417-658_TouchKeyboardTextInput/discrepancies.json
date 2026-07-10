@@ -1,0 +1,27 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 0,
+  "score": 0,
+  "builds": false,
+  "runs": false,
+  "requirements": [
+    { "id": 0, "text": "Scenario navigation list", "status": "fail", "reason": "WinUI app fails to compile; navigation shell unavailable.", "suspected_skill_gap": "Bootstrap omitted page XAML (orphaned code-behind); no navigation shell could compile." },
+    { "id": 1, "text": "Scenario 1 - spell-check disabled TextBox and RichEdit", "status": "fail", "reason": "Unreachable; app does not build.", "suspected_skill_gap": "Scenario1 .xaml missing → orphaned code-behind → build failure." },
+    { "id": 2, "text": "Scenario 1 - spell-check enabled TextBox and RichEdit", "status": "fail", "reason": "Unreachable; app does not build.", "suspected_skill_gap": "Scenario1 .xaml missing." },
+    { "id": 3, "text": "Scenario 1 - description text", "status": "fail", "reason": "Unreachable; app does not build.", "suspected_skill_gap": "Scenario1 .xaml missing." },
+    { "id": 4, "text": "Scenario 2 - Number InputScope TextBox", "status": "fail", "reason": "Unreachable; app does not build.", "suspected_skill_gap": "Scenario2 .xaml missing." },
+    { "id": 5, "text": "Scenario 2 - Search InputScope TextBox", "status": "fail", "reason": "Unreachable; app does not build.", "suspected_skill_gap": "Scenario2 .xaml missing." },
+    { "id": 6, "text": "Scenario 2 - Url InputScope TextBox", "status": "fail", "reason": "Unreachable; app does not build.", "suspected_skill_gap": "Scenario2 .xaml missing." },
+    { "id": 7, "text": "Scenario 2 - Email InputScope TextBox", "status": "fail", "reason": "Unreachable; app does not build.", "suspected_skill_gap": "Scenario2 .xaml missing." },
+    { "id": 8, "text": "Scenario 2 - Default InputScope TextBox", "status": "fail", "reason": "Unreachable; app does not build.", "suspected_skill_gap": "Scenario2 .xaml missing." },
+    { "id": 9, "text": "Scenario 2 - Telephone InputScope TextBox", "status": "fail", "reason": "Unreachable; app does not build.", "suspected_skill_gap": "Scenario2 .xaml missing." },
+    { "id": 10, "text": "Scenario 2 - Formula InputScope TextBox", "status": "fail", "reason": "Unreachable; app does not build.", "suspected_skill_gap": "Scenario2 .xaml missing." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "whole app", "uwp": "Launches with scenario list + scenario content (baseline frames captured).", "winui": "No frame — build failed, nothing to capture.", "screenshot_ref": "parity/baseline/screenshots/00_launch.png (UWP only; no WinUI counterpart)" }
+  ],
+  "missing_features": [
+    "All 11 rubric features (whole app non-functional due to build failure)."
+  ],
+  "summary": "Every feature failed because the WinUI 3 app never compiled. The build broke because the two scenario pages' code-behind was copied without their .xaml markup (orphaned code-behind), producing WMC/InitializeComponent errors. Recovering the markup during bootstrap removes the root cause."
+}

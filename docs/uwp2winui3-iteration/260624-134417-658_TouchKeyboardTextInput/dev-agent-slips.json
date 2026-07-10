@@ -1,0 +1,14 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The dev agent finished the trial without ever running a build or the final validator, shipping a non-compiling app.",
+      "evidence": "session-log.txt ends at 'TURN 23' mid-edit; no 'dotnet build'/'winapp build'/'Validate-UwpMigration.ps1' invocation appears anywhere in the log.",
+      "covered_clearly_at": "SKILL.md Step 3 ('Work in a tight loop: build -> fix the first error -> launch -> repeat') and Step 0 bootstrap 'Next' item 5 ('End by running scripts/Validate-UwpMigration.ps1'), echoed in the BOOTSTRAP COMPLETE block the agent saw.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The build-then-validate loop is already prominent and mandatory in the skill; a capable model on re-run would run it. This slip was likely a budget/turn exhaustion after the manual XAML re-authoring — the defect fix (auto-recovering the missing markup) removes the work that consumed the budget, so no extra prose telling the agent 'remember to build' is warranted."
+    }
+  ]
+}

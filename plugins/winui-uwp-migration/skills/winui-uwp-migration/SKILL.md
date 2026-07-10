@@ -64,6 +64,8 @@ The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you ex
 
 Open `MIGRATION-MAPPING.md`. Every row already has a final Triage label (`migrate-as-is`, `migrate-with-adaptation`, `defer`). The bootstrap also injected `// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` (or `<!-- … -->` in XAML) above every line that needs adaptation, and recorded a per-file execution mode in `.bootstrap-meta.json`.
 
+**Check for orphaned code-behind first.** If the bootstrap summary reported `Orphaned XAML UNRESOLVED` (also listed in `.bootstrap-meta.json` → `orphanUnresolvedXaml`), one or more `*.xaml.cs` were copied without their `*.xaml` markup and the app cannot build until you author the missing page. Do this before anything else — see [Missing or orphaned source XAML](./MIGRATION-PATTERNS.md#missing-xaml). (Recovered XAML the bootstrap found under the source build output already appears as normal mapping rows.)
+
 **Per-file execution mode** — open `.bootstrap-meta.json` and find the entry for the file you're about to edit under `perFileMode`:
 
 - **`BATCH`** — fix every `TODO[migrate-NNN]` in the file in one pass, then build once. This is the default for files that touch only safe APIs.

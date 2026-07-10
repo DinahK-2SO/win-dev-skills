@@ -1,0 +1,34 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap ran (exit 0), produced MIGRATION-MAPPING.md and Test-Path self-check returned True (session-log turns 2-3)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1", "problem": "Copied only 4 files (manifest + 3 .cs) and silently omitted the pages' .xaml markup, leaving orphaned code-behind with no signal to the agent.", "evidence": "BOOTSTRAP: 'Copied 4 source files'; MIGRATION-MAPPING.md lists no .xaml rows; source .xaml exist only under obj\\x64\\Release (excluded by the bootstrap's bin/obj filter)." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Does not detect a *.xaml.cs copied without its sibling *.xaml, nor recover the markup that survives under the source build output.", "suggested_tweak": "After the copy step, detect orphaned code-behind and recover the .xaml from obj/bin; warn on any unresolved." },
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "No explicit orphaned-code-behind check surfaced before the build cascade.", "suggested_tweak": "Optionally assert every *.xaml.cs partial page has a sibling *.xaml in the build set." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#xaml", "wrong": "Assumes each *.xaml exists in source and is bootstrap-copied ('Copy each *.xaml from the source verbatim') with no procedure for when the authored .xaml is missing from source root.", "correct": "Add a 'missing/orphaned source XAML' pattern: recover from obj/bin, else author the page preserving x:Class/x:Name/handlers." }
+  ],
+  "special_apis": [
+    { "api": "x:Bind DataTemplate x:DataType=\"local:Scenario\"", "special_handling": "SDK-sample MainPage uses x:Bind in a DataTemplate; when the surrounding XAML compilation fails (missing sibling pages) this surfaces as WMC0909 'Cannot resolve DataType' / WMC1111 on the DataTemplate even though the Scenario type is present." }
+  ],
+  "errors_encountered": [
+    { "error": "WMC0909 Cannot resolve DataType local:Scenario; WMC1111 x:DataType missing; WMC9999 Xaml Internal Error (MarkupCompilePass2)", "root_cause": "The XAML compile pass failed because Scenario1/Scenario2 pages had code-behind but no .xaml markup (orphaned), breaking the whole markup compilation.", "fix": "Recover the missing .xaml from the source build output so every code-behind has its markup before building." },
+    { "error": "CS0103 / CS1061 'InitializeComponent' does not exist (MainPage, Scenario1, Scenario2)", "root_cause": "Cascading from the failed XAML compilation — no generated .g.cs because markup was absent.", "fix": "Same recovery; resolves once markup compiles." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Reconstructing pages from scratch after the bootstrap omitted XAML", "symptom": "Agent hand-authored MainPage.xaml (pasted the SDKTemplate markup) and mixed namespaces (SDKTemplate vs project), then ran out of budget without authoring Scenario1/Scenario2 XAML or ever running a build.", "turns_or_retries": "Log ends at turn 23 mid-edit; no build/validate ever ran.", "root_cause": "No signal that .xaml were missing; agent had to discover and re-author them manually, which is slow and error-prone.", "how_resolved": "Not resolved within the trial — app shipped non-compiling (score 0/11).", "preventable_by": "Bootstrap auto-recovering orphaned .xaml from obj/bin and loudly flagging any unresolved, plus a PATTERNS section telling the agent to author missing markup first." }
+  ],
+  "missing_tooling": [
+    { "need": "Orphaned-code-behind detection + XAML recovery in the bootstrap.", "would_have_saved": "The entire failure — the two Scenario pages that broke the build would have had their markup automatically." }
+  ],
+  "env_issues": [
+    { "issue": "UWP source checkout ships *.xaml.cs in the project root but the authored *.xaml only under obj\\x64\\Release (build output).", "workaround": "Recover the .xaml from obj/bin during bootstrap." }
+  ]
+}

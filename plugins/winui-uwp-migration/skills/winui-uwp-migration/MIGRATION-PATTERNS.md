@@ -798,6 +798,21 @@ If you really want ALT+Left back-nav, add a single declarative XAML element to t
 
 XAML migration is mostly **mechanical transformation of existing files**, not re-authoring. Copy each `*.xaml` from the source verbatim, then apply the rewrites below. Do not regenerate a page from scratch — controls, names, and event handlers must be preserved so the code-behind continues to compile.
 
+<a id="missing-xaml"></a>
+### Missing or orphaned source XAML (code-behind without markup)
+
+A `*.xaml.cs` copied **without** its sibling `*.xaml` is an *orphaned code-behind*: the partial class calls `InitializeComponent()` but there is no markup to generate it, so the XAML compiler fails (`WMC0909 Cannot resolve DataType`, `WMC1111`, `WMC9999 Xaml Internal Error`) and every affected page then cascades into `CS0103`/`CS1061 "InitializeComponent does not exist"`. This is not a code bug — the markup is simply absent from the build.
+
+This happens when the source tree ships the code-behind but not the authored `.xaml` (common in **archived or previously-built UWP checkouts**, where the `*.xaml.cs` live in the project root but the `*.xaml` survive only under the build output at `obj\<arch>\<config>\` or `bin\`). The bootstrap excludes `bin`/`obj`, so those pages arrive as code-behind only.
+
+`Initialize-UwpMigration.ps1` now detects this and **recovers each orphaned `.xaml` from the source build output automatically**, then applies the normal namespace rewrite. It reports `Orphaned XAML recovered : N` (recovered, tracked in `MIGRATION-MAPPING.md`) and `Orphaned XAML UNRESOLVED : N` (`.bootstrap-meta.json` → `orphanUnresolvedXaml`) for any it could not find. If any remain **UNRESOLVED**, you must author the missing `.xaml` before building — do not skip the page:
+
+- Keep the exact class name and `x:Class` the code-behind declares.
+- Preserve every `x:Name` and event-handler name the `.xaml.cs` references (the code-behind will not compile otherwise).
+- Reuse the source shell's control structure; do not invent a different layout.
+
+Never leave an orphaned code-behind in the build hoping it will resolve — it never does.
+
 ### xmlns root rewrites
 
 UWP `Page`/`UserControl` root elements use these xmlns declarations as-is in WinUI 3 (the schema URL stayed the same), but any `using:Windows.UI.Xaml.*` references must be rewritten:
