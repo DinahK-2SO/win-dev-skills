@@ -25,7 +25,7 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 }
 ```
 
-The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
+The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`. It is **not** limited to the Xaml namespaces: `DispatcherQueue` / `DispatcherQueuePriority` collide between `Windows.System` (WinRT) and `Microsoft.UI.Dispatching` whenever both usings are in scope — see [Threading](#threading) below.
 
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
@@ -246,6 +246,8 @@ DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () => ProgressBar.Value
 ```
 
 Cache the queue off the UI thread via `DispatcherQueue.GetForCurrentThread()`. UWP's ASTA reentrancy protection is gone — watch for reentrancy in async code that pumps messages. See the official [threading guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/threading).
+
+> **`CS0104: 'DispatcherQueue'/'DispatcherQueuePriority' is an ambiguous reference`** — both names exist in **`Windows.System`** (WinRT) *and* **`Microsoft.UI.Dispatching`** (WinUI 3). This fires whenever a file keeps `using Windows.System;` (extremely common — it is where `User`, `UserWatcher`, `KnownUserProperties`, `Launcher`, `MemoryManager`, etc. live) and also adds `using Microsoft.UI.Dispatching;`. Fix: **do not import `Microsoft.UI.Dispatching` at all** — the `DispatcherQueue` instance is inherited from `Page`/`Window`, so `DispatcherQueue.TryEnqueue(() => ...)` resolves on its own. If you need the priority overload, fully-qualify it: `DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => ...)`. Do not add `using Windows.System;` just to get `DispatcherQueue` — that is the UWP type and will not carry the WinUI 3 members.
 
 <a id="dialogs"></a>
 ## Dialogs: MessageDialog → ContentDialog
@@ -813,6 +815,8 @@ This happens when the source tree ships the code-behind but not the authored `.x
 
 Never leave an orphaned code-behind in the build hoping it will resolve — it never does.
 
+> If the sibling `.xaml` **is** present and you still get `WMC0909`/`WMC1111`, it is not an orphan — the cause is an unresolvable `x:Bind` `x:DataType` in a `DataTemplate`. See [`x:Bind` and compiled bindings](#xbind-and-compiled-bindings).
+
 ### xmlns root rewrites
 
 UWP `Page`/`UserControl` root elements use these xmlns declarations as-is in WinUI 3 (the schema URL stayed the same), but any `using:Windows.UI.Xaml.*` references must be rewritten:
@@ -925,6 +929,8 @@ verified too, not just scenario frames).
 ### `x:Bind` and compiled bindings
 
 `x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+
+> **`WMC0909: Cannot resolve DataType` / `WMC1111: DataTemplates containing x:Bind need a DataType` when the `.xaml` IS present** — this is a *different* cause from the orphaned code-behind case in [Missing or orphaned source XAML](#missing-xaml). A `DataTemplate` that uses `x:Bind` (e.g. `<DataTemplate x:DataType="local:Scenario"><TextBlock Text="{x:Bind Title}"/>`) fails when the `x:DataType` type is not resolvable at compile time — usually the `local:`/xmlns prefix does not map to the CLR namespace that actually declares the item type (post-rewrite this is the app's own namespace), or the type is not `public`. It then cascades into `WMC1111` and a `WMC9999` internal error. Fix: point the xmlns prefix at the type's real namespace and keep `x:Bind`, **or** fall back to classic `{Binding Title}`, which needs no compile-time `DataType`. (This scenario-list `Scenario` template is the standard Windows SDK-sample shape, so it recurs across samples.)
 
 ### Page root element
 

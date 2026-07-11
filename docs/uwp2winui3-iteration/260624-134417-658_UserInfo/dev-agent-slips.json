@@ -1,0 +1,14 @@
+{
+  "scenario": "UserInfo",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "14 nullability warnings (CS8618/CS8625/CS8600/CS8602/CS8603/CS8604/CS8612) remained in the final build.",
+      "evidence": "build-output.txt lines 8-33 — all warnings, 'BUILD SUCCEEDED'; results.json metrics.builds=true, score 100.",
+      "covered_clearly_at": "N/A — these are non-blocking warnings from the scaffold's <Nullable>enable</Nullable> applied to pre-nullable SDK sample code; they do not affect build, run, or parity.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Warnings only; the app builds, runs, and scores 100/100. Chasing cosmetic nullability annotations across every migrated SDK sample would bloat the skill with noise for zero behavioral benefit. A re-run would score identically."
+    }
+  ]
+}

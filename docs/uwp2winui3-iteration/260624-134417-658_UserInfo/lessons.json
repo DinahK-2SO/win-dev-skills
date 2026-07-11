@@ -1,0 +1,34 @@
+{
+  "scenario": "UserInfo",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "dotnet build -c Debug -p:Platform=$Platform", "evidence": "Turn 47/52 — native dotnet build surfaced the two blocking compile errors (CS0104, WMC0909) and confirmed the fix; build succeeded on the 2nd attempt." },
+    { "tool": "Initialize-UwpMigration.ps1 namespace rewrite", "evidence": "Bulk Windows.UI.Xaml -> Microsoft.UI.Xaml rewrite produced a project that compiled after only two manual fixes." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Gates on a clean build but does not pre-scan for the DispatcherQueue/Windows.System ambiguity or x:Bind DataTemplate DataType-resolution traps; both surface only as raw compiler errors the agent must interpret unaided.", "suggested_tweak": "Documentation is the higher-leverage fix here since the compiler already emits the codes; the missing piece is the replacement guidance, not detection." }
+  ],
+  "failed_apis": [
+    { "api": "DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, ...)", "why_tried": "Direct port of UWP CoreDispatcher.RunAsync priority overload into WinUI 3.", "root_cause": "File had both `using Windows.System;` (for Windows.System.User APIs central to UserInfo) and `using Microsoft.UI.Dispatching;`, so `DispatcherQueue` and `DispatcherQueuePriority` were ambiguous between Windows.System.* (WinRT) and Microsoft.UI.Dispatching.* (WinUI 3).", "fix": "Remove `using Microsoft.UI.Dispatching;`, drop the redundant `DispatcherQueuePriority` argument (or fully-qualify Microsoft.UI.Dispatching.DispatcherQueue). WinUI 3's DispatcherQueue instance is inherited from Page/Window, so the instance method resolves without the Dispatching using at all." },
+    { "api": "x:Bind inside a DataTemplate with x:DataType=\"local:Scenario\"", "why_tried": "Preserved the UWP SDK-sample scenario-list ListBox template that binds each Scenario item via compiled binding.", "root_cause": "WMC0909 'Cannot resolve DataType local:Scenario' — the compiled binding could not resolve the `local:` prefix to the CLR namespace where the `Scenario` type lives after migration, which then cascaded to WMC1111 (x:Bind requires a resolvable x:DataType) and a WMC9999 internal error.", "fix": "Either point the `local:` xmlns at the namespace that actually declares Scenario (post-rewrite the app's own namespace) and keep x:Bind, or switch the template to classic `{Binding Title}`, which needs no compile-time DataType. Agent chose {Binding}." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md > 'CS0104 ... ambiguous reference' (line 28)", "wrong": "States the CS0104 ambiguity pattern applies to 'any type name that exists in both Windows.UI.Xaml.* and Microsoft.UI.Xaml.*' — scoping it to the Xaml namespaces only.", "correct": "The same CS0104 trap also fires between Windows.System.* and Microsoft.UI.Dispatching.* for DispatcherQueue / DispatcherQueuePriority — a very common pairing because migrated code frequently keeps `using Windows.System;`." },
+    { "where": "MIGRATION-PATTERNS.md > 'Missing or orphaned source XAML' (line 804)", "wrong": "Attributes WMC0909/WMC1111/WMC9999 exclusively to an orphaned code-behind (missing sibling .xaml).", "correct": "The same codes also fire when the .xaml IS present but a DataTemplate's x:Bind uses an x:DataType the compiler cannot resolve — a distinct root cause with a distinct fix." }
+  ],
+  "special_apis": [
+    { "api": "Windows.System.User / UserWatcher / KnownUserProperties", "special_handling": "These stay in Windows.System (WinRT) after migration and are the reason a UserInfo-style app keeps `using Windows.System;`, which is precisely what collides with Microsoft.UI.Dispatching.DispatcherQueue." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0104: 'DispatcherQueuePriority' is an ambiguous reference between 'Microsoft.UI.Dispatching.DispatcherQueuePriority' and 'Windows.System.DispatcherQueuePriority' (x5)", "root_cause": "Both `using Windows.System;` and `using Microsoft.UI.Dispatching;` in scope.", "fix": "Drop the Microsoft.UI.Dispatching using and the priority arg; use the inherited DispatcherQueue.TryEnqueue(() => ...)." },
+    { "error": "WMC0909 Cannot resolve DataType local:Scenario; WMC1111 DataTemplates containing x:Bind need a DataType; WMC9999 internal error", "root_cause": "x:Bind DataTemplate whose x:DataType type could not be resolved via the XAML xmlns prefixes.", "fix": "Resolve the local: prefix to Scenario's real namespace and keep x:Bind, or fall back to {Binding}." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turn 47 -> 52 (single failed build round)", "symptom": "First `dotnet build` failed with 8 errors: 5x CS0104 DispatcherQueuePriority ambiguity + WMC0909/WMC1111/WMC9999 on the scenario-list DataTemplate.", "turns_or_retries": "~5 turns (47-52), one build failure then a clean rebuild.", "root_cause": "Two namespace/binding traps not documented in MIGRATION-PATTERNS.md: DispatcherQueue ambiguity with Windows.System, and WMC0909 from an unresolved x:Bind x:DataType.", "how_resolved": "Agent removed the Dispatching using + priority arg, and switched the DataTemplate from x:Bind/x:DataType to {Binding}. Rebuild succeeded.", "preventable_by": "Documenting both traps in MIGRATION-PATTERNS.md (threading section + x:Bind/orphaned-XAML sections) so the agent applies the fix on the first pass instead of rediscovering it." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "WinUI 3 window screenshots captured blank in the non-interactive session (composition capture limitation).", "workaround": "Evaluation relied on the UIA tree + behavioral output text; this is an eval-environment caveat, not a migration defect, and is out of scope for the migration skill." }
+  ]
+}

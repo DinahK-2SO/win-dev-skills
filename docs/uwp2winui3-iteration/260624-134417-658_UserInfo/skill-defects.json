@@ -1,0 +1,27 @@
+{
+  "scenario": "UserInfo",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0104 'DispatcherQueuePriority'/'DispatcherQueue' ambiguous between Microsoft.UI.Dispatching.* and Windows.System.* blocked the first build (5 occurrences).",
+      "evidence": "session-log.txt turn 47: 'error CS0104: DispatcherQueuePriority is an ambiguous reference between Microsoft.UI.Dispatching.DispatcherQueuePriority and Windows.System.DispatcherQueuePriority'; fixed turns 48-50.",
+      "skill_search": "grepped winui-uwp-migration for DispatcherQueue, Microsoft.UI.Dispatching, Windows.System, ambiguous, CS0104.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md line 28: 'The same pattern applies to any other type name that exists in both Windows.UI.Xaml.* and Microsoft.UI.Xaml.* namespaces (e.g. Application, RoutedEventArgs)' — scopes CS0104 to the Xaml namespaces and omits the Windows.System <-> Microsoft.UI.Dispatching DispatcherQueue collision. Threading section (lines 233-248) shows DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, ...) with no ambiguity warning.",
+      "root_cause": "In WinUI 3, DispatcherQueue and DispatcherQueuePriority exist in BOTH Windows.System (WinRT) and Microsoft.UI.Dispatching. Migrated files commonly retain `using Windows.System;` for WinRT APIs, so adding `using Microsoft.UI.Dispatching;` makes both unqualified names ambiguous.",
+      "proposed_fix": "In MIGRATION-PATTERNS.md threading section add a short note: DispatcherQueue/DispatcherQueuePriority are ambiguous when both `using Windows.System;` and `using Microsoft.UI.Dispatching;` are in scope; prefer NOT importing Microsoft.UI.Dispatching (the inherited DispatcherQueue instance resolves the TryEnqueue call), or fully-qualify Microsoft.UI.Dispatching. Also broaden the CS0104 note to mention this Windows.System pairing.",
+      "generalizes": "Any UWP app that both dispatches to the UI thread (nearly all do) and uses a Windows.System.* WinRT API (Launcher, User, MemoryManager, AppDiagnostics, etc.) keeps `using Windows.System;` and will hit this exact ambiguity after migration. Not specific to UserInfo."
+    },
+    {
+      "problem": "WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 + WMC9999 blocked the first build on a DataTemplate that uses x:Bind.",
+      "evidence": "session-log.txt turn 47: 'MainPage.xaml(25,30): XamlCompiler error WMC0909: Cannot resolve DataType local:Scenario' and 'MainPage.xaml(26,34): error WMC1111: DataTemplates containing x:Bind need a DataType'; fixed turn 51 by switching x:Bind/x:DataType to {Binding}.",
+      "skill_search": "grepped winui-uwp-migration for WMC0909, WMC1111, x:DataType, x:Bind, DataTemplate.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md line 804: 'A *.xaml.cs copied without its sibling *.xaml is an orphaned code-behind ... so the XAML compiler fails (WMC0909 Cannot resolve DataType, WMC1111, WMC9999 Xaml Internal Error)'. This presents orphaned code-behind as THE cause of these codes; here the .xaml was present, so the guidance is misleading. The x:Bind section (line 927) only covers XLS0414/MC3074 'type was not found', not WMC0909 on x:DataType.",
+      "root_cause": "WMC0909 also fires when a DataTemplate's x:Bind uses an x:DataType whose type is not resolvable via the XAML xmlns prefixes (e.g. the `local:` prefix does not map to the namespace that declares the item type). Compiled binding then cascades into WMC1111/WMC9999.",
+      "proposed_fix": "Add a note under the x:Bind section (and cross-reference from the orphaned-XAML note) that WMC0909/WMC1111 on a DataTemplate that has its .xaml present means the x:DataType type is unresolvable: verify the xmlns prefix maps to the item type's real (post-rewrite) namespace and that the type is public, OR fall back to classic {Binding} which needs no compile-time DataType.",
+      "generalizes": "The Windows SDK 'sample' family (SampleConfiguration.cs + MainPage scenario-list) is the template for essentially all these UWP samples and binds the scenario ListBox exactly this way; the same x:Bind/x:DataType resolution trap recurs across scenarios, and more broadly for any migrated DataTemplate using x:Bind."
+    }
+  ]
+}

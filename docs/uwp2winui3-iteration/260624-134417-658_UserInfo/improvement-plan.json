@@ -1,0 +1,30 @@
+{
+  "scenario": "UserInfo",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0104 DispatcherQueue/DispatcherQueuePriority ambiguity between Windows.System and Microsoft.UI.Dispatching blocked the first build (5 errors).",
+      "evidence": "session-log.txt turn 47 'error CS0104: DispatcherQueuePriority is an ambiguous reference between Microsoft.UI.Dispatching.DispatcherQueuePriority and Windows.System.DispatcherQueuePriority'; lessons.json errors_encountered[0]; skill-defects.json item 1.",
+      "root_cause": "DispatcherQueue and DispatcherQueuePriority exist in both Windows.System (WinRT) and Microsoft.UI.Dispatching; migrated files keep `using Windows.System;` for WinRT APIs, so importing Microsoft.UI.Dispatching makes both names ambiguous. The skill's CS0104 note was scoped to Xaml namespaces only.",
+      "tier": 3,
+      "change": "Broadened the CS0104 note and added a boxed warning in the Threading section: do not import Microsoft.UI.Dispatching (the inherited DispatcherQueue instance resolves TryEnqueue), or fully-qualify the priority overload; don't add `using Windows.System;` to get DispatcherQueue.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent qualifies/omits the Dispatching using on the first pass instead of after a failed build.",
+      "falsifiable_check": "On a re-run of any app that dispatches to the UI thread while using Windows.System.* APIs, the build produces 0 CS0104 DispatcherQueue/DispatcherQueuePriority errors."
+    },
+    {
+      "problem": "WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 + WMC9999 blocked the first build on an x:Bind DataTemplate whose .xaml was present.",
+      "evidence": "session-log.txt turn 47 'MainPage.xaml(25,30): WMC0909 Cannot resolve DataType local:Scenario' / 'WMC1111'; fixed turn 51 by switching to {Binding}; skill-defects.json item 2.",
+      "root_cause": "The skill attributed WMC0909/WMC1111/WMC9999 solely to an orphaned code-behind (missing .xaml). The .xaml was present; the real cause was an x:Bind DataTemplate whose x:DataType type could not be resolved via the xmlns prefixes. The x:Bind section only covered XLS0414/MC3074.",
+      "tier": 3,
+      "change": "Added a note to the x:Bind section for the .xaml-present WMC0909 cause (unresolvable x:DataType: fix the xmlns prefix to the item type's real namespace or fall back to {Binding}) and a reverse cross-reference from the orphaned-XAML note.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent distinguishes the two causes of WMC0909 and fixes the DataTemplate directly instead of hunting for a missing .xaml.",
+      "falsifiable_check": "On a re-run migrating an SDK-sample-style scenario-list app, the build produces 0 WMC0909/WMC1111 errors on the scenario DataTemplate."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/eval caveat (not auto-applied): WinUI 3 window screenshots capture blank in the non-interactive session; parity relies on the UIA tree + behavioral text. This is a measurement-environment limitation, not a migration-skill fix."
+  ]
+}

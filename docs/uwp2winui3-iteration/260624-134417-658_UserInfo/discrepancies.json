@@ -1,0 +1,28 @@
+{
+  "scenario": "UserInfo",
+  "generated": "2026-07-11T12:40:00+08:00",
+  "summary": "The migrated WinUI 3 app faithfully replicates the original UWP UserInfo sample. All 3 scenarios are present with full structural control coverage (3/3 each) and all primary action controls produce correct, meaningful output. No missing controls, no dead controls, no wrong output detected.",
+  "capture_caveats": [
+    "WinUI 3 window screenshots captured blank (both default and --capture-screen methods) — a known WinUI 3 / non-interactive-session composition capture limitation, NOT an app defect. The UIA tree and behavioral output text confirm the app renders and functions fully (scenario list + content + real results text with actual bounds).",
+    "UWP behavioral golden unavailable: the UWP CoreWindow's inner UIA subtree is not reachable via winapp and foreground activation is blocked in this session, so UWP controls could not be actuated for a side-by-side behavioral golden. WinUI behavior was therefore judged against the source-derived checklist and the app's own real output rather than a live UWP response."
+  ],
+  "discrepancies": [
+    {
+      "scenario": "Watch users",
+      "control": "Stop watching",
+      "severity": "info",
+      "type": "no-op-output",
+      "detail": "'Stop watching' invoked successfully (invokeOk=true) but produced no new visible output token (responded=false). This is expected behavior — stopping the UserWatcher does not alter the already-populated list/status text. Not counted as a dead control; no UWP behavioral golden existed to contradict it.",
+      "downgrade": false
+    }
+  ],
+  "missing_controls": [],
+  "dead_controls": [],
+  "wrong_output": [],
+  "layout_differences": [
+    {
+      "detail": "Visual side-by-side layout comparison was limited: the UWP golden covers only the Scenario-1 initial view and the WinUI window pixels did not capture. Structural layout parity was confirmed via the WinUI UIA tree, which mirrors the UWP structure (SampleTitle 'Account picture name C# sample', 'N) <title>' scenario list, Description label, UserList ComboBox, action Button, ResultsText, Microsoft logo, copyright + Trademarks/Privacy links).",
+      "severity": "info"
+    }
+  ]
+}

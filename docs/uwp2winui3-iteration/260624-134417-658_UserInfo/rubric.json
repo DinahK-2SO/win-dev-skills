@@ -1,0 +1,46 @@
+{
+  "scenario": "UserInfo",
+  "created_at": "2026-07-11T12:40:00+08:00",
+  "uwp_capture_status": "partial: UWP launched (uwp-app-runner ok=true, pid=14080, windowTitle='User Info C# Sample'); initial/default view (Scenario 1) captured as a non-blank golden. The SDK sample hosts a Windows.UI.Core.CoreWindow whose inner UIA subtree is not reachable via winapp, and foreground activation is blocked in this non-interactive session, so programmatic per-scenario navigation and control actuation of the UWP could not be performed. No behavioral UWP golden was obtainable; structural checklist (from source) + Scenario-1 visual golden are the usable baseline.",
+  "features": [
+    {
+      "id": "find-users",
+      "area": "Scenario 1",
+      "name": "Find users and display user properties",
+      "description": "A ComboBox lists the machine's users; clicking 'Show properties' enumerates the selected user's properties (name, authentication status, account name, principal name, domain) and displays them in the results text.",
+      "expected_behaviour": [
+        "Scenario reachable from the 'Find users' navigation item",
+        "A user-selection ComboBox (UserList) is present",
+        "A 'Show properties' button is present and, when clicked, populates ResultsText with the selected user's properties"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Find_users.png",
+      "weight": 2
+    },
+    {
+      "id": "watch-users",
+      "area": "Scenario 2",
+      "name": "Watch users with a UserWatcher",
+      "description": "Start/Stop buttons control a UserWatcher that enumerates users into a ListBox and reports enumeration/watch status.",
+      "expected_behaviour": [
+        "Scenario reachable from the 'Watch users' navigation item",
+        "A 'Start watching' button that begins enumeration and lists users plus a status message",
+        "A 'Stop watching' button and a user ListBox are present"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Watch_users.png",
+      "weight": 1
+    },
+    {
+      "id": "check-user-consent-group",
+      "area": "Scenario 3",
+      "name": "Check user consent group",
+      "description": "A ComboBox selects a user; clicking 'Show Consent Group' displays the child/minor/adult content consent verdicts in the results text.",
+      "expected_behaviour": [
+        "Scenario reachable from the 'Check user consent group' navigation item",
+        "A user-selection ComboBox (UserList) is present",
+        "A 'Show Consent Group' button that, when clicked, shows the child/minor/adult content consent results"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_Check_user_consent_group.png",
+      "weight": 1
+    }
+  ]
+}

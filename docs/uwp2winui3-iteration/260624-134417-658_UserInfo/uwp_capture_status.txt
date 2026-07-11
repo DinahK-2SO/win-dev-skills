@@ -1,0 +1,5 @@
+UWP golden capture status: PARTIAL.
+- uwp-app-runner: ok=true, pid=14080, windowTitle='User Info C# Sample', sdk=10.0.26100.0.
+- App launched and rendered (non-blank frames captured for the app's initial/default view = Scenario 1 'Find users').
+- Programmatic per-scenario navigation and control actuation of the UWP FAILED: the SDK sample hosts a Windows.UI.Core.CoreWindow whose inner UIA subtree is not reachable via winapp (only a top-level Pane is exposed), so winapp ui invoke/click could not target the 'N) <title>' nav ListBox items or scenario buttons. Coordinate-based mouse injection also did not register (foreground activation blocked in non-interactive session).
+- Consequence: no reliable BEHAVIORAL UWP golden (no per-control 'responded' truth). Structural checklist (from source) + Scenario-1 visual golden are the usable baseline. Behavioral parity for WinUI is therefore graded as 'flag for manual review' where the UWP response is unknown, never auto-failed on the UWP's behalf.

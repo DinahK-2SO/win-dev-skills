@@ -1,0 +1,15 @@
+{
+  "scenario": "UserInfo",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: document CS0104 DispatcherQueue/DispatcherQueuePriority ambiguity between Windows.System and Microsoft.UI.Dispatching (don't import Microsoft.UI.Dispatching; the inherited DispatcherQueue resolves TryEnqueue) — recurs whenever an app dispatches to the UI thread while using Windows.System.* WinRT APIs.",
+    "MIGRATION-PATTERNS.md: document the second cause of WMC0909/WMC1111 (present .xaml, but an x:Bind DataTemplate with an unresolvable x:DataType) with fix (resolve the xmlns prefix or fall back to {Binding}) plus a cross-reference from the orphaned-XAML note — recurs across the SDK scenario-list sample family."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Blank WinUI 3 screenshot capture in non-interactive sessions is an eval-environment limitation, not a migration-skill fix."
+  ]
+}
