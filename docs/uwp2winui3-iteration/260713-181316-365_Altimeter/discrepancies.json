@@ -1,0 +1,20 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Scenario navigation list (1) Data Events, 2) Polling)", "status": "pass", "reason": "Left-hand list with the two verbatim scenario titles; selection swaps the right pane.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Data Events Enable/Disable buttons wired to ScenarioEnable/ScenarioDisable", "status": "pass", "reason": "Both buttons present and wired; hardware-gated (no altimeter) so no readings, matching UWP.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Data Events altitude output 'Altitude change(m):'", "status": "pass", "reason": "Label + output present; 'No data' with no sensor.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Polling Get Data button wired to ScenarioGetData", "status": "pass", "reason": "Present and wired; hardware-gated.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Polling altitude output", "status": "pass", "reason": "Label + output present.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "No-altimeter status handling ('No altimeter found')", "status": "pass", "reason": "Red status banner shows 'No altimeter found'; graceful degradation, no crash.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Data Events initial Enable button state", "uwp": "OnNavigatedTo unconditionally sets Enable.IsEnabled = true (clickable even with no sensor).", "winui": "Disables Enable/Disable and shows an explanatory 'requires an altimeter device' message.", "screenshot_ref": "parity/winui3/screenshots/01_Data_Events__a01_Enable.png" }
+  ],
+  "missing_features": [],
+  "summary": "Full functional + structural parity (score 100). The only development-time defect was a startup crash (0xC000027B) from navigate-in-constructor in MainWindow, recovered by deferring navigation to Activated. Remaining differences are additive graceful-degradation choices, not regressions."
+}

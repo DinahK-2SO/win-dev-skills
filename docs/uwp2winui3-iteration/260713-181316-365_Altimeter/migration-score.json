@@ -1,0 +1,33 @@
+{
+  "scenario": "Altimeter",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: Scenario 1 (Data Events) captured live from the UWP CoreWindow (parity/baseline/screenshots/01_Data_Events.png); Scenario 2 (Polling) not capturable live because the UWP CoreWindow XAML is opaque to UI Automation (ApplicationFrameHost) and synthetic input/foreground activation is blocked in this non-interactive session. Scenario 2 ground truth from source.",
+  "hardware_note": "No altimeter sensor on this machine: both the UWP golden and the WinUI app show 'No altimeter found' and produce no sensor readings. Enable/Disable/Get Data are therefore hardware-gated (present and wired, but cannot produce output) in BOTH apps, so their non-response is parity, not a WinUI regression.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Data Events",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Data_Events__a01_Enable.png",
+      "note": "Full structural coverage (2/2: Enable, Disable). WinUI layout, description, altitude output and 'No altimeter found' status match the live UWP golden. Enable/Disable are present and wired (ScenarioEnable/ScenarioDisable handlers) but hardware-gated (no altimeter) in both apps, so neither responds with readings here. Minor nuance: UWP leaves Enable enabled when no sensor whereas WinUI disables it and adds an explanatory message (graceful degradation, not a dead control). Verdict pass."
+    },
+    {
+      "name": "Polling",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_Polling.png",
+      "note": "Full structural coverage (1/1: Get Data). WinUI Polling page renders correctly with the 'Get Data' button, 'Polls for altimeter data...' description, altitude output and 'No altimeter found' status. Get Data handler (ScenarioGetData) is wired but hardware-gated (no altimeter) so produces no reading in either app. Live UWP Polling screenshot not capturable (UIA-opaque CoreWindow + blocked synthetic nav); compared against source-derived expectations and the analogous Data Events layout. Verdict pass."
+    }
+  ]
+}

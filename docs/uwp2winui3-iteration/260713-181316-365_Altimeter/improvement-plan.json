@@ -1,0 +1,28 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Startup crash 0xC000027B was a static-window init-order race, but the crash-code table's 0xC000027B row pointed only at 'unsupported API → defer it', never mentioning the init-order race (which was listed only under 0x80004003). This misdirects diagnosis when the same race surfaces under a different native code.",
+      "evidence": "session-log.txt:2524-2571 (validator FAIL 0xc000027b + startup-crashes anchor text) vs the real fix at session-log.txt:2575-2612 (deferred navigation, not an API defer). MIGRATION-PATTERNS.md line 310.",
+      "root_cause": "Native stowed exception codes are non-deterministic; the init-order cause was pinned to a single code (0x80004003), so the 0xC000027B row dead-ended at 'defer an API'.",
+      "tier": 3,
+      "change": "Rewrote the 0xC000027B crash-table row to tell the agent to FIRST rule out the navigate-in-constructor init-order race (cross-linked to #windowing), and only treat it as an unsupported-API-defer if the constructor is already inert.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On re-run, an agent that reads the startup-crashes table for a 0xC000027B crash is pointed at the init-order fix instead of wrongly deferring a working API.",
+      "falsifiable_check": "The 0xC000027B row now contains a '#windowing' / 'init-order' reference; a re-run hitting a navigate-in-constructor crash reaches the deferred-navigation fix without a wasted 'defer an API' detour. Chosen Tier 3 because this is diagnostic-text guidance in a reference table (no script branch keys off this specific code); a Tier 1 validator change is unnecessary since the validator already fails correctly on the crash."
+    },
+    {
+      "problem": "The agent wrote RootFrame.Navigate in the MainWindow constructor during Shell Conversion, causing the crash. The inert-constructor rule exists under MIGRATION-PATTERNS.md #windowing but SKILL.md's Shell Conversion step (where the shell is built) never forward-references it.",
+      "evidence": "session-log.txt:2578-2612 (navigate-in-constructor then fixed); SKILL.md Shell Conversion (lines 92-102) had no init-order warning.",
+      "root_cause": "The correct pattern lived only in a separate patterns file consulted reactively; the shell-building decision point gave no forward pointer.",
+      "tier": 3,
+      "change": "Added one sentence to SKILL.md Shell Conversion: when the target shell hosts a Frame/Page, keep the MainWindow constructor inert and defer the first Navigate until after Activate, linking MIGRATION-PATTERNS.md#windowing.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agents write inert-constructor deferred navigation the first time when building a Frame-rooted shell, avoiding the startup crash proactively.",
+      "falsifiable_check": "On re-run of a Frame-rooted sample, MainWindow ships with deferred (Activated/Loaded) navigation from the start and Validate-UwpMigration's smoke launch passes on the first attempt (no 0xC000027B). Tier 3 chosen because shell conversion is an LLM-judgement structural step (no scaffold/script emits this MainWindow body — it comes from `dotnet new winui` plus agent edits), so the leverage point is prose at the decision site, not a template or script."
+    }
+  ],
+  "deferred_to_human": []
+}

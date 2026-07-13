@@ -1,0 +1,30 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log.txt:200-252 — bootstrapped the WinUI 3 scaffold, seeded MIGRATION-MAPPING.md (4 rows) and neutralized RootFrameNavigationHelper before the agent touched code." },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "session-log.txt:1498,1737,2541 — fetched windowing/threading/csproj/startup-crashes anchors on demand." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log.txt:2524 — smoke-launch step caught the startup crash (0xC000027B) that the clean build and analyzer could not see; forced a fix before declaring done." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 / Get-MigrationPattern.ps1 startup-crashes", "limitation": "The captured native code was 0xC000027B, whose crash-table row points only at 'unsupported API → defer it' and does NOT list the init-order race as a possible cause, even though that was the real root cause here.", "suggested_tweak": "Cross-reference the init-order race under the 0xC000027B row so the diagnostic does not steer agents toward wrongly deferring a working API." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md crash-code table, 0xC000027B row (line 310)", "wrong": "Maps 0xC000027B solely to 'legacy projection/activation incompatibility for an API used at startup ... defer it', implying the fix is to defer an API.", "correct": "A static-window init-order race (navigate-in-constructor before App.MainWindow is assigned) can surface as 0xC000027B too, not only as 0x80004003 E_POINTER. The table should send 0xC000027B to the init-order check before concluding an API must be deferred." }
+  ],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Altimeter", "special_handling": "Hardware-gated: absent on the build machine, so both UWP golden and WinUI app show 'No altimeter found' and produce no readings. Migrated 1:1 (namespace unchanged); no bespoke handling needed beyond a graceful no-sensor message." }
+  ],
+  "errors_encountered": [
+    { "error": "Startup crash 0xC000027B (native stowed exception, module Microsoft.UI.Xaml.dll) — app registered then died within 10s before showing a window.", "root_cause": "MainWindow constructor called RootFrame.Navigate(typeof(MainPage)) during `new MainWindow()`, i.e. before App.OnLaunched assigned App.MainWindow; the page reached during construction read the still-null static window reference and threw at startup.", "fix": "Deferred the first navigation out of the constructor into the Window.Activated handler (guarded by a _navigated flag), so navigation runs only after Activate() completes and App.MainWindow is set. Validator then PASSed." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainWindow.xaml.cs shell setup (session-log.txt:2506-2650)", "symptom": "Clean build + silent analyzer but the smoke launch crashed with 0xC000027B; the crash-table row for that code pointed at 'defer an unsupported API', not the actual init-order race.", "turns_or_retries": "~3 turns (validate → read diagnostics + startup-crashes anchor → edit MainWindow → re-validate PASS)", "root_cause": "The Shell Conversion step (where the agent builds the MainWindow + Frame + Navigate shell) does not cross-reference the 'keep MainWindow's constructor inert / defer navigation' pitfall, so the agent wrote navigate-in-constructor; and the 0xC000027B crash-table row does not list the init-order race as a candidate cause.", "how_resolved": "Agent read MIGRATION-PATTERNS #windowing (Initialization order) and applied the documented Activated-deferred-navigation pattern.", "preventable_by": "(1) Cross-reference the Initialization-order pitfall from SKILL.md's Shell Conversion step so the agent writes inert-constructor navigation the first time; (2) add the init-order race to the 0xC000027B crash-table row so the diagnostic points at it directly." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No altimeter sensor on the build/test machine; UWP CoreWindow XAML is UIA-opaque so Scenario 2 could not be captured live.", "workaround": "Score/parity derived Polling ground truth from UWP source; both apps hardware-gated identically so non-response is parity, not a regression. (Measurement-side only — no migration-skill action.)" }
+  ]
+}

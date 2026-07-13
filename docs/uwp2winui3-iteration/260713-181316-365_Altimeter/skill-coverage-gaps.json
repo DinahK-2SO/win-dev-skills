@@ -1,0 +1,23 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Startup crash 0xC000027B was actually a static-window init-order race (RootFrame.Navigate in MainWindow constructor before App.MainWindow assigned), but the crash-code table's 0xC000027B row points only at 'legacy projection/activation incompatibility for an API used at startup ... defer it'. It never lists the init-order race — that cause is attached only to the 0x80004003 row. A less capable run following the table literally would waste time trying to defer a working API.",
+      "evidence": "session-log.txt:2524-2571 — validator FAIL '0xc000027b ... Native stowed exception'; Get-MigrationPattern startup-crashes returned the table whose 0xC000027B row says 'If the API/contract is unsupported on the current OS, defer it.' The real fix (session-log.txt:2575-2612) was deferring navigation, an init-order fix, not an API defer.",
+      "covered_at": "MIGRATION-PATTERNS.md line 310 (crash-code table, 0xC000027B row) and line 307 (init-order race attached only to 0x80004003).",
+      "why_missed": "under-emphasized — native stowed exception codes are non-deterministic (an init-order race can surface as 0xC000027B OR 0x80004003), but the init-order cause is listed under only one code, so the other code's row dead-ends at 'defer an API'.",
+      "proposed_improvement": "Add a short cross-reference to the 0xC000027B row: before concluding an API must be deferred, rule out the init-order race (navigate-in-constructor) per #windowing — the same race can surface under either native code.",
+      "generalizes": "Every Frame-rooted UWP SDK sample builds a MainWindow+Frame+Navigate shell, so the init-order race is a recurring failure mode; and native stowed exception codes vary between machines/runs, so pinning the init-order cause to a single code misdirects diagnosis broadly."
+    },
+    {
+      "problem": "The agent wrote RootFrame.Navigate(typeof(MainPage)) directly in the MainWindow constructor while performing Shell Conversion, causing the startup crash. The 'keep the constructor inert / defer navigation' rule exists in MIGRATION-PATTERNS.md #windowing, but SKILL.md's Shell Conversion step — the exact place the agent decides how to build the MainWindow + Frame shell — does not point to it, so the pitfall is learned only reactively after the crash.",
+      "evidence": "session-log.txt:2578-2612 — original MainWindow.xaml.cs navigated in the constructor; crash; then fixed to Activated-deferred navigation. SKILL.md Shell Conversion (lines 92-102) lists shell mappings (NavigationView+Frame, single Page) with no init-order warning.",
+      "covered_at": "MIGRATION-PATTERNS.md lines 193-231 (#windowing 'Initialization order — keep MainWindow's constructor inert'); SKILL.md lines 92-102 (Shell Conversion) which omits any pointer to it.",
+      "why_missed": "not prominent at the decision point — the correct pattern lives in a separate patterns file the agent may only consult reactively; the shell-building step that introduces the risk gives no forward reference.",
+      "proposed_improvement": "Add one sentence to SKILL.md Shell Conversion: when the target shell hosts a Frame/Page, keep the MainWindow constructor inert and defer the first Navigate until after Activate (link to MIGRATION-PATTERNS.md #windowing).",
+      "generalizes": "Applies to every migration whose source is a Frame-rooted SDK sample (the dominant UWP sample idiom), i.e. the majority of scenarios in this benchmark family."
+    }
+  ]
+}

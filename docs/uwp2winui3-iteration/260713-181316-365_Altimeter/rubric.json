@@ -1,0 +1,82 @@
+{
+  "scenario": "Altimeter",
+  "created_at": "2026-07-13T18:42:00Z",
+  "uwp_capture_status": "partial: Scenario 1 (Data Events) captured live from the UWP CoreWindow; Scenario 2 (Polling) could not be captured live because the UWP CoreWindow XAML tree is opaque to UI Automation (hosted by ApplicationFrameHost) and synthetic input/foreground activation is blocked in this non-interactive session, so title/keyboard/coordinate navigation to the Polling page did not route. Scenario 2 ground truth taken from UWP source (Scenario2_Polling.xaml.cs).",
+  "features": [
+    {
+      "id": "scenario-navigation",
+      "area": "Shell",
+      "name": "Scenario navigation list",
+      "description": "A left-hand list exposes the two scenarios ('1) Data Events', '2) Polling') and selecting one shows that scenario's page on the right, matching the UWP SDK sample shell.",
+      "expected_behaviour": [
+        "List shows exactly two items: '1) Data Events' and '2) Polling'",
+        "Selecting an item highlights it and swaps the right-hand content pane to that scenario",
+        "Item titles are verbatim from the UWP source"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "weight": 2
+    },
+    {
+      "id": "data-events-controls",
+      "area": "Data Events",
+      "name": "Data Events Enable/Disable buttons",
+      "description": "The Data Events scenario registers/unregisters an altimeter ReadingChanged event listener via Enable/Disable buttons; the Enable handler starts the report interval and swaps enabled state, the Disable handler stops it.",
+      "expected_behaviour": [
+        "Both 'Enable' and 'Disable' buttons are present with those exact labels",
+        "Handlers ScenarioEnable/ScenarioDisable are wired (register/unregister ReadingChanged, toggle button enabled state)",
+        "With a real altimeter, Enable begins updates and disables itself while enabling Disable"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "weight": 2
+    },
+    {
+      "id": "data-events-output",
+      "area": "Data Events",
+      "name": "Data Events altitude output",
+      "description": "The scenario displays 'Altitude change(m):' with a value that updates on each ReadingChanged event (ScenarioOutput_M).",
+      "expected_behaviour": [
+        "Label 'Altitude change(m):' is shown with an output value ('No data' when no readings)",
+        "Value would update to a formatted altitude change when the sensor reports"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "weight": 1
+    },
+    {
+      "id": "polling-control",
+      "area": "Polling",
+      "name": "Polling Get Data button",
+      "description": "The Polling scenario reads the current altimeter value on demand via a 'Get Data' button (ScenarioGetData handler calls sensor.GetCurrentReading()).",
+      "expected_behaviour": [
+        "A 'Get Data' button is present with that exact label",
+        "Handler ScenarioGetData is wired to read the current altimeter reading",
+        "With a real altimeter, clicking updates the altitude change output"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "polling-output",
+      "area": "Polling",
+      "name": "Polling altitude output",
+      "description": "The Polling scenario displays 'Altitude change(m):' with a value updated when Get Data is clicked.",
+      "expected_behaviour": [
+        "Label 'Altitude change(m):' shown with an output value ('No data' initially)",
+        "Value updates to the current formatted altitude change on Get Data when a sensor is present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "no-sensor-status",
+      "area": "Shell",
+      "name": "No-altimeter status handling",
+      "description": "On hardware without an altimeter, both scenarios report 'No altimeter found' via the shared status banner (NotifyUser / StatusBlock).",
+      "expected_behaviour": [
+        "A red status banner shows 'No altimeter found' when no altimeter is present",
+        "Scenarios degrade gracefully rather than crashing"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "weight": 1
+    }
+  ]
+}

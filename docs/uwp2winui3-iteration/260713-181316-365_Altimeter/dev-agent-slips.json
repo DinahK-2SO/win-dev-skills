@@ -1,0 +1,14 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The dev-agent initially wrote RootFrame.Navigate(typeof(MainPage)) in the MainWindow constructor even though MIGRATION-PATTERNS.md #windowing explicitly says the constructor must be inert and navigation deferred until after Activate.",
+      "evidence": "session-log.txt:2578-2612 — navigate-in-constructor code, crash 0xC000027B, then fixed to the exact Activated-deferred pattern documented at MIGRATION-PATTERNS.md lines 219-231.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md lines 193-231 (#windowing 'Initialization order — keep MainWindow's constructor inert'), including the verbatim Activated-deferred RootFrame.Navigate example.",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "PARTIAL — the pitfall IS documented prominently in the patterns file and the agent recovered in ~3 turns, so the reactive guidance is adequate. However, because the shell-building step (SKILL.md Shell Conversion) gives no forward pointer to it, this is tracked as a coverage-gap (item 2) rather than left purely as a slip; the skill edit adds the missing forward reference rather than restating the pattern."
+    }
+  ]
+}

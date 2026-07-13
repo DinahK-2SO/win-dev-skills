@@ -101,6 +101,8 @@ Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 
 If the source shell doesn't match anything above, preserve its structure as faithfully as controls allow.
 
+When the target shell hosts a `Frame`/`Page`, keep the `MainWindow` constructor **inert** and defer the first `Navigate` until after `Activate()` — navigating in the constructor runs before `App.MainWindow` is assigned and crashes at startup (surfaces as a native stowed exception such as `0x80004003` or `0xC000027B`). See MIGRATION-PATTERNS.md [Initialization order — keep MainWindow's constructor inert](MIGRATION-PATTERNS.md#windowing).
+
 **Navigation invariants** (apply regardless of shell control choice):
 
 1. Every non-deferred source scenario / page is reachable from the target's primary navigation surface.
