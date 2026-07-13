@@ -1,0 +1,49 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "uwp_baseline_available": false,
+  "uwp_baseline_note": "Original UWP app hung at startup splash (Responding:False) across two clean Release launches; no functional golden frames. Visual UWP-vs-WinUI comparison could not be performed; discrepancies below are judged against the source-derived checklist and the WinUI capture.",
+  "discrepancies": [
+    {
+      "scenario": "Event Handlers",
+      "type": "uia-false-negative",
+      "severity": "none",
+      "detail": "Parity reports MediaPlayerElement 'not found' (cov 0/1). This is the documented WinUI automation-peer limitation (MediaPlayerElement swallows AutomationId). Element is actually present (Seek/Play/Mute/Cast transport controls render). Not a defect."
+    },
+    {
+      "scenario": "Metadata",
+      "type": "uia-false-negative",
+      "severity": "none",
+      "detail": "Same MediaPlayerElement AutomationId false-negative (cov 0/1). Media element present via transport controls; page renders fully."
+    },
+    {
+      "scenario": "Ad Insertion",
+      "type": "uia-false-negative",
+      "severity": "none",
+      "detail": "Same MediaPlayerElement AutomationId false-negative (cov 0/1). Media element present via transport controls; page renders fully."
+    },
+    {
+      "scenario": "Network Request Modification",
+      "type": "uia-false-negative",
+      "severity": "none",
+      "detail": "MediaPlayerElement missing from UIA (cov 7/8) - same false-negative. All 7 radio buttons present and reachable."
+    },
+    {
+      "scenario": "Adaptive Streaming Tuning",
+      "type": "missing-automationid",
+      "severity": "low",
+      "detail": "The two 'Set' buttons have no AutomationId, so could not be auto-invoked (0/2 actions). They are visibly present. Recommend adding AutomationProperties.AutomationId. (MediaPlayerElement also false-negative -> cov 7/8.)"
+    },
+    {
+      "scenario": "Live Seekable Range",
+      "type": "missing-controls",
+      "severity": "medium",
+      "detail": "Coverage 10/19. Seek-offset buttons (<<15m,<<5m,<<30s,<<2s,2s>>,30s>>,5m>>,15m>>) not found in the UIA tree; bottom layout is cramped/truncated in the captured 768x519 window. Buttons may be offscreen/renamed. Verify layout and AutomationIds. (MediaPlayerElement also false-negative.)"
+    },
+    {
+      "scenario": "All scenarios",
+      "type": "behavior-unverified",
+      "severity": "info",
+      "detail": "Media-gated controls (radio buttons, Set/seek buttons) produced no visible response because no real streaming media loads in this environment ('Unsupported video type' fallback). With no responsive UWP golden to compare, these are flagged for manual review, not scored as dead controls."
+    }
+  ]
+}

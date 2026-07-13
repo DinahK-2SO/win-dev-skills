@@ -1,0 +1,21 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Two 'Set' buttons (Adaptive Streaming Tuning) and the MediaPlayerElement report as not-invocable / not-found in the UIA tree, lowering raw parity coverage.",
+      "evidence": "discrepancies.json 'Adaptive Streaming Tuning' type=missing-automationid severity=low ('two Set buttons have no AutomationId'); repeated 'uia-false-negative' entries for MediaPlayerElement; migration-score.json upgraded scenarios 2/5/6 fail->pass calling these documented false-negatives.",
+      "covered_clearly_at": "N/A - this is a measurement artifact of the eval skill (winui3-parity-check / UIA), not a migration-skill topic.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "MediaPlayerElement not exposing an AutomationId is a documented WinUI/UIA peer limitation the scorer already compensated for (upgraded to pass). The 'Set' buttons matching the UWP source verbatim is correct migration fidelity; adding AutomationProperties the source never had is out of migration scope and would inject test affordances the fidelity rules forbid. No migration-skill edit is warranted."
+    },
+    {
+      "problem": "Many nullable-reference warnings (CS8600/8602/8603/8629) remain in the migrated .xaml.cs files.",
+      "evidence": "build-output.txt tail shows dozens of CS86xx warnings across Scenario3/4/5/6/7; build still reports BUILD SUCCEEDED.",
+      "covered_clearly_at": "SKILL.md Step 4 validator 'dotnet build healthcheck — clean build, zero WUI analyzer warnings' scopes the gate to WUI warnings only.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Nullable warnings are non-fatal, do not affect parity/score, and the gate intentionally targets only WUI analyzer warnings. Broadening the skill to chase nullable warnings would add noise for no scored benefit."
+    }
+  ]
+}

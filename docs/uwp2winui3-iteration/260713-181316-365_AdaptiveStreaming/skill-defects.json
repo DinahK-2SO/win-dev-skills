@@ -1,0 +1,17 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Scenario7 (Live Seekable Range) has its bottom seek-offset button rows clipped/offscreen in the capture window (~768x519); parity coverage 10/19, scored partial. The controls exist in XAML but never render into the viewport or UIA tree.",
+      "evidence": "migration-score.json feature 'Live Seekable Range' verdict=partial, note 'bottom layout is cramped/truncated ... seek-offset buttons (<<15m..15m>>) not found in UIA tree'; discrepancies.json 'Live Seekable Range' severity=medium; migrated MainPage.xaml hosts <Frame x:Name=\"ScenarioFrame\"/> directly under NavigationView with no ScrollViewer (grep of app *.xaml shows zero page-level ScrollViewer).",
+      "skill_search": "grepped SKILL.md + MIGRATION-PATTERNS.md for ScrollViewer / window size / SizeToContent / truncate / clip; the only ScrollViewer mention is the Hub->ScrollViewer control-swap row. Shell Conversion table and 'Navigation invariants' cover reachability of PAGES but say nothing about content taller than the window or scroll-hosting.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "WinUI 3's default/host window is typically smaller than UWP's sample window and NavigationView/Frame content does not scroll on its own. A migrated page taller than the window silently clips its bottom controls (they leave the render and the UIA tree) unless the scenario content region is scroll-hosted. The shell-conversion guidance omits this, so the agent reproduces the UWP page layout 1:1 and tall pages clip.",
+      "proposed_fix": "Add a shell-conversion navigation invariant to SKILL.md (Step 1, 'Navigation invariants') instructing the agent to scroll-host the scenario content region (wrap the content Frame in a <ScrollViewer VerticalScrollBarVisibility=\"Auto\">) so pages taller than the window stay fully reachable, with a caveat that star-sized fill elements (e.g. a MediaPlayerElement Height=\"*\") need a MinHeight because a ScrollViewer measures its child with infinite height.",
+      "generalizes": "UWP sample/app pages are routinely taller than WinUI 3's smaller window, and every UWP->WinUI 3 shell conversion to NavigationView/Frame loses UWP's scrolling content host. Any tall migrated page clips its lower controls in a fixed capture window, so scroll-hosting the content region prevents lost-control parity failures across scenarios."
+    }
+  ]
+}

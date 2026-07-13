@@ -1,0 +1,21 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated NavigationView/Frame shell does not scroll-host scenario content, so a page taller than the small capture window (~768x519) clips its bottom controls out of the render and UIA tree. Scenario7 Live Seekable Range scored partial (cov 10/19).",
+      "evidence": "migration-score.json feature 'Live Seekable Range' verdict=partial ('bottom layout is cramped/truncated ... seek-offset buttons not found in UIA tree'); discrepancies.json severity=medium; migrated MainPage.xaml hosts <Frame x:Name=\"ScenarioFrame\"/> under NavigationView with zero page-level ScrollViewer.",
+      "root_cause": "WinUI 3 window is smaller than UWP's sample window and NavigationView/Frame content does not scroll; UWP's scrolling content host is lost in shell conversion, so tall pages clip.",
+      "tier": 3,
+      "change": "Added Navigation invariant #5 to the Shell Conversion section: scroll-host the scenario content Frame in a ScrollViewer so pages taller than the window stay reachable, with a caveat that star-sized fill elements (e.g. MediaPlayerElement Height=\"*\") need a MinHeight to avoid collapsing under the ScrollViewer's infinite measure.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Migrated shells wrap scenario content in a ScrollViewer; tall pages no longer clip their bottom controls, which then appear in the render and UIA tree.",
+      "falsifiable_check": "On a re-run of a scenario with an over-tall page, all lower controls appear in the parity UIA tree and the feature goes partial->pass (e.g. Live Seekable Range coverage rises above 10/19)."
+    }
+  ],
+  "deferred_to_human": [
+    "MediaPlayerElement exposes no AutomationId and two Set buttons without AutomationId can't be auto-invoked by winui3-parity-check (UIA). This is an eval-skill/UIA measurement limitation, not a migration-skill fix; recorded for human review, not auto-applied.",
+    "Consider whether the parity/capture window size (~768x519) should be enlarged in the harness to better match UWP's default sample window (tier-0 / harness, out of scope here)."
+  ]
+}

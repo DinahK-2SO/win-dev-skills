@@ -1,0 +1,26 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 / Validate-UwpMigration.ps1", "evidence": "Build reached BUILD SUCCEEDED and validator was invoked (16 references in session-log); all 7 scenario pages migrated and reachable, score 93." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "winui3-parity-check (eval, not editable)", "limitation": "MediaPlayerElement does not expose an AutomationId, so every media page reports its media control as 'not found' (cov 0/1) even though transport controls render. Two 'Set' buttons without AutomationId also could not be auto-invoked.", "suggested_tweak": "N/A - eval-skill/UIA limitation, out of scope for the migration skill." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "MediaElement -> MediaPlayerElement", "special_handling": "Carried over per PATTERNS.md controls table; renders with transport controls. UIA does not surface an AutomationId for it (measurement false-negative)." }
+  ],
+  "errors_encountered": [
+    { "error": "Numerous CS8600/CS8602/CS8603/CS8629 nullable-reference warnings across Scenario3/4/5/6/7 .xaml.cs", "root_cause": "Nullable reference types enabled by the WinUI scaffold; UWP source predates nullable annotations.", "fix": "Non-fatal warnings; build succeeded and validator gate does not fail on them (only WUI analyzer warnings gate)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario7 Live Seekable Range layout", "symptom": "Bottom seek-offset button rows (<<15m..15m>>) are clipped/offscreen in the ~768x519 capture window; parity coverage 10/19.", "turns_or_retries": "not iterated on - not detected by the agent (no runtime layout check)", "root_cause": "The migrated shell hosts the scenario Frame directly inside NavigationView with no ScrollViewer; a page whose root Grid has a star-sized MediaPlayerElement row plus trailing Auto rows overflows the small window and clips its bottom controls, which then disappear from render and the UIA tree.", "how_resolved": "not resolved in-trial (scored partial)", "preventable_by": "Shell-conversion guidance that scroll-hosts the scenario content region so pages taller than the window stay reachable." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Original UWP app hung on its startup splash across two Release launches, so no UWP behavioral golden was captured.", "workaround": "Scoring judged against source-derived checklist + WinUI capture; no dead-control downgrades applied." }
+  ]
+}

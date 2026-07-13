@@ -107,6 +107,13 @@ If the source shell doesn't match anything above, preserve its structure as fait
 2. Order matches the source.
 3. Titles match the source (modulo trivial wording cleanup — capitalization, punctuation).
 4. Deferred items are **omitted** from the navigation surface — do not include disabled or broken entries. They are accounted for in `MIGRATION-DEFERRED.md`.
+5. **Scroll-host the scenario content region.** WinUI 3's window is typically smaller than UWP's sample window (the capture/validation window can be as small as ~768×520), and `NavigationView`/`Frame` content does **not** scroll on its own. So any migrated page taller than the window silently **clips its bottom controls** — they leave the render *and* the UIA tree, and fail parity even though the XAML is correct. Wrap the content host so tall pages stay fully reachable:
+   ```xml
+   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+       <Frame x:Name="ScenarioFrame" />
+   </ScrollViewer>
+   ```
+   Caveat: a `ScrollViewer` measures its child with infinite height, so a page whose root row/element is star-sized to fill (e.g. a `MediaPlayerElement` with `Height="*"`) will collapse to zero. For those pages give the fill element a sensible `MinHeight` so it still renders inside the scroll host.
 
 ### Step 2 — Reconcile the project file
 
