@@ -1,0 +1,51 @@
+{
+  "scenario": "ActivitySensor",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 4,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 4,
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true (pid 21356, window 'Activity Sensor C# Sample') but the UWP app hung on its extended splash ('Windows platform sample') and never presented its main page (Responding:False, empty UIA content Pane) across two launches, 15s settle, aggressive foregrounding and 60s+ waits; only the splash frame was captured, so no functional golden baseline exists",
+  "winui_build": "FAILED (CS0118 in Scenario3_ChangeEvents.xaml.cs:33 + XAML WMC9999); app cannot launch",
+  "parity_result": null,
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Current activity",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Current_activity.png",
+      "winui_screenshot": null,
+      "note": "Migrated app does not build (cannot launch/capture). UWP golden unusable: app hung on splash, control never actuated."
+    },
+    {
+      "name": "Activity history",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Activity_history.png",
+      "winui_screenshot": null,
+      "note": "Migrated app does not build (cannot launch/capture). UWP golden unusable: app hung on splash, control never actuated."
+    },
+    {
+      "name": "Events",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Events.png",
+      "winui_screenshot": null,
+      "note": "Migrated app does not build (cannot launch/capture). UWP golden unusable: app hung on splash, controls never actuated."
+    },
+    {
+      "name": "Background activity",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Background_activity.png",
+      "winui_screenshot": null,
+      "note": "Migrated app does not build (cannot launch/capture). UWP golden unusable: app hung on splash, controls never actuated."
+    }
+  ]
+}

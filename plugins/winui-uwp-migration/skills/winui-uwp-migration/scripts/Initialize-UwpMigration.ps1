@@ -170,6 +170,58 @@ $snapPath = Join-Path $Target '.fidelity-snapshot.json'
 ($snapshot | ConvertTo-Json -Depth 5) | Set-Content -LiteralPath $snapPath -Encoding UTF8
 Write-Host "    Snapshotted visible text from $($snapshot.Keys.Count) XAML file(s) -> .fidelity-snapshot.json"
 
+# ─── 3c. Root-namespace alignment (prevents scaffold-vs-source split + CS0118) ─
+# `dotnet new winui -n <ProjectName>` puts the scaffold shell files (App/MainWindow)
+# in `namespace <ProjectName>` and sets <RootNamespace> to <ProjectName>. UWP SDK
+# samples, however, keep their pages in the source's own <RootNamespace> (typically
+# `SDKTemplate`). Left unreconciled this causes two build failures:
+#   * a split project — scaffold files in one namespace, ported pages in another; and
+#   * CS0118 "'X' is a namespace but is used like a type" whenever <ProjectName>
+#     equals a WinRT type the app references. This is common because samples are named
+#     after the API they demo (ActivitySensor, Accelerometer, Barometer, Compass,
+#     Gyrometer, ProximitySensor, ...): the like-named root namespace shadows the type
+#     at every unqualified use.
+# Fix: give the whole app ONE root namespace equal to the source <RootNamespace> by
+# aligning the target csproj + the scaffold-generated (non-copied) shell files.
+$sourceRootNs = $null
+if ($uwpCsprojs.Count -gt 0) {
+    $uwpCsprojText = [System.IO.File]::ReadAllText($uwpCsprojs[0].FullName)
+    $mns = [regex]::Match($uwpCsprojText, '<RootNamespace>\s*([^<\s]+)\s*</RootNamespace>')
+    if ($mns.Success) { $sourceRootNs = $mns.Groups[1].Value }
+}
+$targetCsproj = Get-ChildItem -Path $Target -Filter '*.csproj' -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch $excludePattern } | Select-Object -First 1
+if ($sourceRootNs -and $targetCsproj) {
+    $tgtCsprojText = [System.IO.File]::ReadAllText($targetCsproj.FullName)
+    $tm = [regex]::Match($tgtCsprojText, '<RootNamespace>\s*([^<\s]+)\s*</RootNamespace>')
+    $scaffoldNs = if ($tm.Success) { $tm.Groups[1].Value } else { [System.IO.Path]::GetFileNameWithoutExtension($targetCsproj.Name) }
+    if ($scaffoldNs -ne $sourceRootNs) {
+        if ($tm.Success) {
+            $tgtCsprojText = $tgtCsprojText.Replace($tm.Value, "<RootNamespace>$sourceRootNs</RootNamespace>")
+        } else {
+            $tgtCsprojText = ([regex]'<PropertyGroup>').Replace($tgtCsprojText, "<PropertyGroup>`n    <RootNamespace>$sourceRootNs</RootNamespace>", 1)
+        }
+        [System.IO.File]::WriteAllText($targetCsproj.FullName, $tgtCsprojText)
+        $copiedSet = @{}
+        foreach ($rc in $copied) { $copiedSet[$rc] = $true }
+        $nsRegex = [regex]("\b" + [regex]::Escape($scaffoldNs) + "\b")
+        $alignedNs = 0
+        Get-ChildItem -Path $Target -Recurse -File -Include *.cs,*.xaml -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch $excludePattern } |
+            Where-Object { -not $copiedSet.ContainsKey([System.IO.Path]::GetRelativePath($Target, $_.FullName)) } |
+            ForEach-Object {
+                $t = [System.IO.File]::ReadAllText($_.FullName)
+                $u = $nsRegex.Replace($t, $sourceRootNs)
+                if ($u -ne $t) { [System.IO.File]::WriteAllText($_.FullName, $u); $alignedNs++ }
+            }
+        Write-Host "    Aligned root namespace '$scaffoldNs' -> '$sourceRootNs' (csproj + $alignedNs scaffold shell file(s)) to match UWP source"
+    } else {
+        Write-Host "    Root namespace already matches source ('$sourceRootNs')"
+    }
+} elseif ($targetCsproj -and -not $sourceRootNs) {
+    Write-Host "    Source <RootNamespace> not found in preserved csproj; skipped namespace alignment (verify scaffold and ported files share one namespace)"
+}
+
 
 # ─── 4a. Filter-prone class neutralization ────────────────────────────────────
 # Some SDK Samples boilerplate helpers contain UWP-specific patterns whose

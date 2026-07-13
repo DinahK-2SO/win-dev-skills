@@ -1,0 +1,59 @@
+{
+  "scenario": "ActivitySensor",
+  "created_at": "2026-07-13T14:45:00+00:00",
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true (process 21356 alive, window 'Activity Sensor C# Sample' present) but the app hung on its extended splash screen ('Windows platform sample'), never presenting its main page. UIA content Pane was empty and the process reported Responding:False across two launches, 15s settle, aggressive foregrounding, and 60s+ waits. No functional golden could be captured; only the splash frame was saved.",
+  "features": [
+    {
+      "id": "current-activity",
+      "area": "Scenario 1",
+      "name": "Current activity",
+      "description": "Clicking 'Get Current Activity' queries the ActivitySensor and displays the current activity, its confidence, and a timestamp.",
+      "expected_behaviour": [
+        "A 'Get Current Activity' button is visible",
+        "Clicking it populates activity/confidence/timestamp output text blocks",
+        "A status message updates in the shared status bar"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "activity-history",
+      "area": "Scenario 2",
+      "name": "Activity history",
+      "description": "Clicking 'Get Activity History' reads the activity history and lists count plus first/last activity entries with confidence and timestamps.",
+      "expected_behaviour": [
+        "A 'Get Activity History' button is visible",
+        "Clicking it populates a count and history entries",
+        "A status message updates in the shared status bar"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "events",
+      "area": "Scenario 3",
+      "name": "Events",
+      "description": "'ReadingChanged On'/'ReadingChanged Off' subscribe/unsubscribe to the ReadingChanged event and stream live activity/confidence/timestamp output.",
+      "expected_behaviour": [
+        "'ReadingChanged On' and 'ReadingChanged Off' buttons are visible",
+        "Enabling updates activity/confidence/timestamp as readings arrive",
+        "Disabling stops updates; status bar reflects state"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "background-activity",
+      "area": "Scenario 4",
+      "name": "Background activity",
+      "description": "'Register Task'/'Unregister Task' register or remove a background task and show task registration/status, report count, and last reported activity.",
+      "expected_behaviour": [
+        "'Register Task' and 'Unregister Task' buttons are visible",
+        "Registering shows task registration/status output",
+        "Unregistering clears it; status bar reflects state"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

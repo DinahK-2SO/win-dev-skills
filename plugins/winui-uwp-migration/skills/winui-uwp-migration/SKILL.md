@@ -46,6 +46,8 @@ dotnet new winui -n <ProjectName>
 Test-Path "<winui3-project-root>/MIGRATION-MAPPING.md"
 ```
 
+**One root namespace rule:** the whole app must live in a **single root namespace equal to the UWP source's `<RootNamespace>`** (SDK samples use `SDKTemplate`). The bootstrap's step `3c` aligns the scaffold's `<RootNamespace>` and shell files (`App`/`MainWindow`) to it automatically — do **not** re-namespace shell files to the project/API name afterwards, and do not leave the ported pages and the scaffold in different namespaces. This is critical when the project name equals a WinRT type the app uses (e.g. an app named `ActivitySensor` referencing `Windows.Devices.Sensors.ActivitySensor`): a like-named root namespace shadows the type and breaks the build with `CS0118` (see [Common build errors](./MIGRATION-PATTERNS.md#common-build-errors-after-the-namespace-rewrite)).
+
 **Hard rules:**
 
 Don't:

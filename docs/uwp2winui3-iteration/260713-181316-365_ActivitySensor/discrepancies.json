@@ -1,0 +1,18 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "score": 0,
+  "builds": false,
+  "runs": false,
+  "requirements": [
+    { "id": 0, "text": "Current activity: 'Get Current Activity' button + activity/confidence/timestamp outputs", "status": "fail", "reason": "WinUI app does not build; cannot launch/capture.", "suspected_skill_gap": "Build-blocking namespace/type collision (CS0118) — no skill guidance on aligning scaffold namespace to source RootNamespace." },
+    { "id": 1, "text": "Activity history: 'Get Activity History' button + count/history outputs", "status": "fail", "reason": "WinUI app does not build; cannot launch/capture.", "suspected_skill_gap": "Same build failure blocks all features." },
+    { "id": 2, "text": "Events: 'ReadingChanged On/Off' buttons + streamed output", "status": "fail", "reason": "WinUI app does not build; cannot launch/capture.", "suspected_skill_gap": "CS0118 originates in Scenario3_ChangeEvents.xaml.cs (this feature's page)." },
+    { "id": 3, "text": "Background activity: 'Register/Unregister Task' buttons + task status", "status": "fail", "reason": "WinUI app does not build; cannot launch/capture.", "suspected_skill_gap": "Same build failure blocks all features." }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [
+    "All four scenarios non-functional because the migrated project does not compile."
+  ],
+  "summary": "Every requirement fails for a single reason: the migrated WinUI 3 project does not build. The scaffold placed shell files in 'namespace ActivitySensor' (project name) while ported pages stayed in 'namespace SDKTemplate' and referenced the WinRT type Windows.Devices.Sensors.ActivitySensor unqualified, so the like-named namespace shadows the type (CS0118) with a cascading XAML WMC9999. The UWP golden baseline was also unusable (app hung on its splash), but the migration fails independently on build."
+}

@@ -1,0 +1,25 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied source, preserved .uwp-source/ActivitySensor.csproj, and did the Windows.UI.Xaml->Microsoft.UI.Xaml rewrite; migrated tree contains all scenario pages." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Bootstrap never reconciles the WinUI scaffold's root namespace (= 'dotnet new winui -n <ProjectName>' project name) with the UWP source's original <RootNamespace> (SDKTemplate). It leaves the project on the API-derived project name, which both mismatches the ported pages' namespace and shadows the WinRT type of the same name.", "suggested_tweak": "After copy, read <RootNamespace> from the preserved .uwp-source csproj and align the target csproj RootNamespace + scaffold shell files (App/MainWindow) to it." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.ActivitySensor", "special_handling": "The WinRT type name equals the sample's app/project name. Any unqualified reference to the type collides with the like-named root namespace introduced by the scaffold, producing CS0118." }
+  ],
+  "errors_encountered": [
+    { "error": "Scenario3_ChangeEvents.xaml.cs(33,17): CS0118: 'ActivitySensor' is a namespace but is used like a type", "root_cause": "The WinUI scaffold was created as 'dotnet new winui -n ActivitySensor', so App/MainWindow/MainPage shell files were placed in 'namespace ActivitySensor'. The ported scenario pages kept the UWP source namespace 'SDKTemplate' and reference the WinRT type 'Windows.Devices.Sensors.ActivitySensor' unqualified. The scaffold's 'ActivitySensor' namespace shadows the type, so the unqualified reference resolves to the namespace.", "fix": "Give the whole app one root namespace equal to the UWP source <RootNamespace> (SDKTemplate); rewrite the scaffold shell files to that namespace so no 'ActivitySensor' namespace exists. Alternatively fully-qualify the type as Windows.Devices.Sensors.ActivitySensor." },
+    { "error": "XamlCompiler WMC9999: Object reference not set to an instance of an object (MarkupCompilePass2)", "root_cause": "Cascading internal XAML compiler failure downstream of the CS0118 / split-namespace state (x:Class in ported pages resolved to a different root namespace than the scaffold).", "fix": "Resolved once the single-namespace alignment is applied and CS0118 clears." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Namespace layout of the scaffolded project", "symptom": "App.xaml.cs / MainPage.xaml.cs / MainWindow.xaml.cs were left in 'namespace ActivitySensor' while every ported scenario page stayed in 'namespace SDKTemplate'; build never succeeded and the trial timed out at score 0.", "turns_or_retries": "trial ended with timeout:true, builds:false", "root_cause": "Skill Step 0 instructs 'dotnet new winui -n <ProjectName>' with no guidance to make the project name / RootNamespace / shell-file namespaces match the UWP source's <RootNamespace>, and no warning that the project name must not equal a WinRT type the app references.", "how_resolved": "Not resolved in-trial (build never passed).", "preventable_by": "Bootstrap auto-aligning the scaffold to the source <RootNamespace>, plus a SKILL Step 0 rule + a PATTERNS.md CS0118 entry covering the namespace-vs-type collision." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

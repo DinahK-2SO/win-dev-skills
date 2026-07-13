@@ -1,0 +1,40 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated project fails to build with CS0118 'ActivitySensor is a namespace but is used like a type' (+ cascading XAML WMC9999); the scaffold's root namespace (= project name) both shadows the like-named WinRT type and diverges from the ported pages' 'SDKTemplate' namespace. Score 0/4, all features fail.",
+      "evidence": "migration-score.json winui_build='FAILED (CS0118 in Scenario3_ChangeEvents.xaml.cs:33 + XAML WMC9999)'; results.json builds=false timeout=true; migrated tree shows App/MainWindow/MainPage in 'namespace ActivitySensor' vs scenario pages in 'namespace SDKTemplate'; .uwp-source csproj RootNamespace=SDKTemplate, AssemblyName=ActivitySensor.",
+      "root_cause": "Bootstrap never reconciles the WinUI scaffold's root namespace with the UWP source's <RootNamespace>, and Step 0 gives no rule to do so; agents pick the API-derived project name and produce a split/shadowing namespace.",
+      "tier": 1,
+      "change": "Added step 3c to Initialize-UwpMigration.ps1: read <RootNamespace> from the preserved .uwp-source csproj and align the target csproj <RootNamespace> plus all scaffold-generated (non-copied) shell files (App/MainWindow namespace, x:Class, xmlns:local, using) to it, so the app has one root namespace equal to the source's. Copied/ported files are left untouched.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Fresh migrations start with a single, source-matching root namespace (SDKTemplate for SDK samples), so no like-named namespace shadows a WinRT type and scaffold/ported code agree.",
+      "falsifiable_check": "On re-run, dotnet build no longer emits CS0118/WMC9999 for the namespace-vs-type collision; bootstrap prints 'Aligned root namespace <proj> -> <sourceNs>'."
+    },
+    {
+      "problem": "PATTERNS.md 'Common build errors' documents CS0104/CS0227/CS0246 but not the CS0118 namespace-vs-type collision, so an agent that hits it (or that scaffolded/renamed by hand, bypassing the script) has no recovery guidance.",
+      "evidence": "Grep of MIGRATION-PATTERNS.md 'Common build errors' section: no CS0118 entry existed.",
+      "root_cause": "Missing documented recovery pattern for a recurring build error.",
+      "tier": 3,
+      "change": "Added a 'CS0118: X is a namespace but is used like a type' entry to the Common build errors section: explains both triggers (project name = WinRT type; scaffold vs ported namespace split) and the fix (one root namespace = source RootNamespace; or fully-qualify the type at the use site). Points back to the automatic step 3c.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent can diagnose and self-correct a residual CS0118 without looping.",
+      "falsifiable_check": "Get-MigrationPattern / PATTERNS.md now returns a CS0118 section; a re-run that hits CS0118 resolves it by namespace alignment rather than timing out."
+    },
+    {
+      "problem": "Step 0 scaffold instruction gives no guidance to keep one source-matching root namespace, so agents rename shell files to the project/API name after bootstrap and re-introduce the split even though the script pre-aligned it.",
+      "evidence": "Migrated tree post-agent: App/MainPage/MainWindow re-namespaced to 'ActivitySensor' while pages stayed 'SDKTemplate'.",
+      "root_cause": "No prose rule anchoring the single-root-namespace invariant that the script establishes.",
+      "tier": 3,
+      "change": "Added a 'One root namespace rule' note under Step 0: the whole app lives in a single namespace equal to the source <RootNamespace>; do not re-namespace shell files to the project/API name; links to the CS0118 pattern. Reinforces (does not duplicate) the Tier-1 automation.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent leaves the bootstrap's aligned namespace intact instead of recreating the split.",
+      "falsifiable_check": "On re-run, final scaffold + ported files share one namespace; no CS0118 reappears from a post-bootstrap rename."
+    }
+  ],
+  "deferred_to_human": [
+    "The UWP golden baseline was unusable because the original ActivitySensor UWP app hung on its extended splash screen (uwp-app-runner ok:true but Responding:False). This is an eval/runner limitation, not a migration-skill issue; recorded for the human. No change made to eval skills."
+  ]
+}

@@ -27,6 +27,26 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0118: 'X' is a namespace but is used like a type`
+
+The migrated project has a **root namespace that collides with a type name**, so an unqualified reference to the type resolves to the namespace instead. Two situations produce this, and both come from the WinUI 3 scaffold's root namespace defaulting to the project name (`dotnet new winui -n <ProjectName>`):
+
+1. **Project name equals a WinRT/BCL type the app references.** UWP SDK samples are usually named after the API they demonstrate (`ActivitySensor`, `Accelerometer`, `Barometer`, `Compass`, `Gyrometer`, `ProximitySensor`, …), so the scaffold creates `namespace ActivitySensor`, which shadows `Windows.Devices.Sensors.ActivitySensor`. Every `ActivitySensor x = …;` then fails CS0118, and the XAML compiler cascades into `WMC9999: Object reference not set to an instance of an object`.
+2. **Scaffold shell files and ported pages disagree on the namespace.** The scaffold's `App`/`MainWindow` land in `namespace <ProjectName>` while the copied pages keep the source's `<RootNamespace>` (typically `SDKTemplate`), so the app has two root namespaces at once — the extra one shadows the type.
+
+Fix — give the whole app **one root namespace equal to the UWP source's `<RootNamespace>`** (read it from `.uwp-source/<name>.csproj`; SDK samples use `SDKTemplate`, which never collides with an API type). The current `Initialize-UwpMigration.ps1` does this automatically (step `3c` aligns the target `<RootNamespace>` and the scaffold shell files); if you scaffolded or renamed by hand, apply it yourself:
+
+```xml
+<!-- <ProjectName>.csproj -->
+<RootNamespace>SDKTemplate</RootNamespace>
+```
+```csharp
+// App.xaml.cs / MainWindow.xaml.cs and their x:Class / xmlns:local
+namespace SDKTemplate;      // NOT namespace ActivitySensor
+```
+
+As a local fallback where a single collision remains, fully qualify the type at the use site: `Windows.Devices.Sensors.ActivitySensor`.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
