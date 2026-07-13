@@ -1,0 +1,28 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "First Validate-UwpMigration.ps1 run failed with 8 rows still Status=copied.",
+      "evidence": "session-log.txt L3506-3514 '[FAIL] MIGRATION-MAPPING.md — 8 row(s) still Status=copied'; fixed at L3524-3547 by bulk replacing '| copied |' -> '| done |' and re-running to PASS.",
+      "covered_clearly_at": "SKILL.md Step 4 — a dedicated bold rule: 'You are NOT done until Validate-UwpMigration.ps1 reports PASS' and check 3 lists 'no row stuck at Status = copied'.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The validator prominently catches this and the agent fixed it on the next pass; a capable re-run flips Status before validating. No skill edit needed."
+    },
+    {
+      "problem": "Transient CS8803/CS0106/CS1001/CS1022 from a momentarily malformed edit.",
+      "evidence": "session-log.txt L3171-3192 (top-level statements before namespace / stray modifiers); disappeared after re-edit, final build clean (build-output.txt 'BUILD SUCCEEDED').",
+      "covered_clearly_at": "SKILL.md Step 3 build loop ('build -> fix the first error -> launch -> repeat') — normal edit/build iteration already handles transient compiler errors.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A random malformed edit is not a knowledge gap; the standard build loop the skill already prescribes recovers it."
+    },
+    {
+      "problem": "AppxManifest referenced Splash-sdk.png which could not be located.",
+      "evidence": "session-log.txt L2262 'error 0x80070002: ... splash screen image [Splash-sdk.png] cannot be located'; resolved before final validate (Validate log L3518 '[PASS] Package.appxmanifest — all 5 image reference(s) resolvable').",
+      "covered_clearly_at": "Validate-UwpMigration.ps1 Section 5 explicitly checks that Package.appxmanifest image references resolve under Assets/ — a prominent, dedicated gate.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The validator already surfaces unresolved manifest images prominently; the agent fixed it. No skill content is missing."
+    }
+  ]
+}

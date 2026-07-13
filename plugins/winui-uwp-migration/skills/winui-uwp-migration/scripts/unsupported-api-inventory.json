@@ -35,6 +35,7 @@
     { "pattern": "Windows\\.Networking\\.Proximity","name": "proximity family",              "anchor": "sensors" }
   ],
   "residueOnly": [
+    { "pattern": "\\.GetForCurrentView\\s*\\(",                                "name": "leftover *.GetForCurrentView() call", "reason": "Every UWP per-view singleton accessor (DisplayInformation/UIViewSettings/ApplicationView/ResourceContext/SystemNavigationManager) maps to a non-GetForCurrentView shape in WinUI 3 desktop, so a surviving `.GetForCurrentView(` call is residue — it emits WUI0004 and throws at runtime. Replace it (PATTERNS.md#getforcurrentview); never silence with try/catch." },
     { "pattern": "using\\s+Windows\\.UI\\.Xaml",                               "name": "using Windows.UI.Xaml",      "reason": "Should have been rewritten by Initialize-UwpMigration.ps1" },
     { "pattern": "Windows\\.UI\\.Xaml\\.(Controls|Data|Documents|Input|Markup|Media|Navigation|Shapes|Automation|Hosting)", "name": "Windows.UI.Xaml.* (fully-qualified)", "reason": "Should have been rewritten by Initialize-UwpMigration.ps1" },
     { "pattern": "xmlns:[a-zA-Z]+=\"using:Windows\\.UI\\.Xaml",                "name": "xmlns: using:Windows.UI.Xaml",   "reason": "XAML xmlns clause should have been rewritten" },

@@ -1,0 +1,37 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "A leftover `*.GetForCurrentView()` call that the agent silenced with try/catch instead of migrating slips every validation gate, shipping dead functionality plus a real WUI0004 warning.",
+      "evidence": "build-output.txt L24 'warning WUI0004: DisplayInformation.GetForCurrentView() is UWP-only'; Scenario4_OrientationChanged.xaml.cs L47-55 (try/catch around the call); Validate log L3504 '[PASS] Residue grep' and L3521 '0 WUI analyzer warning(s)'.",
+      "skill_search": "grepped winui-uwp-migration for GetForCurrentView / residue handling; Validate-UwpMigration.ps1 L67-70 builds residue patterns from inventory.unsupported + inventory.residueOnly only; unsupported-api-inventory.json L16 places GetForCurrentView in 'adaptable'.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The residue grep never enforces 'adaptable' APIs, and the validator's plain `dotnet build` does not reference the WindowsAppSDK analyzer, so a leftover singleton-accessor call whose TODO marker was deleted (but call not replaced) is caught by nothing. There is also no rule forbidding the 'wrap-in-try/catch to make it compile' escape.",
+      "proposed_fix": "Add a `residueOnly` entry `\\.GetForCurrentView\\s*\\(` to scripts/unsupported-api-inventory.json so the validator residue grep FAILS on any leftover `*.GetForCurrentView()` call in non-deferred files. Add a one-line rule to MIGRATION-PATTERNS.md 'GetForCurrentView Replacements' that an un-migrated singleton call must be replaced, never silenced with an empty try/catch.",
+      "generalizes": "All five UWP per-view singleton accessors (ApplicationView/UIViewSettings/DisplayInformation/CoreApplication/SystemNavigationManager) resolve to a NON-GetForCurrentView shape in WinUI 3 desktop, so a surviving `.GetForCurrentView(` call is always residue in any migration; the 'silence with try/catch' escape is a generic anti-pattern that produces dead device features across sensor/display/navigation samples."
+    },
+    {
+      "problem": "The WUI0004 guidance is wrong: it presents WUI0004 as SystemNavigationManager/back-button-specific, and the DisplayInformation mapping only covers DPI, giving no path for the far more common orientation members.",
+      "evidence": "MIGRATION-PATTERNS.md L515 (WUI0004 row) and L262 (DisplayInformation -> DPI only); the actual WUI0004 in build-output.txt L24 is for DisplayInformation, not SystemNavigationManager; Scenario4 uses CurrentOrientation/OrientationChanged/ReadingTransform.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md for WUI0004 and DisplayInformation/orientation; WUI0004 row names only SystemNavigationManager; no orientation members mentioned anywhere.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "| `WUI0004` | `SystemNavigationManager.GetForCurrentView() is UWP-only` | Drop the system back button hookup, or use HWND-based COM interop; see \"GetForCurrentView Replacements\" above. |",
+      "root_cause": "WUI0004 is emitted for ANY `*.GetForCurrentView()` singleton; the row's SystemNavigationManager-specific symptom + back-button fix misdirects agents whose warning came from a different singleton, and the DisplayInformation table row silently ignores its orientation surface.",
+      "proposed_fix": "Generalize the WUI0004 row symptom to '<Type>.GetForCurrentView() is UWP-only (any per-view singleton)' and route to 'GetForCurrentView Replacements'; in that section, split the DisplayInformation entry into DPI members (-> XamlRoot.RasterizationScale/GetDpiForWindow) vs orientation members (CurrentOrientation/OrientationChanged/AutoRotationPreferences), noting the latter has no per-view singleton on desktop and must be handled explicitly, not silenced.",
+      "generalizes": "Every UWP→WinUI 3 migration that touches any GetForCurrentView singleton hits WUI0004; a correct, general symptom+routing prevents mis-application, and orientation/DPI on DisplayInformation appears across sensor, camera, and layout samples."
+    },
+    {
+      "problem": "CS0118 'namespace but is used like a type' when the WinUI project namespace equals the WinRT type the sample demos — not covered anywhere in the skill.",
+      "evidence": "session-log.txt L3114 'Scenario4_OrientationChanged.xaml.cs(108,52): error CS0118: Accelerometer is a namespace but is used like a type'; fix visible in final Scenario4 L7 'using SensorAccelerometer = Windows.Devices.Sensors.Accelerometer;'.",
+      "skill_search": "grepped SKILL.md, MIGRATION-PATTERNS.md and scripts for CS0118 / 'namespace but is used' / 'type alias' / 'using X =' / 'root namespace' — No matches found.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "`dotnet new winui -n <ProjectName>` names the project (and root namespace) after the API being demonstrated; the identical WinRT type name is then ambiguous, so every field/parameter of that type fails CS0118.",
+      "proposed_fix": "Add a short MIGRATION-PATTERNS.md section (with the CS #### build-error table) covering CS0118: when the project namespace collides with a WinRT type name, add a using alias (`using <Alias> = <FullyQualifiedType>;`) or fully-qualify the type; do not rename the project.",
+      "generalizes": "UWP SDK samples are conventionally named after the API they showcase (Accelerometer, Compass, Gyrometer, Barometer, ProximitySensor, Geolocator, ...); migrating any of them with a same-named project reproduces this exact collision."
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap produced MIGRATION-MAPPING.md (8 rows), injected TODO[migrate-NNN] markers and per-file BATCH/SEQUENTIAL modes; agent proceeded only after Test-Path returned True (session-log turn ~ '=== BOOTSTRAP COMPLETE ===')." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught 8 rows still at Status=copied on the first run (log line 3506-3514: '[FAIL] MIGRATION-MAPPING.md — 8 row(s) still Status=copied'), forcing a second pass before the agent declared done." },
+    { "tool": "Get-MigrationPattern.ps1 -Anchor getforcurrentview", "evidence": "Agent left the reference 'See PATTERNS.md#getforcurrentview' comment in Scenario4_OrientationChanged.xaml.cs line 46, showing it consulted the anchor." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 (residue grep)", "problem": "Reported '[PASS] Residue grep — 0 UWP-only API references' (log line 3504) even though Scenario4_OrientationChanged.xaml.cs line 49 still calls DisplayInformation.GetForCurrentView(). The residue grep only loads inventory 'unsupported' + 'residueOnly' patterns (Validate-UwpMigration.ps1 lines 69-70); 'adaptable' patterns such as GetForCurrentView() are never enforced, so a leftover call to an adaptable API passes.", "evidence": "Validate-UwpMigration.ps1 lines 67-70 vs unsupported-api-inventory.json line 16 (GetForCurrentView is in 'adaptable')." },
+    { "tool": "Validate-UwpMigration.ps1 (WUI analyzer healthcheck)", "problem": "Its plain 'dotnet build' reported '0 WUI analyzer warning(s)' (log line 3521) because the scaffold build does not reference Microsoft.WindowsAppSDK.Analyzers; the analyzer is only injected by the benchmark's separate 'winapp build', which DID flag WUI0004 (build-output.txt line 24). So the validator gives a false PASS on real WUI residue.", "evidence": "build-output.txt line 24 'warning WUI0004: DisplayInformation.GetForCurrentView() is UWP-only' vs Validate log line 3521 '0 WUI analyzer warning(s)'." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Neither the residue grep nor the build healthcheck catches a leftover *.GetForCurrentView() call that was silenced with try/catch rather than replaced.", "suggested_tweak": "Add a residueOnly pattern for '\\.GetForCurrentView\\s*\\(' so the residue grep fails on any leftover singleton-accessor call in non-deferred files." }
+  ],
+  "failed_apis": [
+    { "api": "DisplayInformation.GetForCurrentView() (orientation members: CurrentOrientation, OrientationChanged, ReadingTransform alignment, AutoRotationPreferences)", "why_tried": "Scenario4 aligns accelerometer ReadingTransform to display orientation and subscribes to OrientationChanged.", "root_cause": "getforcurrentview pattern table maps DisplayInformation.GetForCurrentView() ONLY to a DPI replacement (XamlRoot.RasterizationScale / GetDpiForWindow); it gives no path for the orientation members, so the agent had nothing to apply and kept the UWP call wrapped in try/catch.", "fix": "Do not silence the call; apply the correct per-member replacement, or if the specific member has no supported desktop equivalent, degrade visibly (do not swallow) — see improvement-plan.json." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md 'WUI analyzer warnings' table, WUI0004 row (line 515)", "wrong": "Symptom fixed to 'SystemNavigationManager.GetForCurrentView() is UWP-only' and fix 'Drop the system back button hookup'.", "correct": "WUI0004 fires for ANY *.GetForCurrentView() UWP singleton (DisplayInformation, UIViewSettings, ApplicationView, ResourceContext, SystemNavigationManager, ...). Route to the 'GetForCurrentView Replacements' section; back-button advice only applies to the SystemNavigationManager variant." },
+    { "where": "MIGRATION-PATTERNS.md 'GetForCurrentView Replacements' table (line 262)", "wrong": "DisplayInformation.GetForCurrentView() -> only 'XamlRoot.RasterizationScale or Win32 GetDpiForWindow'.", "correct": "That covers DPI members only. DisplayInformation also exposes orientation (CurrentOrientation / OrientationChanged / AutoRotationPreferences), which has no per-view singleton on WinUI 3 desktop and needs separate handling — not a DPI call." }
+  ],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Accelerometer when the WinUI project namespace is also 'Accelerometer'", "special_handling": "CS0118 ('Accelerometer is a namespace but is used like a type') on every field/parameter of that type. Resolve with a using alias, e.g. 'using SensorAccelerometer = Windows.Devices.Sensors.Accelerometer;' (seen in Scenario4 line 7). Recurs for every device/sensor SDK sample whose project is named after the API type (Compass, Gyrometer, Barometer, ProximitySensor, ...)." }
+  ],
+  "errors_encountered": [
+    { "error": "build-output.txt line 24: warning WUI0004: DisplayInformation.GetForCurrentView() is UWP-only", "root_cause": "Adaptable API GetForCurrentView() left in code (silenced with try/catch) instead of migrated; no gate caught it (residue grep skips adaptable; validator dotnet build lacks the analyzer).", "fix": "Enforce leftover GetForCurrentView() via residue grep; give correct orientation guidance so the agent replaces rather than silences." },
+    { "error": "CS0118: 'Accelerometer' is a namespace but is used like a type (session-log line 3114, Scenario4_OrientationChanged.xaml.cs)", "root_cause": "WinUI project/root namespace 'Accelerometer' collides with the Windows.Devices.Sensors.Accelerometer type it uses.", "fix": "Add a using alias for the WinRT type (agent recovered with 'using SensorAccelerometer = ...')." },
+    { "error": "AppxManifest error 0x80070002: Splash-sdk.png cannot be located (session-log line 2262)", "root_cause": "Manifest referenced a splash asset not present under Assets/.", "fix": "Resolved by the agent; validator Section 5 already checks manifest image references." },
+    { "error": "Transient CS8803/CS0106/CS1001/CS1022 (session-log lines 3171-3192)", "root_cause": "A single edit temporarily malformed a file (top-level statements before a namespace / stray modifiers).", "fix": "Agent re-edited and recovered; one-off editing slip, not a skill gap." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario4_OrientationChanged.xaml.cs display-orientation handling", "symptom": "Kept DisplayInformation.GetForCurrentView() and wrapped it in try/catch (lines 47-55) so it compiles but OrientationChanged never fires on desktop.", "turns_or_retries": "single pass; never revisited because no gate failed", "root_cause": "getforcurrentview table has no orientation replacement, so the agent chose the 'make it compile' escape (empty catch → dead functionality).", "how_resolved": "Not resolved — shipped as latent dead code; passed only because the hardware-less validation env disables the buttons anyway.", "preventable_by": "(1) validator residue check on leftover *.GetForCurrentView() calls; (2) PATTERNS.md guidance that names the orientation members and forbids silencing an un-migrated singleton with try/catch." },
+    { "where": "Scenario field declarations across scenarios", "symptom": "CS0118 on the sensor type name.", "turns_or_retries": "one build cycle", "root_cause": "project namespace equals the WinRT type name.", "how_resolved": "Added 'using SensorAccelerometer = Windows.Devices.Sensors.Accelerometer;'.", "preventable_by": "A PATTERNS.md note on the namespace-vs-type collision recommending a using alias when the project is named after the demoed API." },
+    { "where": "First Validate-UwpMigration.ps1 run", "symptom": "8 rows still Status=copied.", "turns_or_retries": "one extra validate pass", "root_cause": "agent forgot to flip Status before validating.", "how_resolved": "Bulk replaced '| copied |' -> '| done |' and re-ran validator to PASS.", "preventable_by": "Nothing — the validator already catches this prominently; a re-run fixes it (dev-agent slip)." }
+  ],
+  "missing_tooling": [
+    { "need": "A gate that fails on a leftover adaptable singleton call (*.GetForCurrentView()) that was deleted-of-its-TODO but not actually replaced.", "would_have_saved": "The WUI0004 residue and the silent dead OrientationChanged handler would have been caught before 'done'." }
+  ],
+  "env_issues": [
+    { "issue": "Validation host has no accelerometer, so all Enable/Disable buttons are disabled in both UWP and WinUI; the dead OrientationChanged handler is invisible to the screenshot scorer.", "workaround": "None needed for score, but it masks the latent GetForCurrentView regression — tooling must catch it structurally, not visually." }
+  ]
+}

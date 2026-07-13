@@ -1,0 +1,17 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add residueOnly pattern for leftover *.GetForCurrentView() calls so the validator fails on un-migrated per-view singletons instead of passing them silenced in try/catch",
+    "Generalize the WUI0004 row to any *.GetForCurrentView() singleton and split DisplayInformation into DPI vs orientation members (orientation has no per-view singleton on desktop); forbid silencing the call",
+    "Document CS0118 namespace-vs-type collision (project named after a WinRT type) with the using-alias fix, which recurs for every API-named SDK sample"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Validator build healthcheck uses plain `dotnet build` without the WindowsAppSDK analyzer, so WUI warnings are invisible there; consider wiring the analyzer/`winapp build` into the validator."
+  ]
+}

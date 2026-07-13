@@ -259,9 +259,25 @@ None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is 
 |---------|---------------------|
 | `ApplicationView.GetForCurrentView()` | `AppWindow.GetFromWindowId(windowId)` |
 | `UIViewSettings.GetForCurrentView()` | `AppWindow` properties (size, presenter) |
-| `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
+| `DisplayInformation.GetForCurrentView()` — **DPI members** (`LogicalDpi`, `RawPixelsPerViewPixel`, `ResolutionScale`, `DpiChanged`) | `XamlRoot.RasterizationScale` / `RasterizationScaleChanged`, or Win32 `GetDpiForWindow(hwnd)` |
+| `DisplayInformation.GetForCurrentView()` — **orientation members** (`CurrentOrientation`, `OrientationChanged`, `AutoRotationPreferences`, sensor `ReadingTransform` alignment) | No per-view singleton on WinUI 3 desktop. Desktop windows don't auto-rotate: drop the orientation subscription and pass `SimpleOrientation.NotRotated` (identity) for `ReadingTransform`. If the sample's whole purpose is orientation, treat it as an unsupported member and add a visible fallback (see SKILL.md "Defensive UI"). |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+
+> **Never silence a `*.GetForCurrentView()` call to make it compile.** Wrapping the UWP call in an empty `try/catch` (or a null-guard that no-ops) still emits `WUI0004`, still throws at runtime, and leaves the feature dead — a latent regression that only *looks* fine on a machine where the device is absent. Replace the call with the row above, or defer the member with a visible fallback. The validator's residue grep flags any surviving `.GetForCurrentView(` in a non-deferred file.
+
+<a id="namespace-collision"></a>
+## Namespace vs. type-name collision (CS0118)
+
+`error CS0118: '<Name>' is a namespace but is used like a type` appears when the WinUI 3 project's root namespace has the **same name as a WinRT type the code uses**. This is common because `dotnet new winui -n <ProjectName>` names the project after the API the sample demonstrates, and UWP SDK samples are conventionally named after that API — so `namespace Accelerometer { ... Accelerometer sensor; ... }` makes `Accelerometer` ambiguous (the enclosing namespace wins), and every field/parameter/variable of that type fails to compile.
+
+**Fix — alias the type; do not rename the project or the namespace:**
+
+```csharp
+using SensorAccelerometer = Windows.Devices.Sensors.Accelerometer;   // then use SensorAccelerometer everywhere
+```
+
+Or fully-qualify each use (`Windows.Devices.Sensors.Accelerometer sensor;`). Prefer the `using` alias — it is a one-line change at the top of the file and leaves the rest of the body untouched. Recurs for any sample named after its API type: Compass, Gyrometer, Barometer, Inclinometer, OrientationSensor, ProximitySensor, Geolocator, etc.
 
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces
@@ -512,7 +528,7 @@ The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` p
 | --- | --- | --- |
 | `WUI0002` | `Window.Current does not exist in WinUI 3 desktop apps` | Store the `Window` reference in `App.xaml.cs` (`App.Window`) and pass it where needed; see "Windowing" above. |
 | `WUI0003` | `CoreDispatcher is UWP-only` | Use `DispatcherQueue.GetForCurrentThread()` and `TryEnqueue(...)`; see "Threading" above. |
-| `WUI0004` | `SystemNavigationManager.GetForCurrentView() is UWP-only` | Drop the system back button hookup, or use HWND-based COM interop; see "GetForCurrentView Replacements" above. |
+| `WUI0004` | `<Type>.GetForCurrentView() is UWP-only` — fires for **any** per-view singleton accessor (`DisplayInformation`, `UIViewSettings`, `ApplicationView`, `ResourceContext`, `SystemNavigationManager`, …), not just the back button | Apply the matching row in "GetForCurrentView Replacements" above for the *specific* type. The back-button/`BackRequested` advice applies **only** to the `SystemNavigationManager` variant. Do **not** silence the call with `try/catch` — replace it or defer the member with a visible fallback. |
 
 Treat every `warning WUI000\d` line in the build output as a defect — the analyzer does not produce false positives. Search for the API name in this document for the recommended replacement.
 

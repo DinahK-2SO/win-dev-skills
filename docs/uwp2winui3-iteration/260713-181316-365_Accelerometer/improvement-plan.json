@@ -1,0 +1,40 @@
+{
+  "scenario": "Accelerometer",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "A leftover UWP `*.GetForCurrentView()` call (silenced with try/catch instead of migrated) passes every validation gate: the residue grep only enforces inventory `unsupported`+`residueOnly` patterns (GetForCurrentView is `adaptable`), and the validator's plain `dotnet build` lacks the WindowsAppSDK analyzer, so the WUI0004 it emits under `winapp build` is never seen.",
+      "evidence": "build-output.txt L24 (WUI0004 on DisplayInformation.GetForCurrentView); Scenario4_OrientationChanged.xaml.cs L47-55; Validate log L3504 (residue PASS) + L3521 (0 WUI warnings). Validate-UwpMigration.ps1 L69-70; unsupported-api-inventory.json (GetForCurrentView is adaptable).",
+      "root_cause": "No structural gate enforces that an adaptable per-view singleton call was actually replaced; the only signal (analyzer WUI0004) isn't present in the validator build.",
+      "tier": 1,
+      "change": "Add a `residueOnly` pattern `\\.GetForCurrentView\\s*\\(` to the inventory so the validator residue grep FAILS on any surviving `*.GetForCurrentView()` call in a non-deferred file. Tier 1 chosen over prose because a doc note can be ignored; a failing gate cannot. Verified: the pattern matches the actual shipped Scenario4 file.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+      "expected_effect": "The agent is forced to replace the call (or defer the member with a visible fallback) before it can declare done; the WUI0004 residue and the dead OrientationChanged handler cannot ship.",
+      "falsifiable_check": "On re-run, `Validate-UwpMigration.ps1` prints `[FAIL] Residue grep — ... leftover *.GetForCurrentView() call` for Scenario4 until the call is removed; today it prints `[PASS] Residue grep`."
+    },
+    {
+      "problem": "WUI0004 guidance is wrong/narrow: it presents WUI0004 as SystemNavigationManager/back-button-specific, and the `getforcurrentview` table maps `DisplayInformation.GetForCurrentView()` to a DPI-only replacement, giving no path for the orientation members the sample actually uses.",
+      "evidence": "MIGRATION-PATTERNS.md WUI0004 row (was SystemNavigationManager-only) and DisplayInformation row (DPI only); the real WUI0004 was DisplayInformation (build-output.txt L24); Scenario4 uses CurrentOrientation/OrientationChanged/ReadingTransform.",
+      "root_cause": "The prose the agent consulted (`#getforcurrentview`) had no orientation answer, so it fell back to silencing the call; the WUI0004 row would have mis-routed it to back-button advice.",
+      "tier": 3,
+      "change": "Generalize the WUI0004 row to '<Type>.GetForCurrentView() is UWP-only (any per-view singleton)' routing to the replacements table; split the DisplayInformation entry into DPI members (XamlRoot.RasterizationScale/GetDpiForWindow) vs orientation members (no per-view singleton on desktop → drop subscription / identity ReadingTransform / visible fallback); add a 'never silence with try/catch' rule. Tier 3 is required here because the fix is knowledge (what to replace with) that Tier-1 tooling can flag but cannot supply; it pairs with item 1 which supplies the enforcement.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "When the residue gate (item 1) fails, the agent now finds a correct, member-specific replacement instead of re-silencing, and WUI0004 for any singleton routes to the right row.",
+      "falsifiable_check": "On re-run, Scenario4 compiles with 0 WUI0004 and no `try/catch` around a GetForCurrentView call; `Get-MigrationPattern.ps1 -Anchor getforcurrentview` returns orientation guidance."
+    },
+    {
+      "problem": "CS0118 'namespace but is used like a type' when the WinUI project namespace equals the WinRT type the sample demos — absent from the skill.",
+      "evidence": "session-log.txt L3114 (CS0118 in Scenario4); grep of the skill for CS0118/alias/namespace-collision returned no matches; agent recovered ad hoc with `using SensorAccelerometer = ...`.",
+      "root_cause": "`dotnet new winui -n <ProjectName>` names the root namespace after the demoed API, colliding with the identically-named WinRT type.",
+      "tier": 3,
+      "change": "Add an anchored `#namespace-collision` section documenting CS0118 and the `using`-alias fix (or fully-qualify). Tier 3 (knowledge) is appropriate: this is a compiler error the agent already sees and greps for; the skill just needs the canonical answer. A Tier-1 script can't author the alias without picking a name.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The agent resolves CS0118 in one edit via alias instead of trial-and-error, across all API-named SDK samples.",
+      "falsifiable_check": "On re-run of any sensor sample whose project name equals its type, the first CS0118 is fixed by a `using <Alias> = <FQN>;` line and the build proceeds without renaming the project."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/eval-adjacent: the validator's build healthcheck runs plain `dotnet build`, which does not reference Microsoft.WindowsAppSDK.Analyzers, so it reports 0 WUI warnings even when the benchmark's `winapp build` emits them. Consider referencing the analyzer in the validator build (or building via `winapp build`) so WUI residue is caught structurally, not only by the residue grep. Left to a human because it changes how the measurement build is invoked."
+  ]
+}
