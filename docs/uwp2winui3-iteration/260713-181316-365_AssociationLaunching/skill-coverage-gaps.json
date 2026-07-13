@@ -1,0 +1,15 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "After the bootstrap namespace rewrite, code using Windows.UI.Colors (very common: SolidColorBrush(Colors.Red/Green) status indicators) still fails to compile with CS0103 'Colors' does not exist. The dev-agent needed two rewrite attempts (Windows.UI.Colors -> bare Colors -> Microsoft.UI.Colors) to fix it.",
+      "evidence": "session-log CS0103 on MainPage.xaml.cs:125,128; build-events shows 44 bare 'Colors.Green/Red' then 35 'Microsoft.UI.Colors' occurrences; commit note 'Fix Colors: use Microsoft.UI.Colors instead of Windows.UI.Colors'.",
+      "covered_at": "MIGRATION-PATTERNS.md 'Namespace Mapping' table row 92: `| Windows.UI.Colors | Microsoft.UI.Colors |`; Initialize-UwpMigration.ps1 step 3 rewrite loop (only matches 'Windows.UI.Xaml').",
+      "why_missed": "grey-zone / under-emphasized: (1) the mapping row is buried in a 12-row table whose header says 'All Windows.UI.Xaml.* namespaces move to Microsoft.UI.Xaml.*', which implies these are auto-handled; (2) the bootstrap script silently rewrites ONLY Windows.UI.Xaml, leaving Windows.UI.Colors/ColorHelper broken, and nothing flags that these non-Xaml rows are a MANUAL step; (3) the doc never notes Colors/ColorHelper land in the Microsoft.UI root (not Microsoft.UI.Xaml) while the Windows.UI.Color struct stays put.",
+      "proposed_improvement": "Tier-1: extend Initialize-UwpMigration.ps1 to also rewrite `Windows.UI.Colors` -> `Microsoft.UI.Colors` and `Windows.UI.ColorHelper` -> `Microsoft.UI.ColorHelper` (word-boundary so the `Windows.UI.Color` struct is untouched). Tier-3 backup: in MIGRATION-PATTERNS.md annotate the mapping table to mark auto-rewritten (Windows.UI.Xaml.*) vs. manual rows and add a one-line note that Colors/ColorHelper move to the Microsoft.UI root while the Color struct stays.",
+      "generalizes": "Named-color status/error brushes (Colors.Red/Green/etc.) appear in a large fraction of UWP samples and apps. The Windows.UI (non-Xaml) -> Microsoft.UI root move is a fixed, scenario-independent rename that recurs whenever any color, and applies equally to ColorHelper. Fixing it in the bootstrap removes a whole class of post-rewrite CS0103/CS0234 errors across scenarios."
+    }
+  ]
+}

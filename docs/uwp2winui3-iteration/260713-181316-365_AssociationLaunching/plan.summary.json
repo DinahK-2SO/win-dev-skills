@@ -1,0 +1,17 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Bootstrap now also rewrites Windows.UI.Colors/ColorHelper -> Microsoft.UI.* (word-boundary safe, leaves the Windows.UI.Color struct) so post-rewrite color code compiles instead of throwing CS0103/CS0234",
+    "MIGRATION-PATTERNS.md namespace table split into auto-rewritten vs. manual rows + gotcha that Colors/ColorHelper live in the Microsoft.UI root (not Microsoft.UI.Xaml) and the Color struct stays put"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Eval-side: legacy .NET Native samples stuck on the sample-framework splash block behavioral golden capture (measurement-instrument limitation).",
+    "Did not auto-rewrite Windows.UI.Text / Windows.UI.Core (not clean 1:1 renames)."
+  ]
+}

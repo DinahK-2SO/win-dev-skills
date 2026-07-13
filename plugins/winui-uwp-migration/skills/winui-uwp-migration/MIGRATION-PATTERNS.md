@@ -1,6 +1,6 @@
 # UWP → WinUI 3 Replacement Patterns
 
-Reference for API replacements and patterns that the `Initialize-UwpMigration.ps1` bootstrap doesn't (and can't) handle automatically — the script only does the bulk `Windows.UI.Xaml → Microsoft.UI.Xaml` namespace rewrite. Everything below requires code-level adaptation: dialog shape changes, threading model, windowing, lifecycle, resources, controls, and storage. Use this file when fixing build errors or runtime issues during Step 4.
+Reference for API replacements and patterns that the `Initialize-UwpMigration.ps1` bootstrap doesn't (and can't) handle automatically — the script only does the bulk namespace rewrite (`Windows.UI.Xaml → Microsoft.UI.Xaml`, plus `Windows.UI.Colors`/`Windows.UI.ColorHelper → Microsoft.UI.*`). Everything below requires code-level adaptation: dialog shape changes, threading model, windowing, lifecycle, resources, controls, and storage. Use this file when fixing build errors or runtime issues during Step 4.
 
 ## Common build errors after the namespace rewrite
 
@@ -76,7 +76,12 @@ See the official [What's supported](https://learn.microsoft.com/windows/apps/win
 
 ## Namespace Mapping
 
-All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
+The `Initialize-UwpMigration.ps1` bootstrap **auto-rewrites** the rows in the first table
+below. The rows in the **second** table are *not* auto-handled beyond `Colors`/`ColorHelper`
+and must be fixed by hand when you hit them.
+
+**Auto-rewritten by the bootstrap** (all `Windows.UI.Xaml.*` → `Microsoft.UI.Xaml.*`, plus
+the two non-Xaml `Colors`/`ColorHelper` helpers that move to the **`Microsoft.UI` root**):
 
 | UWP | WinUI 3 |
 |-----|---------|
@@ -87,11 +92,22 @@ All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
 | `Windows.UI.Xaml.Data` | `Microsoft.UI.Xaml.Data` |
 | `Windows.UI.Xaml.Navigation` | `Microsoft.UI.Xaml.Navigation` |
 | `Windows.UI.Xaml.Shapes` | `Microsoft.UI.Xaml.Shapes` |
+| `Windows.UI.Colors` | `Microsoft.UI.Colors` (note: `Microsoft.UI` **root**, not `Microsoft.UI.Xaml`) |
+| `Windows.UI.ColorHelper` | `Microsoft.UI.ColorHelper` (root, not `Microsoft.UI.Xaml`) |
+
+> **Gotcha:** the `Colors`/`ColorHelper` static classes live in the `Microsoft.UI` root,
+> so a bare `Colors.Red` only resolves with `using Microsoft.UI;` — reaching for
+> `Microsoft.UI.Xaml.Colors` or leaving `Windows.UI.Colors` both fail with `CS0234`/`CS0103`.
+> The value struct **`Windows.UI.Color` does NOT move** — keep it as `Windows.UI.Color`.
+
+**Manual — bootstrap does not rewrite these** (they are not simple 1:1 renames):
+
+| UWP | WinUI 3 |
+|-----|---------|
 | `Windows.UI.Composition` | `Microsoft.UI.Composition` |
 | `Windows.UI.Input` | `Microsoft.UI.Input` |
-| `Windows.UI.Colors` | `Microsoft.UI.Colors` |
-| `Windows.UI.Text` | `Microsoft.UI.Text` |
-| `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` |
+| `Windows.UI.Text` | `Microsoft.UI.Text` (some types stay under `Windows.UI.Text`) |
+| `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` (see Threading below) |
 
 <a id="threading"></a>
 ## Threading: CoreDispatcher → DispatcherQueue

@@ -12,7 +12,8 @@ build cleanliness, and runtime smoke.
 Steps:
 1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
-3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
+3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml (plus the non-Xaml
+   Windows.UI.Colors/ColorHelper → Microsoft.UI.* root move) across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
 4b/4c. Per-file triage against unsupported-api-inventory.json + inline TODO injection
        (`// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — anchor-only, never an API name)
@@ -116,6 +117,13 @@ if ($uwpCsprojs.Count -gt 0) {
 }
 
 # ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────
+# Also handle the two non-Xaml WinRT UI helpers that moved to the Microsoft.UI *root*
+# (NOT Microsoft.UI.Xaml): the `Colors` and `ColorHelper` static classes. These are
+# extremely common (e.g. new SolidColorBrush(Colors.Red)) and, unlike the Xaml
+# namespaces, are NOT reachable via a `using Microsoft.UI.Xaml;`, so leaving them as
+# `Windows.UI.Colors`/`Windows.UI.ColorHelper` produces CS0234/CS0103 after bootstrap.
+# The `\b` guards ensure the value struct `Windows.UI.Color` (which does NOT move) is
+# never rewritten.
 $excludeDirs = @('bin', 'obj', '.uwp-source', '.vs', '.git', '.github', '.copilot')
 $excludePattern = '\\(' + ($excludeDirs -join '|') + ')\\'
 $nsFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.cs,*.xaml -ErrorAction SilentlyContinue |
@@ -124,12 +132,14 @@ $nsChanged = 0
 foreach ($f in $nsFiles) {
     $orig = [System.IO.File]::ReadAllText($f.FullName)
     $new = $orig -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml'
+    $new = $new -replace 'Windows\.UI\.Colors\b', 'Microsoft.UI.Colors'
+    $new = $new -replace 'Windows\.UI\.ColorHelper\b', 'Microsoft.UI.ColorHelper'
     if ($new -ne $orig) {
         [System.IO.File]::WriteAllText($f.FullName, $new)
         $nsChanged++
     }
 }
-Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml (+ Windows.UI.Colors/ColorHelper -> Microsoft.UI.*) in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 
 # ─── 3b. Visible-text fidelity snapshot ────────────────────────────────────────
 # Capture the user-visible/static text present in each copied XAML *now*, while it

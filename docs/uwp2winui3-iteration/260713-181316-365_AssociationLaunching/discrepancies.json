@@ -1,0 +1,31 @@
+{
+  "scenario": "AssociationLaunching",
+  "measurement_caveat": "UWP launched (uwp-app-runner ok:true) but legacy .NET Native app stayed on sample-framework splash and never presented inner XAML to UIA; no behavioral golden captured. WinUI graded vs source-derived checklist + direct source/visual judgment.",
+  "discrepancies": [
+    {
+      "feature": "1. Launching a file",
+      "type": "none",
+      "detail": "6/6 controls; default/warning emit status text; Open With and view-preference raise system dialog/picker (no in-app text) exactly as source. No regression."
+    },
+    {
+      "feature": "2. Launching a URI",
+      "type": "none",
+      "detail": "6/6 controls; 3/4 actions emit status text; Open With raises system dialog as in source. No regression."
+    },
+    {
+      "feature": "3. Receiving a file",
+      "type": "none",
+      "detail": "3/3 controls; handlers line-for-line faithful (create file in Pictures + LaunchFolderAsync, delete). Actions emit no in-app text in source, so 0/3 text responses is expected, not a dead control."
+    },
+    {
+      "feature": "4. Receiving a URI",
+      "type": "none",
+      "detail": "Display-only page (0 controls, matches checklist); correct description rendered."
+    },
+    {
+      "feature": "capture-artifact",
+      "type": "artifact",
+      "detail": "Lingering 'Open' FileOpenPicker dialogs from Scenario 1/2 automated invokes appear in Scenario 3/4 background frames; harness could not dismiss them. Not a migration defect."
+    }
+  ]
+}

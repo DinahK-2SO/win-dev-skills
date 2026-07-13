@@ -1,0 +1,55 @@
+{
+  "scenario": "AssociationLaunching",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 4,
+  "features_pass": 4,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "degraded: uwp-app-runner returned ok:true (pid 22876, window 'AssociationLaunching C# sample') so the launch gate passed, but the legacy .NET Native UWP app remained on the sample-framework splash ('Windows platform sample') and never presented its inner XAML to UI Automation (empty content pane; all golden frames are identical splash bitmaps). No per-control behavioral golden was obtainable; the WinUI 3 app was graded against the source-derived checklist plus direct structural/visual/behavioral judgment against the UWP source. This is a legacy-app limitation on this machine, not a migration defect.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_gate": "PASS",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "1. Launching a file",
+      "verdict": "pass",
+      "coverage": "6/6",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Launching_a_file.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Launching_a_file.png",
+      "note": "Full SDK-sample layout; 6/6 controls. 'Launch default handler' and 'Launch with warning' emit in-app status text; 'Launch Open With' and 'Launch with view preference' raise a system Open-With dialog / FileOpenPicker (no in-app text) exactly as the UWP source handlers do. UWP golden is splash-only (see uwp_capture_status)."
+    },
+    {
+      "name": "2. Launching a URI",
+      "verdict": "pass",
+      "coverage": "6/6",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Launching_a_URI.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Launching_a_URI.png",
+      "note": "6/6 controls; 3/4 actions emit status text; 'Launch Open With' raises the system dialog as in source. Faithful."
+    },
+    {
+      "name": "3. Receiving a file",
+      "verdict": "pass",
+      "coverage": "3/3",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Receiving_a_file.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Receiving_a_file.png",
+      "note": "3/3 controls; migrated handlers are line-for-line faithful (create file in PicturesLibrary + LaunchFolderAsync, delete files). These actions intentionally emit no in-app status text in the original, so the '0/3 text responses' is expected behavior, not a dead-control regression."
+    },
+    {
+      "name": "4. Receiving a URI",
+      "verdict": "pass",
+      "coverage": "n/a",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Receiving_a_URI.png",
+      "winui_screenshot": "parity/winui3/screenshots/04_Receiving_a_URI.png",
+      "note": "Display-only page (0 controls, matches checklist); renders the correct description text. Non-blank."
+    }
+  ]
+}

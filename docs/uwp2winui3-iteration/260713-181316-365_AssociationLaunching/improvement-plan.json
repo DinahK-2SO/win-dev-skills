@@ -1,0 +1,21 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Post-bootstrap code using Windows.UI.Colors (e.g. SolidColorBrush(Colors.Red/Green) status brushes) fails to compile (CS0103 'Colors' does not exist); the dev-agent needed 2 rewrite attempts to reach Microsoft.UI.Colors. The bootstrap rewrite only handled Windows.UI.Xaml and the mapping table buried the Colors row / never flagged it as manual.",
+      "evidence": "session-log CS0103 on MainPage.xaml.cs:125,128; build-events 44 bare 'Colors.*' -> 35 'Microsoft.UI.Colors'; commit note 'Fix Colors: use Microsoft.UI.Colors instead of Windows.UI.Colors'. Ref notes/skill-coverage-gaps.json item 1.",
+      "root_cause": "The `Colors` and `ColorHelper` static classes moved from Windows.UI to the Microsoft.UI *root* (not Microsoft.UI.Xaml, and not reachable via `using Microsoft.UI.Xaml;`). Initialize-UwpMigration.ps1 rewrote only 'Windows.UI.Xaml', leaving these broken; MIGRATION-PATTERNS.md listed the mapping but under a header implying auto-handling and without the root/struct nuance.",
+      "tier": 1,
+      "change": "Extend the bootstrap namespace mass-rewrite to also map 'Windows.UI.Colors' -> 'Microsoft.UI.Colors' and 'Windows.UI.ColorHelper' -> 'Microsoft.UI.ColorHelper' with word-boundary guards so the value struct 'Windows.UI.Color' is never touched. Backed by a Tier-3 doc clarification: split the namespace-mapping table into auto-rewritten vs. manual rows and add a gotcha note (Colors/ColorHelper live in the Microsoft.UI root; the Color struct stays).",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1 (+ skills/winui-uwp-migration/MIGRATION-PATTERNS.md)",
+      "expected_effect": "After bootstrap, color references compile without manual intervention; the whole class of post-rewrite CS0234/CS0103 'Colors/ColorHelper' errors disappears across scenarios.",
+      "falsifiable_check": "On a re-run of any scenario that uses named colors, the migrated project has 0 occurrences of 'Windows.UI.Colors'/'Windows.UI.ColorHelper' after Initialize-UwpMigration.ps1 runs, and no CS0103/CS0234 'Colors' errors appear in build logs — with 'Windows.UI.Color' struct usages preserved."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0 (eval-side, out of scope): legacy .NET Native UWP samples that stay on the sample-framework splash prevent uwp-app-runner from capturing an inner-XAML behavioral golden. This is a measurement-instrument limitation, not a migration-skill fix.",
+    "Considered but NOT applied: auto-rewriting Windows.UI.Text / Windows.UI.Core. These are not clean 1:1 renames (some Windows.UI.Text types stay; CoreDispatcher is a behavioral change, not a rename), so a blind rewrite would introduce regressions. Left as documented manual rows."
+  ]
+}

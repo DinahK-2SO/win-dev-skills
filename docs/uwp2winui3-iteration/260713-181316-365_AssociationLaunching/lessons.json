@@ -1,0 +1,34 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log: 'Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in 5 of 11 .cs/.xaml files' — bulk namespace rewrite worked and scaffolded the project." },
+    { "tool": "MIGRATION-PATTERNS.md pickers section", "evidence": "Agent correctly added WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd) for FileOpenPicker (commit note: 'Fix FileOpenPicker: add InitializeWithWindow for WinUI 3 desktop'), matching the dedicated pickers pattern at MIGRATION-PATTERNS.md:272-279." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Its mass namespace rewrite only handles 'Windows.UI.Xaml' -> 'Microsoft.UI.Xaml'. Non-Xaml WinRT UI namespaces that ALSO moved to the Microsoft.UI root (Windows.UI.Colors, Windows.UI.ColorHelper) are left untouched, so they fail to compile after bootstrap and the agent must find/fix them by hand.", "suggested_tweak": "Extend the rewrite to also map 'Windows.UI.Colors' -> 'Microsoft.UI.Colors' and 'Windows.UI.ColorHelper' -> 'Microsoft.UI.ColorHelper' (word-boundary matched so the 'Windows.UI.Color' struct is NOT touched)." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.UI.Colors / bare Colors.Green|Colors.Red", "why_tried": "UWP source set SolidColorBrush(Windows.UI.Colors.Green/Red) for status border coloring; agent first left 'Windows.UI.Colors' (does not exist in WinAppSDK) then rewrote to bare 'Colors' with no 'using Microsoft.UI;'.", "root_cause": "'Colors' and 'ColorHelper' static classes moved from Windows.UI to the Microsoft.UI namespace (NOT Microsoft.UI.Xaml), and the bootstrap script's Windows.UI.Xaml rewrite does not cover them.", "fix": "Fully qualify as Microsoft.UI.Colors.Green / Microsoft.UI.Colors.Red (or add 'using Microsoft.UI;'). Confirmed in session-log turn rewriting bare Colors -> Microsoft.UI.Colors." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md:79 'Namespace Mapping' header + table", "wrong": "Header states 'All Windows.UI.Xaml.* namespaces move to Microsoft.UI.Xaml.*' but the same table lists non-Xaml rows (Windows.UI.Colors, Windows.UI.Text, Windows.UI.Core). It never states that the bootstrap auto-rewrite ONLY covers the Windows.UI.Xaml rows, so a reader assumes Colors is handled too.", "correct": "Split/annotate the table to mark which rows the bootstrap auto-rewrites vs. which are manual, and note Colors/ColorHelper land in Microsoft.UI (not Microsoft.UI.Xaml) while the Windows.UI.Color struct stays put." }
+  ],
+  "special_apis": [
+    { "api": "Windows.UI.Colors / Windows.UI.ColorHelper", "special_handling": "Move to Microsoft.UI (root), unlike everything else under Windows.UI.Xaml which moves to Microsoft.UI.Xaml. The value struct Windows.UI.Color does NOT move." },
+    { "api": "FileOpenPicker/FolderPicker/FileSavePicker", "special_handling": "Require WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd) in desktop WinUI 3 — already covered well by the skill; agent applied it correctly." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0103: The name 'Colors' does not exist in the current context (MainPage.xaml.cs:125,128)", "root_cause": "Windows.UI.Colors -> bare Colors without importing Microsoft.UI; static class moved to Microsoft.UI, not covered by the bootstrap Windows.UI.Xaml rewrite.", "fix": "Qualify to Microsoft.UI.Colors.*" },
+    { "error": "CS8803 'Top-level statements must precede namespace/type declarations' + CS1022 'end-of-file expected' + repeated CS0106 'modifier not valid for this item' across Scenario1_LaunchFile.xaml.cs / Scenario2_LaunchUri.xaml.cs", "root_cause": "A stray/extra closing brace introduced while editing the large partial-class code-behind prematurely closed the class+namespace, so subsequent methods parsed as top-level statements. Pure editing slip, recovered within a few build iterations (18 successful builds overall).", "fix": "Re-balanced braces so all members stay inside the class body." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainPage.xaml.cs / Scenario*.xaml.cs color status brushes", "symptom": "CS0103 'Colors' does not exist; two rewrite attempts (Windows.UI.Colors -> bare Colors -> Microsoft.UI.Colors) before it compiled.", "turns_or_retries": "2 rewrite attempts", "root_cause": "Bootstrap script only rewrites Windows.UI.Xaml; Colors/ColorHelper moved to Microsoft.UI and were left broken, and the mapping table under-emphasizes this.", "how_resolved": "Fully qualified to Microsoft.UI.Colors.", "preventable_by": "Extend Initialize-UwpMigration.ps1 to also rewrite Windows.UI.Colors/ColorHelper -> Microsoft.UI.* and sharpen the namespace-mapping doc to flag auto vs. manual rows." },
+    { "where": "Scenario1_LaunchFile.xaml.cs / Scenario2_LaunchUri.xaml.cs", "symptom": "CS8803/CS1022/CS0106 cluster from an unbalanced brace after an in-place edit of the code-behind.", "turns_or_retries": "~3 build attempts (CS8803 x3)", "root_cause": "Editing typo (extra closing brace) in a large partial class — not a UWP knowledge gap.", "how_resolved": "Re-balanced braces; build then succeeded.", "preventable_by": "Generic editing care / build-after-edit; no skill content would prevent a stray-brace typo. (dev-agent-slip)" }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "UWP behavioral golden unavailable — legacy .NET Native sample stayed on the SDK sample-framework splash and never presented inner XAML to UIA (per score notes).", "workaround": "Scored against source-derived checklist; not a migration defect and out of scope for the migration skill (eval-side)." }
+  ]
+}

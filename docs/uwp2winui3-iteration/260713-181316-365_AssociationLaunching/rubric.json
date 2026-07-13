@@ -1,0 +1,15 @@
+{
+  "scenario": "AssociationLaunching",
+  "feature": "Association Launching C# Sample",
+  "scenarios": [
+    { "number": 1, "title": "Launching a file", "controls": 6, "actions": 5,
+      "action_behavior": "default/warning -> in-app status text; Open With -> system dialog; pick/view-preference -> FileOpenPicker then text" },
+    { "number": 2, "title": "Launching a URI", "controls": 6, "actions": 4,
+      "action_behavior": "default/warning/view-preference -> in-app status text; Open With -> system dialog" },
+    { "number": 3, "title": "Receiving a file", "controls": 3, "actions": 3,
+      "action_behavior": "create-file actions -> create file in Pictures + open Explorer (no in-app text); remove -> delete files (no in-app text)" },
+    { "number": 4, "title": "Receiving a URI", "controls": 0, "actions": 0,
+      "action_behavior": "display-only; content populated on URI activation" }
+  ],
+  "thresholds": { "pass": ">=80% coverage + faithful action behavior", "partial": ">=40% coverage or present-but-dead control", "fail": "blank/unreachable/<40% coverage" }
+}

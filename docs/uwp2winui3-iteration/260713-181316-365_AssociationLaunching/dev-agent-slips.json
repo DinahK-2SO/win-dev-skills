@@ -1,0 +1,14 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS8803 'Top-level statements must precede namespace/type declarations' + CS1022 'end-of-file expected' + repeated CS0106 'modifier not valid' across Scenario1_LaunchFile.xaml.cs and Scenario2_LaunchUri.xaml.cs — caused by an extra/stray closing brace that prematurely closed the class+namespace so later members parsed as top-level statements.",
+      "evidence": "session-log: Scenario1_LaunchFile.xaml.cs(206,9) CS8803; (208,9) CS0106 'public not valid'; (374,5)/(375,1) CS1022; build-events shows CS8803 x3 then recovery (18 total successful builds).",
+      "covered_clearly_at": "N/A — this is a generic C# brace-balance editing typo, not a UWP→WinUI 3 migration API/pattern. No skill section could or should encode 'do not add a stray brace'.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable model on re-run would balance braces correctly; it is an editing error, not a knowledge gap. Adding prose about brace balancing would only bloat the skill with anti-slip noise."
+    }
+  ]
+}
