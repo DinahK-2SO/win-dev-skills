@@ -1,0 +1,35 @@
+{
+  "scenario": "AppServices",
+  "feature": "App service client sample",
+  "source": "uwp-samples-standalone/Samples/AppServices/cs/AppServicesClient",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Open/Close Connection",
+      "description": "Open a connection to an app service that generates a random number between a min and max, then closes the connection by disposing the AppServiceConnection.",
+      "controls": [
+        { "name": "MinValue", "type": "TextBox", "default": "0" },
+        { "name": "MaxValue", "type": "TextBox", "default": "10" },
+        { "name": "Result", "type": "TextBlock", "role": "output" }
+      ],
+      "actions": [
+        { "name": "GenerateRandomNumber", "type": "Button", "expected": "Opens connection, requests a random number in [min,max], shows it in Result, then closes the connection." }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Keep Connection Open",
+      "description": "Keep an AppServiceConnection open across multiple messages. Open Connection, then Generate Random Number repeatedly, then Close Connection.",
+      "controls": [
+        { "name": "MinValue", "type": "TextBox", "default": "0" },
+        { "name": "MaxValue", "type": "TextBox", "default": "10" },
+        { "name": "Result", "type": "TextBlock", "role": "output" }
+      ],
+      "actions": [
+        { "name": "OpenConnection", "type": "Button", "expected": "Opens and keeps an app service connection open." },
+        { "name": "CloseConnection", "type": "Button", "expected": "Closes the open connection." },
+        { "name": "GenerateRandomNumber", "type": "Button", "expected": "If a connection is open, returns a random number in [min,max]; otherwise reports that a connection must be opened first." }
+      ]
+    }
+  ]
+}

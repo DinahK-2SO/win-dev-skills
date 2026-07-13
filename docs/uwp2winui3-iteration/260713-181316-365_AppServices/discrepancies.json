@@ -1,0 +1,25 @@
+{
+  "scenario": "AppServices",
+  "summary": "The migrated WinUI 3 app faithfully replicates the original UWP app. Both baseline scenarios are present, correctly laid out, and every control is wired up and behaviorally responsive. No missing controls, no dead controls, no incorrect outputs were found. Differences observed are additive/enhancements, not regressions.",
+  "discrepancies": [
+    {
+      "scenario": "Open/Close Connection",
+      "type": "enhancement",
+      "severity": "none",
+      "detail": "WinUI adds a colored Status banner (green 'App service responded with a result') below Result. Not present in the UWP layout but does not remove or alter any original control; the original Result output is still shown ('Result: 0')."
+    },
+    {
+      "scenario": "Keep Connection Open",
+      "type": "enhancement",
+      "severity": "none",
+      "detail": "WinUI adds a Status banner that correctly reflects state (e.g. red 'You need to open a connection before trying to generate a random number.' when Generate is clicked without an open connection). This matches the UWP handler's guard logic, surfaced more visibly."
+    },
+    {
+      "scenario": "(navigation shell)",
+      "type": "superset",
+      "severity": "none",
+      "detail": "WinUI nav lists a third scenario '3) Show Package Family Name' (present in the shared UWP source as ShowPackageFamilyName.xaml) that the UWP AppServicesClient nav did not register. This is a superset of the baseline checklist (2 scenarios), not a missing feature. Both baseline scenarios are fully present."
+    }
+  ],
+  "uwp_capture_note": "The original UWP app launched (uwp-app-runner ok:true) and rendered real content; a golden screenshot of Scenario 1 was captured from its CoreWindow (uwp_now.png). The legacy UWP app exposed NO UIA content subtree and did not accept synthetic input in this non-interactive session, so per-scenario UIA-driven navigation/actuation of the golden was not possible. Ground truth for both scenarios was therefore taken from the live Scenario-1 frame plus the UWP source XAML/handlers. This is an environmental capture limitation of the legacy app, not a migration defect."
+}

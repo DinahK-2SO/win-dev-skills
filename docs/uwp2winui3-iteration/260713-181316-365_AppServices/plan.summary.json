@@ -1,0 +1,15 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: empty copied legacy Properties\\AssemblyInfo.cs so SDK-style projects don't fail with CS0579 duplicate assembly attributes",
+    "MIGRATION-PATTERNS.md: document CS0579 duplicate-Assembly*Attribute (empty the legacy AssemblyInfo.cs / GenerateAssemblyInfo=false)",
+    "MIGRATION-PATTERNS.md: note UWP App Service provider activation is unsupported (no ExtendedActivationKind.AppService / IAppServiceActivatedEventArgs) — drop or host out-of-process; client-side AppServiceConnection still works"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

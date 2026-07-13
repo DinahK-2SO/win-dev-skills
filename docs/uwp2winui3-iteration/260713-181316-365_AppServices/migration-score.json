@@ -1,0 +1,32 @@
+{
+  "scenario": "AppServices",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (launched via uwp-app-runner, pid 2956, window 'App Service Client C# sample'; real content rendered and Scenario-1 golden captured from CoreWindow. Legacy UWP exposed no UIA content subtree and rejected synthetic input in this non-interactive session, so per-scenario UIA nav of the golden was limited; ground truth completed from source XAML/handlers. Structural baseline is the source-derived checklist, unaffected.)",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Open/Close Connection",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "uwp_now.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Open_Close_Connection__a01_Generate_Random_Number.png",
+      "note": "Full control coverage 3/3. Generate Random Number responds in WinUI (Result: 0, green status banner). Layout matches the UWP golden (Description, Min/Max Value, Generate button, Result). UWP action shows uwp_responded=false only because the legacy UWP app was not UIA-drivable in this session, not because the UWP control is dead; verified faithful from source + golden frame."
+    },
+    {
+      "name": "Keep Connection Open",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "uwp_now.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Keep_Connection_Open__a03_Generate_Random_Number.png",
+      "note": "Full control coverage 5/5. Open Connection, Close Connection, and Generate Random Number all respond in WinUI. Correct guard behavior reproduced: Generate without an open connection shows 'You need to open a connection before trying to generate a random number.' Matches UWP source handler logic. uwp_responded=false reflects the UWP UIA/input capture limitation, not a dead UWP control."
+    }
+  ]
+}

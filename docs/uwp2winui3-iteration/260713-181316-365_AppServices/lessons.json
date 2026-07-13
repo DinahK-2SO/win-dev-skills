@@ -1,0 +1,33 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Namespace mass-replace and bin/obj exclusion ran cleanly; source copied with no stale-output CS0101 flood." },
+    { "tool": "dotnet build -p:Platform=$Platform", "evidence": "Iterative build loop (turns 35,37,39,41) surfaced each remaining error cluster clearly, letting the agent converge to a clean build." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Copies legacy Properties\\AssemblyInfo.cs verbatim; in an SDK-style project this guarantees CS0579 duplicate-attribute failures that the agent must discover and fix manually.", "suggested_tweak": "Empty any copied AssemblyInfo.cs that declares assembly attributes during init (SDK auto-generates them)." }
+  ],
+  "failed_apis": [
+    { "api": "Microsoft.Windows.AppLifecycle.ExtendedActivationKind.AppService", "why_tried": "Port UWP in-process App Service provider activation branch", "root_cause": "ExtendedActivationKind has no AppService member in WinAppSDK; provider-side app-service activation has no drop-in equivalent.", "fix": "Removed the provider activation branch; launch MainWindow normally (client-side AppServiceConnection still works)." },
+    { "api": "Windows.ApplicationModel.Activation.IAppServiceActivatedEventArgs", "why_tried": "Cast activation args for the app-service provider path", "root_cause": "Type does not exist for a WinAppSDK desktop app (CS0234).", "fix": "Dropped the provider path entirely." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.ApplicationModel.AppService (provider side)", "special_handling": "UWP in-process app-service provider activation does not map to WinAppSDK ExtendedActivationKind; host out-of-process or drop it. Client side (AppServiceConnection) is fine with package identity." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0579 Duplicate 'System.Reflection.Assembly*Attribute' (AppServices.AssemblyInfo.cs)", "root_cause": "Legacy Properties\\AssemblyInfo.cs copied into an SDK-style project that auto-generates the same assembly attributes.", "fix": "Emptied the legacy AssemblyInfo.cs and let the SDK generate assembly info." },
+    { "error": "CS0246 AssemblyDescriptionAttribute/AssemblyCopyrightAttribute could not be found (RandomNumberService\\Properties\\AssemblyInfo.cs)", "root_cause": "Same legacy AssemblyInfo.cs; trimming individual attributes still left unresolved attribute types.", "fix": "Emptied the whole file rather than trimming attribute-by-attribute (two build cycles wasted on the trim attempt)." },
+    { "error": "CS0117 'ExtendedActivationKind' does not contain a definition for 'AppService'; CS0234 IAppServiceActivatedEventArgs missing", "root_cause": "UWP app-service provider activation model not present in WinAppSDK.", "fix": "Removed provider activation branch from App.xaml.cs." },
+    { "error": "CS0120 An object reference is required for AppInstance.GetActivatedEventArgs()", "root_cause": "Called the method as if static; it is an instance method on AppInstance.GetCurrent().", "fix": "Removed the call along with the provider branch (skill already documents AppInstance.GetCurrent().GetActivatedEventArgs())." },
+    { "error": "CS0246 'MainPage' could not be found in MainWindow.xaml.cs", "root_cause": "Sample pages live in namespace SDKTemplate; MainWindow.xaml.cs lacked using SDKTemplate.", "fix": "Added using SDKTemplate;." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "App.xaml.cs / MainWindow.xaml.cs (turns 34-37)", "symptom": "5 build errors: AppService activation APIs missing + MainPage unresolved", "turns_or_retries": "1 diagnose + 1 fix build", "root_cause": "Attempted to preserve UWP app-service provider activation which has no WinAppSDK equivalent.", "how_resolved": "Removed the provider activation branch and added the missing using.", "preventable_by": "Skill note that ExtendedActivationKind has no AppService member and provider-side app-service activation must be dropped/hosted out-of-process." },
+    { "where": "Properties\\AssemblyInfo.cs x2 (turns 38-41)", "symptom": "CS0579 duplicate assembly attributes, then CS0246 unresolved attribute types after a partial trim", "turns_or_retries": "2 fix builds (trim, then empty)", "root_cause": "Legacy hand-authored AssemblyInfo.cs conflicts with SDK auto-generated assembly attributes.", "how_resolved": "Emptied the file entirely.", "preventable_by": "Initialize-UwpMigration.ps1 emptying copied AssemblyInfo.cs at init + a CS0579 entry in MIGRATION-PATTERNS.md." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

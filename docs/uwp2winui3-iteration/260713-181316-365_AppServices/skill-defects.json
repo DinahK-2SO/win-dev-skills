@@ -1,0 +1,17 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Legacy Properties\\AssemblyInfo.cs copied from the UWP project causes CS0579 duplicate-assembly-attribute build failures (and CS0246 unresolved attribute types) because SDK-style WinUI 3 projects auto-generate those attributes.",
+      "evidence": "session-log.txt:3172-3177 (CS0579 Duplicate AssemblyCompany/Configuration/FileVersion/Product/Title/Version in AppServices.AssemblyInfo.cs); :3388-3393 (CS0246 AssemblyDescriptionAttribute etc. in RandomNumberService\\Properties\\AssemblyInfo.cs); resolved turns 38-41 over 2 extra build cycles.",
+      "skill_search": "grepped winui-uwp-migration for 'AssemblyInfo', 'GenerateAssemblyInfo', 'CS0579', 'Duplicate' — no matches anywhere in SKILL.md, MIGRATION-PATTERNS.md, or scripts.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 copies all .cs files including Properties\\AssemblyInfo.cs; the SDK-style project also emits GenerateAssemblyInfo attributes → duplicate definitions.",
+      "proposed_fix": "Tier 1: in Initialize-UwpMigration.ps1, empty any copied AssemblyInfo.cs that declares assembly attributes. Tier 3: add a CS0579 subsection to MIGRATION-PATTERNS.md 'Common build errors' documenting empty-the-file / GenerateAssemblyInfo=false.",
+      "generalizes": "Every classic/UWP project carries a Properties\\AssemblyInfo.cs; every WinUI 3 scaffold is SDK-style with auto-generated assembly info. This CS0579 collision recurs in essentially all UWP->WinUI 3 migrations, independent of scenario."
+    }
+  ]
+}

@@ -99,6 +99,35 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
 
 Write-Host "    Copied $($copied.Count) source files"
 
+# ─── 1b. Neutralize legacy Properties\AssemblyInfo.cs ──────────────────────────
+# Classic/UWP projects carry a hand-authored Properties\AssemblyInfo.cs with
+# [assembly: AssemblyVersion/Title/Company/Product/...] attributes. SDK-style
+# projects (every WinUI 3 scaffold) AUTO-GENERATE those same attributes, so a
+# copied legacy AssemblyInfo.cs makes the build fail with CS0579 "Duplicate
+# 'System.Reflection.Assembly*Attribute'" (and often CS0246 for attribute types
+# whose `using System.Reflection;` no longer resolves the way it did). Emptying
+# the legacy file (letting the SDK generate assembly info) is the correct fix and
+# generalizes to every UWP→WinUI 3 migration. Do this mechanically so the agent
+# never burns build cycles rediscovering it.
+$asmInfoNeutralized = 0
+foreach ($rel in @($copied)) {
+    if ($rel -notmatch '(?i)(^|\\)Properties\\AssemblyInfo\.cs$' -and $rel -notmatch '(?i)(^|\\)AssemblyInfo\.cs$') { continue }
+    $full = Join-Path $Target $rel
+    if (-not (Test-Path -LiteralPath $full)) { continue }
+    $body = [System.IO.File]::ReadAllText($full)
+    if ($body -notmatch '(?im)^\s*\[assembly:\s*Assembly(Version|FileVersion|Title|Company|Product|Configuration|Description|Copyright|Trademark|Culture)') { continue }
+    $stub = "// Assembly attributes (AssemblyVersion/Title/Company/Product/...) are auto-generated" + "`r`n" +
+            "// by the SDK-style project. The legacy UWP AssemblyInfo.cs was emptied to avoid" + "`r`n" +
+            "// CS0579 duplicate-attribute build errors. Set <GenerateAssemblyInfo>false</GenerateAssemblyInfo>" + "`r`n" +
+            "// in the .csproj only if you must author these attributes by hand." + "`r`n"
+    [System.IO.File]::WriteAllText($full, $stub)
+    $asmInfoNeutralized++
+    Write-Host "    Emptied legacy assembly-attribute file $rel (SDK auto-generates AssemblyInfo; prevents CS0579)"
+}
+if ($asmInfoNeutralized -gt 0) {
+    Write-Host "    Neutralized $asmInfoNeutralized legacy AssemblyInfo.cs file(s)"
+}
+
 # ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
 $uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
 $refDir = Join-Path $Target '.uwp-source'

@@ -1,0 +1,38 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Legacy Properties\\AssemblyInfo.cs collides with SDK auto-generated assembly attributes → CS0579 duplicate-attribute (and CS0246) build failures.",
+      "evidence": "session-log.txt:3172-3177 (CS0579), :3388-3393 (CS0246); 2 wasted build cycles turns 38-41. lessons.json errors_encountered[0..1].",
+      "root_cause": "Initialize-UwpMigration.ps1 copies AssemblyInfo.cs verbatim; SDK-style project also emits those attributes.",
+      "tier": 1,
+      "change": "Added step 1b to Initialize-UwpMigration.ps1: empty any copied AssemblyInfo.cs that declares [assembly: Assembly*] attributes, leaving a comment (SDK auto-generates). Cannot be ignored by the agent.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Migrated projects build without CS0579/CS0246 from legacy assembly attributes; no manual trim/empty cycles.",
+      "falsifiable_check": "On re-run, 0 CS0579 'Duplicate System.Reflection.Assembly*Attribute' errors and init log reports 'Emptied legacy assembly-attribute file ...'."
+    },
+    {
+      "problem": "Same CS0579 also documented for the agent as a fallback when a legacy AssemblyInfo.cs slips through.",
+      "evidence": "grep of skill found no AssemblyInfo/CS0579 coverage.",
+      "root_cause": "No documented pattern for the SDK-style duplicate-assembly-attribute error.",
+      "tier": 3,
+      "change": "Added a 'CS0579 Duplicate Assembly*Attribute (legacy Properties\\AssemblyInfo.cs)' subsection under MIGRATION-PATTERNS.md 'Common build errors' — empty the file (or GenerateAssemblyInfo=false).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "If the script fix misses an edge case, the agent has the fix documented and does not trim attribute-by-attribute.",
+      "falsifiable_check": "On re-run with a stray AssemblyInfo.cs, the agent empties it in one edit rather than iterating."
+    },
+    {
+      "problem": "UWP App Service provider activation has no WinAppSDK equivalent (ExtendedActivationKind.AppService / IAppServiceActivatedEventArgs absent); agent burned a build cycle porting then stripping it.",
+      "evidence": "session-log.txt:2797-2798 (CS0117/CS0234), provider branch removed :2858.",
+      "root_cause": "Activation section documents supported kinds but not the absent AppService provider path.",
+      "tier": 3,
+      "change": "Added a callout in MIGRATION-PATTERNS.md 'Application Lifecycle and Activation': ExtendedActivationKind has no AppService member, IAppServiceActivatedEventArgs is unavailable, drop/host-out-of-process the provider, note GetActivatedEventArgs() is instance (GetCurrent()), and client-side AppServiceConnection still works with package identity.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent removes the provider activation branch immediately instead of compiling into CS0117/CS0234.",
+      "falsifiable_check": "On a future app-service scenario, no CS0117 ExtendedActivationKind.AppService / CS0234 IAppServiceActivatedEventArgs errors appear."
+    }
+  ],
+  "deferred_to_human": []
+}

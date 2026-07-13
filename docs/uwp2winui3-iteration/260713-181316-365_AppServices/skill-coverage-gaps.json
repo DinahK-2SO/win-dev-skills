@@ -1,0 +1,15 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "UWP in-process App Service *provider* activation does not map to WinAppSDK: ExtendedActivationKind has no AppService member (CS0117) and Windows.ApplicationModel.Activation.IAppServiceActivatedEventArgs does not exist (CS0234). The dev-agent tried to port the provider branch and had to strip it after a failed build.",
+      "evidence": "session-log.txt:2797 (CS0117 ExtendedActivationKind.AppService), :2798 (CS0234 IAppServiceActivatedEventArgs), :2858 (agent deletes the provider activation branch from App.xaml.cs).",
+      "covered_at": "MIGRATION-PATTERNS.md '## Application Lifecycle and Activation' (line ~317) documents AppInstance.GetCurrent().GetActivatedEventArgs() and lists ExtendedActivationKind.File/Protocol/AppNotification cases — but says nothing about which kinds are absent, and never mentions App Services.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "In the activation section, add a callout that ExtendedActivationKind covers only supported kinds (no AppService), that IAppServiceActivatedEventArgs is unavailable, that provider-side app-service activation must be removed or hosted out-of-process, and that the client side (AppServiceConnection) still works with package identity.",
+      "generalizes": "App Services are a common UWP inter-app/background pattern; any sample or app that implements an app-service provider hits the same missing ExtendedActivationKind.AppService / IAppServiceActivatedEventArgs wall on WinAppSDK. Documenting the unsupported provider path and the client-vs-provider split prevents wasted build cycles across scenarios."
+    }
+  ]
+}

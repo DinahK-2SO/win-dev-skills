@@ -1,0 +1,21 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS0120: called AppInstance.GetActivatedEventArgs() as if static instead of AppInstance.GetCurrent().GetActivatedEventArgs().",
+      "evidence": "session-log.txt:2796 (CS0120 on AppInstance.GetActivatedEventArgs()).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md '## Application Lifecycle and Activation' shows the exact correct form `var args = AppInstance.GetCurrent().GetActivatedEventArgs();` in its code block (line ~324).",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already shows the correct static-vs-instance usage prominently in the activation code sample; a capable model would copy it correctly. (The surrounding AppService provider gap is handled separately as a coverage-gap.)"
+    },
+    {
+      "problem": "CS0246: 'MainPage' could not be found in MainWindow.xaml.cs (missing using SDKTemplate).",
+      "evidence": "session-log.txt:2790 (CS0246 MainPage), fixed turn 36 by adding using SDKTemplate;.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'Common build errors' CS0104 subsection already teaches the general fix for cross-namespace type resolution (add the using / fully-qualify); this is the same class of trivial missing-using fix.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A missing using directive for the sample's own namespace is a trivial, self-evident compiler fix that any capable model resolves on the next build without skill guidance."
+    }
+  ]
+}
