@@ -1,0 +1,19 @@
+{
+  "scenario": "ApplicationData",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: auto-rewrite Windows.UI.Colors -> Microsoft.UI.Colors (safe leaf static class; \\b guard spares the Windows.UI.Color struct) so ubiquitous named-color references no longer break the build post-bootstrap",
+    "Validate-UwpMigration.ps1 + unsupported-api-inventory.json: flag leftover non-Xaml Windows.UI.(Colors|Text|Composition|Input) residue pre-build, pointing to the Namespace Mapping table",
+    "MIGRATION-PATTERNS.md: clarify which Windows.UI.* namespaces the bootstrap auto-rewrites vs. manual, and note that WMC0909/WMC1509 XAML errors during MarkupCompilePass2 are a downstream C# compile failure (fix CS0234 first)"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Eval-side locked-screen UWP actuation limitation (uwp-app-runner/harness) — out of scope for the migration skill"
+  ]
+}

@@ -12,7 +12,7 @@ build cleanliness, and runtime smoke.
 Steps:
 1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
-3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
+3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml (+ Windows.UI.Colors → Microsoft.UI.Colors) across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
 4b/4c. Per-file triage against unsupported-api-inventory.json + inline TODO injection
        (`// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — anchor-only, never an API name)
@@ -124,12 +124,19 @@ $nsChanged = 0
 foreach ($f in $nsFiles) {
     $orig = [System.IO.File]::ReadAllText($f.FullName)
     $new = $orig -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml'
+    # Windows.UI.Colors is a leaf static class (named colors, e.g. Colors.Red) that
+    # relocates 1:1 to Microsoft.UI.Colors. It has no sub-namespace, so a blanket
+    # rewrite is safe. The trailing 's' guard leaves the Windows.UI.Color STRUCT
+    # (still valid WinRT) untouched. UWP samples reference these constantly, and the
+    # leftover reference otherwise surfaces late as CS0234 (and can cascade into
+    # XamlCompiler WMC0909 "cannot resolve DataType" when the local assembly fails to build).
+    $new = $new -replace 'Windows\.UI\.Colors\b', 'Microsoft.UI.Colors'
     if ($new -ne $orig) {
         [System.IO.File]::WriteAllText($f.FullName, $new)
         $nsChanged++
     }
 }
-Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+Write-Host "    Rewrote Windows.UI.Xaml/Windows.UI.Colors -> Microsoft.UI.* in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 
 # ─── 3b. Visible-text fidelity snapshot ────────────────────────────────────────
 # Capture the user-visible/static text present in each copied XAML *now*, while it

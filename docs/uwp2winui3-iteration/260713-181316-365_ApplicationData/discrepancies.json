@@ -1,0 +1,19 @@
+{
+  "scenario": "ApplicationData",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Clear scenario page renders (scenario list + ClearAsync description + Clear button)", "status": "pass", "reason": "All controls present and wired; matches UWP Scenario6_ClearScenario.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Clear button clears ApplicationData and shows confirmation text", "status": "pass", "reason": "Clicking Clear shows 'ApplicationData has been cleared. ...' per capture-manifest outputText.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "SetVersion scenario page renders (two buttons + initial Version: N)", "status": "pass", "reason": "Both buttons present and wired; initial Version shown on navigation.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Set version to 0 shows 'Version: 0'", "status": "pass", "reason": "Verified in capture-manifest outputText and after-click screenshot.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Set version to 1 shows 'Version: 1'", "status": "pass", "reason": "Verified in capture-manifest outputText and after-click screenshot.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "App theme", "uwp": "Dark theme (dark background, light text)", "winui": "Light theme (white background, dark text)", "screenshot_ref": "parity/winui3/screenshots/01_Clear.png vs parity/baseline/screenshots/01_Clear.png" }
+  ],
+  "missing_features": [],
+  "summary": "Faithful migration — all controls present, wired, and producing UWP-matching output. Only a minor, non-functional light-vs-dark default-theme difference. No behavioral regressions. The single build hiccup (leftover Windows.UI.Colors) was fixed by the agent and is the target of this improvement."
+}

@@ -1,0 +1,28 @@
+{
+  "scenario": "ApplicationData",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "4 MIGRATION-MAPPING.md rows left at Status=copied caused a validator FAIL before the agent flipped them to done.",
+      "evidence": "session-log.txt turn 30 lines 2952-2956 (validator FAIL), turn 31 lines 2970-2975 (agent flipped copied->done), re-run PASS at line 2987.",
+      "covered_clearly_at": "The bootstrap's printed instructions (session-log lines 233-259) and Validate-UwpMigration.ps1's explicit '[FAIL] ... still Status=copied (flip to done or deferred)' message name the exact fix.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The validator already tells the agent precisely what to do and the agent fixed it in one turn; this is the normal review loop working as designed, not a skill gap."
+    },
+    {
+      "problem": "CoreDispatcher.RunAsync needed conversion to DispatcherQueue.",
+      "evidence": "session-log.txt line 810 (original CoreDispatcher.RunAsync) -> final code uses DispatcherQueue.HasThreadAccess/TryEnqueue (line 2053 rewrite); no build error resulted.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md dedicated 'Threading: CoreDispatcher -> DispatcherQueue' section (anchor #threading, line 96).",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The agent applied the documented pattern correctly with zero friction; the skill already covers this prominently."
+    },
+    {
+      "problem": "Light-vs-dark default theme difference vs the UWP baseline.",
+      "evidence": "migration-score.json / discrepancies.json: WinUI renders light, UWP was dark; classified minor/non-functional by the scorer.",
+      "covered_clearly_at": "N/A — this is a default-theme convention and a scoring observation, not a migration-skill instruction target.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Non-functional and scenario-agnostic; forcing a specific RequestedTheme would be a scenario-specific cosmetic tweak, not a general migration rule."
+    }
+  ]
+}

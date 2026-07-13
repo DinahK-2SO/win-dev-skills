@@ -1,0 +1,32 @@
+{
+  "scenario": "ApplicationData",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: UWP app launched (PID 17820, window 'ApplicationData C# Sample') and screenshotted (Clear scenario). Could not actuate/navigate — session at Windows lock screen and legacy UWP CoreWindow exposes no inner UIA tree; behavioral ground truth taken from UWP source and confirmed against WinUI capture-manifest outputText.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Clear",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Clear.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Clear.png",
+      "note": "Structural coverage 1/1. Clear button present and wired: clicking it produced 'ApplicationData has been cleared.  Visit the other scenarios to see that their data has been cleared.' (verified in WinUI capture-manifest outputText and after-click screenshot), matching UWP source Scenario6_ClearScenario. uwp_responded asserted from source (UWP could not be actuated in a locked session). Only a light-vs-dark theme difference."
+    },
+    {
+      "name": "SetVersion",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_SetVersion.png",
+      "note": "Structural coverage 2/2. Both buttons present and wired: 'Set version to 0' shows 'Version: 0', 'Set version to 1' shows 'Version: 1' (verified in WinUI capture-manifest outputText and after-click screenshots), matching UWP source Scenario7_SetVersion. UWP golden screenshot for this scenario not captured (locked-session UWP could not be navigated); expected behaviour taken from source. uwp_responded asserted from source."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "scenario": "ApplicationData",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The UWP page's Windows.UI.Colors.Green/Red survived the bootstrap and caused a CS0234 build failure that cascaded into XamlCompiler WMC0909/WMC1111 errors.",
+      "evidence": "session-log.txt turn 26 lines 2491-2497 (CS0234 'Colors does not exist in namespace Windows.UI' + WMC0909 'Cannot resolve DataType local:Scenario'); Initialize output line 213 rewrote only Windows.UI.Xaml.",
+      "covered_at": "MIGRATION-PATTERNS.md 'Namespace Mapping' table, row 'Windows.UI.Colors | Microsoft.UI.Colors' (line 92); intro line 3 states the bootstrap 'only does the bulk Windows.UI.Xaml -> Microsoft.UI.Xaml namespace rewrite'.",
+      "why_missed": "under-emphasized: the mapping is a single table row, and the bootstrap that mechanized the sibling Windows.UI.Xaml rewrite silently skips Colors, so an agent trusting the bootstrap does not proactively hand-fix it. The table heading ('All Windows.UI.Xaml.* namespaces move...') further implies only Xaml rows are in play.",
+      "proposed_improvement": "Mechanize the safe leaf case: have Initialize-UwpMigration.ps1 also rewrite Windows.UI.Colors -> Microsoft.UI.Colors, add a Validate-UwpMigration.ps1 residue flag for non-Xaml Windows.UI.(Colors|Text|Composition|Input), and sharpen the mapping-table note to state exactly which namespaces the bootstrap auto-applies vs. which are manual.",
+      "generalizes": "Named colors (Colors.Red/Green/etc via Windows.UI.Colors) and other non-Xaml Windows.UI.* runtime namespaces (Text/Composition/Input) appear in a large fraction of UWP samples and always relocate to Microsoft.UI.*. Auto-rewriting the safe leaf and flagging the rest prevents a recurring late CS0234 -> cascading XAML failure across scenarios, not just this one."
+    },
+    {
+      "problem": "The XamlCompiler WMC0909 'Cannot resolve DataType' / WMC1509 'No LocalAssembly' errors looked like an x:Bind/x:DataType problem but were purely a downstream effect of the C# compile failure.",
+      "evidence": "session-log.txt turn 26 lines 2494-2497: WMC1509 'No LocalAssembly parameter given during MarkupCompilePass2' + WMC0909 + WMC9999 appeared alongside the CS0234; fixing only the C# Colors error cleared all XAML errors (BUILD_EXIT=0 at line 2933) with no XAML change.",
+      "covered_at": "MIGRATION-PATTERNS.md 'x:Bind and compiled bindings' section (line 593) mentions XLS0414/MC3074 'type was not found' but not the WMC0909/WMC1509 cascade class.",
+      "why_missed": "not prominent: the existing troubleshooting note covers a different error code family (XLS0414/MC3074) and gives no guidance that a WMC0909 during MarkupCompilePass2 is usually a symptom of a failed C# build rather than a XAML DataType bug.",
+      "proposed_improvement": "Extend the x:Bind troubleshooting note to say WMC0909/WMC1509/WMC9999 during MarkupCompilePass2 usually means the project's C# failed to compile (no local assembly produced) — fix the CS errors first, do not edit the XAML.",
+      "generalizes": "Any project that has both a C# compile error and compiled XAML bindings will emit this exact confusing cascade. Telling agents to fix C# first avoids wasted turns hunting a non-existent XAML bug across many scenarios."
+    }
+  ]
+}

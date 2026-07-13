@@ -37,6 +37,7 @@
   "residueOnly": [
     { "pattern": "using\\s+Windows\\.UI\\.Xaml",                               "name": "using Windows.UI.Xaml",      "reason": "Should have been rewritten by Initialize-UwpMigration.ps1" },
     { "pattern": "Windows\\.UI\\.Xaml\\.(Controls|Data|Documents|Input|Markup|Media|Navigation|Shapes|Automation|Hosting)", "name": "Windows.UI.Xaml.* (fully-qualified)", "reason": "Should have been rewritten by Initialize-UwpMigration.ps1" },
+    { "pattern": "Windows\\.UI\\.(Colors|Text|Composition|Input)\\b", "name": "Windows.UI.* (non-Xaml runtime namespace)", "reason": "Relocates 1:1 to Microsoft.UI.* (see MIGRATION-PATTERNS.md Namespace Mapping). The bootstrap only auto-rewrites Windows.UI.Xaml and Windows.UI.Colors — rewrite Text/Composition/Input by hand. Leftovers surface as CS0234 and can cascade into XamlCompiler WMC0909 errors" },
     { "pattern": "xmlns:[a-zA-Z]+=\"using:Windows\\.UI\\.Xaml",                "name": "xmlns: using:Windows.UI.Xaml",   "reason": "XAML xmlns clause should have been rewritten" },
     { "pattern": "Microsoft\\.NETCore\\.UniversalWindowsPlatform",             "name": "Microsoft.NETCore.UniversalWindowsPlatform PackageReference", "reason": "UWP-only NuGet — drop and use Microsoft.WindowsAppSDK" },
     { "pattern": "<TargetPlatformIdentifier>\\s*UAP",                          "name": "<TargetPlatformIdentifier>UAP", "reason": "UWP csproj marker — should not appear in WinAppSDK project" },

@@ -1,0 +1,36 @@
+{
+  "scenario": "ApplicationData",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log turn ~206-213: copied 4 source files and 'Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in 3 of 9 .cs/.xaml files', seeding MIGRATION-MAPPING.md — got the port most of the way in one call." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log turn ~2947-2996: caught 4 mapping rows still Status=copied (FAIL), then confirmed clean residue grep + dotnet build + smoke launch on re-run." },
+    { "tool": "dotnet build -p:Platform=$Platform", "evidence": "session-log turns 26/29: surfaced CS0234 + XamlCompiler errors that pinpointed the leftover Windows.UI.Colors reference." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1", "problem": "Namespace mass-rewrite only handles Windows.UI.Xaml; the documented non-Xaml Windows.UI.* namespaces (Colors, Text, Composition, Input) are left for manual fixing.", "evidence": "session-log line 213 rewrote only Windows.UI.Xaml; line 819/822 still had Windows.UI.Colors.Green/Red, causing the CS0234 build failure at turn 26 (lines 2491-2492)." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Bootstrap leaves safe 1:1 leaf namespaces like Windows.UI.Colors unrewritten.", "suggested_tweak": "Also blanket-rewrite Windows.UI.Colors -> Microsoft.UI.Colors (leaf static class, no sub-namespace, no struct collision with the 's' guard)." },
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Residue grep only flags leftover Windows.UI.Xaml, not other Windows.UI.* runtime namespaces that also relocate.", "suggested_tweak": "Add a residue pattern for Windows.UI.(Colors|Text|Composition|Input) so they are caught pre-build." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.UI.Colors", "why_tried": "Original UWP MainPage.xaml.cs used Windows.UI.Colors.Green/Red for the status border brush; the bootstrap did not rewrite it.", "root_cause": "Windows.UI.Colors relocated to Microsoft.UI.Colors in WinUI 3, but the bootstrap only auto-rewrites Windows.UI.Xaml.", "fix": "Changed Windows.UI.Colors.* to Colors.* with 'using Microsoft.UI;' (agent turns 27-28); rebuild succeeded." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md Namespace Mapping heading (line 79)", "wrong": "'All Windows.UI.Xaml.* namespaces move to Microsoft.UI.Xaml.*:' — but the table also lists non-Xaml rows (Colors, Composition, Input, Text, Core) and does not say which the bootstrap actually auto-applies.", "correct": "Clarify that non-Xaml Windows.UI.* namespaces also relocate and that the bootstrap only auto-rewrites Windows.UI.Xaml (+ now Colors); the rest are manual." }
+  ],
+  "special_apis": [
+    { "api": "CoreDispatcher.RunAsync", "special_handling": "Replaced with DispatcherQueue.HasThreadAccess / TryEnqueue per the Threading section — handled cleanly by the agent (session-log line 810 -> DispatcherQueue in final code)." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: The type or namespace name 'Colors' does not exist in the namespace 'Windows.UI'", "root_cause": "Leftover Windows.UI.Colors reference the bootstrap did not rewrite.", "fix": "Rewrote to Microsoft.UI.Colors (using Microsoft.UI; + Colors.Green/Red)." },
+    { "error": "XamlCompiler error WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 + WMC1509 'No LocalAssembly' + WMC9999", "root_cause": "Cascade: the C# compile failed (the CS0234 above), so the project local assembly was never produced and the XAML compiler could not resolve the project's own type. NOT an x:DataType bug.", "fix": "Fixing the CS0234 made the whole build (including XAML) succeed with no XAML edit (agent turns 27-29 -> BUILD_EXIT=0 at line 2933)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Build turns 26-29", "symptom": "Build failed with 5 errors mixing CS0234 (Colors) and XamlCompiler WMC0909/WMC1111/WMC9999.", "turns_or_retries": "~3 turns", "root_cause": "Leftover Windows.UI.Colors namespace not auto-rewritten by the bootstrap; the C# failure cascaded into scary-looking XAML type-resolution errors.", "how_resolved": "Agent correctly diagnosed and fixed only the Colors namespace; the XAML errors cleared on their own.", "preventable_by": "Bootstrap auto-rewriting Windows.UI.Colors; a validator residue flag for non-Xaml Windows.UI.* namespaces; a doc note that WMC0909/WMC1509 during MarkupCompilePass2 is usually a downstream C# compile failure." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Scoring session sat at the Windows lock screen; legacy UWP CoreWindow exposed no inner UIA tree, so the original UWP app could not be actuated for a behavioral golden.", "workaround": "Meta-agent took behavioral ground truth from UWP source and confirmed against the WinUI capture-manifest outputText. This is an eval-side constraint, not a migration-skill issue." }
+  ]
+}

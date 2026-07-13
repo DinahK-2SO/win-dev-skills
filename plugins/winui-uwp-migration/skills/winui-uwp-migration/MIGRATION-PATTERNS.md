@@ -76,7 +76,9 @@ See the official [What's supported](https://learn.microsoft.com/windows/apps/win
 
 ## Namespace Mapping
 
-All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
+All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`. Several **non-Xaml** `Windows.UI.*` runtime namespaces (Colors, Text, Composition, Input, Core) also relocate to `Microsoft.UI.*` — see the last rows of the table.
+
+> **Bootstrap coverage:** `Initialize-UwpMigration.ps1` auto-rewrites only `Windows.UI.Xaml` **and** `Windows.UI.Colors`. The remaining non-Xaml rows below (`Windows.UI.Text`, `Windows.UI.Composition`, `Windows.UI.Input`, `Windows.UI.Core`) are **not** auto-rewritten — apply them by hand. A leftover reference (e.g. `Windows.UI.Colors.Green`, `Windows.UI.Text.FontWeights`) surfaces late as build error **CS0234** ("the type or namespace name X does not exist in the namespace Windows.UI"), and that C# failure can **cascade** into XAML compiler errors (`WMC0909 "Cannot resolve DataType"`, `WMC1509 "No LocalAssembly"`). `Validate-UwpMigration.ps1` flags these residues before the build.
 
 | UWP | WinUI 3 |
 |-----|---------|
@@ -591,6 +593,8 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 ### `x:Bind` and compiled bindings
 
 `x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+
+**Cascading XAML errors:** a `XamlCompiler error WMC0909 "Cannot resolve DataType local:<Type>"` (often paired with `WMC1509 "No LocalAssembly parameter given during MarkupCompilePass2"` and `WMC9999`) usually is **not** an `x:DataType` bug — it means the project's own C# **failed to compile**, so the local assembly the XAML compiler needs was never produced. Fix the underlying C# errors first (commonly a leftover `Windows.UI.*` namespace → `CS0234`); the XAML errors typically clear once the C# build is green. Do not chase the WMC0909 by editing the XAML.
 
 ### Page root element
 

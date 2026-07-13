@@ -1,0 +1,40 @@
+{
+  "scenario": "ApplicationData",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Leftover Windows.UI.Colors (named colors) survived the bootstrap namespace rewrite and caused a CS0234 build failure that cascaded into XamlCompiler WMC0909/WMC1111 errors.",
+      "evidence": "session-log.txt turn 26 lines 2491-2497 (CS0234 + WMC0909); Initialize output line 213 rewrote only Windows.UI.Xaml.",
+      "root_cause": "Initialize-UwpMigration.ps1 mass-rewrite only handles Windows.UI.Xaml; the documented sibling Windows.UI.Colors relocation is not mechanized, so it is left for manual discovery via a build error.",
+      "tier": 1,
+      "change": "Extend the bootstrap mass-rewrite to also convert Windows.UI.Colors -> Microsoft.UI.Colors (leaf static class; '\\b' guard leaves the Windows.UI.Color struct untouched).",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Windows.UI.Colors references are rewritten during bootstrap, so no CS0234 and no downstream XAML cascade on re-run.",
+      "falsifiable_check": "On a re-run of any sample using named colors, dotnet build emits no \"CS0234 ... 'Colors' does not exist in the namespace 'Windows.UI'\" and the Initialize summary line reports Windows.UI.Colors rewrites."
+    },
+    {
+      "problem": "The validator only catches leftover Windows.UI.Xaml residue, not the other non-Xaml Windows.UI.* namespaces that also relocate to Microsoft.UI.*.",
+      "evidence": "Validate residue grep passed (session-log line 2948) despite the earlier Colors build break — because Colors/Text/Composition/Input are not in the residue set.",
+      "root_cause": "unsupported-api-inventory.json residueOnly (and the validator fallback) lack a pattern for non-Xaml Windows.UI.* runtime namespaces that need manual rewrite.",
+      "tier": 1,
+      "change": "Add a residue pattern Windows.UI.(Colors|Text|Composition|Input)\\b (with a reason pointing to the Namespace Mapping table) to unsupported-api-inventory.json residueOnly and to the Validate-UwpMigration.ps1 fallback list.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json (+ Validate-UwpMigration.ps1 fallback)",
+      "expected_effect": "Any leftover Text/Composition/Input (or Colors, if bootstrap ever misses it) is reported by the validator before the build, with a pointer to the mapping table.",
+      "falsifiable_check": "Validate-UwpMigration.ps1 run against a project containing e.g. Windows.UI.Text.FontWeights reports a residue hit named 'Windows.UI.* (non-Xaml runtime namespace)'; it does NOT flag the Windows.UI.Color struct or Windows.UI.Xaml.Input."
+    },
+    {
+      "problem": "The CS0234 cascaded into XamlCompiler WMC0909 'Cannot resolve DataType' / WMC1509 'No LocalAssembly', which reads like an x:DataType bug but is a downstream effect of the failed C# build.",
+      "evidence": "session-log.txt turn 26 lines 2494-2497; fixing only the C# error cleared all XAML errors (BUILD_EXIT=0, line 2933) with no XAML change.",
+      "root_cause": "The x:Bind troubleshooting note only covers XLS0414/MC3074 and does not explain the MarkupCompilePass2 cascade, and the mapping-table heading under-states which Windows.UI.* rows are auto-applied.",
+      "tier": 3,
+      "change": "Clarify the Namespace Mapping intro (auto-applied Xaml+Colors vs. manual non-Xaml rows; CS0234 -> WMC0909 cascade warning) and add a WMC0909/WMC1509 'fix C# first' note to the x:Bind troubleshooting section. Tier-1 tooling fixes the mechanics; this prose prevents wasted turns interpreting the cascade, which tooling cannot convey.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents that still hit a residual non-Xaml Windows.UI.* error interpret the XAML cascade correctly and fix the C# root cause first.",
+      "falsifiable_check": "MIGRATION-PATTERNS.md contains a note that WMC0909/WMC1509 during MarkupCompilePass2 indicates a failed C# compile; the Namespace Mapping section states which namespaces the bootstrap auto-rewrites."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-side: locked-screen sessions prevent actuating legacy UWP apps (no inner UIA tree on CoreWindow), forcing source-derived behavioral goldens. This is a uwp-app-runner / harness limitation, out of scope for the migration skill."
+  ]
+}

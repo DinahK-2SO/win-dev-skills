@@ -1,0 +1,64 @@
+{
+  "scenario": "ApplicationData",
+  "created_at": "2026-07-13T19:45:00Z",
+  "uwp_capture_status": "partial: original UWP app launched and was screenshotted (Clear scenario, default frame). Could not navigate/actuate the UWP app because the session is at the Windows lock screen (foreground = 'Windows Default Lock Screen') and the legacy UWP CoreWindow exposes no inner UIA tree (0 interactive elements), so synthetic input and UIA invoke both fail. Behavioral ground truth for each control taken from the UWP source.",
+  "features": [
+    {
+      "id": "clear-scenario-render",
+      "area": "Clear",
+      "name": "Clear scenario page renders",
+      "description": "Scenario 1 shows the descriptive text 'The ClearAsync method clears data from ApplicationData.' and a 'Clear' button.",
+      "expected_behaviour": [
+        "Scenario list shows '1) Clear' and '2) SetVersion'",
+        "Content pane shows the ClearAsync description text and a Clear button"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Clear.png",
+      "weight": 1
+    },
+    {
+      "id": "clear-button",
+      "area": "Clear",
+      "name": "Clear button clears ApplicationData",
+      "description": "Clicking 'Clear' calls ApplicationData.Current.ClearAsync() and sets OutputTextBlock to a confirmation message.",
+      "expected_behaviour": [
+        "Clicking Clear shows 'ApplicationData has been cleared.  Visit the other scenarios to see that their data has been cleared.'"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Clear.png",
+      "weight": 2
+    },
+    {
+      "id": "setversion-scenario-render",
+      "area": "SetVersion",
+      "name": "SetVersion scenario page renders",
+      "description": "Scenario 2 shows the versioning description text, two buttons ('Set version to 0', 'Set version to 1'), and an initial 'Version: N' output from OnNavigatedTo.",
+      "expected_behaviour": [
+        "Two buttons 'Set version to 0' and 'Set version to 1' are visible",
+        "Initial output shows 'Version: <current version>' on navigation"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "setversion-0",
+      "area": "SetVersion",
+      "name": "Set version to 0",
+      "description": "Clicking 'Set version to 0' calls SetVersionAsync(0, handler) and displays 'Version: 0'.",
+      "expected_behaviour": [
+        "After clicking, output shows 'Version: 0'"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "setversion-1",
+      "area": "SetVersion",
+      "name": "Set version to 1",
+      "description": "Clicking 'Set version to 1' calls SetVersionAsync(1, handler) and displays 'Version: 1'.",
+      "expected_behaviour": [
+        "After clicking, output shows 'Version: 1'"
+      ],
+      "screenshot": null,
+      "weight": 2
+    }
+  ]
+}

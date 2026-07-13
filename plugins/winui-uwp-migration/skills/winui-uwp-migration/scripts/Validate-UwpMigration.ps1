@@ -72,6 +72,7 @@ if ($inv) {
     # Fallback baseline if inventory file is missing
     $residuePatterns = @(
         [PSCustomObject]@{ Pattern = 'using\s+Windows\.UI\.Xaml';                                  Name = 'using Windows.UI.Xaml' },
+        [PSCustomObject]@{ Pattern = 'Windows\.UI\.(Colors|Text|Composition|Input)\b';             Name = 'Windows.UI.* (non-Xaml runtime namespace)' },
         [PSCustomObject]@{ Pattern = 'xmlns:[a-zA-Z]+="using:Windows\.UI\.Xaml';                  Name = 'xmlns: using:Windows.UI.Xaml' },
         [PSCustomObject]@{ Pattern = 'Microsoft\.NETCore\.UniversalWindowsPlatform';              Name = 'UWP PackageReference' },
         [PSCustomObject]@{ Pattern = '<TargetPlatformIdentifier>\s*UAP';                          Name = '<TargetPlatformIdentifier>UAP' },
