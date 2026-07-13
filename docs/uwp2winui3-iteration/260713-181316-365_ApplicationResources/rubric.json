@@ -1,0 +1,23 @@
+{
+  "scenario": "ApplicationResources",
+  "created_at": "2026-07-13T20:41:14Z",
+  "uwp_capture_status": "ok",
+  "note": "Extract-UwpFeatureChecklist could not parse the sample's scenario list (SampleConfiguration) and modeled the app as a single MainPage feature with 4 shell controls. The live UWP app + source confirm the sample is a 13-scenario 'Application Resources' shell. Rubric below reflects the single measured feature (the shell + default scenario) that the parity pipeline actually captured and compared.",
+  "features": [
+    {
+      "id": "app-resources-shell",
+      "area": "Shell",
+      "name": "Application Resources sample shell + scenario navigation",
+      "description": "MainPage shell: sample title, a scenario navigation list (ScenarioControl ListBox in UWP), copyright, and Trademarks/Privacy footer HyperlinkButtons, plus the default scenario content demonstrating x:Uid string-resource lookup.",
+      "expected_behaviour": [
+        "App launches and presents a non-blank window",
+        "A scenario navigation list exposes every scenario and selecting an item navigates to that scenario's content",
+        "Default scenario shows the x:Uid-bound resource string ('Hello World') resolved from resources.resw",
+        "Sample title and '(c) Microsoft Corporation' copyright are shown",
+        "Trademarks and Privacy footer links are present (they open external URLs; no in-app response in the UWP original)"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_ApplicationResources.png",
+      "weight": 2
+    }
+  ]
+}

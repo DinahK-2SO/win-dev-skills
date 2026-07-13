@@ -1,0 +1,21 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Structural parity gate reported coverage 1/4 (missing ScenarioControl list, Trademarks, Privacy).",
+      "evidence": "discrepancies.json id 'structural-gate-collapsed-nav'; screenshots/winui_nav_expanded.png shows all 13 scenarios + footer links present once the NavigationView pane is expanded.",
+      "covered_clearly_at": "N/A — capture artifact of the evaluation pipeline (collapsed NavigationView pane at capture), not a migration behavior. Reconciled by the scorer as a pass.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "This is a measurement/capture artifact in the parity instrument, not a defect in the migrated app; the controls exist and navigation is live. No migration-skill change could or should address it."
+    },
+    {
+      "problem": "Nullable-reference warnings (CS8600/CS8602/CS8618/CS8604) across several files.",
+      "evidence": "build-output.txt lists numerous CS86xx warnings in scenario*.xaml.cs, MainPage.xaml.cs, constants.cs.",
+      "covered_clearly_at": "N/A — these are pre-existing C# nullable-annotation style issues inherited from the sample source, not UWP→WinUI 3 API residue.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Not migration-specific and not analyzer WUI residue; they do not affect parity/score and would not generalize as a migration-skill rule."
+    }
+  ]
+}

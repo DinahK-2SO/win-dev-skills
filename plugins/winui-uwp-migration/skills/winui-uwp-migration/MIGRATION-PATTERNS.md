@@ -347,9 +347,18 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 
 See the [toast notifications guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/toast-notifications) and [push notifications guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/notifications).
 
+<a id="resources"></a>
 ## Resources: MRT → MRT Core
 
-`.resw` files are still supported, but the API surface changed. See the [MRT Core migration guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/mrtcore).
+`.resw` files are still supported, but the API surface changed. The whole
+`Windows.ApplicationModel.Resources.Core` namespace moves to
+`Microsoft.Windows.ApplicationModel.Resources` (add `Microsoft.` at the front, drop the
+trailing `.Core`). Leaving a `using Windows.ApplicationModel.Resources.Core;` (or any
+`ResourceManager` / `ResourceContext` / `ResourceMap` from it) in place still compiles via
+the compat projection but emits analyzer warning **WUI1001** — treat it as residue and
+migrate it. See the [MRT Core migration guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/mrtcore).
+
+### `ResourceLoader` (simple string lookup)
 
 UWP (replace this):
 
@@ -364,6 +373,38 @@ WinAppSDK:
 var loader = new Microsoft.Windows.ApplicationModel.Resources.ResourceLoader();
 var s = loader.GetString("Greeting");
 ```
+
+### `ResourceManager` / `ResourceContext` / `ResourceMap` (programmatic MRT lookup)
+
+The static `ResourceManager.Current` singleton is gone — construct an instance. The
+`ResourceContext.GetForCurrentView()` / `GetForViewIndependentUse()` factory methods are
+gone — get the context from the manager via `CreateResourceContext()`. `ResourceMap`
+lookups use `TryGetValue` (not `GetValue`).
+
+UWP (replace this):
+
+```csharp
+using Windows.ApplicationModel.Resources.Core;
+...
+ResourceContext ctx = ResourceContext.GetForViewIndependentUse();
+ResourceMap map = ResourceManager.Current.MainResourceMap.GetSubtree("Resources");
+string s = map.GetValue("string1", ctx).ValueAsString;
+```
+
+WinAppSDK:
+
+```csharp
+using Microsoft.Windows.ApplicationModel.Resources;
+...
+var manager = new ResourceManager();
+ResourceContext ctx = manager.CreateResourceContext();
+ResourceMap map = manager.MainResourceMap.GetSubtree("Resources");
+string s = map.TryGetValue("string1", ctx).ValueAsString;
+```
+
+MRT Core only pre-populates the **Language** qualifier on a new context; set any others
+you need yourself (there is no `SetGlobalQualifierValue` — assign into
+`ctx.QualifierValues[...]`, e.g. `KnownResourceQualifierName.Scale`).
 
 ## Text Rendering: DirectWrite → DWriteCore
 

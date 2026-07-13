@@ -1,0 +1,17 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated code kept UWP MRT programmatic API (Windows.ApplicationModel.Resources.Core: ResourceManager.Current, ResourceContext.GetForViewIndependentUse/GetForCurrentView, ResourceMap.GetValue) -> 5x WUI1001 analyzer warnings (UWP-only API residue).",
+      "evidence": "build-output.txt: 'scenario10/12/13/7/8.xaml.cs ... warning WUI1001: Windows.ApplicationModel.Resources.Core -> Microsoft.Windows.ApplicationModel.Resources'; migrated scenario7.xaml.cs line 16 'using Windows.ApplicationModel.Resources.Core;' + line 61 'ResourceManager.Current.MainResourceMap.GetValue(...)'.",
+      "skill_search": "grepped winui-uwp-migration for 'Resources.Core|ResourceManager|ResourceContext|ResourceMap|WUI1001' and inspected unsupported-api-inventory.json 'adaptable' list.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Two coupled gaps: (1) MIGRATION-PATTERNS.md #resources documented ONLY ResourceLoader, not the ResourceManager/ResourceContext/ResourceMap MRT Core mapping the app uses; (2) unsupported-api-inventory.json had no entry for the MRT Core namespace/types, so Initialize-UwpMigration.ps1 injected no TODO[migrate] marker and the agent copied the UWP namespace verbatim. The #resources heading also lacked an <a id> anchor, so even a TODO route would not resolve via Get-MigrationPattern.ps1.",
+      "proposed_fix": "Add an <a id=\"resources\"></a> anchor + expand MIGRATION-PATTERNS.md #resources with the ResourceManager (new instance instead of .Current), ResourceContext (CreateResourceContext instead of GetForCurrentView/GetForViewIndependentUse), ResourceMap (TryGetValue instead of GetValue) and qualifier-values mappings; add an 'adaptable' inventory entry matching Windows.ApplicationModel.Resources.Core / ResourceManager.Current / ResourceContext routed to anchor 'resources' so a TODO is injected.",
+      "generalizes": "Programmatic MRT resource lookup (ResourceManager/ResourceContext/ResourceMap) is common in any localized or resource-driven UWP app, not just this sample. The namespace move + static-to-instance + GetValue->TryGetValue changes recur identically across every such app, and the WindowsAppSDK analyzer flags the residue the same way every time (WUI1001)."
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Namespace mass-rewrite (Windows.UI.Xaml -> Microsoft.UI.Xaml) and per-file TODO injection let the agent produce a clean-building 13-scenario app that scored 100." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1 / unsupported-api-inventory.json", "limitation": "MRT Core programmatic API (Windows.ApplicationModel.Resources.Core: ResourceManager.Current / ResourceContext / ResourceMap) is not in the 'adaptable' inventory, so no TODO[migrate] marker was injected on those lines and the agent copied the UWP namespace verbatim.", "suggested_tweak": "Add an 'adaptable' inventory entry routing the MRT Core namespace/types to a 'resources' anchor." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md #resources ('Resources: MRT -> MRT Core')", "wrong": "Section documented only ResourceLoader.GetForCurrentView() -> new ResourceLoader(); it did not cover ResourceManager.Current / ResourceContext.GetForViewIndependentUse / ResourceMap.GetValue, which is the API this scenario actually uses.", "correct": "ResourceManager.Current -> new ResourceManager(); ResourceContext.GetForViewIndependentUse()/GetForCurrentView() -> manager.CreateResourceContext(); ResourceMap.GetValue -> TryGetValue; namespace Windows.ApplicationModel.Resources.Core -> Microsoft.Windows.ApplicationModel.Resources." }
+  ],
+  "special_apis": [
+    { "api": "Microsoft.Windows.ApplicationModel.Resources.ResourceContext", "special_handling": "MRT Core only pre-populates the Language qualifier; other qualifiers (e.g. Scale) must be set manually via ctx.QualifierValues[...]; there is no SetGlobalQualifierValue and the current-view/view-independent distinction is gone." }
+  ],
+  "errors_encountered": [
+    { "error": "warning WUI1001: Windows.ApplicationModel.Resources.Core -> Microsoft.Windows.ApplicationModel.Resources (emitted for scenario7/8/10/12/13.xaml.cs)", "root_cause": "Migrated scenario code retained the UWP MRT namespace and static ResourceManager.Current / ResourceContext factory calls; the WindowsAppSDK analyzer flags this as UWP-only API residue.", "fix": "Switch to Microsoft.Windows.ApplicationModel.Resources: new ResourceManager(), manager.CreateResourceContext(), map.TryGetValue(...)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "scenario7/8/10/12/13.xaml.cs resource lookups", "symptom": "Left 'using Windows.ApplicationModel.Resources.Core;' and ResourceManager.Current/ResourceContext usage in place; build produced 5 WUI1001 warnings (UWP residue) though it compiled and ran.", "turns_or_retries": "not iterated on (agent never surfaced WUI1001 in the log)", "root_cause": "No TODO[migrate] marker was injected on those lines (API absent from the inventory) AND the #resources doc section only covered ResourceLoader, so the agent had no signal or mapping for the MRT Core ResourceManager/ResourceContext family.", "how_resolved": "Not resolved during the trial (residue shipped; scorer reconciled functionality as pass).", "preventable_by": "Add the MRT Core namespace/types to unsupported-api-inventory.json 'adaptable' (routes to a #resources TODO) and expand MIGRATION-PATTERNS.md #resources to map ResourceManager/ResourceContext/ResourceMap." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

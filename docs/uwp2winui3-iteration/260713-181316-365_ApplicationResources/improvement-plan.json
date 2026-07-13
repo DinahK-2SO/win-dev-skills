@@ -1,0 +1,28 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "MRT Core programmatic API (Windows.ApplicationModel.Resources.Core: ResourceManager.Current, ResourceContext.GetForViewIndependentUse/GetForCurrentView, ResourceMap.GetValue) migrated as UWP residue -> 5x WUI1001 analyzer warnings.",
+      "evidence": "build-output.txt: 5x 'warning WUI1001: Windows.ApplicationModel.Resources.Core -> Microsoft.Windows.ApplicationModel.Resources' (scenario7/8/10/12/13.xaml.cs); skill-defects.json item 1.",
+      "root_cause": "Detection/routing gap: the MRT Core namespace/types are absent from unsupported-api-inventory.json, so Initialize-UwpMigration.ps1 injects no TODO[migrate] marker on those lines and the agent copies the UWP API verbatim.",
+      "tier": 2,
+      "change": "Add an 'adaptable' inventory entry with pattern 'Windows\\.ApplicationModel\\.Resources\\.Core|ResourceManager\\.Current|\\bResourceContext\\b' routed to anchor 'resources' (tier safe), so bootstrap injects a TODO[migrate]: see PATTERNS.md#resources on every MRT Core line.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+      "expected_effect": "On re-run, each MRT Core usage carries a TODO marker; the agent resolves it via Get-MigrationPattern.ps1 -Anchor resources and migrates to Microsoft.Windows.ApplicationModel.Resources.",
+      "falsifiable_check": "Re-run build emits 0 WUI1001 warnings; Validate-UwpMigration WUI gate passes; no 'using Windows.ApplicationModel.Resources.Core;' remains in migrated .cs files."
+    },
+    {
+      "problem": "MIGRATION-PATTERNS.md #resources documented only ResourceLoader, giving no mapping for ResourceManager/ResourceContext/ResourceMap even if the agent reached the section.",
+      "evidence": "Pre-edit #resources section contained only the ResourceLoader.GetForCurrentView() example; skill-defects.json item 1 root_cause.",
+      "root_cause": "Missing mapping content + the heading had no <a id> anchor, so Get-MigrationPattern.ps1 -Anchor resources could not resolve it.",
+      "tier": 3,
+      "change": "Add <a id=\"resources\"></a> anchor and expand the section: namespace move (drop .Core / add Microsoft.), ResourceManager.Current -> new ResourceManager(), GetForCurrentView/GetForViewIndependentUse -> CreateResourceContext(), ResourceMap.GetValue -> TryGetValue, and manual qualifier values (no SetGlobalQualifierValue). Note WUI1001 = residue to fix.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The TODO route from item 1 resolves to concrete, correct MRT Core guidance the agent can apply directly.",
+      "falsifiable_check": "Get-MigrationPattern.ps1 -Anchor resources returns the ResourceManager/ResourceContext mapping; re-run migrates MRT Core code with 0 WUI1001 warnings."
+    }
+  ],
+  "deferred_to_human": []
+}

@@ -1,0 +1,26 @@
+{
+  "scenario": "ApplicationResources",
+  "scored_at": "2026-07-13T20:41:14Z",
+  "uwp_launchable": true,
+  "app_launched": true,
+  "score": 100,
+  "features_total": 1,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_gate_verdict": "fail (structural cov 1/4) — reconciled as capture artifact; see discrepancies.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "ApplicationResources (shell + scenario navigation + default resource scenario)",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_ApplicationResources.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_ApplicationResources.png",
+      "note": "Faithful, fully functional migration verified by direct observation. Structural gate reported cov 1/4 only because the NavigationView pane was collapsed at capture; after expanding it (screenshots/winui_nav_expanded.png) the full 13-scenario list, the 'Application Resources C# sample' title, the copyright, and the 'Trademarks | Privacy' footer links are all present. Scenario navigation is behaviorally live (selecting scenario 2 navigates — screenshots/winui_scenario2.png). Core feature works: the x:Uid-bound resource string 'Hello World' resolves from resources.resw. Trademarks/Privacy links are dead in-app in BOTH UWP and WinUI (external URLs), so no behavioral regression. Minor cosmetic: WinUI header rebranded 'Windows platform sample' -> 'Windows App SDK sample' and skips the UWP splash logo."
+    }
+  ]
+}

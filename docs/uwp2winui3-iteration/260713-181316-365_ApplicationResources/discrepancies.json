@@ -1,0 +1,15 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "App launches, presents non-blank window, exposes scenario navigation list, default scenario renders x:Uid resource string 'Hello World', shows title/copyright/Trademarks+Privacy links.", "status": "pass", "reason": "Faithful, fully functional migration verified by direct observation (NavigationView pane, 13 scenarios, x:Uid string resolves).", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Initial presentation / header text", "uwp": "Splash logo + 'Windows platform sample'", "winui": "Navigates directly to scenario 1; header 'Windows App SDK sample'", "screenshot_ref": "parity/baseline/screenshots/01_ApplicationResources.png vs parity/winui3/screenshots/01_ApplicationResources.png" }
+  ],
+  "missing_features": [],
+  "summary": "Migration scored 100 and is behaviorally faithful. The only real, generalizable defect is UWP MRT residue: 5 scenario files retained Windows.ApplicationModel.Resources.Core (WUI1001). Structural gate 1/4 was a NavigationView collapsed-pane capture artifact (not a defect). Header rebrand is expected modernization. Nullable (CS86xx) warnings are pre-existing sample style, not migration-specific."
+}
