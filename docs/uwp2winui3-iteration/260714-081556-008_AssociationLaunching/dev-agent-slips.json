@@ -1,0 +1,21 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "First Validate-UwpMigration.ps1 run FAILed with 6 rows still Status=copied in MIGRATION-MAPPING.md.",
+      "evidence": "session-log.txt lines 3039-3045 '[FAIL] MIGRATION-MAPPING.md — 6 row(s) still Status=copied'; re-run lines 3070-3082 all PASS after flipping.",
+      "covered_clearly_at": "SKILL.md Step 1 ('Flip `Status` from `copied` -> `done` ... as each row is finished') and Step 4 common-fixes ('`Status = copied` rows -> those files were never finished. Either complete the migration and flip to `done`, or defer').",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill states the copied->done flip prominently in two places and the validator caught it and named the fix; a capable model re-run flips the rows without any skill edit. The self-correcting loop worked as designed."
+    },
+    {
+      "problem": "Benign warnings CA1416 (KnownFolders.GetFolderAsync supported 19041+ vs manifest MinVersion 17763) and CS0414 (unused Protocol field in Scenario4).",
+      "evidence": "build-output.txt lines 8, 11-13.",
+      "covered_clearly_at": "General C#/analyzer hygiene, not a UWP->WinUI 3 migration pattern; behavior verified live (Scenario 3 create/remove file worked). Scenario-specific and non-blocking.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Scenario-specific benign warnings with no parity impact; not a recurring migration pattern worth encoding."
+    }
+  ]
+}

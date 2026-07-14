@@ -1,0 +1,17 @@
+{
+  "scenario": "AssociationLaunching",
+  "summary": "No parity defects found. All 4 scenarios are present, render correctly, are structurally complete (100% control coverage), and are behaviorally functional in the migrated WinUI 3 app. Visual fidelity vs the UWP golden is high.",
+  "discrepancies": [],
+  "notes": [
+    {
+      "type": "measurement-limitation",
+      "scope": "UWP golden (baseline)",
+      "detail": "The original UWP app launched (uwp-app-runner ok:true) and rendered its content (a 55KB non-blank CoreWindow screenshot of Scenario 1 was captured), but its XAML content is not exposed through UI Automation in this environment (the ApplicationFrameWindow/CoreWindow UIA subtree is an empty Pane), and it rejected synthetic mouse/keyboard input (the desktop was showing the Windows lock screen in the foreground, so SetForegroundWindow could not activate the app). As a result, per-scenario navigation and control actuation could not be driven on the UWP golden, so no UWP behavioral baseline exists. Grading therefore relied on structural coverage + WinUI behavioral verification + visual comparison against the Scenario-1 UWP golden."
+    },
+    {
+      "type": "capture-artifact",
+      "scope": "WinUI Scenario 3 (Receiving a file) during batch capture",
+      "detail": "In the automated batch capture, Scenario 3 reported 0/3 live actions and 'Create test file' failed to invoke. This was a capture artifact: modal file-picker 'Open' dialogs opened by Scenario 1/2 'Pick and launch' were left on top and blocked invocation, and 'Create test file' is a file-system side effect that produces no visible page-text change. On direct re-verification (dialogs cleared), all three Scenario 3 controls are present with AutomationIds and behave correctly: invoking 'Create test file' created 'Test alsdkcs file.alsdkcs' in the Pictures library, and 'Remove test files' deleted it."
+    }
+  ]
+}

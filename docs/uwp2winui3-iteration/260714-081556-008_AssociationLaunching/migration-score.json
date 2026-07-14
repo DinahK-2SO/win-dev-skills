@@ -1,0 +1,51 @@
+{
+  "scenario": "AssociationLaunching",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 4,
+  "features_pass": 4,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (launched, ok:true, rendered); Scenario-1 golden captured. Per-scenario UWP navigation/actuation NOT drivable in this environment: the UWP app exposes no UIA content tree and rejected synthetic input (desktop was on the Windows lock screen, blocking window activation). No UWP behavioral baseline; WinUI liveness verified directly instead.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "skipped": false,
+  "features": [
+    {
+      "name": "Launching a file",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Launching_a_file.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Launching_a_file.png",
+      "note": "6/6 controls present in WinUI UIA tree; visually faithful to the UWP golden (same nav list, description, and buttons). Launch default handler, Pick and launch (opened file picker), and Launch with warning produced visible responses; Open With / view-preference are wired but produce out-of-page effects. uwp_responded unknown (UWP UIA/input not drivable)."
+    },
+    {
+      "name": "Launching a URI",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_Launching_a_URI.png",
+      "note": "6/6 controls present including the URI TextBox (default http://www.bing.com) and launch buttons; 3/4 tested actions responded. Renders faithfully. No distinct UWP golden (UWP nav not drivable)."
+    },
+    {
+      "name": "Receiving a file",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/03_Receiving_a_file.png",
+      "note": "3/3 controls present with AutomationIds. Batch capture showed 0/3 live due to leftover modal file-picker dialogs + file-side-effect (capture artifact). Direct re-verification: 'Create test file' created 'Test alsdkcs file.alsdkcs' in Pictures and 'Remove test files' deleted it — controls confirmed LIVE. No distinct UWP golden (UWP nav not drivable)."
+    },
+    {
+      "name": "Receiving a URI",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/04_Receiving_a_URI.png",
+      "note": "Informational page with no interactive controls (matches source). Renders correctly with the correct description text; reachable and non-blank."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "BOOTSTRAP_EXIT=0; seeded MIGRATION-MAPPING.md (6 rows) + TODO markers, agent proceeded directly to migration (session-log turns ~1-3)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught 6 rows still Status=copied on first run (FAIL), then PASS after fix incl. smoke launch pid 29472 (session-log lines 3034-3083)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Its `dotnet build` healthcheck reported '0 WUI analyzer warnings' while the benchmark's `winapp build` emitted WUI1001 on the same picker code — the two builds surface different WUI rulesets, so the validator's WUI gate can pass while winapp build shows advisories.", "suggested_tweak": "Distinguish fatal WUI000x from benign WUI1xxx interop advisories and note winapp build is the authoritative WUI surface." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#wui-analyzer-warnings", "wrong": "'Treat every warning WUI000\\d line ... the analyzer does not produce false positives' — omits the WUI1xxx advisory family entirely (only WUI0002/0003/0004 documented).", "correct": "WUI1xxx (e.g. WUI1001 pickers) is an advisory class that persists even after the correct InitializeWithWindow interop is applied and is benign — distinct from WUI000x runtime-crash residue." }
+  ],
+  "special_apis": [
+    { "api": "Windows.Storage.Pickers.FileOpenPicker", "special_handling": "Requires WinRT.Interop.WindowNative.GetWindowHandle + InitializeWithWindow.Initialize; the WUI1001 analyzer warning still fires on the type usage afterward (syntactic rule) but the picker works — confirmed by parity pass (picker opened)." },
+    { "api": "AppInstance.GetCurrent().GetActivatedEventArgs()", "special_handling": "Replaces UWP OnFileActivated/OnActivated; agent captured it in OnLaunched into a static App.InitialActivationArgs for scenario pages (App.xaml.cs)." },
+    { "api": "windows.fileTypeAssociation / windows.protocol / windows.appUriHandler manifest extensions", "special_handling": "Preserved verbatim from UWP manifest into the WinUI3 Package.appxmanifest; these <uap:Extension> declarations carry over unchanged and are required for the association scenarios." }
+  ],
+  "errors_encountered": [
+    { "error": "Validate-UwpMigration.ps1 FAIL: 6 rows still Status=copied", "root_cause": "Agent finished transforming files but had not flipped MIGRATION-MAPPING.md Status column from copied->done.", "fix": "Flipped rows to done and re-ran validator -> PASS." },
+    { "error": "winapp build warning WUI1001 (FileOpenPicker) x2", "root_cause": "Analyzer flags the WinRT picker type; not resolvable by adding interop (agent had already added InitializeWithWindow at the call sites).", "fix": "None needed — benign advisory; picker works at runtime." },
+    { "error": "warning CA1416 KnownFolders.GetFolderAsync supported on 19041+ (manifest MinVersion 17763)", "root_cause": "Platform-version floor lower than the API's supported floor.", "fix": "Benign warning; behavior verified live (Create/Remove test file worked)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Step 4 validation", "symptom": "First validator run FAILed on Status=copied rows.", "turns_or_retries": "1 retry", "root_cause": "Status column not flipped after migrating each row.", "how_resolved": "Flipped to done, re-ran -> PASS.", "preventable_by": "Skill already prominently documents flipping Status copied->done (SKILL.md Step 1 and Step 4 common-fixes list); this was a one-off slip, not a skill gap." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Scoring could not drive the UWP golden (no UIA tree, lock-screen blocked input).", "workaround": "WinUI liveness verified directly; not a migration-skill concern (eval-side limitation)." }
+  ]
+}

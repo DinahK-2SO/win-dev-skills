@@ -1,0 +1,54 @@
+{
+  "scenario": "AssociationLaunching",
+  "feature": "Association Launching C# Sample",
+  "source": "C:\\ado\\win-dev-skills-benchmark\\agent-benchmark\\uwp-samples-standalone\\Samples\\AssociationLaunching\\cs",
+  "features": [
+    {
+      "number": 1,
+      "title": "Launching a file",
+      "class": "Scenario1_LaunchFile",
+      "controls": [
+        "Launch default handler (Button)",
+        "Launch Open With (Button)",
+        "Pick and launch (Button)",
+        "Launch with warning (Button)",
+        "Default (ComboBox / view-size preference)",
+        "Launch with view preference (Button)"
+      ],
+      "expected_behavior": "Launch a .png with the default handler; optionally show Open With; pick a file and launch it; warn before launching; launch with a view-size preference."
+    },
+    {
+      "number": 2,
+      "title": "Launching a URI",
+      "class": "Scenario2_LaunchUri",
+      "controls": [
+        "URI TextBox (http://www.bing.com)",
+        "Launch default handler (Button)",
+        "Launch Open With (Button)",
+        "Launch with warning (Button)",
+        "Default (ComboBox / view-size preference)",
+        "Launch with view preference (Button)"
+      ],
+      "expected_behavior": "Launch the entered URI with the default handler; optionally Open With; warn before launching; launch with a view-size preference."
+    },
+    {
+      "number": 3,
+      "title": "Receiving a file",
+      "class": "Scenario3_ReceiveFile",
+      "controls": [
+        "Create test file (Button)",
+        "Create test file with no file extension (Button)",
+        "Remove test files (Button)"
+      ],
+      "expected_behavior": "Create a .alsdkcs test file (and an extension-less one) in the Pictures library; remove the created test files."
+    },
+    {
+      "number": 4,
+      "title": "Receiving a URI",
+      "class": "Scenario4_ReceiveUri",
+      "controls": [],
+      "expected_behavior": "Informational page describing how to activate the app via a custom URI scheme (alsdkcs:) or AppUriHandler; no interactive controls."
+    }
+  ],
+  "grading": "Each feature scored pass/partial/fail on (a) structural control coverage in the WinUI 3 UIA tree, (b) behavioral liveness of controls, and (c) visual fidelity vs the UWP golden. score = round(100*(pass + 0.5*partial)/features_total)."
+}

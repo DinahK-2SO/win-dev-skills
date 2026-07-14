@@ -1,0 +1,32 @@
+{
+  "scenario": "AssociationLaunching",
+  "index": 0,
+  "apply": true,
+  "summary": "Clean 100/100 migration; no parity defects. Applied two surgical, generalizable skill-defect fixes around the WinAppSDK analyzer's WUI1xxx interop-advisory family (WUI1001 pickers), which the skill neither documented nor distinguished from the fatal WUI000x runtime-crash class.",
+  "changes": [
+    {
+      "file": "MIGRATION-PATTERNS.md",
+      "section": "WUI analyzer warnings — two classes, handled differently (was: 'WUI analyzer warnings (UWP API residue)')",
+      "edit": "Split into Class 1 WUI000x (UWP-only API residue, MUST fix) and Class 2 WUI1xxx interop/modernization advisories (e.g. WUI1001 pickers). Documented that WUI1001 persists on the WinRT picker type even after InitializeWithWindow is applied (syntactic rule) and is benign — do not chase or revert working interop. Scoped the 'no false positives' claim to WUI000x. Cross-referenced #pickers. Noted winapp build is the authoritative WUI surface vs a plain dotnet build.",
+      "general_rule": "WinAppSDK WUIxxxx warnings are two classes: WUI000x = UWP-only API residue that throws at runtime (fix it); WUI1xxx = interop/modernization advisories that are benign once the documented interop pattern is applied and may keep firing regardless — never revert working code to silence them."
+    },
+    {
+      "file": "scripts/Validate-UwpMigration.ps1",
+      "section": "Section 6 dotnet build healthcheck — WUI warning classification",
+      "edit": "Partitioned WUI warnings into $wuiFatal (WUI000x) and $wuiAdvisory (other WUIxxxx). FAIL only on WUI000x; report WUI1xxx advisories via a [WARN] line. Updated comments to name winapp build as the authoritative WUI surface. Verified PARSE OK.",
+      "general_rule": "The validator must fail only on runtime-crash residue (WUI000x); a correct picker/share/print migration that follows the skill's interop pattern will legitimately emit WUI1xxx advisories and must not be failed for them."
+    },
+    {
+      "file": "SKILL.md",
+      "section": "Step 4 validator checklist item 6",
+      "edit": "Reworded 'zero WUI analyzer warnings' to 'zero WUI000x (UWP-only API residue) warnings; benign WUI1xxx interop advisories (e.g. picker WUI1001) are WARN, not FAIL — do not chase', with a link to the reworked PATTERNS.md section.",
+      "general_rule": "Same two-class distinction, surfaced at the point where the agent reads the validation gate expectations."
+    }
+  ],
+  "rejected_or_deferred": [
+    { "item": "Force the validator's dotnet build to enable the full winapp analyzer ruleset", "reason": "Higher risk / speculative; not evidenced to be needed this run (validator's dotnet build already reported 0 WUI). Two-class partition is the surgical fix." },
+    { "item": "Recommend switching pickers to Microsoft.Windows.Storage.Pickers to eliminate WUI1001", "reason": "New API with version constraints; optional, not required for parity. Documented as optional rather than mandated to avoid over-reach." },
+    { "item": "Encode CA1416 / CS0414 handling", "reason": "Scenario-specific benign warnings, no parity impact — dev-agent-slip, not generalizable." }
+  ],
+  "devils_advocate": "Score was 100, so no change is strictly required by outcome. But the WUI1001 evidence is concrete (appeared in the actual winapp build on correctly-migrated, working picker code), pickers recur across most UWP samples, and the current docs+validator would actively mislead a future agent into chasing or reverting a benign warning. The falsifiable check: if a future picker migration emits WUI1001, the reworked skill now tells the agent it is benign and the validator no longer FAILs it — without weakening the WUI000x runtime-crash gate."
+}

@@ -427,26 +427,39 @@ if (-not $csproj) {
         $allWarnLines = @($buildOut | Select-String -Pattern '\bwarning [A-Z]+\d+:')
         $warnCount = $allWarnLines.Count
 
-        # WUI000X warnings are emitted by the WindowsAppSDK analyzer for
-        # UWP-only API usage (Window.Current, CoreDispatcher,
-        # SystemNavigationManager.GetForCurrentView, etc). They compile, but
-        # the underlying calls throw COMException at runtime — usually inside
-        # Application.Start() before any window can render. Treat them as FAIL
-        # even when the build itself succeeds.
+        # WinAppSDK analyzer warnings come in two classes:
+        #  * WUI000x — UWP-only API residue (Window.Current, CoreDispatcher,
+        #    SystemNavigationManager.GetForCurrentView, etc). They compile, but
+        #    the underlying calls throw COMException at runtime — usually inside
+        #    Application.Start() before any window can render. These are FAIL.
+        #  * Other WUIxxxx (e.g. WUI1001 on Windows.Storage.Pickers.*) are
+        #    interop / API-modernization advisories that do NOT crash at runtime
+        #    and keep firing even after the correct InitializeWithWindow interop
+        #    is applied (see PATTERNS.md#pickers — the analyzer flags the type,
+        #    not the missing call). Report them as WARN, not FAIL, so a correct
+        #    picker/share/print migration is never blocked by benign noise.
         $wuiLines = @($allWarnLines | Where-Object { $_.Line -match '\bwarning\s+WUI\d+:' })
-        $wuiDistinct = @{}
+        $wuiFatal = @{}
+        $wuiAdvisory = @{}
         foreach ($w in $wuiLines) {
             $key = ($w.Line -replace '\s*\[.*\]\s*$','').Trim()
-            if (-not $wuiDistinct.ContainsKey($key)) { $wuiDistinct[$key] = $true }
+            if ($w.Line -match '\bwarning\s+WUI000\d:') {
+                if (-not $wuiFatal.ContainsKey($key)) { $wuiFatal[$key] = $true }
+            } else {
+                if (-not $wuiAdvisory.ContainsKey($key)) { $wuiAdvisory[$key] = $true }
+            }
         }
-        $wuiCount = $wuiDistinct.Count
+        $wuiCount = $wuiFatal.Count
+        if ($wuiAdvisory.Count -gt 0) {
+            Write-Host "[WARN] dotnet build emitted $($wuiAdvisory.Count) WUI interop advisory warning(s) (e.g. WUI1001 pickers) — benign once the PATTERNS.md#pickers interop is applied; not a build failure."
+        }
         if ($wuiCount -gt 0) {
-            Write-Host "[FAIL] dotnet build succeeded but emitted $wuiCount distinct WUI analyzer warning(s) (UWP-only API residue; full diagnostics in .validator-diagnostics.txt):"
+            Write-Host "[FAIL] dotnet build succeeded but emitted $wuiCount distinct WUI000x analyzer warning(s) (UWP-only API residue; full diagnostics in .validator-diagnostics.txt):"
             # Sanitized stdout: print only `<file>(line,col): warning WUIxxxx` —
             # strip the message body which names the offending API.
             $diagBlock = New-Object System.Collections.Generic.List[string]
             $shownN = 0
-            foreach ($w in $wuiDistinct.Keys) {
+            foreach ($w in $wuiFatal.Keys) {
                 [void]$diagBlock.Add($w)
                 if ($shownN -lt 15) {
                     $rest = $w -replace [regex]::Escape($Target + '\'),''
@@ -464,7 +477,7 @@ if (-not $csproj) {
             Add-Diag 'Build: WUI analyzer warnings' (($diagBlock) -join "`r`n")
             $failures++
         } else {
-            Write-Host "[PASS] dotnet build succeeded ($warnCount warning(s), 0 WUI analyzer warning(s))"
+            Write-Host "[PASS] dotnet build succeeded ($warnCount warning(s), 0 WUI000x analyzer warning(s))"
         }
     } else {
         # Capture distinct CS#### errors (collapse the same error reported by multiple TFMs).

@@ -504,9 +504,11 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
 
-### WUI analyzer warnings (UWP API residue)
+### WUI analyzer warnings — two classes, handled differently
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package. It emits **two distinct classes** of `WUIxxxx` warning; do not treat them the same. (Note: a plain `dotnet build` may surface only a subset of these — `winapp build` is where the full ruleset fires, so judge WUI residue from the `winapp build` output, not only the validator's `dotnet build`.)
+
+**Class 1 — `WUI000x`: UWP-only API residue (MUST fix).** These flag UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` FAILs the build healthcheck for each unique one.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |
@@ -514,7 +516,15 @@ The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` p
 | `WUI0003` | `CoreDispatcher is UWP-only` | Use `DispatcherQueue.GetForCurrentThread()` and `TryEnqueue(...)`; see "Threading" above. |
 | `WUI0004` | `SystemNavigationManager.GetForCurrentView() is UWP-only` | Drop the system back button hookup, or use HWND-based COM interop; see "GetForCurrentView Replacements" above. |
 
-Treat every `warning WUI000\d` line in the build output as a defect — the analyzer does not produce false positives. Search for the API name in this document for the recommended replacement.
+Treat every `warning WUI000\d` line as a defect — these do not produce false positives. Search for the API name in this document for the recommended replacement.
+
+**Class 2 — `WUI1xxx`: interop / API-modernization advisories (usually already handled — do NOT chase).** These do **not** crash at runtime; they advise wiring a window handle into a Win32-backed surface or moving to a newer WinAppSDK API. The most common:
+
+| Rule | Symptom | Resolution |
+| --- | --- | --- |
+| `WUI1001` | `FileOpenPicker` / `FileSavePicker` / `FolderPicker` (and other window-targeted surfaces) need a window handle | Apply the `InitializeWithWindow.Initialize(obj, hwnd)` pattern from [Pickers and Win32 Surfaces](#pickers). |
+
+Important: `WUI1001` is a **syntactic** warning on the `Windows.Storage.Pickers.*` type — it keeps firing on the WinRT picker **even after you have correctly added `InitializeWithWindow`**, because the analyzer flags the type usage, not the missing call. Once the `#pickers` interop pattern is in place the picker works at runtime; the residual `WUI1001` is benign advisory noise, **not** a defect. Do **not** rip out the working interop, revert to a different picker, or loop trying to silence it. (Eliminating it entirely means switching to the newer `Microsoft.Windows.Storage.Pickers` API, which needs no HWND interop — optional, never required for parity.)
 
 ### Bootstrap-neutralized helper classes (filter-prone)
 

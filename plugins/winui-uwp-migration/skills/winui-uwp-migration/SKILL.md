@@ -154,7 +154,7 @@ The validator covers:
 3. **`MIGRATION-MAPPING.md` integrity** — `.bootstrap-meta.json` present + parses; row count matches the seeded count; every row has a resolved Triage label; no row stuck at `Status = copied`.
 4. **`MIGRATION-DEFERRED.md` consistency** — every defer row in mapping has a matching row in the deferred file.
 5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability.
-6. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
+6. **`dotnet build` healthcheck** — clean build, zero `WUI000x` (UWP-only API residue) analyzer warnings. Benign `WUI1xxx` interop advisories (e.g. picker `WUI1001`, which persists even after the correct `InitializeWithWindow` interop is applied — see [WUI analyzer warnings](./MIGRATION-PATTERNS.md#wui-analyzer-warnings--two-classes-handled-differently)) are reported as WARN, not FAIL — do not chase them.
 7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
 
 The validator's stdout is intentionally terse: `[FAIL]` lines show only `file:line` (plus an error code where applicable). The full diagnostic text — code snippets, compiler error messages — is written to `.validator-diagnostics.txt` at the project root. **Open that file** to read the details before deciding the fix.
