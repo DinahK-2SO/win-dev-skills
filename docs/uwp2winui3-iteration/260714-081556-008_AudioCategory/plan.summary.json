@@ -1,0 +1,16 @@
+{
+  "scenario": "AudioCategory",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "SKILL.md: require absolute paths for the four skill scripts and warn that a bare relative 'dir\\script.ps1' is parsed as a module-qualified command that fails without setting $LASTEXITCODE — preventing a silent skip / false-pass of the mandatory validation gate (seen in AudioCategory turn 4).",
+    "MIGRATION-PATTERNS.md: add a CS8618 'Common build errors' entry for non-nullable auto-properties on migrated SDK-sample model classes (SampleConfiguration.cs) under the nullable-enabled scaffold, with the one-line initialize/nullable fix."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "UWP golden baseline unavailable (original app hung on splash) is an eval/environment condition in the measurement skills, not a migration-skill gap."
+  ]
+}

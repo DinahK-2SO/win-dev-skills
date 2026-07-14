@@ -1,0 +1,34 @@
+{
+  "scenario": "AudioCategory",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "session-log turn ~19 fetched the deferred-API patterns without opening the full MIGRATION-PATTERNS.md; no friction." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Final run (session-log turn 5, lines 4630-4646) reported 11 PASS checks incl. residue grep, mapping integrity, manifest, clean build, smoke launch." },
+    { "tool": "pickers pattern (MIGRATION-PATTERNS.md#pickers)", "evidence": "FileOpenPicker migrated with WinRT.Interop.InitializeWithWindow + WindowNative.GetWindowHandle(App.MainWindow) on the first try; no COMException." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 invocation", "problem": "Invoked via a bare relative path with backslashes ('& \".github\\skills\\...\\Validate-UwpMigration.ps1\"'); PowerShell parsed the leading '.github' segment as a MODULE-QUALIFIED command and the script never ran, yet $LASTEXITCODE stayed 0 so 'VALIDATE_EXIT=0' printed as if it had passed.", "evidence": "session-log turn 4, lines 4617-4623: '& : The module '.github' could not be loaded. ... VALIDATE_EXIT=0'." }
+  ],
+  "tool_limitations": [
+    { "tool": "skill script invocation guidance", "limitation": "SKILL.md always shows '& \"<skill-root>/scripts/X.ps1\"' but never states <skill-root> must resolve to an ABSOLUTE path, nor warns that a relative 'dir\\script.ps1' is parsed as a module-qualified command that fails without setting $LASTEXITCODE.", "suggested_tweak": "Add a one-line invocation rule near the Process/script list in SKILL.md." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "MediaElement", "special_handling": "Migrated to MediaPlayerElement + MediaPlayer; MediaElement.SetSource(stream, contentType) replaced with MediaSource.CreateFromStorageFile(file) assigned to MediaPlayer.Source. Handled cleanly." },
+    { "api": "FileOpenPicker", "special_handling": "Requires WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd) with hwnd from WindowNative.GetWindowHandle(App.MainWindow) on WinUI 3 desktop. Handled cleanly." },
+    { "api": "CoreDispatcher.RunAsync", "special_handling": "Replaced with DispatcherQueue.TryEnqueue across all call sites. Handled cleanly." }
+  ],
+  "errors_encountered": [
+    { "error": "warning CS8618: Non-nullable property 'Title'/'ClassType' must contain a non-null value when exiting constructor (SampleConfiguration.cs Scenario class)", "root_cause": "The migrated SDK-sample model class (copied verbatim from the UWP source, which had no nullable context) has non-nullable auto-properties ('string Title', 'Type ClassType'); the WinUI scaffold enables <Nullable>enable</Nullable>, so the compiler flags them.", "fix": "Initialized the properties (Title = string.Empty; ClassType = typeof(object)). session-log turns 1-3, lines 4552-4610." },
+    { "error": "& : The module '.github' could not be loaded", "root_cause": "Validate-UwpMigration.ps1 invoked via a bare relative path with backslashes; PowerShell treats a leading 'name\\...' token as a module-qualified command, so the script was never executed and $LASTEXITCODE was left unchanged (0).", "fix": "Re-invoked with the absolute path. session-log turns 4-5, lines 4615-4646." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Validate-UwpMigration.ps1 invocation (session-log turns 4-5)", "symptom": "Validator command emitted '& : The module '.github' could not be loaded' and never ran, but printed VALIDATE_EXIT=0.", "turns_or_retries": "1 retry", "root_cause": "Relative script path with backslashes parsed as a module-qualified command; failure does not set $LASTEXITCODE.", "how_resolved": "Re-invoked the script with an absolute path.", "preventable_by": "SKILL.md stating that skill scripts must be invoked via an absolute (or .\\-prefixed) path, and that a relative 'dir\\script.ps1' silently fails without changing $LASTEXITCODE." },
+    { "where": "SampleConfiguration.cs (session-log turns 1-3)", "symptom": "4x CS8618 nullable warnings on the migrated Scenario model class.", "turns_or_retries": "1 fix turn", "root_cause": "SDK-sample model class with non-nullable auto-properties under the nullable-enabled WinUI scaffold.", "how_resolved": "Added default initializers.", "preventable_by": "A 'Common build errors' entry naming CS8618 on migrated model/config classes and the one-line fix." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Original UWP app hung on its splash screen during scoring (no live golden baseline).", "workaround": "Not a migration-skill issue; scoring fell back to the source-derived checklist + structural parity. Out of scope for the migration skill." }
+  ]
+}

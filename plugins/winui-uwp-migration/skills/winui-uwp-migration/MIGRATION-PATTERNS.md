@@ -27,6 +27,19 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS8618: Non-nullable property/field must contain a non-null value` (migrated model classes)
+
+The WinUI scaffold's `.csproj` enables `<Nullable>enable</Nullable>`, but UWP SDK-sample model/config classes are copied in verbatim from a source that had no nullable context. Classes with non-nullable auto-properties — most commonly the sample's `SampleConfiguration.cs` `Scenario` (`public string Title { get; set; }`, `public Type ClassType { get; set; }`) or `ControlInfoData`-style data items — then emit `CS8618` ("must contain a non-null value when exiting constructor"). These are warnings, not errors, so the build still succeeds, but clean them up so the warning count stays at zero.
+
+Fix by initializing each property (or making it nullable):
+
+```csharp
+public string Title { get; set; } = string.Empty;
+public Type ClassType { get; set; } = typeof(object);   // or: = null!;
+```
+
+This recurs in essentially every Microsoft UWP SDK sample, because they all ship the same `SampleConfiguration.cs` model idiom.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:

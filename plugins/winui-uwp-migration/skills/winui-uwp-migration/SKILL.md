@@ -29,6 +29,16 @@ Four scripts do every mechanical step. Your job is the judgement work in between
 - `scripts/Test-AppLaunch.ps1` — launches the built app and tells you whether it survived startup; on a crash it captures the real exception (native code + .NET type/stack) and points at the fix. Your launch step throughout Step 3.
 - `scripts/Validate-UwpMigration.ps1` — final-validation gate at the end of Step 4.
 
+> **Invoking these scripts (avoid a silent skip):** always resolve `<skill-root>` to an
+> **absolute** path (or prefix a relative path with `.\`). Never invoke a script via a
+> bare relative path that starts with a directory name and a backslash — e.g.
+> `& "some\dir\Validate-UwpMigration.ps1"` — because PowerShell parses the leading segment
+> as a **module-qualified command name** (`Import-Module`-style), so the script *never
+> runs* and, critically, `$LASTEXITCODE` is left **unchanged from the previous command**.
+> An agent that keys off the exit code then reads a false success and skips the gate. After
+> running any script, confirm it actually executed (look for its own header/`PASS`/`FAIL`
+> output) — do not trust `$LASTEXITCODE` alone.
+
 ### Step 0 — Bootstrap (mandatory)
 
 🛑 **Before any file edit, any `view` of the source, any analysis** — your literal first three powershell commands when this skill is invoked MUST be:
