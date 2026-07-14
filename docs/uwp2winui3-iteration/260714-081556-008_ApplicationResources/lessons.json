@@ -1,0 +1,36 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Copied .cs/.xaml/.resw/appdata from the UWP source and produced MIGRATION-MAPPING.md + MIGRATION-DEFERRED.md; 12/13 scenarios migrated and function." },
+    { "tool": "unsupported-api-inventory.json triage", "evidence": "Flagged ResourceContext/ResourceLoader.GetForCurrentView() via the 'getforcurrentview' anchor, routing the agent to a PATTERNS.md section." }
+  ],
+  "tools_problematic": [
+    { "tool": "unsupported-api-inventory.json 'getforcurrentview' routing", "problem": "The single generic '\\bGetForCurrentView\\s*\\(' adaptable pattern routes ALL GetForCurrentView() calls to the windowing-only 'getforcurrentview' section, which declares 'None of the GetForCurrentView() patterns work in WinUI 3 desktop'. That absolute statement is false for the resource flavors and caused the agent to defer scenario9.", "evidence": "MIGRATION-DEFERRED.md lists scenario9.xaml.cs with anchor 'getforcurrentview'; constants.cs omits Scenario9 entirely." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Verifies Package.appxmanifest image references resolve under Assets/, but does NOT verify in-app XAML 'Image Source=' / ms-appx file references resolve to a copied physical (or qualifier-variant) file.", "suggested_tweak": "Optionally extend Section 7-style checks to warn when a XAML Image Source path has no matching file (or scale-/contrast-/language-variant) under the project." }
+  ],
+  "failed_apis": [
+    { "api": "ResourceContext.GetForCurrentView()", "why_tried": "scenario9 (Override Languages) sets the current view's default context language at runtime and listens for QualifierValues.MapChanged.", "root_cause": "Skill's 'getforcurrentview' section says none of the GetForCurrentView() patterns work, so the agent deferred the file instead of using the trivial view-independent replacement.", "fix": "Replace with 'new ResourceContext()' (or 'ResourceManager.Current.DefaultContext'), set context.Languages / context.QualifierValues[...] to override, and resolve via ResourceManager MainResourceMap.GetValue(id, context). MapChanged/Reset work on the constructed context. The agent already used exactly this pattern in the passing scenarios 7/8/10." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md #getforcurrentview", "wrong": "'None of the GetForCurrentView() patterns work in WinUI 3 desktop.' (absolute)", "correct": "Only the view/windowing singletons lack a desktop equivalent. ResourceLoader.GetForCurrentView() -> new ResourceLoader(); ResourceContext.GetForCurrentView()/GetForViewIndependentUse() -> new ResourceContext(). These are migrations, not deferrals." }
+  ],
+  "special_apis": [
+    { "api": "ResourceContext runtime qualifier override", "special_handling": "Construct a view-independent ResourceContext, then set context.Languages or context.QualifierValues['language'|'scale'|'contrast'|'homeregion'] and resolve named resources via ResourceManager MainResourceMap.GetValue(id, context)." },
+    { "api": "MRT image/file resource variants (Image Source, ms-appx:///)", "special_handling": "Physical qualifier-variant files (.scale-###, .contrast-###, language folders en-US/, ja/) must be carried into the project as Content; MRT resolves the logical name at runtime. In UWP SDK samples these live in a shared/ sibling folder, not the cs/ project folder." }
+  ],
+  "errors_encountered": [
+    { "error": "scenario2 images render as blank white boxes", "root_cause": "The Images/ qualifier-variant tree (shared/images/, incl. en-US/ and ja/ folders and .scale-*/.contrast-* files) was never copied into the migrated project; only shared/strings and shared/xaml were carried over.", "fix": "Copy the full in-app image/file resource variant tree into the WinUI 3 project (Build Action = Content) so MRT can resolve Image Source='Images/projector.png'." },
+    { "error": "scenario9 (Override Languages) dropped from navigation", "root_cause": "Deferred on the false premise that ResourceContext.GetForCurrentView() has no WinUI 3 desktop equivalent.", "fix": "Migrate with new ResourceContext() + qualifier override (see failed_apis)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "scenario9.xaml.cs triage", "symptom": "Labeled 'defer' and removed Scenario9 from constants.cs, even though a near-identical view-independent ResourceContext pattern was successfully applied in scenarios 7/8/10.", "turns_or_retries": "1 (deferred without attempting the resource replacement)", "root_cause": "Overbroad 'getforcurrentview' guidance the analyzer routed it to.", "how_resolved": "Not resolved — feature dropped.", "preventable_by": "Carve the resource-loader/resource-context flavors out of the getforcurrentview 'no equivalent' claim and give them explicit replacements in the MRT section." },
+    { "where": "scenario2 image resources", "symptom": "Descriptive text migrated but both Image controls blank.", "turns_or_retries": "n/a (silently omitted the image folder)", "root_cause": "No skill guidance to carry in-app qualifier-variant image/file resources; sample stored them in shared/images/.", "how_resolved": "Not resolved.", "preventable_by": "Add an 'in-app image & file resource variants' subsection instructing the agent to copy the qualifier-variant tree (from shared/ if present) as Content and verify each XAML Image Source resolves." }
+  ],
+  "missing_tooling": [
+    { "need": "A check that in-app XAML Image Source / ms-appx file references resolve to a copied file or qualifier-variant.", "would_have_saved": "Scenario2's blank-image partial." }
+  ],
+  "env_issues": []
+}

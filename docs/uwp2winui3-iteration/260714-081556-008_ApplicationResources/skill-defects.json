@@ -1,0 +1,27 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Agent deferred scenario9 (Override Languages) and dropped it from navigation because it believed ResourceContext.GetForCurrentView() has no WinUI 3 desktop equivalent.",
+      "evidence": "MIGRATION-DEFERRED.md: 'scenario9.xaml.cs | getforcurrentview'; constants.cs omits Scenario9; migration-score.json feature 'Override Languages' verdict=fail. Yet scenario7/8/10 (pass) use 'new ResourceContext()' + ResourceManager.Current.MainResourceMap.",
+      "skill_search": "grepped winui-uwp-migration for GetForCurrentView / ResourceContext / ResourceLoader",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md #getforcurrentview: 'None of the GetForCurrentView() patterns work in WinUI 3 desktop — there is no implicit per-view singleton.' The replacement table lists only windowing APIs (ApplicationView, UIViewSettings, DisplayInformation, CoreApplication, SystemNavigationManager).",
+      "root_cause": "The absolute 'None ... work' claim plus a windowing-only replacement table gives no exit for the resource-loader/resource-context flavors, so the analyzer's generic 'getforcurrentview' anchor routes them to a 'defer' conclusion. In reality ResourceLoader.GetForCurrentView() -> new ResourceLoader() and ResourceContext.GetForCurrentView()/GetForViewIndependentUse() -> new ResourceContext() (view-independent) are trivial migrations.",
+      "proposed_fix": "In MIGRATION-PATTERNS.md: (a) narrow the #getforcurrentview claim to the view/windowing singletons; (b) add two rows mapping ResourceLoader.GetForCurrentView([name]) -> new ResourceLoader([name]) and ResourceContext.GetForCurrentView()/GetForViewIndependentUse() -> new ResourceContext(), each cross-referencing the Resources section and marked 'migrate, do not defer'; (c) extend the 'Resources: MRT -> MRT Core' section with ResourceContext runtime qualifier override (context.Languages / context.QualifierValues['language'|'scale'|'contrast'|'homeregion'], MainResourceMap.GetValue(id, context), MapChanged/Reset on the constructed context).",
+      "generalizes": "Any localizable UWP app that overrides language/scale/contrast at runtime uses ResourceContext.GetForCurrentView()/GetForViewIndependentUse(); the overbroad claim would cause the same false deferral in every such migration."
+    },
+    {
+      "problem": "In-app image/file resource variants referenced by XAML Image Source / ms-appx:/// were not carried into the migrated project, so scenario2 images render blank.",
+      "evidence": "Migrated project has no Images/ folder or projector*.png (Get-ChildItem found none outside .uwp-source); source variants live in shared/images/ (en-US/, ja/, .scale-*/.contrast-*). migration-score.json scenario2 verdict=partial 'blank white boxes'.",
+      "skill_search": "grepped for Image / ms-appx / scale- / qualifier / Content / shared in winui-uwp-migration",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill only documents reconciling Package.appxmanifest LOGO assets (Assets/). It says nothing about carrying over in-app application resources — qualifier-variant images/data referenced by XAML Image Source or code ms-appx URIs — which MRT resolves at runtime. UWP SDK samples commonly store these in a shared/ sibling folder, so pointing Initialize/copy at the cs/ project folder alone drops them.",
+      "proposed_fix": "Add an 'In-app image & file resource variants' subsection to the Resources area of MIGRATION-PATTERNS.md: copy the full qualifier-variant resource tree (e.g. Images/, en-US/, ja/, *.scale-*, *.contrast-*, appdata/) into the WinUI 3 project as Build Action = Content, including from a shared/ sibling folder if the sample uses one; then verify each XAML 'Image Source=' / ms-appx path resolves to a copied file or variant.",
+      "generalizes": "Localized/scaled UWP apps and virtually all UWP SDK samples ship qualifier-variant resource files in a shared/ folder; without explicit guidance the migration silently drops them and images/files render blank across many scenarios."
+    }
+  ]
+}

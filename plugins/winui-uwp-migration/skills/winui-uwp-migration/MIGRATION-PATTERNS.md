@@ -253,7 +253,7 @@ Validator catches this race with a 10s smoke launch after the build healthcheck 
 <a id="getforcurrentview"></a>
 ## GetForCurrentView() Replacements
 
-None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is no implicit per-view singleton.
+The **view/windowing** `GetForCurrentView()` singletons have no WinUI 3 desktop equivalent — there is no implicit per-view singleton.
 
 | UWP API | WinUI 3 Replacement |
 |---------|---------------------|
@@ -262,6 +262,15 @@ None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is 
 | `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+
+**Not every `GetForCurrentView()` is a deferral.** The *resource* flavors have direct, trivial replacements — **migrate them, do not defer the file**:
+
+| UWP API | WinUI 3 Replacement |
+|---------|---------------------|
+| `ResourceLoader.GetForCurrentView([name])` | `new ResourceLoader([name])` — see [Resources](#resources-mrt) |
+| `ResourceContext.GetForCurrentView()` / `ResourceContext.GetForViewIndependentUse()` | `new ResourceContext()` (view-independent) — see [Resources](#resources-mrt) |
+
+Because the analyzer's generic `getforcurrentview` signal fires on *all* of these, confirm which family a hit belongs to before triaging: a `ResourceLoader`/`ResourceContext.GetForCurrentView()` hit is a **migrate-with-adaptation**, never a `defer`.
 
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces
@@ -347,6 +356,7 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 
 See the [toast notifications guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/toast-notifications) and [push notifications guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/notifications).
 
+<a id="resources-mrt"></a>
 ## Resources: MRT → MRT Core
 
 `.resw` files are still supported, but the API surface changed. See the [MRT Core migration guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/mrtcore).
@@ -364,6 +374,32 @@ WinAppSDK:
 var loader = new Microsoft.Windows.ApplicationModel.Resources.ResourceLoader();
 var s = loader.GetString("Greeting");
 ```
+
+### ResourceContext and runtime qualifier override (language / scale / contrast / region)
+
+`ResourceContext.GetForCurrentView()` and `ResourceContext.GetForViewIndependentUse()` are **not** deferrals — construct the context directly. A view-independent context is the correct default in WinUI 3 desktop:
+
+```csharp
+// UWP: var ctx = ResourceContext.GetForCurrentView();   // or GetForViewIndependentUse()
+var ctx = new ResourceContext();                          // view-independent
+
+// Override qualifiers at runtime (the "Override Languages" / multi-dimensional cases):
+ctx.QualifierValues["language"]  = "fr-FR";   // also "scale", "contrast", "homeregion"
+// or, for language specifically:  ctx.Languages = new[] { "fr-FR" };
+
+var map = ResourceManager.Current.MainResourceMap.GetSubtree("Resources");
+string value = map.GetValue("string1", ctx).ValueAsString;
+```
+
+`QualifierValues.MapChanged` and `ResourceContext.Reset()` continue to work on the constructed context. Only the *implicit per-view* acquisition is gone, not the qualifier-override capability — so scenarios that programmatically override language/scale/contrast/region migrate faithfully and must not be dropped from the app.
+
+### In-app image & file resource variants (`Image Source`, `ms-appx:///`)
+
+XAML `<Image Source="Images/foo.png"/>` and code `ms-appx:///…` references resolve a **logical** name to a **physical qualifier-variant** file at runtime via MRT (e.g. `Images/en-US/projector.scale-140_contrast-standard.png`). These variant files are application resources, **separate from the `Assets/` logo images in the manifest**, and the skill's manifest-asset reconciliation does **not** cover them.
+
+- Copy the **entire qualifier-variant resource tree** into the WinUI 3 project — the folder(s) the XAML/code reference (`Images/`, `appdata/`, etc.), including language subfolders (`en-US/`, `ja/`) and filename-qualified files (`*.scale-100`, `*.contrast-standard`, `*.targetsize-*`). Include them with **Build Action = Content**.
+- **UWP SDK samples usually store these in a `shared/` sibling folder** (e.g. `shared/images/`, `shared/strings/`) that the platform `cs/` project links via `<Content Include="..\shared\...">`. If you point the copy step at the `cs/` project folder alone you will silently drop them. Copy from the `shared/` root too.
+- After copying, **verify every `Image Source=` and `ms-appx:///` path resolves** to a file (or a scale-/contrast-/language-variant of it) under the project. A missing variant tree renders as a **blank image / empty box**, not a build error.
 
 ## Text Rendering: DirectWrite → DWriteCore
 

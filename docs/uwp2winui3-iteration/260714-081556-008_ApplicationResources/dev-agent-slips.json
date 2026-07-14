@@ -1,0 +1,14 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Even after writing a working view-independent ResourceContext version of scenario9.xaml.cs (context.Languages = lang; ResourceManager.Current.MainResourceMap.GetSubtree('Resources').GetValue('string1', context)), the agent still removed Scenario9 from constants.cs, so the feature was unreachable.",
+      "evidence": "scenario9.xaml.cs in the migrated app contains the working pattern, but constants.cs omits the 'Override Languages' entry.",
+      "covered_clearly_at": "Not adequately covered — the removal was driven by the overbroad #getforcurrentview 'defer' framing, so the primary cause is the skill-defect (item 1 in skill-defects.json), not a pure slip.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The secondary 'forgot to re-add to the nav list' action is a one-off; fixing the underlying #getforcurrentview defect removes the reason to defer in the first place, so no additional slip-specific skill text is warranted."
+    }
+  ]
+}

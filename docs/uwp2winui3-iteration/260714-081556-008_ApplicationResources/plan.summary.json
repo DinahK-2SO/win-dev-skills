@@ -1,0 +1,18 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Fix overbroad GetForCurrentView() guidance: carve out ResourceLoader/ResourceContext.GetForCurrentView() as direct migrations (new ResourceLoader()/new ResourceContext()) so localizable resource scenarios aren't wrongly deferred and dropped",
+    "Add MRT ResourceContext runtime qualifier-override recipe (language/scale/contrast/region via QualifierValues, MainResourceMap.GetValue, MapChanged/Reset) to the Resources section",
+    "Add 'in-app image & file resource variants' guidance: copy the qualifier-variant tree (incl. from a UWP sample's shared/ folder) as Content and verify Image Source/ms-appx paths resolve, so images don't render blank",
+    "Route ResourceContext/ResourceLoader.GetForCurrentView analyzer TODOs to the resources section instead of the windowing one"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json"
+  ],
+  "deferred_to_human": [
+    "Optional Tier-1: extend Validate-UwpMigration.ps1 to warn when a XAML Image Source / ms-appx path resolves to no file or qualifier-variant under the project."
+  ]
+}

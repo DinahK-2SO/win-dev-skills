@@ -1,0 +1,40 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Agent deferred and dropped scenario9 (Override Languages) believing ResourceContext.GetForCurrentView() has no WinUI 3 desktop equivalent.",
+      "evidence": "MIGRATION-DEFERRED.md 'scenario9.xaml.cs | getforcurrentview'; constants.cs omits Scenario9; migration-score.json 'Override Languages' verdict=fail. Working view-independent ResourceContext pattern is used by passing scenarios 7/8/10.",
+      "root_cause": "MIGRATION-PATTERNS.md #getforcurrentview stated 'None of the GetForCurrentView() patterns work in WinUI 3 desktop' with a windowing-only replacement table, giving no exit for the resource-loader/resource-context flavors; the analyzer's generic getforcurrentview signal routed them there.",
+      "tier": 3,
+      "change": "Narrowed the #getforcurrentview claim to view/windowing singletons; added a 'not every GetForCurrentView is a deferral' table mapping ResourceLoader.GetForCurrentView()->new ResourceLoader() and ResourceContext.GetForCurrentView()/GetForViewIndependentUse()->new ResourceContext(); extended the Resources (MRT) section with a ResourceContext runtime qualifier-override recipe (QualifierValues/Languages, MainResourceMap.GetValue, MapChanged/Reset).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent migrates ResourceContext/ResourceLoader.GetForCurrentView() scenarios instead of deferring them.",
+      "falsifiable_check": "On re-run, scenario9 (Override Languages) is present in constants.cs and reachable; the migration-score 'Override Languages' feature goes fail->pass; scenario9.xaml.cs is not listed in MIGRATION-DEFERRED.md."
+    },
+    {
+      "problem": "In-app image/file resource variants were not carried over; scenario2 images render blank.",
+      "evidence": "Migrated project has no Images/ tree or projector*.png; source variants live in shared/images/ (en-US/, ja/, .scale-*/.contrast-*). migration-score.json scenario2 verdict=partial.",
+      "root_cause": "Skill only covers reconciling manifest Assets/ logos; no guidance to carry in-app qualifier-variant resources (Image Source / ms-appx), which UWP SDK samples store in a shared/ sibling folder.",
+      "tier": 3,
+      "change": "Added an 'In-app image & file resource variants' subsection: copy the full qualifier-variant tree (incl. from shared/) as Build Action=Content and verify every Image Source / ms-appx path resolves; noted that a missing variant tree renders blank, not a build error.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent copies the image/file resource variant tree so MRT resolves them at runtime.",
+      "falsifiable_check": "On re-run, the migrated project contains the Images/ variant tree and scenario2's two Image controls render the projector images (partial->pass)."
+    },
+    {
+      "problem": "The analyzer's generic getforcurrentview signal injected a TODO pointing only at the windowing section for resource-context/loader hits.",
+      "evidence": "unsupported-api-inventory.json had a single '\\bGetForCurrentView\\s*\\(' -> 'getforcurrentview' adaptable entry.",
+      "root_cause": "No specific routing for the resource flavors, so the injected TODO led the agent to the windowing-only guidance.",
+      "tier": 1,
+      "change": "Added two more-specific adaptable entries (ResourceLoader.GetForCurrentView and ResourceContext.GetForCurrentView/GetForViewIndependentUse) ordered before the generic entry, routing their injected TODO to the #resources-mrt anchor.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+      "expected_effect": "The inline TODO for resource-context/loader points at the resources section that explains the direct replacement, reinforcing the prose fix (can't be ignored).",
+      "falsifiable_check": "On re-run, files using ResourceContext/ResourceLoader.GetForCurrentView carry a TODO 'see PATTERNS.md#resources-mrt' and are labeled migrate-with-adaptation, not defer."
+    }
+  ],
+  "deferred_to_human": [
+    "Optional Tier-1: extend Validate-UwpMigration.ps1 to warn when a XAML 'Image Source=' / ms-appx path has no matching file or scale-/contrast-/language-variant under the project (parallel to the existing manifest-asset check)."
+  ]
+}

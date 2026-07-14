@@ -1,0 +1,17 @@
+{
+  "scenario": "ApplicationResources",
+  "index": 0,
+  "score": 88,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 9, "text": "Override Languages (scenario9) — runtime language override of resource lookup", "status": "fail", "reason": "Dropped from the migrated scenario list (constants.cs skips Scenario9); unreachable. Deferred on the false premise that ResourceContext.GetForCurrentView() has no WinUI 3 desktop equivalent.", "suspected_skill_gap": "MIGRATION-PATTERNS.md #getforcurrentview overbroadly states no GetForCurrentView() pattern works; the resource-context flavor has a trivial view-independent replacement." },
+    { "id": 2, "text": "File Resources In XAML (scenario2) — scale/language image variants", "status": "partial", "reason": "Descriptive text renders but both Image controls are blank white boxes; physical image variant files do not resolve.", "suspected_skill_gap": "No guidance to carry in-app qualifier-variant image/file resources (shared/images tree) into the project as Content." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "File Resources In XAML", "uwp": "Two projector images (scale/language variants) shown", "winui": "Two blank white boxes", "screenshot_ref": "parity/winui3/manual/s02.png" },
+    { "feature": "Override Languages", "uwp": "Navigation entry + language override ComboBox", "winui": "No navigation entry (scenario missing)", "screenshot_ref": null }
+  ],
+  "missing_features": ["Override Languages (scenario9)"],
+  "summary": "12/13 scenarios migrated faithfully. Scenario9 dropped due to a false 'no equivalent' deferral of ResourceContext.GetForCurrentView(); scenario2 images blank because in-app image resource variants were not carried over."
+}

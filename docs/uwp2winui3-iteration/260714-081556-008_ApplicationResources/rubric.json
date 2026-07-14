@@ -1,0 +1,111 @@
+{
+  "scenario": "ApplicationResources",
+  "created_at": "2026-07-14T16:20:00Z",
+  "uwp_capture_status": "partial: UWP app launched (ok:true, pid 7136) but remained on its extended splash screen ('Windows platform sample'); its XAML content never became UIA-accessible, so per-scenario golden/behavioral capture was unavailable. Only the splash frame was captured (parity/baseline/screenshots/01_ApplicationResources.png). Scenarios were judged against the well-documented source behavior and the migrated app's own rendered/behavioral output.",
+  "features": [
+    {
+      "id": "scenario-1-string-resources-xaml",
+      "name": "String Resources In XAML",
+      "description": "A TextBlock uses x:Uid to load a localized string resource (WelcomeHeader) from resources.resw.",
+      "expected_behaviour": ["Output shows the localized string 'Hello World'"],
+      "screenshot": "parity/baseline/screenshots/01_ApplicationResources.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario-2-file-resources-xaml",
+      "name": "File Resources In XAML",
+      "description": "Image elements reference logical images that resolve to physical scale/language/contrast variants in the package.",
+      "expected_behaviour": ["Two images (scale variant, language+scale variant) are displayed"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-3-string-resources-code",
+      "name": "String Resources In Code",
+      "description": "ResourceLoader is used to load a string resource in code; a Show Message button displays it.",
+      "expected_behaviour": ["Clicking 'Show Message' displays the localized string 'Hello World'"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-4-appx-manifest-resources",
+      "name": "Resources in the AppX manifest",
+      "description": "Explains manifest ms-resource: string references.",
+      "expected_behaviour": ["Descriptive text about AppX manifest resources is shown"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-5-additional-resource-files",
+      "name": "Additional Resource Files",
+      "description": "Loading strings from additional .resw files via path-absolute URIs; Show Message button.",
+      "expected_behaviour": ["Descriptive text + Show Message button present and wired"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-6-class-library-resources",
+      "name": "Class Library Resources",
+      "description": "Retrieve resources from a class library; Show Message button.",
+      "expected_behaviour": ["Descriptive text + Show Message button present and wired"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-7-runtime-changes-events",
+      "name": "Runtime Changes/Events",
+      "description": "React to language/scale/contrast changes at runtime; Show Message button.",
+      "expected_behaviour": ["Descriptive text + Show Message button present and wired"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-8-application-languages",
+      "name": "Application Languages",
+      "description": "Shows app languages and PrimaryLanguageOverride via a ComboBox + Show Message.",
+      "expected_behaviour": ["ComboBox for language override present", "Shows current app language(s), e.g. 'en-US, fr-FR'"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-9-override-languages",
+      "name": "Override Languages",
+      "description": "Overrides app languages using ResourceContext.GetForCurrentView (per-view language override).",
+      "expected_behaviour": ["Scenario is reachable from navigation", "Demonstrates per-view language override"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-10-multi-dimensional-fallback",
+      "name": "Multi-dimensional fallback",
+      "description": "Choose Language/Scale/Contrast/HomeRegion qualifiers and view the resolved resource.",
+      "expected_behaviour": ["Four qualifier ComboBoxes present", "Show Message resolves the qualified resource"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-11-working-with-webservices",
+      "name": "Working with webservices",
+      "description": "Resolve a URL resource for a web service based on language.",
+      "expected_behaviour": ["Clicking 'Get Url' displays a resolved URL, e.g. http://api.contoso.com/Feed?lang=en"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-12-non-ui-threads",
+      "name": "Retrieving resources in non-UI threads",
+      "description": "Retrieve resources on a non-UI thread using ResourceContext / GetForViewIndependentUse.",
+      "expected_behaviour": ["Show Results button present", "View-dependent and view-independent resource outputs shown"],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "scenario-13-file-resources-code",
+      "name": "File resources in code",
+      "description": "Access a file resource (appdata.dat) via ms-appx URI with the DXFeatureLevel qualifier set via SetGlobalQualifierValue.",
+      "expected_behaviour": ["DXFeatureLevel ComboBox present", "Shows data read from file, e.g. 'This data file is for DX9'"],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}
