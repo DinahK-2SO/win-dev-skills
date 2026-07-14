@@ -124,12 +124,19 @@ $nsChanged = 0
 foreach ($f in $nsFiles) {
     $orig = [System.IO.File]::ReadAllText($f.FullName)
     $new = $orig -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml'
+    # The Colors/ColorHelper types moved out of Windows.UI into Microsoft.UI too
+    # (unlike the rest of Windows.UI.*, e.g. Core/Input/ViewManagement/Popups, which
+    # did NOT move). These two are extremely common (SolidColorBrush(Colors.Red),
+    # status banners, etc.) and otherwise produce guaranteed CS0234 build errors.
+    # Match the exact tokens so the Windows.UI.Color *struct* is left untouched.
+    $new = $new -replace 'Windows\.UI\.ColorHelper', 'Microsoft.UI.ColorHelper'
+    $new = $new -replace 'Windows\.UI\.Colors', 'Microsoft.UI.Colors'
     if ($new -ne $orig) {
         [System.IO.File]::WriteAllText($f.FullName, $new)
         $nsChanged++
     }
 }
-Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+Write-Host "    Rewrote Windows.UI.Xaml/Colors/ColorHelper -> Microsoft.UI.* in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 
 # ─── 4a. Filter-prone class neutralization ────────────────────────────────────
 # Some SDK Samples boilerplate helpers contain UWP-specific patterns whose

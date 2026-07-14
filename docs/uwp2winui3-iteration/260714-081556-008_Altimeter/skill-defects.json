@@ -1,0 +1,27 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0234: 'Colors' does not exist in the namespace 'Windows.UI' — copied UWP code using SolidColorBrush(Windows.UI.Colors.Green/Red) fails to build.",
+      "evidence": "session-log.txt build error: MainPage.xaml.cs(80,67)/(83,67) 'error CS0234: The type or namespace name Colors does not exist in the namespace Windows.UI'; fixed at L3832 by switching to Colors.Green/Red (Microsoft.UI).",
+      "skill_search": "grepped winui-uwp-migration for 'Windows.UI.Colors', 'Colors', and the Initialize-UwpMigration.ps1 rewrite block",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize-UwpMigration.ps1 header/comment claims the bootstrap does 'the bulk Windows.UI.Xaml -> Microsoft.UI.Xaml namespace rewrite'; the rewrite loop only replaces 'Windows.UI.Xaml' and silently leaves Windows.UI.Colors/ColorHelper, which also moved to Microsoft.UI.",
+      "root_cause": "Colors and ColorHelper moved from Windows.UI to Microsoft.UI in WinUI 3, but the automated rewrite covers only Windows.UI.Xaml, so these sibling moves always require manual fixup.",
+      "proposed_fix": "Extend the Initialize-UwpMigration.ps1 rewrite loop to also replace the exact tokens Windows.UI.Colors -> Microsoft.UI.Colors and Windows.UI.ColorHelper -> Microsoft.UI.ColorHelper (leaving the Windows.UI.Color struct and non-moved Windows.UI.* namespaces untouched). Add the ColorHelper row to the Namespace Mapping table.",
+      "generalizes": "SolidColorBrush(Colors.X) and named colors appear in a large fraction of UWP apps (status banners, theming, adornments); every such app hits this exact CS0234 unless the tool rewrites it. Tier-1 tooling fix that can't be ignored."
+    },
+    {
+      "problem": "CS0118 'X is a namespace but is used like a type' plus a CS0103 'App does not exist' cascade when the project root namespace equals a WinRT type name and/or differs from the copied UWP source's namespace.",
+      "evidence": "session-log.txt: Scenario2_Polling.xaml.cs(22,17) 'error CS0118: Altimeter is a namespace but is used like a type'; MainPage/Scenario*.xaml.cs 'error CS0103: The name App does not exist'; UWP source uses 'namespace SDKTemplate' (L462+) while scaffold App/MainWindow used 'namespace Altimeter'; agent worked around it with 'using AltimeterSensor = Windows.Devices.Sensors.Altimeter;' (L2859/L3187).",
+      "skill_search": "grepped for 'namespace collision', 'is a namespace but is used like a type', 'CS0118', 'RootNamespace', 'SDKTemplate' — no coverage of the app-namespace-vs-WinRT-type collision or scaffold-vs-source namespace mismatch (only the Windows.UI.Xaml-vs-Microsoft.UI.Xaml dual-type case is documented).",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The WinUI scaffold sets the root namespace to the app/project name; UWP SDK samples are named after the WinRT API (Altimeter, Compass, Barometer, ...) and use 'namespace SDKTemplate' internally. Leaving the scaffold files on the app-name namespace both shadows the identically-named WinRT type (CS0118) and desynchronizes from the copied pages so 'App' is invisible (CS0103).",
+      "proposed_fix": "Add a MIGRATION-PATTERNS.md build-error section: unify every file onto the UWP source's original root namespace (rename the few scaffold-generated files rather than the many copied ones), and call out the sensor/device-name vs WinRT-type collision with the alias fallback.",
+      "generalizes": "The benchmark corpus and UWP samples in general name projects after the API; sensor/device samples (Altimeter, Compass, Accelerometer, Gyrometer, Barometer, Pedometer, ProximitySensor, Magnetometer) all reproduce the exact CS0118 collision, and any scaffold-vs-source namespace mismatch reproduces the CS0103 App cascade."
+    }
+  ]
+}

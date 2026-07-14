@@ -1,0 +1,29 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Copied UWP code using Windows.UI.Colors / Windows.UI.ColorHelper fails to build (CS0234) because the bootstrap only rewrites Windows.UI.Xaml.",
+      "evidence": "session-log.txt MainPage.xaml.cs(80,67)/(83,67) 'error CS0234: ... Colors does not exist in the namespace Windows.UI'; lessons.json errors_encountered[0].",
+      "root_cause": "Colors and ColorHelper moved from Windows.UI to Microsoft.UI in WinUI 3, but Initialize-UwpMigration.ps1's namespace mass-replace only handles Windows.UI.Xaml.",
+      "tier": 1,
+      "change": "Extend the namespace rewrite loop in Initialize-UwpMigration.ps1 to also replace the exact tokens 'Windows.UI.ColorHelper' -> 'Microsoft.UI.ColorHelper' and 'Windows.UI.Colors' -> 'Microsoft.UI.Colors', chosen so the Windows.UI.Color struct and non-moved Windows.UI.* namespaces (Core/Input/ViewManagement/Popups) are left untouched. Also add the ColorHelper row to the MIGRATION-PATTERNS.md Namespace Mapping table and update the intro sentence.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1 (+ MIGRATION-PATTERNS.md)",
+      "expected_effect": "Apps using named colors / SolidColorBrush(Colors.X) build without a manual Colors fixup.",
+      "falsifiable_check": "On a re-run, no CS0234 'Colors does not exist in the namespace Windows.UI' error; grep of the migrated tree finds 0 residual 'Windows.UI.Colors'/'Windows.UI.ColorHelper' while 'Windows.UI.Color ' struct usages remain intact."
+    },
+    {
+      "problem": "Root-namespace collision/mismatch: project namespace = app name shadows an identically-named WinRT type (CS0118) and desyncs from the copied UWP 'SDKTemplate' pages so 'App' is invisible (CS0103).",
+      "evidence": "session-log.txt Scenario2_Polling.xaml.cs(22,17) CS0118 'Altimeter is a namespace but is used like a type'; MainPage/Scenario*.xaml.cs CS0103 'App does not exist'; UWP source 'namespace SDKTemplate' (L462) vs scaffold 'namespace Altimeter'; agent workaround 'using AltimeterSensor = ...' (L2859).",
+      "root_cause": "WinUI scaffold sets root namespace to the app/project name; UWP SDK samples are named after a WinRT API and use 'namespace SDKTemplate'. Mixed namespaces + name/type collision produce the CS0118 + CS0103 cluster.",
+      "tier": 3,
+      "change": "Add a 'CS0103 App / CS0118 namespace' build-error section to MIGRATION-PATTERNS.md: unify every file onto the UWP source's original root namespace (rename the few scaffold-generated files, not the many copied ones), and document the sensor/device-name vs WinRT-type collision with the `using AltimeterSensor = Windows.Devices.Sensors.Altimeter;` alias fallback.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent unifies namespaces up front, avoiding the CS0118/CS0103 cluster common to device/sensor samples.",
+      "falsifiable_check": "On a re-run of a sensor-named sample, no CS0118 'is a namespace but is used like a type' and no CS0103 'App does not exist'; a single root namespace across App/MainWindow/pages.",
+      "tier_justification": "Tier-1 auto-rename of the root namespace would be a broad, risky rewrite touching x:Class/xmlns across every file and could corrupt partial-class links; the collision is trivial to fix once flagged, so a targeted documented pattern is the highest-reliability low-risk fix."
+    }
+  ],
+  "deferred_to_human": []
+}

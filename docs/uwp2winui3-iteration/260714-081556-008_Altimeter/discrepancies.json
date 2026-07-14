@@ -1,0 +1,14 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Scenario 1 - Data Events: list nav, description, Enable/Disable (Disable disabled until Enable), 'Altitude change(m)' output, 'No altimeter found' fallback", "status": "pass", "reason": "Full structural coverage (2/2); Enable invokes; hardware-gated no-reading matches fallback", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Scenario 2 - Polling: list nav, description, Get Data, 'Altitude change(m)' output, 'No altimeter found' fallback", "status": "pass", "reason": "Full structural coverage (1/1); Get Data invokes; hardware-gated no-reading matches fallback", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "WinUI 3 migration reproduces the SDK sample layout faithfully with 100% control coverage and no behavioral regressions. Both scenarios pass. Live sensor behavior is hardware-gated and unverifiable on both UWP and WinUI (no altimeter on the machine; UWP also stuck on splash). No parity-level skill gaps; all improvement leverage is in build-time friction (namespace rewrite completeness and root-namespace collisions)."
+}

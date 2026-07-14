@@ -1,0 +1,21 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS8803/CS1022/CS0106/CS1001 syntax cascade in Scenario1_DataEvents.xaml.cs / Scenario2_Polling.xaml.cs ('Top-level statements must precede...', 'modifier not valid', unbalanced braces).",
+      "evidence": "session-log.txt: Scenario1_DataEvents.xaml.cs(146,9) CS8803 + CS0106 + CS1022 chain; appeared after a large multi-member file edit and disappeared once the file was re-emitted whole.",
+      "covered_clearly_at": "N/A — this is a generic C# well-formedness error from a botched edit, not a UWP→WinUI migration topic. The skill does not need to teach basic brace balancing.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A malformed edit that leaves stray members outside a type is a transient editing error; a capable model re-emitting the file gets it right with no skill change. Adding 'write valid C#' guidance would only bloat the skill."
+    },
+    {
+      "problem": "App static window / MainWindow exposure and initialization-order race.",
+      "evidence": "session-log.txt L1535-L1576 shows the skill's own guidance ('expose MainWindow from App', 'keep MainWindow's constructor inert', E_POINTER race) being surfaced to the agent, which applied it (App.MainWindow static added at L2261).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md windowing/App.MainWindow guidance (already prominent; injected into the dev-agent's context and followed).",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already covers App/MainWindow exposure clearly and the agent used it successfully; no change needed."
+    }
+  ]
+}

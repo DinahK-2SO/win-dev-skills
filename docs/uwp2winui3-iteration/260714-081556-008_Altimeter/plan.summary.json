@@ -1,0 +1,15 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: also rewrite Windows.UI.Colors/ColorHelper -> Microsoft.UI.* (leaving the Windows.UI.Color struct and non-moved Windows.UI.* namespaces intact) so named-color code builds without a manual CS0234 fixup",
+    "MIGRATION-PATTERNS.md: document the CS0103 'App'/CS0118 root-namespace collision — unify all files onto the UWP source's namespace (SDKTemplate) and alias a WinRT type whose name matches the project (common for device/sensor samples)",
+    "MIGRATION-PATTERNS.md: add the Windows.UI.ColorHelper -> Microsoft.UI.ColorHelper mapping row and note the extended rewrite in the intro"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

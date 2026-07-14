@@ -1,6 +1,6 @@
 # UWP → WinUI 3 Replacement Patterns
 
-Reference for API replacements and patterns that the `Initialize-UwpMigration.ps1` bootstrap doesn't (and can't) handle automatically — the script only does the bulk `Windows.UI.Xaml → Microsoft.UI.Xaml` namespace rewrite. Everything below requires code-level adaptation: dialog shape changes, threading model, windowing, lifecycle, resources, controls, and storage. Use this file when fixing build errors or runtime issues during Step 4.
+Reference for API replacements and patterns that the `Initialize-UwpMigration.ps1` bootstrap doesn't (and can't) handle automatically — the script only does the bulk `Windows.UI.Xaml → Microsoft.UI.Xaml` namespace rewrite (plus the `Windows.UI.Colors`/`Windows.UI.ColorHelper → Microsoft.UI.*` moves). Everything below requires code-level adaptation: dialog shape changes, threading model, windowing, lifecycle, resources, controls, and storage. Use this file when fixing build errors or runtime issues during Step 4.
 
 ## Common build errors after the namespace rewrite
 
@@ -26,6 +26,23 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 ```
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
+
+### `CS0103: The name 'App' does not exist` / `CS0118: 'X' is a namespace but is used like a type` — keep ONE root namespace
+
+The scaffold generates `App.xaml.cs`, `MainWindow.xaml[.cs]`, and `MainPage` under the **new project's default namespace (the app/project name)**, while the copied UWP source keeps its **original** namespace. UWP SDK samples almost always use `namespace SDKTemplate`. If you leave the two mixed, the copied pages can no longer see the scaffold's `App` class (`CS0103: The name 'App' does not exist`) and cross-references break.
+
+**Fix:** pick one root namespace and make every file agree. The lowest-friction choice is to rename the scaffold-generated files to the UWP source's original namespace (e.g. `SDKTemplate`) rather than editing dozens of copied files. Update `x:Class` and `xmlns:local="using:..."` in the matching `.xaml` at the same time.
+
+A second, related trap: **if the project/app name equals a WinRT type name, the root namespace shadows that type.** This is common because UWP device/sensor samples are named after the API — `Altimeter`, `Compass`, `Barometer`, `Accelerometer`, `Gyrometer`, `Pedometer`, `ProximitySensor`, `Magnetometer`, etc. Inside `namespace Altimeter`, the identifier `Altimeter` resolves to the *namespace*, not to `Windows.Devices.Sensors.Altimeter`, giving `CS0118: 'Altimeter' is a namespace but is used like a type`. Renaming the root namespace to the sample's neutral `SDKTemplate` (per the fix above) removes the collision. If you must keep the colliding namespace, alias the WinRT type instead:
+
+```csharp
+using AltimeterSensor = Windows.Devices.Sensors.Altimeter;
+// ...
+private AltimeterSensor sensor;
+sensor = AltimeterSensor.GetDefault();
+```
+
+Prefer the single-namespace rename — it fixes the `App`-not-found cascade and the type-shadowing collision at once.
 
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
@@ -90,6 +107,7 @@ All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
 | `Windows.UI.Composition` | `Microsoft.UI.Composition` |
 | `Windows.UI.Input` | `Microsoft.UI.Input` |
 | `Windows.UI.Colors` | `Microsoft.UI.Colors` |
+| `Windows.UI.ColorHelper` | `Microsoft.UI.ColorHelper` |
 | `Windows.UI.Text` | `Microsoft.UI.Text` |
 | `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` |
 

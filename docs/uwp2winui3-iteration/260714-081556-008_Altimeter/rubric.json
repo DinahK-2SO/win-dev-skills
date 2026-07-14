@@ -1,0 +1,37 @@
+{
+  "scenario": "Altimeter",
+  "created_at": "2026-07-14T14:45:00Z",
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true (process alive, window present) but the original UWP app hung on the SDK sample 'Universal Windows Platform sample' extended-splash screen across two fresh launches (20s settle). MainPage never presented; the CoreWindow content pane stayed empty in the UIA tree, so the golden frames (parity/baseline/screenshots/*.png) show only the splash and no feature-level controls were exposed or actuable. No live UWP behavioral baseline was obtainable; the source-derived checklist (Extract-UwpFeatureChecklist) is the structural ground truth used instead.",
+  "features": [
+    {
+      "id": "data-events",
+      "area": "Scenarios",
+      "name": "Scenario 1 - Data Events",
+      "description": "Registers an event listener for altimeter data and displays the change in height in meters as reports arrive. Enable begins the subscription; Disable ends it. Status area reports sensor availability.",
+      "expected_behaviour": [
+        "Scenario list shows '1) Data Events' and it is selectable/navigable",
+        "Description text 'Registers an event listener for altimeter data and displays the change in height in meters as they are reported.' is shown",
+        "Enable and Disable buttons are present; Disable is disabled until Enable is pressed",
+        "'Altitude change(m):' output field shows 'No data' before any reading",
+        "When no altimeter is present the Status area shows 'No altimeter found' (defensive fallback), not a blank/crash"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "weight": 2
+    },
+    {
+      "id": "polling",
+      "area": "Scenarios",
+      "name": "Scenario 2 - Polling",
+      "description": "Polls for altimeter data on demand and displays the change in height in meters. Get Data performs a single reading.",
+      "expected_behaviour": [
+        "Scenario list shows '2) Polling' and it is selectable/navigable",
+        "Description text 'Polls for altimeter data and displays the change in height in meters.' is shown",
+        "Get Data button is present and invokable",
+        "'Altitude change(m):' output field shows 'No data' before any reading",
+        "When no altimeter is present the Status area shows 'No altimeter found' (defensive fallback), not a blank/crash"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Polling.png",
+      "weight": 1
+    }
+  ]
+}

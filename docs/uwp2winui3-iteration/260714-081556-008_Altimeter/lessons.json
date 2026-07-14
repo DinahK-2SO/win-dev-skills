@@ -1,0 +1,32 @@
+{
+  "scenario": "Altimeter",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Scaffolded the WinUI 3 project, preserved UWP source under .uwp-source/, and mass-rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml; build reached only a handful of residual errors." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Namespace mass-replace only rewrites Windows.UI.Xaml; it leaves Windows.UI.Colors / Windows.UI.ColorHelper untouched, so any file using SolidColorBrush(Colors.X) still fails with CS0234.", "suggested_tweak": "Also rewrite the Windows.UI.Colors and Windows.UI.ColorHelper tokens (which moved to Microsoft.UI) while leaving the Windows.UI.Color struct and non-moved Windows.UI.* namespaces alone." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.UI.Colors", "why_tried": "Copied UWP status-banner code used SolidColorBrush(Windows.UI.Colors.Green/Red)", "root_cause": "Colors moved from Windows.UI to Microsoft.UI in WinUI 3; the automated rewrite only covered Windows.UI.Xaml", "fix": "Use Microsoft.UI.Colors (or `using Microsoft.UI;` + Colors.Green)" }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Altimeter", "special_handling": "Type name collides with the project's root namespace (Altimeter). Requires either a neutral root namespace or a `using AltimeterSensor = Windows.Devices.Sensors.Altimeter;` alias." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: 'Colors' does not exist in the namespace 'Windows.UI'", "root_cause": "Colors/ColorHelper moved to Microsoft.UI; automated rewrite only handled Windows.UI.Xaml", "fix": "Rewrite Windows.UI.Colors -> Microsoft.UI.Colors" },
+    { "error": "CS0118: 'Altimeter' is a namespace but is used like a type", "root_cause": "Project root namespace equals a WinRT type name (Altimeter), so the namespace shadows Windows.Devices.Sensors.Altimeter", "fix": "Rename root namespace to the UWP source's neutral namespace (SDKTemplate) or alias the WinRT type" },
+    { "error": "CS0103: The name 'App' does not exist in the current context", "root_cause": "Scaffold-generated App/MainWindow kept namespace 'Altimeter' while copied pages used 'SDKTemplate'; the pages could not see App", "fix": "Unify every file onto one root namespace (SDKTemplate)" },
+    { "error": "CS8803/CS1022/CS0106/CS1001 syntax cascade in Scenario*.xaml.cs", "root_cause": "A botched multi-line file edit left an unbalanced brace / stray members outside the type", "fix": "Re-emitted the file with correct structure (self-inflicted edit slip)" }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainPage/Scenario*.xaml.cs after scaffold", "symptom": "CS0103 'App does not exist' + CS0118 'Altimeter is a namespace' across several files", "turns_or_retries": "~2 build/fix cycles", "root_cause": "Mixed root namespaces (scaffold app-name 'Altimeter' vs UWP source 'SDKTemplate') plus app name colliding with a WinRT type", "how_resolved": "Renamed pages to SDKTemplate and aliased the sensor type", "preventable_by": "Skill guidance to unify on the UWP source's original namespace and to watch for app-name/WinRT-type collisions" },
+    { "where": "MainPage.xaml.cs status banner", "symptom": "CS0234 Colors not found", "turns_or_retries": "1", "root_cause": "Windows.UI.Colors not rewritten by the bootstrap", "how_resolved": "Switched to Microsoft.UI.Colors", "preventable_by": "Extending the Initialize-UwpMigration.ps1 rewrite to Colors/ColorHelper" }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No altimeter sensor on the CI machine", "workaround": "App shows its 'No altimeter found' fallback; behavior is hardware-gated and unverifiable on both UWP and WinUI. Not a migration defect." }
+  ]
+}
