@@ -1,0 +1,21 @@
+{
+  "scenario": "BackgroundActivation",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "~30 nullable warnings (CS8618/CS8625/CS8600/CS8602/CS8604) from UWP code under <Nullable>enable</Nullable> (Scenario.Title/ClassType, Grouped 'group' field, MainPage.Current, null-literal args).",
+      "evidence": "build-output.txt lists CS8618/CS8625/... across SampleConfiguration.cs, Scenario*.xaml.cs, MainPage.xaml.cs; build still succeeded (warnings only).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md nullable guidance (lines ~160-178: nullable field/property handling with 'required' / '= null!').",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already documents nullable handling prominently; warnings are non-blocking and do not affect score or behaviour, and a capable re-run would annotate them. Not worth bloating the skill."
+    },
+    {
+      "problem": "Numbered ListBox nav titles ('1) Background Task' ...) meant the parity tool's verbatim-title navigation could not switch scenarios, so all six winui3 parity frames were identical Scenario-1 renders.",
+      "evidence": "discrepancies.md item 3; MainPage.xaml.cs OnNavigatedTo prefixes '{i}) '. Manual ListItem selection confirmed all six scenarios navigate correctly (manual/s1..s6.png).",
+      "covered_clearly_at": "N/A — this is an evaluation-tool (winui3-parity-check) navigation limitation, not a migration-skill concern. The numbering faithfully matches the UWP titles.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The migrated app is faithful; the identical frames are an eval-tool nav-by-title artifact. Changing the migration skill to drop the numbering would REDUCE fidelity. Recorded for the human, not a skill edit."
+    }
+  ]
+}

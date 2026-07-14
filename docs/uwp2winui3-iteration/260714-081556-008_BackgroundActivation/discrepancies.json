@@ -1,0 +1,37 @@
+{
+  "feature": "Background Activation",
+  "generated": "2026-07-14T22:33:55Z",
+  "uwp_capture_status": "degraded",
+  "discrepancies": [
+    {
+      "id": "uwp-golden-uncapturable",
+      "severity": "measurement-limitation",
+      "scope": "baseline",
+      "detail": "uwp-app-runner returned ok:true (pid 28120, window 'Background Activation C# Sample', sdk 10.0.26100.0), and the process launched and stayed alive with a window, but its UWP CoreWindow content never composed in this non-interactive automation context. The app remained on the OS splash ('Windows platform sample') and the ApplicationFrameWindow's content pane was empty in the UIA tree across repeated foreground attempts and waits. Only splash frames were captured; no live UWP feature/behavior golden was obtainable. Baseline fell back to the source-derived checklist + .xaml reading."
+    },
+    {
+      "id": "checklist-zero-controls",
+      "severity": "measurement-limitation",
+      "scope": "baseline",
+      "detail": "Extract-UwpFeatureChecklist.ps1 produced 6 scenarios with 0 controls / 0 actions each, because the Register/Unregister buttons live in per-scenario .xaml files the extractor does not descend into. This makes Compare-Parity's structural coverage 'n/a', so its 100/100 PASS is a non-blank-screenshot check only, not real control coverage. Control expectations were recovered manually from the .xaml sources for judgment."
+    },
+    {
+      "id": "winui-nav-numbered-titles",
+      "severity": "cosmetic",
+      "scope": "winui3",
+      "detail": "The migrated app's ScenarioControl ListBox items are rendered as '1) Background Task' ... '6) Grouped Background Task' (number-prefixed, matching the SDK sample convention). Title-driven nav that searches for the verbatim un-numbered title therefore did not switch scenarios during Capture-AppScenarios (all 6 parity/winui3 frames are identical Scenario-1 renders). Manual selection of each ListItem confirmed all 6 scenarios navigate and render distinct, correct content."
+    },
+    {
+      "id": "winui-register-no-visible-response",
+      "severity": "behavioral-unconfirmed",
+      "scope": "winui3",
+      "detail": "Actuating the Register button (coordinate click AND UIA invoke, with the window forced foreground) did not change the Status output ('Unregistered' persisted, Unregister stayed disabled) on Scenarios 1 and 6. winapp UIA also reports the Button 'does not support any invoke pattern'. The app does not crash (App.xaml.cs has no global UnhandledException handler), so the click either does not reach the Click handler or Register()/RequestAccessAsync is silently gated. Background-task registration is environment-gated (needs an interactive foreground access grant), and there is NO UWP golden behavior to compare against (see uwp-golden-uncapturable), so per the scoring rules this is flagged for manual review, not a confirmed regression. It nonetheless caps each scenario at 'partial' because behavioral response could not be verified."
+    },
+    {
+      "id": "manifest-no-bg-task-extension",
+      "severity": "informational",
+      "scope": "parity",
+      "detail": "The migrated Package.appxmanifest declares no windows.backgroundTasks extension — but neither does the original UWP manifest (both rely on the single-process BackgroundActivated model). This is therefore NOT a migration regression and does not by itself explain the dead Register button."
+    }
+  ]
+}

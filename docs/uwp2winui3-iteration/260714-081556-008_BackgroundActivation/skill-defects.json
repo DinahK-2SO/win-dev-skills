@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundActivation",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The migration analyzer under-detects the in-process/legacy background-task family, so files that drive background activation without literally naming IBackgroundTask/BackgroundTaskBuilder get no background-tasks TODO routing.",
+      "evidence": "unsupported-api-inventory.json line 20 matches only '\\bIBackgroundTask\\b|BackgroundTaskBuilder'. The migrated SampleConfiguration.cs uses BackgroundExecutionManager.RequestAccessAsync(), BackgroundTaskRegistrationGroup, SystemTrigger; App.xaml.cs used group.BackgroundActivated; original App overrode OnBackgroundActivated (session-log.txt lines 294, 304-305).",
+      "skill_search": "grepped winui-uwp-migration for background|BackgroundTask|OnBackgroundActivated|RequestAccessAsync|BackgroundExecutionManager",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The detection pattern is keyed to two tokens and misses the rest of the Windows.ApplicationModel.Background surface + the Application.OnBackgroundActivated activation hook.",
+      "proposed_fix": "Broaden the adaptable entry's regex to also match BackgroundExecutionManager, BackgroundTaskRegistrationGroup, SystemTrigger, TimeTrigger, ApplicationTrigger, MaintenanceTrigger and OnBackgroundActivated so any file touching the in-process background model is routed to the background-tasks anchor.",
+      "generalizes": "Every UWP background-activation sample/app uses this family; keying detection to only two tokens systematically misses the single-process/in-process pattern that is the common case, so the agent gets no guidance on those files."
+    }
+  ]
+}

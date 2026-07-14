@@ -1,0 +1,30 @@
+{
+  "scenario": "BackgroundActivation",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log.txt: per-file triage table classified every file migrate-as-is / migrate-with-adaptation and rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml; build produced only nullable warnings, no errors." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "unsupported-api-inventory.json (Initialize/Validate-UwpMigration)", "limitation": "Background-task detection matches only '\\bIBackgroundTask\\b|BackgroundTaskBuilder'. The in-process background model this sample uses touches BackgroundExecutionManager, BackgroundTaskRegistrationGroup, SystemTrigger/TimeTrigger/ApplicationTrigger and Application.OnBackgroundActivated WITHOUT necessarily naming IBackgroundTask/BackgroundTaskBuilder, so files can dodge the background-tasks TODO routing.", "suggested_tweak": "Broaden the adaptable pattern to the whole in-process background family so any such file is routed to the background-tasks anchor." }
+  ],
+  "failed_apis": [
+    { "api": "BackgroundTaskBuilder.Register() (Windows.ApplicationModel.Background) for SystemTrigger/TimeTrigger/ApplicationTrigger", "why_tried": "Migrated 1:1 from the UWP sample's RegisterBackgroundTask helper.", "root_cause": "The legacy in-process background model compiles under WinAppSDK but is not wired to run in a packaged desktop app: no windows.backgroundTasks <Extensions> declaration in Package.appxmanifest (copied migrate-as-is with none) and the single-process activation entry differs. Register() therefore produces no visible Status change.", "fix": "Declare the windows.backgroundTasks manifest extension (task types systemEvent/timer/general, in-process => no EntryPoint) and keep the in-process BackgroundTaskRegistrationGroup.BackgroundActivated wiring; or migrate to the WinAppSDK BackgroundTaskBuilder." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Application.OnBackgroundActivated(BackgroundActivatedEventArgs)", "special_handling": "UWP override has NO equivalent on Microsoft.UI.Xaml.Application. Dev-agent correctly dropped the override and wired group.BackgroundActivated += BackgroundActivity.Start in the App constructor for the grouped task. Ungrouped in-process tasks that relied on OnBackgroundActivated need the AppInstance/ExtendedActivationKind model instead." },
+    { "api": "BackgroundExecutionManager.RequestAccessAsync()", "special_handling": "TimeTrigger/ApplicationTrigger tasks call it; it requires an interactive foreground grant and is environment-gated headlessly." }
+  ],
+  "errors_encountered": [
+    { "error": "~30 nullable warnings (CS8618/CS8625/CS8600/CS8602/CS8604)", "root_cause": "Scaffold enables <Nullable>enable</Nullable> but UWP source assigns null literals / leaves auto-properties (Scenario.Title/ClassType, Grouped 'group' field, MainPage.Current) uninitialized.", "fix": "Warnings only, non-blocking; nullable-annotate or use 'required'/'= null!' as the skill already documents." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "App.xaml.cs background-activation wiring", "symptom": "UWP App overrode OnBackgroundActivated and used partial void Construct(); WinUI 3 Application exposes neither.", "turns_or_retries": "resolved inline (no visible loop)", "root_cause": "No WinUI 3 equivalent for Application.OnBackgroundActivated; partial Construct() is a UWP codegen hook.", "how_resolved": "Dropped the override; moved group.BackgroundActivated wiring into the App constructor.", "preventable_by": "A background-tasks section that explicitly names the OnBackgroundActivated -> BackgroundTaskRegistrationGroup.BackgroundActivated transform." },
+    { "where": "Register/Unregister runtime behaviour", "symptom": "Register click produced no Status change in the migrated app; capped every scenario at partial.", "turns_or_retries": "n/a (not observed at build time; surfaced only at score time)", "root_cause": "In-process background registration not wired for a packaged WinUI 3 app (no windows.backgroundTasks manifest extension); compiles but is behaviourally dead.", "how_resolved": "Not resolved in this trial.", "preventable_by": "Skill warning that legacy background APIs compile-but-die without the manifest extension + a checklist to add it (or switch to WinAppSDK BackgroundTaskBuilder)." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "UWP golden un-capturable (splash only) and background registration is environment-gated (needs interactive foreground grant); behaviour could not be verified either side.", "workaround": "Baseline fell back to source-derived checklist + .xaml reading; behaviour flagged for manual review." }
+  ]
+}

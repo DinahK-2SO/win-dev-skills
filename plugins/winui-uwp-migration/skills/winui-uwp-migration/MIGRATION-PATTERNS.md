@@ -337,6 +337,40 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 
 `IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK [`BackgroundTaskBuilder`](https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.windows.applicationmodel.background.backgroundtaskbuilder) (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler. See the [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy).
 
+> **Compiles-but-dead trap (general rule).** The legacy `Windows.ApplicationModel.Background` surface (`BackgroundTaskBuilder`, `BackgroundExecutionManager`, `BackgroundTaskRegistrationGroup`, `SystemTrigger` / `TimeTrigger` / `ApplicationTrigger` / `MaintenanceTrigger`) still **compiles** under WinAppSDK, so a 1:1 port builds and renders — but `builder.Register()` silently no-ops or throws at runtime, leaving Register/Unregister buttons that never change status. A clean build is **not** evidence the feature works; the UI looks faithful while being behaviourally dead. If you keep the legacy in-process model, you must wire the two things below.
+
+**1. `Application.OnBackgroundActivated` has no WinUI 3 override.** UWP single-process tasks arrive via `protected override void OnBackgroundActivated(BackgroundActivatedEventArgs)` on `Application`; `Microsoft.UI.Xaml.Application` does not expose it (nor the `partial void Construct()` codegen hook). Delete the override and wire in-process activation explicitly in the `App` constructor:
+
+```csharp
+// UWP:  protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
+//           => BackgroundActivity.Start(args.TaskInstance);
+// WinUI 3 — wire the registration group in the App ctor instead:
+public App()
+{
+    InitializeComponent();
+    var group = BackgroundTaskSample.GetTaskGroup(GroupId, GroupName);
+    group.BackgroundActivated += BackgroundActivity.Start;   // in-process, no TaskEntryPoint
+}
+```
+
+Ungrouped in-process tasks that relied solely on `OnBackgroundActivated` must move to the unified activation model — read the args via `AppInstance.GetCurrent().GetActivatedEventArgs()` and branch on `ExtendedActivationKind` (see [Application Lifecycle and Activation](#lifecycle)).
+
+**2. Declare the manifest extension.** In-process registration only functions in a **packaged** app when `Package.appxmanifest` declares the background-task entry inside the `<Application>` element (a copied UWP manifest that omits it is the usual reason Register does nothing). Add the task types your triggers use (in-process ⇒ no `EntryPoint`):
+
+```xml
+<Extensions>
+  <uap:Extension Category="windows.backgroundTasks">
+    <uap:BackgroundTasks>
+      <uap:Task Type="systemEvent" />  <!-- SystemTrigger -->
+      <uap:Task Type="timer" />        <!-- TimeTrigger / MaintenanceTrigger -->
+      <uap:Task Type="general" />      <!-- ApplicationTrigger -->
+    </uap:BackgroundTasks>
+  </uap:Extension>
+</Extensions>
+```
+
+`TimeTrigger` / `ApplicationTrigger` also require `BackgroundExecutionManager.RequestAccessAsync()` to be granted, which needs an interactive foreground session.
+
 <a id="notifications"></a>
 ## Notifications
 

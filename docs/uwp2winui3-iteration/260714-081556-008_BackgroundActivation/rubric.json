@@ -1,0 +1,15 @@
+{
+  "feature": "Background Activation",
+  "source": "uwp-samples-standalone/Samples/BackgroundActivation/cs",
+  "dimensions": ["structural", "visual", "behavioral"],
+  "sharedControls": ["Register", "Unregister", "Status"],
+  "scenarios": [
+    { "number": 1, "title": "Background Task", "controls": ["Register", "Unregister"], "output": "Status: Unregistered/Registered", "trigger": "SystemTrigger(TimeZoneChange)" },
+    { "number": 2, "title": "Background Task with Condition", "controls": ["Register", "Unregister"], "output": "Status", "trigger": "SystemTrigger(TimeZoneChange)+InternetAvailable condition" },
+    { "number": 3, "title": "Servicing Complete Task", "controls": ["Register", "Unregister"], "output": "Status", "trigger": "SystemTrigger(ServicingComplete)" },
+    { "number": 4, "title": "Background Task with Time Trigger", "controls": ["Register", "Unregister"], "output": "Status", "trigger": "TimeTrigger (requires background access)" },
+    { "number": 5, "title": "Background Task with Application Trigger", "controls": ["Register", "Unregister", "Signal"], "output": "Status + result", "trigger": "ApplicationTrigger" },
+    { "number": 6, "title": "Grouped Background Task", "controls": ["Register", "Unregister", "Unregister Ungrouped Tasks"], "output": "Status", "trigger": "TimeZoneChange under BackgroundTaskRegistrationGroup" }
+  ],
+  "notes": "checklist.json parsed 6 scenarios / 0 controls (buttons live in per-scenario .xaml the extractor does not descend into); control lists recovered by reading the .xaml sources. Background-task registration is environment-gated and may be unobservable headlessly for both apps."
+}

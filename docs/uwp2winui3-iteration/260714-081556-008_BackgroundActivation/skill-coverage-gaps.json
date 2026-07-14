@@ -1,0 +1,15 @@
+{
+  "scenario": "BackgroundActivation",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Legacy Windows.ApplicationModel.Background code migrated 1:1 compiles and renders but is behaviourally dead: the Register button never changes Status because a packaged WinUI 3 app needs a windows.backgroundTasks manifest extension (and the OnBackgroundActivated activation entry differs). This capped every scenario at partial.",
+      "evidence": "migration-score.json behavioral_note: 'Register/Unregister produced no visible Status change in WinUI 3'; Package.appxmanifest (copied migrate-as-is) declares no <Extensions>/windows.backgroundTasks (grep shows only Capabilities). SampleConfiguration.cs RegisterBackgroundTask -> builder.Register().",
+      "covered_at": "MIGRATION-PATTERNS.md anchor 'background-tasks' (## Background Tasks, line 336-338).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Sharpen the existing background-tasks section: (1) warn that legacy Windows.ApplicationModel.Background APIs COMPILE in WinAppSDK but silently no-op/throw at runtime unless wired; (2) give the concrete Application.OnBackgroundActivated -> BackgroundTaskRegistrationGroup.BackgroundActivated (in App ctor) transform; (3) state the windows.backgroundTasks <Extensions> manifest requirement needed to make in-process registration actually function; keep the 'or switch to WinAppSDK BackgroundTaskBuilder' recommendation.",
+      "generalizes": "Any UWP app with system/time/application/maintenance-triggered or grouped background tasks hits the identical compiles-but-dead trap and the OnBackgroundActivated gap; the fix is the same across scenarios."
+    }
+  ]
+}

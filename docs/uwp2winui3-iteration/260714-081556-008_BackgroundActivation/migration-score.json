@@ -1,0 +1,70 @@
+{
+  "scenario": "BackgroundActivation",
+  "uwp_launchable": true,
+  "score": 50,
+  "features_total": 6,
+  "features_pass": 0,
+  "features_partial": 6,
+  "features_fail": 0,
+  "uwp_capture_status": "degraded: uwp-app-runner returned ok:true (pid 28120, window 'Background Activation C# Sample', sdk 10.0.26100.0) and the app launched and stayed alive, but its UWP CoreWindow content never composed in this non-interactive automation context - it remained on the OS splash ('Windows platform sample') with an empty content pane in the UIA tree. Only splash frames were captured; no live UWP behavioral golden was obtainable, so the baseline is the source-derived checklist + .xaml reading.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_gate": "Compare-Parity reported 6/6 PASS (100/100) but coverage is 'n/a' because checklist.json parsed 0 controls; that gate is a non-blank-screenshot check only and is treated as necessary-not-sufficient here.",
+  "behavioral_regressions": 0,
+  "behavioral_note": "Register/Unregister produced no visible Status change in WinUI 3 (Scenarios 1 and 6 tested with foregrounded window; UIA reports the Button lacks an invoke pattern). Background-task registration is environment-gated and there is no UWP golden behavior to compare against, so this is flagged for manual review rather than counted as a confirmed regression - but it caps every scenario at 'partial'.",
+  "features": [
+    {
+      "name": "Background Task",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Background_Task.png",
+      "winui_screenshot": "manual/s1.png",
+      "note": "Renders correctly: 'Registers a background task for the Time Zone Change system event...' with Register/Unregister buttons and 'Unregistered' status. Structurally + visually faithful. Register click did not change Status ('Unregistered' persisted, Unregister stayed disabled) with window foregrounded; UWP golden was splash-only so behavior could not be compared -> partial. UWP screenshot is the OS splash (content never composed)."
+    },
+    {
+      "name": "Background Task with Condition",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Background_Task_with_Condition.png",
+      "winui_screenshot": "manual/s2.png",
+      "note": "Renders correctly with the InternetAvailable-condition description and Register/Unregister buttons. Structurally + visually faithful. Behavior unverifiable (no UWP golden; Register produced no visible response) -> partial. UWP screenshot is splash-only."
+    },
+    {
+      "name": "Servicing Complete Task",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Servicing_Complete_Task.png",
+      "winui_screenshot": "manual/s3.png",
+      "note": "Renders correctly with the ServicingComplete description and Register/Unregister buttons. Structurally + visually faithful. Behavior unverifiable (no UWP golden) -> partial. UWP screenshot is splash-only."
+    },
+    {
+      "name": "Background Task with Time Trigger",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Background_Task_with_Time_Trigger.png",
+      "winui_screenshot": "manual/s4.png",
+      "note": "Renders correctly with the TimeTrigger description and Register/Unregister buttons. TimeTrigger requires a background-access grant (interactive/foreground), so its behavior is doubly gated headlessly. No UWP golden -> partial. UWP screenshot is splash-only."
+    },
+    {
+      "name": "Background Task with Application Trigger",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/05_Background_Task_with_Application_Trigger.png",
+      "winui_screenshot": "manual/s5.png",
+      "note": "Renders correctly with the ApplicationTrigger description and Register/Unregister buttons. Structurally + visually faithful. Behavior unverifiable (no UWP golden; requires background-access grant) -> partial. UWP screenshot is splash-only."
+    },
+    {
+      "name": "Grouped Background Task",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/06_Grouped_Background_Task.png",
+      "winui_screenshot": "manual/s6.png",
+      "note": "Renders correctly with the grouped-task description AND the extra 'Unregister Ungrouped Tasks' button (matches the UWP Scenario 6 control set exactly). Structurally + visually faithful. Register click did not change Status with window foregrounded; no UWP golden to compare -> partial. UWP screenshot is splash-only."
+    }
+  ]
+}

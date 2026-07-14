@@ -1,0 +1,31 @@
+{
+  "scenario": "BackgroundActivation",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migration analyzer routes only files literally naming IBackgroundTask/BackgroundTaskBuilder to the background-tasks guidance; the common in-process model (BackgroundExecutionManager, BackgroundTaskRegistrationGroup, SystemTrigger/TimeTrigger/ApplicationTrigger, Application.OnBackgroundActivated) is missed.",
+      "evidence": "unsupported-api-inventory.json line 20 (pre-edit); migrated SampleConfiguration.cs/App.xaml.cs use the wider family (session-log.txt 294,304-305; SampleConfiguration.cs 82-118).",
+      "root_cause": "Detection keyed to two tokens, missing the rest of Windows.ApplicationModel.Background + the OnBackgroundActivated activation hook.",
+      "tier": 1,
+      "change": "Broaden the adaptable regex for the background-tasks anchor to the whole in-process family so any such file gets the TODO/routing (cannot be ignored by the agent).",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+      "expected_effect": "Files touching background activation are flagged and routed to the background-tasks section during Initialize-UwpMigration, and surfaced by Validate-UwpMigration residue grep.",
+      "falsifiable_check": "Re-running Initialize-UwpMigration on a background-task app injects the background-tasks TODO even when only BackgroundExecutionManager / SystemTrigger / OnBackgroundActivated appear (no IBackgroundTask/BackgroundTaskBuilder token)."
+    },
+    {
+      "problem": "Legacy background code migrated 1:1 compiles and renders but is behaviourally dead (Register never changes Status) because the packaged app lacks the windows.backgroundTasks manifest extension and Application.OnBackgroundActivated has no WinUI 3 override.",
+      "evidence": "migration-score.json behavioral_note; Package.appxmanifest has no <Extensions>; MIGRATION-PATTERNS.md background-tasks section was 2 sentences.",
+      "root_cause": "The background-tasks section recommends a model switch but never warns compiles!=works, never gives the OnBackgroundActivated transform, and never states the manifest-extension requirement.",
+      "tier": 3,
+      "change": "Expand the existing background-tasks section (the anchor the Tier-1 analyzer already links to) with: a compiles-but-dead warning, the OnBackgroundActivated -> BackgroundTaskRegistrationGroup.BackgroundActivated (App ctor) transform, and the windows.backgroundTasks <Extensions> manifest snippet.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent preserves background-task behaviour: drops the invalid override, wires the group, and declares the manifest extension so registration actually runs.",
+      "falsifiable_check": "Re-run migration of a triggered background-task sample declares the windows.backgroundTasks extension and the Register button flips Status Unregistered->Registered."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-tool limitation: winui3-parity-check navigates by verbatim scenario title, so numbered ListBox titles ('1) ...') collapse all six frames to Scenario 1. Not fixable in the migration skill without reducing fidelity.",
+    "Eval-tool limitation: uwp-app-runner captured only the OS splash (CoreWindow never composed) and background registration is environment-gated, so no behavioural golden existed to confirm the fix."
+  ]
+}

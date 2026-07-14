@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundActivation",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "winui-uwp-migration: broaden background-task analyzer pattern to the full in-process family (BackgroundExecutionManager, BackgroundTaskRegistrationGroup, System/Time/Application/MaintenanceTrigger, OnBackgroundActivated) so files using the single-process model are routed to the background-tasks guidance, not just those naming IBackgroundTask/BackgroundTaskBuilder",
+    "winui-uwp-migration: expand MIGRATION-PATTERNS.md Background Tasks section with the compiles-but-dead warning, the Application.OnBackgroundActivated -> BackgroundTaskRegistrationGroup.BackgroundActivated transform, and the required windows.backgroundTasks manifest extension so migrated background tasks actually register at runtime"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "winui3-parity-check navigates by verbatim scenario title; numbered ListBox titles collapse all frames to Scenario 1 (eval-tool limitation).",
+    "uwp-app-runner captured only splash and background registration is environment-gated; no behavioural golden available."
+  ]
+}
