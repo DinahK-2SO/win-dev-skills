@@ -1,0 +1,14 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Validate-UwpMigration.ps1 FAILed because all 9 MIGRATION-MAPPING.md rows were still Status=copied; the agent had to bulk-flip them to done and re-run.",
+      "evidence": "session-log turn 35 (validator '[FAIL] ... 9 row(s) still Status=copied') -> turn 36 bulk replace '| copied |' -> '| done |' -> turn 37 validator PASS.",
+      "covered_clearly_at": "SKILL.md Step 1 line 90 ('Flip Status from copied -> done (or deferred) as each row is finished') and line 86 ('migrate-as-is ... flip Status to done once the file appears in your final build'); plus Step 4 validator fix note line 167 ('Status = copied rows -> those files were never finished. Either complete ... and flip to done, or defer').",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already tells the agent, prominently and in two places, to flip Status to done as each file is finished and that the validator checks for it. A capable model on re-run flips the rows as it goes (or immediately when the validator flags them, as this one did in a single retry). Adding more prose would just restate existing guidance."
+    }
+  ]
+}

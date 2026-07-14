@@ -1,0 +1,27 @@
+{
+  "scenario": "AppServices",
+  "summary": "The migrated WinUI 3 app faithfully replicates the UWP App Service Client sample. All checklist controls are present and all action controls are wired and respond with the correct status messages. No missing controls, no dead controls, no wrong output text. Only minor, non-functional differences noted below.",
+  "discrepancies": [
+    {
+      "severity": "minor",
+      "type": "visual-theme",
+      "scenario": "all",
+      "detail": "The original UWP sample renders in a dark theme; the migrated WinUI 3 app renders in the default light theme. Layout, control set, labels, and behavior are equivalent — only the color scheme differs (follows system default). Not a functional defect."
+    },
+    {
+      "severity": "info",
+      "type": "additional-feature",
+      "scenario": "3) Show Package Family Name",
+      "detail": "The WinUI 3 app merges the separate UWP AppServicesProvider sample into the same app and exposes an extra 'Show Package Family Name' scenario in the navigation. This is a superset of the client checklist (which only covers the 2 client scenarios), not a regression."
+    },
+    {
+      "severity": "info",
+      "type": "environment",
+      "scenario": "all",
+      "detail": "In both the UWP golden and the WinUI candidate the app-service PROVIDER is not deployed as a separate registered app service, so 'Generate Random Number' / 'Open Connection' return the app's built-in error status ('The app service is not available...'). This is the correct, matching behavior in both apps — the WinUI handlers exercise the real AppServiceConnection code path and surface the proper error, confirming the buttons are genuinely wired (not dead)."
+    }
+  ],
+  "behavioral_regressions": [],
+  "dead_controls": [],
+  "missing_controls": []
+}

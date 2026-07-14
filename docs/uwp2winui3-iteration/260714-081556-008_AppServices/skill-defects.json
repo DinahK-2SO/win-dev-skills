@@ -1,0 +1,27 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The AppService family (client AppServiceConnection + in-process provider + windows.appService manifest extension) has no coverage anywhere in the migration skill. The dev-agent had to reason out the entire migration unaided.",
+      "evidence": "session-log turns ~30-38: agent hand-crafted the <uap:Extension Category=\"windows.appService\"> block, kept IBackgroundTask, and swapped hardcoded PFN to Package.Current.Id.FamilyName; final summary items 4/6/7/8.",
+      "skill_search": "grepped winui-uwp-migration for 'AppService', 'windows.appService', 'app service', 'uap3:AppService', 'in-process' — zero matches in SKILL.md, MIGRATION-PATTERNS.md, and scripts (only IBackgroundTask appears, misroutingly).",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "No pattern documents that (a) AppServiceConnection is supported and migrates as-is, (b) the provider stays an IBackgroundTask + AppServiceTriggerDetails, (c) the windows.appService/uap3:AppService manifest extension must be preserved with the EntryPoint retargeted, (d) merged client+provider packages resolve the host via Package.Current.Id.FamilyName. The analyzer also has no AppServiceConnection pattern, so no routing TODO is injected.",
+      "proposed_fix": "Add an 'app-services' anchor section to MIGRATION-PATTERNS.md covering client-as-is + provider-IBackgroundTask + manifest extension + PackageFamilyName; add an 'adaptable' entry for AppServiceConnection|AppServiceTriggerDetails to scripts/unsupported-api-inventory.json routing to that anchor so the bootstrap injects a TODO.",
+      "generalizes": "App services are a standard UWP inter-app / provider IPC mechanism. Any UWP app or SDK sample that exposes or consumes an app service has exactly this triad (AppServiceConnection client, IBackgroundTask+AppServiceTriggerDetails provider, windows.appService manifest extension). The pattern is not scenario-specific."
+    },
+    {
+      "problem": "The background-tasks pattern gives blanket advice to abandon IBackgroundTask, which is actively wrong for an in-process app-service provider and would break it if followed.",
+      "evidence": "MIGRATION-PATTERNS.md#background-tasks (line 338) says use BackgroundTaskBuilder / Task Scheduler; the agent overrode it — final summary turn 38: 'RandomNumberGeneratorTask retains IBackgroundTask (the only valid implementation for AppService hosting)'.",
+      "skill_search": "grepped 'background-task', 'IBackgroundTask', 'BackgroundTaskBuilder' — found MIGRATION-PATTERNS.md#background-tasks and the analyzer entry, both routing every IBackgroundTask to the 'abandon it' advice.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "IBackgroundTask / BackgroundTaskRegistration are not the recommended model. Use the WinAppSDK BackgroundTaskBuilder (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler.",
+      "root_cause": "The advice does not carve out the app-service host case, where IBackgroundTask + AppServiceTriggerDetails is the only valid model and BackgroundTaskBuilder does not apply.",
+      "proposed_fix": "Add a one-line carve-out to the background-tasks section: if the task's TriggerDetails is an AppServiceTriggerDetails (an app-service provider), keep IBackgroundTask and see #app-services; only non-app-service tasks move to BackgroundTaskBuilder.",
+      "generalizes": "Every app-service provider is implemented as an IBackgroundTask. The blanket advice misroutes all of them, in every UWP app that hosts an app service, not just this sample."
+    }
+  ]
+}

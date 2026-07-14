@@ -1,0 +1,28 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "The AppService family (client AppServiceConnection + in-process IBackgroundTask provider + windows.appService manifest extension) has no coverage in the migration skill; the dev-agent migrated it entirely unaided.",
+      "evidence": "lessons.json dev_agent_struggles[0]; skill-defects.json item 1; session-log turns 30-38 (hand-crafted uap:Extension, kept IBackgroundTask, PFN -> Package.Current.Id.FamilyName).",
+      "root_cause": "No 'app-services' pattern documents client-as-is + provider-keeps-IBackgroundTask + manifest-extension + merged-package PackageFamilyName; and the background-tasks pattern actively misroutes app-service hosts.",
+      "tier": 2,
+      "change": "Added an 'app-services' anchor section to MIGRATION-PATTERNS.md (client migrate-as-is; provider keeps IBackgroundTask + AppServiceTriggerDetails; preserve windows.appService/uap3:AppService extension and retarget EntryPoint; replace hardcoded PackageFamilyName with Package.Current.Id.FamilyName on merge). Added a carve-out to #background-tasks pointing to it.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "A migration agent hosting an app service keeps the provider working and preserves the manifest extension without having to override the skill.",
+      "falsifiable_check": "On a re-run of any app-service scenario, Get-MigrationPattern.ps1 -Anchor app-services returns the section, and the agent does not attempt to convert the provider to BackgroundTaskBuilder (grep build-events for BackgroundTaskBuilder = 0)."
+    },
+    {
+      "problem": "AppServiceConnection / AppServiceTriggerDetails get no routing TODO from the bootstrap analyzer, so the agent is not pointed at any guidance.",
+      "evidence": "skill-defects.json item 1; unsupported-api-inventory.json had no AppService pattern (only IBackgroundTask -> background-tasks).",
+      "root_cause": "Missing analyzer entry means no inline TODO[migrate-NNN] is injected for app-service code.",
+      "tier": 1,
+      "change": "Added an 'adaptable' entry matching \\bAppServiceConnection\\b|\\bAppServiceTriggerDetails\\b routed to anchor 'app-services' in scripts/unsupported-api-inventory.json.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+      "expected_effect": "Initialize-UwpMigration.ps1 injects a TODO above app-service lines routing the agent to the new pattern — tooling the agent cannot ignore.",
+      "falsifiable_check": "On re-run, MIGRATION-MAPPING/injected TODOs for a file using AppServiceConnection reference PATTERNS.md#app-services."
+    }
+  ],
+  "deferred_to_human": []
+}

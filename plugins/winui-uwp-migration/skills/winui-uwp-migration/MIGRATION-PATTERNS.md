@@ -337,6 +337,28 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 
 `IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK [`BackgroundTaskBuilder`](https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.windows.applicationmodel.background.backgroundtaskbuilder) (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler. See the [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy).
 
+> **Exception — app-service providers.** If the task's `TriggerDetails` casts to `AppServiceTriggerDetails` (i.e. it *is* an in-process app-service host, not a periodic/maintenance task), **keep `IBackgroundTask` verbatim** — `BackgroundTaskBuilder` does not host app services. See [App Services](#app-services). Only convert background tasks that are **not** app-service hosts.
+
+<a id="app-services"></a>
+## App Services
+
+App services (`Windows.ApplicationModel.AppService`) are **supported** on WinUI 3 desktop with package identity (the packaged WinAppSDK scaffold already has it). Migrate the three parts as follows:
+
+| Part | UWP | WinUI 3 action |
+|------|-----|----------------|
+| **Client** | `AppServiceConnection`, `AppServiceConnectionStatus`, `connection.AppServiceName`, `SendMessageAsync` | **Migrate as-is** — namespace unchanged, no code change beyond the shell/threading fixes the file already needs. |
+| **Provider** | `IBackgroundTask` whose `taskInstance.TriggerDetails as AppServiceTriggerDetails` yields the incoming `AppServiceConnection` | **Keep `IBackgroundTask` + `Run(IBackgroundTaskInstance)` verbatim.** Do **not** convert to `BackgroundTaskBuilder`. Only update the class's `namespace` if you merge projects (below). |
+| **Manifest** | `<uap:Extension Category="windows.appService">` with a `<uap3:AppService Name="..."/>` child | **Preserve the extension.** Declare the `uap3` namespace (`xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"` in `IgnorableNamespaces`) and update `EntryPoint` to the **fully-qualified task class in the merged project** (e.g. `MyApp.RandomNumberGeneratorTask`). |
+
+**Merging separate client/provider projects.** SDK samples often ship the client, the provider app, and the service task as three projects. Merge them into the **single** WinUI 3 project (one package). Because the client and the service now share one package, replace any **hardcoded `PackageFamilyName`** used to address the service with the runtime value:
+
+```csharp
+// UWP: connection.PackageFamilyName = "Some.Hardcoded.Pfn_abc123";
+connection.PackageFamilyName = Package.Current.Id.FamilyName;
+```
+
+Leave `connection.AppServiceName` (e.g. `"com.microsoft.randomnumbergenerator"`) unchanged — it must match the `<uap3:AppService Name="...">` in the manifest.
+
 <a id="notifications"></a>
 ## Notifications
 

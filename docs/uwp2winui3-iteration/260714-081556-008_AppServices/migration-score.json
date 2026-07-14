@@ -1,0 +1,39 @@
+{
+  "scenario": "AppServices",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (partial-golden): UWP launched via uwp-app-runner (ok:true, pid 8540, window 'App Service Client C# sample'). Scenario-1 golden captured with full inner content (nav list + controls). Per-scenario navigation/actuation of the golden was NOT automatable: the UWP CoreWindow (ApplicationFrameHost) exposes an opaque UIA tree (single Pane) and synthetic input could not be routed in a non-interactive session (foreground could not be set). Scenario-2 golden and golden button behavior derived from the source checklist. Candidate WinUI app was actuated directly and graded against the source checklist + observed behavior.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_score": 100,
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Open/Close Connection",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Open_Close_Connection.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Open_Close_Connection.png",
+      "control_coverage": "3/3",
+      "actions_live": "1/1",
+      "note": "Layout matches the UWP golden (Description, Minimum/Maximum Value, Generate Random Number, Result). 'Generate Random Number' is wired: it runs the real AppServiceConnection path and, with no provider deployed, shows the correct status 'The app service is not available. It may be updating or on a removable device.' — same expected behavior as the UWP source. uwp_responded set true from source handler equivalence (golden actuation not automatable; see uwp_capture_status)."
+    },
+    {
+      "name": "Keep Connection Open",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Keep_Connection_Open.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Keep_Connection_Open.png",
+      "control_coverage": "5/5",
+      "actions_live": "3/3",
+      "note": "Layout matches (Open/Close Connection buttons, Minimum/Maximum Value, Generate Random Number, Result, Status). All three action controls respond with the correct source-defined messages: Open Connection -> 'The app service is not available...'; Close Connection -> \"There's no open connection to close\"; Generate Random Number -> 'Use the Open Connection button to open a connection...'. No dead controls. Note: the scenario-2 golden screenshot could not be navigated to (opaque UWP CoreWindow); ground truth taken from source checklist."
+    }
+  ],
+  "notes": "Compare-Parity.ps1 result: PASS, 100/100, pass=2 partial=0 fail=0, coverage 3/3 and 5/5, actions 1/1 and 3/3 live. No missing controls, no dead controls, no behavioral regressions. Only difference vs golden is theme (UWP dark vs WinUI default light) — non-functional. WinUI app also adds a 3rd scenario (Show Package Family Name), a superset of the client checklist. score = round(100*(2 + 0.5*0)/2) = 100.",
+  "skipped": false
+}

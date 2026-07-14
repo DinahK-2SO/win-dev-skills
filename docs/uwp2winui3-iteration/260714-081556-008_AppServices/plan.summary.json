@@ -1,0 +1,15 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add app-services pattern to MIGRATION-PATTERNS.md: client migrates as-is, provider keeps IBackgroundTask + AppServiceTriggerDetails, preserve windows.appService/uap3:AppService manifest extension, use Package.Current.Id.FamilyName on merge",
+    "Carve out app-service hosts in the background-tasks pattern so agents no longer wrongly convert an app-service provider to BackgroundTaskBuilder",
+    "Route AppServiceConnection/AppServiceTriggerDetails to the new app-services anchor in unsupported-api-inventory.json so the bootstrap injects a TODO"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json"
+  ],
+  "deferred_to_human": []
+}

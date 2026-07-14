@@ -1,0 +1,31 @@
+{
+  "scenario": "AppServices",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap produced MIGRATION-MAPPING.md with 9 seeded rows and injected TODO[migrate-NNN] markers (session-log turns ~7-9), giving the agent a mechanical starting inventory." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught the unfinished state (rows stuck at Status=copied) at turn 35 and confirmed PASS after fix at turn 37 (clean build, smoke launch pid 15020)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "unsupported-api-inventory.json (bootstrap analyzer)", "limitation": "No pattern for AppServiceConnection / AppServiceTriggerDetails, so the client and provider app-service code got no routing TODO — the agent had to recognise and adapt the app-service triad unaided.", "suggested_tweak": "Add an 'adaptable' entry for AppServiceConnection|AppServiceTriggerDetails routing to a new app-services anchor." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#background-tasks", "wrong": "Blanket 'IBackgroundTask / BackgroundTaskRegistration are not the recommended model. Use BackgroundTaskBuilder ... or Task Scheduler.'", "correct": "An in-process AppService provider MUST remain an IBackgroundTask whose TriggerDetails is an AppServiceTriggerDetails; BackgroundTaskBuilder does not host app services. Only non-app-service background tasks should move to BackgroundTaskBuilder." }
+  ],
+  "special_apis": [
+    { "api": "AppServiceConnection (Windows.ApplicationModel.AppService)", "special_handling": "Supported on WinUI 3 desktop with package identity; client code migrates as-is (namespace unchanged)." },
+    { "api": "IBackgroundTask app-service provider", "special_handling": "Kept verbatim; hosted via <uap:Extension Category=\"windows.appService\"> + <uap3:AppService Name=\"...\"/> in the manifest, EntryPoint updated to the merged namespace." }
+  ],
+  "errors_encountered": [
+    { "error": "Validate-UwpMigration.ps1 FAIL: '9 row(s) still Status=copied' (session-log turn 35)", "root_cause": "Bootstrap seeds every mapping row as Status=copied; agent finished the files but had not flipped Status to done.", "fix": "Bulk-replaced '| copied |' -> '| done |' in MIGRATION-MAPPING.md; re-ran validator -> PASS (turn 37)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "RandomNumberGeneratorTask.cs + Package.appxmanifest (turns ~30-38)", "symptom": "No skill guidance on how to migrate an app-service provider; the background-tasks anchor pointed the opposite direction (abandon IBackgroundTask).", "turns_or_retries": "handled in one pass but required the agent to reason unaided and explicitly override the skill", "root_cause": "Skill has no app-services pattern and the background-tasks pattern is wrong for app-service hosts.", "how_resolved": "Agent kept IBackgroundTask ('the only valid implementation for AppService hosting'), added the windows.appService manifest extension, and replaced the hardcoded PackageFamilyName with Package.Current.Id.FamilyName.", "preventable_by": "Adding an app-services pattern section + a background-tasks carve-out + an analyzer routing entry." },
+    { "where": "MIGRATION-MAPPING.md status flip (turns 35-37)", "symptom": "Validator FAIL on rows stuck at Status=copied.", "turns_or_retries": "1 retry", "root_cause": "Agent deferred flipping Status until validation ran.", "how_resolved": "Bulk flip copied->done.", "preventable_by": "Already covered in SKILL.md Step 1 ('Flip Status from copied -> done as each row is finished') — a slip, not a skill gap." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "App-service provider is not separately deployed/registered, so Generate/Open return the built-in 'app service is not available' status in both UWP golden and WinUI candidate.", "workaround": "None needed — identical, correct behavior in both; confirms buttons are genuinely wired." }
+  ]
+}
