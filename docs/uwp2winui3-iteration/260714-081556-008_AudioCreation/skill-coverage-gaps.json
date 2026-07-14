@@ -1,0 +1,15 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "First dotnet build FAILED with CS0227 because the scaffold csproj did not enable unsafe code, while the AudioGraph frame-buffer source (IMemoryBufferByteAccess / byte* in CustomEffect.cs and Scenario3_FrameInputNode.xaml.cs) requires `unsafe`.",
+      "evidence": "Migration session-log ~turn 46 build output (CS0227 in CustomEffect.cs and Scenario3_FrameInputNode.xaml.cs); fixed ~turn 47 by adding <AllowUnsafeBlocks>true</AllowUnsafeBlocks>.",
+      "covered_at": "MIGRATION-PATTERNS.md, section '### CS0227: Unsafe code may only appear if compiling with /unsafe' — instructs adding <AllowUnsafeBlocks>true</AllowUnsafeBlocks>.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "The guidance is purely reactive ('fix them inline as you encounter them'), so it only helps AFTER a failed build. Make it proactive at Tier 1: have Initialize-UwpMigration.ps1 scan the copied .cs for the `unsafe` keyword and, when present, auto-add <AllowUnsafeBlocks>true</AllowUnsafeBlocks> to the scaffold csproj during bootstrap; cross-reference this in the CS0227 note.",
+      "generalizes": "Any UWP SDK sample that touches raw pixel/audio/media buffers (AudioGraph FrameInputNode, custom IBasicAudioEffect, SoftwareBitmap/pixel access, camera frames) compiles `unsafe`. The scaffold never enables it, so CS0227 recurs across the whole media-sample family. Auto-enabling at bootstrap removes a guaranteed build round-trip for that class."
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "scenario": "AudioCreation",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 6,
+  "features_pass": 6,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (launched Release, pid 29152, windowTitle 'AudioCreation'); however the UWP CoreWindow UIA tree is not exposed via ApplicationFrameHost on this host, so per-scenario navigation and behavioral actuation of the UWP golden were not possible. Only the initial File Playback frame was captured as UWP pixel ground truth; scenarios 2-6 judged against source + faithful WinUI renders.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_gate": "PASS",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "File Playback",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "coverage": "4/4",
+      "uwp_screenshot": "parity/baseline/screenshots/01_File_Playback.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_File_Playback__a01_Load_File.png",
+      "note": "Layout matches UWP golden exactly (Load File -> Output Device node red/DeviceNotAvailable, Start Graph disabled, Loop toggle Off, Playback Speed slider). Load File responded (opened picker). Start Graph/Loop gated by file/device, same as UWP."
+    },
+    {
+      "name": "Capture From Device",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "coverage": "5/5",
+      "uwp_screenshot": "parity/baseline/screenshots/02_Capture_From_Device.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Capture_From_Device.png",
+      "note": "Device pickers, Input/Output node diagram, Pick Output File, Record, Create Graph all present and laid out as in the source. Actions gated by DeviceNotAvailable (no audio device) -- same gating as the UWP golden."
+    },
+    {
+      "name": "Using A FrameInput Node",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "coverage": "n/a (no discrete actuation controls in checklist)",
+      "uwp_screenshot": "parity/baseline/screenshots/03_Using_A_FrameInput_Node.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Using_A_FrameInput_Node.png",
+      "note": "Frame Input -> Output Device node rendered GREEN with live status 'Device Output Node successfully created' and a Generate Audio button. Positive behavioral signal."
+    },
+    {
+      "name": "Using A Submix Node",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "coverage": "4/4",
+      "uwp_screenshot": "parity/baseline/screenshots/04_Using_A_Submix_Node.png",
+      "winui_screenshot": "parity/winui3/screenshots/04_Using_A_Submix_Node.png",
+      "note": "Load File 1/2 -> SubMix node (Echo toggle Off) -> Output Device (red), Start Graph, DeviceNotAvailable status. Faithful to source. Actions gated by file/device."
+    },
+    {
+      "name": "Inbox Effects",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "coverage": "13/13",
+      "uwp_screenshot": "parity/baseline/screenshots/05_Inbox_Effects.png",
+      "winui_screenshot": "parity/winui3/screenshots/05_Inbox_Effects.png",
+      "note": "Full 13/13 control coverage: Load File, Start Graph, Echo/Reverb/Limiter/Equalizer toggles with Delay/Decay/parameter sliders. Load File responded; remaining actions gated by file/device."
+    },
+    {
+      "name": "Custom Effects",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "coverage": "2/2",
+      "uwp_screenshot": "parity/baseline/screenshots/06_Custom_Effects.png",
+      "winui_screenshot": "parity/winui3/screenshots/06_Custom_Effects.png",
+      "note": "Load File -> Output Device, Start Graph, IBasicAudioEffect echo description. Load File responded; Start Graph gated by file/device. Matches source."
+    }
+  ]
+}

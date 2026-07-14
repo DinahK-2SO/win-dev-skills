@@ -1,0 +1,15 @@
+{
+  "scenario": "AudioCreation",
+  "ground_truth": "original UWP AudioCreation C# SDK sample (Release), windowTitle 'AudioCreation'",
+  "scoring_formula": "round(100 * (pass + 0.5*partial) / features_total)",
+  "verdicts": { "pass": "reachable, non-blank, >=80% coverage, visually faithful, controls behave as UWP golden", "partial": "reachable but missing controls or present-but-dead vs UWP golden", "fail": "blank/unreachable, dropped scenario, or every frame blank" },
+  "features": [
+    { "n": 1, "name": "File Playback", "controls": ["Load File", "Output Device node", "Start Graph", "Loop toggle", "Playback Speed slider"] },
+    { "n": 2, "name": "Capture From Device", "controls": ["Pick output device", "Pick input device", "Pick Output File", "Record", "Create Graph"] },
+    { "n": 3, "name": "Using A FrameInput Node", "controls": ["Frame Input node", "Output Device node", "Generate Audio"] },
+    { "n": 4, "name": "Using A Submix Node", "controls": ["Load File 1", "Load File 2", "Echo toggle", "Start Graph"] },
+    { "n": 5, "name": "Inbox Effects", "controls": ["Load File", "Start Graph", "Echo/Reverb/Limiter/Equalizer toggles", "parameter sliders"] },
+    { "n": 6, "name": "Custom Effects", "controls": ["Load File", "Start Graph"] }
+  ],
+  "instrument_note": "UWP CoreWindow UIA not exposed via ApplicationFrameHost; only the initial File Playback frame captured as UWP pixel ground truth. Scenarios 2-6 judged vs source + WinUI renders."
+}

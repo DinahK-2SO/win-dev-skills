@@ -1,0 +1,17 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "On a clean migration with zero deferred files, Validate-UwpMigration.ps1 emits '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency'.",
+      "evidence": "Migration session-log validation output (~line 4925): the WARN fired even though nothing was deferred and the build was clean (1386 warnings, 0 WUI analyzer warnings).",
+      "skill_search": "grep 'DEFERRED', 'No items deferred', '(none)' across Initialize-UwpMigration.ps1 and Validate-UwpMigration.ps1",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize-UwpMigration.ps1 (empty-defer branch): `if ($deferredKeys.Count -eq 0) { [void]$dlines.Add('| (none) | — |') }`  ;  Validate-UwpMigration.ps1: `if ($deferText -notmatch 'No items deferred') { Write-Host '[WARN] ...' }`",
+      "root_cause": "The two migration-skill scripts disagree on the empty-defer sentinel: the seeder writes a table placeholder row '(none)', but the validator only suppresses the WARN when the file contains the literal text 'No items deferred'.",
+      "proposed_fix": "In Initialize-UwpMigration.ps1's empty-defer branch, also write the 'No items deferred.' sentinel line the validator checks for.",
+      "generalizes": "Most simple UWP SDK samples defer nothing (no unsupported APIs). Every such migration currently trips this spurious WARN, adding noise that can push an agent to mis-declare a FAIL or waste turns investigating. Fixing the seeder/validator contract helps all zero-deferral scenarios."
+    }
+  ]
+}

@@ -115,6 +115,36 @@ if ($uwpCsprojs.Count -gt 0) {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
 }
 
+# ─── 2b. Enable unsafe blocks if the copied source uses them ────────────────────
+# UWP SDK samples that touch raw pixel/audio/media buffers (IMemoryBufferByteAccess,
+# byte* access, stackalloc — e.g. AudioGraph FrameInputNode, custom IBasicAudioEffect,
+# SoftwareBitmap pixel access, camera frames) compile `unsafe` blocks. The
+# `dotnet new winui` scaffold csproj does NOT set <AllowUnsafeBlocks>, so the first
+# build fails with CS0227. Detect the keyword up front and set the flag so the build
+# is clean without a failed round-trip (MIGRATION-PATTERNS.md "CS0227" documents the
+# same fix for the reactive case).
+$usesUnsafe = $false
+foreach ($rel in $copied) {
+    if ($rel -notmatch '\.cs$') { continue }
+    $txt = Get-Content -LiteralPath (Join-Path $Target $rel) -Raw -ErrorAction SilentlyContinue
+    if ($txt -match '(?m)\bunsafe\b') { $usesUnsafe = $true; break }
+}
+if ($usesUnsafe) {
+    $targetRoot = (Resolve-Path -LiteralPath $Target).Path
+    $scaffoldCsproj = Get-ChildItem -Path $Target -Filter '*.csproj' -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.DirectoryName -eq $targetRoot } | Select-Object -First 1
+    if ($scaffoldCsproj) {
+        $cp = Get-Content -LiteralPath $scaffoldCsproj.FullName -Raw
+        if ($cp -notmatch 'AllowUnsafeBlocks') {
+            $cp = [regex]::Replace($cp, '(?s)(</PropertyGroup>)', "  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>`r`n`$1", 1)
+            Set-Content -LiteralPath $scaffoldCsproj.FullName -Value $cp -Encoding UTF8
+            Write-Host "    Detected 'unsafe' in copied source — added <AllowUnsafeBlocks>true</AllowUnsafeBlocks> to $($scaffoldCsproj.Name) (prevents CS0227)"
+        }
+    } else {
+        Write-Warning "    Copied source uses 'unsafe' but no scaffold .csproj found at target root — add <AllowUnsafeBlocks>true</AllowUnsafeBlocks> manually to avoid CS0227"
+    }
+}
+
 # ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────
 $excludeDirs = @('bin', 'obj', '.uwp-source', '.vs', '.git', '.github', '.copilot')
 $excludePattern = '\\(' + ($excludeDirs -join '|') + ')\\'
@@ -438,6 +468,10 @@ foreach ($rel in $deferredKeys) {
 }
 if ($deferredKeys.Count -eq 0) {
     [void]$dlines.Add('| (none) | — |')
+    [void]$dlines.Add('')
+    # Sentinel the validator looks for; without it Validate-UwpMigration.ps1 emits a
+    # spurious [WARN] on every zero-deferral migration (the two scripts must agree).
+    [void]$dlines.Add('No items deferred.')
 }
 Set-Content -LiteralPath $deferredPath -Value $dlines -Encoding UTF8
 

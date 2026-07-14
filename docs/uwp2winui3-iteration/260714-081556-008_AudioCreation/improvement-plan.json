@@ -1,0 +1,28 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Zero-deferral migrations trip a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows' from the mandatory Validate gate.",
+      "evidence": "notes/skill-defects.json item 1; migration session-log validation output ~line 4925 (WARN on a clean, zero-defer build).",
+      "root_cause": "Initialize-UwpMigration.ps1 seeds the empty MIGRATION-DEFERRED.md with a '| (none) | — |' placeholder, but Validate-UwpMigration.ps1 only suppresses the WARN when the file contains the literal text 'No items deferred'. The two migration-skill scripts disagree on the empty-defer sentinel.",
+      "tier": 1,
+      "change": "In Initialize-UwpMigration.ps1's empty-defer branch, additionally emit the 'No items deferred.' sentinel line the validator checks for.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Clean zero-deferral migrations pass the DEFERRED consistency check with '[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes No items deferred.' instead of a WARN.",
+      "falsifiable_check": "Re-run Validate-UwpMigration.ps1 after a fresh bootstrap with no defer rows: the DEFERRED section prints [PASS], not [WARN]."
+    },
+    {
+      "problem": "First dotnet build fails with CS0227 for any sample whose source uses `unsafe` (AudioGraph FrameInputNode / custom IBasicAudioEffect / pixel buffers), because the scaffold csproj lacks <AllowUnsafeBlocks>.",
+      "evidence": "notes/skill-coverage-gaps.json item 1; migration session-log ~turn 46 CS0227 in CustomEffect.cs and Scenario3_FrameInputNode.xaml.cs, fixed ~turn 47.",
+      "root_cause": "MIGRATION-PATTERNS.md covers CS0227 only reactively ('fix inline as you encounter'). The `dotnet new winui` scaffold never enables unsafe code, so a build round-trip is guaranteed for buffer-manipulating samples.",
+      "tier": 1,
+      "change": "Initialize-UwpMigration.ps1 scans the copied .cs for the `unsafe` keyword and, when found, auto-adds <AllowUnsafeBlocks>true</AllowUnsafeBlocks> to the scaffold csproj (idempotent). Added a cross-reference note in MIGRATION-PATTERNS.md's CS0227 section.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1 ; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Bootstrap produces a csproj with AllowUnsafeBlocks already set for media/buffer samples; the first build no longer fails CS0227.",
+      "falsifiable_check": "After bootstrapping a sample containing `unsafe`, grep the scaffold .csproj for AllowUnsafeBlocks (present) and confirm the first `dotnet build` emits no CS0227."
+    }
+  ],
+  "deferred_to_human": []
+}

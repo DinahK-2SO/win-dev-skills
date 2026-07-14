@@ -1,0 +1,35 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Seeded 16 source files, triage labels, and inline TODOs; the mechanical namespace rewrite and MIGRATION-MAPPING seed worked cleanly (session-log ~turn 2)." },
+    { "tool": "Get-MigrationPattern.ps1 -Anchor pickers / threading / csproj", "evidence": "Returned the correct IInitializeWithWindow file-picker pattern and DispatcherQueue.TryEnqueue threading replacement, which the agent applied to all pickers/threading sites without error (session-log ~turn 9)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Second run PASSed and drove the runtime smoke launch; it correctly flagged the still-copied MIGRATION-MAPPING rows on the first run." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 + Initialize-UwpMigration.ps1", "problem": "The validator emits '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows' on a clean zero-deferral migration.", "evidence": "session-log validation output line ~4925; the two scripts disagree on the empty-defer sentinel." }
+  ],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Does not inspect the copied source for `unsafe` usage, so the scaffold csproj lacks <AllowUnsafeBlocks> and the first build fails with CS0227.", "suggested_tweak": "Scan copied .cs for the `unsafe` keyword and auto-add <AllowUnsafeBlocks>true</AllowUnsafeBlocks> to the scaffold csproj at bootstrap." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "AudioGraph frame access (IMemoryBufferByteAccess / byte* / FrameInputNode / custom IBasicAudioEffect)", "special_handling": "Requires C# `unsafe` blocks; the WinUI 3 scaffold csproj must set <AllowUnsafeBlocks>true</AllowUnsafeBlocks> or the build fails CS0227." },
+    { "api": "FileOpenPicker / FileSavePicker", "special_handling": "In WinUI 3 desktop there is no implicit active window; must call WinRT.Interop.InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(App.MainWindow)). Skill covered this and agent applied it to all 7 pickers with no error." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0227: Unsafe code may only appear if compiling with /unsafe (CustomEffect.cs, Scenario3_FrameInputNode.xaml.cs)", "root_cause": "AudioGraph frame-buffer code uses `unsafe`; scaffold csproj did not enable unsafe blocks.", "fix": "Added <AllowUnsafeBlocks>true</AllowUnsafeBlocks> to AudioCreation.csproj (session-log ~turn 47)." },
+    { "error": "CS0103: The name 'Colors' does not exist in the current context", "root_cause": "After the namespace rewrite, unqualified `Colors` lost its `using`. MIGRATION-PATTERNS.md mapping table already lists Windows.UI.Colors -> Microsoft.UI.Colors.", "fix": "Added the color namespace using / qualified the reference in the scenario files." },
+    { "error": "Validate FAIL: N rows still Status=copied", "root_cause": "Agent had not flipped MIGRATION-MAPPING Status from copied to done as it finished each file; SKILL.md documents this explicitly.", "fix": "Flipped all rows copied -> done and re-ran validation (PASS)." },
+    { "error": "Validate WARN: MIGRATION-DEFERRED.md exists with content but mapping has no defer rows", "root_cause": "Initialize seeds DEFERRED.md with a '| (none) | — |' row; Validate expects the literal 'No items deferred' text.", "fix": "None applied by agent (non-blocking WARN); this is a genuine skill self-inconsistency." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "First dotnet build (session-log ~turn 46)", "symptom": "Build FAILED with simultaneous CS0227 (unsafe) and CS0103 (Colors) errors.", "turns_or_retries": "~2-3 build attempts", "root_cause": "Scaffold csproj lacked AllowUnsafeBlocks; audio-buffer source needs unsafe.", "how_resolved": "Added AllowUnsafeBlocks and fixed color namespace.", "preventable_by": "Initialize-UwpMigration.ps1 auto-adding <AllowUnsafeBlocks> when it detects `unsafe` in copied source." },
+    { "where": "Validation (session-log ~turn 68-71)", "symptom": "Validate FAIL on Status=copied rows; then a lingering WARN about MIGRATION-DEFERRED.md.", "turns_or_retries": "2 validation runs", "root_cause": "Status flip is a documented manual step (slip); the DEFERRED WARN is a script inconsistency.", "how_resolved": "Flipped statuses; ignored the WARN.", "preventable_by": "Initialize seeding MIGRATION-DEFERRED.md with the 'No items deferred.' sentinel the validator expects." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No audio output device / non-interactive file pickers gate Start Graph, Record, effect toggles.", "workaround": "Same gating exists in the UWP golden; not a migration defect (per scoring discrepancies.md)." }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS0103: The name 'Colors' does not exist in the current context after the namespace rewrite.",
+      "evidence": "Migration session-log build errors on scenario files; agent fixed by adding the color namespace using/qualifier.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md namespace mapping table row: `| Windows.UI.Colors | Microsoft.UI.Colors |` (the exact type is listed).",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The type is explicitly in the mapping table; a capable model would consult it and qualify/using the color namespace. Adding more prose about one already-tabulated type would just bloat the mapping."
+    },
+    {
+      "problem": "Validate-UwpMigration.ps1 first run FAILED because MIGRATION-MAPPING rows were still Status=copied.",
+      "evidence": "Migration session-log ~turn 68 FAIL; agent flipped rows copied->done and re-ran to PASS (~turn 71).",
+      "covered_clearly_at": "SKILL.md Step 3: 'Flip `Status` from `copied` -> `done` (or `deferred`) as each row is finished.' and Step 4 diagnostic: 'Status = copied rows -> those files were never finished. Either complete the migration and flip to done ...'",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "The Status lifecycle is stated prominently in both the walk-the-rows step and the validation-failure playbook. A re-run that follows the documented per-file flip would not hit this. Fixing a slip here would mean 'tell the model to read', which is noise."
+    },
+    {
+      "problem": "File pickers needed InitializeWithWindow in WinUI 3 desktop.",
+      "evidence": "Agent applied WinRT.Interop.InitializeWithWindow.Initialize to all 7 pickers with no failure (session-log ~turn 24+).",
+      "covered_clearly_at": "Get-MigrationPattern.ps1 -Anchor pickers (dedicated pattern the agent fetched and applied).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Not even a failure — this is a positive: the skill's pickers anchor was adequate and the agent succeeded. Listed only to confirm no skill change is warranted."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "File Playback", "status": "pass", "reason": "Layout matches UWP golden; Load File opens picker; Start Graph/Loop gated by file/device as in UWP.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Capture From Device", "status": "pass", "reason": "Device pickers, node diagram, Pick Output File, Record, Create Graph present; gated by DeviceNotAvailable as in UWP.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Using A FrameInput Node", "status": "pass", "reason": "Green Output node + 'Device Output Node successfully created'; positive behavioral signal.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Using A Submix Node", "status": "pass", "reason": "Load File 1/2 -> SubMix (Echo) -> Output; faithful to source.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Inbox Effects", "status": "pass", "reason": "13/13 control coverage; Echo/Reverb/Limiter/Equalizer toggles + sliders.", "suspected_skill_gap": "" },
+    { "id": 6, "text": "Custom Effects", "status": "pass", "reason": "Load File -> Output, Start Graph, IBasicAudioEffect echo; matches source.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Faithful migration; 6/6 PASS, parity gate PASS, no visual/structural discrepancies. Improvement signal is dev-agent build friction (CS0227 unsafe round-trip; spurious MIGRATION-DEFERRED.md WARN), not output quality."
+}

@@ -1,0 +1,14 @@
+{
+  "scenario": "AudioCreation",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: seed the 'No items deferred.' sentinel in MIGRATION-DEFERRED.md when nothing is deferred, so Validate-UwpMigration.ps1 stops emitting a spurious WARN on every zero-deferral migration (the two scripts now agree on the empty-defer contract).",
+    "Initialize-UwpMigration.ps1: auto-add <AllowUnsafeBlocks>true</AllowUnsafeBlocks> to the scaffold csproj when copied source uses `unsafe`, preventing the CS0227 build round-trip on raw-buffer media samples (AudioGraph/custom effects/pixel access); MIGRATION-PATTERNS.md CS0227 note updated to reference the auto-fix."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}
