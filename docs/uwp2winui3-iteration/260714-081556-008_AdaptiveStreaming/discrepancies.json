@@ -1,0 +1,22 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Simplest Adaptive Streaming (Load)", "status": "pass", "reason": "Load responds in both; identical env fallback.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Event Handlers", "status": "pass", "reason": "Faithful layout; MediaPlayerElement renders. Structural 0/1 = automation-peer artifact.", "suspected_skill_gap": "MediaPlayerElement automation peer does not expose AutomationId to UIA; skill has no note about wrapping complex controls for discoverability." },
+    { "id": 3, "text": "Network Request Modification", "status": "pass", "reason": "HDCP Off/On/Type respond in both; labels/log match.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Adaptive Streaming Tuning", "status": "pass", "reason": "All bitrate combos + Set boxes present; Set env-gated in both.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Metadata", "status": "pass", "reason": "AutoPlay checked (matches UWP); MediaPlayerElement renders. Structural 0/1 = automation-peer artifact.", "suspected_skill_gap": "Same MediaPlayerElement UIA-discoverability limitation." },
+    { "id": 6, "text": "Ad Insertion", "status": "pass", "reason": "Faithful; MediaPlayerElement renders. Structural 0/1 = automation-peer artifact.", "suspected_skill_gap": "Same MediaPlayerElement UIA-discoverability limitation." },
+    { "id": 7, "text": "Live Seekable Range", "status": "pass", "reason": "All controls present and match UWP; seek/Set env-gated in both.", "suspected_skill_gap": "Unnamed seek/transport buttons carry no AutomationId; general accessibility-naming gap." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "MediaPlayerElement scenarios (2,5,6)", "uwp": "media element present in UIA tree", "winui": "renders visually (transport bar) but not exposed with AutomationId in UIA tree", "screenshot_ref": "parity/winui3/screenshots/02_Event_Handlers.png, 05_Metadata.png, 06_Ad_Insertion.png" },
+    { "feature": "Sample-template chrome", "uwp": "UWP sample header/footer branding present", "winui": "boilerplate chrome omitted (not a scored feature)", "screenshot_ref": "all" }
+  ],
+  "missing_features": [],
+  "summary": "Full functional + behavioral parity (100/100 feature score, 0 regressions). Structural gate depressed only by MediaPlayerElement automation-peer and unnamed-button measurement artifacts. Primary reusable lesson is the CS0104 Windows.Web.Http vs System.Net.Http build ambiguity, which the skill does not document."
+}

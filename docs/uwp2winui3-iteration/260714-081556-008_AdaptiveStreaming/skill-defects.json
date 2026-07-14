@@ -1,0 +1,17 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0104 'HttpClient'/'HttpRequestMessage'/'HttpResponseMessage' is an ambiguous reference between System.Net.Http.* and Windows.Web.Http.* across 8 files, which then cascaded into a hanging XAML compile (WMC1509/WMC9999).",
+      "evidence": "session-log.txt:9143-9165 (19 errors, 8 CS0104 across ContentSelector + Scenario2-7 + AdaptiveMediaSourceHttpFilterLogger); fix at session-log.txt:9334 ('<Using Remove=\"System.Net.Http\" />'); WMC hang session-log.txt:9431-9732; clean build session-log.txt:9958.",
+      "skill_search": "Grepped MIGRATION-PATTERNS.md, SKILL.md, scripts for 'Windows.Web.Http', 'System.Net.Http', 'HttpClient', 'CS0104', 'Using Remove', 'ambiguous', 'IHttpFilter'. Only hit: the CS0104 *LaunchActivatedEventArgs* section and a Validate-UwpMigration comment mentioning CS0104 LaunchActivatedEventArgs.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The WinUI scaffold's .csproj enables ImplicitUsings, adding a global 'using System.Net.Http'. Any UWP source that legitimately keeps the WinRT 'Windows.Web.Http' stack (HttpClient, IHttpFilter, HttpRequestMessage/HttpResponseMessage) then has two identically-named types in scope. Deleting a using does not fix it because ImplicitUsings re-injects System.Net.Http; the correct fix is a project-wide '<Using Remove=\"System.Net.Http\" />'. The existing CS0104 guidance ('fully qualify, or remove the stale UWP using') is wrong for this case.",
+      "proposed_fix": "Add a 'CS0104 HttpClient / Windows.Web.Http ambiguity' subsection under 'Common build errors' in MIGRATION-PATTERNS.md: explain the ImplicitUsings root cause and prescribe adding '<ItemGroup><Using Remove=\"System.Net.Http\" /></ItemGroup>' to the .csproj (and NOT rewriting the WinRT HTTP calls, since AdaptiveMediaSource/IHttpFilter interception depends on the Windows.Web.Http types).",
+      "generalizes": "Windows.Web.Http is pervasive across UWP apps (HTTP requests, OAuth via IHttpFilter, adaptive-streaming request interception). Every such app hits this CS0104 the moment it builds against an ImplicitUsings-enabled WinUI scaffold. The fix is a single, safe, project-wide directive — highly reusable and not scenario-specific."
+    }
+  ]
+}

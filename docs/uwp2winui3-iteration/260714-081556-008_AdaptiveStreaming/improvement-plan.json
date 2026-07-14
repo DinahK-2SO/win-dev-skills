@@ -1,0 +1,31 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0104 ambiguity between Windows.Web.Http and System.Net.Http on HttpClient/HttpRequestMessage/HttpResponseMessage across 8 files, cascading into a hanging XAML compile (WMC1509/WMC9999).",
+      "evidence": "lessons.json errors_encountered #1; session-log.txt:9143-9165 (8 CS0104), fix at 9334, WMC hang 9431-9732, clean build 9958. Skill grep: only CS0104-LaunchActivatedEventArgs documented.",
+      "root_cause": "WinUI scaffold .csproj ImplicitUsings=enable injects a global 'using System.Net.Http' that collides with the WinRT Windows.Web.Http stack the media/IHttpFilter code keeps. Deleting a using does not help (ImplicitUsings re-adds it); the existing 'remove the stale using' advice is wrong for this case.",
+      "tier": 3,
+      "change": "Added a 'CS0104 HttpClient/Windows.Web.Http ambiguity' subsection under 'Common build errors' documenting the ImplicitUsings root cause and prescribing a project-wide '<Using Remove=\"System.Net.Http\" />' (not rewriting the WinRT HTTP calls).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents resolve the HttpClient ambiguity in one edit instead of trial/error, avoiding the WMC compile-hang cascade and the retry/timeout thrash.",
+      "falsifiable_check": "On a re-run of any Windows.Web.Http-using UWP app, the first build's CS0104 HttpClient errors are fixed by the csproj Using Remove directive with no WMC9999 hang; no per-file HTTP call rewrites. Why Tier 3 not Tier 1: a script cannot safely blanket-remove System.Net.Http (some files may need it); the correct fix is a judgement the agent applies per-project, so documented guidance is the right lever."
+    },
+    {
+      "problem": "MediaPlayerElement's automation peer does not project AutomationProperties.AutomationId/Name to the UIA tree, so the migrated media surface is not individually discoverable/named for accessibility.",
+      "evidence": "skill-coverage-gaps.json #1; score-notes migration-score.json + discrepancies.json (scenarios 2/5/6 structural 0/1, element renders). Existing rows only covered the element/namespace swap.",
+      "root_cause": "WinUI's MediaPlayerElementAutomationPeer does not surface AutomationProperties set on the element; UWP's did. The control-mapping rows say properties 'carry over' and gave no discoverability caveat.",
+      "tier": 3,
+      "change": "Appended a one-line UIA caveat to the existing MediaElement/MediaPlayerElement mapping rows: wrap in a named Grid/Border carrying AutomationProperties if the surface must stay UIA-discoverable/named. Sharpened existing rows, no new topic.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Migrated media apps preserve the UIA discoverability/naming of the media surface, improving accessibility fidelity of a very common control.",
+      "falsifiable_check": "On a re-run of a media app, the migrated MediaPlayerElement (or its wrapping container) exposes an AutomationId/Name in the UIA tree. Why Tier 3: this is an authoring judgement about when discoverability matters; it belongs next to the existing control-mapping rows the agent already consults."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier 0/1 idea (not auto-applied): Initialize-UwpMigration.ps1 could detect Windows.Web.Http usage in the source and auto-inject '<Using Remove=\"System.Net.Http\" />' into the scaffold .csproj, removing the manual step entirely. Left to a human because it changes generated project state and needs a guard for the rare file that also needs System.Net.Http.",
+    "Structural parity gate scores MediaPlayerElement scenarios 0/1 and unnamed transport buttons low; this is an eval-skill (winui3-parity-check) measurement limitation, out of scope to change here."
+  ]
+}

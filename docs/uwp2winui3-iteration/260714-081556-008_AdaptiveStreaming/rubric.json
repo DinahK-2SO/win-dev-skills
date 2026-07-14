@@ -1,0 +1,151 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "features": [
+    {
+      "name": "Simplest Adaptive Streaming",
+      "controls": [
+        "Load",
+        "mediaPlayerElement"
+      ],
+      "actions": "Load",
+      "outputs": [
+        null,
+        "StatusBorder",
+        "StatusBlock"
+      ]
+    },
+    {
+      "name": "Event Handlers",
+      "controls": "mediaPlayerElement",
+      "actions": null,
+      "outputs": [
+        null,
+        "StatusBorder",
+        "StatusBlock"
+      ]
+    },
+    {
+      "name": "Network Request Modification",
+      "controls": [
+        "RadioButtonNone",
+        "RadioButtonAuthorizationHeader",
+        "RadioButtonUrlQueryParameter",
+        "RadioButtonApplicationDownloaded",
+        "HcdpOff",
+        "HcdpOn",
+        "HdcpOnWithTypeEnforcement",
+        "mediaPlayerElement"
+      ],
+      "actions": [
+        "RadioButtonNone",
+        "RadioButtonAuthorizationHeader",
+        "RadioButtonUrlQueryParameter",
+        "RadioButtonApplicationDownloaded",
+        "HcdpOff",
+        "HcdpOn",
+        "HdcpOnWithTypeEnforcement"
+      ],
+      "outputs": [
+        "EffectiveHdcpProtectionText",
+        "DesiredMaxBitrateText",
+        "StatusBorder",
+        "StatusBlock"
+      ]
+    },
+    {
+      "name": "Adaptive Streaming Tuning",
+      "controls": [
+        "DesiredMinBitrateList",
+        "InitialBitrateList",
+        "DesiredMaxBitrateList",
+        "BitrateDowngradeTriggerRatioText",
+        "",
+        "BitrateHeadroomTriggerRatioText",
+        "",
+        "mediaPlayerElement"
+      ],
+      "actions": [
+        "",
+        ""
+      ],
+      "outputs": [
+        "BitrateDowngradeTriggerRatioText",
+        "BitrateHeadroomTriggerRatioText",
+        "StatusBorder",
+        "StatusBlock"
+      ]
+    },
+    {
+      "name": "Metadata",
+      "controls": "mediaPlayerElement",
+      "actions": null,
+      "outputs": [
+        null,
+        "StatusBorder",
+        "StatusBlock"
+      ]
+    },
+    {
+      "name": "Ad Insertion",
+      "controls": "mediaPlayerElement",
+      "actions": null,
+      "outputs": [
+        null,
+        "StatusBorder",
+        "StatusBlock"
+      ]
+    },
+    {
+      "name": "Live Seekable Range",
+      "controls": [
+        "mediaPlayerElement",
+        "DesiredSeekableWindowSize",
+        "DesiredSeekableWindowSizeButton",
+        "DesiredLiveOffset",
+        "DesiredLiveOffsetButton",
+        "PositionSlider",
+        "LogCurrentTimeCorrelation",
+        "GoToStart",
+        "",
+        "",
+        "",
+        "",
+        "PlayButton",
+        "PauseButton",
+        "",
+        "",
+        "",
+        "",
+        "GoToLive"
+      ],
+      "actions": [
+        "DesiredSeekableWindowSizeButton",
+        "DesiredLiveOffsetButton",
+        "LogCurrentTimeCorrelation",
+        "GoToStart",
+        "",
+        "",
+        "",
+        "",
+        "PlayButton",
+        "PauseButton",
+        "",
+        "",
+        "",
+        "",
+        "GoToLive"
+      ],
+      "outputs": [
+        "MaxSeekableWindowSize",
+        "DesiredSeekableWindowSize",
+        "DesiredLiveOffset",
+        "MinLiveOffset",
+        "StartPosition",
+        "CurrentPosition",
+        "EndPosition",
+        "StatusBorder",
+        "StatusBlock"
+      ]
+    }
+  ]
+}

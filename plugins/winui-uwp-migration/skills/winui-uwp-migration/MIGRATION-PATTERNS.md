@@ -27,6 +27,20 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0104: 'HttpClient' / 'HttpRequestMessage' / 'HttpResponseMessage' is an ambiguous reference`
+
+Ambiguous between `System.Net.Http.*` and `Windows.Web.Http.*`. This is **not** a stale-UWP-using problem, and removing a `using` does **not** fix it: the WinUI scaffold's `.csproj` sets `<ImplicitUsings>enable</ImplicitUsings>`, which injects a project-wide global `using System.Net.Http`. Any file that keeps the WinRT HTTP stack — `Windows.Web.Http.HttpClient`, or an `IHttpFilter` used for `AdaptiveMediaSource` request interception / OAuth — then has two identically-named types in scope in every such file.
+
+Do **not** rewrite the calls to `System.Net.Http`: `IHttpFilter`, `HttpBaseProtocolFilter`, and `AdaptiveMediaSource` request interception only exist on the `Windows.Web.Http` stack. Instead remove the implicit global using once, project-wide, in the `.csproj`:
+
+```xml
+<ItemGroup>
+  <Using Remove="System.Net.Http" />
+</ItemGroup>
+```
+
+After this, `HttpClient` etc. resolve unambiguously to `Windows.Web.Http`. If a few files genuinely need `System.Net.Http` as well, keep the `Remove` and add an explicit `using System.Net.Http;` (or fully-qualify) only in those files.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -374,8 +388,8 @@ If you do custom text rendering with DirectWrite, switch to **DWriteCore** — t
 
 | UWP | WinUI 3 / WinAppSDK |
 |-----|---------------------|
-| `MediaElement` | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) |
-| `MediaPlayerElement` (Windows.UI.Xaml) | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) — namespace change only |
+| `MediaElement` | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) — see UIA note below |
+| `MediaPlayerElement` (Windows.UI.Xaml) | `MediaPlayerElement` (Microsoft.UI.Xaml.Controls) — namespace change only; see UIA note below |
 | `MapControl` (Windows.UI.Xaml.Controls.Maps) | `MapControl` (Microsoft.UI.Xaml.Controls) — WinAppSDK 1.5+ |
 | `CameraCaptureUI` (Windows.Media.Capture) | `CameraCaptureUI` (Microsoft.Windows.Media.Capture) — WinAppSDK 1.7+ |
 | `WebAuthenticationBroker` | `Microsoft.Security.Authentication.OAuth` — WinAppSDK 1.7+ |
@@ -581,7 +595,7 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 | UWP element | WinUI 3 element | Notes |
 |---|---|---|
-| `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. |
+| `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. Its automation peer does **not** surface `AutomationProperties.AutomationId`/`Name` to the UIA tree — if the media surface must stay individually discoverable/named for accessibility, wrap it in a named `<Grid>`/`<Border>` that carries the `AutomationProperties` and keep the element's `x:Name`. |
 | `<InkCanvas … />` | _(none — defer)_ | Not supported. |
 | `<Pivot>` / `<PivotItem>` | `<TabView>` / `<TabViewItem>`, or `<controls:Pivot>` from `CommunityToolkit.WinUI.UI.Controls` | Pick based on the source's intent (top-tab vs swipe pivot). |
 | `<Hub>` / `<HubSection>` | Hand-rolled `<NavigationView>` with section grouping, or `<ScrollViewer>` with stacked sections. | No drop-in equivalent. |

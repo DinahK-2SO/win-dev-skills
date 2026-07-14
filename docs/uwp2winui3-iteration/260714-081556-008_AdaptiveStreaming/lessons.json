@@ -1,0 +1,37 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Scaffolded the WinUI 3 project, seeded MIGRATION-MAPPING.md, and injected 20 TODO[migrate-NNN] anchors (threading). session-log.txt bootstrap block." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught a residual UWP namespace reference inside a XAML comment (Styles\\Styles.xaml:313 'Windows.UI.Xaml.Controls.ListBoxItem') on first run; PASS after fix. session-log.txt:10030,10080." },
+    { "tool": "dotnet build", "evidence": "Emitted all 19 first-pass errors with actionable CS codes; clean build after fixes ('Build succeeded in 3.5s', session-log.txt:9958)." }
+  ],
+  "tools_problematic": [
+    { "tool": "XAML markup compiler (WMC)", "problem": "Build hung in MarkupCompilePass1/2 for minutes and emitted a non-actionable 'WMC9999: Object reference not set'.", "evidence": "session-log.txt:9164-9165, 9431-9732; multiple stop/restart cycles with 120s->600s timeouts. Cleared once the CS0104 type-resolution errors were fixed." }
+  ],
+  "tool_limitations": [
+    { "tool": "WinUI scaffold ImplicitUsings", "limitation": "The scaffold's .csproj sets ImplicitUsings=enable, which injects a global 'using System.Net.Http'. UWP code that uses 'Windows.Web.Http' then hits CS0104 on HttpClient/HttpRequestMessage/HttpResponseMessage in every such file.", "suggested_tweak": "Document (and let the agent apply) a project-wide '<Using Remove=\"System.Net.Http\" />' when the source uses Windows.Web.Http." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md 'Common build errors' / CS0104 section", "wrong": "Only the LaunchActivatedEventArgs flavour of CS0104 is documented; the very common Windows.Web.Http vs System.Net.Http ambiguity (caused by the scaffold's implicit global using, not a stale UWP using) is absent.", "correct": "Add a CS0104 HttpClient/Windows.Web.Http subsection whose fix is a project-wide '<Using Remove=\"System.Net.Http\" />' (deleting a using does not help because ImplicitUsings re-adds it)." }
+  ],
+  "special_apis": [
+    { "api": "Windows.Web.Http.IHttpFilter / HttpClient", "special_handling": "AdaptiveMediaSource request interception keeps the WinRT Windows.Web.Http stack; it must NOT be swapped to System.Net.Http. Resolve the ambiguity by removing the implicit System.Net.Http using, not by rewriting the HTTP calls." },
+    { "api": "MediaPlayerElement (Microsoft.UI.Xaml.Controls)", "special_handling": "Namespace-only port, but its automation peer does not project AutomationProperties.AutomationId/Name onto the UIA tree; wrap in a named Grid/Border if the media surface must be individually discoverable/named for accessibility." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0104 'HttpClient' is an ambiguous reference between System.Net.Http.HttpClient and Windows.Web.Http.HttpClient (x8 files: ContentSelector, Scenario2/3/4/5/6/7, AdaptiveMediaSourceHttpFilterLogger)", "root_cause": "Scaffold .csproj ImplicitUsings=enable injects global 'using System.Net.Http'; UWP media code uses Windows.Web.Http, so both types are in scope.", "fix": "Added '<ItemGroup><Using Remove=\"System.Net.Http\" /></ItemGroup>' to the .csproj (session-log.txt:9334)." },
+    { "error": "CS0111/CS0102 duplicate 'FindContentById' / 'ContentManagementSystemStub' on MainPage", "root_cause": "SampleConfiguration.cs (a partial of MainPage, an SDK-sample idiom) duplicated members that also existed in the scaffold MainPage.xaml.cs.", "fix": "Removed the duplicate members from SampleConfiguration.cs (session-log.txt:9328-9344)." },
+    { "error": "WMC1509 'No LocalAssembly parameter' + WMC9999 'Object reference not set' with a hanging build", "root_cause": "XAML compiler could not resolve project types while the CS0104 ambiguity errors were unresolved.", "fix": "Cleared once the HttpClient ambiguity was fixed; build then succeeded (session-log.txt:9958)." },
+    { "error": "Validate-UwpMigration residue FAIL: Styles\\Styles.xaml:313 contained 'Windows.UI.Xaml.Controls.ListBoxItem'", "root_cause": "UWP namespace left inside an XAML comment; the residue grep matches comments too.", "fix": "Rewrote the comment to drop the UWP namespace (session-log.txt:10080)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "First full build (7 scenario files + 2 helpers)", "symptom": "19 errors dominated by CS0104 HttpClient/HttpRequestMessage/HttpResponseMessage ambiguity across 8 files", "turns_or_retries": "~2-3 turns to diagnose and apply the csproj Using Remove fix", "root_cause": "Scaffold ImplicitUsings global 'using System.Net.Http' collides with Windows.Web.Http used by the media/adaptive-streaming code.", "how_resolved": "Added '<Using Remove=\"System.Net.Http\" />' to the .csproj.", "preventable_by": "A documented CS0104-HttpClient pattern in MIGRATION-PATTERNS.md prescribing the project-wide Using Remove directive." },
+    { "where": "XAML compile phase", "symptom": "Build hung for minutes; WMC9999 'Object reference not set'; several stop/restart cycles with escalating timeouts", "turns_or_retries": "~8 turns of wait/retry", "root_cause": "Cascade from the unresolved CS0104 errors starving XAML type resolution.", "how_resolved": "Resolved automatically once the CS0104 fix landed.", "preventable_by": "Same CS0104-HttpClient pattern; fixing the ambiguity earlier avoids the WMC cascade and the retry/timeout thrash." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Sample adaptive streams could not be fetched/decoded on the offline capture host ('Unsupported video type or invalid file path'); Set/seek buttons inert because no live DVR stream loads.", "workaround": "None needed — identical behaviour in the UWP golden, so no regression. Purely environment-gated." }
+  ]
+}

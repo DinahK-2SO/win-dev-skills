@@ -1,0 +1,15 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "MediaPlayerElement (and similar complex controls) do not project AutomationProperties.AutomationId/Name onto the UIA tree via their own automation peer, so a migrated media surface is not individually discoverable/named for accessibility (structural checker saw 0/1 on scenarios 2/5/6, though the element renders correctly).",
+      "evidence": "discrepancies.json (score notes) + migration-score.json note: 'MediaPlayerElement automation peer does not expose AutomationId in UIA (needs Grid/Border wrapper); structural checker reports 0/1' for Event Handlers, Metadata, Ad Insertion. Element renders (transport bar visible) in all three.",
+      "covered_at": "MIGRATION-PATTERNS.md 'Controls and Features' (line ~377-378: MediaElement/MediaPlayerElement mapping) and 'Controls that need element-level swaps' (line ~584: '<MediaElement/> -> <MediaPlayerElement/>').",
+      "why_missed": "under-emphasized — the existing rows only cover the namespace/element swap and say properties 'carry over'; they do not warn that AutomationProperties set on the control may not surface in the UIA tree, so the agent had no reason to wrap it.",
+      "proposed_improvement": "Add a one-line Notes caveat to the existing MediaPlayerElement rows: its automation peer does not surface AutomationProperties.AutomationId/Name; if the media surface must be individually discoverable/named for accessibility, wrap it in a named Grid/Border carrying the AutomationProperties. Sharpen existing rows — do not add a new topic.",
+      "generalizes": "Media playback via MediaPlayerElement is one of the most common UWP sample/app features; preserving UIA discoverability/naming of the migrated control is a general accessibility-fidelity concern (UWP's peer exposed it; WinUI's does not), applicable to any migrated media app."
+    }
+  ]
+}

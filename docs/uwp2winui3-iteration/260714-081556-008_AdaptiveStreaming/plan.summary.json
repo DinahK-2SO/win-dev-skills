@@ -1,0 +1,16 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Document CS0104 Windows.Web.Http vs System.Net.Http ambiguity: prescribe project-wide '<Using Remove=\"System.Net.Http\" />' (ImplicitUsings root cause), since deleting a using can't fix it and IHttpFilter/AdaptiveMediaSource need the WinRT HTTP stack",
+    "Add a UIA caveat to the MediaPlayerElement control-mapping rows: its automation peer drops AutomationProperties; wrap in a named Grid/Border to keep the media surface discoverable/named for accessibility"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Initialize-UwpMigration.ps1 could auto-inject the System.Net.Http Using Remove when the source uses Windows.Web.Http (needs a guard for files that also need System.Net.Http)",
+    "Structural parity gate under-scores MediaPlayerElement/unnamed-button scenarios — winui3-parity-check eval-skill limitation, out of scope"
+  ]
+}

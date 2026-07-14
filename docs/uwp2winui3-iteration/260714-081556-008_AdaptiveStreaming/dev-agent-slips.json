@@ -1,0 +1,21 @@
+{
+  "scenario": "AdaptiveStreaming",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS0111/CS0102 duplicate 'FindContentById' / 'ContentManagementSystemStub' members on MainPage — SampleConfiguration.cs (a partial of MainPage) duplicated members that also existed in the scaffold MainPage.xaml.cs.",
+      "evidence": "session-log.txt:9160-9161 (CS0111/CS0102); resolved by removing the duplicates from SampleConfiguration.cs at session-log.txt:9328-9344 in ~1-2 turns.",
+      "covered_clearly_at": "SKILL.md Step 1 'Shell conversion' + Fidelity rules (MainPage is replaced by MainWindow; do not regenerate, copy verbatim then transform). The duplicate arose from the ordinary scaffold-MainPage vs source-MainPage-partial overlap, which the agent resolved trivially in-line without any missing guidance.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable model recognises a C# partial-class duplicate-member error and deletes the redundant copy immediately (it did, in ~1-2 turns). This is generic C# competence, not a UWP->WinUI-specific gap; adding 'watch for duplicate partials' would just be slip-avoidance noise."
+    },
+    {
+      "problem": "Validate residue FAIL: UWP namespace 'Windows.UI.Xaml.Controls.ListBoxItem' left inside a XAML comment (Styles.xaml:313).",
+      "evidence": "session-log.txt:10030 (validator FAIL) -> 10080 (fixed by rewriting the comment).",
+      "covered_clearly_at": "SKILL.md 'Comment hygiene' section explicitly warns not to name UWP API identifiers in comments because 'the validator's residue grep also matches inside comments'; Step 4 tells the agent to open .validator-diagnostics.txt and fix residue.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already calls out this exact case prominently (Comment hygiene + validator residue-grep note). The validator caught it and the agent fixed it in one turn. No skill change would improve on already-explicit, already-effective guidance."
+    }
+  ]
+}
