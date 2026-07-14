@@ -1,0 +1,14 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Current activity status text differs (WinUI 'No activity sensor found' vs UWP 'Access denied to activity sensors').",
+      "evidence": "discrepancies.json non_discrepancies_noted: both are valid device-gated no-sensor error states and the control responds in both; scored pass.",
+      "covered_clearly_at": "SKILL.md ### Defensive UI for device-dependent features (lines 196-202) — device-gated fallbacks expected on machines lacking the device.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Not a regression — both apps respond and show a valid no-sensor message; the exact string differs only because the two runtimes report different device-access states on a sensor-less machine. No skill edit would or should force identical strings."
+    }
+  ]
+}

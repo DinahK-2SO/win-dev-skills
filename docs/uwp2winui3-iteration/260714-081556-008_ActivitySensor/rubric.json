@@ -1,0 +1,40 @@
+{
+  "scenario": "ActivitySensor",
+  "featureName": "Activity sensor",
+  "source": "uwp-samples-standalone/Samples/ActivitySensor/cs",
+  "gradingRule": "score = round(100 * (pass + 0.5*partial) / features_total); a control present-but-dead (responds in UWP, dead in WinUI) is at most partial; a genuinely blank scenario (anyFrameRendered=false) is fail.",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Current activity",
+      "controls": ["Get Current Activity (Button)"],
+      "actions": ["Get Current Activity"],
+      "outputs": ["Activity", "Confidence", "Timestamp", "Status"],
+      "passCriteria": "Scenario reachable, 'Get Current Activity' present and responds (updates output/status) as in the UWP golden."
+    },
+    {
+      "number": 2,
+      "title": "Activity history",
+      "controls": ["Get Activity History (Button)"],
+      "actions": ["Get Activity History"],
+      "outputs": ["Count", "First Activity/Confidence/Timestamp", "Last Activity/Confidence/Timestamp", "Status"],
+      "passCriteria": "Scenario reachable, 'Get Activity History' present and responds as in the UWP golden."
+    },
+    {
+      "number": 3,
+      "title": "Events",
+      "controls": ["ReadingChanged On (Button)", "ReadingChanged Off (Button)"],
+      "actions": ["ReadingChanged On", "ReadingChanged Off"],
+      "outputs": ["Activity", "Confidence", "Reading Timestamp", "Status"],
+      "passCriteria": "Both buttons present; 'ReadingChanged On' responds; 'ReadingChanged Off' state must match UWP (disabled/inert until subscribed)."
+    },
+    {
+      "number": 4,
+      "title": "Background activity",
+      "controls": ["Register Task (Button)", "Unregister Task (Button)"],
+      "actions": ["Register Task", "Unregister Task"],
+      "outputs": ["Task Registration", "Task Status", "Report Count", "Last Activity/Confidence/Timestamp", "Status"],
+      "passCriteria": "Both buttons present; 'Register Task' must respond (update status) as in the UWP golden; 'Unregister Task' state must match UWP (disabled until registered)."
+    }
+  ]
+}

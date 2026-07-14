@@ -1,0 +1,15 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Migrated `async void` event handlers that call WinRT APIs which are unsupported/throw on WinUI 3 desktop swallow the exception, producing a present-yet-dead control with no UI feedback (caps the feature at partial). Here ScenarioRegisterTask threw inside RequestAccessAsync and nothing happened.",
+      "evidence": "migration-score.json feature 'Background activity' note: 'invoked, but produced no output/status change; newTokens 0, post-click frame did not update'; source Scenario4_BackgroundActivity.xaml.cs:68 'async private void ScenarioRegisterTask(...)' has no try/catch around the throwing await.",
+      "covered_at": "SKILL.md ### Defensive UI for device-dependent features (lines 196-202) — currently scoped to page INIT leaving a blank window.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Broaden the existing Defensive-UI rule so it also covers `async void` EVENT HANDLERS (button clicks), not just page init: wrap the handler body in try/catch and route the exception to the same status/notify surface the handler updates on success, so a throwing API yields a visible message instead of a dead control.",
+      "generalizes": "UWP samples are built almost entirely from `async void` click handlers calling WinRT APIs; on WinUI 3 desktop many of those throw (identity/device/capability gated). Requiring handler-level try/catch that surfaces errors prevents dead-control regressions across essentially every migrated scenario."
+    }
+  ]
+}

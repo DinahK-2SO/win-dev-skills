@@ -337,6 +337,8 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 
 `IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK [`BackgroundTaskBuilder`](https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.windows.applicationmodel.background.backgroundtaskbuilder) (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler. See the [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy).
 
+**Runtime warning — the legacy calls throw, they do not no-op.** `BackgroundExecutionManager.RequestAccessAsync()`, out-of-process registration via `BackgroundTaskBuilder.TaskEntryPoint` (a separate WinRT component), and device/sensor triggers (e.g. `ActivitySensorTrigger`) **throw at runtime in a WinUI 3 desktop app** — they are not supported by the old out-of-process infrastructure. Because these calls almost always live inside an `async void` click handler, the thrown exception is swallowed and the button becomes a silently **dead control** (present in the UIA tree but produces no visible response). Do not leave these calls unguarded: wrap them in `try/catch` and surface a status message on the failure path (see *Defensive UI* in `SKILL.md`), and migrate registration to the in-process WinAppSDK `BackgroundTaskBuilder` or defer with a visible message.
+
 <a id="notifications"></a>
 ## Notifications
 

@@ -1,0 +1,28 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated `async void` event handlers swallow exceptions from WinRT APIs that throw on WinUI 3 desktop, leaving present-yet-dead controls (Register Task did nothing).",
+      "evidence": "migration-score.json Background activity=partial, winui_responded=false ('invoked, produced no output/status change; newTokens 0'); Scenario4_BackgroundActivity.xaml.cs:68 async void handler with no try/catch.",
+      "root_cause": "SKILL.md Defensive-UI rule only covered page-init blank screens, not async void event handlers; a thrown exception in async void is silent.",
+      "tier": 3,
+      "change": "Extended the existing 'Defensive UI for device-dependent features' rule in SKILL.md to require try/catch around every migrated `async void` event-handler body, routing the exception message to the same status/notify surface used on success.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Handlers calling APIs that throw show a visible error instead of a dead control, keeping the control responsive for parity.",
+      "falsifiable_check": "On re-run, requirement 'Background activity / Register Task' goes partial->pass (winui_responded=true) because the click surfaces a status message; no present-yet-dead controls flagged by the parity behavioral check."
+    },
+    {
+      "problem": "Out-of-process UWP background APIs (BackgroundExecutionManager.RequestAccessAsync, TaskEntryPoint components, ActivitySensorTrigger) throw at runtime in WinUI 3 desktop but were never flagged by tooling nor documented as throwing.",
+      "evidence": "session-log.txt:656 keeps 'await BackgroundExecutionManager.RequestAccessAsync();' unmodified; the only injected TODO (migrate-003) landed on the BackgroundTaskBuilder line, not the throwing call.",
+      "root_cause": "unsupported-api-inventory.json IBackgroundTask pattern matched only the builder, so no TODO was injected on the throwing call; PATTERNS.md#background-tasks named the replacement builder but gave no runtime-behavior warning.",
+      "tier": 1,
+      "change": "Added `BackgroundExecutionManager` to the background-tasks inventory pattern (so Initialize-UwpMigration injects a TODO on the throwing line and Validate flags it), and added a runtime warning to MIGRATION-PATTERNS.md#background-tasks that these calls throw and must be guarded / migrated to the in-process builder.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json + skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The migration agent is routed to the background-tasks anchor at the exact line that breaks and told it throws, prompting a guarded/adapted implementation instead of a verbatim copy.",
+      "falsifiable_check": "On re-run, a `// TODO[migrate-NNN]: see PATTERNS.md#background-tasks` appears on the BackgroundExecutionManager.RequestAccessAsync() line, and Validate-UwpMigration reports the background-tasks adaptation; the Register Task control is no longer dead."
+    }
+  ],
+  "deferred_to_human": []
+}

@@ -1,0 +1,18 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "score": 88,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Current activity — Get Current Activity responds", "status": "pass", "reason": "Wired; responds in both apps (device-gated no-sensor state).", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Activity history — Get Activity History responds", "status": "pass", "reason": "Wired and responds in both apps.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Events — ReadingChanged On/Off", "status": "pass", "reason": "ReadingChanged On responds in both; Off inert in both (parity).", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Background activity — Register Task", "status": "partial", "reason": "Register Task responds in UWP golden (updates Status bar) but is DEAD in WinUI (invoked, no output/status change).", "suspected_skill_gap": "async void handler calls BackgroundExecutionManager.RequestAccessAsync() (unsupported/throws in WinUI 3 desktop); with no try/catch the exception is swallowed and the control appears dead. Inventory flags BackgroundTaskBuilder but not the throwing RequestAccessAsync call; PATTERNS.md#background-tasks lacks a runtime-behavior warning." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Background activity / Register Task", "uwp": "Status bar updates to a device-gated message (e.g. 'Access denied to activity sensors'); Task Registration/Status fields refresh.", "winui": "No visible response — no status text change, post-click frame unchanged.", "screenshot_ref": "parity/winui3/screenshots/04_Background_activity.png vs parity/baseline/screenshots/04_Background_activity__a01_Register_Task.png" }
+  ],
+  "missing_features": [],
+  "summary": "Only regression: 'Register Task' is a present-yet-dead control because the migrated async void handler calls the out-of-process UWP background API BackgroundExecutionManager.RequestAccessAsync(), which throws in WinUI 3 desktop, and the swallowed exception yields no UI feedback."
+}

@@ -1,0 +1,30 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 (inventory-driven TODO injection)", "evidence": "Injected '// TODO[migrate-003]: see PATTERNS.md#background-tasks' on the BackgroundTaskBuilder line (Scenario4_BackgroundActivity.xaml.cs:150), routing the agent to the background-tasks anchor." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "unsupported-api-inventory.json (adaptable: IBackgroundTask row)", "limitation": "Pattern '\\bIBackgroundTask\\b|BackgroundTaskBuilder' matches the builder but NOT 'BackgroundExecutionManager.RequestAccessAsync()' — the actual API that throws at runtime in WinUI 3 desktop — so no TODO was injected on that line and the agent left it unmodified.", "suggested_tweak": "Add BackgroundExecutionManager / RequestAccessAsync to the background-tasks pattern so the analyzer flags the runtime-throwing call, not just the builder." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.ApplicationModel.Background.BackgroundExecutionManager.RequestAccessAsync()", "why_tried": "UWP 'Register Task' handler requests background access before registering an out-of-process ActivitySensorTrigger task.", "root_cause": "The old out-of-process background infrastructure (RequestAccessAsync + TaskEntryPoint component + device triggers) is unsupported in WinUI 3 desktop; the call throws. Because the handler is 'async void' with no try/catch, the exception is swallowed and the button appears dead.", "fix": "Guard the call in try/catch and surface the error via the app's existing NotifyUser status path; migrate registration to WinAppSDK single-process BackgroundTaskBuilder or defer with a visible status message." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#background-tasks", "wrong": "Section only says IBackgroundTask/BackgroundTaskRegistration 'are not the recommended model' and points to the WinAppSDK BackgroundTaskBuilder; it does not warn that BackgroundExecutionManager.RequestAccessAsync() and TaskEntryPoint-based out-of-process tasks THROW at runtime in desktop, nor that the call must be guarded.", "correct": "State that RequestAccessAsync() / out-of-process TaskEntryPoint tasks / device triggers throw in WinUI 3 desktop and must be wrapped in try/catch that surfaces a status message." }
+  ],
+  "special_apis": [
+    { "api": "BackgroundExecutionManager.RequestAccessAsync / ActivitySensorTrigger / out-of-process TaskEntryPoint", "special_handling": "No WinUI 3 desktop equivalent for the out-of-process model; guard at the call site and surface an error, or move to WinAppSDK in-process BackgroundTaskBuilder." }
+  ],
+  "errors_encountered": [
+    { "error": "'Register Task' invoked in WinUI 3 produces no visible response (dead control); newTokens 0, post-click frame unchanged.", "root_cause": "async void ScenarioRegisterTask has no try/catch; BackgroundExecutionManager.RequestAccessAsync() throws in desktop and the exception is silently swallowed.", "fix": "Wrap async void event-handler bodies in try/catch and route the exception to the same status UI the handler updates on success." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario4_BackgroundActivity.xaml.cs ScenarioRegisterTask / RegisterBackgroundTask", "symptom": "Kept UWP out-of-process background API verbatim; button silently dead at runtime.", "turns_or_retries": "1 (TODO at builder line was cleared but the RequestAccessAsync call was left unadapted)", "root_cause": "The injected TODO landed on BackgroundTaskBuilder, but the runtime-throwing call (RequestAccessAsync) was not flagged, and PATTERNS.md#background-tasks gave no runtime-behavior warning; the async void handler hid the resulting exception.", "how_resolved": "Not resolved — shipped as a dead control (feature scored partial).", "preventable_by": "(1) Extend inventory pattern to flag BackgroundExecutionManager/RequestAccessAsync so a TODO is injected on the throwing line; (2) broaden the Defensive-UI rule to require try/catch around async void event handlers that call WinRT APIs, surfacing the error to the UI." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Validation machine has no activity sensor; background/sensor APIs are device- and identity-gated.", "workaround": "Handlers must surface a visible status on the no-device / unsupported-API path instead of silently no-op'ing." }
+  ]
+}

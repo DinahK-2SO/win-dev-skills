@@ -1,0 +1,16 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "SKILL.md: extend Defensive-UI rule to require try/catch around async void event handlers, surfacing errors to the status UI — prevents WinRT APIs that throw on desktop from producing silently dead controls",
+    "unsupported-api-inventory.json: add BackgroundExecutionManager to the background-tasks pattern so the analyzer injects a TODO on the runtime-throwing RequestAccessAsync call, not just the builder",
+    "MIGRATION-PATTERNS.md#background-tasks: warn that RequestAccessAsync / out-of-process TaskEntryPoint tasks / sensor triggers throw in WinUI 3 desktop and must be guarded or moved to the in-process builder"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

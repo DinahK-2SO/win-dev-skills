@@ -1,0 +1,17 @@
+{
+  "scenario": "ActivitySensor",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Out-of-process UWP background APIs (BackgroundExecutionManager.RequestAccessAsync, TaskEntryPoint-based components, device triggers like ActivitySensorTrigger) throw at runtime in WinUI 3 desktop, but the migration tooling never flags the throwing call and the patterns doc gives no runtime-behavior warning. The migrated 'Register Task' handler kept RequestAccessAsync() and became a dead control.",
+      "evidence": "session-log.txt:656 'var status = await BackgroundExecutionManager.RequestAccessAsync();' left unmodified; migration-score.json feature 'Background activity' verdict partial, winui_responded=false; only injected TODO (migrate-003) landed on the BackgroundTaskBuilder line, not the RequestAccessAsync line.",
+      "skill_search": "grep 'BackgroundExecutionManager|RequestAccessAsync|async void' across SKILL.md, MIGRATION-PATTERNS.md, unsupported-api-inventory.json",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "unsupported-api-inventory.json adaptable row uses '\\bIBackgroundTask\\b|BackgroundTaskBuilder', which matches the builder but not BackgroundExecutionManager/RequestAccessAsync — the API that actually throws — so no TODO is injected on that line. MIGRATION-PATTERNS.md#background-tasks names the replacement builder but never warns the legacy call throws in desktop and must be guarded.",
+      "proposed_fix": "Extend the inventory background-tasks pattern to also match BackgroundExecutionManager/RequestAccessAsync (so a TODO is injected on the throwing line), and add a one-line runtime warning to MIGRATION-PATTERNS.md#background-tasks: these out-of-process/RequestAccessAsync calls throw in WinUI 3 desktop — guard in try/catch and surface a status message, or move to WinAppSDK in-process BackgroundTaskBuilder.",
+      "generalizes": "Every UWP app using out-of-process background tasks hits BackgroundExecutionManager.RequestAccessAsync() before registering; this API family throws in WinUI 3 desktop regardless of scenario, so flagging it and documenting the runtime failure recurs broadly."
+    }
+  ]
+}

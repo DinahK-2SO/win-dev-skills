@@ -201,6 +201,8 @@ Pages that depend on physical hardware (camera, microphone, location, sensors, B
 
 This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1` Section 7) will still pass the process-alive gate, but the benchmark's later screenshot-diff check will penalise the trial. A two-line fallback prevents a ~20-point score loss.
 
+**The same rule applies to `async void` event handlers, not just page init.** UWP samples wire buttons to `async void` click handlers that call WinRT APIs; on WinUI 3 desktop many of those APIs are identity-, capability-, or device-gated and **throw** (e.g. `BackgroundExecutionManager.RequestAccessAsync()`, out-of-process background tasks, some sensor/media calls). An exception thrown inside an `async void` handler is **swallowed silently**, leaving a button that is present in the UIA tree but produces no visible response — a **dead control** that caps the feature at *partial* in parity scoring. **Rule:** wrap the body of every migrated `async void` event handler in `try/catch`, and on catch route the exception's `Message` to the **same status/notify surface the handler updates on success** (never just log-and-return). A control that reports an error is parity; a control that does nothing is a regression.
+
 ## Post-Migration
 
 ### Restore sandboxing (if needed)

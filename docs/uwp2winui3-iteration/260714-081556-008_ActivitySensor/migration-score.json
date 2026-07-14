@@ -1,0 +1,50 @@
+{
+  "scenario": "ActivitySensor",
+  "uwp_launchable": true,
+  "score": 88,
+  "features_total": 4,
+  "features_pass": 3,
+  "features_partial": 1,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 1,
+  "features": [
+    {
+      "name": "Current activity",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Current_activity__a01_Get_Current_Activity.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Current_activity__a01_Get_Current_Activity.png",
+      "note": "Layout matches UWP. 'Get Current Activity' is wired and responds in both apps (device-gated error status: UWP shows 'Access denied to activity sensors', WinUI shows 'No activity sensor found' — both valid no-sensor states on this machine). Control coverage 1/1."
+    },
+    {
+      "name": "Activity history",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Activity_history__a01_Get_Activity_History.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Activity_history__a01_Get_Activity_History.png",
+      "note": "Layout matches UWP. 'Get Activity History' is wired and responds in both apps. Control coverage 1/1."
+    },
+    {
+      "name": "Events",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Events__a01_ReadingChanged_On.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Events__a01_ReadingChanged_On.png",
+      "note": "Layout matches UWP. Control coverage 2/2. 'ReadingChanged On' responds in both; 'ReadingChanged Off' is inert in both (invoke fails identically in UWP and WinUI — the button is disabled until a subscription is active), so this is parity, not a regression."
+    },
+    {
+      "name": "Background activity",
+      "verdict": "partial",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Background_activity__a01_Register_Task.png",
+      "winui_screenshot": "parity/winui3/screenshots/04_Background_activity.png",
+      "note": "Behavioral regression: 'Register Task' responds in the UWP golden (updates the Status bar) but is DEAD in WinUI (invoked, but produced no output/status change; newTokens 0, post-click frame did not update). Control coverage is 2/2 and layout matches UWP, but a present-yet-dead control caps this at partial per the scoring rule. 'Unregister Task' is disabled/inert in both (parity)."
+    }
+  ]
+}
