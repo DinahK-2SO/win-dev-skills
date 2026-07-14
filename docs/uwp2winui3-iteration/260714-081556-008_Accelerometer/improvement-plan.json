@@ -1,0 +1,28 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Clean, zero-deferral migrations are flagged with a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows' because the scaffold and the validator disagree on the zero-defer sentinel.",
+      "evidence": "session-log.txt:3609 '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency'; Initialize-UwpMigration.ps1:439-441 seeded '| (none) | — |' while Validate-UwpMigration.ps1:266 PASSes only on the literal 'No items deferred'.",
+      "root_cause": "Two migration-skill scripts use different zero-defer sentinels; the scaffold produces a DEFERRED.md state its own validator warns about.",
+      "tier": 1,
+      "change": "In Initialize-UwpMigration.ps1's DEFERRED.md seeding, when there are zero defer rows also emit the exact sentinel line 'No items deferred.' that Validate's PASS branch recognizes.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Validate-UwpMigration.ps1 takes its '[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes \"No items deferred.\"' branch on clean migrations; no spurious WARN.",
+      "falsifiable_check": "On any zero-deferral scenario re-run, Validate prints the PASS line for DEFERRED.md and no longer prints '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows'."
+    },
+    {
+      "problem": "Migrating shared C# DTO classes as-is (SampleConfiguration.cs's `Scenario` with non-nullable auto-properties) under <Nullable>enable</Nullable> emits CS8618, costing an extra build/fix/rebuild cycle to reach a clean build.",
+      "evidence": "session-log.txt turns 32-34: 'Build succeeded with 4 warning(s)' (CS8618 on SampleConfiguration.cs) then an edit adding `= string.Empty;` / `= typeof(object);` to reach 0 warnings.",
+      "root_cause": "Skill documents the nullable pattern only for the App.MainWindow static (MIGRATION-PATTERNS.md:166); the 'Common build errors' section never mentions CS8618 for plain migrate-as-is data classes.",
+      "tier": 3,
+      "change": "Add a short CS8618 entry to the existing 'Common build errors after the namespace rewrite' section: migrate-as-is data classes with non-nullable auto-properties need field initializers (or `required`), citing the shared SampleConfiguration.cs `Scenario` DTO.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents initialize the Scenario DTO properties when copying SampleConfiguration.cs, so the first build is warning-clean without a fix cycle.",
+      "falsifiable_check": "On a re-run, the initial `dotnet build` reports 0 CS8618 warnings on SampleConfiguration.cs with no follow-up nullable-fix edit in the log."
+    }
+  ],
+  "deferred_to_human": []
+}

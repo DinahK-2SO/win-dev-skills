@@ -1,0 +1,84 @@
+{
+  "scenario": "Accelerometer",
+  "created_at": "2026-07-14T00:32:00Z",
+  "uwp_capture_status": "ok",
+  "features": [
+    {
+      "id": "choose-accelerometer",
+      "area": "Scenario 1",
+      "name": "Choose accelerometer",
+      "description": "Lets the user pick which accelerometer (Standard/Linear/etc.) subsequent scenarios use, via a ComboBox.",
+      "expected_behaviour": [
+        "A 'Choose the accelerometer to be used by the other scenarios.' description is shown",
+        "A ComboBox (default selection 'Standard') is present and enabled"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Choose_accelerometer.png",
+      "weight": 2
+    },
+    {
+      "id": "data-events",
+      "area": "Scenario 2",
+      "name": "Data events",
+      "description": "Registers a ReadingChanged listener and shows X/Y/Z values; gated by Enable/Disable buttons.",
+      "expected_behaviour": [
+        "Enable and Disable buttons are present",
+        "An output region for reading values is present",
+        "With no accelerometer hardware, Status shows 'Standard accelerometer not found' and buttons are disabled"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Data_events.png",
+      "weight": 1
+    },
+    {
+      "id": "shake-events",
+      "area": "Scenario 3",
+      "name": "Shake events",
+      "description": "Registers a Shaken listener and displays a cumulative shake count; gated by Enable/Disable.",
+      "expected_behaviour": [
+        "Enable and Disable buttons are present",
+        "'Shake count: 0' output is shown",
+        "Status shows 'Standard accelerometer not found' when no hardware is present"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_Shake_events.png",
+      "weight": 1
+    },
+    {
+      "id": "polling",
+      "area": "Scenario 4",
+      "name": "Polling",
+      "description": "Polls the accelerometer at an interval and displays X/Y/Z values; gated by Enable/Disable.",
+      "expected_behaviour": [
+        "Enable and Disable buttons are present",
+        "A 'No data' output placeholder is shown",
+        "Status shows 'Standard accelerometer not found' when no hardware is present"
+      ],
+      "screenshot": "parity/baseline/screenshots/04_Polling.png",
+      "weight": 1
+    },
+    {
+      "id": "orientation-change",
+      "area": "Scenario 5",
+      "name": "Orientation change",
+      "description": "Uses ReadingTransform to show accelerometer readings with and without display-orientation transformation.",
+      "expected_behaviour": [
+        "Enable and Disable buttons are present",
+        "'Untransformed:' and 'Transformed to DisplayOrientation:' sections each show 'No data'",
+        "Status shows 'Standard accelerometer not found' when no hardware is present"
+      ],
+      "screenshot": "parity/baseline/screenshots/05_Orientation_change.png",
+      "weight": 1
+    },
+    {
+      "id": "data-events-batching",
+      "area": "Scenario 6",
+      "name": "Data events batching",
+      "description": "Registers a ReadingChanged listener with a report latency (batching) and displays X/Y/Z values; gated by Enable/Disable.",
+      "expected_behaviour": [
+        "Enable and Disable buttons are present",
+        "An output region for reading values is present",
+        "Status shows 'Standard accelerometer not found' when no hardware is present"
+      ],
+      "screenshot": "parity/baseline/screenshots/06_Data_events_batching.png",
+      "weight": 1
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Migrating shared C# data/DTO classes as-is (e.g. SampleConfiguration.cs's `Scenario { public string Title; public Type ClassType; }`) into a `<Nullable>enable</Nullable>` project produces CS8618 warnings, forcing an extra build/fix/rebuild cycle to reach the skill's clean-build bar.",
+      "evidence": "session-log.txt turn 32-34: 'Build succeeded with 4 warning(s)' then edit initializing `Title = string.Empty` / `ClassType = typeof(object)`; warnings are 'SampleConfiguration.cs(44,23): warning CS8618 ...' x4.",
+      "covered_at": "MIGRATION-PATTERNS.md:166 documents the nullable pattern, but ONLY for the App.MainWindow static: '// With <Nullable>enable</Nullable>, declare as nullable since the assignment only happens during OnLaunched.' There is no general note for plain migrate-as-is data classes; the 'Common build errors after the namespace rewrite' section (line 5+) lists CS0104/CS0227/CS0246/CS0101 but not CS8618.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add one short CS8618 entry to the 'Common build errors after the namespace rewrite' section: migrate-as-is C# classes with non-nullable auto-properties (very common in the shared SampleConfiguration.cs `Scenario` DTO) emit CS8618 under <Nullable>enable</Nullable>; give the properties field initializers (`= string.Empty;`, `= typeof(object);`) or add the `required` modifier. Keep it to a few lines; do not invent a new topic.",
+      "generalizes": "The `Scenario` DTO ships in the shared SampleConfiguration.cs of 87 samples in this corpus, and every WinUI 3 scaffold here enables nullable, so the identical CS8618 warnings appear on essentially every migration."
+    }
+  ]
+}

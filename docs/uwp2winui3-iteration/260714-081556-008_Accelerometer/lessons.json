@@ -1,0 +1,31 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Seeded MIGRATION-MAPPING.md (8 rows), TODO[migrate-] anchors, and MIGRATION-DEFERRED.md; agent followed the seed rows to a clean 6/6 migration." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Turn 36: single run reported residue grep, mapping integrity, manifest image checks, dotnet build healthcheck (0 WUI warnings), and smoke launch (pid 10604) — one command gave the agent full go/no-go." },
+    { "tool": "Get-MigrationPattern.ps1 / MIGRATION-PATTERNS.md anchors", "evidence": "Agent used anchor-based lookups (windowing, activation) to adapt MainWindow navigation without opening the whole patterns doc." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1 + Validate-UwpMigration.ps1 (DEFERRED.md contract)", "problem": "Initialize seeds MIGRATION-DEFERRED.md with a '| (none) | — |' table row when there are zero defer rows, but Validate expects the literal sentinel 'No items deferred' — so a fully clean migration is flagged.", "evidence": "session-log.txt:3609 '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency'; trial MIGRATION-DEFERRED.md contains '| (none) | — |' and never the string 'No items deferred'." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Its no-defer PASS branch keys on the exact string 'No items deferred', which the scaffold it partners with never writes.", "suggested_tweak": "Make Initialize seed the exact sentinel 'No items deferred.' in the zero-defer case so the two scripts agree." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Accelerometer", "special_handling": "Accelerometer.GetDefault() returns null on machines with no sensor; the sample's own 'not found' status path is preserved and is correct — dead Enable/Disable buttons are hardware-gated, not a migration defect." }
+  ],
+  "errors_encountered": [
+    { "error": "CS8618: Non-nullable property 'Title' / 'ClassType' must contain a non-null value when exiting constructor (SampleConfiguration.cs, 4 warnings)", "root_cause": "The shared UWP sample class `Scenario { public string Title { get; set; } public Type ClassType { get; set; } }` was migrated as-is into a project with `<Nullable>enable</Nullable>`; non-nullable auto-properties with no initializer trigger CS8618. This class ships in the shared SampleConfiguration.cs of 87 samples in this corpus.", "fix": "Turn 33: initialize the auto-properties — `Title { get; set; } = string.Empty;` and `ClassType { get; set; } = typeof(object);` — yielding a 0-warning build." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "SampleConfiguration.cs, turns 32-34", "symptom": "First build succeeded but emitted 4 CS8618 warnings; agent spent a build/fix/rebuild cycle to reach the '0 warnings' bar the skill sets for a clean build.", "turns_or_retries": "1 extra build-fix-rebuild cycle", "root_cause": "Migrating the shared Scenario DTO verbatim under Nullable-enable; the skill documents the nullable pattern only for the App.MainWindow static, not for plain migrate-as-is data classes.", "how_resolved": "Initialized the two auto-properties with defaults; rebuild reported 0 warnings.", "preventable_by": "A one-line MIGRATION-PATTERNS.md note that migrate-as-is C# classes with non-nullable auto-properties emit CS8618 under <Nullable>enable</Nullable> and must be given field initializers (or the `required` modifier)." },
+    { "where": "Validation, turn 36", "symptom": "Validate-UwpMigration.ps1 emitted a [WARN] about MIGRATION-DEFERRED.md despite a genuinely clean, zero-defer migration.", "turns_or_retries": "1 (spurious warning the agent had to reason about and dismiss)", "root_cause": "Scaffold/validator sentinel mismatch: Initialize seeds '| (none) | — |', Validate's PASS branch requires the literal 'No items deferred'.", "how_resolved": "Agent correctly judged it benign and proceeded; no code change.", "preventable_by": "Aligning Initialize-UwpMigration.ps1 to seed the exact 'No items deferred.' sentinel in the zero-defer case." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "Machine has no physical accelerometer, so all Enable/Disable controls are inert at runtime in both apps.", "workaround": "None needed for migration; parity check accounts for hardware-gating in both golden and candidate." }
+  ]
+}

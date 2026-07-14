@@ -1,0 +1,21 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Choose accelerometer", "status": "pass", "reason": "ComboBox (default 'Standard') + description reproduced; 1/1 control covered.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Data events", "status": "pass", "reason": "2/2 controls covered; Enable/Disable hardware-gated in both apps.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Shake events", "status": "pass", "reason": "2/2 controls; 'Shake count: 0' reproduced.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Polling", "status": "pass", "reason": "2/2 controls; 'No data' placeholder reproduced.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Orientation change", "status": "pass", "reason": "Untransformed/Transformed sections reproduced.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Data events batching", "status": "pass", "reason": "2/2 controls; output region reproduced.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Header branding", "uwp": "'Universal Windows Platform sample'", "winui": "'Windows App SDK Sample'", "screenshot_ref": "scoreNotes/screenshots" },
+    { "feature": "Footer logo", "uwp": "Microsoft logo image + copyright text", "winui": "copyright text only (no logo image)", "screenshot_ref": "scoreNotes/screenshots" }
+  ],
+  "missing_features": [],
+  "summary": "Perfect functional/behavioral parity (6/6, 100 score). Only expected UWP->WinUI 3 sample-chrome branding differences remain. No skill-attributable parity gaps; improvement targets are build-log frictions (nullable DTO warnings, DEFERRED.md validator sentinel mismatch) that recur corpus-wide."
+}

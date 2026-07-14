@@ -438,6 +438,10 @@ foreach ($rel in $deferredKeys) {
 }
 if ($deferredKeys.Count -eq 0) {
     [void]$dlines.Add('| (none) | — |')
+    [void]$dlines.Add('')
+    # Sentinel recognized by Validate-UwpMigration.ps1's zero-defer PASS branch;
+    # without it a clean, zero-deferral migration is flagged with a spurious [WARN].
+    [void]$dlines.Add('No items deferred.')
 }
 Set-Content -LiteralPath $deferredPath -Value $dlines -Encoding UTF8
 

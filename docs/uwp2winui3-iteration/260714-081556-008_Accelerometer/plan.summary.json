@@ -1,0 +1,14 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: seed the 'No items deferred.' sentinel when there are zero defer rows so Validate-UwpMigration.ps1 stops emitting a spurious DEFERRED.md WARN on clean migrations (recurs on every zero-deferral scenario).",
+    "MIGRATION-PATTERNS.md: add a CS8618 entry to 'Common build errors' — migrate-as-is DTO classes (shared SampleConfiguration.cs Scenario) need field initializers under <Nullable>enable</Nullable>, avoiding an extra build/fix cycle across the 87 samples that ship that DTO."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

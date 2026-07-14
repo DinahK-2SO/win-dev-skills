@@ -35,6 +35,20 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 ```
 
+### `CS8618: Non-nullable property must contain a non-null value when exiting constructor`
+
+The WinUI 3 scaffold enables `<Nullable>enable</Nullable>`, so any plain C# data/DTO class migrated **as-is** whose non-nullable auto-properties have no initializer emits `CS8618`. This bites the shared sample plumbing in particular — `SampleConfiguration.cs` ships a `Scenario` DTO (`public string Title { get; set; }` / `public Type ClassType { get; set; }`) in almost every UWP SDK sample, so the same warnings recur on nearly every migration. Give each property a field initializer (or add `required`):
+
+```csharp
+public class Scenario
+{
+    public string Title { get; set; } = string.Empty;
+    public Type ClassType { get; set; } = typeof(object);
+}
+```
+
+Do this proactively when copying such classes so the very first build is warning-clean.
+
 ### Thousands of `CS0101` duplicate-type / `CS0227` / `CS0234` errors (often a build that hangs)
 
 If `dotnet build` floods with **tens of thousands** of `CS0101` ("already contains a definition for …"), `CS0227`, or `CS0234` errors — or the build appears to hang for minutes — the cause is almost always **stale UWP build output that was copied into the migrated tree**. A previously-built UWP project (especially a multi-project sample with sub-folders) leaves machine-generated sources under `bin/` and `obj/`, e.g. .NET-Native ILC files at `obj\<arch>\Release\ilc\**\*.g.cs` and `*.McgInterop\ImplTypes.g.cs`. The SDK-style WinUI `.csproj` globs `**/*.cs`, and MSBuild's default `bin`/`obj` exclusion only covers the **project-root** `bin`/`obj` — any **nested** sub-project `bin`/`obj` is still compiled, producing the duplicate types.

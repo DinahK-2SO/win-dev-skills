@@ -1,0 +1,17 @@
+{
+  "scenario": "Accelerometer",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "A fully clean, zero-deferral migration is flagged with a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows' by Validate-UwpMigration.ps1.",
+      "evidence": "session-log.txt:3609 '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency'; trial MIGRATION-DEFERRED.md contains a '| (none) | — |' row and never the string 'No items deferred'.",
+      "skill_search": "Grepped Initialize-UwpMigration.ps1 and Validate-UwpMigration.ps1 for 'DEFERRED', 'No items deferred', 'defer'.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize-UwpMigration.ps1:439-441 writes `if ($deferredKeys.Count -eq 0) { [void]$dlines.Add('| (none) | — |') }`, but Validate-UwpMigration.ps1:266 requires the sentinel: `if ($deferText -notmatch 'No items deferred') { Write-Host \"[WARN] ...\" }`.",
+      "root_cause": "The two migration-skill scripts disagree on the zero-defer sentinel: Initialize seeds a '(none)' table row; Validate's PASS branch only recognizes the literal 'No items deferred'. The scaffold therefore produces a state its own validator warns about.",
+      "proposed_fix": "In Initialize-UwpMigration.ps1's DEFERRED.md seeding, when $deferredKeys.Count -eq 0 emit the exact sentinel line 'No items deferred.' (in addition to or instead of the '(none)' row) so Validate takes its PASS branch.",
+      "generalizes": "Most well-formed UWP->WinUI 3 migrations (simple sensor/API samples especially) have zero deferrals, so this false WARN fires on the common happy path of essentially every scenario, adding noise and prompting agents to second-guess a clean result."
+    }
+  ]
+}
