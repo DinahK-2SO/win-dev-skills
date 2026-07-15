@@ -1,0 +1,79 @@
+{
+  "scenario": "BackgroundTransfer",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 7,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 7,
+  "uwp_capture_status": "degraded: uwp-app-runner returned ok:true (process alive, window 'BackgroundTransfer C#' present, SDK 10.0.26100.0, Release/.NET Native build), but the original UWP app HUNG on its OS splash screen ('Windows platform sample') across 3 launches - process Responding=False, CPU ~0.25s, empty content Pane, no scenario ListBox in the UIA tree, and every action invoke returned FAIL. No Application Error/WER crash was logged for the UWP Release build (the 0xc000027b faults in the log belong to the migrated WinUI 3 app and its winapp-stage copy). Golden frames therefore show only the splash; no per-feature UWP UI could be captured. Not a hard runner failure, so the pipeline continued.",
+  "migrated_launch_status": "crashed: dotnet build succeeded (0 errors, 523 warnings); winapp run launched the app (PIDs 28004, 10264) but it crashed at startup with exception 0xc000027b in Microsoft.UI.Xaml.dll (Faulting module Microsoft.WindowsAppRuntime.2 2.2.0.0) before presenting its first frame. Process exited within seconds; Capture-AppScenarios found 'No process found with PID 10264'. Matches subject results.json builds:true, runs:false.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_report": "parity/winui3/PARITY-REPORT.md",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "File Download",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_File_Download.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_File_Download.png",
+      "note": "Migrated WinUI 3 app crashed at startup (0xc000027b in Microsoft.UI.Xaml.dll) before presenting any frame; no control captured or responded. Structural coverage 0/8. UWP golden also could not exercise this control because the original app hung on its splash screen, but the migrated app is independently non-functional -> fail."
+    },
+    {
+      "name": "File Upload",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_File_Upload.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_File_Upload.png",
+      "note": "Migrated WinUI 3 app crashed at startup (0xc000027b in Microsoft.UI.Xaml.dll) before presenting any frame; no control captured or responded. Structural coverage 0/5. UWP golden also could not exercise this control because the original app hung on its splash screen, but the migrated app is independently non-functional -> fail."
+    },
+    {
+      "name": "Completion Notifications",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Completion_Notifications.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Completion_Notifications.png",
+      "note": "Migrated WinUI 3 app crashed at startup (0xc000027b in Microsoft.UI.Xaml.dll) before presenting any frame; no control captured or responded. Structural coverage 0/4. UWP golden also could not exercise this control because the original app hung on its splash screen, but the migrated app is independently non-functional -> fail."
+    },
+    {
+      "name": "Completion Groups",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Completion_Groups.png",
+      "winui_screenshot": "parity/winui3/screenshots/04_Completion_Groups.png",
+      "note": "Migrated WinUI 3 app crashed at startup (0xc000027b in Microsoft.UI.Xaml.dll) before presenting any frame; no control captured or responded. Structural coverage 0/2. UWP golden also could not exercise this control because the original app hung on its splash screen, but the migrated app is independently non-functional -> fail."
+    },
+    {
+      "name": "Random Access Downloads",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/05_Random_Access_Downloads.png",
+      "winui_screenshot": "parity/winui3/screenshots/05_Random_Access_Downloads.png",
+      "note": "Migrated WinUI 3 app crashed at startup (0xc000027b in Microsoft.UI.Xaml.dll) before presenting any frame; no control captured or responded. Structural coverage 0/8. UWP golden also could not exercise this control because the original app hung on its splash screen, but the migrated app is independently non-functional -> fail."
+    },
+    {
+      "name": "Recoverable Errors",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/06_Recoverable_Errors.png",
+      "winui_screenshot": "parity/winui3/screenshots/06_Recoverable_Errors.png",
+      "note": "Migrated WinUI 3 app crashed at startup (0xc000027b in Microsoft.UI.Xaml.dll) before presenting any frame; no control captured or responded. Structural coverage 0/5. UWP golden also could not exercise this control because the original app hung on its splash screen, but the migrated app is independently non-functional -> fail."
+    },
+    {
+      "name": "Download Reordering",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/07_Download_Reordering.png",
+      "winui_screenshot": "parity/winui3/screenshots/07_Download_Reordering.png",
+      "note": "Migrated WinUI 3 app crashed at startup (0xc000027b in Microsoft.UI.Xaml.dll) before presenting any frame; no control captured or responded. Structural coverage 0/4. UWP golden also could not exercise this control because the original app hung on its splash screen, but the migrated app is independently non-functional -> fail."
+    }
+  ]
+}

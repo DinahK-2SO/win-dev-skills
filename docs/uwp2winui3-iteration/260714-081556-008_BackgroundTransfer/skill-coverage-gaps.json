@@ -1,0 +1,15 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Migrated app crashes at startup (0xC000027B, Microsoft.UI.Xaml.dll) before its first frame because the first Frame.Navigate runs in MainWindow's ctor and the initial NavigationView selection (SelectedItem = MenuItems[0]) runs in MainPage's ctor — i.e. navigation happens before Window.Activate().",
+      "evidence": "migration-score.json migrated_launch_status (crashed 0xC000027B before first frame); discrepancies.json (all 7 scenarios scenario-missing); MainWindow.xaml.cs RootFrame.Navigate(...) in ctor; MainPage.xaml.cs NavigationViewControl.SelectedItem = MenuItems[0] in ctor.",
+      "covered_at": "MIGRATION-PATTERNS.md > 'Initialization order — keep MainWindow's constructor inert' (lines ~193-238) and the 0xC000027B row of the 'Diagnosing Startup Crashes' table (line ~310).",
+      "why_missed": "under-emphasized — the existing 'defer first navigation' guidance is framed narrowly around the static-window init-order race (a Page that reads App.MainWindow -> E_POINTER 0x80004003). The migrated pages never read App.MainWindow, so an agent reasonably concluded ctor navigation was safe. The guidance does not state the general rule (defer ALL first navigation AND initial NavigationView/ListBox selection past Activate) and the 0xC000027B row does not mention this cause; nothing enforces it at validate-time.",
+      "proposed_improvement": "(1) Add a validator static check (Tier 1) that FAILS when an initial NavigationView selection (SelectedItem/SelectedIndex assignment) — or a first Frame.Navigate — runs inside a Window/Page constructor, pointing at the deferred-navigation pattern; it can't be ignored and does not depend on reproducing the race. (2) Broaden the MIGRATION-PATTERNS 'Initialization order' section so the rule is general (defer first navigation and initial selection to Loaded/Activated regardless of whether a static window ref is read), add the SDK-sample 'select first item in constructor' idiom with its deferred fix, and cross-reference this from the 0xC000027B row.",
+      "generalizes": "UWP SDK samples almost universally set the first NavigationView/ListBox selection (and navigate) in the constructor. In WinUI 3 that synchronously navigates a Frame before Activate and intermittently throws 0xC000027B before the first frame. This recurs across every multi-scenario SDK-sample migration, and the intermittency means the smoke launch can pass while the scorer's launch crashes."
+    }
+  ]
+}

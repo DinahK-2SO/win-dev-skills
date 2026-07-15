@@ -1,0 +1,187 @@
+{
+  "featureName": "BackgroundTransfer",
+  "parityScore": 0.0,
+  "counts": {
+    "partial": 0,
+    "fail": 7,
+    "pass": 0
+  },
+  "totalScenarios": 7,
+  "pass": false,
+  "thresholds": {
+    "partial": 0.4,
+    "pass": 0.8,
+    "strictPartial": false
+  },
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "File Download",
+      "verdict": "fail",
+      "coverage": 0.0,
+      "controlsTotal": 8,
+      "controlsFound": 0,
+      "reachable": false,
+      "screenshotBytes": 0,
+      "actionsTotal": 5,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"http://localhost/BackgroundTransferSample/download.aspx\"",
+        "TextBox \"DownloadedFile.txt\"",
+        "Button \"Start Download\"",
+        "Button \"Start High Priority Download\"",
+        "Button \"Pause All\"",
+        "Button \"Resume All\"",
+        "Button \"Cancel All\"",
+        "TextBox (outputField)"
+      ],
+      "reason": "Scenario not reachable — no screenshot/UIA captured.",
+      "screenshot": "01_File_Download.png"
+    },
+    {
+      "number": 2,
+      "title": "File Upload",
+      "verdict": "fail",
+      "coverage": 0.0,
+      "controlsTotal": 5,
+      "controlsFound": 0,
+      "reachable": false,
+      "screenshotBytes": 0,
+      "actionsTotal": 3,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"http://localhost/BackgroundTransferSample/Upload.aspx\"",
+        "Button \"Start Upload\"",
+        "Button \"Start Multipart Upload\"",
+        "Button \"Cancel All\"",
+        "TextBox (outputField)"
+      ],
+      "reason": "Scenario not reachable — no screenshot/UIA captured.",
+      "screenshot": "02_File_Upload.png"
+    },
+    {
+      "number": 3,
+      "title": "Completion Notifications",
+      "verdict": "fail",
+      "coverage": 0.0,
+      "controlsTotal": 4,
+      "controlsFound": 0,
+      "reachable": false,
+      "screenshotBytes": 0,
+      "actionsTotal": 2,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"http://localhost/BackgroundTransferSample/notifications.aspx\"",
+        "Button \"Start three downloads and show toast on completion\"",
+        "Button \"Start three downloads and update tile on completion\"",
+        "TextBox (outputField)"
+      ],
+      "reason": "Scenario not reachable — no screenshot/UIA captured.",
+      "screenshot": "03_Completion_Notifications.png"
+    },
+    {
+      "number": 4,
+      "title": "Completion Groups",
+      "verdict": "fail",
+      "coverage": 0.0,
+      "controlsTotal": 2,
+      "controlsFound": 0,
+      "reachable": false,
+      "screenshotBytes": 0,
+      "actionsTotal": 1,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"http://localhost/BackgroundTransferSample/bitmap.aspx\"",
+        "Button \"Start ten downloads in a completion group\""
+      ],
+      "reason": "Scenario not reachable — no screenshot/UIA captured.",
+      "screenshot": "04_Completion_Groups.png"
+    },
+    {
+      "number": 5,
+      "title": "Random Access Downloads",
+      "verdict": "fail",
+      "coverage": 0.0,
+      "controlsTotal": 8,
+      "controlsFound": 0,
+      "reachable": false,
+      "screenshotBytes": 0,
+      "actionsTotal": 4,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"http://localhost/BackgroundTransferSample/randomAccess.aspx\"",
+        "TextBox \"RandomAccessFile.txt\"",
+        "Button \"Start\"",
+        "Button \"Pause\"",
+        "Button \"Resume\"",
+        "Slider \"Seek to position (MB)\"",
+        "Button \"Seek\"",
+        "Slider \"Current read position (MB)\""
+      ],
+      "reason": "Scenario not reachable — no screenshot/UIA captured.",
+      "screenshot": "05_Random_Access_Downloads.png"
+    },
+    {
+      "number": 6,
+      "title": "Recoverable Errors",
+      "verdict": "fail",
+      "coverage": 0.0,
+      "controlsTotal": 5,
+      "controlsFound": 0,
+      "reachable": false,
+      "screenshotBytes": 0,
+      "actionsTotal": 1,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"http://localhost/BackgroundTransferSample/recoverableErrors.aspx?shouldExpire=yes\"",
+        "TextBox \"RecoverableErrorsFile.txt\"",
+        "CheckBox \"Recover from expired URL\"",
+        "Button \"Start\"",
+        "TextBox \"1234\""
+      ],
+      "reason": "Scenario not reachable — no screenshot/UIA captured.",
+      "screenshot": "06_Recoverable_Errors.png"
+    },
+    {
+      "number": 7,
+      "title": "Download Reordering",
+      "verdict": "fail",
+      "coverage": 0.0,
+      "controlsTotal": 4,
+      "controlsFound": 0,
+      "reachable": false,
+      "screenshotBytes": 0,
+      "actionsTotal": 2,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"http://localhost/BackgroundTransferSample/download.aspx\"",
+        "TextBox \"DownloadReordering.txt\"",
+        "Button \"Start Download\"",
+        "Button \"Make Current\""
+      ],
+      "reason": "Scenario not reachable — no screenshot/UIA captured.",
+      "screenshot": "07_Download_Reordering.png"
+    }
+  ]
+}

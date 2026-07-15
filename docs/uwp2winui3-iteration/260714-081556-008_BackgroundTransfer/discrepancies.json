@@ -1,0 +1,21 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 1,
+  "score": 0,
+  "builds": true,
+  "runs": false,
+  "requirements": [
+    { "id": 1, "text": "File Download", "status": "fail", "reason": "App crashed at startup (0xC000027B) before first frame; control not reachable (coverage 0/8).", "suspected_skill_gap": "First navigation / initial NavigationView selection in constructor -> startup race; skill covers deferral only for the static-window-ref (E_POINTER) case." },
+    { "id": 2, "text": "File Upload", "status": "fail", "reason": "Unreachable; startup crash before first frame (coverage 0/5).", "suspected_skill_gap": "Same startup race." },
+    { "id": 3, "text": "Completion Notifications", "status": "fail", "reason": "Unreachable; startup crash before first frame (coverage 0/4).", "suspected_skill_gap": "Same startup race." },
+    { "id": 4, "text": "Completion Groups", "status": "fail", "reason": "Unreachable; startup crash before first frame (coverage 0/2).", "suspected_skill_gap": "Same startup race." },
+    { "id": 5, "text": "Random Access Downloads", "status": "fail", "reason": "Unreachable; startup crash before first frame (coverage 0/8).", "suspected_skill_gap": "Same startup race." },
+    { "id": 6, "text": "Recoverable Errors", "status": "fail", "reason": "Unreachable; startup crash before first frame (coverage 0/5).", "suspected_skill_gap": "Same startup race." },
+    { "id": 7, "text": "Download Reordering", "status": "fail", "reason": "Unreachable; startup crash before first frame (coverage 0/4).", "suspected_skill_gap": "Same startup race." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "All 7 scenarios", "uwp": "UWP golden hung on OS splash (runner degraded), but app is launchable.", "winui": "Migrated app never presented a frame (0-byte screenshots, 'No process found with PID 10264').", "screenshot_ref": "notes/parity/winui3/screenshots/*.png (all 0 bytes)" }
+  ],
+  "missing_features": ["File Download", "File Upload", "Completion Notifications", "Completion Groups", "Random Access Downloads", "Recoverable Errors", "Download Reordering"],
+  "summary": "Every feature failed for a single reason: the migrated WinUI 3 app crashes at startup (0xC000027B, Microsoft.UI.Xaml.dll) before rendering, because the first navigation and initial NavigationView selection run in constructors before Window.Activate()."
+}

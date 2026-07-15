@@ -1,0 +1,29 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap copied 11 files and injected 18 TODO[migrate-NNN] markers; agent worked through them (session-log TURN 7 summary)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught manifest/residue requirements (runFullTrust, backgroundTasks extension) and gated on a clean build; reported PASS at TURN 6." }
+  ],
+  "tools_problematic": [
+    { "tool": "Test-AppLaunch.ps1 / Validate-UwpMigration Section 7 smoke launch", "problem": "False PASS on an intermittent startup crash. The smoke launch reported status=running ('App stayed alive 10s', pid 18412; smoke pid 28772) but the scorer's launch of the same build crashed with 0xC000027B in Microsoft.UI.Xaml.dll before the first frame (migration-score.json migrated_launch_status).", "evidence": "session-log TURN 5/6 vs migration-score.json / discrepancies.json (all 7 scenarios scenario-missing, runs:false)." }
+  ],
+  "tool_limitations": [
+    { "tool": "Test-AppLaunch.ps1", "limitation": "A single 10s process-liveness check on one Debug launch cannot reliably detect a startup RACE (navigation before Activate) that only crashes on some launches.", "suggested_tweak": "Do not rely on the launch to catch this class; prevent the fragile pattern statically (added validator check for first navigation/initial selection inside a Window/Page constructor)." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "NavigationView initial selection (SelectedItem = MenuItems[0]) in Page constructor", "special_handling": "In WinUI 3 this fires SelectionChanged and synchronously navigates a Frame before the window is Activated / the visual tree is loaded, which can throw a native stowed exception (0xC000027B) at startup. Must be deferred to a Loaded/Activated handler." }
+  ],
+  "errors_encountered": [
+    { "error": "Startup crash 0xC000027B in Microsoft.UI.Xaml.dll (faulting module Microsoft.WindowsAppRuntime) before first frame; process exits within seconds; runs:false.", "root_cause": "First Frame.Navigate ran in MainWindow ctor AND the initial NavigationView SelectedItem assignment ran in the MainPage ctor, so scenario-page construction/navigation happened before Window.Activate() — a startup-timing race.", "fix": "Defer the first navigation and the initial NavigationView selection to a Loaded (or Window Activated) handler." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "App startup wiring (App.xaml.cs / MainWindow.xaml.cs / MainPage.xaml.cs)", "symptom": "App builds and the smoke launch passes, but the scored launch crashes before rendering.", "turns_or_retries": "0 (agent never observed the crash; smoke launch passed so it declared done at TURN 7).", "root_cause": "Initial navigation/selection performed in constructors before Activate; the crash is intermittent so the smoke launch did not reproduce it.", "how_resolved": "Not resolved in-trial (undetected).", "preventable_by": "A validator static check that FAILS when the initial NavigationView selection (or first Frame.Navigate) runs inside a Window/Page constructor, plus broadened MIGRATION-PATTERNS guidance that this must be deferred regardless of whether a static window reference is read." }
+  ],
+  "missing_tooling": [
+    { "need": "Static detection of 'first navigation / initial selection in a constructor' so the fragile pattern is caught at validate-time instead of relying on an intermittent launch.", "would_have_saved": "The whole trial (score 0 -> the app never presented a frame)." }
+  ],
+  "env_issues": []
+}

@@ -1,0 +1,16 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: add Section 5d static check that FAILs when a first Frame.Navigate or initial NavigationView/ListBox selection runs inside a Window/Page constructor (deferred Loaded/Activated handlers are stripped first) — catches the intermittent 0xC000027B startup race the smoke launch misses.",
+    "MIGRATION-PATTERNS.md: broaden 'Initialization order' to the general rule (defer first navigation AND initial NavigationView selection past Activate even with no static window ref), add the SDK-sample 'select first item in constructor' idiom + deferred fix, and cross-ref it from the 0xC000027B row."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Consider a scaffold-template change so MainWindow defers initial navigation to Activated by default."
+  ]
+}

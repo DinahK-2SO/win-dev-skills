@@ -1,0 +1,14 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Agent declared the migration done on a green validator + green smoke launch even though the app crashes when the scorer launches it.",
+      "evidence": "session-log TURN 5 (Test-AppLaunch status=running, pid 18412), TURN 6 (Validate-UwpMigration PASS, smoke pid 28772), TURN 7 ('all checks green, including the smoke launch').",
+      "covered_clearly_at": "SKILL.md line ~130 ('A WinUI 3 app can build cleanly and still crash the instant it starts, so it compiled is not it runs') and MIGRATION-PATTERNS.md 'Diagnosing Startup Crashes'.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The agent DID run the prescribed launch/validate steps and they genuinely reported PASS — the failure is that those checks cannot reproduce an intermittent startup race, not that the agent skipped guidance. This is addressed by the coverage-gap fixes (static prevention of the fragile pattern), not by telling the agent to 'try harder'. No additional skill edit is warranted for the agent's behaviour itself."
+    }
+  ]
+}

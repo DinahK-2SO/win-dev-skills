@@ -1,0 +1,30 @@
+{
+  "scenario": "BackgroundTransfer",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated app crashes at startup (0xC000027B, Microsoft.UI.Xaml.dll) before its first frame because the first Frame.Navigate runs in MainWindow's ctor and the initial NavigationView selection runs in MainPage's ctor — before Window.Activate(). The intermittent race passed the smoke launch (false PASS) but crashed under the scorer, so all 7 scenarios scored fail.",
+      "evidence": "migration-score.json migrated_launch_status (crashed 0xC000027B before first frame); session-log TURN 5/6 (Test-AppLaunch status=running, Validate PASS); MainWindow.xaml.cs / MainPage.xaml.cs constructors.",
+      "root_cause": "Initial navigation and initial NavigationView selection performed in Window/Page constructors (before Activate). The skill's deferral guidance was scoped only to the static-window-ref (E_POINTER) case, so pages that don't read App.MainWindow were assumed safe; nothing enforced deferral statically.",
+      "tier": 1,
+      "change": "Added Validate-UwpMigration.ps1 Section 5d: a static check that FAILS when a first Frame.Navigate(...) or an initial NavigationView/ListBox/ListView selection (SelectedItem/SelectedIndex =) appears inside a Window/Page constructor. It brace-matches each ctor body and strips correctly-deferred Loaded/Activated handler bodies first, so the recommended deferred pattern is not flagged. Runs pre-build, so it does not depend on reproducing the race.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The validator FAILs this exact migration, forcing the agent to move the first navigation + initial selection into a Loaded/Activated handler before declaring done.",
+      "falsifiable_check": "On re-run against the current output, Validate-UwpMigration prints '[FAIL] First navigation / initial selection runs inside a Window/Page constructor' listing MainWindow.xaml.cs and MainPage.xaml.cs. After the fix it prints '[PASS] Startup navigation ...', the app presents its first frame (runs:true), and parity coverage for the scenarios rises above 0."
+    },
+    {
+      "problem": "Same as above — the prose guidance did not state the general rule and did not name the NavigationView-selection idiom or 0xC000027B, so a capable agent missed it.",
+      "evidence": "MIGRATION-PATTERNS.md 'Initialization order' section framed entirely around App.MainWindow/E_POINTER; the 0xC000027B row did not mention navigation timing.",
+      "root_cause": "Under-emphasized / narrowly-scoped guidance.",
+      "tier": 3,
+      "change": "Broadened MIGRATION-PATTERNS.md 'Initialization order' to state the general rule (defer first Frame.Navigate AND initial NavigationView/ListBox selection past Activate, even when no static window ref is read), added the SDK-sample 'select first item in constructor' idiom with its deferred Loaded fix, and cross-referenced this cause from the 0xC000027B startup-crash row.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "An agent reading the pattern doc defers initial navigation/selection by default instead of only for the static-window-ref case.",
+      "falsifiable_check": "MIGRATION-PATTERNS.md 'Initialization order' contains the initial-selection idiom + deferred fix, and the 0xC000027B row references first-frame navigation timing."
+    }
+  ],
+  "deferred_to_human": [
+    "Consider whether the WinUI 3 scaffold template's MainWindow should ship with initial navigation already deferred to Activated (Tier-2 scaffold change) so the fragile ctor idiom is never scaffolded in the first place."
+  ]
+}

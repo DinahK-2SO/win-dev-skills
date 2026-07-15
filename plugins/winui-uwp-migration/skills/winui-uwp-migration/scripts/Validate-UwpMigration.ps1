@@ -401,6 +401,87 @@ if (Test-Path -LiteralPath $manifestPath) {
     Write-Host "[WARN] Package.appxmanifest not found at $manifestPath — skipping image-reference check"
 }
 
+# ─── 5d. First navigation / initial selection must not run in a constructor ────
+# A packaged WinUI 3 app can build cleanly yet crash INTERMITTENTLY at startup
+# (native stowed exception 0xC000027B, faulting Microsoft.UI.Xaml.dll, before the
+# first frame) when the first Frame.Navigate(...) OR the initial NavigationView/
+# ListBox/ListView selection (SelectedItem/SelectedIndex =) runs inside a Window
+# or Page constructor. Setting the initial selection in a ctor fires
+# SelectionChanged, which synchronously navigates a Frame BEFORE the window is
+# Activated and the visual tree is loaded. Because it is a RACE, the Section 7
+# smoke launch often survives it once and reports a false PASS, so it slips the
+# build+launch gate and only fails under the scorer's launch. UWP SDK samples
+# universally select the first scenario (and navigate) in the constructor, so this
+# recurs across every multi-scenario migration. Detect it statically and FAIL —
+# the fix (move the first navigation + initial selection to a Loaded/Activated
+# handler) is always safe and never breaks a working app.
+# See MIGRATION-PATTERNS.md > 'Initialization order — keep MainWindow's constructor inert'.
+$ctorNavHits = New-Object System.Collections.Generic.List[object]
+foreach ($cs in @($files | Where-Object { $_.Extension -eq '.cs' })) {
+    $csText = [System.IO.File]::ReadAllText($cs.FullName)
+    $usesNavLike = $csText -match 'NavigationView' -or $csText -match 'ListBox' -or $csText -match 'ListView'
+    # Iterate candidate constructors: <modifier> <ClassName>(<args>) [: base/this(...)] {
+    foreach ($m in [regex]::Matches($csText, '(?:public|internal|protected|private)\s+(\w+)\s*\([^\)]*\)\s*(?::\s*(?:base|this)\s*\([^\)]*\)\s*)?\{')) {
+        $cls = $m.Groups[1].Value
+        # Only constructors of Window/Page-derived classes (guards against methods).
+        if ($csText -notmatch ('class\s+' + [regex]::Escape($cls) + '\b[^\{]*:\s*[^\{]*\b(?:Window|Page)\b')) { continue }
+        # Extract the constructor body by matching braces from the opening '{'.
+        $open = $m.Index + $m.Length - 1
+        $depth = 0; $close = -1
+        for ($i = $open; $i -lt $csText.Length; $i++) {
+            $ch = $csText[$i]
+            if ($ch -eq '{') { $depth++ }
+            elseif ($ch -eq '}') { $depth--; if ($depth -eq 0) { $close = $i; break } }
+        }
+        if ($close -lt 0) { continue }
+        $body = $csText.Substring($open, $close - $open + 1)
+        # Strip navigation that is correctly DEFERRED: bodies of Loaded/Activated
+        # handlers wired inside the ctor (the recommended fix) are safe, so remove
+        # them before scanning for immediate (ctor-time) navigation/selection.
+        $scan = $body
+        $defRx = [regex]'(?:Loaded|Activated)\s*\+=\s*[^;{]*?=>\s*'
+        while ($true) {
+            $dm = $defRx.Match($scan)
+            if (-not $dm.Success) { break }
+            $p = $dm.Index + $dm.Length
+            if ($p -lt $scan.Length -and $scan[$p] -eq '{') {
+                $d2 = 0; $q = -1
+                for ($j = $p; $j -lt $scan.Length; $j++) {
+                    $c2 = $scan[$j]
+                    if ($c2 -eq '{') { $d2++ } elseif ($c2 -eq '}') { $d2--; if ($d2 -eq 0) { $q = $j; break } }
+                }
+                if ($q -lt 0) { break }
+                $scan = $scan.Substring(0, $dm.Index) + $scan.Substring($q + 1)
+            } else {
+                $semi = $scan.IndexOf(';', $p)
+                if ($semi -lt 0) { break }
+                $scan = $scan.Substring(0, $dm.Index) + $scan.Substring($semi + 1)
+            }
+        }
+        $risk = $null
+        if ($scan -match '\.Navigate\s*\(') { $risk = 'first Frame.Navigate(...) in constructor' }
+        elseif ($usesNavLike -and $scan -match '\.Selected(Item|Index)\s*=') { $risk = 'initial NavigationView/ListBox selection in constructor' }
+        if ($risk) {
+            $relCs = [System.IO.Path]::GetRelativePath($Target, $cs.FullName)
+            $lineNo = ($csText.Substring(0, $m.Index) -split "`r?`n").Count
+            [void]$ctorNavHits.Add([PSCustomObject]@{ File = $relCs; Line = $lineNo; Ctor = $cls; Risk = $risk })
+        }
+    }
+}
+if ($ctorNavHits.Count -eq 0) {
+    Write-Host "[PASS] Startup navigation — no first Frame.Navigate/initial NavigationView selection inside a Window/Page constructor"
+} else {
+    Write-Host "[FAIL] First navigation / initial selection runs inside a Window/Page constructor (startup race -> intermittent 0xC000027B crash before first frame):"
+    foreach ($h in $ctorNavHits) {
+        Write-Host "       $($h.File):$($h.Line)  ($($h.Ctor) ctor: $($h.Risk))"
+    }
+    Write-Host "       Effect: navigation runs before Window.Activate()/the visual tree is loaded; the app builds and may survive one smoke launch, then crashes before rendering under a real launch."
+    Write-Host "       Fix: move the first navigation AND the initial NavigationView/ListBox selection out of the constructor into a Loaded (or Window Activated) handler."
+    Write-Host "       See MIGRATION-PATTERNS.md > 'Initialization order - keep MainWindow's constructor inert'."
+    Add-Diag 'Startup navigation in constructor' (($ctorNavHits | ForEach-Object { "$($_.File):$($_.Line) [$($_.Ctor)] $($_.Risk)" }) -join "`n")
+    $failures++
+}
+
 # ─── 6. dotnet build healthcheck ──────────────────────────────────────────────
 # The validator must gate on a clean build, otherwise common namespace-rewrite
 # fallout (CS0104 LaunchActivatedEventArgs ambiguity, CS0246 scaffold-vs-UWP

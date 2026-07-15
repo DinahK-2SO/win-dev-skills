@@ -235,7 +235,38 @@ public MainWindow()
 private bool _navigated;
 ```
 
-Validator catches this race with a 10s smoke launch after the build healthcheck passes — see `Validate-UwpMigration.ps1` Section 7.
+**The rule is broader than the `App.MainWindow` race.** Defer the **first `Frame.Navigate`** *and* any **initial `NavigationView` / `ListBox` / `ListView` selection** (`SelectedItem = …`, `SelectedIndex = …`) out of every `Window`/`Page` constructor — **even when the target page reads no static window reference at all**. Setting the initial selection in a constructor fires `SelectionChanged`, which synchronously navigates a `Frame` *before* the window is `Activate`d and the visual tree is loaded. On WinUI 3 that intermittently throws a native stowed exception (`0xC000027B`, faulting `Microsoft.UI.Xaml.dll`) *before the first frame renders* — so the app builds cleanly, sometimes even survives one smoke launch, then crashes under the scorer. This is not the same failure as the `E_POINTER` static-window race; there is no `App.MainWindow` access involved.
+
+The **SDK-sample idiom** to rewrite: the canonical UWP samples select the first scenario in the `MainPage`/shell constructor:
+
+```csharp
+// UWP idiom — DO NOT keep this in the constructor:
+public MainPage()
+{
+    InitializeComponent();
+    Current = this;
+    if (NavigationViewControl.MenuItems.Count > 0)
+        NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0]; // navigates NOW, before Activate
+}
+```
+
+Move it to `Loaded`, which runs after the tree is up:
+
+```csharp
+public MainPage()
+{
+    InitializeComponent();
+    Current = this;
+    this.Loaded += (_, _) =>
+    {
+        if (NavigationViewControl.SelectedItem is null &&
+            NavigationViewControl.MenuItems.Count > 0)
+            NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
+    };
+}
+```
+
+Validator catches this statically (`Validate-UwpMigration.ps1` — it **fails** when a first `Frame.Navigate` or initial `NavigationView`/`ListBox`/`ListView` selection appears inside a `Window`/`Page` constructor) and also runs a 10s smoke launch after the build healthcheck — see `Validate-UwpMigration.ps1` Sections 5d and 7. The static check is the reliable gate here because the crash is a race the smoke launch may not reproduce.
 
 ### AppWindow API replacements
 
@@ -307,7 +338,7 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | `0x80004003` | `E_POINTER` | Static-window **init-order race** — a `Page` read `App.MainWindow` (or another static window reference) before `OnLaunched` assigned it. Keep `MainWindow`'s constructor inert and navigate after `Activate`. See [Initialization order](#windowing). |
 | `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
-| `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
+| `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. **Also the classic first-frame race:** a first `Frame.Navigate` or an initial `NavigationView`/`ListBox` selection performed in a `Window`/`Page` constructor navigates before `Activate` and throws here before the first frame — defer it to `Loaded`/`Activated`, see [Initialization order](#windowing). If an API/contract is unsupported on the current OS, defer it. |
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 
