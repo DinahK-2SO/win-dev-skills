@@ -1,0 +1,28 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "index": 46,
+  "applied": true,
+  "items": [
+    {
+      "problem": "UWP code subscribing to Application.Current.Suspending / .Resuming (and the default UWP App template's `this.Suspending += OnSuspending;`) fails to compile in WinUI 3 with CS1061; agent lost ~9 build cycles rediscovering this.",
+      "evidence": "lessons.json errors_encountered CS1061 (9x each); UWP MainPage.xaml.cs lines 102-103; skill-defects.json item 1.",
+      "root_cause": "Microsoft.UI.Xaml.Application has no Suspending/Resuming/EnteredBackground/LeavingBackground events; the skill's #lifecycle section covered activation but never the removed suspend/resume events.",
+      "tier": 2,
+      "change": "Added a `\\.(Suspending|Resuming)\\s*\\+=` adaptable pattern to unsupported-api-inventory.json (anchor: lifecycle) so Initialize-UwpMigration injects an inline `// TODO[migrate-NNN]: see PATTERNS.md#lifecycle` on the exact subscription lines; extended the #lifecycle section with a 'Suspend / Resume events are gone' subsection; and added a CS1061 entry to the 'Common build errors' section.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json ; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On re-run the agent sees an inline TODO at the Suspending/Resuming lines pointing to lifecycle guidance and removes/relocates the handlers on the first pass instead of after repeated CS1061 build failures.",
+      "falsifiable_check": "Re-run build log shows 0 CS1061 'Application does not contain a definition for Suspending/Resuming' errors; an inline TODO#lifecycle appears on the subscription lines after Initialize-UwpMigration."
+    },
+    {
+      "problem": "`NavigationCacheMode = NavigationCacheMode.Disabled;` (standard UWP page-template line) fails with CS0176 in WinUI 3; agent lost build cycles.",
+      "evidence": "lessons.json errors_encountered CS0176 (11x); UWP MainPage.xaml.cs line 99; skill-defects.json item 2.",
+      "root_cause": "Inside a Page the unqualified enum `NavigationCacheMode` is shadowed by the Page.NavigationCacheMode instance property, so the enum member is read through an instance. Not covered by the existing CS0104 namespace-collision note.",
+      "tier": 3,
+      "change": "Added a CS0176 entry to the 'Common build errors after the namespace rewrite' section with the qualify-the-enum fix (`Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Disabled`).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent qualifies the enum (or drops the line) on first pass instead of hitting CS0176.",
+      "falsifiable_check": "Re-run build log shows 0 CS0176 errors on NavigationCacheMode."
+    }
+  ],
+  "deferred_to_human": []
+}

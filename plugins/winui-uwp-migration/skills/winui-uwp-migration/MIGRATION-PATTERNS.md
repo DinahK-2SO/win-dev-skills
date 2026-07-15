@@ -35,6 +35,20 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 ```
 
+### `CS1061: 'Application' does not contain a definition for 'Suspending' / 'Resuming'`
+
+UWP wires up the app-suspend/resume lifecycle — the default UWP `App.xaml.cs` template has `this.Suspending += OnSuspending;`, and pages/services commonly do `Application.Current.Suspending += …;` / `Application.Current.Resuming += …;` (often to save/restore state or init/clean up hardware such as a camera). **WinUI 3 `Microsoft.UI.Xaml.Application` has none of these events** (`Suspending`, `Resuming`, `EnteredBackground`, `LeavingBackground`) — desktop apps are not process-lifecycle-suspended the way UWP apps are — so every subscription becomes a `CS1061`. See [Application Lifecycle and Activation](#lifecycle) for the full replacement. Fix: delete the `+=` subscriptions and their handler methods; if the code did real teardown, move it to the main window's `Window.Closed` event.
+
+### `CS0176: Member 'NavigationCacheMode.<X>' cannot be accessed with an instance reference`
+
+The standard UWP page-template constructor ships a line like `NavigationCacheMode = NavigationCacheMode.Disabled;` (or `.Required`). Inside a `Page`, the unqualified identifier `NavigationCacheMode` binds to the inherited **`Page.NavigationCacheMode` instance property**, so the compiler reads `NavigationCacheMode.Disabled` as accessing the static enum member through an instance → `CS0176`. Fix by fully-qualifying the enum:
+
+```csharp
+NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Disabled;
+```
+
+(This is the same property/enum name collision that can occur for any XAML property whose type is an enum of the same name; qualify the right-hand enum.)
+
 ### Thousands of `CS0101` duplicate-type / `CS0227` / `CS0234` errors (often a build that hangs)
 
 If `dotnet build` floods with **tens of thousands** of `CS0101` ("already contains a definition for …"), `CS0227`, or `CS0234` errors — or the build appears to hang for minutes — the cause is almost always **stale UWP build output that was copied into the migrated tree**. A previously-built UWP project (especially a multi-project sample with sub-folders) leaves machine-generated sources under `bin/` and `obj/`, e.g. .NET-Native ILC files at `obj\<arch>\Release\ilc\**\*.g.cs` and `*.McgInterop\ImplTypes.g.cs`. The SDK-style WinUI `.csproj` globs `**/*.cs`, and MSBuild's default `bin`/`obj` exclusion only covers the **project-root** `bin`/`obj` — any **nested** sub-project `bin`/`obj` is still compiled, producing the duplicate types.
@@ -331,6 +345,22 @@ switch (args.Kind)
 ```
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
+
+### Suspend / Resume events are gone
+
+`Microsoft.UI.Xaml.Application` does **not** expose the UWP app-lifecycle events
+`Suspending`, `Resuming`, `EnteredBackground`, or `LeavingBackground` — WinUI 3 desktop apps
+run as ordinary Win32 processes and are not suspended/resumed by the system. Any code that
+subscribes to them (the default UWP `App.xaml.cs` has `this.Suspending += OnSuspending;`, and
+pages often do `Application.Current.Suspending += …;` / `Application.Current.Resuming += …;`)
+fails to compile with `CS1061`.
+
+- Delete the `+= …Suspending` / `+= …Resuming` subscriptions and their handler methods
+  (`OnSuspending`, `Application_Suspending`, `Application_Resuming`, etc.).
+- If the handler did real work: **save/persist on demand** instead of on suspend, and run
+  **teardown/cleanup from the main window's `Window.Closed` event** (e.g. dispose a
+  `MediaCapture`, stop a preview). There is no "resume" counterpart — re-initialize lazily
+  when the relevant page/window is shown.
 
 <a id="background-tasks"></a>
 ## Background Tasks

@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "index": 46,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS0102: 'MainPage' already contains a definition for 'AdvancedCaptureContext' — the helper class was defined twice inside MainPage.xaml.cs.",
+      "evidence": "build-events.jsonl turns 34-35: MainPage.xaml.cs(604,22) error CS0102 (18x across retries); final MainPage.xaml.cs has exactly one definition at line 66.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'Common build errors' -> 'Thousands of CS0101 duplicate-type ... errors' section already establishes duplicate-type-definition handling; this specific instance was a self-inflicted copy/paste during editing, not a UWP->WinUI 3 pattern.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable model on re-run would not duplicate its own class definition; there is no general migration rule to encode. Adding 'do not define classes twice' would be noise."
+    }
+  ]
+}

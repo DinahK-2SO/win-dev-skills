@@ -1,0 +1,27 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "index": 46,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Agent lost ~9 build cycles on CS1061: UWP code that subscribes to Application.Current.Suspending / .Resuming (and the standard UWP App template's `this.Suspending += OnSuspending;`) does not compile in WinUI 3 because Microsoft.UI.Xaml.Application has no Suspending/Resuming events.",
+      "evidence": "build-events.jsonl turns 34-35: repeated 'error CS1061: Application does not contain a definition for Suspending/Resuming'; UWP MainPage.xaml.cs lines 102-103.",
+      "skill_search": "grep 'Suspend', 'Resum', 'lifecycle' across SKILL.md + MIGRATION-PATTERNS.md",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The lifecycle section (#lifecycle) covers OnLaunched/OnActivated -> AppInstance but never states that the Suspending/Resuming/EnteredBackground/LeavingBackground app-lifecycle events are removed in WinUI 3 desktop, nor how to handle code that subscribes to them.",
+      "proposed_fix": "Add a CS1061 entry to 'Common build errors after the namespace rewrite' and extend the #lifecycle section to document that WinUI 3 Application has no Suspending/Resuming events (delete the handlers; desktop apps aren't suspended; use Window.Closed for teardown). Add a `Suspending|Resuming +=` adaptable pattern to unsupported-api-inventory.json (anchor: lifecycle) so Initialize-UwpMigration injects an inline TODO on those exact lines.",
+      "generalizes": "The suspend/resume lifecycle model is UWP-wide: the default UWP App.xaml.cs template ships `this.Suspending += OnSuspending;`, and pages/services across almost every UWP sample hook Suspending/Resuming for save/restore. Nearly every UWP->WinUI 3 migration hits this exact CS1061."
+    },
+    {
+      "problem": "Agent lost build cycles on CS0176 for `NavigationCacheMode = NavigationCacheMode.Disabled;` — the standard UWP page-template constructor line.",
+      "evidence": "build-events.jsonl: 'error CS0176: Member NavigationCacheMode.Disabled cannot be accessed with an instance reference' (11x); UWP MainPage.xaml.cs line 99.",
+      "skill_search": "grep 'NavigationCacheMode', 'CS0176' across SKILL.md + MIGRATION-PATTERNS.md",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Inside a Page, the unqualified enum name `NavigationCacheMode` resolves to the Page.NavigationCacheMode instance property, so `.Disabled` is treated as a static member accessed through an instance. The skill's CS0104 ambiguity note covers namespace collisions but not this property/enum-name shadowing.",
+      "proposed_fix": "Add a CS0176 entry to 'Common build errors' explaining the fix: fully-qualify the enum, e.g. `NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Disabled;`.",
+      "generalizes": "`NavigationCacheMode = NavigationCacheMode.<X>;` ships verbatim in the standard UWP page-template constructor, so it recurs across the UWP sample suite whenever a page sets its cache mode."
+    }
+  ]
+}

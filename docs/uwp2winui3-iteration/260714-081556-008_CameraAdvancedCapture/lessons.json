@@ -1,0 +1,31 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "index": 46,
+  "tools_helpful": [
+    { "tool": "dotnet build (native)", "evidence": "build-events.jsonl turn 34/35: agent iterated dotnet build to surface CS errors one batch at a time until BUILD SUCCEEDED (build-output.txt)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [
+    { "api": "Application.Current.Suspending / Application.Current.Resuming (events)", "why_tried": "UWP MainPage.xaml.cs (lines 102-103) subscribes to app suspend/resume to init/clean up the camera; carried verbatim into WinUI 3.", "root_cause": "Microsoft.UI.Xaml.Application in WinUI 3 has no Suspending/Resuming events (desktop apps are not process-lifecycle-suspended like UWP); the members simply do not exist.", "fix": "Remove the event subscriptions and their handlers. WinUI 3 desktop apps are not suspended; if teardown is needed, use the main Window.Closed event or AppInstance activation." },
+    { "api": "NavigationCacheMode = NavigationCacheMode.Disabled", "why_tried": "UWP MainPage.xaml.cs line 99 (standard UWP page-template line) carried verbatim.", "root_cause": "Inside a Page, the unqualified identifier 'NavigationCacheMode' binds to the Page's instance property (type NavigationCacheMode), so 'NavigationCacheMode.Disabled' is read as accessing the static enum member through an instance -> CS0176.", "fix": "Fully-qualify the enum: NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Disabled;" }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Media.Capture / CaptureElement", "special_handling": "CaptureElement has no WinUI 3 XAML equivalent; agent substituted an Image preview surface plus a no-camera FallbackPanel (score note confirms present + graceful)." }
+  ],
+  "errors_encountered": [
+    { "error": "CS1061 'Application' does not contain a definition for 'Suspending' / 'Resuming' (9x each across build attempts)", "root_cause": "WinUI 3 Application exposes no Suspending/Resuming events.", "fix": "Deleted the += subscriptions and their async handler methods." },
+    { "error": "CS0176 Member 'NavigationCacheMode.Disabled' cannot be accessed with an instance reference (11x)", "root_cause": "Unqualified enum name shadowed by the Page.NavigationCacheMode instance property.", "fix": "Qualify the enum with its namespace (or drop the line)." },
+    { "error": "CS0102 The type 'MainPage' already contains a definition for 'AdvancedCaptureContext' (18x, all same error across retries)", "root_cause": "Agent editing slip: the AdvancedCaptureContext helper class ended up defined twice inside MainPage.xaml.cs.", "fix": "Removed the duplicate definition; final file has one at line 66." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainPage.xaml.cs App lifecycle wiring", "symptom": "Repeated build failures on CS1061 Suspending/Resuming.", "turns_or_retries": "~9 build cycles", "root_cause": "No skill guidance that WinUI 3 Application drops the Suspending/Resuming events; agent kept the UWP hookup.", "how_resolved": "Agent eventually deleted the handlers.", "preventable_by": "A build-error entry + lifecycle-section note in MIGRATION-PATTERNS.md and an inventory pattern that injects an inline TODO on the Suspending/Resuming subscription lines." },
+    { "where": "MainPage.xaml.cs constructor", "symptom": "CS0176 on NavigationCacheMode assignment.", "turns_or_retries": "~several build cycles", "root_cause": "Enum/instance-property name collision not documented.", "how_resolved": "Removed the assignment.", "preventable_by": "A build-error entry documenting the qualify-the-enum fix (the line ships in the standard UWP page template)." },
+    { "where": "MainPage.xaml.cs", "symptom": "CS0102 duplicate AdvancedCaptureContext.", "turns_or_retries": "~2 build cycles", "root_cause": "One-off copy/paste duplication by the agent.", "how_resolved": "Deleted the duplicate.", "preventable_by": "N/A — editing slip, not a migration-pattern gap." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No camera hardware on the runner; UWP golden stayed on splash.", "workaround": "WinUI verified against source XAML + live UIA tree; no impact on skill improvement." }
+  ]
+}

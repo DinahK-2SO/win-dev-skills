@@ -1,0 +1,23 @@
+{
+  "scenario": "CameraAdvancedCapture",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 1,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (launched via uwp-app-runner, windowTitle 'Camera Advanced Capture C# Sample', SDK 10.0.26100.0); note: no camera hardware on this machine, so the running UWP app stayed on its extended splash and exposed no interactive XAML controls in the UIA tree",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "CameraAdvancedCapture",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_CameraAdvancedCapture.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_CameraAdvancedCapture.png",
+      "note": "Faithful single-page migration. WinUI renders a full non-blank frame; all source controls present in the UIA tree with correct AutomationIds (PreviewControl, CycleModeButton+ModeTextBlock 'Standard', PhotoButton, HdrImpactBar, SceneTypeTextBlock, HDR Analyzer label) and correct layout (buttons right, HDR bar bottom). Both buttons are correctly disabled because no camera is present (IsEnabled=False until camera init) — this matches the UWP intent, not a dead-control regression; the UWP golden itself was camera-gated (stuck on splash) so no control 'responded in UWP but dead in WinUI'. WinUI additionally shows a graceful no-camera FallbackPanel. Visual fidelity verified against source XAML + live UIA; full running-UWP pixel comparison limited only by the absent camera hardware."
+    }
+  ]
+}
