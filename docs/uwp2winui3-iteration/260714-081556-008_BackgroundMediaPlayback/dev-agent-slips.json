@@ -1,0 +1,14 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Agent left one 'using SDKTemplate;' behind while renaming the root namespace file-by-file, and timed out before running the mandatory Step 4 validation that would have surfaced the build failure.",
+      "evidence": "session-log turns 33-39: renaming SDKTemplate->BackgroundMediaPlayback in App.xaml etc., then timeout (results.json timeout:true) before a final build/Validate-UwpMigration.ps1 run.",
+      "covered_clearly_at": "SKILL.md Step 4 ('You are NOT done until Validate-UwpMigration.ps1 reports PASS') and Step 3 build loop.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The 'always validate before done' discipline is already prominent; the miss was a partial manual edit + running out of budget, not a skill gap. HOWEVER the underlying friction (an undocumented, large, error-prone manual namespace rename) IS a skill defect and is being addressed separately, which also reduces the manual work that led to this slip. This entry is recorded as context only; no additional skill edit is made for the slip itself."
+    }
+  ]
+}

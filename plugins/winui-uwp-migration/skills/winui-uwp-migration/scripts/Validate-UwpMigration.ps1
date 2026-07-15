@@ -136,6 +136,45 @@ if ($residueHits.Count -eq 0) {
     $failures++
 }
 
+# ─── 1b. Orphaned sample-root-namespace residue (SDKTemplate) ────────────────────
+# Windows Universal Samples put the whole app in `namespace SDKTemplate`; the scaffold
+# uses the project name, so the root namespace must be reconciled. A *partial* rename —
+# most files renamed but a stray `using SDKTemplate;` / `SDKTemplate.Foo` /
+# `xmlns:…="using:SDKTemplate"` left behind — makes that name unresolvable (CS0246) and
+# cascades into a WMC9999 XAML-compiler crash, failing the whole build. When NO file
+# declares `namespace SDKTemplate`, any remaining `SDKTemplate` reference is orphaned.
+$declaresSdkTemplate = $false
+$sdkRefHits = New-Object System.Collections.Generic.List[object]
+foreach ($f in $files) {
+    if ($f.Extension -notin @('.cs', '.xaml')) { continue }
+    $text = [System.IO.File]::ReadAllText($f.FullName)
+    if ($text -match '(?m)^\s*namespace\s+SDKTemplate\b') { $declaresSdkTemplate = $true }
+    if ($text -match '\bSDKTemplate\b') {
+        $fileLines = $text -split "`r?`n"
+        for ($i = 0; $i -lt $fileLines.Count; $i++) {
+            if ($fileLines[$i] -match '\bSDKTemplate\b') {
+                $rel = [System.IO.Path]::GetRelativePath($Target, $f.FullName)
+                [void]$sdkRefHits.Add([PSCustomObject]@{ File = $rel; Line = $i+1; Snippet = $fileLines[$i].Trim() })
+            }
+        }
+    }
+}
+$sdkRefHits = @($sdkRefHits | Where-Object { -not $deferredFiles.ContainsKey($_.File) })
+if ($sdkRefHits.Count -gt 0 -and -not $declaresSdkTemplate) {
+    Write-Host "[FAIL] Orphaned 'SDKTemplate' root-namespace reference(s) — the sample root namespace was partially renamed (no file declares 'namespace SDKTemplate'). Finish the rename tree-wide (or keep it consistent). See MIGRATION-PATTERNS.md#sdktemplate-namespace (full diagnostics in .validator-diagnostics.txt):"
+    $diagBlock = New-Object System.Collections.Generic.List[string]
+    foreach ($g in ($sdkRefHits | Group-Object File | Select-Object -First 30)) {
+        foreach ($h in @($g.Group | Select-Object -First 10)) { Write-Host "       $($g.Name):$($h.Line)" }
+        if ($g.Group.Count -gt 10) { Write-Host "       $($g.Name): ($($g.Group.Count - 10) more)" }
+        [void]$diagBlock.Add("[$($g.Name)]")
+        foreach ($h in $g.Group) { [void]$diagBlock.Add("  L$($h.Line)  SDKTemplate  | $($h.Snippet)") }
+    }
+    Add-Diag 'Orphaned SDKTemplate namespace' (($diagBlock) -join "`r`n")
+    $failures++
+} else {
+    Write-Host "[PASS] Root-namespace reconciliation — no orphaned 'SDKTemplate' references"
+}
+
 # ─── 2. TODO[migrate-NNN] residue ──────────────────────────────────────────────
 # Initialize-UwpMigration.ps1 injects `TODO[migrate-NNN]: see PATTERNS.md#<anchor>`
 # markers above every adaptable API hit. Every one of them must be resolved

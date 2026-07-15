@@ -27,6 +27,29 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+<a id="sdktemplate-namespace"></a>
+### `CS0246: The type or namespace name 'SDKTemplate' could not be found` (partial root-namespace rename)
+
+The Windows Universal Samples (the corpus these migrations draw from) put the **entire app in the `SDKTemplate` namespace** — `App`, `MainPage`, every scenario `Page`, and the shared helpers they call (`MainPage.Current`, `NotifyUser`, `NotifyType`, the `Scenario` list) all live in `namespace SDKTemplate`, and the XAML uses `x:Class="SDKTemplate.…"` plus `xmlns:local="using:SDKTemplate"`. The WinUI 3 scaffold, by contrast, uses the **project name** as its root namespace (e.g. `MyApp.MainWindow`). The bootstrap only rewrites `Windows.UI.Xaml → Microsoft.UI.Xaml`; it does **not** touch the root namespace, so reconciling `SDKTemplate` with the project namespace is on you.
+
+Reconcile it **atomically across the whole tree, then verify** — a *partial* rename is the failure mode. Renaming `SDKTemplate` in most files but leaving a single `using SDKTemplate;` (or a qualified `SDKTemplate.Foo`, or an `xmlns:…="using:SDKTemplate"`) in one file makes that name unresolvable. Worse, because the offending file's `partial` class then fails to compile, the XAML compiler crashes with a **cascading `Xaml Internal Error WMC9999: Object reference not set to an instance of an object`** — so the whole project fails to build and nothing runs, from one stray line.
+
+```powershell
+# Rename the sample root namespace to the project's root namespace in ONE sweep,
+# covering .cs (namespace + using) AND .xaml (x:Class + xmlns:…="using:SDKTemplate").
+$proj = 'MyApp'   # the scaffold's root namespace / project name
+Get-ChildItem $Target -Recurse -Include *.cs,*.xaml |
+    Where-Object { $_.FullName -notmatch '\\(\.uwp-source|bin|obj)\\' } |
+    ForEach-Object { (Get-Content $_ -Raw) -replace '\bSDKTemplate\b', $proj | Set-Content $_ -NoNewline }
+
+# Verify BEFORE building — this MUST return nothing:
+Get-ChildItem $Target -Recurse -Include *.cs,*.xaml |
+    Where-Object { $_.FullName -notmatch '\\(\.uwp-source|bin|obj)\\' } |
+    Select-String -Pattern '\bSDKTemplate\b'
+```
+
+Keeping the original namespace is equally valid — leave everything as `SDKTemplate` and set the scaffold's `<RootNamespace>SDKTemplate</RootNamespace>` plus its generated `MainWindow`/`App` to match. Either way the rule is **consistency**: exactly one root namespace across `.cs` *and* `.xaml`, with zero residual tokens of the other. `Validate-UwpMigration.ps1` fails on an orphaned `SDKTemplate` reference so a missed spot is caught before the build.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:

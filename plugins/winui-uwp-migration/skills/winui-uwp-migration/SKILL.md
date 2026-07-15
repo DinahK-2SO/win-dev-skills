@@ -89,6 +89,8 @@ Walk each row by its Triage label:
 
 Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 
+**Root-namespace reconciliation (do this once, tree-wide).** These SDK samples put the whole app in the `SDKTemplate` namespace, while the scaffold uses the project name. Rename `SDKTemplate` → the project's root namespace in a **single sweep across every `.cs` and `.xaml`** (`namespace`, `using`, `x:Class`, and `xmlns:…="using:SDKTemplate"`), then grep the tree to confirm **zero** residual `SDKTemplate` tokens *before* building. One leftover `using SDKTemplate;` fails the entire build with `CS0246` and cascades into a `WMC9999` XAML-compiler crash, so nothing runs — see [PATTERNS.md](./MIGRATION-PATTERNS.md#sdktemplate-namespace) for the sweep + verify commands. The rule is consistency: exactly one root namespace, in both `.cs` and `.xaml`.
+
 **Shell conversion** is the one structural change LLM judgement decides. UWP's `Frame`-rooted app model has no direct WinUI 3 desktop equivalent. Pick the closest WinUI 3 idiom of the source shell:
 
 | Source shell pattern (UWP) | Suggested WinUI 3 target |

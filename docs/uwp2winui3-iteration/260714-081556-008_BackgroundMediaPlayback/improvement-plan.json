@@ -1,0 +1,30 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Windows Universal Samples put the whole app in 'namespace SDKTemplate'; the scaffold uses the project name. A partial rename left an orphaned 'using SDKTemplate;' (Settings.xaml.cs:15) -> CS0246 -> cascading WMC9999 -> whole build fails.",
+      "evidence": "notes/skill-defects.json item 1; migration-score.json winui_build_errors; produced app has 0 'namespace SDKTemplate' and 1 leftover 'using SDKTemplate;'.",
+      "root_cause": "Root-namespace reconciliation is undocumented (0 grep hits in the skill) and the bootstrap only rewrites Windows.UI.Xaml->Microsoft.UI.Xaml, so the agent does it ad hoc and misses a spot.",
+      "tier": 3,
+      "change": "Add a dedicated 'CS0246 SDKTemplate / partial root-namespace rename' pattern to MIGRATION-PATTERNS.md (one-sweep rename + verify recipe, WMC9999 cascade note, keep-or-rename consistency rule) and a mandatory root-namespace reconciliation callout in SKILL.md Step 1 that links to it.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agent reconciles the root namespace in one deterministic sweep and greps for residual SDKTemplate before building, avoiding the partial-rename CS0246/WMC9999 and the manual thrash that led to the timeout.",
+      "falsifiable_check": "On re-run, `grep -r '\\bSDKTemplate\\b' <project> (excl .uwp-source)` returns nothing and the project no longer emits CS0246 'SDKTemplate' / WMC9999; build succeeds."
+    },
+    {
+      "problem": "Even with docs, a single missed SDKTemplate reference silently breaks the whole build; the agent may not notice until it reads raw build errors (or, as here, times out first).",
+      "evidence": "notes/dev-agent-slips.json item 1; the miss was exactly one line in one file.",
+      "root_cause": "No deterministic pre-build check for an orphaned root namespace; the existing residue grep only targets Windows.UI.Xaml/UWP-only APIs.",
+      "tier": 1,
+      "change": "Add check 1b to Validate-UwpMigration.ps1: if any non-deferred .cs/.xaml references 'SDKTemplate' but NO file declares 'namespace SDKTemplate', FAIL with file:line and a pointer to MIGRATION-PATTERNS.md#sdktemplate-namespace.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "A partial rename is caught deterministically (grep-based, no successful build required) with an actionable file:line, instead of surfacing only as an opaque CS0246/WMC9999.",
+      "falsifiable_check": "Running the validator on a tree with a leftover 'using SDKTemplate;' and no 'namespace SDKTemplate' prints '[FAIL] Orphaned SDKTemplate ...'; on a fully-reconciled tree it prints '[PASS] Root-namespace reconciliation'. Verified against the trial's produced app (flagged Settings.xaml.cs:15)."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier 1/2 option: have Initialize-UwpMigration.ps1 perform the SDKTemplate->project-namespace rename deterministically at bootstrap time (would eliminate the manual step entirely), or set the scaffold <RootNamespace> to the sample's namespace. Left to a human because it changes bootstrap behavior and needs corpus-wide testing."
+  ]
+}

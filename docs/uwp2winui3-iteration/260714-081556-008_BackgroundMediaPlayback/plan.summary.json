@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Document SDKTemplate root-namespace reconciliation (PATTERNS.md + SKILL.md Step 1): Windows Universal Samples put the whole app in namespace SDKTemplate, so rename it tree-wide in one sweep and grep for residuals before building — a partial rename causes CS0246 + a cascading WMC9999 that breaks the entire build.",
+    "Add an orphaned-SDKTemplate residue check to Validate-UwpMigration.ps1: fail deterministically (file:line) when a SDKTemplate reference remains but no file declares 'namespace SDKTemplate', catching a missed rename pre-build instead of via an opaque CS0246/WMC9999."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": [
+    "Optionally perform the SDKTemplate->project-namespace rename in Initialize-UwpMigration.ps1 at bootstrap time (or set scaffold <RootNamespace> to the sample namespace); changes bootstrap behavior, needs corpus-wide testing."
+  ]
+}

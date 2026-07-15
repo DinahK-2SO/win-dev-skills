@@ -1,0 +1,27 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log turns 3-4: seeded MIGRATION-MAPPING.md (20 rows), .bootstrap-meta.json perFileMode, and the Windows.UI.Xaml->Microsoft.UI.Xaml rewrite." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Rewrites only Windows.UI.Xaml->Microsoft.UI.Xaml; it does not reconcile the sample's app-wide root namespace (SDKTemplate) with the scaffold's project namespace, leaving a large, error-prone manual rename to the agent.", "suggested_tweak": "Document the SDKTemplate reconciliation (done) and guard it in Validate-UwpMigration.ps1 (done); optionally have the bootstrap perform the tree-wide rename deterministically." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "SDKTemplate namespace (Windows Universal Samples shared template)", "special_handling": "The whole app (App, MainPage, every scenario Page, shared MainPage.Current/NotifyUser/NotifyType/Scenario helpers) lives in namespace SDKTemplate with x:Class=\"SDKTemplate.*\" and xmlns:local=\"using:SDKTemplate\". Must be reconciled with the scaffold's project namespace consistently and completely." }
+  ],
+  "errors_encountered": [
+    { "error": "Settings.xaml.cs(15,7): CS0246 The type or namespace name 'SDKTemplate' could not be found", "root_cause": "Agent renamed SDKTemplate->BackgroundMediaPlayback across 26 files but left one stray 'using SDKTemplate;' in Settings.xaml.cs; no file declares namespace SDKTemplate anymore, so the using is orphaned.", "fix": "Rename the sample root namespace tree-wide in one sweep (.cs and .xaml) then grep for residual SDKTemplate before building; or keep SDKTemplate consistently." },
+    { "error": "Microsoft.UI.Xaml.Markup.Compiler.interop.targets(847,9): Xaml Internal Error WMC9999: Object reference not set to an instance of an object", "root_cause": "Cascading symptom of the CS0246: the Settings partial class fails to compile, so the XAML compiler crashes generating the .g.cs.", "fix": "Resolve the CS0246 (orphaned SDKTemplate reference); WMC9999 disappears once the code-behind compiles." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "session-log turns 5-39 (App.xaml/App.xaml.cs/MainPage/pages)", "symptom": "Agent spent the whole trial performing a manual, file-by-file SDKTemplate->BackgroundMediaPlayback rename and re-authoring XAML; timed out (results.json timeout:true) at turn 39 mid-rename before ever running the final build/validate.", "turns_or_retries": "~34 turns, timed out", "root_cause": "The SDKTemplate root-namespace reconciliation is a large, undocumented, unsupported manual task; the agent did it ad hoc and missed one 'using SDKTemplate;', and ran out of budget before validating.", "how_resolved": "Not resolved — trial timed out with a non-building app (score 0).", "preventable_by": "Documenting the SDKTemplate convention + a one-sweep rename recipe in SKILL.md/MIGRATION-PATTERNS.md (reduces work and residue risk) and a deterministic orphaned-SDKTemplate guard in Validate-UwpMigration.ps1 (catches a missed spot before build)." }
+  ],
+  "missing_tooling": [
+    { "need": "A deterministic root-namespace reconciliation (rename or guard) for the ubiquitous SDKTemplate sample namespace.", "would_have_saved": "The ~30-turn manual rename and the single-line residue that failed the whole build; likely turns the trial from timeout/score-0 into a building app." }
+  ],
+  "env_issues": []
+}

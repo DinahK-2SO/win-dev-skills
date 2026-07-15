@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The sample's app-wide root namespace 'SDKTemplate' must be reconciled with the WinUI scaffold's project namespace, but a partial rename leaves an orphaned reference (here 'using SDKTemplate;' in Settings.xaml.cs:15) that fails the whole build with CS0246 and a cascading WMC9999 XAML-compiler crash.",
+      "evidence": "migration-score.json winui_build_errors: [\"Settings.xaml.cs(15,7): CS0246 'SDKTemplate' not found\", \"WMC9999 Xaml internal error\"]; produced app has 0 'namespace SDKTemplate' and 1 leftover 'using SDKTemplate;'; session-log turns 33-39 show the agent renaming SDKTemplate->BackgroundMediaPlayback then timing out.",
+      "skill_search": "grep -r 'SDKTemplate' in skills/winui-uwp-migration (SKILL.md, MIGRATION-PATTERNS.md, scripts) → 0 matches; grep 'root namespace' / 'RootNamespace' reconciliation → none.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 rewrites only Windows.UI.Xaml->Microsoft.UI.Xaml and never touches the root namespace. The skill nowhere explains that Windows Universal Samples put the entire app in 'namespace SDKTemplate' (App, MainPage, scenarios, shared MainPage.Current/NotifyUser/NotifyType/Scenario helpers) and that this must be renamed completely-or-not-at-all. The agent renamed most files and missed one, breaking the whole build.",
+      "proposed_fix": "Add a 'CS0246 SDKTemplate / partial root-namespace rename' pattern to MIGRATION-PATTERNS.md (with a one-sweep rename + verify recipe and the WMC9999 cascade note), reference it from SKILL.md Step 1 as a mandatory root-namespace reconciliation, and add a deterministic orphaned-SDKTemplate residue check to Validate-UwpMigration.ps1 (flag any SDKTemplate reference when no file declares 'namespace SDKTemplate').",
+      "generalizes": "88 of 94 samples in the migration corpus use 'namespace SDKTemplate' as their root namespace; every one of these migrations faces the same scaffold-vs-sample namespace mismatch, so a partial-rename CS0246/WMC9999 is a recurring, high-impact (build-breaking) failure class, not a one-off."
+    }
+  ]
+}

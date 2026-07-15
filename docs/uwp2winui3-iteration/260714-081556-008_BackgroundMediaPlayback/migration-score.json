@@ -1,0 +1,37 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 2,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 2,
+  "uwp_capture_status": "ok: uwp-app-runner returned ok:true (pid 27524, window 'Background Media Playback C# Sample'), golden screenshots saved; however the original UWP app stayed on the extended splash screen ('Windows platform sample') and its scenario content never rendered in the UIA tree, so no UWP controls could be actuated (all uwp_responded=false).",
+  "winui_build_status": "failed",
+  "winui_build_errors": [
+    "Settings.xaml.cs(15,7): CS0246 'SDKTemplate' not found",
+    "WMC9999 Xaml internal error: Object reference not set to an instance of an object"
+  ],
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Background Media Playback",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Background_Media_Playback.png",
+      "winui_screenshot": null,
+      "note": "Migrated app does not build (CS0246 SDKTemplate, WMC9999), so no output launched and no controls (mediaPlayerElement, prevButton, playButton, nextButton, speedButton) could be captured. UWP golden showed only the extended splash, so no UWP baseline behavior was available either. Non-functional migration."
+    },
+    {
+      "name": "Settings",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Settings.png",
+      "winui_screenshot": null,
+      "note": "Migrated app does not build; Settings page unreachable/uncaptured. UWP golden remained on splash."
+    }
+  ]
+}

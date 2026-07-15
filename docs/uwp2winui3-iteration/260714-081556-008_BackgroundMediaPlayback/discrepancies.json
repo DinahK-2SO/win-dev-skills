@@ -1,0 +1,16 @@
+{
+  "scenario": "BackgroundMediaPlayback",
+  "index": 0,
+  "score": 0,
+  "builds": false,
+  "runs": false,
+  "requirements": [
+    { "id": 0, "text": "Background Media Playback scenario (mediaPlayerElement, prevButton, playButton, nextButton, speedButton)", "status": "fail", "reason": "Migrated app does not build (CS0246 SDKTemplate, WMC9999); no output launched, no controls captured.", "suspected_skill_gap": "Skill does not document the SDKTemplate root-namespace convention nor mandate a complete, verified reconciliation; a single orphaned 'using SDKTemplate;' fails the whole build." },
+    { "id": 1, "text": "Settings scenario (ToastOnAppEvents, UseCustomControls)", "status": "fail", "reason": "Build failed; Settings page unreachable/uncaptured.", "suspected_skill_gap": "Same root cause — the orphaned SDKTemplate reference is IN Settings.xaml.cs; whole-project build failure." }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [
+    "Entire app non-functional: build failure means no scenario rendered."
+  ],
+  "summary": "Non-functional migration. The agent partially renamed the sample's SDKTemplate root namespace and timed out before validating, leaving one 'using SDKTemplate;' in Settings.xaml.cs -> CS0246 -> cascading WMC9999 -> whole build fails -> score 0. Root cause is a single, generalizable skill gap (SDKTemplate namespace reconciliation) affecting 88/94 corpus samples."
+}
