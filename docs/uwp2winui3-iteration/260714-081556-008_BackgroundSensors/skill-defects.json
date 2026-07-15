@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundSensors",
+  "index": 25,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrating a UWP app that keeps an in-process WinRT background task (a windows.backgroundTasks Extension whose EntryPoint is an IBackgroundTask class, e.g. DeviceUseTrigger) produces a manifest that builds cleanly but fails AppX registration at launch with 0x80080204: the EntryPoint has no matching ActivatableClassId under windows.activatableClass.inProcessServer.",
+      "evidence": "session-log.txt TURN 47: Test-AppLaunch reported '0x80080204 ... not allowed to have EntryPoint=\"BackgroundTask.Scenario1_BackgroundTask\" without ActivatableClassId in windows.activatableClass.inProcessServer'; TURN 48 the agent added the inProcessServer Extension to fix it.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md and SKILL.md and Validate-UwpMigration.ps1 for 'activatableClass', 'inProcessServer', 'backgroundTasks', 'IBackgroundTask', '0x80080204'",
+      "skill_state": "absent",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md > Background Tasks: 'IBackgroundTask / BackgroundTaskRegistration are not the recommended model. Use the WinAppSDK BackgroundTaskBuilder ... or move the work to push-driven activation / Windows Task Scheduler.' (only covers replacing the task; nothing about retaining an in-process task nor the required inProcessServer manifest registration)",
+      "root_cause": "In UWP the platform implicitly registered the in-process background-task class; a packaged WinUI 3 desktop app must explicitly register it as an in-process COM server via a windows.activatableClass.inProcessServer Extension. Neither the Background Tasks pattern, the Manifest migration checklist, nor Validate-UwpMigration.ps1 mention this requirement, and a clean dotnet build does not surface it.",
+      "proposed_fix": "(1) Add item 5 to MIGRATION-PATTERNS.md 'Manifest migration checklist' documenting the windows.activatableClass.inProcessServer requirement (with ActivatableClassId == the backgroundTasks EntryPoint) and the 0x80080204 symptom. (2) Expand the Background Tasks anchor to note that trigger types still bound to the in-process WinRT model (DeviceUseTrigger, DeviceServicingTrigger, etc.) should keep IBackgroundTask and cross-link the checklist. (3) Add a static check to Validate-UwpMigration.ps1 that FAILs when a non-audio windows.backgroundTasks EntryPoint lacks a matching ActivatableClassId.",
+      "generalizes": "Any UWP app with an in-process background task (deviceUse, timer, systemTrigger, maintenance, servicing) migrated to a packaged WinUI 3 desktop app hits the same 0x80080204 registration failure. It is silent at build time and only appears on launch, so it recurs across scenarios and is easy to ship broken."
+    }
+  ]
+}

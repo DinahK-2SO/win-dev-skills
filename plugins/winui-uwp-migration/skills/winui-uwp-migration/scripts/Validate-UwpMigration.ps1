@@ -369,6 +369,40 @@ if (Test-Path -LiteralPath $manifestPath) {
     } else {
         $failures += $manifestFailures
     }
+
+    # ─── 5c. In-process background task activation registration ────────────────
+    # If the app keeps an in-process WinRT IBackgroundTask (a windows.backgroundTasks
+    # Extension whose EntryPoint is the task class — e.g. a DeviceUseTrigger sensor
+    # task), a packaged WinUI 3 desktop app must ALSO register that class as an
+    # in-process COM server via windows.activatableClass.inProcessServer with a
+    # matching ActivatableClassId. UWP registered it implicitly; WinUI 3 does not.
+    # A clean `dotnet build` does NOT catch this — `winapp run` fails registration at
+    # launch with 0x80080204 "not allowed to have EntryPoint=... without
+    # ActivatableClassId in windows.activatableClass.inProcessServer". Real-world
+    # impact: run25 BackgroundSensors built cleanly but failed launch until the
+    # inProcessServer Extension was added.
+    $btFailures = 0
+    $btExtensions = [regex]::Matches($manifestText, '(?is)<Extension\b[^>]*\bCategory="windows\.backgroundTasks"[^>]*>.*?</Extension>')
+    foreach ($bt in $btExtensions) {
+        $btText = $bt.Value
+        # Audio background tasks are exempt from the inProcessServer requirement.
+        if ($btText -match '(?is)<Task\b[^>]*\bType="audio"') { continue }
+        $epMatch = [regex]::Match($btText, '(?i)\bEntryPoint="([^"]+)"')
+        if (-not $epMatch.Success) { continue }
+        $entryPoint = $epMatch.Groups[1].Value
+        $registered = $manifestText -match ('(?is)<Extension\b[^>]*\bCategory="windows\.activatableClass\.inProcessServer".*?ActivatableClassId="' + [regex]::Escape($entryPoint) + '"')
+        if (-not $registered) {
+            Write-Host "[FAIL] Package.appxmanifest declares a windows.backgroundTasks EntryPoint=`"$entryPoint`" with no matching windows.activatableClass.inProcessServer registration"
+            Write-Host "       `winapp run` will fail registration at launch: 0x80080204 'not allowed to have EntryPoint=... without ActivatableClassId in windows.activatableClass.inProcessServer'."
+            Write-Host "       Fix: add an <Extension Category=`"windows.activatableClass.inProcessServer`"> with <InProcessServer><Path>YourApp.dll</Path><ActivatableClass ActivatableClassId=`"$entryPoint`" ThreadingModel=`"both`" /></InProcessServer>."
+            Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist' item 5 and 'Background Tasks'."
+            $btFailures++
+        }
+    }
+    if ($btExtensions.Count -gt 0 -and $btFailures -eq 0) {
+        Write-Host "[PASS] Package.appxmanifest — in-process background task(s) registered under windows.activatableClass.inProcessServer"
+    }
+    if ($btFailures -gt 0) { $failures += $btFailures }
 } else {
     Write-Host "[WARN] Package.appxmanifest not found at $manifestPath — skipping image-reference check"
 }

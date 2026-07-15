@@ -1,0 +1,87 @@
+{
+  "scenario": "BackgroundSensors",
+  "created_at": "2026-07-15T03:13:00Z",
+  "uwp_capture_status": "ok: UWP app built (Release) and launched via uwp-app-runner (pid 13992, windowTitle 'Background Sensors C# Sample'); captured. The UWP CoreWindow presented only the extended splash to UI Automation, so its content controls were not exposed and Enable/Disable actuation did not register. This scenario is hardware-gated (no accelerometer on this machine), so the buttons produce no output in either app regardless.",
+  "features": [
+    {
+      "id": "scenario1-nav",
+      "area": "Navigation",
+      "name": "Scenario list: 'Accelerometer DeviceUse'",
+      "description": "The single sample scenario is reachable from the navigation list with its verbatim title.",
+      "expected_behaviour": [
+        "A navigation entry labeled '1) Accelerometer DeviceUse' is present and selected",
+        "Selecting it shows the DeviceUse scenario page"
+      ],
+      "screenshot": "parity/winui3/screenshots/01_Accelerometer_DeviceUse.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario1-description",
+      "area": "Scenario 1",
+      "name": "Description text",
+      "description": "Explains the DeviceUse trigger background task listening for accelerometer data.",
+      "expected_behaviour": [
+        "Description reads 'Launches a DeviceUse trigger background task to listen for accelerometer data. Displays the number of data samples received by the background task.'"
+      ],
+      "screenshot": "parity/winui3/screenshots/01_Accelerometer_DeviceUse.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario1-enable-button",
+      "area": "Scenario 1",
+      "name": "Enable button",
+      "description": "Registers/starts the DeviceUse background task (ScenarioEnableButton).",
+      "expected_behaviour": [
+        "An 'Enable' button is present",
+        "With no accelerometer present it is inert/disabled and status reports 'No accelerometer found' (hardware-gated, matches UWP)"
+      ],
+      "screenshot": "parity/winui3/screenshots/01_Accelerometer_DeviceUse.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario1-disable-button",
+      "area": "Scenario 1",
+      "name": "Disable button",
+      "description": "Cancels/unregisters the DeviceUse background task (ScenarioDisableButton).",
+      "expected_behaviour": [
+        "A 'Disable' button is present",
+        "Inert/disabled when no task is active (hardware-gated, matches UWP)"
+      ],
+      "screenshot": "parity/winui3/screenshots/01_Accelerometer_DeviceUse.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario1-sample-count",
+      "area": "Scenario 1",
+      "name": "Sample count output",
+      "description": "Displays the number of accelerometer samples received (ScenarioOutput_SampleCount).",
+      "expected_behaviour": [
+        "A 'Sample count:' label with a value ('No data' when no task has run)"
+      ],
+      "screenshot": "parity/winui3/screenshots/01_Accelerometer_DeviceUse.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario1-status",
+      "area": "Scenario 1",
+      "name": "Status block",
+      "description": "Shared status message area (StatusBorder/StatusBlock).",
+      "expected_behaviour": [
+        "A Status area shows messages; with no accelerometer it shows 'No accelerometer found'"
+      ],
+      "screenshot": "parity/winui3/screenshots/01_Accelerometer_DeviceUse.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario1-fallback",
+      "area": "Scenario 1",
+      "name": "Defensive hardware-gated fallback",
+      "description": "Visible fallback message when the required accelerometer is missing, so the page never renders blank.",
+      "expected_behaviour": [
+        "Shows 'This sample requires an accelerometer that is not available on this machine.'"
+      ],
+      "screenshot": "parity/winui3/screenshots/01_Accelerometer_DeviceUse.png",
+      "weight": 1
+    }
+  ]
+}

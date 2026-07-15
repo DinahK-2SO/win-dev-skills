@@ -337,6 +337,8 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 
 `IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK [`BackgroundTaskBuilder`](https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.windows.applicationmodel.background.backgroundtaskbuilder) (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler. See the [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy).
 
+**But some trigger types are still bound to the in-process WinRT model** — notably `DeviceUseTrigger` and `DeviceServicingTrigger`, which have no `BackgroundTaskBuilder` equivalent. For those, **keep the existing `IBackgroundTask` class and its `windows.backgroundTasks` manifest Extension**. When you keep an in-process task in a **packaged** WinUI 3 desktop app you must ALSO register the task class as an in-process COM server, or the app builds cleanly but fails AppX registration at launch with `0x80080204: ... not allowed to have EntryPoint="…" without ActivatableClassId in windows.activatableClass.inProcessServer`. See item 5 of the [Manifest migration checklist](#manifest-migration-checklist-windowsdesktop--runfulltrust) below.
+
 <a id="notifications"></a>
 ## Notifications
 
@@ -503,6 +505,19 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
    Packaged WinUI 3 desktop apps run outside the UWP AppContainer sandbox and must declare this. Keep any UWP `<Capability>` entries you actually use (e.g. `<DeviceCapability Name="webcam" />`) but add the `runFullTrust` line above no matter what.
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
+
+5. **In-process background task class registered under `windows.activatableClass.inProcessServer`** — ONLY if the app keeps an in-process WinRT `IBackgroundTask` (a `windows.backgroundTasks` Extension whose `EntryPoint` is your task class, e.g. for a `DeviceUseTrigger`). UWP registered that class implicitly; a packaged WinUI 3 desktop app must register it as an in-process COM server or `winapp run` fails registration with `0x80080204: ... not allowed to have EntryPoint="…" without ActivatableClassId in windows.activatableClass.inProcessServer` (a **clean `dotnet build` does not catch this** — it only appears at launch). Add, next to `<Capabilities>`:
+   ```xml
+   <Extensions>
+     <Extension Category="windows.activatableClass.inProcessServer">
+       <InProcessServer>
+         <Path>YourAppName.dll</Path>
+         <ActivatableClass ActivatableClassId="BackgroundTaskNamespace.YourTaskClass" ThreadingModel="both" />
+       </InProcessServer>
+     </Extension>
+   </Extensions>
+   ```
+   `ActivatableClassId` must match the `EntryPoint` of the `windows.backgroundTasks` Extension exactly, and `<Path>` is the assembly (`.dll`) that contains the task class. Audio background tasks (`<Task Type="audio" />`) are exempt.
 
 ### WUI analyzer warnings (UWP API residue)
 

@@ -1,0 +1,14 @@
+{
+  "scenario": "BackgroundSensors",
+  "index": 25,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: add check 5c flagging any non-audio windows.backgroundTasks EntryPoint with no matching windows.activatableClass.inProcessServer ActivatableClassId, so the 0x80080204 launch failure is caught statically before launch",
+    "MIGRATION-PATTERNS.md: document retaining in-process WinRT background tasks (DeviceUseTrigger etc.) and add Manifest-checklist item 5 for the required windows.activatableClass.inProcessServer registration"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

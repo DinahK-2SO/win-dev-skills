@@ -1,0 +1,23 @@
+{
+  "scenario": "BackgroundSensors",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 1,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok: uwp-app-runner launched the original app (pid 13992, windowTitle 'Background Sensors C# Sample'); captured. The UWP CoreWindow exposed only its extended splash to UI Automation, so the golden content frame is the splash and Enable/Disable actuation did not register. Scenario is hardware-gated (no accelerometer), so buttons produce no output in either app.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Accelerometer DeviceUse",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Accelerometer_DeviceUse.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Accelerometer_DeviceUse.png",
+      "note": "Full control coverage (2/2). WinUI renders a complete, non-blank frame: scenario list, description, Enable/Disable buttons, 'Sample count: No data', 'No accelerometer found' status, and a defensive fallback message. Enable/Disable are non-responsive in both apps because the machine has no accelerometer (hardware-gated) — the UWP golden also recorded 0/2 responding actions, so there is no dead-control regression. Scenario matches the UWP source behavior."
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "scenario": "BackgroundSensors",
+  "index": 25,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Accelerometer DeviceUse scenario (nav, description, Enable/Disable, sample count, status, fallback)", "status": "pass", "reason": "WinUI renders a complete, non-blank frame with full 2/2 control coverage and a defensive hardware-gated fallback; matches UWP source behaviour.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No functional or structural parity discrepancies (score 100). The only reusable finding is a process defect the agent self-recovered from: retaining an in-process WinRT background task (DeviceUseTrigger) required adding a windows.activatableClass.inProcessServer manifest registration, which a clean build did not surface and no static check flagged."
+}
