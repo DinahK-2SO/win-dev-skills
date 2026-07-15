@@ -1,0 +1,15 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 27,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: FAIL when retained classic BackgroundTaskBuilder code (Windows.ApplicationModel.Background + TaskEntryPoint + .Register()) has no <Extension Category=\"windows.backgroundTasks\"> in the build manifest — catches the silent dead-Register regression before scoring (verified it flags this trial).",
+    "MIGRATION-PATTERNS.md 'Background Tasks': documented that retaining the classic model requires a windows.backgroundTasks manifest <Extension> per TaskEntryPoint plus try/catch around Register(), else the button is a silent dead control (builds + launches fine).",
+    "MIGRATION-PATTERNS.md manifest checklist: added an explicit 'carry over every UWP <Extension>' step (backgroundTasks/protocol/fileTypeAssociation/appService/shareTarget) — these are runtime activation prerequisites that were only a buried parenthetical before."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

@@ -1,0 +1,14 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 27,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The UWP source manifest was copied into a nested folder (BackgroundTask/BackgroundTask/Package.appxmanifest) rather than the WinUI 3 project root, creating two manifests and confusion about which one the build uses.",
+      "evidence": "Two Package.appxmanifest files exist in the migrated tree; only app/BackgroundTask/Package.appxmanifest is the build manifest. This is a byproduct of the source-copy step, not the actual defect (the defect is that the <Extensions> were never merged into the build manifest, which is addressed as a skill-defect + coverage-gap).",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'Manifest migration checklist' establishes that the scaffold's root Package.appxmanifest is the build manifest to edit; the nested copy is reference material.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The nested-copy artifact itself is harmless and scenario-specific; the substantive, general failure (extensions not merged into the build manifest) is already captured as a skill-defect + coverage-gap, so no separate slip-oriented skill edit is warranted."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 27,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log.txt lines ~206-210: copied the UWP source (.xaml/.cs/.resw/.appxmanifest/assets) into the target and preserved the UWP .csproj under .uwp-source/, giving the agent a clean starting tree." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1", "problem": "Its manifest checks only cover image-reference resolution + Windows.Desktop/rescap/runFullTrust packaging shape. It does NOT verify that UWP <Extension> declarations the migrated code still depends on (windows.backgroundTasks in particular) were carried into the build Package.appxmanifest, so it passed a manifest that silently breaks Register() at runtime.", "evidence": "Validate-UwpMigration.ps1 section 5/5b (lines 277-374) has no <Extension>/backgroundTasks check; the migrated app scored 50 (6x partial) purely from a missing manifest extension." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "No cross-check between retained UWP background-task code (Windows.ApplicationModel.Background.BackgroundTaskBuilder + string TaskEntryPoint + Register()) and the presence of a matching <Extension Category=\"windows.backgroundTasks\"> in the build manifest.", "suggested_tweak": "Add a check: if target *.cs uses the classic BackgroundTaskBuilder/TaskEntryPoint model, FAIL when Package.appxmanifest has no windows.backgroundTasks extension." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.ApplicationModel.Background.BackgroundTaskBuilder.Register()", "why_tried": "Sample keeps the classic out-of-process background-task model; RegisterBackgroundTask handler calls builder.Register().", "root_cause": "The build Package.appxmanifest (app/BackgroundTask/Package.appxmanifest) declares no <Extension Category=\"windows.backgroundTasks\" EntryPoint=\"Tasks.SampleBackgroundTask\">, so Register() throws at runtime (the out-of-process task entry point is not declared).", "fix": "Merge the UWP manifest's <Extensions>/<Extension Category=\"windows.backgroundTasks\"> declaration(s) into the WinUI 3 build Package.appxmanifest for every retained TaskEntryPoint." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "IBackgroundTask / BackgroundTaskBuilder (classic, out-of-process)", "special_handling": "When the classic model is retained (not ported to WinAppSDK BackgroundTaskBuilder), the app is packaged and the <Extension Category=\"windows.backgroundTasks\"> declaration is a runtime prerequisite of Register(); it must be present in the build manifest with the same EntryPoint string used in code." }
+  ],
+  "errors_encountered": [
+    { "error": "Register button dead in all 6 scenarios: Status stays 'Unregistered', Unregister stays disabled, no exception surfaced.", "root_cause": "builder.Register() throws because the build manifest lacks the windows.backgroundTasks extension; the click handler has no try/catch, so the exception is swallowed and UpdateUI() is never reached with registered=true.", "fix": "(1) Add the windows.backgroundTasks <Extension> to the build manifest; (2) wrap Register() in try/catch and surface the failure in the UI Status text so a missing-declaration failure is never silent." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Package.appxmanifest reconciliation", "symptom": "Agent copied the UWP source manifest into a nested folder (BackgroundTask/BackgroundTask/Package.appxmanifest, which DID contain the two windows.backgroundTasks extensions) but never merged those <Extension> elements into the actual WinUI 3 build manifest (app/BackgroundTask/Package.appxmanifest).", "turns_or_retries": "n/a — one-pass omission, never revisited", "root_cause": "The skill's manifest guidance emphasizes image references + Windows.Desktop/rescap/runFullTrust packaging shape; carrying over UWP <Extensions> is only a buried parenthetical, and background tasks specifically are not called out as needing a manifest declaration.", "how_resolved": "Not resolved — shipped broken; scored 50.", "preventable_by": "A Validate-UwpMigration.ps1 check that FAILs when retained background-task code has no matching manifest extension, plus an explicit 'carry over <Extensions>' step in the manifest checklist and the Background Tasks pattern." }
+  ],
+  "missing_tooling": [
+    { "need": "Automated detection of UWP manifest <Extension> declarations that the migrated code still depends on but that are missing from the build manifest.", "would_have_saved": "All 6 scenarios (the entire behavioral score) — a single FAIL would have flagged the dead Register control before scoring." }
+  ],
+  "env_issues": []
+}

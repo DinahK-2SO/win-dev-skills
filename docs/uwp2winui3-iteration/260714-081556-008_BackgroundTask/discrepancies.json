@@ -1,0 +1,22 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 27,
+  "score": 50,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Background Task scenario: register/unregister a system-triggered background task", "status": "partial", "reason": "Renders; Register is dead (Status stays 'Unregistered', Unregister disabled).", "suspected_skill_gap": "Missing windows.backgroundTasks <Extension> in build manifest; skill never tells the agent to carry it over." },
+    { "id": 2, "text": "Background Task with Condition", "status": "partial", "reason": "Register dead, same manifest root cause.", "suspected_skill_gap": "Same." },
+    { "id": 3, "text": "Servicing Complete Task", "status": "partial", "reason": "Register dead, same manifest root cause.", "suspected_skill_gap": "Same." },
+    { "id": 4, "text": "Background Task with Time Trigger", "status": "partial", "reason": "Register dead, same manifest root cause.", "suspected_skill_gap": "Same." },
+    { "id": 5, "text": "Background Task with Application Trigger (+ Signal)", "status": "partial", "reason": "Register dead; Signal never reachable.", "suspected_skill_gap": "Same." },
+    { "id": 6, "text": "Grouped Background Task", "status": "partial", "reason": "Register dead, same manifest root cause.", "suspected_skill_gap": "Same." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Register action", "uwp": "Registering a task flips Status to 'Registered' and enables Unregister.", "winui": "Status stays 'Unregistered', Unregister stays disabled after click.", "screenshot_ref": "../001_score-BackgroundTask/notes/winui-s1-afterreg.png" }
+  ],
+  "missing_features": [
+    "windows.backgroundTasks manifest extension for every retained TaskEntryPoint"
+  ],
+  "summary": "Structurally faithful, behaviorally broken: the single missing windows.backgroundTasks manifest extension makes BackgroundTaskBuilder.Register() throw in all 6 scenarios, capping each at partial (score 50)."
+}

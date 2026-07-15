@@ -1,0 +1,51 @@
+{
+  "scenario": "BackgroundTask",
+  "featureName": "Background tasks",
+  "source": "uwp-samples-standalone/Samples/BackgroundTask/cs",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Background Task",
+      "controls": ["RegisterButton", "UnregisterButton", "Status", "Progress"],
+      "primaryAction": "Register registers a SystemTrigger(TimeZoneChange) background task; Status -> 'Registered', Unregister becomes enabled.",
+      "outputs": ["Status", "Progress"]
+    },
+    {
+      "number": 2,
+      "title": "Background Task with Condition",
+      "controls": ["RegisterButton", "UnregisterButton", "Status", "Progress"],
+      "primaryAction": "Register registers a background task with an InternetAvailable condition; Status -> 'Registered'.",
+      "outputs": ["Status", "Progress"]
+    },
+    {
+      "number": 3,
+      "title": "Servicing Complete Task",
+      "controls": ["RegisterButton", "UnregisterButton", "Status", "Progress"],
+      "primaryAction": "Register registers a ServicingComplete trigger task; Status -> 'Registered'.",
+      "outputs": ["Status", "Progress"]
+    },
+    {
+      "number": 4,
+      "title": "Background Task with Time Trigger",
+      "controls": ["RegisterButton", "UnregisterButton", "Status", "Progress"],
+      "primaryAction": "Register requests background access then registers a 15-min TimeTrigger; Status -> 'Registered'.",
+      "outputs": ["Status", "Progress"]
+    },
+    {
+      "number": 5,
+      "title": "Background Task with Application Trigger",
+      "controls": ["RegisterButton", "UnregisterButton", "SignalButton", "Status", "Progress", "Result"],
+      "primaryAction": "Register requests access and registers an ApplicationTrigger; Signal fires the trigger; Status/Result update.",
+      "outputs": ["Status", "Progress", "Result"]
+    },
+    {
+      "number": 6,
+      "title": "Grouped Background Task",
+      "controls": ["RegisterButton", "UnregisterButton", "Status", "Progress"],
+      "primaryAction": "Register registers a task inside a BackgroundTaskRegistrationGroup; Status -> 'Registered'.",
+      "outputs": ["Status", "Progress"]
+    }
+  ],
+  "gradingRule": "Each scenario: structural (controls present, non-blank, nav reachable) AND behavioral (Register produces the documented Status change). A present-but-dead Register control caps the scenario at 'partial'.",
+  "scoreFormula": "round(100 * (pass + 0.5*partial) / total)"
+}

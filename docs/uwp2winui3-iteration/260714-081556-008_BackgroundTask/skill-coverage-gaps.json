@@ -1,0 +1,15 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 27,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The migration must carry over ALL UWP manifest <Extensions> (windows.backgroundTasks, protocol, fileTypeAssociation, appService, shareTarget) into the WinUI 3 build manifest, but the skill only mentions this as a buried parenthetical, so the agent copied the UWP manifest into a nested folder and never merged its <Extensions> into the build manifest.",
+      "evidence": "MIGRATION-PATTERNS.md line ~455 mentions 'When you merge any other content from the UWP manifest into the scaffold's (capabilities, file-type associations, <uap:Extension>, <Application Id>, etc.)' — but only inside a paragraph about NOT overwriting image references; the 'Manifest migration checklist' (lines 473-505) lists TargetDeviceFamily/rescap/runFullTrust/EntryPoint but has no step for merging <Extensions>. The agent left both windows.backgroundTasks extensions in the unused nested manifest.",
+      "covered_at": "MIGRATION-PATTERNS.md 'Package.appxmanifest — reconcile image references' (~line 455 parenthetical) and 'Manifest migration checklist' (~lines 473-505)",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add an explicit numbered step to the 'Manifest migration checklist' — 'Carry over every <Extension>/<Extensions> the UWP manifest declares (windows.backgroundTasks, windows.protocol, windows.fileTypeAssociation, windows.appService, windows.shareTarget, ...): these are activation/registration prerequisites, and omitting them makes the corresponding feature throw at runtime (often surfacing as a dead control), not a build error.'",
+      "generalizes": "Any UWP app whose behavior depends on a manifest <Extension> (protocol handlers, file associations, app services, share targets, background tasks) will silently lose that feature on migration unless the checklist forces the merge; this is a recurring, cross-scenario omission."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 27,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Retaining the classic out-of-process background-task model (Windows.ApplicationModel.Background.BackgroundTaskBuilder with a string TaskEntryPoint + builder.Register()) makes Register() throw at runtime because the build Package.appxmanifest has no <Extension Category=\"windows.backgroundTasks\">. The dead Register control capped all 6 scenarios at partial (score 50).",
+      "evidence": "score notes discrepancies.json D1 (rootCause: no windows.backgroundTasks declaration in deployed manifest); migrated app/BackgroundTask/Package.appxmanifest has no <Extensions>; SampleConfiguration.cs line ~113 calls builder.Register(); the UWP source manifest with the extension sits unused in the nested BackgroundTask/BackgroundTask/Package.appxmanifest.",
+      "skill_search": "grepped winui-uwp-migration for 'backgroundTask|windows.backgroundTasks|BackgroundTaskBuilder|<Extension|Extensions'",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md 'Background Tasks' section: '`IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK BackgroundTaskBuilder ... or move the work to push-driven activation / Windows Task Scheduler.' — it never states that if the classic model is retained (which is what agents actually do to preserve behavior), the windows.backgroundTasks <Extension> is a runtime prerequisite that must be carried into the build manifest.",
+      "root_cause": "The skill treats background tasks purely as an API-porting topic and omits the manifest-declaration requirement; its manifest checklist and Validate-UwpMigration.ps1 verify image refs + Windows.Desktop/rescap/runFullTrust packaging but never that retained-code extensions were carried over.",
+      "proposed_fix": "(1) In MIGRATION-PATTERNS.md 'Background Tasks', add: if you keep the classic BackgroundTaskBuilder/TaskEntryPoint model, the app must be packaged AND the build Package.appxmanifest must declare a <Extension Category=\"windows.backgroundTasks\" EntryPoint=\"...\"> for every TaskEntryPoint, else Register() throws and (without try/catch) the button looks dead. (2) Add a Validate-UwpMigration.ps1 check that FAILs when target *.cs uses the classic model but the build manifest has no windows.backgroundTasks extension.",
+      "generalizes": "Every UWP app that uses classic background tasks (a large, common category of samples/apps) hits this exact runtime failure on migration; the manifest extension is always required, and the symptom (silent dead control) is always the same."
+    }
+  ]
+}

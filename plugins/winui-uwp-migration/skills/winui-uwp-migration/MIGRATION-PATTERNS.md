@@ -337,6 +337,25 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 
 `IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK [`BackgroundTaskBuilder`](https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.windows.applicationmodel.background.backgroundtaskbuilder) (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler. See the [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy).
 
+**If you keep the classic out-of-process model** (`Windows.ApplicationModel.Background.BackgroundTaskBuilder` with a string `TaskEntryPoint` such as `"Tasks.SampleBackgroundTask"` + `builder.Register()`) — which is the low-risk way to preserve existing behavior — then two things are **runtime prerequisites**, not optional:
+
+1. The app must be **packaged** (keep `Package.appxmanifest`), and the **build** manifest must declare an `<Extension Category="windows.backgroundTasks" EntryPoint="<Namespace>.<TaskClass>">` for **every** `TaskEntryPoint` string used in code. This declaration lives in the UWP source manifest — carry it into the WinUI 3 project's root `Package.appxmanifest` (see the manifest checklist below). If it is missing, `builder.Register()` **throws at runtime** (`0x80070032`/class-not-registered) even though the app builds and launches fine.
+
+   ```xml
+   <Application ...>
+     <Extensions>
+       <Extension Category="windows.backgroundTasks" EntryPoint="Tasks.SampleBackgroundTask">
+         <BackgroundTasks>
+           <Task Type="systemEvent" />
+           <Task Type="timer" />
+         </BackgroundTasks>
+       </Extension>
+     </Extensions>
+   </Application>
+   ```
+
+2. Wrap `Register()` in `try/catch` and surface the failure in the UI (e.g. the Status text). The SDK samples call `Register()` with no guard, so a missing-declaration failure otherwise presents as a **silent dead control** (the button click does nothing, Status never changes) — the hardest kind of regression to notice because there is no build error and no crash.
+
 <a id="notifications"></a>
 ## Notifications
 
@@ -503,6 +522,18 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
    Packaged WinUI 3 desktop apps run outside the UWP AppContainer sandbox and must declare this. Keep any UWP `<Capability>` entries you actually use (e.g. `<DeviceCapability Name="webcam" />`) but add the `runFullTrust` line above no matter what.
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
+
+5. **Carry over every UWP `<Extension>` the app's behavior depends on.** The scaffold manifest has none; the UWP manifest's `<Extensions>` are activation/registration prerequisites — omitting them makes the feature fail **at runtime** (often as a silently dead control), not at build time. Copy each `<Extension>` block from the UWP source manifest (under `.uwp-source/` or the copied UWP `Package.appxmanifest`) into the WinUI 3 root manifest's `<Application>`. Common ones:
+
+   | Extension `Category` | Feature it powers |
+   |----------------------|-------------------|
+   | `windows.backgroundTasks` | out-of-process `BackgroundTaskBuilder` tasks (one `<Extension EntryPoint="...">` per `TaskEntryPoint`) |
+   | `windows.protocol` | custom URI-scheme activation |
+   | `windows.fileTypeAssociation` | open-with / file activation |
+   | `windows.appService` | background app services |
+   | `windows.shareTarget` | receiving shared content |
+
+   `Validate-UwpMigration.ps1` FAILs if retained `BackgroundTaskBuilder` code has no `windows.backgroundTasks` extension; the other categories have no automated check, so verify them by diffing the UWP manifest's `<Extensions>` against the migrated one.
 
 ### WUI analyzer warnings (UWP API residue)
 

@@ -1,0 +1,38 @@
+{
+  "scenario": "BackgroundTask",
+  "index": 27,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Retained classic BackgroundTaskBuilder code + missing <Extension Category=\"windows.backgroundTasks\"> in the build manifest → Register() throws, dead control, 6x partial (score 50).",
+      "evidence": "score notes discrepancies.json D1; app/BackgroundTask/Package.appxmanifest has no <Extensions>; SampleConfiguration.cs calls builder.Register().",
+      "root_cause": "Skill treats background tasks as API-only and never states the manifest extension is a runtime prerequisite; no validator check enforces it.",
+      "tier": 1,
+      "change": "Added section 5c to Validate-UwpMigration.ps1: if migrated *.cs uses the classic model (Windows.ApplicationModel.Background + TaskEntryPoint/new BackgroundTaskBuilder + .Register()) and the build Package.appxmanifest has no windows.backgroundTasks <Extension>, emit [FAIL] with a fix hint. Un-ignorable — blocks 'done' until fixed.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "On re-run the validator FAILs until the extension is added; agent adds it; Register() succeeds; scenarios go partial->pass.",
+      "falsifiable_check": "Running Validate-UwpMigration.ps1 on the current (broken) app prints '[FAIL] ... no <Extension Category=\"windows.backgroundTasks\">' (verified via detection snippet: bgFiles=1, manifest match=False => FAIL=True). After adding the extension it prints [PASS]."
+    },
+    {
+      "problem": "Skill never documents that retaining the classic background-task model requires the windows.backgroundTasks manifest extension + try/catch around Register().",
+      "evidence": "MIGRATION-PATTERNS.md 'Background Tasks' only said 'use WinAppSDK BackgroundTaskBuilder or Task Scheduler'.",
+      "root_cause": "Documentation gap (skill-defect).",
+      "tier": 3,
+      "change": "Expanded the 'Background Tasks' pattern: added the two runtime prerequisites (manifest <Extension> per TaskEntryPoint with an XML example; try/catch to avoid a silent dead control).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent that reads the pattern carries the extension over and guards Register().",
+      "falsifiable_check": "Grep MIGRATION-PATTERNS.md 'Background Tasks' contains 'windows.backgroundTasks' and 'try/catch'."
+    },
+    {
+      "problem": "The general rule 'carry over ALL UWP <Extensions>' was a buried parenthetical; the checklist had no explicit step, so extensions (backgroundTasks/protocol/fileTypeAssociation/appService/shareTarget) get dropped.",
+      "evidence": "MIGRATION-PATTERNS.md manifest checklist (lines ~473-505) listed only TargetDeviceFamily/rescap/runFullTrust/EntryPoint.",
+      "root_cause": "Under-emphasized coverage gap.",
+      "tier": 3,
+      "change": "Added checklist item 5 'Carry over every UWP <Extension>' with a category->feature table and a note that omission fails at runtime (dead control), not build.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents merge manifest extensions for protocol/file/appService/shareTarget/backgroundTasks apps generally.",
+      "falsifiable_check": "Grep the manifest checklist contains a 'windows.protocol'/'windows.fileTypeAssociation' extension table row."
+    }
+  ],
+  "deferred_to_human": []
+}

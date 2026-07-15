@@ -18,7 +18,7 @@ Checks (numbering matches the `# ─── N.` sections in the code):
 2. TODO[migrate-NNN] residue — every injected marker must be resolved
 3. MIGRATION-MAPPING.md integrity — .bootstrap-meta.json present, row count, labels filled, no row stuck at Status=copied
 4. MIGRATION-DEFERRED.md consistency — every defer row in mapping has a row here, and vice versa
-5. Package.appxmanifest image refs + WinAppSDK packaging (TargetDeviceFamily=Windows.Desktop, rescap, runFullTrust)
+5. Package.appxmanifest image refs + WinAppSDK packaging (TargetDeviceFamily=Windows.Desktop, rescap, runFullTrust) + retained manifest <Extension>s (e.g. windows.backgroundTasks) required by kept code
 6. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
 7. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
 
@@ -368,6 +368,34 @@ if (Test-Path -LiteralPath $manifestPath) {
         Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared"
     } else {
         $failures += $manifestFailures
+    }
+
+    # ─── 5c. Retained manifest <Extension>s must be carried into the build manifest ──
+    # UWP manifest <Extension> declarations are activation/registration prerequisites,
+    # not branding. If the migrated code keeps the classic out-of-process background-task
+    # model (Windows.ApplicationModel.Background.BackgroundTaskBuilder + a string
+    # TaskEntryPoint + .Register()) but the build manifest has no matching
+    # <Extension Category="windows.backgroundTasks">, Register() THROWS at runtime. With
+    # no try/catch (the SDK samples have none) the exception is swallowed and the button
+    # looks dead — the app builds and launches, so nothing else catches it. This exact
+    # omission scored a BackgroundTask migration 50 (all scenarios partial, Register dead).
+    $bgFiles = @($files | Where-Object { $_.Extension -eq '.cs' } | Where-Object {
+        $t = [System.IO.File]::ReadAllText($_.FullName)
+        ($t -match 'Windows\.ApplicationModel\.Background') -and
+        ($t -match '\.TaskEntryPoint\s*=' -or $t -match 'new\s+BackgroundTaskBuilder') -and
+        ($t -match '\.Register\s*\(')
+    })
+    if ($bgFiles.Count -gt 0) {
+        if ($manifestText -match 'Category\s*=\s*"windows\.backgroundTasks"') {
+            Write-Host "[PASS] Package.appxmanifest — windows.backgroundTasks <Extension> present for retained BackgroundTaskBuilder code"
+        } else {
+            Write-Host "[FAIL] Migrated code uses the classic BackgroundTaskBuilder model but Package.appxmanifest has no <Extension Category=`"windows.backgroundTasks`">"
+            Write-Host "       Effect: BackgroundTaskBuilder.Register() throws at runtime; without try/catch the Register control silently does nothing (app still builds and launches)."
+            Write-Host "       Fix: add an <Extensions><Extension Category=`"windows.backgroundTasks`" EntryPoint=`"<Namespace>.<TaskClass>`"> entry for every TaskEntryPoint used in code (copy from the UWP source manifest under .uwp-source/ or the copied UWP Package.appxmanifest)."
+            Write-Host "       See MIGRATION-PATTERNS.md > 'Background Tasks' and 'Manifest migration checklist'."
+            Add-Diag 'windows.backgroundTasks extension missing' (($bgFiles | ForEach-Object { $_.FullName }) -join "`n")
+            $failures++
+        }
     }
 } else {
     Write-Host "[WARN] Package.appxmanifest not found at $manifestPath — skipping image-reference check"

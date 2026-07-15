@@ -1,0 +1,69 @@
+{
+  "scenario": "BackgroundTask",
+  "uwp_launchable": true,
+  "score": 50,
+  "features_total": 6,
+  "features_pass": 0,
+  "features_partial": 6,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true and the original UWP app rendered its landing frame (captured as the scenario-1 golden), but it then froze on its extended splash / became unresponsive (Responding=false across 3 relaunches; synthetic input ignored; hosted CoreWindow exposed no UIA subtree). Per-scenario navigation and a live behavioral golden could not be captured from the UWP app; behavioral expectations were taken from the deterministic sample source.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_result_note": "Compare-Parity reported 100/100, but that structural gate is blind here: the source-derived checklist extracted 0 controls (the sample's XAML file names, e.g. Scenario1_SampleBackgroundTask.xaml, do not equal the class name SampleBackgroundTask, so the extractor matched no controls) and there was no UWP behavioral golden. The authoritative score below is based on direct behavioral measurement of the migrated app.",
+  "behavioral_regressions": 6,
+  "features": [
+    {
+      "name": "Background Task",
+      "verdict": "partial",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Background_Task.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Background_Task.png",
+      "note": "Scenario renders faithfully; all controls present with AutomationIds. Register is DEAD: clicking it (confirmed on-screen click) leaves Status 'Unregistered' and Unregister disabled. Root cause: no windows.backgroundTasks declaration in deployed manifest -> Register() throws. UWP behavior not verifiable (app frozen); expected 'Registered' per source."
+    },
+    {
+      "name": "Background Task with Condition",
+      "verdict": "partial",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_Background_Task_with_Condition.png",
+      "note": "Renders faithfully; controls present. Register DEAD (confirmed on-screen click: Status unchanged, Unregister stays disabled). Same manifest root cause. No UWP golden (app frozen)."
+    },
+    {
+      "name": "Servicing Complete Task",
+      "verdict": "partial",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/03_Servicing_Complete_Task.png",
+      "note": "Renders faithfully; controls present. Register DEAD (shared code path / manifest root cause; loop showed Status stays 'Unregistered'). No UWP golden (app frozen)."
+    },
+    {
+      "name": "Background Task with Time Trigger",
+      "verdict": "partial",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/04_Background_Task_with_Time_Trigger.png",
+      "note": "Renders faithfully; controls present. Register DEAD (shared root cause). No UWP golden (app frozen)."
+    },
+    {
+      "name": "Background Task with Application Trigger",
+      "verdict": "partial",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/05_Background_Task_with_Application_Trigger.png",
+      "note": "Renders faithfully; Register/Unregister/Signal + Result all present with AutomationIds. Register DEAD (confirmed on-screen click: Status unchanged). Because Register never succeeds, Signal stays permanently disabled. No UWP golden (app frozen)."
+    },
+    {
+      "name": "Grouped Background Task",
+      "verdict": "partial",
+      "uwp_responded": null,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/06_Grouped_Background_Task.png",
+      "note": "Renders faithfully; controls present. Register DEAD (shared root cause). No UWP golden (app frozen)."
+    }
+  ]
+}
