@@ -1,0 +1,30 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 42,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Mechanical pass produced MIGRATION-MAPPING.md with every scenario/file triaged and marked done; deferredCount=0 (session-log.txt:323)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Validate-UwpMigration.ps1 (windows.backgroundTasks check)", "problem": "Its background-task check only asserts that a windows.backgroundTasks <Extension> exists. This scenario used the IN-PROCESS task model (TaskEntryPoint omitted) and the manifest DID declare the extension, so the check PASSED — yet the Run control was still dead at runtime. A green validator gave false confidence.", "evidence": "Validate-UwpMigration.ps1:388-398 passes when 'windows.backgroundTasks' present; Package.appxmanifest:31-42 declares it; migration-score.json scenarios 3&4 verdict=partial (dead Run)." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "No detection of the in-process background-task variant: BackgroundTaskBuilder with no TaskEntryPoint assignment, dispatched via App.OnBackgroundActivated. In WinUI 3 (Microsoft.UI.Xaml.Application) there is no OnBackgroundActivated, so an in-process task can never fire and registration itself typically fails with an HRESULT the UWP sample's narrow catch does not handle.", "suggested_tweak": "Extend the background-task branch: when retained BackgroundTaskBuilder code has NO TaskEntryPoint assignment (in-process model), FAIL/WARN unless an OnBackgroundActivated handler exists, and point at the in-process guidance." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.ApplicationModel.Background.BackgroundTaskBuilder (in-process: TaskEntryPoint omitted) + App.OnBackgroundActivated", "why_tried": "Faithful port of the UWP BluetoothAdvertisement Scenario 3/4 in-process background watcher/publisher.", "root_cause": "WinUI 3's Microsoft.UI.Xaml.Application has no OnBackgroundActivated override, so the in-process task activation model does not exist. BackgroundExecutionManager.RequestAccessAsync()/builder.Register() on a desktop WinUI 3 app fails with an HRESULT other than the E_DEVICE_NOT_AVAILABLE the sample catches; because RunButton_Click is async void and RequestAccessAsync is outside the try, the failure is swallowed and no status is shown.", "fix": "Convert the in-process task to the out-of-process model (assign a string TaskEntryPoint) OR at minimum broaden the catch to catch(Exception), move RequestAccessAsync inside the guard, and always NotifyUser a status so the control is never silently dead." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "In-process background tasks (BackgroundTaskBuilder without TaskEntryPoint + App.OnBackgroundActivated + windows.activatableClass.inProcessServer)", "special_handling": "Has no WinUI 3 equivalent — Microsoft.UI.Xaml.Application exposes no OnBackgroundActivated. Must be re-hosted as an out-of-process task (string TaskEntryPoint) or reworked; simply carrying the manifest inProcessServer/backgroundTasks extension is not enough." }
+  ],
+  "errors_encountered": [
+    { "error": "Scenario 3/4 Run button dead: RequestAccessAsync completes, no status text, Stop stays disabled, no task registered.", "root_cause": "In-process background task registration fails at runtime on WinUI 3 (no OnBackgroundActivated dispatch; identity/activation differs from UWP); the failure HRESULT is not E_DEVICE_NOT_AVAILABLE so the sample's narrow catch misses it and the async void handler swallows it.", "fix": "Port to out-of-process model and/or broaden the registration catch + always surface a status." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario3_BackgroundWatcher.xaml.cs / Scenario4_BackgroundPublisher.xaml.cs RunButton_Click", "symptom": "Code compiled and validator passed, but the background Run controls silently do nothing at runtime.", "turns_or_retries": "n/a — agent marked both files 'migrate-with-adaptation → done' (MIGRATION-MAPPING.md:14-15) with no adaptation for the missing in-process activation.", "root_cause": "The skill's Background Tasks section only covers the out-of-process model, so the agent had no signal that the in-process variant (TaskEntryPoint omitted + OnBackgroundActivated) is unsupported in WinUI 3.", "how_resolved": "Not resolved — shipped as a dead control (score 75, two partials).", "preventable_by": "Adding an in-process background-task subsection to MIGRATION-PATTERNS.md and a validator branch that flags TaskEntryPoint-less BackgroundTaskBuilder code lacking OnBackgroundActivated." }
+  ],
+  "missing_tooling": [
+    { "need": "Validator detection of the in-process background-task model.", "would_have_saved": "The two partial (dead-control) background scenarios; the existing check passed and hid the regression." }
+  ],
+  "env_issues": []
+}

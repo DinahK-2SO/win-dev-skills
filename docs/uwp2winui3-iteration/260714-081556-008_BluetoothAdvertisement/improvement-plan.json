@@ -1,0 +1,28 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 42,
+  "applied": true,
+  "items": [
+    {
+      "problem": "UWP in-process background tasks (BackgroundTaskBuilder with TaskEntryPoint omitted + App.OnBackgroundActivated) were ported verbatim; Scenarios 3 & 4 Run controls are silently dead because WinUI 3's Microsoft.UI.Xaml.Application has no OnBackgroundActivated.",
+      "evidence": "notes/skill-defects.json item 1; Scenario3_BackgroundWatcher.xaml.cs:165-194; App.xaml.cs has no OnBackgroundActivated; migration-score.json scenarios 3 & 4 = partial (dead Run).",
+      "root_cause": "The in-process background-task activation model does not exist in WinUI 3; registration fails with an HRESULT the UWP sample's narrow catch misses and the async void handler swallows.",
+      "tier": 1,
+      "change": "Added validator check 5d to Validate-UwpMigration.ps1: FAIL when retained code builds a BackgroundTaskBuilder with no TaskEntryPoint assignment (in-process model) and no OnBackgroundActivated handler exists. Instructs converting to the out-of-process model (set a string TaskEntryPoint). Complements existing check 5c (which only asserts extension presence and passed here).",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Agent's 'validator must PASS' loop now catches in-process background-task migrations before declaring done, forcing conversion to the dispatchable out-of-process model.",
+      "falsifiable_check": "Re-running Validate-UwpMigration.ps1 on the current app emits '[FAIL] ... IN-PROCESS background task ... no OnBackgroundActivated'; after the agent sets TaskEntryPoint the check PASSes and requirements 3 & 4 go partial->pass."
+    },
+    {
+      "problem": "The skill's Background Tasks guidance documents only the out-of-process model, so the agent had no signal that the in-process variant is unsupported in WinUI 3, and that the UWP sample's HRESULT-specific Register() catch is too narrow.",
+      "evidence": "notes/skill-defects.json + skill-coverage-gaps.json; MIGRATION-PATTERNS.md > Background Tasks previously covered only string-TaskEntryPoint tasks.",
+      "root_cause": "Missing documentation of the in-process model and of the WinUI-specific registration-failure HRESULT behavior.",
+      "tier": 3,
+      "change": "Added an 'In-process tasks do NOT port' paragraph (with a convert-to-out-of-process code snippet) to MIGRATION-PATTERNS.md > Background Tasks, and broadened the existing 'surface the failure' item to warn that the UWP HRESULT-specific catch (e.g. E_DEVICE_NOT_AVAILABLE) misses the WinUI failure — use catch(Exception), keep RequestAccessAsync inside the guard, always NotifyUser.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "When the validator FAILs (item 1) or the agent reads the pattern, it has an actionable, general fix rather than re-shipping a dead control.",
+      "falsifiable_check": "On re-run the migrated background handlers set a string TaskEntryPoint and use a broad catch that NotifyUser's a status; parity Run invoke on Scenarios 3 & 4 produces a visible status change (winui_responded=true)."
+    }
+  ],
+  "deferred_to_human": []
+}

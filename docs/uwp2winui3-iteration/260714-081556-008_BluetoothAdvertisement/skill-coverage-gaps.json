@@ -1,0 +1,15 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 42,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The validator's background-task check passes whenever a windows.backgroundTasks <Extension> exists, so it gave a green result on this in-process migration while the Run control was still dead. The existing MIGRATION-PATTERNS guidance about surfacing Register() failures is also written only for the out-of-process case.",
+      "evidence": "Validate-UwpMigration.ps1:388-398 (PASS if manifest matches 'windows.backgroundTasks'); Package.appxmanifest:31-42 declares that extension; yet migration-score.json scenarios 3 & 4 = partial (dead Run). MIGRATION-PATTERNS.md:357 mentions try/catch + status only under the out-of-process model.",
+      "covered_at": "Validate-UwpMigration.ps1 section 5c (lines 373-399) 'Retained manifest <Extension>s must be carried into the build manifest'; MIGRATION-PATTERNS.md > Background Tasks item 2 (line 357).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Extend the SAME validator branch so that when retained BackgroundTaskBuilder code has NO TaskEntryPoint assignment (in-process model), it FAILs/WARNs unless an OnBackgroundActivated handler exists, and prints the in-process pointer. Extend the PATTERNS 'surface the failure in the UI' note to apply to any BackgroundTaskBuilder registration (both models) and to warn that the UWP sample's HRESULT-specific catch is too narrow on WinUI 3.",
+      "generalizes": "A validator that only checks extension presence will keep passing in-process migrations across scenarios; broadening the check and the always-surface-status rule prevents the silent dead-control regression class generally, not just for BLE."
+    }
+  ]
+}

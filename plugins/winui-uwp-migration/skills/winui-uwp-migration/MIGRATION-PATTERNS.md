@@ -354,7 +354,18 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
    </Application>
    ```
 
-2. Wrap `Register()` in `try/catch` and surface the failure in the UI (e.g. the Status text). The SDK samples call `Register()` with no guard, so a missing-declaration failure otherwise presents as a **silent dead control** (the button click does nothing, Status never changes) — the hardest kind of regression to notice because there is no build error and no crash.
+2. Wrap `Register()` in `try/catch` and surface the failure in the UI (e.g. the Status text). The SDK samples call `Register()` with no guard, so a missing-declaration failure otherwise presents as a **silent dead control** (the button click does nothing, Status never changes) — the hardest kind of regression to notice because there is no build error and no crash. Note the UWP samples often catch a **specific** HRESULT (e.g. `E_DEVICE_NOT_AVAILABLE`/`0x800710DF`); on WinUI 3 the registration frequently fails with a *different* HRESULT, so that narrow catch never fires. Broaden the guard to `catch (Exception)`, keep the `RequestAccessAsync()` call **inside** the guarded region (not before it), and always `NotifyUser` a status on both success and failure.
+
+**In-process tasks (`TaskEntryPoint` omitted) do NOT port — convert them.** If the UWP code builds the task with `new BackgroundTaskBuilder()` and **never sets `TaskEntryPoint`**, it is an *in-process* task, dispatched in UWP via `App.OnBackgroundActivated` (and declared with a `windows.activatableClass.inProcessServer` extension). **WinUI 3's `Microsoft.UI.Xaml.Application` has no `OnBackgroundActivated` override**, so the in-process model has no equivalent: the task never dispatches and `Register()`/`RequestAccessAsync()` fail at runtime, leaving a silent dead control **even though the `windows.backgroundTasks` extension is present**. Fix by converting to the out-of-process model — give the builder a string `TaskEntryPoint` pointing at the existing `IBackgroundTask` class (the UWP samples already implement `IBackgroundTask`, so it is usually a one-line change):
+
+   ```csharp
+   var builder = new BackgroundTaskBuilder { Name = taskName };
+   builder.SetTrigger(trigger);
+   builder.TaskEntryPoint = "MyApp.AdvertisementWatcherTask"; // was omitted (in-process) in UWP
+   var registration = builder.Register();
+   ```
+
+   Keep (or add) the matching `<Extension Category="windows.backgroundTasks" EntryPoint="MyApp.AdvertisementWatcherTask">` in the build manifest. `Validate-UwpMigration.ps1` FAILs when a `BackgroundTaskBuilder` with no `TaskEntryPoint` is retained without an `OnBackgroundActivated` handler.
 
 <a id="notifications"></a>
 ## Notifications

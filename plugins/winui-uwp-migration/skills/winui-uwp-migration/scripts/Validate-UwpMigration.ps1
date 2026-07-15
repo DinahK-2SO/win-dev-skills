@@ -397,6 +397,37 @@ if (Test-Path -LiteralPath $manifestPath) {
             $failures++
         }
     }
+
+    # ─── 5d. In-process background-task model does not exist in WinUI 3 ────────────
+    # A BackgroundTaskBuilder with NO TaskEntryPoint assignment is an IN-PROCESS task,
+    # dispatched in UWP via App.OnBackgroundActivated. Microsoft.UI.Xaml.Application has
+    # NO OnBackgroundActivated override, so the task never dispatches AND Register() /
+    # RequestAccessAsync() fail at runtime with an HRESULT the UWP samples' narrow catch
+    # (e.g. E_DEVICE_NOT_AVAILABLE) does not handle — the async void handler swallows it
+    # and the Run control is silently dead even though a windows.backgroundTasks
+    # <Extension> is present (so check 5c passes). Fix = convert to the out-of-process
+    # model: assign a string TaskEntryPoint pointing at the existing IBackgroundTask class.
+    $inProcBgFiles = @($files | Where-Object { $_.Extension -eq '.cs' } | Where-Object {
+        $t = [System.IO.File]::ReadAllText($_.FullName)
+        ($t -match 'new\s+BackgroundTaskBuilder') -and
+        ($t -match '\.Register\s*\(') -and
+        ($t -notmatch '\.TaskEntryPoint\s*=')
+    })
+    if ($inProcBgFiles.Count -gt 0) {
+        $hasOnBackgroundActivated = @($files | Where-Object { $_.Extension -eq '.cs' } | Where-Object {
+            [System.IO.File]::ReadAllText($_.FullName) -match '\boverride\b[^\n]*\bOnBackgroundActivated\b'
+        }).Count -gt 0
+        if ($hasOnBackgroundActivated) {
+            Write-Host "[PASS] BackgroundTaskBuilder used without TaskEntryPoint but an OnBackgroundActivated handler is present"
+        } else {
+            Write-Host "[FAIL] Migrated code registers an IN-PROCESS background task (BackgroundTaskBuilder with no TaskEntryPoint) but has no OnBackgroundActivated handler"
+            Write-Host "       Effect: WinUI 3 (Microsoft.UI.Xaml.Application) has no OnBackgroundActivated, so the task never dispatches and Register()/RequestAccessAsync() fail with an HRESULT the UWP sample's narrow catch misses — the Run control is silently dead (app still builds and launches, check 5c still passes)."
+            Write-Host "       Fix: convert to the out-of-process model — set builder.TaskEntryPoint = `"<Namespace>.<TaskClass>`" (the existing IBackgroundTask class) so the windows.backgroundTasks <Extension> dispatches it. Also broaden the registration catch to catch(Exception) and always NotifyUser a status."
+            Write-Host "       See MIGRATION-PATTERNS.md > 'Background Tasks' > 'In-process tasks'."
+            Add-Diag 'in-process background task without OnBackgroundActivated' (($inProcBgFiles | ForEach-Object { $_.FullName }) -join "`n")
+            $failures++
+        }
+    }
 } else {
     Write-Host "[WARN] Package.appxmanifest not found at $manifestPath — skipping image-reference check"
 }

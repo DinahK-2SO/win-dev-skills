@@ -1,0 +1,17 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 42,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "In-process background tasks (BackgroundTaskBuilder with TaskEntryPoint omitted, dispatched via App.OnBackgroundActivated) were ported verbatim; the Run controls in Scenarios 3 & 4 are silently dead at runtime.",
+      "evidence": "Scenario3_BackgroundWatcher.xaml.cs:165-194 (builder with no TaskEntryPoint; catch only E_DEVICE_NOT_AVAILABLE; RequestAccessAsync outside try); App.xaml.cs has no OnBackgroundActivated; migration-score.json scenarios 3 & 4 verdict=partial 'Run button DEAD'.",
+      "skill_search": "grepped winui-uwp-migration for 'OnBackgroundActivated', 'in-process', 'TaskEntryPoint', 'BackgroundTaskBuilder' — MIGRATION-PATTERNS.md 'Background Tasks' only documents the out-of-process (string TaskEntryPoint) model; no mention of the in-process variant or OnBackgroundActivated.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "WinUI 3's Microsoft.UI.Xaml.Application has no OnBackgroundActivated, so the UWP in-process background-task activation model does not exist. RequestAccessAsync()/builder.Register() fails on desktop WinUI 3 with an HRESULT other than E_DEVICE_NOT_AVAILABLE; the sample's narrow catch misses it and the async void handler swallows it, so no status is ever shown.",
+      "proposed_fix": "Add an 'In-process background tasks' subsection to MIGRATION-PATTERNS.md > Background Tasks: state that in-process tasks (TaskEntryPoint omitted + App.OnBackgroundActivated) have no WinUI 3 equivalent; instruct converting to the out-of-process model (assign a string TaskEntryPoint pointing at the existing IBackgroundTask class) and, regardless, broaden the registration catch to catch(Exception) and always NotifyUser a status (move RequestAccessAsync inside the guard) so registration failures are never a silent dead control.",
+      "generalizes": "The in-process background-task pattern (BackgroundTaskBuilder without TaskEntryPoint + OnBackgroundActivated) is common across UWP SDK samples (BLE advertisement, geolocation, device background triggers). Any such app migrated to WinUI 3 will hit the same silent dead-control failure, so the guidance recurs broadly."
+    }
+  ]
+}

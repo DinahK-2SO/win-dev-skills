@@ -1,0 +1,60 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "created_at": "2026-07-15T16:55:00Z",
+  "uwp_capture_status": "partial: UWP app launched (uwp-app-runner ok:true, pid 10540, windowTitle 'Bluetooth Advertisement C# Sample'), but the legacy UWP CoreWindow's UIA tree is opaque to winapp (inspect/search return 0 interior elements) and synthetic mouse/keyboard input could not switch the ListBox scenarios. Only Scenario 1 (initial view) was captured as a genuine golden; Scenarios 2-4 golden screenshots were not obtainable. Behavioral verdicts for Scenarios 3-4 are based on the WinUI capture plus UWP source analysis.",
+  "features": [
+    {
+      "id": "foreground-watcher",
+      "area": "Bluetooth Low Energy Advertisement",
+      "name": "Scenario 1 - Foreground watcher",
+      "description": "Foreground BLE advertisement watcher. Two checkboxes (1M+Coded PHYs, coexistence/performance optimizations), Run/Stop buttons, a received-advertisement ListBox, and a status area. Run starts a BluetoothLEAdvertisementWatcher; Stop stops it. Status updates on each action.",
+      "expected_behaviour": [
+        "Run button starts the watcher and updates the status text (e.g. 'Watcher started.')",
+        "Stop button stops the watcher and updates the status text",
+        "Both checkboxes are present (disabled/annotated when the feature is unsupported by the adapter)",
+        "Received advertisements list is present"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Foreground_watcher.png",
+      "weight": 2
+    },
+    {
+      "id": "foreground-publisher",
+      "area": "Bluetooth Low Energy Advertisement",
+      "name": "Scenario 2 - Foreground publisher",
+      "description": "Foreground BLE advertisement publisher. One checkbox (2M+Coded PHYs), Run/Stop buttons, published-payload text, and a status area. Run starts a BluetoothLEAdvertisementPublisher and reports its status; Stop stops it.",
+      "expected_behaviour": [
+        "Run button starts the publisher and updates status (started + published payload; on a radio-less machine reports an aborted/RadioNotAvailable status)",
+        "Stop button stops the publisher and updates status",
+        "Published payload information is displayed"
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "background-watcher",
+      "area": "Bluetooth Low Energy Advertisement",
+      "name": "Scenario 3 - Background watcher",
+      "description": "Background BLE advertisement watcher using a BackgroundTaskBuilder + BluetoothLEAdvertisementWatcherTrigger. Two checkboxes, Run/Stop buttons, received-advertisement ListBox, and status. Run requests background access and registers the background task, then reports a status ('Background watcher registered.' / 'Cannot register background task...' / 'Background tasks may be disabled...'). Stop unregisters and reports status.",
+      "expected_behaviour": [
+        "Run button registers the background task and updates the status text with a success or explicit error message (UWP source always NotifyUser's one of the three outcomes)",
+        "Stop button unregisters the task and updates status",
+        "Both checkboxes and the received-advertisement list are present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "background-publisher",
+      "area": "Bluetooth Low Energy Advertisement",
+      "name": "Scenario 4 - Background publisher",
+      "description": "Background BLE advertisement publisher using a BackgroundTaskBuilder + BluetoothLEAdvertisementPublisherTrigger. One checkbox, Run/Stop buttons, published-payload text, and status. Run requests background access and registers the publisher task, reporting a status. Stop unregisters and reports status.",
+      "expected_behaviour": [
+        "Run button registers the background publisher task and updates the status text with a success or explicit error message",
+        "Stop button unregisters the task and updates status",
+        "Published payload information is displayed"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

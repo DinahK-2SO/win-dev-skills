@@ -1,0 +1,14 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 42,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: add check 5d that FAILs when retained BackgroundTaskBuilder code omits TaskEntryPoint (in-process model) with no OnBackgroundActivated handler, since WinUI 3 cannot dispatch in-process tasks and the Run control is silently dead even though check 5c passes",
+    "MIGRATION-PATTERNS.md > Background Tasks: document that in-process tasks (TaskEntryPoint omitted + App.OnBackgroundActivated) do not port to WinUI 3 and must be converted to the out-of-process model, and broaden the Register() guidance to use catch(Exception) with RequestAccessAsync inside the guard so registration failures always surface a status"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

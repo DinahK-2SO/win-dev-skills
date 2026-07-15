@@ -1,0 +1,21 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "index": 42,
+  "score": 75,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Scenario 1 - Foreground watcher: Run/Stop update status, checkboxes + received list present", "status": "pass", "reason": "Full 5/5 coverage; Run and Stop both produce live status changes.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Scenario 2 - Foreground publisher: Run/Stop update status, payload displayed", "status": "pass", "reason": "Run reports 'Publisher started.' + payload + RadioNotAvailable (hardware-gated, faithful); Stop reports 'Publisher stopped.'", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Scenario 3 - Background watcher: Run registers task + updates status, Stop unregisters", "status": "partial", "reason": "Run button DEAD: invoke succeeds but no status appears and Stop stays disabled; no task registered.", "suspected_skill_gap": "In-process background-task model (BackgroundTaskBuilder with no TaskEntryPoint + App.OnBackgroundActivated) not covered by the skill; WinUI 3 Application has no OnBackgroundActivated so registration fails silently. Validator's windows.backgroundTasks check passed (extension present) and missed it." },
+    { "id": 4, "text": "Scenario 4 - Background publisher: Run registers publisher task + updates status, Stop unregisters", "status": "partial", "reason": "Run button DEAD: PublisherStatusBlock stays empty and Stop stays disabled.", "suspected_skill_gap": "Same in-process background-task defect + validator blind spot as Scenario 3." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Scenario 3 Background watcher Run", "uwp": "Source always NotifyUser's registered / cannot-register / disabled status", "winui": "No status message; Stop disabled", "screenshot_ref": "parity/winui3/screenshots/03_Background_watcher__a01_Run.png" },
+    { "feature": "Scenario 4 Background publisher Run", "uwp": "Source registers publisher trigger and reports a status", "winui": "PublisherStatusBlock empty; Stop disabled", "screenshot_ref": "parity/winui3/screenshots/04_Background_publisher__a01_Run.png" }
+  ],
+  "missing_features": [
+    "Background (in-process) task registration feedback in Scenarios 3 & 4"
+  ],
+  "summary": "Structural parity is full (100% control coverage, non-blank). Two behavioral regressions: the background scenarios ported the UWP in-process background-task model (TaskEntryPoint omitted + App.OnBackgroundActivated), which has no WinUI 3 equivalent, so the Run controls are silently dead. The skill covers only the out-of-process model and its validator check passes on the present manifest extension, hiding the failure."
+}

@@ -1,0 +1,50 @@
+{
+  "scenario": "BluetoothAdvertisement",
+  "uwp_launchable": true,
+  "score": 75,
+  "features_total": 4,
+  "features_pass": 2,
+  "features_partial": 2,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true (pid 10540, windowTitle 'Bluetooth Advertisement C# Sample'), but the legacy UWP CoreWindow UIA tree is opaque to winapp (inspect/search return 0 interior elements) and synthetic input could not switch the ListBox scenarios. Only Scenario 1 (initial view) captured as a genuine golden; Scenarios 2-4 UWP goldens unobtainable. Behavioral verdicts for background scenarios derived from WinUI capture + UWP source (explicit NotifyUser calls).",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 2,
+  "features": [
+    {
+      "name": "Scenario 1 - Foreground watcher",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Foreground_watcher.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Foreground_watcher.png",
+      "note": "Full 5/5 structural coverage. Run and Stop both produce status changes (live). Layout matches the captured UWP golden."
+    },
+    {
+      "name": "Scenario 2 - Foreground publisher",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/02_Foreground_publisher.png",
+      "note": "Full 3/3 coverage. Run reports 'Publisher started.' + payload + 'Published Status: Aborted, Error: RadioNotAvailable' (correct hardware-gated behavior on a radio-less machine); Stop reports 'Publisher stopped.' Control is live and faithful. UWP golden for this scenario unobtainable (CoreWindow UIA opaque), so uwp_responded inferred from source."
+    },
+    {
+      "name": "Scenario 3 - Background watcher",
+      "verdict": "partial",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/03_Background_watcher__a01_Run.png",
+      "note": "Full 5/5 structural coverage and non-blank render, but the Run button is DEAD: invoke succeeds yet no status appears and Stop stays disabled. UWP source always NotifyUser's a registered/cannot-register/disabled status, so a live control would change the status even on a radio-less machine. Dead control => partial, never pass. UWP golden unobtainable (CoreWindow UIA opaque); expectation grounded in source."
+    },
+    {
+      "name": "Scenario 4 - Background publisher",
+      "verdict": "partial",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": "parity/winui3/screenshots/04_Background_publisher__a01_Run.png",
+      "note": "Full 3/3 structural coverage and non-blank render, but the Run button is DEAD: invoke succeeds yet PublisherStatusBlock stays empty and Stop stays disabled. UWP source registers the publisher trigger and reports a status. Dead control => partial, never pass. UWP golden unobtainable (CoreWindow UIA opaque); expectation grounded in source."
+    }
+  ]
+}
