@@ -1,0 +1,27 @@
+{
+  "scenario": "BasicMediaCasting",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Namespace rewrites + manifest retarget landed cleanly; build succeeded with 0 errors (build-output.txt 'BUILD SUCCEEDED')." },
+    { "tool": "Validate-UwpMigration.ps1 smoke launch", "evidence": "session-log.txt line 2711 'All checks passed including the smoke launch (app stayed alive)'." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "unsupported-api-inventory.json", "limitation": "MediaElement is tagged tier 'safe' with anchor 'controls', but the 'controls' guidance understates the code-behind API surface change (Source/SetSource/MediaPlayer).", "suggested_tweak": "Point MediaElement's guidance at a media-specific pattern that spells out the Source and MediaPlayer changes." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md line 615 (Controls that need element-level swaps)", "wrong": "'<MediaElement> -> <MediaPlayerElement>: Source and transport-control properties carry over with minor renames.'", "correct": "MediaPlayerElement.Source is IMediaPlaybackSource, not Uri; MediaElement.SetSource(stream, contentType) has no equivalent -> use MediaSource.CreateFromUri/CreateFromStream. Playback + casting APIs (Play/Pause/GetAsCastingSource) move to the underlying MediaPlayer via MediaPlayerElement.MediaPlayer." }
+  ],
+  "special_apis": [
+    { "api": "MediaElement -> MediaPlayerElement", "special_handling": "video.Source = MediaSource.CreateFromStream(stream, contentType) (was video.SetSource(stream, contentType)); casting source is video.MediaPlayer.GetAsCastingSource() (was video.GetAsCastingSource())." },
+    { "api": "CastingDevicePicker", "special_handling": "Requires WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd) before .Show(rect, placement) or it throws COMException on WinUI 3 desktop, same as file pickers." }
+  ],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    { "where": "Scenario1/2/3 code-behind media source assignment", "symptom": "UWP source used MediaElement.SetSource(stream, contentType) and MediaElement.GetAsCastingSource() which do not exist on MediaPlayerElement.", "turns_or_retries": "resolved first-try from model knowledge (no web_fetch in log)", "root_cause": "Skill maps MediaElement->MediaPlayerElement as a near-trivial rename; the Source/SetSource/MediaPlayer differences are undocumented.", "how_resolved": "Agent wrote video.Source = MediaSource.CreateFromStream(...) and video.MediaPlayer.GetAsCastingSource() (session-log lines 2107-2121, 2717-2719).", "preventable_by": "Document the MediaElement->MediaPlayerElement Source/SetSource/MediaPlayer conversion in MIGRATION-PATTERNS.md." },
+    { "where": "Scenario2 CastingDevicePicker.Show", "symptom": "CastingDevicePicker (a WinRT UI object) needs an HWND on WinUI 3 desktop.", "turns_or_retries": "resolved first-try", "root_cause": "Picker section lists file/folder pickers + DataTransferManager/PrintManager but never names CastingDevicePicker/DevicePicker.", "how_resolved": "Agent added InitializeWithWindow.Initialize(picker, hwnd) in the Scenario2 constructor (Scenario2_CastingDevicePicker.xaml.cs lines 24-26).", "preventable_by": "List CastingDevicePicker/DevicePicker in the InitializeWithWindow surfaces enumeration." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

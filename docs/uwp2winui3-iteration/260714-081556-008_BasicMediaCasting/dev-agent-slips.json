@@ -1,0 +1,14 @@
+{
+  "scenario": "BasicMediaCasting",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Navigation item labels carry a numeric prefix ('1) Basic Media Casting', '2) ...') vs the bare source scenario titles.",
+      "evidence": "discrepancies.md 'Minor / cosmetic' section; migration-score.json navigation discrepancy type 'label-prefix' severity 'cosmetic'.",
+      "covered_clearly_at": "This is the standard WinUI/UWP SDK-sample numbering convention, not a migration rule; no skill guidance instructs adding a prefix and the scoring judged it cosmetic (all 3 features still PASS).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Cosmetic and scenario-specific; it did not affect functionality or score, and only tripped the eval tool's title-driven capture (an evaluation-skill concern, out of scope). A re-run may or may not add the prefix; no migration-skill edit generalizes here."
+    }
+  ]
+}

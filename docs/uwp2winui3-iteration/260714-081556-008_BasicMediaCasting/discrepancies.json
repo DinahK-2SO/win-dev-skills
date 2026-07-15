@@ -1,0 +1,33 @@
+{
+  "scenario": "BasicMediaCasting",
+  "uwp_golden_visuals_available": false,
+  "uwp_golden_note": "uwp-app-runner ok:true but original UWP app never presented XAML content (stuck on OS splash); golden screenshots are splash-only. Parity judged vs UWP source + live WinUI render + independent WinUI behavioral actuation.",
+  "discrepancies": [
+    {
+      "feature": "Basic Media Casting",
+      "severity": "none",
+      "type": "ok",
+      "detail": "MediaPlayerElement + transport controls (incl. Cast to Device) + Load Video present; Load Video opens FileOpenPicker (live)."
+    },
+    {
+      "feature": "Casting Using Casting Picker",
+      "severity": "info",
+      "type": "hardware-gated",
+      "detail": "Cast Button present and wired to CastingDevicePicker; not actuated to completion (requires cast hardware). Flagged for manual review, not a defect."
+    },
+    {
+      "feature": "Casting Using Custom Picker",
+      "severity": "none",
+      "type": "ok",
+      "detail": "Start Device Watcher behaviorally verified (label toggles, ProgressRing active, green status shown). Disconnect collapsed per source; device ListBox present (empty absent hardware)."
+    },
+    {
+      "feature": "navigation",
+      "severity": "cosmetic",
+      "type": "label-prefix",
+      "detail": "Nav labels prefixed 'N) ' vs bare source titles; standard SDK numbering. Caused automated title-driven capture to miss S2/S3 (collapsed hamburger NavigationView); verified via manual navigation."
+    }
+  ],
+  "dead_controls": [],
+  "behavioral_regressions": 0
+}

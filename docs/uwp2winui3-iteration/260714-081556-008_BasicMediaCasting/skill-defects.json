@@ -1,0 +1,17 @@
+{
+  "scenario": "BasicMediaCasting",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "MediaElement -> MediaPlayerElement is documented as a near-trivial rename, but the code-behind API surface differs materially: Source type, SetSource, and where playback/casting live.",
+      "evidence": "UWP source used video.SetSource(stream, file.ContentType) and video.GetAsCastingSource() (session-log.txt lines 360/497/529/623/724). Migrated code required video.Source = MediaSource.CreateFromStream(stream, file.ContentType) (Scenario1_BuiltInCasting.xaml.cs line 41) and video.MediaPlayer.GetAsCastingSource() (Scenario2_CastingDevicePicker.xaml.cs line 74).",
+      "skill_search": "grepped MIGRATION-PATTERNS.md for MediaElement / MediaPlayerElement / SetSource / GetAsCastingSource",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md line 615: '| `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. |'  and line 396 mapping row with no notes.",
+      "root_cause": "The mapping treats the swap as XAML-only. In reality MediaPlayerElement.Source is IMediaPlaybackSource (not Uri), MediaElement.SetSource(stream, contentType) has no equivalent, and playback/casting methods (Play/Pause/GetAsCastingSource) are on the underlying MediaPlayer exposed via MediaPlayerElement.MediaPlayer. A weaker agent following 'minor renames' would emit CS1061 on SetSource/GetAsCastingSource or a type-mismatch on Source.",
+      "proposed_fix": "In MIGRATION-PATTERNS.md, expand the MediaElement->MediaPlayerElement guidance to state: Source = MediaSource.CreateFromUri(uri) / MediaSource.CreateFromStream(stream, contentType) instead of a Uri or SetSource(...); and playback/casting go through the .MediaPlayer property (e.g. element.MediaPlayer.Play(), element.MediaPlayer.GetAsCastingSource()).",
+      "generalizes": "Every UWP app that plays media uses MediaElement with .Source/.SetSource and often GetAsCastingSource; the same three-part conversion (Source via MediaSource, SetSource removal, .MediaPlayer for control/cast) applies to all of them."
+    }
+  ]
+}

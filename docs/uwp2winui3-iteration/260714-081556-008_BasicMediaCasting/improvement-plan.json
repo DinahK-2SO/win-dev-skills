@@ -1,0 +1,30 @@
+{
+  "scenario": "BasicMediaCasting",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "MediaElement -> MediaPlayerElement documented as a near-trivial rename, but the code-behind API surface (Source type, SetSource, playback/casting on .MediaPlayer) differs materially.",
+      "evidence": "skill-defects.json item 1; UWP source video.SetSource(...)/video.GetAsCastingSource() (session-log 360/497/529/623/724) migrated to video.Source = MediaSource.CreateFromStream(...) (Scenario1 line 41) and video.MediaPlayer.GetAsCastingSource() (Scenario2 line 74).",
+      "root_cause": "MIGRATION-PATTERNS.md line 615 said 'Source and transport-control properties carry over with minor renames', which is wrong for Source/SetSource and hides the .MediaPlayer indirection.",
+      "tier": 3,
+      "change": "Corrected the MediaElement mapping-row note and added a focused 'MediaElement -> MediaPlayerElement code-behind (not a rename)' sub-table documenting Source via MediaSource.CreateFromUri/CreateFromStream, removal of SetSource, and Play/Pause/GetAsCastingSource on element.MediaPlayer.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents migrating any UWP media app emit correct MediaPlayerElement code-behind on the first pass instead of deriving it ad hoc.",
+      "falsifiable_check": "On a re-run of any MediaElement-based scenario, no CS1061 on SetSource/GetAsCastingSource/Play and Source is assigned a MediaSource; grep of the migrated code shows element.MediaPlayer.* for playback/casting."
+    },
+    {
+      "problem": "CastingDevicePicker / DevicePicker need InitializeWithWindow before .Show() on WinUI 3 desktop, but the picker section did not name them.",
+      "evidence": "skill-coverage-gaps.json item 1; Scenario2_CastingDevicePicker.xaml.cs lines 24-26 add InitializeWithWindow.Initialize(picker, hwnd) before picker.Show(...) line 62.",
+      "root_cause": "MIGRATION-PATTERNS.md #pickers enumerated file pickers + DataTransferManager/PrintManager but left the Show(rect)-style device/casting pickers to a vague 'other UI surfaces' catch-all.",
+      "tier": 3,
+      "change": "Added CastingDevicePicker and DevicePicker (with 'before calling .Show(...)') to the explicit InitializeWithWindow surfaces sentence, and noted .Show() throws COMException at runtime with a clean build.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents migrating casting/device-selection UWP apps add the HWND init proactively, avoiding a runtime COMException the build cannot catch.",
+      "falsifiable_check": "On a re-run of a casting/device-picker scenario, the migrated code calls InitializeWithWindow.Initialize on the CastingDevicePicker/DevicePicker before .Show(), and the app launches without a COMException at cast time."
+    }
+  ],
+  "deferred_to_human": [
+    "unsupported-api-inventory.json could route the MediaElement 'controls' anchor to the new media-specific sub-section for a stronger inline TODO signal (Tier 1); left as-is to keep the edit minimal since the prose fix already covers it."
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "BasicMediaCasting",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Document MediaElement->MediaPlayerElement code-behind conversion (Source via MediaSource.CreateFromUri/CreateFromStream, no SetSource, Play/Pause/GetAsCastingSource on .MediaPlayer); the old 'minor renames' note was misleading and recurs in every UWP media app.",
+    "Name CastingDevicePicker and DevicePicker in the InitializeWithWindow picker list; these Show()-style pickers throw COMException at runtime on WinUI 3 desktop without an HWND, the same as file pickers."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Optionally route unsupported-api-inventory.json's MediaElement 'controls' anchor to the new media sub-section for a stronger inline TODO signal."
+  ]
+}

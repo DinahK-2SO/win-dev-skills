@@ -1,0 +1,15 @@
+{
+  "scenario": "BasicMediaCasting",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "CastingDevicePicker (and DevicePicker) require InitializeWithWindow.Initialize before .Show() on WinUI 3 desktop, but the picker section never names them.",
+      "evidence": "Scenario2_CastingDevicePicker.xaml.cs lines 24-26 add WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd) for a CastingDevicePicker before picker.Show(...) (line 62). session-log line 2718 records 'CastingDevicePicker -> InitializeWithWindow'.",
+      "covered_at": "MIGRATION-PATTERNS.md 'Pickers and Win32 Surfaces' (anchor #pickers, lines 266-279) — documents the InitializeWithWindow pattern and lists FileOpenPicker/FileSavePicker/FolderPicker, DataTransferManager, PrintManager, then says 'and other UI surfaces that target a window'.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add CastingDevicePicker and DevicePicker to the explicit InitializeWithWindow surfaces list so the Show(rect,...) device/casting pickers are named alongside the file pickers, rather than left to the vague 'other UI surfaces' catch-all.",
+      "generalizes": "Any UWP app doing device/media casting or Bluetooth/Wi-Fi device selection uses CastingDevicePicker/DevicePicker; all need the same HWND init on WinUI 3 desktop or they throw COMException at runtime (invisible to the build)."
+    }
+  ]
+}

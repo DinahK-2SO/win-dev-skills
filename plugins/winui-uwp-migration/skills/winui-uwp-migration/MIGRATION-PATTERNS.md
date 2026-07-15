@@ -276,7 +276,7 @@ WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
 var file = await picker.PickSingleFileAsync();
 ```
 
-Apply the same `InitializeWithWindow.Initialize(obj, hwnd)` pattern to `FolderPicker`, `FileSavePicker`, `DataTransferManager` (Share), `PrintManager`, and other UI surfaces that target a window.
+Apply the same `InitializeWithWindow.Initialize(obj, hwnd)` pattern to `FolderPicker`, `FileSavePicker`, `DataTransferManager` (Share), `PrintManager`, `CastingDevicePicker` and `DevicePicker` (before calling `.Show(...)`), and any other WinRT UI surface that targets a window. The casting/device pickers fail the same way as file pickers — `.Show()` throws `COMException` at runtime (the build stays clean), so initialize them right after construction.
 
 <a id="startup-crashes"></a>
 ## Diagnosing Startup Crashes
@@ -612,12 +612,29 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 
 | UWP element | WinUI 3 element | Notes |
 |---|---|---|
-| `<MediaElement … />` | `<MediaPlayerElement … />` | Source and transport-control properties carry over with minor renames. |
+| `<MediaElement … />` | `<MediaPlayerElement … />` | XAML swap is simple, but the **code-behind API differs** — see the note below. `AreTransportControlsEnabled` carries over. |
 | `<InkCanvas … />` | _(none — defer)_ | Not supported. |
 | `<Pivot>` / `<PivotItem>` | `<TabView>` / `<TabViewItem>`, or `<controls:Pivot>` from `CommunityToolkit.WinUI.UI.Controls` | Pick based on the source's intent (top-tab vs swipe pivot). |
 | `<Hub>` / `<HubSection>` | Hand-rolled `<NavigationView>` with section grouping, or `<ScrollViewer>` with stacked sections. | No drop-in equivalent. |
 | `<AppBarButton Icon="…">` system icons | Most identifiers carry over | A handful of glyphs were renamed; verify visually. |
 | `<CommandBar>` `LabelPosition` | unchanged | Behaviour parity. |
+
+#### `MediaElement` → `MediaPlayerElement` code-behind (not a rename)
+
+`MediaPlayerElement` is **not** API-compatible with `MediaElement` in code-behind. The XAML element
+swaps cleanly, but every `.cs` reference must change:
+
+| UWP `MediaElement` | WinUI 3 `MediaPlayerElement` |
+|---|---|
+| `element.Source = uri;` (a `Uri`) | `element.Source = MediaSource.CreateFromUri(uri);` (`Source` is `IMediaPlaybackSource`) |
+| `element.SetSource(stream, contentType);` | `element.Source = MediaSource.CreateFromStream(stream, contentType);` (no `SetSource`) |
+| `element.Play()` / `element.Pause()` | `element.MediaPlayer.Play()` / `element.MediaPlayer.Pause()` |
+| `element.GetAsCastingSource()` | `element.MediaPlayer.GetAsCastingSource()` |
+
+Playback control and casting live on the **underlying `MediaPlayer`**, reached via
+`MediaPlayerElement.MediaPlayer` (add `using Windows.Media.Core;` for `MediaSource`). Following the
+old "minor renames" assumption produces `CS1061` on `SetSource`/`GetAsCastingSource`/`Play` or a
+type-mismatch on `Source`.
 
 ### `x:Bind` and compiled bindings
 
