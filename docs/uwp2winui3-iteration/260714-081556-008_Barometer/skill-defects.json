@@ -1,0 +1,17 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "When a C# code-behind file fails to compile, the WinUI XAML markup compiler emits misleading cascade errors (WMC0909 'Cannot resolve DataType', WMC1111 'DataTemplates containing x:Bind need a DataType', WMC1509 'No LocalAssembly parameter', WMC9999 internal error) against correct x:Bind/x:DataType markup. The dev-agent misattributed these to an x:Bind problem and downgraded compiled bindings `{x:Bind}`+`x:DataType` to classic `{Binding}`.",
+      "evidence": "session-log.txt:2557-2627 (CS0234 + WMC0909/WMC1111/WMC1509/WMC9999 in one build) and session-log.txt:2652 (agent replaced x:Bind/x:DataType with {Binding}).",
+      "skill_search": "grep MIGRATION-PATTERNS.md + SKILL.md for 'WMC', 'x:DataType', 'Cannot resolve', 'cascade', 'compile order'. WMC codes: no matches. x:Bind section (MIGRATION-PATTERNS.md:622-624) only mentions XLS0414/MC3074 'type not found' from stale UWP namespace prefixes — a different cause.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Skill has no guidance that WMC-series XAML errors commonly cascade from a C# compile failure, nor the ordering rule to fix CS#### errors first. So the agent treated a downstream symptom as an independent XAML defect and regressed x:Bind to Binding.",
+      "proposed_fix": "Add a short subsection to MIGRATION-PATTERNS.md near the x:Bind section: WMC0909/WMC1111/WMC1509/WMC9999 are usually a cascade from a C# compile error; fix all `CS####` errors first, rebuild, then re-judge remaining WMC errors; never downgrade `x:Bind`/`x:DataType` to `{Binding}` to silence them.",
+      "generalizes": "Any UWP sample that uses x:Bind DataTemplates (extremely common — scenario list templates, item templates) combined with ANY code-behind compile error will produce this exact cascade. The fix-C#-first ordering rule prevents a whole class of misdiagnoses and needless compiled-binding regressions across scenarios."
+    }
+  ]
+}

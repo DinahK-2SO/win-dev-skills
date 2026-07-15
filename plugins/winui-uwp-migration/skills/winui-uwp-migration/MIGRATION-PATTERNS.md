@@ -93,6 +93,8 @@ All `Windows.UI.Xaml.*` namespaces move to `Microsoft.UI.Xaml.*`:
 | `Windows.UI.Text` | `Microsoft.UI.Text` |
 | `Windows.UI.Core` (dispatcher) | `Microsoft.UI.Dispatching` |
 
+> Note: `Windows.UI.Colors` and `Windows.UI.ColorHelper` are **types** (not namespaces) that relocated to `Microsoft.UI.Colors` / `Microsoft.UI.ColorHelper` — code like `new SolidColorBrush(Colors.Red)` needs `using Microsoft.UI;`. The `Windows.UI.Color` **struct** itself is unchanged and stays in `Windows.UI`. `Initialize-UwpMigration.ps1` rewrites the `Colors`/`ColorHelper` references automatically.
+
 <a id="threading"></a>
 ## Threading: CoreDispatcher → DispatcherQueue
 
@@ -622,6 +624,8 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 ### `x:Bind` and compiled bindings
 
 `x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+
+**Fix C# compile errors before "fixing" x:Bind.** The XAML markup compiler can only resolve project-local `x:DataType` / `x:Bind` types (e.g. `local:Scenario`) *after* the code-behind assembly compiles. So a single `CS####` error in any code-behind file makes MarkupCompilePass2 emit a burst of **misleading cascade errors** — typically `WMC1509` ("No LocalAssembly parameter given during MarkupCompilePass2"), `WMC0909` ("Cannot resolve DataType ..."), `WMC1111` ("DataTemplates containing x:Bind need a DataType"), and `WMC9999` (internal error) — against markup that is actually correct. When a build shows both `CS####` and `WMC####` errors, **fix every `CS####` error first and rebuild**, then re-judge any remaining `WMC` errors. Do **not** downgrade `{x:Bind}`+`x:DataType` to `{Binding}` or delete `x:DataType` to silence the cascade — that discards compile-time binding for no reason and usually "fixes" nothing once the real C# error is resolved.
 
 ### Page root element
 

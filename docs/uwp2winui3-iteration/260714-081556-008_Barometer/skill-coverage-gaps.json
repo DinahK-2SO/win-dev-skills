@@ -1,0 +1,15 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Migrated code used `new SolidColorBrush(Windows.UI.Colors.Green/Red)` and failed with CS0234 because the named-color class relocated to `Microsoft.UI.Colors` (requires `using Microsoft.UI;`). The mapping exists in the docs but the bootstrap script does not apply it, so it survives to a compile failure the agent must fix by hand.",
+      "evidence": "session-log.txt:2622-2623 (CS0234 on Windows.UI.Colors), fixed at session-log.txt:2635-2641. Bootstrap rewrite log session-log.txt:279 shows only Windows.UI.Xaml was rewritten.",
+      "covered_at": "MIGRATION-PATTERNS.md:92 — the 'Namespace Mapping' table row `| Windows.UI.Colors | Microsoft.UI.Colors |`.",
+      "why_missed": "under-emphasized — the entry is buried in a table introduced as 'All Windows.UI.Xaml.* namespaces move to Microsoft.UI.Xaml.*' (MIGRATION-PATTERNS.md:79). Windows.UI.Colors is NOT a `.Xaml.` namespace and Colors is a static class, not a namespace, so the framing hides it; and unlike Windows.UI.Xaml it is NOT auto-applied by Initialize-UwpMigration.ps1 (line 126 only maps Windows.UI.Xaml), so nothing enforces it.",
+      "proposed_improvement": "Promote this from doc-only to enforced tooling: extend Initialize-UwpMigration.ps1's mass-rewrite to also map the non-Xaml Windows.UI.* relocations `Windows.UI.Colors`->`Microsoft.UI.Colors` and `Windows.UI.ColorHelper`->`Microsoft.UI.ColorHelper` (word-boundary guarded so the unchanged `Windows.UI.Color` STRUCT is not touched), and add matching residueOnly patterns so Validate-UwpMigration.ps1 flags any leftover. Optionally note in the mapping table that Colors/ColorHelper are types (not namespaces) and Color the struct stays in Windows.UI.",
+      "generalizes": "Status-block coloring via `SolidColorBrush(Colors.Green/Red)` is ubiquitous in the WinUI/UWP sample-template family (shared NotifyUser status block). Auto-applying the relocation removes a recurring hand-fixed CS0234 across essentially every sample that colors a status message."
+    }
+  ]
+}

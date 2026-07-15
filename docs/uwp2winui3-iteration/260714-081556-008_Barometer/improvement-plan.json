@@ -1,0 +1,28 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "`Windows.UI.Colors` references survive bootstrap and fail with CS0234 because the named-color class relocated to `Microsoft.UI.Colors`; the mapping is documented but only `Windows.UI.Xaml` is auto-rewritten.",
+      "evidence": "lessons.json failed_apis[0]; session-log.txt:2622-2623 (CS0234) and :279 (bootstrap rewrote only Windows.UI.Xaml). skill-coverage-gaps.json item 1.",
+      "root_cause": "Initialize-UwpMigration.ps1 mass-rewrite (line 126) only maps Windows.UI.Xaml; sibling non-Xaml relocations (Colors, ColorHelper) are never applied and the validator does not flag them.",
+      "tier": 1,
+      "change": "Extend the bootstrap mass-rewrite to also map `Windows.UI.Colors`->`Microsoft.UI.Colors` and `Windows.UI.ColorHelper`->`Microsoft.UI.ColorHelper` (word-boundary guarded so the `Windows.UI.Color` struct is untouched); add matching residueOnly patterns so Validate-UwpMigration.ps1 flags any leftover; clarify in the mapping table that Colors/ColorHelper are types while the Color struct stays in Windows.UI.",
+      "file": "scripts/Initialize-UwpMigration.ps1, scripts/unsupported-api-inventory.json, MIGRATION-PATTERNS.md",
+      "expected_effect": "The named-color relocation is applied automatically before the agent builds, and any residual reference is caught by the validator.",
+      "falsifiable_check": "On re-run, no `error CS0234: The type or namespace name 'Colors' does not exist in the namespace 'Windows.UI'`, and Validate-UwpMigration.ps1 residue grep stays PASS."
+    },
+    {
+      "problem": "A C# compile error triggered misleading WMC0909/WMC1111/WMC1509/WMC9999 XAML-compiler cascade errors against correct x:Bind/x:DataType markup; the agent misdiagnosed and downgraded compiled bindings to `{Binding}`.",
+      "evidence": "lessons.json errors_encountered[1] + dev_agent_struggles[0]; session-log.txt:2557-2627 (mixed CS+WMC) and :2652 (x:Bind->Binding downgrade). skill-defects.json item 1.",
+      "root_cause": "The skill's x:Bind section covers only XLS0414/MC3074 (stale namespace prefixes) and never explains that WMC-series errors usually cascade from a code-behind compile failure, nor the fix-C#-first ordering.",
+      "tier": 3,
+      "change": "Add a paragraph to the x:Bind section of MIGRATION-PATTERNS.md: WMC0909/WMC1111/WMC1509/WMC9999 usually cascade from a CS#### error; fix all CS errors first and rebuild before judging remaining WMC errors; never downgrade x:Bind/x:DataType to {Binding} to silence them.",
+      "file": "MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent fixes the real C# error first and preserves compiled bindings instead of wasting turns and regressing x:Bind.",
+      "falsifiable_check": "On a re-run with a coexisting CS error, the log shows the agent rebuilding after the CS fix and retaining `x:Bind`/`x:DataType` (no `{x:Bind}`->`{Binding}` downgrade edit)."
+    }
+  ],
+  "deferred_to_human": []
+}

@@ -1,0 +1,32 @@
+{
+  "scenario": "Barometer",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 2,
+  "features_pass": 2,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (app launched; PID 17256, window 'Barometer C# Sample'). Note: legacy UWP CoreWindow content is not exposed to UI Automation on this OS and synthetic input to it is blocked, so the golden was captured by screenshot (real loaded content for Data Events) rather than UIA-driven navigation; Polling ground truth confirmed from source. No barometer sensor on this machine, so both scenarios' terminal state is 'No barometer found'.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Data Events",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Data_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Data_Events.png",
+      "note": "Full structural coverage (2/2 controls: Enable, Disable). Reachable, non-blank. Visuals match the UWP golden: same title, scenario list, description, hPa 'No data', and red 'No barometer found' status. Buttons are defensively disabled because no sensor is present (UWP leaves Enable clickable but it only re-shows the same error) — same net outcome, no dead/dropped control. Neither app shows a live button response (hardware-gated), so no behavioral regression."
+    },
+    {
+      "name": "Polling",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Polling.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Polling.png",
+      "note": "Full structural coverage (1/1 control: Get Data). Reachable via title-driven nav, non-blank. Correct description ('Polls for barometer data...'), hPa 'No data', and shared 'No barometer found' status. Get Data defensively disabled (no sensor). UWP golden for this scenario could not be UIA-navigated (CoreWindow not exposed to UIA); ground truth confirmed from source. No behavioral regression (hardware-gated on both)."
+    }
+  ]
+}

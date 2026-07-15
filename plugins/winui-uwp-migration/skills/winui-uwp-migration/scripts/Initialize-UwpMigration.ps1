@@ -12,7 +12,8 @@ build cleanliness, and runtime smoke.
 Steps:
 1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
-3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
+3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml (plus the non-Xaml
+   Windows.UI.Colors/ColorHelper relocations) across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
 4b/4c. Per-file triage against unsupported-api-inventory.json + inline TODO injection
        (`// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` — anchor-only, never an API name)
@@ -115,7 +116,7 @@ if ($uwpCsprojs.Count -gt 0) {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
 }
 
-# ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────
+# ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml (+ Colors) ─
 $excludeDirs = @('bin', 'obj', '.uwp-source', '.vs', '.git', '.github', '.copilot')
 $excludePattern = '\\(' + ($excludeDirs -join '|') + ')\\'
 $nsFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.cs,*.xaml -ErrorAction SilentlyContinue |
@@ -124,6 +125,11 @@ $nsChanged = 0
 foreach ($f in $nsFiles) {
     $orig = [System.IO.File]::ReadAllText($f.FullName)
     $new = $orig -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml'
+    # Non-Xaml Windows.UI.* types that ALSO relocated to Microsoft.UI.* in WinUI 3.
+    # Word-boundary guarded so the Windows.UI.Color STRUCT (which stays in Windows.UI)
+    # is left intact — only the Colors/ColorHelper helper classes move.
+    $new = $new -replace 'Windows\.UI\.Colors\b', 'Microsoft.UI.Colors'
+    $new = $new -replace 'Windows\.UI\.ColorHelper\b', 'Microsoft.UI.ColorHelper'
     if ($new -ne $orig) {
         [System.IO.File]::WriteAllText($f.FullName, $new)
         $nsChanged++

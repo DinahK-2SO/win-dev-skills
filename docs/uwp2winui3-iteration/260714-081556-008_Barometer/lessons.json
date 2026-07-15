@@ -1,0 +1,30 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log.txt:272-283 — bootstrapped scaffold, copied source, rewrote Windows.UI.Xaml->Microsoft.UI.Xaml in 3/9 files, seeded MIGRATION-MAPPING." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log.txt:3133-3179 — caught 1 FAIL then PASS incl. 10s smoke launch (pid 24236)." },
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "session-log.txt:1082 — pulled windowing/threading/csproj anchors on demand." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Namespace mass-rewrite (line 126) only maps `Windows.UI.Xaml` -> `Microsoft.UI.Xaml`. Sibling non-Xaml relocations (`Windows.UI.Colors`, `Windows.UI.ColorHelper`) are left untouched, so a `Windows.UI.Colors.Green` reference survives bootstrap and fails compile.", "suggested_tweak": "Add the non-Xaml Windows.UI.* -> Microsoft.UI.* relocations (Colors, ColorHelper) to the mass-rewrite, word-boundary guarded so the unchanged `Windows.UI.Color` struct is not touched." },
+    { "tool": "Validate-UwpMigration.ps1 / unsupported-api-inventory.json", "limitation": "residueOnly patterns only flag leftover `Windows.UI.Xaml.*`; leftover `Windows.UI.Colors`/`ColorHelper` is not detected as residue.", "suggested_tweak": "Add residueOnly patterns for `Windows.UI.Colors`/`Windows.UI.ColorHelper`." }
+  ],
+  "failed_apis": [
+    { "api": "Windows.UI.Colors", "why_tried": "Status block coloring: `new SolidColorBrush(Windows.UI.Colors.Green/Red)` in the migrated MainPage.xaml.cs.", "root_cause": "In WinUI 3 the named-color class relocated to `Microsoft.UI.Colors` (requires `using Microsoft.UI;`). Bootstrap only rewrites `Windows.UI.Xaml`, so this reference was never converted.", "fix": "Replace `Windows.UI.Colors` with `Microsoft.UI.Colors` and add `using Microsoft.UI;` (session-log.txt:2635-2641)." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "x:Bind / x:DataType in DataTemplate", "special_handling": "The XAML markup compiler resolves project-local `x:DataType` types (e.g. `local:Scenario`) only after the code-behind assembly compiles. A C# compile error makes Pass2 emit misleading WMC0909/WMC1111/WMC1509/WMC9999 errors against x:Bind even though the binding is correct." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0234: The type or namespace name 'Colors' does not exist in the namespace 'Windows.UI'", "root_cause": "Windows.UI.Colors relocated to Microsoft.UI.Colors; not rewritten by bootstrap.", "fix": "Windows.UI.Colors -> Microsoft.UI.Colors + using Microsoft.UI;" },
+    { "error": "WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 'DataTemplates containing x:Bind need a DataType' + WMC1509 'No LocalAssembly parameter...' + WMC9999 internal error", "root_cause": "Cascade from the CS0234 code-behind failure: with the assembly not compiled, the XAML markup compiler cannot resolve the project-local `local:Scenario` DataType. The x:Bind/x:DataType markup was actually correct (xmlns:local=using:Barometer, class Scenario in namespace Barometer).", "fix": "Real fix was the CS0234 correction. The agent ALSO downgraded `{x:Bind Title}`+`x:DataType` to `{Binding Title}` (session-log.txt:2652) — an unnecessary regression from compiled to classic binding; fixing the C# error alone would have cleared the WMC errors." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "TURN 27-30, session-log.txt:2557-2660", "symptom": "One build produced 5 errors (1 real CS0234 + 4 cascade WMC XAML errors); agent treated the XAML errors as an independent x:Bind/x:DataType problem.", "turns_or_retries": "~2 turns; two separate 'fixes' applied in one pass", "root_cause": "Skill does not explain that WMC-series XAML-compiler errors commonly cascade from a C# compile failure, so the agent mis-attributed them and downgraded x:Bind to Binding to make the WMC errors disappear.", "how_resolved": "Fixed Colors CS0234 and simultaneously replaced x:Bind with Binding; next build succeeded.", "preventable_by": "MIGRATION-PATTERNS.md x:Bind section stating: fix all CS#### errors first and rebuild before diagnosing WMC0909/WMC1111/WMC1509/WMC9999; never downgrade x:Bind->Binding to silence a cascade." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

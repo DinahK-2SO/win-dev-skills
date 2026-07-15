@@ -1,0 +1,16 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Scenario 1 'Data Events' reachable, all controls (Enable, Disable) present, visuals match UWP golden, correct hardware-gated status.", "status": "pass", "reason": "Full 2/2 control coverage; visuals match; red 'No barometer found' status shown.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Scenario 2 'Polling' reachable, control (Get Data) present, visuals match, correct status.", "status": "pass", "reason": "Full 1/1 control coverage; reachable via title-driven nav; shared status shown.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Data Events Enable/Disable buttons", "uwp": "Enable button clickable even with no sensor (click re-shows 'No barometer found').", "winui": "Enable/Disable rendered disabled (greyed) because no sensor present.", "screenshot_ref": "001_score-Barometer/notes/parity/winui3/screenshots/01_Data_Events.png" }
+  ],
+  "missing_features": [],
+  "summary": "Faithful, functional replica; 100/100. The only parity nuance is a benign, non-scoring defensive-UI choice (buttons disabled when no sensor) plus an added fallback text line. Neither drops or alters an original control. All measured friction was build-time (Windows.UI.Colors relocation + a cascade XAML-compiler misdiagnosis), not visible in the final app."
+}

@@ -1,0 +1,14 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The WinUI app renders the Data Events Enable/Disable buttons disabled (greyed) when no barometer sensor is present, whereas the UWP golden leaves the Enable button clickable (clicking only re-shows 'No barometer found'). Net user-visible outcome is identical.",
+      "evidence": "001_score-Barometer/notes/discrepancies.json — 'control-state-difference', severity minor, downgrade:false; migration-score.json still scores both features pass (100/100).",
+      "covered_clearly_at": "SKILL.md:178 ('Do not regenerate XAML from scratch. Copy each *.xaml verbatim, then transform — controls, names, and event handlers must be preserved') and SKILL.md:102 ('preserve its structure as faithfully as controls allow').",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already directs faithful preservation of the source's control state; adding defensive IsEnabled gating was a benign, scenario-specific (hardware-gated) choice that did not drop a control, did not alter the net outcome, and did not lower the score. A capable re-run would either preserve the enabled state or make the same harmless choice — no generalizable skill change is warranted, and encoding 'do not defensively disable controls' would be low-value prose bloat."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "scenario": "Barometer",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: also rewrite Windows.UI.Colors/ColorHelper -> Microsoft.UI.* (word-boundary guarded so the Windows.UI.Color struct is untouched) — prevents the recurring CS0234 on status-block coloring that the bootstrap's Xaml-only rewrite left behind.",
+    "unsupported-api-inventory.json: add residueOnly patterns for Windows.UI.Colors/ColorHelper so Validate-UwpMigration.ps1 flags any leftover named-color relocation.",
+    "MIGRATION-PATTERNS.md: document that WMC0909/WMC1111/WMC1509/WMC9999 XAML errors usually cascade from a C# compile failure — fix all CS#### errors first, then re-judge; never downgrade x:Bind/x:DataType to {Binding} to silence the cascade.",
+    "MIGRATION-PATTERNS.md: clarify Colors/ColorHelper are relocated types while the Windows.UI.Color struct stays put."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}
