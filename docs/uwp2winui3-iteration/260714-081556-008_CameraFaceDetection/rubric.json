@@ -1,0 +1,19 @@
+{
+  "scenario": "CameraFaceDetection",
+  "source": "single-page UWP sample (FaceDetection.MainPage) — camera preview + face detection",
+  "features": [
+    {
+      "name": "CameraFaceDetection",
+      "controls": [
+        { "name": "PreviewControl", "type": "CaptureElement", "role": "live camera preview surface" },
+        { "name": "FacesCanvas", "type": "Canvas", "role": "overlay hosting face bounding boxes" },
+        { "name": "PhotoButton", "type": "Button", "role": "capture a photo (enabled once camera initialized)" },
+        { "name": "VideoButton", "type": "Button", "role": "start/stop video recording (enabled once camera initialized)" },
+        { "name": "FaceDetectionButton", "type": "Button", "role": "toggle face detection on/off (enabled once camera initialized)" }
+      ],
+      "actions": [ "PhotoButton", "VideoButton", "FaceDetectionButton" ],
+      "outputs": [ "camera preview frames", "face bounding-box overlays" ],
+      "notes": "All three buttons start IsEnabled=False and only enable after a camera device is found and MediaCapture initializes. On a machine with no camera the buttons remain disabled. This is hardware-gated behavior in the original UWP app."
+    }
+  ]
+}

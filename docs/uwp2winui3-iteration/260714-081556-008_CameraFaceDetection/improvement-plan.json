@@ -1,0 +1,28 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Skill classifies CaptureElement (live camera preview) as unsupported/'no compatible replacement' and tells the agent to DEFER the camera page, which would blank the whole feature.",
+      "evidence": "MIGRATION-PATTERNS.md L53-55 + unsupported-api-inventory.json 'unsupported' entry; contradicted by migration-score.json ('software-bitmap-into-Image is the correct equivalent') and the migrated MainPage.xaml.cs L202-239 which builds/runs.",
+      "root_cause": "Conflates 'no drop-in XAML element' with 'no migration path'. Live preview -> <Image> + SoftwareBitmapSource fed by MediaCapture frames (Bgra8/Premultiplied); FaceDetectionEffect -> FaceDetector.DetectFacesAsync per Gray8 frame.",
+      "tier": 1,
+      "change": "Reclassified <CaptureElement> from 'unsupported' to 'adaptable' (anchor 'capture', tier sensitive) in unsupported-api-inventory.json; rewrote the CS0246/CaptureElement subsection to stop instructing 'defer'; added a new '<a id=\"capture\">' section in MIGRATION-PATTERNS.md with the Image+SoftwareBitmapSource recipe and the FaceDetectionEffect->FaceDetector pivot (incl. the Windows.Media.Core vs Windows.Media.FaceAnalysis namespace note).",
+      "file": "scripts/unsupported-api-inventory.json + MIGRATION-PATTERNS.md",
+      "expected_effect": "Bootstrap now tags camera files 'adapt' (routed to anchor 'capture') instead of 'defer'; agent gets a concrete recipe and avoids the CS0246 FaceDetectionEffect loop.",
+      "falsifiable_check": "On a re-run: Get-MigrationPattern.ps1 -Anchor capture returns the recipe (exit 0); the camera page is not entered in MIGRATION-DEFERRED.md; FaceDetectionEffect CS0246 turns disappear; preview migrates to an <Image>."
+    },
+    {
+      "problem": "A removed UWP theme-resource key ({ThemeResource SystemErrorTextColor}) crashes the XAML markup compiler with an opaque WMC9999/WMC1509 instead of a clear 'resource not found'; the agent misattributed it to FaceDetectionEffect and looped.",
+      "evidence": "build-events.jsonl: 15x SystemErrorTextColor, 'Xaml Internal Error WMC9999: Object reference not set' + WMC1509; agent quote acknowledging SystemErrorTextColor is invalid.",
+      "root_cause": "The DynamicResource->ThemeResource section notes key names changed but never states the failure mode: a dangling key crashes the compiler opaquely.",
+      "tier": 3,
+      "change": "Added a failure-mode warning to the existing 'Resource references' section: treat WMC9999 on a XAML build as a dangling resource key (not a .cs bug); verify every theme/static key exists in WinUI 3 and replace removed UWP System* keys with a Fluent equivalent or literal brush.",
+      "file": "MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent recognizes WMC9999 as a resource-key problem immediately and fixes the XAML instead of chasing code.",
+      "falsifiable_check": "On a re-run with a bad theme key, the agent resolves WMC9999 by fixing the resource key in <=1 diagnostic turn rather than looping on unrelated code."
+    }
+  ],
+  "deferred_to_human": []
+}

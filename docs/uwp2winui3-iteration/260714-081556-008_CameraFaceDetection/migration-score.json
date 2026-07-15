@@ -1,0 +1,23 @@
+{
+  "scenario": "CameraFaceDetection",
+  "uwp_launchable": true,
+  "score": 50,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 1,
+  "features_fail": 0,
+  "uwp_capture_status": "ok (splash rendered; UWP CoreWindow content not exposed via UIA through ApplicationFrameHost, and app is camera-hardware-gated on this VM — no controls responded in the golden)",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "CameraFaceDetection",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_CameraFaceDetection.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_CameraFaceDetection.png",
+      "note": "Faithful migration: WinUI 3 app builds, runs, and renders a clean non-blank frame. All interactive controls present in the UIA tree (PhotoButton, VideoButton, FaceDetectionButton) plus the migrated camera-preview Image (CaptureElement->Image, automationId=PreviewImage) and a defensive 'No camera device found' fallback. Structural gate: coverage 3/5 -> partial (PreviewControl matched under its new name PreviewImage; FacesCanvas is a Canvas with no UIA peer in either framework — both false-negatives, not real gaps). Not scored 'pass' because the three buttons are IsEnabled=False (camera-hardware-gated on this VM) and could not be actuated to positively confirm behavior. No behavioral regression: the UWP golden is gated identically and had no responding controls."
+    }
+  ]
+}

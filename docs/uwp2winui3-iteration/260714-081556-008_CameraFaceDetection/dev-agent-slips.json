@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Partial score (buttons IsEnabled=False, behavior unverifiable) because the VM has no camera.",
+      "evidence": "migration-score.json: buttons present with correct AutomationIds but disabled; identical to the UWP golden (no regression).",
+      "covered_clearly_at": "SKILL.md L196-202 'Defensive UI for device-dependent features' (the agent already applied it — fallback panel rendered).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "This is an environment hardware-gating artifact, not a skill or agent failure. The skill's defensive-UI guidance was followed correctly and produced a non-blank frame; no skill edit could raise the score without a camera present. Not a skill change."
+    }
+  ]
+}

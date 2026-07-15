@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Referencing a UWP theme-resource key that does not exist in WinUI 3 ({ThemeResource SystemErrorTextColor}) crashes the XAML markup compiler with an opaque 'Xaml Internal Error WMC9999: Object reference not set' (+ WMC1509) instead of a clear 'resource not found'. The agent misattributed the crash to FaceDetectionEffect and looped.",
+      "evidence": "build-events.jsonl: {ThemeResource SystemErrorTextColor} present 15x; build error 'Xaml Internal Error WMC9999: Object reference not set to an instance of an object' + 'WMC1509'. Agent quote: 'I'm realizing that SystemErrorTextColor isn't a valid WinUI 3 theme resource, so that XAML reference is likely causing the compiler crash.'",
+      "covered_at": "MIGRATION-PATTERNS.md L593-609 '### Resource references: DynamicResource -> ThemeResource'",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "The section already tells agents to migrate to {ThemeResource} and that key names changed, but does not warn about the FAILURE MODE: an unknown/removed key does not produce a clear error — it crashes the markup compiler with WMC9999/WMC1509. Add a short warning + the rule 'verify every {ThemeResource}/{StaticResource} key exists in WinUI 3; replace removed UWP System* keys with a Fluent equivalent or a literal brush', and give WMC9999-on-a-resource-key as the diagnostic signature.",
+      "generalizes": "Many UWP System*/SystemControl* brush and color keys were removed or renamed in Fluent v2. Any migrated XAML that keeps such a key hits the same opaque compiler crash, so a one-line failure-mode warning saves debugging time across most XAML-heavy migrations."
+    }
+  ]
+}

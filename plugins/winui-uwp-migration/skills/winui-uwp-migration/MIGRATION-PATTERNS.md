@@ -52,7 +52,45 @@ Generated sources never belong in source control or the migrated tree — only `
 
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
-`<CaptureElement>` is listed under [Unsupported on WinUI 3 Desktop](#unsupported-on-winui-3-desktop-no-migration-path). The file using it should be marked `Triage label = defer` in `MIGRATION-MAPPING.md` and entered in `MIGRATION-DEFERRED.md`. Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).
+`<CaptureElement>` does not exist in WinUI 3, but the **live camera preview is not a defer** — it has a standard replacement: render `MediaCapture` preview frames into an `<Image>` via `SoftwareBitmapSource`. See the [Camera preview](#capture) section below for the full recipe. Do **not** mark the camera page `defer` — that deletes the whole feature and leaves a blank window. (`MediaPlayerElement` is only for media playback, not the live camera surface.)
+
+<a id="capture"></a>
+## Camera preview: `CaptureElement` → `Image` + `SoftwareBitmapSource`
+
+`MediaCapture` itself carries over unchanged, but WinUI 3 has **no XAML preview element**. The live preview migrates to an `<Image>` whose source is a `SoftwareBitmapSource` that you refresh from `MediaCapture` frames. This is `adaptable`, not `defer` — deferring loses the entire camera feature. Keep the [Defensive UI](SKILL.md) fallback so a device-less machine still renders a non-blank frame.
+
+XAML — swap the element (preserve the name/`AutomationProperties` so parity checks still match):
+
+```xml
+<!-- was: <CaptureElement x:Name="PreviewControl" .../> -->
+<Image x:Name="PreviewImage" Stretch="Uniform"
+       AutomationProperties.Name="Camera preview"/>
+```
+
+C# — pump frames into the `Image` (`SoftwareBitmapSource` requires **Bgra8 + Premultiplied**):
+
+```csharp
+_previewSource = new SoftwareBitmapSource();
+PreviewImage.Source = _previewSource;
+// per frame (timer/loop, or a MediaFrameReader for higher fps):
+var frame = new VideoFrame(BitmapPixelFormat.Bgra8, w, h);
+await _mediaCapture.GetPreviewFrameAsync(frame);
+var bmp = frame.SoftwareBitmap;
+if (bmp.BitmapPixelFormat != BitmapPixelFormat.Bgra8 || bmp.BitmapAlphaMode == BitmapAlphaMode.Straight)
+    bmp = SoftwareBitmap.Convert(bmp, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+await _previewSource.SetBitmapAsync(bmp);
+```
+
+**Face / frame analysis (`FaceDetectionEffect` → `FaceDetector`):** the UWP live `FaceDetectionEffect` (which lives in `Windows.Media.Core`, **not** `Windows.Media.FaceAnalysis` — that mismatch is the usual `CS0246`) has no CaptureElement pipeline to attach to. With the frame-pump above, run the detector per frame instead:
+
+```csharp
+_faceDetector ??= await FaceDetector.CreateAsync();          // Windows.Media.FaceAnalysis
+using var gray8 = SoftwareBitmap.Convert(bmp, BitmapPixelFormat.Gray8); // DetectFacesAsync needs Gray8
+var faces = await _faceDetector.DetectFacesAsync(gray8);
+```
+
+Draw the returned `FaceBox` rectangles onto a `Canvas` overlaid on the `Image`. The same "poll a frame → analyse → overlay" shape applies to other MediaCapture effects (OCR, barcode).
+
 
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
@@ -607,6 +645,8 @@ WinUI 3 ships Fluent theme resources under `ThemeResource`. UWP code that used `
 ```
 
 The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-reference with the [Fluent Design colour palette](https://learn.microsoft.com/windows/apps/design/style/xaml-theme-resources).
+
+> **Failure mode — a removed key crashes the XAML compiler, it does not warn.** If a `{ThemeResource X}` / `{StaticResource X}` names a key that **no longer exists** in WinUI 3 (many UWP `System*` / `SystemControl*` brush and colour keys were removed or renamed — e.g. `SystemErrorTextColor`, `SystemControlForegroundBaseHighBrush`), the markup compiler does **not** emit a clear "resource not found". It throws an opaque **`Xaml Internal Error WMC9999: Object reference not set to an instance of an object`** (often alongside `WMC1509`). Treat `WMC9999` on a XAML build as a **dangling resource key**, not a code bug — do not go hunting in `.cs`. **Verify every theme/static resource key exists in WinUI 3**; replace unknown UWP keys with a Fluent equivalent or an explicit literal brush (`Foreground="Red"` / `<SolidColorBrush .../>`).
 
 ### Controls that need element-level swaps
 

@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Reclassify CaptureElement as adaptable (not defer) and add a MIGRATION-PATTERNS 'capture' section: live preview -> Image + SoftwareBitmapSource from MediaCapture frames; deferring loses the whole camera feature",
+    "Document FaceDetectionEffect -> FaceDetector.DetectFacesAsync per Gray8 frame, incl. the Windows.Media.Core vs Windows.Media.FaceAnalysis namespace that caused the CS0246 loop",
+    "Warn that a removed UWP theme-resource key (e.g. SystemErrorTextColor) crashes the XAML compiler with opaque WMC9999/WMC1509 — treat WMC9999 as a dangling resource key, verify keys exist in WinUI 3"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

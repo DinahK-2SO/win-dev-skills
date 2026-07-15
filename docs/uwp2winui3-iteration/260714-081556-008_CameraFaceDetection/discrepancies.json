@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 1,
+  "score": 50,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    {
+      "id": 0,
+      "text": "Camera face-detection page: live preview (CaptureElement), face overlay Canvas, Photo/Video/FaceDetection buttons",
+      "status": "partial",
+      "reason": "Builds, runs, renders a clean non-blank frame; all controls present in the UIA tree (PhotoButton, VideoButton, FaceDetectionButton, PreviewImage) plus a defensive fallback. Buttons IsEnabled=False (no camera on VM) so behavior could not be positively actuated. No behavioral regression vs the identically-gated UWP golden.",
+      "suspected_skill_gap": "Skill told the agent CaptureElement has 'no compatible replacement' and should be deferred; the agent had to discover the Image+SoftwareBitmapSource recipe itself. A future agent that obeyed the skill would defer the camera page and blank the whole feature."
+    }
+  ],
+  "visual_discrepancies": [
+    { "feature": "CameraFaceDetection preview", "uwp": "blank splash (camera-gated)", "winui": "clean fallback panel 'No camera device found on this machine.'", "screenshot_ref": "parity/winui3/screenshots/01_CameraFaceDetection.png" }
+  ],
+  "missing_features": [],
+  "summary": "Faithful migration that builds and runs. Central substance was CaptureElement->Image+SoftwareBitmapSource live-preview and FaceDetectionEffect->FaceDetector-on-frames — a pattern the skill currently marks as unsupported/defer. Partial score is a hardware-gating artifact, not a migration defect."
+}

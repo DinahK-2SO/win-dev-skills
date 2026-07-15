@@ -1,0 +1,27 @@
+{
+  "scenario": "CameraFaceDetection",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CaptureElement (live camera preview) is classified as unsupported with 'no compatible replacement', instructing the agent to DEFER the file.",
+      "evidence": "MIGRATION-PATTERNS.md L53-55 ('there is no compatible replacement' / mark defer); unsupported-api-inventory.json 'unsupported' list entry for <CaptureElement>. Score note (migration-score.json) contradicts this: 'CaptureElement does not exist in WinUI 3, so software-bitmap-into-Image is the correct equivalent.' The migrated app (MainPage.xaml.cs L202-239) implements exactly that and builds/runs.",
+      "skill_search": "grepped skill for CaptureElement / MediaCapture / SoftwareBitmap / camera",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "'Do **not** try to fake it with a placeholder XAML element — the build will fail and there is no compatible replacement (`MediaPlayerElement` covers playback only, not the live camera preview API surface).'",
+      "root_cause": "The skill conflates 'no drop-in XAML element' with 'no migration path'. A live preview migrates to <Image> + SoftwareBitmapSource fed by MediaCapture.GetPreviewFrameAsync / MediaFrameReader frames (convert to Bgra8/Premultiplied). Deferring instead deletes the whole camera feature.",
+      "proposed_fix": "Reclassify <CaptureElement> from 'unsupported' to 'adaptable' (anchor 'capture') in unsupported-api-inventory.json; rewrite the CS0246/CaptureElement subsection in MIGRATION-PATTERNS.md to point at a new '<a id=\"capture\">' section giving the Image+SoftwareBitmapSource recipe, and pair FaceDetectionEffect -> FaceDetector.DetectFacesAsync(Gray8) on frames.",
+      "generalizes": "Every UWP camera app uses CaptureElement for live preview; the Image+SoftwareBitmapSource pattern is the standard, documented WinUI 3 replacement. Recurs across all camera/scanner/AR/preview scenarios."
+    },
+    {
+      "problem": "FaceDetectionEffect / FaceDetectedEventArgs not found (CS0246 x22); the skill has no guidance for migrating a live FaceDetectionEffect.",
+      "evidence": "build-events.jsonl CS0246 on FaceDetectionEffect/FaceDetectedEventArgs (many turns of speculation about unprojected namespaces / missing NuGet). Final MainPage.xaml.cs uses FaceDetector.CreateAsync + DetectFacesAsync (L288-290, L255-256).",
+      "skill_search": "grepped skill for FaceDetect / FaceDetector / Windows.Media.Core / Windows.Media.FaceAnalysis — absent",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "FaceDetectionEffect/FaceDetectedEventArgs live in Windows.Media.Core (not Windows.Media.FaceAnalysis). With an Image-based preview there is no CaptureElement/effect pipeline, so the natural WinUI 3 approach is FaceDetector.DetectFacesAsync per polled frame (Gray8). The skill covers neither the namespace nor the pivot.",
+      "proposed_fix": "In the new 'capture' section, document FaceDetectionEffect -> FaceDetector-on-frames (Windows.Media.FaceAnalysis; Gray8) and note FaceDetectionEffect itself is in Windows.Media.Core if a live effect is retained.",
+      "generalizes": "MediaCapture live-analysis effects (face, but also the same pattern for barcode/OCR frame analysis) recur; pairing frame-polling preview with per-frame analysis is the general WinUI 3 shape."
+    }
+  ]
+}
