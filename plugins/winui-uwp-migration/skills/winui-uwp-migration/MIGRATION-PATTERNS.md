@@ -332,6 +332,31 @@ switch (args.Kind)
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
 
+### Suspend / Resume lifecycle events are removed
+
+The UWP `Application` **suspend/resume lifecycle events do not exist** on the WinUI 3
+`Microsoft.UI.Xaml.Application` — desktop apps are not suspended/terminated by the OS the
+way UWP apps are. Any of these will fail to build (typically **CS1061 "Application does
+not contain a definition for …"**):
+
+| UWP (removed) | WinUI 3 replacement |
+|---|---|
+| `this.Suspending += OnSuspending;` (+ `OnSuspending(object, SuspendingEventArgs)` with `e.SuspendingOperation.GetDeferral()`) | Save state on window close: `window.Closed += async (s, a) => await SaveStateAsync();` (no deferral — `await` directly). |
+| `this.Resuming += OnResuming;` | No general resume; restore state during `OnLaunched` startup (or `Window.Activated` if you need per-activation restore). |
+| `EnteredBackground` / `LeavingBackground` | No equivalent; drop, or use `Window.Activated` (`WindowActivationState`) if you need focus-based behavior. |
+
+This is the classic UWP **`SuspensionManager` / `NavigationHelper` "Common" template**
+(shipped in most UWP SDK samples and VS templates). The manager classes themselves port
+fine; only the **App-level wiring** must move off `Suspending`:
+
+```csharp
+// Remove: this.Suspending += OnSuspending;  and the OnSuspending handler + SuspendingEventArgs.
+// In OnLaunched, after creating the window:
+window.Closed += async (s, a) => await SuspensionManager.SaveAsync();
+```
+
+Also delete the now-unused `using Windows.ApplicationModel;` (home of `SuspendingEventArgs`).
+
 <a id="background-tasks"></a>
 ## Background Tasks
 

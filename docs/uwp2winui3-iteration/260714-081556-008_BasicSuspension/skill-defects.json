@@ -1,0 +1,17 @@
+{
+  "scenario": "BasicSuspension",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "UWP Application.Suspending event (this.Suspending += OnSuspending) does not exist on the WinUI 3 Application class, causing a hard build failure (CS1061). The dev-agent had to infer the Window.Closed replacement with no skill guidance.",
+      "evidence": "session-log.txt line 1961: \"error CS1061: 'App' does not contain a definition for 'Suspending'\"; Turn 12 fetched -Anchor lifecycle which returned only activation guidance (line 2059) and did not mention Suspending; Turns 13-20 the agent removed the hook and re-routed SaveAsync to window.Closed.",
+      "skill_search": "Grepped MIGRATION-PATTERNS.md and SKILL.md for 'Suspend|Resuming|lifecycle|Closed|EnteredBackground'; grepped unsupported-api-inventory.json for 'Suspend'.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The 'Application Lifecycle and Activation' anchor (MIGRATION-PATTERNS.md line 316) covers only OnLaunched/OnActivated/OnFileActivated -> AppInstance/AppLifecycle. It never states that the Suspending/Resuming/EnteredBackground/LeavingBackground lifecycle events are removed in WinUI 3, nor gives the Window.Closed replacement. The API is also absent from unsupported-api-inventory.json, so the bootstrap injects no TODO to warn the agent.",
+      "proposed_fix": "Add a 'Suspend / Resume lifecycle events' subsection to the lifecycle anchor in MIGRATION-PATTERNS.md documenting that Application.Suspending/Resuming/EnteredBackground/LeavingBackground do not exist on the WinUI 3 Application, and to save/restore state from Window.Closed (or AppLifecycle) instead — dropping SuspendingEventArgs/deferral and the Windows.ApplicationModel using. Also add an 'adaptable' entry (pattern matching .Suspending += / SuspendingEventArgs / EnteredBackground, anchor 'lifecycle') to unsupported-api-inventory.json so Initialize-UwpMigration.ps1 injects an inline TODO at bootstrap.",
+      "generalizes": "The SuspensionManager/NavigationHelper 'Common' template that wires this.Suspending += OnSuspending shipped in nearly every UWP SDK sample and Visual Studio UWP project template. Any such app fails to build on the removed Suspending event, so this fix prevents a recurring CS1061 across the whole UWP->WinUI 3 corpus, not just this scenario."
+    }
+  ]
+}

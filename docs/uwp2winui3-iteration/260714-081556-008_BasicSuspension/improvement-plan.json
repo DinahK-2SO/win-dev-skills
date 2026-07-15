@@ -1,0 +1,18 @@
+{
+  "scenario": "BasicSuspension",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "UWP Application.Suspending event (this.Suspending += OnSuspending, SuspendingEventArgs, deferral) does not exist on the WinUI 3 Application class -> CS1061 build failure; the skill gave no guidance and the dev-agent had to infer the Window.Closed replacement.",
+      "evidence": "session-log.txt:1961 'error CS1061: App does not contain a definition for Suspending'; Turn 12 fetched -Anchor lifecycle (line 2059) which covered only activation and not Suspending; lessons.json.failed_apis + skill-defects.json.",
+      "root_cause": "The 'Application Lifecycle and Activation' anchor documents only OnLaunched/OnActivated/OnFileActivated -> AppInstance/AppLifecycle. It omits the removal of the Suspending/Resuming/EnteredBackground/LeavingBackground events and the Window.Closed replacement; the API is also absent from unsupported-api-inventory.json so no bootstrap TODO is injected.",
+      "tier": 1,
+      "change": "Added a 'Suspend / Resume lifecycle events are removed' subsection to the lifecycle anchor in MIGRATION-PATTERNS.md (UWP->WinUI 3 mapping table + SuspensionManager wiring example: move SaveAsync to window.Closed, drop SuspendingEventArgs/deferral and the Windows.ApplicationModel using). Added an 'adaptable' entry to unsupported-api-inventory.json matching .Suspending += / SuspendingEventArgs / .Resuming += / EnteredBackground / LeavingBackground, routed to the lifecycle anchor, so Initialize-UwpMigration.ps1 injects an inline TODO before the build breaks.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+      "expected_effect": "UWP apps using the SuspensionManager/Suspending template migrate without hitting CS1061; the agent is pointed at the Window.Closed replacement at bootstrap time.",
+      "falsifiable_check": "On re-run of any scenario whose UWP source contains 'this.Suspending +=', the bootstrap injects a lifecycle TODO and the build no longer emits CS1061 on 'Suspending'."
+    }
+  ],
+  "deferred_to_human": []
+}

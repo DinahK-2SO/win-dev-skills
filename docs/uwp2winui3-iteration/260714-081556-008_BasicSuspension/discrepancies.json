@@ -1,0 +1,13 @@
+{
+  "scenario": "BasicSuspension",
+  "index": 1,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "ListView 'list' present and reachable in the WinUI 3 UIA tree with its label and Item 1..N; no dead controls vs the UWP golden.", "status": "pass", "reason": "ListView 'list' present (coverage 1/1) with label and Item 1..4; AppBar add/reset/more present and enabled; 0 action controls on the main surface so no behavioral regressions.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Final migration scored 100 with full structural + behavioral + visual parity. No parity discrepancies. The only development-time issue was a self-recovered CS1061 on the removed Application.Suspending event — captured as a generalizable skill-defect, not a parity gap."
+}

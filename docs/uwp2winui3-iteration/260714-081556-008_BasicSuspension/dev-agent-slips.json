@@ -1,0 +1,21 @@
+{
+  "scenario": "BasicSuspension",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Piping `dotnet build` through `Select-String` buffered output and appeared to hang; the agent waited 3x120s before stopping the shell and re-running unfiltered.",
+      "evidence": "session-log.txt Turns 16-19: shellId 7 repeatedly reported 'still running'; Turn 19 stop_powershell, Turn 20 re-ran `dotnet build -c Debug -p:Platform=$Platform` unfiltered and it succeeded (line 2489 'Build succeeded').",
+      "covered_clearly_at": "SKILL.md build/validate guidance already instructs running `dotnet build` to surface errors; the harness tool docs cover long-running builds via read_powershell. This is an agent command-shaping choice, not missing skill content.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable model would run the build unfiltered or read the shell output incrementally; no migration-skill edit generalizes this away, and it did not affect the final result."
+    },
+    {
+      "problem": "A self-inflicted duplicated code block appeared in App.xaml.cs after the first edit, requiring a cleanup edit.",
+      "evidence": "session-log.txt Turn 15: agent removed duplicated trailing OnNavigationFailed/OnSuspending content it had just introduced.",
+      "covered_clearly_at": "General editing discipline; no UWP->WinUI 3 skill guidance is implicated.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Editing hygiene issue unrelated to migration knowledge; a re-run would likely avoid it and no skill text would prevent it."
+    }
+  ]
+}

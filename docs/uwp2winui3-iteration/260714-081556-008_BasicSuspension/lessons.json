@@ -1,0 +1,31 @@
+{
+  "scenario": "BasicSuspension",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Get-MigrationPattern.ps1 -Anchor lifecycle", "evidence": "Turn 12: agent fetched the lifecycle anchor while diagnosing the CS1061 Suspending error; one-anchor-at-a-time routing kept the turn small." },
+    { "tool": "dotnet build -c Debug -p:Platform=x64", "evidence": "Turn 11 surfaced the CS1061 error cleanly; Turn 20 confirmed Build succeeded with 0 errors after the fix." }
+  ],
+  "tools_problematic": [
+    { "tool": "dotnet build ... | Select-String -Pattern 'error|warning|Build|...'", "problem": "Piping the build through Select-String buffered output and appeared to hang; agent waited 3x120s then had to stop the shell and re-run unfiltered.", "evidence": "Turns 16-20: shellId 7 kept reporting 'still running', agent issued stop_powershell then re-ran without the filter." }
+  ],
+  "tool_limitations": [
+    { "tool": "Get-MigrationPattern.ps1 -Anchor lifecycle", "limitation": "The lifecycle anchor only covers activation (OnLaunched/OnActivated/OnFileActivated); it returned nothing about the Suspending/Resuming events, so it did not directly resolve the actual error.", "suggested_tweak": "Extend the lifecycle anchor to cover Application.Suspending/Resuming/EnteredBackground removal and the Window.Closed replacement." }
+  ],
+  "failed_apis": [
+    { "api": "Application.Suspending event ( this.Suspending += OnSuspending )", "why_tried": "Carried over verbatim from the UWP SuspensionManager template to save session state on suspend.", "root_cause": "The WinUI 3 Microsoft.UI.Xaml.Application class has no Suspending (or Resuming/EnteredBackground/LeavingBackground) event; desktop apps are not suspended by the OS the way UWP apps are.", "fix": "Remove the Suspending subscription and OnSuspending handler; save state from Window.Closed (e.g. window.Closed += async (s,a) => await SuspensionManager.SaveAsync();). Drop the now-unused Windows.ApplicationModel using and SuspendingEventArgs/deferral code." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "SuspensionManager / NavigationHelper Common template (UWP SDK samples & VS templates)", "special_handling": "The Common\\SuspensionManager.cs pattern builds under WinUI 3, but its App-level wiring depends on the removed Suspending event. The manager is reusable; only the lifecycle hook must be re-routed to Window.Closed." }
+  ],
+  "errors_encountered": [
+    { "error": "CS1061: 'App' does not contain a definition for 'Suspending'", "root_cause": "UWP Application.Suspending event does not exist on the WinUI 3 Application base class.", "fix": "Remove this.Suspending += OnSuspending; save state on Window.Closed instead; delete the OnSuspending/SuspendingEventArgs deferral handler." },
+    { "error": "XamlCompiler WMC9999 'Object reference not set' during MarkupCompilePass2", "root_cause": "Cascade of the same failing build (XAML precompile ran against a project that failed C# compile); it disappeared once the CS1061 was fixed.", "fix": "Fix the underlying C# compile error; the XAML internal error was not independent." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "App.xaml.cs lifecycle wiring", "symptom": "Build failed with CS1061 on this.Suspending; the fetched lifecycle anchor did not mention Suspending, so the agent had to infer the Window.Closed replacement itself.", "turns_or_retries": "Turns 11-20 (1 failed build, 1 self-inflicted duplicated-code edit to clean up, then success)", "root_cause": "Migration skill documents activation events but not the removal of the Suspending/Resuming lifecycle events, which are ubiquitous in UWP SuspensionManager templates.", "how_resolved": "Agent removed the Suspending hook and moved SaveAsync to window.Closed.", "preventable_by": "Adding a Suspending/Resuming removal + Window.Closed replacement subsection to the lifecycle anchor and flagging the API in unsupported-api-inventory.json so the bootstrap injects an inline TODO." },
+    { "where": "Build command", "symptom": "Piping dotnet build through Select-String appeared to hang for 3x120s.", "turns_or_retries": "Turns 16-19", "root_cause": "Filtered/buffered pipeline hid progress; not a skill-content issue.", "how_resolved": "Stopped the shell and re-ran the build unfiltered.", "preventable_by": "Agent-side habit of running dotnet build unfiltered; no skill change warranted." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}
