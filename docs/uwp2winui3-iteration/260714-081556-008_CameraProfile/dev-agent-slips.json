@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Migrated app rendered in light theme while the UWP golden was captured in dark theme.",
+      "evidence": "score discrepancies.json 'theme' item ('reflects the host system theme, not a migration defect'); parity/winui3/screenshots/00_launch.png.",
+      "covered_clearly_at": "N/A — not a skill concern; this is host system theme at capture time, not anything the migration controls.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The theme is determined by the host OS at runtime, not by the migration output. No skill edit could or should change it; layout/controls/nav all matched the UWP structure."
+    },
+    {
+      "problem": "UWP behavioural golden could not be captured (winapp UIA could not drive the ApplicationFrameHost-hosted CoreWindow).",
+      "evidence": "migration-score.json uwp_capture_status 'only a top-level Pane exposed ... per-scenario navigation and control actuation could not be performed on the UWP golden'.",
+      "covered_clearly_at": "N/A — this is a limitation of the evaluation tooling (uwp-app-runner / winui3-parity-check), which is out of scope for migration-skill changes.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "It is an eval-instrument limitation, not a migration-skill or dev-agent behaviour; modifying the eval skills is explicitly out of scope."
+    }
+  ]
+}

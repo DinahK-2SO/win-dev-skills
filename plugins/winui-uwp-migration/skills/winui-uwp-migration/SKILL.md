@@ -176,6 +176,7 @@ After PASS, do a final `winapp build` to confirm the build is still clean. Only 
 - Every page, UserControl, helper class, and XAML element in the source must appear in the target — unless explicitly deferred with a cited unsupported API.
 - Silent omission is a defect. If `MIGRATION-MAPPING.md` is missing a file you expected, the bootstrap input was wrong — fix the `-Source` path and re-run, do not patch by hand.
 - Do not regenerate XAML from scratch. Copy each `*.xaml` verbatim, then transform — controls, names, and event handlers must be preserved so the code-behind continues to compile.
+- **Give every interactive control a stable AutomationId.** UWP samples routinely declare action controls as bare `<Button Content="Do X" Click="..."/>` with no `x:Name`. When you copy a control that has **neither `x:Name` nor `AutomationProperties.AutomationId`**, add an `AutomationProperties.AutomationId="<stable-id>"` (derive it from the `Click` handler or the control's purpose). Without a stable id the control is unaddressable by UI Automation: parity capture can only target it by visible text, which frequently collides with a `NavigationView` item embedding the same scenario title — so the wrong element is invoked and a live control reads as **dead**. `Validate-UwpMigration.ps1` warns on any interactive control missing both identifiers. See MIGRATION-PATTERNS.md > "Interactive controls need a stable AutomationId".
 
 ### API-level
 

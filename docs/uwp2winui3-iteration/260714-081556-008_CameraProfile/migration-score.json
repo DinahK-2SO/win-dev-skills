@@ -1,0 +1,41 @@
+{
+  "scenario": "CameraProfile",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 3,
+  "features_pass": 3,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "partial: UWP launched (ok:true, pid 23188) and its initial frame was captured, but winapp UIA could not drive the ApplicationFrameHost-hosted CoreWindow (only a top-level Pane exposed), so per-scenario navigation and control actuation could not be performed on the UWP golden. Behavior judged from UWP source plus direct visual/behavioral verification of the migrated app.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Locate Record Specific Profile",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Locate_Record_Specific_Profile.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Locate_Record_Specific_Profile__a01_Find_640x480_30FPS_Recording_Profile.png",
+      "note": "Both buttons live: clicking each appends the video-device enumeration output and shows the expected 'No Video Device Id found' ERROR status (correct on a camera-less machine). Structural coverage 3/3, actions 2/2 live. Layout matches UWP (left nav, description, buttons, output box, status bar). UWP behavioral golden unavailable (see uwp_capture_status)."
+    },
+    {
+      "name": "Query Profile for Concurrency",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Query_Profile_for_Concurrency.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Query_Profile_for_Concurrency__a01_Query_for_Concurrent_Profile.png",
+      "note": "Button live: front/back panel enumeration output appended and expected ERROR 'A capture device doesn't support Video Profile' shown. Structural coverage 2/2, actions 1/1 live."
+    },
+    {
+      "name": "Query Profile for HDR Support",
+      "verdict": "pass",
+      "uwp_responded": null,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Query_Profile_for_HDR_Support.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Query_Profile_for_HDR_Support__manual_verified.png",
+      "note": "Button IS live. The automated capture invoke failed only due to target ambiguity (button Content is a substring of nav item '3) Query Profile for HDR Support' and has no AutomationId). Manual invoke by stable token btn-queryprofilefor-9f72 populated outputBox with HDR query output and the expected ERROR status — verified visually. Structural coverage 2/2. Not a dead control; a capture-targeting artifact."
+    }
+  ]
+}

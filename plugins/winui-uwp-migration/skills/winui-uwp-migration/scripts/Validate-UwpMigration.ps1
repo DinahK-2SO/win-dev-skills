@@ -401,6 +401,51 @@ if (Test-Path -LiteralPath $manifestPath) {
     Write-Host "[WARN] Package.appxmanifest not found at $manifestPath — skipping image-reference check"
 }
 
+# ─── 5d. Interactive controls need a stable automation identifier ─────────────
+# UWP SDK samples almost always declare their action controls as bare
+# `<Button Content="Do X" Click="..."/>` with no x:Name and no
+# AutomationProperties.AutomationId. Copying that verbatim (correct for fidelity)
+# leaves the control unaddressable by UI Automation: the parity capture can only
+# target it by its visible text, which frequently collides with a NavigationView
+# item that embeds the same scenario title (e.g. Content "Query Profile for HDR
+# Support" is a substring of nav item "3) Query Profile for HDR Support"), so the
+# driver invokes the wrong element and the action reads as dead (actionsInvoked
+# 0/N) even though the control is live. A stable AutomationId also makes the app
+# reachable by assistive technology. This is advisory (WARN) — a control named
+# via x:Name is already addressable (x:Name projects to AutomationId), so only
+# controls with NEITHER identifier are flagged.
+$interactiveTags = 'Button','ToggleButton','RepeatButton','DropDownButton','SplitButton',
+                   'ToggleSwitch','CheckBox','RadioButton','HyperlinkButton','AppBarButton',
+                   'AppBarToggleButton','MenuFlyoutItem','ToggleMenuFlyoutItem'
+$tagAlt = ($interactiveTags -join '|')
+$autoIdOffenders = New-Object System.Collections.Generic.List[object]
+foreach ($f in @($files | Where-Object { $_.Extension -eq '.xaml' })) {
+    $xamlText = [System.IO.File]::ReadAllText($f.FullName)
+    foreach ($m in [regex]::Matches($xamlText, "<(?<tag>$tagAlt)(?<attrs>\s[^>]*?)?/?>")) {
+        $attrs = $m.Groups['attrs'].Value
+        if ($attrs -match '\bx:Name\s*=' ) { continue }
+        if ($attrs -match 'AutomationProperties\.AutomationId\s*=') { continue }
+        if ($attrs -match '\bAutomationId\s*=') { continue }
+        $label = ''
+        $cm = [regex]::Match($attrs, 'Content\s*=\s*"([^"]*)"')
+        if ($cm.Success) { $label = $cm.Groups[1].Value }
+        $rel = [System.IO.Path]::GetRelativePath($Target, $f.FullName)
+        [void]$autoIdOffenders.Add([PSCustomObject]@{ File = $rel; Tag = $m.Groups['tag'].Value; Label = $label })
+    }
+}
+if ($autoIdOffenders.Count -eq 0) {
+    Write-Host "[PASS] Interactive controls — every Button/toggle/etc. has x:Name or AutomationProperties.AutomationId"
+} else {
+    Write-Host "[WARN] $($autoIdOffenders.Count) interactive control(s) have neither x:Name nor AutomationProperties.AutomationId — UI Automation cannot reliably target them (parity capture may match a same-named nav item instead, reading the action as dead):"
+    foreach ($o in $autoIdOffenders | Select-Object -First 15) {
+        $lbl = if ($o.Label) { " Content=`"$($o.Label)`"" } else { '' }
+        Write-Host "       $($o.File): <$($o.Tag)$lbl>"
+    }
+    if ($autoIdOffenders.Count -gt 15) { Write-Host "       ($($autoIdOffenders.Count - 15) more)" }
+    Write-Host "       Fix: add AutomationProperties.AutomationId=`"<stable-id>`" (derive from the Click handler / purpose) to each. See MIGRATION-PATTERNS.md > 'Interactive controls need a stable AutomationId'."
+    Add-Diag 'interactive controls missing AutomationId' (($autoIdOffenders | ForEach-Object { "$($_.File): <$($_.Tag)> $($_.Label)" }) -join "`n")
+}
+
 # ─── 6. dotnet build healthcheck ──────────────────────────────────────────────
 # The validator must gate on a clean build, otherwise common namespace-rewrite
 # fallout (CS0104 LaunchActivatedEventArgs ambiguity, CS0246 scaffold-vs-UWP

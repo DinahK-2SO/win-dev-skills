@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Migrated interactive controls (buttons) carry no stable automation identifier: none of the Scenario1/2/3 <Button> elements has x:Name or AutomationProperties.AutomationId (Content-only). This made the automated UIA capture unable to invoke the Scenario 3 'Query Profile for HDR Support' button — its Content is a substring of the nav item '3) Query Profile for HDR Support', so with no AutomationId the driver matched the nav popup instead.",
+      "evidence": "notes(score)/discrepancies.json 'automation-metadata' item ('no AutomationProperties.AutomationId ... invokeOk=false'); parity/winui3/parity-result.json scenario 3 actionsInvoked=0/1; generated Scenario3_EnableHdrProfile.xaml:39 '<Button Content=\"Query Profile for HDR Support\" Click=\"CheckHdrSupportBtn_Click\"/>' (no x:Name/AutomationId).",
+      "covered_at": "MIGRATION-PATTERNS.md:62 (CaptureElement→Image swap) — the ONLY mention of AutomationProperties: 'preserve the name/AutomationProperties so parity checks still match'. SKILL.md:178 fidelity rule: 'controls, names, and event handlers must be preserved'. The parity report footer (PARITY-REPORT.md:18) also advises 'Set AutomationProperties.AutomationId on controls to make this check reliable.'",
+      "why_missed": "under-emphasized + narrow-scope: AutomationProperties is mentioned once, only inside the camera-preview element-swap recipe, and only as 'preserve' (not 'add where absent'). The general fidelity rule says preserve names, but UWP SDK samples routinely give interactive controls only a Content string and no name — so verbatim copying preserves the ABSENCE of any stable id, and nothing tells the agent to add one.",
+      "proposed_improvement": "Promote the AutomationId guidance from a one-off aside into a general, prominent rule that applies to every interactive control: when copying a control that has neither x:Name nor AutomationProperties.AutomationId, add a stable AutomationProperties.AutomationId (derived from the Click handler / control purpose). Back it with a non-ignorable Validate-UwpMigration.ps1 WARN that lists interactive controls (Button, ToggleButton, ToggleSwitch, CheckBox, RadioButton, HyperlinkButton, AppBarButton, ...) missing both identifiers.",
+      "generalizes": "Nearly every UWP SDK sample declares interactive controls as '<Button Content=\"...\" Click=\"...\"/>' with no name. Without a stable AutomationId these controls are unaddressable by UIA-based parity capture and invisible/hard to target for assistive technology across ALL scenarios; ambiguity is especially likely because sample nav items embed the same scenario title text, so a Content-only match collides with the nav entry."
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "scenario": "CameraProfile",
+  "created_at": "2026-07-16T18:55:00Z",
+  "uwp_capture_status": "partial: UWP launched (ok:true, pid 23188) and its initial frame was captured, but winapp UIA could not drive the ApplicationFrameHost-hosted CoreWindow (only a top-level Pane was exposed), so per-scenario navigation and control actuation could not be performed on the UWP golden. Scenario 1 initial visual is genuine golden; scenarios 2-3 golden frames are duplicates of the scenario-1 view.",
+  "features": [
+    {
+      "id": "locate-record-specific-profile",
+      "area": "Scenario 1",
+      "name": "Locate Record Specific Profile",
+      "description": "Query if the camera supports a specific recording profile (640x480 30FPS) and a custom recording profile; report results into the output box and status bar.",
+      "expected_behaviour": [
+        "Left navigation lists all three scenarios with verbatim titles",
+        "'Find 640x480 30FPS Recording Profile' button appends query output to the output box",
+        "'Find Custom Recording Profile' button appends query output to the output box",
+        "On a device with no camera, an ERROR status is shown ('No Video Device Id found, verify your device supports profiles')"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Locate_Record_Specific_Profile.png",
+      "weight": 2
+    },
+    {
+      "id": "query-profile-for-concurrency",
+      "area": "Scenario 2",
+      "name": "Query Profile for Concurrency",
+      "description": "Query front and rear cameras for a matching concurrent profile and report the outcome.",
+      "expected_behaviour": [
+        "'Query for Concurrent Profile' button appends front/back panel enumeration output",
+        "On a device with no camera, ERROR 'A capture device doesn't support Video Profile' is shown"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Query_Profile_for_Concurrency.png",
+      "weight": 1
+    },
+    {
+      "id": "query-profile-for-hdr-support",
+      "area": "Scenario 3",
+      "name": "Query Profile for HDR Support",
+      "description": "Acquire record media descriptions from the available video profile and query for HDR support.",
+      "expected_behaviour": [
+        "'Query Profile for HDR Support' button appends HDR query output to the output box",
+        "On a device with no camera, ERROR 'No Video Device Id found, verify your device supports profiles' is shown"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_Query_Profile_for_HDR_Support.png",
+      "weight": 1
+    }
+  ]
+}

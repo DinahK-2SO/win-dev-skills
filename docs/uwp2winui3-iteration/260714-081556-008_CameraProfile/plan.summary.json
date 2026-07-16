@@ -1,0 +1,18 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Validate-UwpMigration.ps1: add WARN for interactive controls (Button/toggle/etc.) that have neither x:Name nor AutomationProperties.AutomationId — they are unaddressable by UI Automation and their Content text collides with same-named NavigationView items, making live controls read as dead in parity capture.",
+    "MIGRATION-PATTERNS.md: add prominent 'Interactive controls need a stable AutomationId' section (rationale + before/after) generalizing the previously camera-only AutomationProperties mention.",
+    "SKILL.md: add a Fidelity Critical Rule to give every interactive control lacking a name a stable AutomationProperties.AutomationId derived from its Click handler/purpose."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "winapp UIA could not drive the UWP ApplicationFrameHost CoreWindow (no UWP behavioural golden) — an eval-tool (uwp-app-runner/winui3-parity-check) limitation, out of scope for the migration skill."
+  ]
+}

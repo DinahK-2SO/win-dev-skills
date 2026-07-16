@@ -1,0 +1,33 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log.txt:270 'Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in 4 of 13 .cs/.xaml files' — bulk namespace rewrite completed the mechanical bootstrap cleanly." },
+    { "tool": "dotnet build (native)", "evidence": "build-output.txt 'BUILD SUCCEEDED' on x64 Debug net10.0 — no CS/WMC/WUI errors; migration compiled first-class." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "MediaCapture / FindConcurrentProfiles / FindAllVideoProfiles / IsVideoProfileSupported", "special_handling": "These WinRT camera-profile query APIs carry over unchanged to WinUI 3 (they are Windows.Media.Capture, not XAML). Only Windows.UI.Xaml namespaces and CoreDispatcher.RunAsync needed adapting; the profile-query logic migrated verbatim." },
+    { "api": "CoreDispatcher.RunAsync (Windows.UI.Core.CoreDispatcherPriority)", "special_handling": "session-log.txt:611,628,842 — UWP UI-thread marshalling; migrates to DispatcherQueue.TryEnqueue in WinUI 3." }
+  ],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    {
+      "where": "Scenario1/2/3 XAML — interactive Button elements",
+      "symptom": "The migrated <Button> controls carry only a Content string plus a Click handler; none has x:Name or AutomationProperties.AutomationId. The scoring task's automated Capture-AppScenarios could not reliably invoke the Scenario 3 'Query Profile for HDR Support' button because its Content is a substring of the nav item '3) Query Profile for HDR Support' and there was no AutomationId to disambiguate (invokeOk=false; parity actionsInvoked 0/1).",
+      "turns_or_retries": "n/a (not a build loop) — surfaced only in scoring (discrepancies.json 'automation-metadata'; parity-result.json scenario 3 actionsInvoked=0)",
+      "root_cause": "The dev-agent copied the UWP XAML verbatim (correct fidelity behaviour), and the UWP source buttons themselves had no x:Name/AutomationId. The skill's fidelity rule says 'copy verbatim, preserve names' but never says to ADD a stable AutomationId to interactive controls that lack one — so unnamed controls stay unaddressable by UIA.",
+      "how_resolved": "Scoring fell back to manual invoke by a synthetic UIA token (btn-queryprofilefor-9f72) and confirmed the button is live; scored pass. But automated targeting would have failed → potential partial on a stricter run with no manual fallback.",
+      "preventable_by": "A migration rule + a Validate-UwpMigration.ps1 WARN that flags interactive controls (Button/ToggleButton/ToggleSwitch/etc.) which have neither x:Name nor AutomationProperties.AutomationId, telling the agent to add a stable AutomationId."
+    }
+  ],
+  "missing_tooling": [
+    { "need": "A validator signal for interactive controls lacking any stable automation identifier (x:Name or AutomationId).", "would_have_saved": "The Scenario 3 capture-targeting ambiguity; makes every migrated app reliably drivable by UIA-based parity checks and accessible to screen readers." }
+  ],
+  "env_issues": [
+    { "issue": "Migrated app rendered light theme while UWP golden was captured dark; UWP CoreWindow could not be driven by winapp UIA (ApplicationFrameHost).", "workaround": "Cosmetic host-theme difference, not a migration defect; UWP golden behavioural capture unavailable — judged from source. No skill action." }
+  ]
+}

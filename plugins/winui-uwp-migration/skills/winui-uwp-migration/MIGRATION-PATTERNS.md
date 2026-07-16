@@ -54,12 +54,40 @@ Generated sources never belong in source control or the migrated tree — only `
 
 `<CaptureElement>` does not exist in WinUI 3, but the **live camera preview is not a defer** — it has a standard replacement: render `MediaCapture` preview frames into an `<Image>` via `SoftwareBitmapSource`. See the [Camera preview](#capture) section below for the full recipe. Do **not** mark the camera page `defer` — that deletes the whole feature and leaves a blank window. (`MediaPlayerElement` is only for media playback, not the live camera surface.)
 
+<a id="automationid"></a>
+## Interactive controls need a stable AutomationId
+
+UWP SDK samples almost always declare their action controls as bare
+`<Button Content="Do X" Click="OnDoX"/>` — no `x:Name`, no `AutomationProperties.AutomationId`.
+Copying that verbatim is correct for fidelity, but it leaves the control **unaddressable
+by UI Automation**. Automated verification (and any assistive technology) can then only
+target the control by its visible text, which frequently collides with a `NavigationView`
+item that embeds the same scenario title (e.g. a button `Content="Query Profile for HDR
+Support"` is a substring of the nav item `3) Query Profile for HDR Support`). The driver
+invokes the wrong element, and a perfectly live control reads as **dead**.
+
+**Rule:** when you copy any interactive control (`Button`, `ToggleButton`, `ToggleSwitch`,
+`CheckBox`, `RadioButton`, `HyperlinkButton`, `AppBarButton`, `MenuFlyoutItem`, …) that has
+**neither `x:Name` nor `AutomationProperties.AutomationId`**, add a stable
+`AutomationProperties.AutomationId`. Derive the id from the `Click` handler or the control's
+purpose so it is deterministic and unique on the page.
+
+```xml
+<!-- was: <Button Content="Query Profile for HDR Support" Click="CheckHdrSupportBtn_Click"/> -->
+<Button Content="Query Profile for HDR Support" Click="CheckHdrSupportBtn_Click"
+        AutomationProperties.AutomationId="CheckHdrSupportButton"/>
+```
+
+A control that already has `x:Name` is fine — `x:Name` projects to the UIA AutomationId, so
+it is addressable without a second attribute. `Validate-UwpMigration.ps1` warns on any
+interactive control missing *both* identifiers.
+
 <a id="capture"></a>
 ## Camera preview: `CaptureElement` → `Image` + `SoftwareBitmapSource`
 
 `MediaCapture` itself carries over unchanged, but WinUI 3 has **no XAML preview element**. The live preview migrates to an `<Image>` whose source is a `SoftwareBitmapSource` that you refresh from `MediaCapture` frames. This is `adaptable`, not `defer` — deferring loses the entire camera feature. Keep the [Defensive UI](SKILL.md) fallback so a device-less machine still renders a non-blank frame.
 
-XAML — swap the element (preserve the name/`AutomationProperties` so parity checks still match):
+XAML — swap the element (preserve the name / add a stable [AutomationId](#automationid) so parity checks still match):
 
 ```xml
 <!-- was: <CaptureElement x:Name="PreviewControl" .../> -->

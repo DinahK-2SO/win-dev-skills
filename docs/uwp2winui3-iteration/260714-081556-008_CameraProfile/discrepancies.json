@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Locate Record Specific Profile — buttons append query output; ERROR status on camera-less machine", "status": "pass", "reason": "Both buttons live; enumeration output + expected 'No Video Device Id found' ERROR shown. Coverage 3/3, actions 2/2 live.", "suspected_skill_gap": "" },
+    { "id": 1, "text": "Query Profile for Concurrency — front/back enumeration; ERROR 'A capture device doesn't support Video Profile'", "status": "pass", "reason": "Button live; expected ERROR shown. Coverage 2/2, actions 1/1 live.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Query Profile for HDR Support — append HDR query output; ERROR status on camera-less machine", "status": "pass", "reason": "Button IS live (verified manually via stable UIA token). Automated invoke failed only due to target ambiguity: Content is a substring of nav item and there is no AutomationId.", "suspected_skill_gap": "Migration skill has no rule to add a stable AutomationProperties.AutomationId to interactive controls that lack x:Name/AutomationId; verbatim-copied unnamed buttons stay unaddressable by UIA." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "all scenarios", "uwp": "dark theme golden", "winui": "light theme (host system theme)", "screenshot_ref": "parity/winui3/screenshots/00_launch.png" }
+  ],
+  "missing_features": [],
+  "summary": "Faithful migration, 100/100, no functional regressions. Sole recurring signal: interactive buttons carry no stable AutomationId (Content-only), which made automated UIA targeting of the HDR button ambiguous — a parity/accessibility reliability gap, not a functional defect."
+}

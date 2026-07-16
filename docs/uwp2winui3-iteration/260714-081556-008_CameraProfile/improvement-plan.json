@@ -1,0 +1,30 @@
+{
+  "scenario": "CameraProfile",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Interactive controls are migrated verbatim from UWP with only a Content string — no x:Name, no AutomationProperties.AutomationId — so UI Automation cannot reliably target them. The Scenario 3 'Query Profile for HDR Support' button could not be auto-invoked (its Content is a substring of nav item '3) Query Profile for HDR Support'); the driver matched the nav popup, actionsInvoked=0/1. It only scored pass via a manual UIA-token fallback.",
+      "evidence": "score notes/discrepancies.json 'automation-metadata' item ('no AutomationProperties.AutomationId ... invokeOk=false'); parity/winui3/parity-result.json scenario 3 actionsInvoked=0; generated Scenario3_EnableHdrProfile.xaml:39 (Content-only Button). Skill: MIGRATION-PATTERNS.md:62 was the only, narrow mention of AutomationProperties.",
+      "root_cause": "The skill teaches 'copy XAML verbatim, preserve names' but never says to ADD a stable AutomationId when the source control has none. UWP SDK samples routinely omit names, so verbatim copy preserves the absence and leaves controls unaddressable by UIA and assistive tech.",
+      "tier": 1,
+      "change": "Added section 5d to Validate-UwpMigration.ps1: scans .xaml for interactive controls (Button/ToggleButton/ToggleSwitch/CheckBox/RadioButton/HyperlinkButton/AppBarButton/MenuFlyoutItem/…) that have neither x:Name nor AutomationProperties.AutomationId and emits a WARN listing each offender with a fix pointer. Advisory (not a hard FAIL) because a control with x:Name is already addressable and passing migrations must not regress.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The agent sees a concrete, per-control WARN naming the offending buttons and adds a stable AutomationId before declaring done.",
+      "falsifiable_check": "On re-run, Validate-UwpMigration.ps1 prints '[PASS] Interactive controls — every Button/toggle/etc. has x:Name or AutomationProperties.AutomationId', and the parity capture reports actionsInvoked N/N for scenarios whose only ambiguity was Content/nav-text collision."
+    },
+    {
+      "problem": "Same root cause — the prose gives no general rule to add AutomationIds; the only mention is buried in the CaptureElement→Image camera recipe.",
+      "evidence": "MIGRATION-PATTERNS.md:62 was the sole 'AutomationProperties' reference, scoped to camera preview; SKILL.md fidelity rule only says 'preserve names'.",
+      "root_cause": "Under-emphasized guidance; no restatable general rule the agent can apply to ordinary buttons.",
+      "tier": 3,
+      "change": "Added a prominent 'Interactive controls need a stable AutomationId' section (anchor #automationid) to MIGRATION-PATTERNS.md with the collision rationale and a before/after example, and a Fidelity bullet in SKILL.md making it a Critical Rule. Tier 1 WARN carries enforcement; this Tier 3 text supplies the how/why the WARN references.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "When the WARN fires (or during initial migration), the agent has a clear, general recipe for deriving and adding stable AutomationIds.",
+      "falsifiable_check": "Migrated interactive controls carry AutomationProperties.AutomationId; validator section 5d passes; parity actionsInvoked reaches N/N."
+    }
+  ],
+  "deferred_to_human": [
+    "Eval-tool limitation (out of scope): winapp UIA could not drive the UWP ApplicationFrameHost CoreWindow, so no UWP behavioural golden was captured (migration-score.json uwp_capture_status). This is a uwp-app-runner/winui3-parity-check capture limitation, not a migration-skill issue."
+  ]
+}
