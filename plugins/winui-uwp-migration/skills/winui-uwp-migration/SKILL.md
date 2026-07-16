@@ -199,6 +199,12 @@ Pages that depend on physical hardware (camera, microphone, location, sensors, B
 
 **Rule:** every device-dependent page must show a visible fallback when device acquisition or initialization throws. The fallback can be as simple as a centred `TextBlock` saying *"This sample requires a <device-kind> device that is not available on this machine."* plus the exception's `Message` underneath. Wrap the init call in `try/catch`; on catch, swap the page's main content for the fallback (don't only log and return).
 
+**Render the message exactly once.** The fallback has one fixed headline line and one *optional* detail line, and the detail line is **exception-only**:
+
+- The headline TextBlock ("This sample requires a … device …") is the single source of that sentence. Do **not** hardcode the same sentence in XAML *and* re-emit it from code — that renders the message twice.
+- The detail TextBlock is populated **only** from the caught exception's `Message`. Leave it empty when there is no exception. The most common no-hardware path is *not* a thrown exception but a benign empty result (e.g. `FindAllAsync()` returns an empty list); in that case show the headline alone and pass an empty detail string — never repeat the headline as the detail.
+- So a helper like `ShowFallback(string detail)` should set only the detail line from the exception message (or `""`), while the headline stays fixed. This keeps the fallback identical whether the cause was an exception or an empty enumeration.
+
 This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1` Section 7) will still pass the process-alive gate, but the benchmark's later screenshot-diff check will penalise the trial. A two-line fallback prevents a ~20-point score loss.
 
 ## Post-Migration

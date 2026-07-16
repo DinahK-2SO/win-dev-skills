@@ -1,0 +1,20 @@
+{
+  "scenario": "CameraFrames",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Device-unavailable fallback message renders twice on device-dependent pages (fixed headline + dynamic detail line showing the same string).",
+      "evidence": "discrepancies.json s1-duplicate-fallback-message; Scenario1_DisplayDepthColorIR.xaml:49 (static headline) + .xaml.cs:102 ShowFallback('This sample requires a camera device...') -> FallbackMessage (.xaml.cs:227). skill-coverage-gaps.json item 1.",
+      "root_cause": "SKILL.md 'Defensive UI for device-dependent features' pairs a fixed headline with an exception-message line but never states the detail line is exception-ONLY. The common no-hardware path returns an empty device list (no exception), so the agent repeated the headline into the detail line.",
+      "tier": 3,
+      "change": "Sharpen the existing Defensive-UI rule: render the headline exactly once; the optional detail line is populated ONLY from the caught exception's Message and left empty for the benign empty-result (no-exception) path. Explicitly warn against hardcoding the sentence in XAML and re-emitting it from code.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "On re-run, device-dependent pages render the unavailable-device message once; the empty-enumeration path shows the headline with an empty detail line.",
+      "falsifiable_check": "In the migrated app on no-hardware, the fallback panel contains the 'requires a <device> device' sentence exactly once (no duplicate orange + plain copy); parity capture shows a single fallback message."
+    }
+  ],
+  "deferred_to_human": [
+    "Scenario 2 select->Start->preview data flow is unverifiable on no-camera hardware for BOTH the UWP golden and the WinUI app; and Compare-Parity keys on x:Name so UWP source ComboBoxes with empty x:Name yield a false-negative coverage count. These are eval-harness / hardware limitations (winui3-parity-check / uwp-app-runner), out of scope for the migration skill."
+  ]
+}

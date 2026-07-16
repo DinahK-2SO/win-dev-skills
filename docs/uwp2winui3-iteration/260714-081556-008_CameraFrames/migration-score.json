@@ -1,0 +1,55 @@
+{
+  "scenario": "CameraFrames",
+  "scored_at": "2026-07-16T16:00:03Z",
+  "uwp_launchable": true,
+  "app_launched": true,
+  "score": 75,
+  "features_total": 2,
+  "features_pass": 1,
+  "features_partial": 1,
+  "features_fail": 0,
+  "total_features": 2,
+  "pass": 1,
+  "partial": 1,
+  "fail": 0,
+  "weighted_score_pct": 75.0,
+  "uwp_capture_status": "partial: UWP launched via uwp-app-runner (ok:true, pid 20260); scenario 1 captured live from the CoreWindow (hwnd 918596). The UWP UI thread then hung (Responding=false) with no camera present, freezing on 'No source groups found'; the legacy CoreWindow exposes an opaque UIA tree (single Pane, no children) so scenario 2 could not be navigated via UIA invoke nor by simulated input. Scenario 2 reference is source-derived.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "id": "scenario-1-shared-mode",
+      "name": "Shared mode access to color, depth and infrared frame sources",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "winui_screenshot": "parity/winui3/screenshots/01_Shared_mode_access_to_color_depth_and_infrared_frame_sources.png",
+      "uwp_screenshot": "parity/baseline/screenshots/01_Shared_mode_access_to_color_depth_and_infrared_frame_sources.png",
+      "note": "Full structural coverage (1/1). Description text, 'Next Source Group' button, Color/Depth/Infrared frame-source labels and the 'No source groups found.' status all match the live UWP golden. 'Next Source Group' actuates and the UIA text state changes (responded=true) — a live control. Minor cosmetic: the camera-unavailable fallback message renders twice; theme is light vs the UWP's dark. Non-blank frames throughout.",
+      "expected_behaviour_results": [
+        { "bullet": "Reachable from nav list with verbatim title", "met": true },
+        { "bullet": "Description matches UWP", "met": true },
+        { "bullet": "'Next Source Group' button present and invokable", "met": true },
+        { "bullet": "Color/Depth/Infrared frame source labels present", "met": true },
+        { "bullet": "Status line reports 'No source groups found.'", "met": true }
+      ]
+    },
+    {
+      "id": "scenario-2-find-sources",
+      "name": "Find and display all media frame sources",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "winui_screenshot": "parity/winui3/screenshots/02_Find_and_display_all_media_frame_sources.png",
+      "uwp_screenshot": null,
+      "note": "All five controls are present with AutomationIds (GroupComboBox, SourceComboBox, FormatComboBox, StartButton, StopButton) plus the matching description, an output text block and a preview image — the automated gate's 2/5 coverage is a false negative because the UWP source ComboBoxes have empty names, not a real drop. Start/Stop are correctly disabled (no camera => no selectable source group), so no control could be actuated to confirm the select-group -> Start -> preview data flow end-to-end. The UWP golden could not demonstrate this flow either (UI thread hung, no camera), so behavioural parity is UNCONFIRMED rather than proven — scored partial conservatively. No dead control: nothing that responds in the UWP is dead in WinUI.",
+      "expected_behaviour_results": [
+        { "bullet": "Reachable from nav list with verbatim title", "met": true },
+        { "bullet": "Description matches UWP", "met": true },
+        { "bullet": "Three ComboBoxes present (Source Group / Frame Source / Media Format)", "met": true },
+        { "bullet": "Start and Stop buttons present, disabled until a source group is selected", "met": true },
+        { "bullet": "Behavioural data flow (select -> Start -> live preview) verified end-to-end", "met": false }
+      ]
+    }
+  ]
+}

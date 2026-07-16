@@ -1,0 +1,37 @@
+{
+  "scenario": "CameraFrames",
+  "created_at": "2026-07-16T16:00:03Z",
+  "uwp_capture_status": "partial: UWP launched via uwp-app-runner (ok:true, pid 20260); scenario 1 captured live from the CoreWindow (hwnd 918596). The UWP UI thread then hung (Responding=false) with no camera present, freezing on 'No source groups found'; the legacy CoreWindow exposes an opaque UIA tree (single Pane, no children) so scenario 2 could not be navigated via UIA invoke nor by simulated input. Scenario 2 reference is source-derived.",
+  "features": [
+    {
+      "id": "scenario-1-shared-mode",
+      "area": "Scenario 1",
+      "name": "Shared mode access to color, depth and infrared frame sources",
+      "description": "Displays multiple frame sources (color/depth/infrared) simultaneously in shared mode. Has a 'Next Source Group' button to cycle source groups, three preview panes labelled Color/Depth/Infrared frame source, and a status/output text line.",
+      "expected_behaviour": [
+        "Scenario is reachable from the navigation list with the verbatim title",
+        "Description reads 'Display multiple frame sources to screen simultaneously in shared mode access.'",
+        "A 'Next Source Group' button is present and invokable (cycles source groups)",
+        "Three labelled preview areas: Color frame source, Depth frame source, Infrared frame source",
+        "A status/output line reports source-group state (e.g. 'No source groups found.' when no camera is present)"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Shared_mode_access_to_color_depth_and_infrared_frame_sources.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario-2-find-sources",
+      "area": "Scenario 2",
+      "name": "Find and display all media frame sources",
+      "description": "Enumerates frame sources and initializes a selected source via a frame reader. Provides three ComboBoxes (Source Group, Frame Source, Media Format) and Start/Stop buttons, plus a preview image and output text.",
+      "expected_behaviour": [
+        "Scenario is reachable from the navigation list with the verbatim title",
+        "Description reads 'Enumerate frame sources, and initialize selected source using frame reader and display frames on screen.'",
+        "Three ComboBoxes present: Source Group (placeholder 'Select ...'), Frame Source (placeholder 'Select ...'), Media Format (placeholder 'Default format')",
+        "Start and Stop buttons present; Start/Stop are disabled until a source group is selected (no camera => no selectable groups => buttons remain disabled)",
+        "An output/status text area is present"
+      ],
+      "screenshot": null,
+      "weight": 1
+    }
+  ]
+}

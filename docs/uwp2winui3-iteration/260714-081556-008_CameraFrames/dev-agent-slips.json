@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraFrames",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Validator FAIL: 6 MIGRATION-MAPPING.md rows left at Status=copied after the files were transformed.",
+      "evidence": "session-log.txt: '[FAIL] MIGRATION-MAPPING.md — 6 row(s) still Status=copied'; agent then flipped them to done and re-ran → PASS.",
+      "covered_clearly_at": "SKILL.md > Step 1 ('Flip Status from copied -> done ... as each row is finished') and Step 4 (validator check 3: 'no row stuck at Status = copied', with an explicit 'Status = copied rows' fix entry).",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill states the rule prominently in two places and the validator already catches it deterministically; the agent self-corrected in one step. A re-run would get it right with no skill edit."
+    },
+    {
+      "problem": "Scenario 2 scored partial: select-group -> Start -> live preview data flow not verified end-to-end.",
+      "evidence": "migration-score.md scenario 2; discrepancies.json s2-start-stop-not-actuatable (invokeOk=false because no camera => no selectable source group; UWP golden also hung on no-camera hardware).",
+      "covered_clearly_at": "N/A — not a skill issue. Environment-limited (no camera) plus a measurement artifact (empty x:Name on UWP source combos). Controls are all present with AutomationIds and correctly gated.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The gap is hardware/measurement, not migration. Both apps behave identically on no-camera hardware; no skill edit could change the outcome, and improving the eval harness is out of scope."
+    }
+  ]
+}

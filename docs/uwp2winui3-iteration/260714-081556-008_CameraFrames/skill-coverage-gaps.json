@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraFrames",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Device-unavailable fallback message rendered twice (once as a fixed headline, once as the dynamic detail line showing the identical string).",
+      "evidence": "discrepancies.json s1-duplicate-fallback-message; generated Scenario1_DisplayDepthColorIR.xaml line 49 (static headline TextBlock) + .xaml.cs line 102 ShowFallback(\"This sample requires a camera device...\") setting FallbackMessage (line 50/227) to the same string.",
+      "covered_at": "SKILL.md > Critical Rules > 'Defensive UI for device-dependent features' (Rule: 'The fallback can be as simple as a centred TextBlock saying \"This sample requires a <device-kind> device that is not available on this machine.\" plus the exception's Message underneath.')",
+      "why_missed": "under-emphasized / ambiguous — the wording describes a fixed headline PLUS an exception-message line, but never says the detail line is exception-ONLY. On the most common no-hardware path the device list simply comes back empty (no exception thrown), so the agent repeated the fixed headline into the detail line, duplicating it.",
+      "proposed_improvement": "Sharpen the existing rule to state that the fallback must render the headline exactly once, and the optional second/detail line is populated ONLY from the caught exception's Message — left empty when there is no exception (e.g. the empty-device-list / 'nothing found' case). Do not hardcode the headline in XAML and also re-emit it dynamically.",
+      "generalizes": "The Defensive-UI pattern is applied to EVERY device-dependent page in EVERY scenario (camera, microphone, location, sensors, Bluetooth, NFC). The no-device path is the DEFAULT path in the no-hardware validation environment, so a duplicate-message bug caused by this wording recurs on essentially every device-dependent migration, not just CameraFrames."
+    }
+  ]
+}

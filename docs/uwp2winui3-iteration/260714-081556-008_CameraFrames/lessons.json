@@ -1,0 +1,33 @@
+{
+  "scenario": "CameraFrames",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap seeded MIGRATION-MAPPING.md and TODO markers; agent worked file-by-file with no manual inventory." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Caught 6 rows still Status=copied ('[FAIL] MIGRATION-MAPPING.md — 6 row(s) still Status=copied'); after fix reported PASS and a clean smoke launch (pid 23824)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "MediaFrameSourceGroup.FindAllAsync / MediaCapture / MediaFrameReader", "special_handling": "Migrated as-is (supported on WinUI 3 desktop). Device-init wrapped in try/catch with a fallback panel per the skill's Defensive-UI rule; on a no-camera machine the empty-list branch is the live path." }
+  ],
+  "errors_encountered": [
+    { "error": "Validate-UwpMigration: 1 FAIL — 6 MIGRATION-MAPPING.md rows still Status=copied", "root_cause": "Agent finished transforming files but did not flip mapping Status from 'copied' to 'done'.", "fix": "Flipped the 6 rows to 'done' and re-ran the validator → PASS. (Covered clearly by SKILL.md Step 4; a slip, not a skill gap.)" },
+    { "error": "git: 'LF would be replaced by CRLF in MIGRATION-PATTERNS.md'", "root_cause": "Line-ending normalization on a skill doc the agent did not need to commit.", "fix": "Non-fatal; did not affect the migration." }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Scenario1_DisplayDepthColorIR.xaml (line 49) + .xaml.cs ShowFallback (line 102/227)",
+      "symptom": "Camera-unavailable fallback message renders twice — once as a static orange XAML TextBlock and once as the dynamic FallbackMessage TextBlock showing the identical string.",
+      "turns_or_retries": "single-pass, not looped",
+      "root_cause": "Agent followed the skill's Defensive-UI wording ('a TextBlock saying \"...\" plus the exception's Message underneath') by creating a fixed headline TextBlock AND a detail TextBlock, then in the no-device empty-list branch (no exception available) passed the same fixed headline string into the detail line, so both show the same text.",
+      "how_resolved": "not resolved — shipped as a low-severity cosmetic discrepancy (discrepancies.json s1-duplicate-fallback-message).",
+      "preventable_by": "Sharpening the SKILL.md 'Defensive UI for device-dependent features' section so the fallback renders the headline exactly once and the second/detail line is exception-only (empty when there is no exception, e.g. the empty-device-list case)."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No camera on the validation machine; both UWP and WinUI report 'No source groups found.' and the UWP UI thread hung, so scenario 2's select→Start→preview flow is unverifiable for either app.", "workaround": "Behavioural parity scored conservatively as partial; not a migration defect." }
+  ]
+}

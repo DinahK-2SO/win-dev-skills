@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraFrames",
+  "index": 0,
+  "score": 75.0,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Scenario 1 — Shared mode access to color, depth and infrared frame sources", "status": "pass", "reason": "Full structural coverage; description, Next Source Group button (live), Color/Depth/Infrared labels and 'No source groups found.' status all match UWP golden.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Scenario 2 — Find and display all media frame sources", "status": "partial", "reason": "All five controls present with AutomationIds; 2/5 coverage is a false negative (UWP source combos have empty x:Name). Start/Stop correctly disabled (no camera); select→Start→preview flow unverifiable on no-camera hardware for either app.", "suspected_skill_gap": "None — environment-limited + measurement artifact, not a skill defect." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Scenario 1 camera-unavailable fallback", "uwp": "Camera state signalled only via the status line ('No source groups found.').", "winui": "Fallback message 'This sample requires a camera device...' rendered twice (static orange TextBlock + dynamic FallbackMessage with same text).", "screenshot_ref": "parity/winui3/screenshots/01_Shared_mode_access_to_color_depth_and_infrared_frame_sources.png" },
+    { "feature": "Scenario 1 theme", "uwp": "Dark theme CoreWindow capture.", "winui": "Default light theme.", "screenshot_ref": "parity/baseline/screenshots/01_Shared_mode_access_to_color_depth_and_infrared_frame_sources.png" }
+  ],
+  "missing_features": [],
+  "summary": "Faithful, functional replica. The only migration-attributable cosmetic defect is the duplicated camera-unavailable fallback message, which traces to the skill's own Defensive-UI wording. Remaining items are platform defaults (theme) or environment-limited (no camera)."
+}
