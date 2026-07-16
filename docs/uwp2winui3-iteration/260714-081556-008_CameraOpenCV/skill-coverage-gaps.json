@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The SKILL.md front-matter says 'C++/WinRT and VB UWP projects are out of scope — refuse the request.' This can be misread to mean 'refuse any migration whose solution contains a C++/WinRT project', which would wrongly reject a C# UWP app that merely ProjectReferences a native helper component (exactly this scenario). The agent correctly did NOT refuse, but the boundary is ambiguous.",
+      "evidence": "SKILL.md line 3 (description front-matter). The scenario is a C# app referencing OpenCVBridge.vcxproj; a stricter reading of the current wording could have produced an incorrect refusal.",
+      "covered_at": "SKILL.md front-matter 'description' field: '**C++/WinRT and VB UWP projects are out of scope** — refuse the request.'",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "Sharpen the out-of-scope clause to make clear that only the *application project itself* being C++/WinRT or VB is out of scope; a C# app that *depends on* a native WinRT component stays in scope and is handled by the native-component pattern (rebuild-or-replace).",
+      "generalizes": "Many in-scope C# UWP apps reference native components; clarifying that 'refuse' targets the app language, not any native dependency in the solution, prevents false refusals across every such scenario."
+    }
+  ]
+}

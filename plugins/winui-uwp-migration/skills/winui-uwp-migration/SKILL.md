@@ -1,6 +1,6 @@
 ---
 name: winui-uwp-migration
-description: "Migrate **C# UWP** applications to WinUI 3 / Windows App SDK, preserving every page, control, and helper class unless an API is explicitly unsupported. Also covers replacing legacy `Windows.UI.Xaml` APIs and fixing build errors from prior UWP-to-WinUI 3 ports. **C++/WinRT and VB UWP projects are out of scope** — refuse the request."
+description: "Migrate **C# UWP** applications to WinUI 3 / Windows App SDK, preserving every page, control, and helper class unless an API is explicitly unsupported. Also covers replacing legacy `Windows.UI.Xaml` APIs and fixing build errors from prior UWP-to-WinUI 3 ports. **C++/WinRT and VB UWP *application* projects are out of scope** — refuse the request. (A C# app is still in scope when it merely *references* a native WinRT component; rebuild-or-replace that component — see MIGRATION-PATTERNS.md#native-component.)"
 ---
 
 ## Principles
@@ -19,6 +19,10 @@ This skill migrates code, it does not redesign it. Every page, UserControl, help
 ## Unsupported on WinUI 3 desktop
 
 Some UWP features have no WinUI 3 desktop equivalent. See the [Unsupported on WinUI 3 Desktop](./MIGRATION-PATTERNS.md#unsupported-on-winui-3-desktop-no-migration-path) section of MIGRATION-PATTERNS.md for the inventory; the machine-readable form lives at [`scripts/unsupported-api-inventory.json`](./scripts/unsupported-api-inventory.json) and is used by both the bootstrap and the validator.
+
+## Native WinRT component dependencies
+
+A C# UWP app that `ProjectReference`s a **native WinRT component** (a `.vcxproj` C++/CX or C++/WinRT helper) is still **in scope** — only C++/WinRT/VB *application* projects are refused. The bootstrap flags such a dependency (`NATIVE COMPONENT DEPENDENCY DETECTED`). The prebuilt component is AppContainer-flagged and won't load in a desktop process, so **rebuild-or-replace** it — never `defer` the feature. See [`MIGRATION-PATTERNS.md#native-component`](./MIGRATION-PATTERNS.md#native-component) (fetch via `Get-MigrationPattern.ps1 -Anchor native-component`).
 
 ## Process
 

@@ -1,0 +1,38 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "A C# UWP app that ProjectReferences a native WinRT component (.vcxproj C++/CX or C++/WinRT helper) has no migration guidance and the bootstrap never surfaces the dependency; the agent spent ~9 turns hand-inspecting the solution and PE-parsing the DLL to conclude OpenCVBridge was AppContainer-flagged before replacing it with managed OpenCvSharp4.",
+      "evidence": "session-log.txt ~lines 1486-2012 (PE DllCharacteristics=0x1160 -> IsAppContainer:True; 'OpenCVBridge.dll is AppContainer-flagged so I'll use OpenCvSharp4 instead'); UWP csproj <ProjectReference Include=\"..\\shared\\OpenCVBridge\\OpenCVBridge.vcxproj\">; lessons.json dev_agent_struggles[0].",
+      "root_cause": "Skill covers C# source + PackageReference reconciliation but not a native-component ProjectReference; bootstrap preserves the UWP csproj without parsing it for native references, so the dependency is invisible.",
+      "tier": 1,
+      "change": "Initialize-UwpMigration.ps1 now scans the preserved UWP .csproj(s) for <ProjectReference> to a .vcxproj and, when found, prints a prominent 'NATIVE COMPONENT DEPENDENCY DETECTED' warning in the BOOTSTRAP COMPLETE block pointing at the new native-component pattern anchor and stating do-not-refuse.",
+      "file": "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "The agent learns of the native dependency at bootstrap time (a step it cannot skip) and plans rebuild-or-replace immediately instead of discovering it mid-build.",
+      "falsifiable_check": "On a re-run of any UWP app with a native .vcxproj ProjectReference, the BOOTSTRAP COMPLETE output contains 'NATIVE COMPONENT DEPENDENCY DETECTED' and the agent does not spend turns PE-inspecting DLLs before deciding to replace/rebuild."
+    },
+    {
+      "problem": "Even once detected, the skill had no documented decision for what to do with a native component ProjectReference.",
+      "evidence": "grep of SKILL.md / MIGRATION-PATTERNS.md / scripts for 'ProjectReference|vcxproj|winmd|native|C++|AppContainer' returned nothing before this change.",
+      "root_cause": "Missing pattern content.",
+      "tier": 3,
+      "change": "Added MIGRATION-PATTERNS.md section (anchor native-component) stating the AppContainer-load rule and the rebuild-or-replace decision (replace with a managed equivalent NuGet + re-implement the helper surface, or rebuild the native component for desktop; feature is adaptable not defer). Tier 3 chosen because the *decision/knowledge* cannot live in a script — the script (Tier 1) can only detect and route to it.",
+      "file": "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Get-MigrationPattern.ps1 -Anchor native-component returns a concrete rebuild-or-replace recipe; agent adapts the feature instead of deferring or stalling.",
+      "falsifiable_check": "Get-MigrationPattern.ps1 -Anchor native-component returns the section; on re-run the native-backed feature is migrated (adaptable) rather than deferred or dropped."
+    },
+    {
+      "problem": "The 'C++/WinRT ... out of scope — refuse' clause is ambiguous and could trigger a false refusal for a C# app whose solution contains a native component.",
+      "evidence": "SKILL.md front-matter description line; scenario is a C# app referencing OpenCVBridge.vcxproj. skill-coverage-gaps.json item 1.",
+      "root_cause": "Wording does not distinguish the application project's language from a referenced native dependency.",
+      "tier": 3,
+      "change": "Clarified the SKILL.md description clause to say only C++/WinRT/VB *application* projects are refused, and added a short 'Native WinRT component dependencies' subsection routing to the native-component pattern.",
+      "file": "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agents do not wrongly refuse an in-scope C# app that references a native component.",
+      "falsifiable_check": "On re-run of a C# app with a native ProjectReference, the agent proceeds with the migration (no refusal) and follows the native-component pattern."
+    }
+  ],
+  "deferred_to_human": []
+}

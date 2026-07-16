@@ -1,0 +1,23 @@
+{
+  "scenario": "CameraOpenCV",
+  "uwp_launchable": true,
+  "score": 100,
+  "features_total": 1,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 0,
+  "uwp_capture_status": "ok-with-caveat: uwp-app-runner returned ok:true (pid 20220, window 'CameraOpenCV C# sample'), but the original UWP app stayed on its extended splash screen ('Windows platform sample') and never rendered the scenario UI (content pane empty in UIA at depth 8). Golden screenshot is splash-only; no live UWP functional reference for pixel comparison. UWP-side environment issue (likely native OpenCVBridge/.NET Native startup), not a WinUI defect.",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Example Operations",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Example_Operations.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Example_Operations.png",
+      "note": "WinUI 3 app rendered the full scenario UI (NavigationView item '1) Example Operations', header, description, 'Current: Blur', OperationComboBox, and a graceful camera-unavailable fallback). ComboBox present in UIA and manually actuated: selecting 'Contours' updated CurrentOperationTextBlock to 'Current: Contours' (control is behaviorally live). Camera preview/output/FPS are hardware-gated (no camera on this machine) and equally unobservable in both apps; the migration uses managed OpenCvSharp4 and shows a defensive fallback. The original UWP app never rendered this scenario (stuck on splash), so uwp_responded is false; the migrated app is a strict improvement, hence pass."
+    }
+  ]
+}

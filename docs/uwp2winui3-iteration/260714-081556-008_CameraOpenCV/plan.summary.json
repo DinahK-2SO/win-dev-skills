@@ -1,0 +1,16 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: detect native WinRT component ProjectReferences (.vcxproj) in the UWP csproj and warn loudly in BOOTSTRAP COMPLETE, so the agent plans rebuild-or-replace instead of PE-inspecting DLLs mid-build",
+    "MIGRATION-PATTERNS.md: add native-component section documenting that AppContainer-flagged native helpers can't load on desktop and the rebuild-or-replace decision (feature is adaptable, not defer)",
+    "SKILL.md: clarify that only C++/WinRT/VB *application* projects are out of scope, and route C# apps that reference a native component to the native-component pattern"
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": []
+}

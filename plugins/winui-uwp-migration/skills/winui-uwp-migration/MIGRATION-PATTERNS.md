@@ -92,6 +92,38 @@ var faces = await _faceDetector.DetectFacesAsync(gray8);
 Draw the returned `FaceBox` rectangles onto a `Canvas` overlaid on the `Image`. The same "poll a frame → analyse → overlay" shape applies to other MediaCapture effects (OCR, barcode).
 
 
+<a id="native-component"></a>
+## Native WinRT component `ProjectReference` (C++/CX or C++/WinRT helper)
+
+A **C# UWP app is in scope even when it depends on a native component.** UWP solutions
+often ship a native WinRT helper — a separate `.vcxproj` (C++/CX or C++/WinRT) whose
+projected types the C# app calls (e.g. an image-processing or hardware-interop helper).
+The UWP `.csproj` references it as `<ProjectReference Include="..\..\Foo\Foo.vcxproj" />`.
+The bootstrap flags this in its `BOOTSTRAP COMPLETE` block as *NATIVE COMPONENT DEPENDENCY
+DETECTED*.
+
+**Why you can't just carry it over:** the component's prebuilt `.winmd`/`.dll` is
+**AppContainer-flagged** (built for the UWP sandbox) and will **not load in a Full-Trust
+WinUI 3 desktop process** — you don't need to PE-inspect the DLL to confirm this; assume
+it. A WinUI 3 project also can't `ProjectReference` a UWP-targeted `.vcxproj` unchanged.
+
+**Decide rebuild-or-replace (do NOT `defer` the feature, and do NOT refuse the migration):**
+
+1. **Replace with a managed equivalent (preferred when one exists).** Add the equivalent
+   managed NuGet package and re-implement the helper's public surface in C#. Keep the same
+   class/method names the call sites use so the rest of the migration compiles unchanged.
+   *Example shape:* a native OpenCV bridge → the managed `OpenCvSharp4` (+
+   `OpenCvSharp4.runtime.win`) packages, re-implementing the helper in C#.
+2. **Rebuild the native component for desktop.** If no managed equivalent exists, retarget
+   the C++/WinRT component to a desktop-compatible configuration (non-AppContainer) and
+   reference the rebuilt `.winmd`/`.dll`. Heavier; only when option 1 is unavailable.
+
+Either way the feature is **`adaptable`, not `defer`** — deferring deletes a real feature.
+Any managed-library errors you hit while re-implementing (obsolete constructors, changed
+method shapes) are third-party API details — fix them from the compiler messages; they are
+not migration concerns.
+
+
 ## Unsupported on WinUI 3 Desktop (no migration path)
 
 Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding files in `MIGRATION-MAPPING.md` get `Triage label = defer`; cite the specific API in `MIGRATION-DEFERRED.md`.

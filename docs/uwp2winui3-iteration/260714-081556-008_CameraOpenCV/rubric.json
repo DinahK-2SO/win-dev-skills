@@ -1,0 +1,26 @@
+{
+  "scenario": "CameraOpenCV",
+  "feature": "CameraOpenCV C# Sample",
+  "source": "uwp-samples-standalone/Samples/CameraOpenCV/cs (+ shared)",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Example Operations",
+      "class": "Scenario1_ExampleOperations",
+      "description": "Shows the output of various OpenCV operations over live camera frames.",
+      "controls": [
+        { "name": "CurrentOperationTextBlock", "type": "TextBlock", "expected": "Shows 'Current: <operation>'; updates on ComboBox selection." },
+        { "name": "OperationComboBox", "type": "ComboBox", "expected": "Populated with 5 OperationType values: Blur, HoughLines, Contours, Histogram, MotionDetector; SelectionChanged updates current operation + CurrentOperationTextBlock." },
+        { "name": "PreviewImage", "type": "Image", "expected": "Displays the raw camera frame (hardware-gated)." },
+        { "name": "OutputImage", "type": "Image", "expected": "Displays the OpenCV-processed frame for the selected operation (hardware-gated)." },
+        { "name": "FPSMonitor", "type": "TextBlock", "expected": "Shows 'FPS: N' while frames arrive (hardware-gated)." }
+      ],
+      "actions": [
+        { "control": "OperationComboBox", "effect": "Selecting an item sets currentOperation and rewrites CurrentOperationTextBlock text." }
+      ],
+      "outputs": ["CurrentOperationTextBlock", "PreviewImage", "OutputImage", "FPSMonitor"],
+      "hardwareGated": "Camera capture (MediaCapture / MediaFrameReader). Without a camera the app must show a graceful fallback, not a blank/broken page."
+    }
+  ],
+  "notes": "Extract-UwpFeatureChecklist reported 0 controls/0 actions (the extractor did not parse the ComboBox); this rubric records the real controls read from the XAML + code-behind and is used for the manual visual/behavioral judgment."
+}

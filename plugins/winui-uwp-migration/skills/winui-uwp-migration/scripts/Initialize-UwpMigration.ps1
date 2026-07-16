@@ -115,6 +115,22 @@ if ($uwpCsprojs.Count -gt 0) {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
 }
 
+# ─── 2b. Detect native WinRT component ProjectReferences ───────────────────────
+# A C# UWP app that ProjectReferences a native WinRT component (a .vcxproj — C++/CX or
+# C++/WinRT helper) cannot consume that component as-is on WinUI 3 desktop: its prebuilt
+# .winmd/.dll is AppContainer-flagged and will not load in a Full-Trust desktop process.
+# Common in Windows-universal-samples (shared native helpers) and C++-interop UWP apps.
+# Surface it loudly so the agent plans a rebuild-or-replace up front instead of
+# discovering it mid-build by PE-inspecting DLLs.
+$nativeProjRefs = @()
+foreach ($p in $uwpCsprojs) {
+    $csprojText = [System.IO.File]::ReadAllText($p.FullName)
+    foreach ($m in [regex]::Matches($csprojText, '(?i)<ProjectReference[^>]*Include\s*=\s*"([^"]+\.vcxproj)"')) {
+        $nativeProjRefs += $m.Groups[1].Value
+    }
+}
+$nativeProjRefs = @($nativeProjRefs | Sort-Object -Unique)
+
 # ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────
 $excludeDirs = @('bin', 'obj', '.uwp-source', '.vs', '.git', '.github', '.copilot')
 $excludePattern = '\\(' + ($excludeDirs -join '|') + ')\\'
@@ -479,6 +495,17 @@ foreach ($lbl in ($counts.Keys | Where-Object { $labelOrder -notcontains $_ })) 
 Write-Host "Inline TODOs injected : $todoCountTotal"
 Write-Host "  SEQUENTIAL files    : $sensitiveFileCount"
 Write-Host "  BATCH files         : $($fileMode.Count - $sensitiveFileCount)"
+if ($nativeProjRefs.Count -gt 0) {
+    Write-Host ""
+    Write-Host "!! NATIVE COMPONENT DEPENDENCY DETECTED"
+    Write-Host "   The UWP app ProjectReferences $($nativeProjRefs.Count) native WinRT component(s):"
+    foreach ($r in $nativeProjRefs) { Write-Host "     $r" }
+    Write-Host "   A native .vcxproj (C++/CX or C++/WinRT) helper CANNOT be consumed as-is by a"
+    Write-Host "   WinUI 3 desktop app — its prebuilt .winmd/.dll is AppContainer-flagged and will"
+    Write-Host "   not load in a Full-Trust desktop process. Plan a rebuild-or-replace now:"
+    Write-Host "     scripts/Get-MigrationPattern.ps1 -Anchor native-component"
+    Write-Host "   Do NOT refuse the migration — only C++/WinRT *application* projects are out of scope."
+}
 Write-Host "Artifacts:"
 Write-Host "  MIGRATION-MAPPING.md       (triage labels per file)"
 Write-Host "  MIGRATION-DEFERRED.md      (pre-seeded; anchors only)"

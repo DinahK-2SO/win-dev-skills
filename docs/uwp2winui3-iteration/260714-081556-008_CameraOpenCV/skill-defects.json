@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "A C# UWP app that ProjectReferences a native WinRT component (a .vcxproj C++/CX or C++/WinRT helper) has no migration guidance. The agent spent ~9 turns manually browsing the solution and hand-writing a PE-header parser to prove the OpenCVBridge DLL was AppContainer-flagged before deciding to replace it.",
+      "evidence": "session-log.txt lines ~1486-2012: reads ..\\shared\\OpenCVBridge, lists OpenCVBridge.winmd/.dll, PE-parses DllCharacteristics=0x1160 -> IsAppContainer:True (turn 22), then 'OpenCVBridge.dll is AppContainer-flagged so I'll use OpenCvSharp4 instead' (turn 24). build-events.jsonl shows the ProjectReference at the UWP csproj: <ProjectReference Include=\"..\\shared\\OpenCVBridge\\OpenCVBridge.vcxproj\">.",
+      "skill_search": "grepped SKILL.md, MIGRATION-PATTERNS.md, and scripts/*.ps1|*.json for 'ProjectReference', 'vcxproj', 'winmd', 'native', 'C++', 'AppContainer', 'component'",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill covers migrating C# source and reconciling the csproj's PackageReferences, but never addresses a ProjectReference to a native WinRT component. The bootstrap preserves the UWP .csproj at .uwp-source/ but does not parse it for native project references, so the dependency is never surfaced.",
+      "proposed_fix": "(1) Tier 1: in Initialize-UwpMigration.ps1, scan the preserved UWP .csproj(s) for <ProjectReference> pointing at a native project (.vcxproj) and print a prominent warning in the BOOTSTRAP COMPLETE block referencing a new pattern anchor. (2) Tier 3: add a 'Native WinRT component ProjectReference' section to MIGRATION-PATTERNS.md (anchor native-component) stating the AppContainer-load rule and the rebuild-or-replace decision.",
+      "generalizes": "UWP apps frequently ProjectReference a native C++ acceleration/helper component (Windows-universal-samples ship shared native helpers such as OpenCVBridge, and many production UWP apps use C++/WinRT interop components). Any such app will hit the same AppContainer-load wall on WinUI 3 desktop, so a general rebuild-or-replace pattern applies broadly."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap produced MIGRATION-MAPPING.md + TODO markers; agent proceeded straight into file-by-file migration without hand-inventorying the source." },
+    { "tool": "MIGRATION-PATTERNS.md #capture (Camera preview: CaptureElement -> Image + SoftwareBitmapSource)", "evidence": "The camera page was migrated as an adaptable feature (not deferred) with a device-unavailable fallback; score trial verified the graceful fallback rendered." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Preserves the UWP .csproj at .uwp-source/ but never parses it for native-component ProjectReferences (.vcxproj / C++/CX / C++/WinRT). The dependency on OpenCVBridge.vcxproj was invisible in the bootstrap output; the agent discovered it only by manually browsing the solution and PE-inspecting the built DLL.", "suggested_tweak": "Scan the preserved UWP .csproj for <ProjectReference> to a native project and surface a loud warning in the BOOTSTRAP COMPLETE block pointing at a rebuild-or-replace pattern anchor." }
+  ],
+  "failed_apis": [
+    { "api": "OpenCVBridge (native C++/CX WinRT component, referenced via ..\\shared\\OpenCVBridge\\OpenCVBridge.vcxproj)", "why_tried": "The UWP C# app called OpenCVHelper types projected from this native component to do the OpenCV image processing.", "root_cause": "The component's OpenCVBridge.winmd/.dll is AppContainer-flagged (agent confirmed via PE DllCharacteristics 0x1160 -> IsAppContainer:True) and cannot load in a Full-Trust WinUI 3 desktop process. There is no way to consume the native winmd as-is.", "fix": "Replaced the native component with the managed OpenCvSharp4 (+ OpenCvSharp4.runtime.win) NuGet packages and re-implemented OpenCVHelper.cs in managed C#." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Native WinRT component ProjectReference (.vcxproj helper)", "special_handling": "A C# UWP app that ProjectReferences a native C++/CX or C++/WinRT WinRT component must rebuild that component for desktop OR replace it with a managed equivalent library and re-implement the projected helper types; the prebuilt AppContainer winmd/dll will not load in a WinUI 3 desktop process." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0619: 'Mat.Mat(int,int,MatType,nint,long)' is obsolete: Use Mat.FromPixelData instead (OpenCVHelper.cs, 4 sites)", "root_cause": "OpenCvSharp4 version churn — the SoftwareBitmap-buffer-to-Mat constructor the agent first wrote was deprecated in the installed package version.", "fix": "Switched to Mat.FromPixelData. Library-version detail, not a UWP->WinUI concern." },
+    { "error": "CS1061: 'MatExpr' does not contain a definition for 'Rows'/'Cols' (OpenCVHelper.cs, ~5 sites)", "root_cause": "OpenCvSharp4 API shape — matrix arithmetic yields a MatExpr that must be materialized to a Mat before querying Rows/Cols.", "fix": "Materialized the MatExpr to a Mat. Library-specific; agent resolved without skill guidance." },
+    { "error": "CS1519: Invalid token '}' in a member declaration (OpenCVHelper.cs line 193)", "root_cause": "One-off brace imbalance in a hand-authored file during editing.", "fix": "Corrected the brace. Transient typo." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turns ~15-24 (session-log lines ~1486-2012)", "symptom": "Agent browsed the shared/OpenCVBridge folder, read OpenCVHelper.h, listed the built x64 artifacts, then hand-wrote a PowerShell PE-header parser to read the DLL's DllCharacteristics and prove the AppContainer flag before deciding it could not be reused.", "turns_or_retries": "~9 turns of investigation before the rebuild-or-replace decision", "root_cause": "The migration skill has no guidance for the 'C# UWP app depends on a native WinRT component' case, and the bootstrap did not flag the native ProjectReference, so the agent had to derive the whole conclusion from first principles.", "how_resolved": "Concluded the AppContainer winmd/dll cannot load in desktop and replaced OpenCVBridge with managed OpenCvSharp4, re-implementing OpenCVHelper.cs.", "preventable_by": "A bootstrap warning that detects native .vcxproj ProjectReferences plus a MIGRATION-PATTERNS.md section documenting the rebuild-or-replace rule (so the agent plans it immediately instead of PE-inspecting DLLs)." }
+  ],
+  "missing_tooling": [
+    { "need": "Detection of native-component ProjectReferences during bootstrap", "would_have_saved": "~9 turns of manual solution spelunking and PE-header parsing." }
+  ],
+  "env_issues": [
+    { "issue": "No camera device on the validation machine.", "workaround": "Skill's Defensive-UI rule already covered this — the migrated page shows a fallback panel; both apps are equally hardware-gated." }
+  ]
+}

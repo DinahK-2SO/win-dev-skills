@@ -1,0 +1,21 @@
+{
+  "scenario": "CameraOpenCV",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "OpenCvSharp4 build errors while re-implementing OpenCVHelper.cs: CS0619 obsolete Mat(int,int,MatType,nint,long) ctor (use Mat.FromPixelData), CS1061 MatExpr has no Rows/Cols (materialize to Mat), CS1519 stray brace.",
+      "evidence": "build-events.jsonl: 16x CS0619 on Mat ctor, 20x CS1061 on MatExpr.Rows/Cols, 4x CS1519 — all in OpenCVHelper.cs; agent fixed them and the final build succeeded.",
+      "covered_clearly_at": "N/A — out of scope for the migration skill. These are OpenCvSharp4 library-version/API details, not UWP->WinUI 3 migration patterns. The migration skill correctly does not (and should not) enumerate third-party CV library APIs.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "These are third-party NuGet library specifics unrelated to the UWP->WinUI migration surface. A capable model re-implementing against OpenCvSharp4 will resolve obsolete-ctor/API-shape errors from the compiler messages themselves; encoding one CV library's API churn into the migration skill would not generalize and would bloat it."
+    },
+    {
+      "problem": "Camera preview / device-unavailable handling.",
+      "evidence": "Score trial confirmed the migrated page renders a graceful 'requires a camera device' fallback; requirement passed.",
+      "covered_clearly_at": "SKILL.md '### Defensive UI for device-dependent features' and MIGRATION-PATTERNS.md #capture ('Camera preview: CaptureElement -> Image + SoftwareBitmapSource').",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "Not actually a slip — the agent applied the existing guidance correctly and the feature passed. Listed here only to confirm no skill change is warranted for the camera path itself."
+    }
+  ]
+}
