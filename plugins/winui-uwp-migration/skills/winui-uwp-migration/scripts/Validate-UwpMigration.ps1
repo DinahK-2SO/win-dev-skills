@@ -656,6 +656,48 @@ if ($failures -eq 0 -and -not $env:UWP_MIGRATION_SKIP_SMOKE_LAUNCH) {
     }
 }
 
+# ─── Automation-identity advisory (non-fatal) ──────────────────────────────────
+# x:Name is NOT exposed as an AutomationId in the WinUI 3 UIA tree. Interactive
+# controls whose only identity is x:Name are frequently undiscoverable to UI
+# Automation — so both assistive tech and UIA-based parity checks can miss a
+# faithfully-migrated control. Advisory only: it does NOT affect PASS/exit code,
+# because some controls legitimately need no AutomationId. See PATTERNS.md#automation-ids.
+try {
+    $interactiveTypes = 'Button|AppBarButton|HyperlinkButton|ToggleButton|ToggleSwitch|CheckBox|RadioButton|ComboBox|Slider|TextBox|PasswordBox|AutoSuggestBox|ListView|GridView'
+    $xamlFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.xaml -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch $excludePattern }
+    $autoHits = New-Object System.Collections.Generic.List[object]
+    foreach ($f in $xamlFiles) {
+        $rel = [System.IO.Path]::GetRelativePath($Target, $f.FullName)
+        if ($deferredFiles.ContainsKey($rel)) { continue }
+        $text = [System.IO.File]::ReadAllText($f.FullName)
+        # Split into element tags so a single control spanning multiple lines is one unit.
+        foreach ($m in [regex]::Matches($text, '<(?<tag>[A-Za-z]+)\b[^>]*?(?<self>/?)>')) {
+            $tag = $m.Groups['tag'].Value
+            if ($tag -notmatch "^($interactiveTypes)$") { continue }
+            $chunk = $m.Value
+            $hasName = $chunk -match '\b(?:x:Name|Name)\s*='
+            $hasAid  = $chunk -match 'AutomationProperties\.AutomationId\s*='
+            if ($hasName -and -not $hasAid) {
+                $line = ($text.Substring(0, $m.Index) -split "`r?`n").Count
+                [void]$autoHits.Add([PSCustomObject]@{ File = $rel; Line = $line; Tag = $tag })
+            }
+        }
+    }
+    if ($autoHits.Count -eq 0) {
+        Write-Host "[PASS] Automation identity — every named interactive control sets AutomationProperties.AutomationId"
+    } else {
+        Write-Host "[ADVISORY] $($autoHits.Count) interactive control(s) have x:Name but no AutomationProperties.AutomationId (undiscoverable to UI Automation — see PATTERNS.md#automation-ids):"
+        foreach ($h in @($autoHits | Select-Object -First 20)) {
+            Write-Host "       $($h.File):$($h.Line)  <$($h.Tag)>"
+        }
+        if ($autoHits.Count -gt 20) { Write-Host "       ($($autoHits.Count - 20) more)" }
+        Write-Host '       (advisory only — does not fail validation; add AutomationProperties.AutomationId matching each x:Name)'
+    }
+} catch {
+    Write-Host "[WARN] Automation-identity advisory skipped (scan error): $_"
+}
+
 # ─── Summary ───────────────────────────────────────────────────────────────────
 # Always write the diagnostics file (even when empty) so its presence is
 # predictable. The agent can grep / open it on FAIL without guessing.

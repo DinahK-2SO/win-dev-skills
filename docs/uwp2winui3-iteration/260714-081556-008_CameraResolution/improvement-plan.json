@@ -1,0 +1,33 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Interactive controls migrated with only x:Name are invisible to UI Automation, so parity structural matching (and assistive tech) can miss them. Scenario 3 'Video Settings' ComboBox scored PARTIAL (2/3) for this reason.",
+      "evidence": "migration-score.json feature 'Match aspect ratios' partial 2/3; produced Scenario3_AspectRatio.xaml L37 ComboBox has no AutomationProperties.AutomationId; agent set AutomationProperties.Name only on the <Image> per PATTERNS.md#capture.",
+      "root_cause": "The migration skill mentions AutomationProperties only inside the camera-preview pattern (scoped, under-emphasized) and implies keeping x:Name suffices. x:Name is never exposed as AutomationId in the WinUI 3 UIA tree, so controls with only x:Name are undiscoverable.",
+      "tier": 3,
+      "change": "Add an anchored 'Automation identity for interactive controls' subsection in the XAML Migration section of MIGRATION-PATTERNS.md stating the general rule (set AutomationProperties.AutomationId = x:Name on every interactive control, for parity + accessibility), and correct the misleading #capture wording. A pure-prose Tier 3 change alone is ignorable, so it is paired with the Tier 1 advisory below.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent sets AutomationProperties.AutomationId on interactive controls during XAML migration.",
+      "falsifiable_check": "On re-run, Scenario 3 'Video Settings' ComboBox appears in the captured UIA tree -> coverage 3/3 -> requirement #3 partial->pass."
+    },
+    {
+      "problem": "Prose alone can be ignored; nothing surfaced the missing AutomationId before the agent declared done.",
+      "evidence": "Validate-UwpMigration.ps1 has no automation-exposure check; the trial passed validation yet still shipped an undiscoverable control.",
+      "root_cause": "No tooling signal for the automation-identity gap, so the loop had no falsifiable trigger to fix it.",
+      "tier": 1,
+      "change": "Add a non-fatal advisory section to Validate-UwpMigration.ps1 that scans non-deferred .xaml for interactive controls (ComboBox, Button, ToggleSwitch, CheckBox, RadioButton, Slider, ToggleButton, AppBarButton, HyperlinkButton, TextBox, PasswordBox, AutoSuggestBox) carrying x:Name/Name but no AutomationProperties.AutomationId, and print an [ADVISORY] file:line list pointing to PATTERNS.md#automation-ids. Advisory (does not change PASS/exit code) to avoid false-positive FAILs on controls that legitimately need none.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Validator lists interactive controls missing AutomationId so the agent adds them before declaring done.",
+      "falsifiable_check": "On re-run, Validate-UwpMigration prints '[ADVISORY] ... interactive control(s) without AutomationProperties.AutomationId' listing the Video Settings combo; after the agent fixes it the advisory count drops to 0 and coverage becomes 3/3."
+    }
+  ],
+  "deferred_to_human": [],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/SKILL.md"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: add anchored 'Automation identity for interactive controls' rule — set AutomationProperties.AutomationId (matching x:Name) on every interactive control, because x:Name is not exposed in the UIA tree so controls are otherwise undiscoverable to parity checks and assistive tech; also corrected the #capture note that implied x:Name alone matches.",
+    "Validate-UwpMigration.ps1: add non-fatal [ADVISORY] scan listing interactive controls with x:Name but no AutomationProperties.AutomationId, pointing at PATTERNS.md#automation-ids, so the gap is surfaced before the agent declares done.",
+    "SKILL.md: document the new validator advisory in the Step 4 validator coverage list and tell the agent to clear it before done."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": []
+}

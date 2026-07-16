@@ -59,11 +59,12 @@ Generated sources never belong in source control or the migrated tree — only `
 
 `MediaCapture` itself carries over unchanged, but WinUI 3 has **no XAML preview element**. The live preview migrates to an `<Image>` whose source is a `SoftwareBitmapSource` that you refresh from `MediaCapture` frames. This is `adaptable`, not `defer` — deferring loses the entire camera feature. Keep the [Defensive UI](SKILL.md) fallback so a device-less machine still renders a non-blank frame.
 
-XAML — swap the element (preserve the name/`AutomationProperties` so parity checks still match):
+XAML — swap the element. Keep the `x:Name`, and **also set an explicit `AutomationProperties.AutomationId`** — `x:Name` alone is *not* exposed in the UIA tree, so parity/automation checks won't match on it (see [Automation identity for interactive controls](#automation-ids)):
 
 ```xml
 <!-- was: <CaptureElement x:Name="PreviewControl" .../> -->
 <Image x:Name="PreviewImage" Stretch="Uniform"
+       AutomationProperties.AutomationId="PreviewImage"
        AutomationProperties.Name="Camera preview"/>
 ```
 
@@ -658,6 +659,27 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 | `<Hub>` / `<HubSection>` | Hand-rolled `<NavigationView>` with section grouping, or `<ScrollViewer>` with stacked sections. | No drop-in equivalent. |
 | `<AppBarButton Icon="…">` system icons | Most identifiers carry over | A handful of glyphs were renamed; verify visually. |
 | `<CommandBar>` `LabelPosition` | unchanged | Behaviour parity. |
+
+<a id="automation-ids"></a>
+### Automation identity for interactive controls (parity + accessibility)
+
+**`x:Name` is a code-behind field name; it is NOT surfaced as an `AutomationId` in the WinUI 3 UI Automation tree.** A control whose only identity is `x:Name` (relying on `PlaceholderText`, header text, or nothing) is frequently **undiscoverable** to UI Automation — which means both assistive technology (screen readers) and any UIA-based structural/parity check can silently miss it, even though it renders perfectly. This is a top cause of a faithfully-migrated control being scored as "missing."
+
+**Rule — set `AutomationProperties.AutomationId` on every interactive control** as you migrate its XAML (default it to the control's existing `x:Name`):
+
+```xml
+<!-- was (UWP): <ComboBox x:Name="VideoSettings" .../> -->
+<ComboBox x:Name="VideoSettings"
+          AutomationProperties.AutomationId="VideoSettings" .../>
+```
+
+- Applies to every actionable/value control: `Button`, `AppBarButton`, `HyperlinkButton`, `ToggleButton`, `ToggleSwitch`, `CheckBox`, `RadioButton`, `ComboBox`, `Slider`, `TextBox`, `PasswordBox`, `AutoSuggestBox`, `ListView`/`GridView`, etc.
+- Do **not** rely on `PlaceholderText` / nearby label `TextBlock`s for identity — those are inconsistently exposed and matching on them is flaky.
+- Where the source already has a `Name`/`x:Name`, reuse it verbatim as the `AutomationId` so it stays traceable to the UWP original.
+- If a control has no visible text label, also set `AutomationProperties.Name` (a short human-readable label) for accessibility.
+- Some WinUI 3 controls swallow `AutomationId` set directly on the element; if one does not appear in the UIA tree, set the `AutomationId` on an enclosing `<Grid>`/`<Border>` wrapper instead.
+
+`Validate-UwpMigration.ps1` emits an `[ADVISORY]` list of interactive controls missing an `AutomationId` — clear it before declaring done.
 
 ### `x:Bind` and compiled bindings
 

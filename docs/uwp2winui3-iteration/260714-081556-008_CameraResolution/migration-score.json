@@ -1,0 +1,47 @@
+{
+  "scenario": "CameraResolution",
+  "uwp_launchable": true,
+  "score": 83,
+  "features_total": 3,
+  "features_pass": 2,
+  "features_partial": 1,
+  "features_fail": 0,
+  "uwp_capture_status": "launched-but-splash-only: uwp-app-runner ok:true (pid 14032, window 'Camera Resolution C# Sample'), but the app never advanced past its extended splash ('Windows platform sample') — content pane stayed empty over ~80s because the SDK sample's async camera/device enumeration stalls on a box with no camera. Golden screenshots show splash only; no behavioral UWP baseline could be established (controls hardware-gated, not WinUI defects).",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_report": "parity/winui3/PARITY-REPORT.md",
+  "parity_score": 83.3,
+  "behavioral_regressions": 0,
+  "behavioral_note": "The live UWP never rendered its scenario controls (splash-only, camera-hardware-gated), so no control could be shown responding in UWP; no WinUI dead-control regression can be proven against it. In the WinUI 3 app, Initialize Camera actuated and produced a visible status change in all 3 scenarios.",
+  "features": [
+    {
+      "name": "Change camera preview settings",
+      "verdict": "pass",
+      "coverage": "2/2",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Change_camera_preview_settings.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Change_camera_preview_settings__a01_Initialize_Camera.png",
+      "note": "Preview Settings combo + Initialize Camera present, laid out faithfully; Initialize Camera responds with 'denied access to the camera' status (correct with no camera). UWP screenshot is splash-only (app never rendered), so uwp_responded reflects hardware-gated, not a defect."
+    },
+    {
+      "name": "Change preview and photo settings",
+      "verdict": "pass",
+      "coverage": "3/3",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Change_preview_and_photo_settings.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Change_preview_and_photo_settings__a01_Initialize_Camera.png",
+      "note": "Preview Settings + Photo Settings combos + Take Photo + Initialize Camera all present and faithful; Initialize Camera responds. UWP screenshot splash-only."
+    },
+    {
+      "name": "Match aspect ratios",
+      "verdict": "partial",
+      "coverage": "2/3",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Match_aspect_ratios.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Match_aspect_ratios__a01_Initialize_Camera.png",
+      "note": "Video Settings ComboBox is visually present and correctly laid out but NOT exposed in the UIA tree (likely missing AutomationProperties.AutomationId), dropping structural coverage to 2/3. Control renders and is not dead; Initialize Camera responds. Held at partial to match the structural gate. UWP screenshot splash-only."
+    }
+  ]
+}

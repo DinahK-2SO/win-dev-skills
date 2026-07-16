@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Interactive controls migrated with only x:Name (no AutomationProperties.AutomationId) are not discoverable in the UIA tree, so parity/structural matching (and assistive tech) can miss them. Scenario 3's 'Video Settings' ComboBox rendered correctly but was absent from the captured UIA tree, dropping coverage to 2/3 (PARTIAL).",
+      "evidence": "migration-score.json feature 'Match aspect ratios' verdict=partial coverage 2/3; discrepancies.json automation-exposure item; produced Scenario3_AspectRatio.xaml L37 '<ComboBox Name=\"VideoSettings\" PlaceholderText=\"Video Settings\" .../>' has no AutomationProperties.AutomationId. The agent set AutomationProperties.Name ONLY on the camera-preview <Image> (Scenario*.xaml L43/46) — exactly where PATTERNS.md#capture told it to — proving it applied automation props only where the skill mentioned them.",
+      "covered_at": "MIGRATION-PATTERNS.md#capture (L62-67): 'preserve the name/AutomationProperties so parity checks still match' with an example on the <Image> only. This is the sole mention in the migration skill, is scoped to the camera-preview element, and is subtly misleading (implies keeping x:Name suffices).",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add a short, prominent, anchored subsection in the XAML Migration section stating the general rule: x:Name is NOT exposed as AutomationId in the UIA tree, so set AutomationProperties.AutomationId (matching x:Name) on every interactive control during migration — for parity matching AND accessibility. Correct the #capture line so it no longer implies x:Name alone matches. Reinforce with a non-fatal validator advisory (Tier 1) that lists interactive controls lacking AutomationId.",
+      "generalizes": "Every UWP->WinUI 3 migration is scored/inspected via UI Automation, and every app has interactive controls. x:Name never surfaces as AutomationId in WinUI 3, so controls whose identity is only x:Name are routinely invisible to UIA and to screen readers. A general rule + advisory fixes this class of gap for all scenarios, not just this one."
+    }
+  ]
+}

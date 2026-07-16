@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "UWP app could not establish a behavioral baseline (splash-only, camera-hardware-gated). No WinUI defect; informational only.",
+      "evidence": "migration-score.json uwp_capture_status 'launched-but-splash-only'; discrepancies.json baseline-unavailable (informational).",
+      "covered_clearly_at": "SKILL.md 'Defensive UI for device-dependent features' (L196-202) — the agent already implemented a visible no-camera fallback, so all 3 scenarios render non-blank.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "This is an environment limitation (no camera on the box), not something a skill edit can change; the migration agent already handled device-absence correctly per the existing Defensive-UI rule."
+    }
+  ]
+}

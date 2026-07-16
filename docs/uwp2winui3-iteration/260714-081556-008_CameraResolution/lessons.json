@@ -1,0 +1,27 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 / MIGRATION-MAPPING.md", "evidence": "Bootstrap self-check returned True; agent proceeded file-by-file without hand-inventorying the source (session-log.txt ~L250)." },
+    { "tool": "Camera preview pattern (PATTERNS.md#capture)", "evidence": "Agent migrated CaptureElement -> Image + SoftwareBitmapSource and kept a non-blank fallback; all 3 scenarios render a non-blank frame and Initialize Camera actuates (migration-score.json winui_observations)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "winui-uwp-migration skill (XAML guidance)", "limitation": "The only place the skill tells the agent to set AutomationProperties is the camera-preview <Image> in PATTERNS.md#capture. The agent applied it there and NOWHERE else, so interactive controls (ComboBox/Button) were left with only x:Name, which is not exposed as AutomationId in the UIA tree.", "suggested_tweak": "Add a general, prominent rule to set AutomationProperties.AutomationId on every interactive control during XAML migration; back it with a validator advisory." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md#capture (L62)", "wrong": "'preserve the name/AutomationProperties so parity checks still match' implies keeping the XAML x:Name is enough for automation matching.", "correct": "x:Name is NOT surfaced as AutomationId in the UIA tree. Automation/parity matching needs AutomationProperties.AutomationId (or a discoverable Name/label) explicitly set on the control." }
+  ],
+  "special_apis": [],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    { "where": "Scenario3_AspectRatio.xaml 'Video Settings' ComboBox", "symptom": "Control renders correctly but is absent from the captured UIA tree, dropping structural coverage to 2/3 (scenario held at PARTIAL).", "turns_or_retries": "n/a — not a stuck loop; a silent fidelity gap the agent never knew to close", "root_cause": "ComboBox identity is only x:Name='VideoSettings' + PlaceholderText; no AutomationProperties.AutomationId. x:Name does not appear in the UIA tree, and placeholder-text matching is unreliable, so the structural matcher missed it.", "how_resolved": "Not resolved in-trial; scored PARTIAL.", "preventable_by": "A migration-skill rule (Tier 3) + Validate-UwpMigration advisory (Tier 1) that requires AutomationProperties.AutomationId on every interactive control." }
+  ],
+  "missing_tooling": [
+    { "need": "A validator advisory that flags interactive controls lacking AutomationProperties.AutomationId.", "would_have_saved": "The Scenario 3 partial (2/3 -> 3/3) and improves accessibility across every migrated app." }
+  ],
+  "env_issues": [
+    { "issue": "No camera on the box; the original UWP app stalled on splash so no behavioral UWP baseline could be captured.", "workaround": "Score rests on structural coverage + WinUI actuation; not a migration defect." }
+  ]
+}

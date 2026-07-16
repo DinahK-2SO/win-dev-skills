@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "score": 83,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Change camera preview settings (Preview Settings combo + Initialize Camera)", "status": "pass", "reason": "Controls present & faithful; Initialize Camera responds with a denied-access status (correct with no camera).", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Change preview and photo settings (Preview + Photo combos + Take Photo + Initialize Camera)", "status": "pass", "reason": "All controls present & faithful; Initialize Camera responds.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Match aspect ratios (Preview + Video combos + Initialize Camera)", "status": "partial", "reason": "'Video Settings' ComboBox is visually present but NOT in the captured UIA tree, dropping structural coverage to 2/3.", "suspected_skill_gap": "Migration skill only sets AutomationProperties on the camera-preview <Image> (PATTERNS.md#capture); it has no general rule to set AutomationProperties.AutomationId on interactive controls. x:Name is not exposed in the UIA tree, so the matcher missed the combo." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Match aspect ratios — Video Settings ComboBox", "uwp": "splash-only (camera-hardware-gated; no behavioral baseline)", "winui": "ComboBox renders and is laid out faithfully but is not discoverable via UI Automation", "screenshot_ref": "parity/winui3/screenshots/03_Match_aspect_ratios__a01_Initialize_Camera.png" }
+  ],
+  "missing_features": [],
+  "summary": "Migration is functionally faithful (builds, runs, all 3 scenarios render, Initialize Camera actuates). The only shortfall is an automation-exposure gap: interactive controls carry only x:Name, no AutomationProperties.AutomationId, so the 'Video Settings' ComboBox is invisible to UIA structural matching and to assistive tech. This recurs on any migrated control whose identity is only x:Name."
+}

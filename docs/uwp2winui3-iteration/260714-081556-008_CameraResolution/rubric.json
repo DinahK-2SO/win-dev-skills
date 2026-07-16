@@ -1,0 +1,43 @@
+{
+  "scenario": "CameraResolution",
+  "featureName": "Camera resolution C# sample",
+  "source": "uwp-samples-standalone/Samples/CameraResolution/cs",
+  "features": [
+    {
+      "number": 1,
+      "title": "Change camera preview settings",
+      "controls": [
+        { "type": "ComboBox", "label": "Preview Settings" },
+        { "type": "Button", "label": "Initialize Camera" }
+      ],
+      "actions": [ "Initialize Camera" ],
+      "outputs": [ "StatusBorder", "StatusBlock" ],
+      "expected": "Selecting a preview resolution then Initialize Camera applies the chosen preview stream setting; status text reflects success or (no camera) an access/denied message."
+    },
+    {
+      "number": 2,
+      "title": "Change preview and photo settings",
+      "controls": [
+        { "type": "ComboBox", "label": "Preview Settings" },
+        { "type": "ComboBox", "label": "Photo Settings" },
+        { "type": "Button", "label": "Initialize Camera" }
+      ],
+      "actions": [ "Initialize Camera" ],
+      "outputs": [ "StatusBorder", "StatusBlock" ],
+      "expected": "Preview and photo stream resolutions can be set independently; Take Photo captures at the selected photo resolution once a camera is initialized."
+    },
+    {
+      "number": 3,
+      "title": "Match aspect ratios",
+      "controls": [
+        { "type": "ComboBox", "label": "Preview Settings" },
+        { "type": "ComboBox", "label": "Video Settings" },
+        { "type": "Button", "label": "Initialize Camera" }
+      ],
+      "actions": [ "Initialize Camera" ],
+      "outputs": [ "StatusBorder", "StatusBlock" ],
+      "expected": "Video stream aspect ratio is matched to the preview stream; Record Video records at the matched aspect ratio once a camera is initialized."
+    }
+  ],
+  "notes": "Every scenario shares the Initialize Camera action and a Status output region. All device operations are camera-hardware-gated; on a box with no camera the expected observable is a visible 'denied access to the camera' status rather than a crash."
+}

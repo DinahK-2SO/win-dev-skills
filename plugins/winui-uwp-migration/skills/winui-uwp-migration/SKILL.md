@@ -157,6 +157,8 @@ The validator covers:
 6. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
 7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
 
+It also prints a non-fatal **`[ADVISORY]`** list of interactive controls that carry an `x:Name` but no `AutomationProperties.AutomationId`. `x:Name` is **not** exposed in the UI Automation tree, so such controls are undiscoverable to assistive tech *and* to the parity check — a faithfully-migrated control then scores as "missing." The advisory does not fail validation, but **clear it before declaring done**: set `AutomationProperties.AutomationId` (matching each `x:Name`) on every interactive control. See [Automation identity for interactive controls](./MIGRATION-PATTERNS.md#automation-ids).
+
 The validator's stdout is intentionally terse: `[FAIL]` lines show only `file:line` (plus an error code where applicable). The full diagnostic text — code snippets, compiler error messages — is written to `.validator-diagnostics.txt` at the project root. **Open that file** to read the details before deciding the fix.
 
 If any check fails, read the diagnostic, fix the root cause, re-run. **Do not report done with a FAIL.** Common fixes by check:
