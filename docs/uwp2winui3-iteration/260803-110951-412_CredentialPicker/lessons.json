@@ -1,0 +1,24 @@
+{
+  "scenario": "CredentialPicker",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 / WinUI Blank App template", "evidence": "build-events.jsonl: 'The template \"WinUI Blank App\" was created successfully.' — scaffold produced a building MainWindow+Frame shell with 0 build errors." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 (Section 7 smoke launch)", "limitation": "The 10s smoke launch only confirms the window activates; it cannot detect a shell that renders but whose content Frame never navigates (blank scenario pages). The app scored 0 yet passed build + launch healthcheck.", "suggested_tweak": "N/A here — validator improvements are a separate concern; the primary fix is a correct wiring pattern so the frame is never left blank." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Security.Credentials.UI.CredentialPicker", "special_handling": "Still available in WinUI 3 but the picker requires an HWND; CredentialPicker.PickAsync uses the app window handle. Not the cause of failure here (content never rendered), but worth noting for the API-mapping table." }
+  ],
+  "errors_encountered": [
+    { "error": "Migrated app builds (0 errors) and launches, but every scenario content Frame is blank; no scenario controls exist in the UIA tree; every Launch invoke fails (target not found). Score 0/3.", "root_cause": "NavigationView used MenuItemsSource (x:Bind Scenarios) to populate items, but the SelectionChanged handler tested `args.SelectedItem is NavigationViewItem`. With MenuItemsSource the SelectedItem is the bound DATA item (Scenario), not a NavigationViewItem, so the cast fails, ScenarioFrame.Navigate is never called, and the content Frame stays empty. Additionally the constructor set NavView.SelectedItem = NavView.MenuItems[0], but MenuItems is empty when MenuItemsSource is used, so no initial navigation occurred either.", "fix": "In SelectionChanged, read the data item directly: `if (args.SelectedItem is Scenario s) ScenarioFrame.Navigate(s.ClassType);` (or, when using literal NavigationViewItems in MenuItems, read item.Tag). Set the initial selection from the source collection (Scenarios[0]) not NavView.MenuItems." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainPage.xaml/.cs NavigationView + Frame wiring", "symptom": "Shell (3 nav items) renders but content Frame blank on every scenario; SelectionChanged never navigates.", "turns_or_retries": "Single-pass — the bug is silent (no build/runtime error), so the dev-agent never saw a failure signal to retry on.", "root_cause": "Skill recommends `NavigationView + Frame` for the SDK-sample idiom but gives no concrete wiring pattern, so the dev-agent invented one with the classic MenuItemsSource/SelectedItem type mismatch.", "how_resolved": "Not resolved by the dev-agent (silent failure).", "preventable_by": "A concrete, copy-pasteable NavigationView+Frame wiring snippet in MIGRATION-PATTERNS.md showing the MenuItemsSource vs. MenuItems SelectedItem-type distinction and the initial-navigation call." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

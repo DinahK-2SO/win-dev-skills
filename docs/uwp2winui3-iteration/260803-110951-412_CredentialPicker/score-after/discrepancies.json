@@ -1,0 +1,41 @@
+{
+  "scenario": "CredentialPicker",
+  "summary": "Structural + visual parity is excellent (all controls present, layout faithful), but the app's CORE feature is broken: clicking Launch throws 'COMException: The handle is invalid' instead of showing the Windows Security credential dialog. In the UWP golden, Launch spawns the credential dialog. This is a behavioral regression affecting all 3 scenarios (shared PickAsync code path, missing IInitializeWithWindow HWND init).",
+  "discrepancies": [
+    {
+      "scenario": "1 - Message",
+      "control": "Launch",
+      "type": "dead-core-feature",
+      "severity": "high",
+      "uwp_behaviour": "Clicking Launch opens a 'Windows Security' credential dialog window (observed as HWND 2166432 in the golden capture).",
+      "winui_behaviour": "Clicking Launch writes an error to the Status area: 'System.Runtime.InteropServices.COMException: The handle is invalid.' No credential dialog appears.",
+      "evidence": "parity/winui3/screenshots/01_Message__a01_Launch.png vs parity/baseline/screenshots/01_Message__a01_Launch.png",
+      "likely_cause": "CredentialPicker.PickAsync on WinUI 3 desktop requires the picker to be initialized with the window handle via IInitializeWithWindow/InitializeWithWindow. The migration did not associate the HWND, so the shell rejects the call with 'handle is invalid'."
+    },
+    {
+      "scenario": "2 - Message+Caption",
+      "control": "Launch",
+      "type": "dead-core-feature",
+      "severity": "high",
+      "uwp_behaviour": "Launch invokes the credential picker with message + caption.",
+      "winui_behaviour": "Same broken PickAsync path (handle-invalid); no dialog. Automated capture recorded no new text token (responded:false) in both UWP and WinUI for this scenario, but the shared code path is the same broken one seen in scenario 1.",
+      "evidence": "parity/winui3/screenshots/02_Message_Caption__a01_Launch.png",
+      "likely_cause": "Same missing HWND initialization as scenario 1."
+    },
+    {
+      "scenario": "3 - CredentialPickerOptions",
+      "control": "Launch",
+      "type": "dead-core-feature",
+      "severity": "high",
+      "uwp_behaviour": "Launch invokes the credential picker with the full options set.",
+      "winui_behaviour": "Same broken PickAsync path; no dialog.",
+      "evidence": "parity/winui3/screenshots/03_CredentialPickerOptions__a01_Launch.png",
+      "likely_cause": "Same missing HWND initialization as scenario 1."
+    }
+  ],
+  "non_issues": [
+    "All controls (TextBoxes, ComboBoxes, CheckBox, Button, result fields) are present in the WinUI UIA tree — structural coverage 9/9, 10/10, 14/14.",
+    "Visual layout, labels, default text, and theming are faithful to the UWP app.",
+    "No blank frames; every scenario rendered."
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "scenario": "CredentialPicker",
+  "uwp_launchable": true,
+  "summary": "Migrated WinUI 3 app builds and launches but renders a blank content frame in all 3 scenarios; no scenario controls exist in the UIA tree and every Launch invoke failed.",
+  "discrepancies": [
+    { "scenario": 1, "title": "Message", "type": "blank-content-frame", "detail": "Content frame empty; Launch button and all input/output controls absent. UWP golden Launch opened a native Windows Security credential dialog." },
+    { "scenario": 2, "title": "Message+Caption", "type": "blank-content-frame", "detail": "Content frame empty; nav item selected but no page content; all controls absent." },
+    { "scenario": 3, "title": "CredentialPickerOptions", "type": "blank-content-frame", "detail": "Content frame empty; Protocol combo, Custom Protocol, Always Show? checkbox, Launch and all fields absent." }
+  ],
+  "coverage": { "scenario1": "1/9", "scenario2": "2/10", "scenario3": "2/14" },
+  "behavioral_regressions": 1,
+  "note": "Only nav-item labels matched structurally. UWP scenario 1 Launch responded (credential dialog); WinUI Launch controls do not exist. Scenarios 2/3 UWP responded:false is a capture artifact of scenario 1's modal dialog, not a UWP defect."
+}

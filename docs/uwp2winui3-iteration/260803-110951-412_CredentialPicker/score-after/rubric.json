@@ -1,0 +1,47 @@
+{
+  "scenario": "CredentialPicker",
+  "created_at": "2026-08-03T08:07:00Z",
+  "uwp_capture_status": "ok",
+  "features": [
+    {
+      "id": "scenario1-message",
+      "area": "Scenario 1",
+      "name": "Message - prompt with custom message",
+      "description": "Scenario 1 lets the user enter a Message and Target, then click Launch to invoke CredentialPicker.PickAsync with a message. Results (Domain, Username, Password, CredentialSaved, CheckboxState, Status) are displayed.",
+      "expected_behaviour": [
+        "Message and Target TextBoxes are present with default text 'Enter your credentials' and 'contoso.com'",
+        "A Launch button is present and clicking it invokes the credential picker (produces a visible response / status output)",
+        "Result fields Domain, Username, Password, CredentialSaved, CheckboxState, Status are present"
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Message.png",
+      "weight": 2
+    },
+    {
+      "id": "scenario2-message-caption",
+      "area": "Scenario 2",
+      "name": "Message+Caption - prompt with message and caption",
+      "description": "Scenario 2 adds a Caption TextBox to the Message/Target inputs. Launch invokes PickAsync with both message and caption.",
+      "expected_behaviour": [
+        "Message, Caption and Target TextBoxes are present",
+        "A Launch button is present and invokes the credential picker",
+        "Result fields are present"
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Message_Caption.png",
+      "weight": 1
+    },
+    {
+      "id": "scenario3-options",
+      "area": "Scenario 3",
+      "name": "CredentialPickerOptions - full options",
+      "description": "Scenario 3 exposes SaveCheckboxSelection and ProtocolSelection ComboBoxes, a CustomProtocol TextBox, an AlwaysShowDialog CheckBox, plus Message/Caption/Target inputs and Launch. ProtocolSelection has a SelectionChanged handler.",
+      "expected_behaviour": [
+        "SaveCheckboxSelection and ProtocolSelection ComboBoxes are present",
+        "CustomProtocol TextBox and AlwaysShowDialog CheckBox are present",
+        "A Launch button is present and invokes the credential picker with the chosen options",
+        "Result fields are present"
+      ],
+      "screenshot": "parity/baseline/screenshots/03_CredentialPickerOptions.png",
+      "weight": 2
+    }
+  ]
+}

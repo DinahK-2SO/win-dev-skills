@@ -1,0 +1,41 @@
+{
+  "scenario": "CredentialPicker",
+  "uwp_launchable": true,
+  "score": 50,
+  "features_total": 3,
+  "features_pass": 0,
+  "features_partial": 3,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 3,
+  "features": [
+    {
+      "name": "Scenario 1 - Message",
+      "verdict": "partial",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Message__a01_Launch.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Message__a01_Launch.png",
+      "note": "All controls present and visual layout faithful (structural cov 9/9). But the core Launch action is broken: in UWP it opens the Windows Security credential dialog; in WinUI it throws 'COMException: The handle is invalid' (missing HWND init for PickAsync). Control responds (writes error to Status) but the feature is dead, so partial not pass."
+    },
+    {
+      "name": "Scenario 2 - Message+Caption",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Message_Caption__a01_Launch.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Message_Caption__a01_Launch.png",
+      "note": "Structural cov 10/10 and visual layout faithful. Shares the same broken PickAsync/HWND path as scenario 1, so the credential picker cannot launch. UWP automated capture also recorded responded:false here (dialog focus behavior), but the WinUI path is definitively broken. Partial."
+    },
+    {
+      "name": "Scenario 3 - CredentialPickerOptions",
+      "verdict": "partial",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_CredentialPickerOptions__a01_Launch.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_CredentialPickerOptions__a01_Launch.png",
+      "note": "Structural cov 14/14; all ComboBoxes, CustomProtocol TextBox, AlwaysShowDialog CheckBox present and visually faithful. Same broken PickAsync/HWND path — credential picker cannot launch. Partial."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "scenario": "CredentialPicker",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 3,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 3,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 1,
+  "features": [
+    {
+      "name": "Message",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Message__a01_Launch.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Message.png",
+      "note": "WinUI content frame blank; no Launch/Message/Target/output controls in UIA tree (cov 1/9). UWP golden Launch opened native Windows Security credential dialog."
+    },
+    {
+      "name": "Message+Caption",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Message_Caption__a01_Launch.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Message_Caption.png",
+      "note": "WinUI content frame blank; nav item selects but no page content; all controls absent (cov 2/10). UWP responded:false is a capture artifact of scenario 1's still-open modal dialog, not a UWP defect."
+    },
+    {
+      "name": "CredentialPickerOptions",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_CredentialPickerOptions__a01_Launch.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_CredentialPickerOptions.png",
+      "note": "WinUI content frame blank; Protocol combo, Custom Protocol, Always Show? checkbox, Launch and all fields absent (cov 2/14). UWP responded:false is a modal-dialog capture artifact."
+    }
+  ]
+}

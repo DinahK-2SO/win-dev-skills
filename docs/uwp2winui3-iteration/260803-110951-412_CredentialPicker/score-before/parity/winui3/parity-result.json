@@ -1,0 +1,105 @@
+{
+  "featureName": "CredentialPicker",
+  "parityScore": 0.0,
+  "counts": {
+    "partial": 0,
+    "fail": 3,
+    "pass": 0
+  },
+  "totalScenarios": 3,
+  "pass": false,
+  "thresholds": {
+    "partial": 0.4,
+    "strictPartial": false,
+    "pass": 0.8
+  },
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Message",
+      "verdict": "fail",
+      "coverage": 0.111,
+      "controlsTotal": 9,
+      "controlsFound": 1,
+      "reachable": true,
+      "screenshotBytes": 7527,
+      "actionsTotal": 1,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [
+        "Launch"
+      ],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"contoso.com\"",
+        "Button \"Launch\"",
+        "TextBox (Domain)",
+        "TextBox (Username)",
+        "TextBox (Password)",
+        "TextBox (CredentialSaved)",
+        "TextBox (CheckboxState)",
+        "TextBox (Status)"
+      ],
+      "reason": "Missing 8/9 control(s): TextBox \"contoso.com\"; Button \"Launch\"; TextBox (Domain); TextBox (Username); TextBox (Password); TextBox (CredentialSaved); TextBox (CheckboxState); TextBox (Status)",
+      "screenshot": "01_Message.png"
+    },
+    {
+      "number": 2,
+      "title": "Message+Caption",
+      "verdict": "fail",
+      "coverage": 0.2,
+      "controlsTotal": 10,
+      "controlsFound": 2,
+      "reachable": true,
+      "screenshotBytes": 13517,
+      "actionsTotal": 1,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"contoso.com\"",
+        "Button \"Launch\"",
+        "TextBox (Domain)",
+        "TextBox (Username)",
+        "TextBox (Password)",
+        "TextBox (CredentialSaved)",
+        "TextBox (CheckboxState)",
+        "TextBox (Status)"
+      ],
+      "reason": "Missing 8/10 control(s): TextBox \"contoso.com\"; Button \"Launch\"; TextBox (Domain); TextBox (Username); TextBox (Password); TextBox (CredentialSaved); TextBox (CheckboxState); TextBox (Status)",
+      "screenshot": "02_Message_Caption.png"
+    },
+    {
+      "number": 3,
+      "title": "CredentialPickerOptions",
+      "verdict": "fail",
+      "coverage": 0.143,
+      "controlsTotal": 14,
+      "controlsFound": 2,
+      "reachable": true,
+      "screenshotBytes": 13915,
+      "actionsTotal": 1,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "TextBox \"contoso.com\"",
+        "ComboBox (SaveCheckboxSelection)",
+        "ComboBox (ProtocolSelection)",
+        "TextBox \"CustomProtocolName\"",
+        "CheckBox (AlwaysShowDialog)",
+        "Button \"Launch\"",
+        "TextBox (Domain)",
+        "TextBox (Username)",
+        "TextBox (Password)",
+        "TextBox (CredentialSaved)",
+        "TextBox (CheckboxState)",
+        "TextBox (Status)"
+      ],
+      "reason": "Missing 12/14 control(s): TextBox \"contoso.com\"; ComboBox (SaveCheckboxSelection); ComboBox (ProtocolSelection); TextBox \"CustomProtocolName\"; CheckBox (AlwaysShowDialog); Button \"Launch\"; TextBox (Domain); TextBox (Username)",
+      "screenshot": "03_CredentialPickerOptions.png"
+    }
+  ]
+}

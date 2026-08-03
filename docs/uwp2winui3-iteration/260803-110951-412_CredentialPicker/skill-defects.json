@@ -1,0 +1,17 @@
+{
+  "scenario": "CredentialPicker",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated NavigationView + Frame shell renders but the scenario content Frame is blank on every page; no scenario controls exist and every Launch invoke fails. Score 0/3.",
+      "evidence": "migration-score.json (all 3 features fail, 'WinUI content frame blank; nav item selects but no page content'); source MainPage.xaml.cs SelectionChanged casts args.SelectedItem to NavigationViewItem while MenuItemsSource binds Scenario data items.",
+      "skill_search": "grepped SKILL.md + MIGRATION-PATTERNS.md for NavigationView, MenuItemsSource, SelectedItem, SelectionChanged, Frame.Navigate, MenuItemTemplate",
+      "skill_state": "absent",
+      "wrong_text_if_any": "SKILL.md line 96 maps 'MainPage + ListView + Frame (SDK-sample idiom)' -> 'NavigationView + Frame' but no wiring pattern exists anywhere; MIGRATION-PATTERNS.md has RootFrame.Navigate for the root shell only, nothing for NavigationView item selection -> content Frame navigation.",
+      "root_cause": "Skill directs migration to the NavigationView + Frame idiom (the single LLM-judgement shell decision) but ships no concrete wiring code. The dev-agent invented wiring with the classic type mismatch: with MenuItemsSource, SelectionChanged's args.SelectedItem is the bound DATA item, not a NavigationViewItem, so the cast fails and ScenarioFrame.Navigate is never called. Failure is silent (no build/runtime error).",
+      "proposed_fix": "Add a 'NavigationView + Frame wiring (SDK-sample scenario list)' subsection to MIGRATION-PATTERNS.md with a copy-pasteable snippet that (1) navigates off the data item when MenuItemsSource is used (`args.SelectedItem is Scenario s`), or off item.Tag when literal NavigationViewItems are used; (2) performs the initial navigation from the source collection, not NavView.MenuItems; (3) calls a short falsifiable check: 'after selecting the first item, the content Frame must contain scenario controls'. Cross-link it from the SKILL.md shell-mapping table row.",
+      "generalizes": "Nearly every UWP SDK sample uses the MainPage + ListView + Frame scenario-list idiom, and the skill explicitly steers all of them to NavigationView + Frame. The MenuItemsSource<->SelectedItem type trap and the empty-MenuItems initial-selection trap are the default mistakes for this idiom, so a correct wiring pattern prevents blank-content-frame failures across the whole SDK-sample family."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "scenario": "CredentialPicker",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "NavigationView + Frame shell renders but the scenario content Frame is blank on every page (score 0/3). Builds and launches with no error, so nothing flags it.",
+      "evidence": "migration-score.json: all 3 features fail, 'WinUI content frame blank; nav item selects but no page content'. Source MainPage.xaml.cs SelectionChanged casts args.SelectedItem to NavigationViewItem while MenuItemsSource binds Scenario data items, so Navigate is never called.",
+      "root_cause": "Skill maps the ubiquitous SDK-sample MainPage+ListView+Frame idiom to NavigationView+Frame but ships no wiring pattern. The dev-agent invented wiring with the classic MenuItemsSource<->SelectedItem type trap (SelectedItem is the data item, not a NavigationViewItem) plus an empty-MenuItems initial selection.",
+      "tier": 3,
+      "change": "Added a 'NavigationView + Frame wiring (SDK-sample scenario list)' anchored section to MIGRATION-PATTERNS.md with copy-pasteable SelectionChanged snippets for both the MenuItemsSource (navigate off the data item) and literal-MenuItems (navigate off item.Tag) cases, correct initial-selection from the source collection, an explicit 'do not mix the two' warning, and a falsifiable 'frame must contain scenario controls' check. Cross-linked it from the SKILL.md shell-mapping table row (fetch via Get-MigrationPattern.ps1 -Anchor navigationview-frame-wiring). Added an appwindow-api-replacements anchor so the fetcher returns only the new section.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Migrations of SDK-sample scenario-list apps wire NavigationView item selection to the content Frame correctly, so scenario pages render and controls appear in the UIA tree.",
+      "falsifiable_check": "On a re-run, after the shell loads and the first nav item is selected, the content Frame contains the first scenario's controls (Launch button, input fields) instead of being blank; feature verdicts move fail->pass."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-1: the smoke-launch validator (Validate-UwpMigration.ps1 Section 7) confirms activation but cannot detect a rendered-shell-with-blank-content-frame; a UIA content-presence check would catch this class of silent failure, but that touches validator/eval tooling and is out of scope here."
+  ]
+}
