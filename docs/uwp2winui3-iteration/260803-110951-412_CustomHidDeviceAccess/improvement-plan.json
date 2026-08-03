@@ -1,0 +1,20 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Multi-scenario SDK-sample shell: NavigationView highlights but content Frame never switches; scenarios 2-4 render Scenario 1's UI (dead scenarios). 3 of 4 features fail (score 25/100).",
+      "evidence": "migration-score.json features[1..3] verdict=fail 'nav item highlights but content pane never switches'; MainPage.xaml.cs (build session-log ~2228) set NavView.SelectedItem = Scenarios[0] in ctor and navigated only from NavView_SelectionChanged, citing the anchor.",
+      "root_cause": "The navigationview-frame-wiring anchor recommended a constructor SelectedItem assignment to drive navigation via SelectionChanged. Constructor-time SelectedItem does not reliably raise SelectionChanged, and for MenuItemsSource data items SelectionChanged alone does not reliably drive the Frame, so scenario switching is dead.",
+      "tier": 3,
+      "change": "Rewrote the navigationview-frame-wiring anchor to: (1) navigate the first scenario EXPLICITLY on Loaded rather than via a constructor SelectedItem side-effect; (2) use NavigationView.ItemInvoked (fires reliably per click, incl. data-bound items) instead of SelectionChanged-only; (3) strengthen the falsifiable check to require verifying that selecting a SECOND scenario switches the Frame, not just first-scenario render. Updated the SKILL.md shell-mapping row note to match.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md ; skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Migrated multi-scenario shells will switch content on every nav click; scenarios 2..N render their own controls.",
+      "falsifiable_check": "On re-run, requirements for scenarios 2-4 go fail->pass; UIA tree after selecting scenario 2 contains scenario-2 controls, not scenario-1 controls."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-1 idea (out of scope for this loop): extend Test-AppLaunch.ps1 / a Validate step to actually exercise nav switching (select item 2, assert Frame content changed) instead of an alive-only smoke check — the current smoke launch is blind to dead-scenario navigation. This touches migration tooling but should be reviewed by a human before automating UI-driving in the smoke step."
+  ]
+}

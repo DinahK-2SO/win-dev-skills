@@ -1,0 +1,22 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "score": 25,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Connecting To Device", "status": "pass", "reason": "Content renders; Connect/Disconnect buttons, device list, status region present and matching UWP golden.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Feature Reports", "status": "fail", "reason": "Dead scenario: nav highlights but content Frame never switches; still shows Scenario 1. Missing ButtonGetLedBlinkPattern, ButtonSetLedBlinkPattern, LedBlinkPatternInput.", "suspected_skill_gap": "navigationview-frame-wiring anchor recommends constructor SelectedItem + SelectionChanged-only navigation, which does not reliably switch the Frame for MenuItemsSource data items." },
+    { "id": 3, "text": "Input Report Events", "status": "fail", "reason": "Dead scenario: content Frame never switches. Missing ButtonRegisterForInputReportEvents, ButtonUnregisterFromInputReportEvents.", "suspected_skill_gap": "Same navigationview-frame-wiring defect." },
+    { "id": 4, "text": "Input and Output Reports", "status": "fail", "reason": "Dead scenario: content Frame never switches. Missing ButtonSendNumericOutputReport, NumericValueToWrite.", "suspected_skill_gap": "Same navigationview-frame-wiring defect." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Feature Reports", "uwp": "Shows LED blink pattern get/set controls", "winui": "Shows Scenario 1 (Connecting) content", "screenshot_ref": "parity/winui3/screenshots/02_Feature_Reports.png" },
+    { "feature": "Input Report Events", "uwp": "Shows register/unregister input-report controls", "winui": "Shows Scenario 1 content", "screenshot_ref": "parity/winui3/screenshots/03_Input_Report_Events.png" },
+    { "feature": "Input and Output Reports", "uwp": "Shows numeric output-report controls", "winui": "Shows Scenario 1 content", "screenshot_ref": "parity/winui3/screenshots/04_Input_and_Output_Reports.png" }
+  ],
+  "missing_features": [
+    "Feature Reports scenario UI", "Input Report Events scenario UI", "Input and Output Reports scenario UI"
+  ],
+  "summary": "The single most-impactful defect is a dead NavigationView->Frame switch: 3 of 4 scenarios never render because the skill's recommended wiring pattern relies on a constructor SelectedItem assignment raising SelectionChanged, which is unreliable for MenuItemsSource data items. This recurs across every multi-scenario UWP SDK-sample migration."
+}

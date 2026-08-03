@@ -1,0 +1,34 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Get-MigrationPattern.ps1 -Anchor navigationview-frame-wiring", "evidence": "Dev-agent fetched the anchor and its MainPage.xaml.cs comment cites 'PATTERNS.md#navigationview-frame-wiring'; the shell code mirrors the anchor's snippet exactly (session-log.txt turns ~2184-2304)." },
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap neutralized RootFrameNavigationHelper to a no-op stub so the shell compiled regardless of helper signature (session-log.txt ~2591)." },
+    { "tool": "Test-AppLaunch.ps1 smoke launch", "evidence": "session-log.txt 3537-3538 '[PASS] Smoke launch — app stayed alive after launch (pid 62088)'." }
+  ],
+  "tools_problematic": [
+    { "tool": "Test-AppLaunch.ps1 / smoke launch", "problem": "Only checks that the process stays alive; it cannot detect that scenario navigation is dead (nav highlights but content Frame never switches). Gave a false green.", "evidence": "Smoke PASS at 3538 while migration-score.json marks 3 of 4 scenarios fail (dead-scenario)." }
+  ],
+  "tool_limitations": [
+    { "tool": "navigationview-frame-wiring anchor / falsifiable check", "limitation": "The anchor's falsifiable check only verifies the FIRST scenario's controls appear; it never verifies that SELECTING a DIFFERENT nav item switches the content Frame. The dead-switch bug passes this check.", "suggested_tweak": "Strengthen the check to require switching between at least two scenarios, and change the recommended wiring to navigate explicitly on load + use ItemInvoked." }
+  ],
+  "failed_apis": [
+    { "api": "NavigationView.SelectedItem (set in constructor) → SelectionChanged", "why_tried": "Skill anchor recommended setting NavView.SelectedItem = Scenarios[0] in the constructor and navigating only from SelectionChanged.", "root_cause": "Setting SelectedItem before the item containers are realized (in the ctor, pre-Loaded) does not reliably raise SelectionChanged, and with MenuItemsSource data items runtime selection changes do not reliably drive the Frame — so the content Frame never switches.", "fix": "Navigate the Frame explicitly on Loaded for the initial item, and handle NavigationView.ItemInvoked (fires reliably per click for data-bound items) to navigate on selection." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md #navigationview-frame-wiring", "wrong": "Recommends `NavView.SelectedItem = Scenarios[0]` in the constructor plus navigating only from SelectionChanged, and a falsifiable check that only inspects the first scenario.", "correct": "Constructor SelectedItem assignment does not reliably raise SelectionChanged; use an explicit initial Navigate (e.g. on Loaded) and handle ItemInvoked for switching. Verify switching between two scenarios, not just the first." }
+  ],
+  "special_apis": [
+    { "api": "NavigationView with MenuItemsSource + MenuItemTemplate", "special_handling": "Data-bound items do not raise SelectionChanged reliably from a constructor-time SelectedItem assignment; prefer ItemInvoked + explicit initial Navigate." }
+  ],
+  "errors_encountered": [
+    { "error": "Dead scenario: nav item highlights but content pane never switches; scenarios 2-4 still show Scenario 1 UI.", "root_cause": "Followed the skill's navigationview-frame-wiring pattern which relies on constructor SelectedItem raising SelectionChanged; it does not, so navigation never fires for the switch.", "fix": "Explicit initial Navigate on Loaded + ItemInvoked handler that navigates off the bound data item's ClassType." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainPage shell navigation", "symptom": "App builds, launches, smoke-passes, first scenario renders, but 3 of 4 scenarios never render — content Frame never switches.", "turns_or_retries": "Single-pass; no retry because smoke launch was green and the anchor's falsifiable check (first scenario only) appeared satisfied.", "root_cause": "The skill's recommended NavigationView wiring pattern is unreliable for data-bound (MenuItemsSource) items; constructor SelectedItem assignment does not raise SelectionChanged.", "how_resolved": "Not resolved in-trial; shipped broken (3 fails).", "preventable_by": "Fixing the navigationview-frame-wiring anchor to use ItemInvoked + explicit initial Navigate, and to require verifying scenario switching (not just first-scenario render)." }
+  ],
+  "missing_tooling": [
+    { "need": "A validation step that exercises nav switching (select item 2, confirm Frame content changed) rather than only confirming the process is alive.", "would_have_saved": "The dead-scenario regression that passed the alive-only smoke launch." }
+  ],
+  "env_issues": []
+}
