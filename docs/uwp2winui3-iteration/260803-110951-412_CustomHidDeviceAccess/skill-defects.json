@@ -1,0 +1,17 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Multi-scenario SDK-sample shell: NavigationView item highlights but the content Frame never switches; scenarios 2-4 render Scenario 1's UI (dead scenarios). 3 of 4 features fail.",
+      "evidence": "migration-score.json features[1..3] verdict=fail 'nav item highlights but content pane never switches'; MainPage.xaml.cs (session-log.txt ~2228) sets NavView.SelectedItem = Scenarios[0] in ctor and navigates only from NavView_SelectionChanged, exactly mirroring the anchor.",
+      "skill_search": "navigationview-frame-wiring, NavigationView, SelectionChanged, ItemInvoked, MenuItemsSource, SelectedItem in MIGRATION-PATTERNS.md / SKILL.md",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md #navigationview-frame-wiring: `public MainPage(){ InitializeComponent(); NavView.SelectedItem = Scenarios.Count > 0 ? Scenarios[0] : null; }` plus navigating only from `NavView_SelectionChanged`. The falsifiable check only verifies the FIRST scenario's controls appear.",
+      "root_cause": "Assigning NavigationView.SelectedItem in the constructor (before item containers are realized / before Loaded) does not reliably raise SelectionChanged, and for MenuItemsSource data items runtime selection changes do not reliably drive the Frame. So navigation never fires and the Frame never switches. The alive-only smoke launch and a first-scenario-only check do not catch it.",
+      "proposed_fix": "Rewrite the anchor to: (1) navigate the Frame EXPLICITLY on Loaded for the initial scenario instead of relying on a constructor SelectedItem side-effect; (2) handle NavigationView.ItemInvoked (which fires reliably per click for data-bound items) to navigate off the invoked data item's ClassType; (3) strengthen the falsifiable check to require verifying that SELECTING a SECOND scenario switches the content Frame, not just that the first scenario renders. Update the SKILL.md shell-mapping row note accordingly.",
+      "generalizes": "Every UWP SDK sample uses the same MainPage + scenario-list + Frame idiom, and nearly every real UWP app has multi-page/multi-scenario navigation. The constructor-SelectedItem + SelectionChanged-only pattern is a recurring silent failure mode across all of them; fixing the canonical anchor fixes the whole class of migrations."
+    }
+  ]
+}

@@ -279,47 +279,76 @@ Validator catches this race with a 10s smoke launch after the build healthcheck 
 ### NavigationView + Frame wiring (SDK-sample scenario list)
 
 The UWP SDK-sample idiom `MainPage` + `ListView`/scenario list + `Frame` maps to
-`NavigationView` + `Frame` (SKILL.md shell-mapping table). The most common **silent**
-failure here is a shell that renders its nav items but leaves the content `Frame` **blank
-on every page** — it builds and launches with no error, so nothing flags it. The cause is
-almost always a `SelectionChanged` type mismatch or a bad initial selection. Wire it like
-this:
+`NavigationView` + `Frame` (SKILL.md shell-mapping table). Two **silent** failures are
+common — they build and launch with no error, so nothing flags them:
+
+1. **Blank Frame on every page** — a `SelectionChanged` type mismatch (see the wrong-cast
+   warning below).
+2. **Dead scenarios / first-page-sticks** — the *first* scenario renders but selecting any
+   *other* nav item highlights it yet never switches the content `Frame`. This is the more
+   dangerous one: it passes an alive-only smoke launch and a "does the first scenario
+   render?" check, so it ships broken.
+
+**Do NOT drive navigation from a constructor `SelectedItem` assignment.** Setting
+`NavView.SelectedItem` in the constructor (before the item containers are realized) does
+**not** reliably raise `SelectionChanged`, and for `MenuItemsSource` data items relying on
+`SelectionChanged` alone to drive the `Frame` is unreliable — that is the exact cause of
+the dead-scenario bug. Instead: **navigate the first item explicitly on `Loaded`, and
+handle `ItemInvoked`** (which fires reliably on every click, for data-bound items too).
 
 **When items come from `MenuItemsSource` (data-bound, e.g. `x:Bind Scenarios`):**
-`args.SelectedItem` is the **bound data item**, NOT a `NavigationViewItem`. Navigate off
-the data item, and set the initial selection from the source collection (`MenuItems` is
-empty when `MenuItemsSource` is used):
+the invoked/selected item is the **bound data item**, NOT a `NavigationViewItem`. Navigate
+off the data item's page type:
 
 ```csharp
 public MainPage()
 {
     InitializeComponent();
-    NavView.SelectedItem = Scenarios.Count > 0 ? Scenarios[0] : null; // source, not NavView.MenuItems
+    Loaded += (_, _) =>                              // explicit initial nav — do NOT rely on SelectedItem
+    {
+        if (Scenarios.Count > 0)
+        {
+            NavView.SelectedItem = Scenarios[0];     // highlight only; navigation is explicit below
+            ScenarioFrame.Navigate(Scenarios[0].ClassType);
+        }
+    };
 }
 
-private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
 {
-    if (args.SelectedItem is Scenario s)          // data item, NOT NavigationViewItem
+    if (args.InvokedItem is string || args.InvokedItemContainer?.DataContext is not Scenario)
+    {
+        // InvokedItem is the bound data item's text; resolve the Scenario from the container.
+    }
+    if (args.InvokedItemContainer?.DataContext is Scenario s)   // data item, NOT NavigationViewItem
         ScenarioFrame.Navigate(s.ClassType);
 }
 ```
 
-**When items are literal `NavigationViewItem`s in `MenuItems`:** then
-`args.SelectedItem` *is* a `NavigationViewItem`; read its `Tag`:
+Wire `ItemInvoked="NavView_ItemInvoked"` on the `NavigationView` in XAML. `ItemInvoked`
+fires on every tap even when re-selecting, which is what keeps the switch reliable.
+
+**When items are literal `NavigationViewItem`s in `MenuItems`:** the invoked item container
+*is* a `NavigationViewItem`; read its `Tag`:
 
 ```csharp
-if (args.SelectedItem is NavigationViewItem item && item.Tag is Type pageType)
-    ScenarioFrame.Navigate(pageType);
+private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+{
+    if (args.InvokedItemContainer is NavigationViewItem item && item.Tag is Type pageType)
+        ScenarioFrame.Navigate(pageType);
+}
 ```
 
 Do not mix the two: casting a `MenuItemsSource` selection to `NavigationViewItem` (or
 reading `NavView.MenuItems[0]` under `MenuItemsSource`) silently no-ops and yields the
 blank-frame bug.
 
-**Falsifiable check:** after the shell loads and the first item is selected, the content
-`Frame` must contain the first scenario's controls (not just the nav labels). If the UIA
-tree shows nav items but no scenario controls, the `SelectionChanged` navigation is
-broken.
+**Falsifiable check (must verify switching, not just first render):** after the shell loads,
+the content `Frame` must contain the **first** scenario's controls; then, selecting the
+**second** nav item must make the `Frame` show the **second** scenario's controls (its
+distinct control names must appear in the UIA tree). If the first scenario renders but
+switching to a second nav item leaves scenario-1 controls in the tree, the navigation is
+broken — do not ship it.
 
 <a id="appwindow-api-replacements"></a>
 ### AppWindow API replacements

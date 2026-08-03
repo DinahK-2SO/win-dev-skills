@@ -1,0 +1,29 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "discrepancies": [
+    {
+      "scenario": "Feature Reports",
+      "type": "dead-scenario",
+      "detail": "Nav item highlights but content pane never switches; shows Scenario 1 content. Missing controls: ButtonGetLedBlinkPattern, ButtonSetLedBlinkPattern, LedBlinkPatternInput (ComboBox).",
+      "severity": "high"
+    },
+    {
+      "scenario": "Input Report Events",
+      "type": "dead-scenario",
+      "detail": "Content pane never switches; shows Scenario 1 content. Missing controls: ButtonRegisterForInputReportEvents, ButtonUnregisterFromInputReportEvents.",
+      "severity": "high"
+    },
+    {
+      "scenario": "Input and Output Reports",
+      "type": "dead-scenario",
+      "detail": "Content pane never switches; shows Scenario 1 content. Missing controls: ButtonSendNumericOutputReport, NumericValueToWrite (ComboBox).",
+      "severity": "high"
+    },
+    {
+      "scenario": "*",
+      "type": "false-pass",
+      "detail": "Compare-Parity reported PASS because Extract-UwpFeatureChecklist parsed 0 controls per scenario (checklist gap), so coverage was n/a. Structural gate blind here; overridden by visual + UIA + source evidence.",
+      "severity": "info"
+    }
+  ]
+}

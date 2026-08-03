@@ -1,0 +1,17 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Fix navigationview-frame-wiring anchor: use explicit on-Loaded initial Navigate + ItemInvoked instead of constructor SelectedItem/SelectionChanged, which silently fails to switch the content Frame for MenuItemsSource data items (dead scenarios).",
+    "Strengthen the anchor's falsifiable check to require verifying a SECOND scenario switches the Frame, not just first-scenario render, so the dead-scenario bug can't pass.",
+    "Update SKILL.md shell-mapping note to flag the dead-scenario switch bug as the #1 silent failure and point at the corrected wiring."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Extend the smoke/validate step to exercise nav switching (select item 2, assert Frame content changed) rather than an alive-only launch check."
+  ]
+}

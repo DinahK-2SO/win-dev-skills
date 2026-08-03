@@ -1,0 +1,34 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "note": "All device-report scenarios (2-4) are gated on a connected SuperMUTT HID device. With no hardware present, the UWP sample hides the SuperMuttScenario panel and shows a not-connected status; a faithful WinUI 3 migration must do the same. Behavioral actuation of gated controls is not possible in either app without hardware, so parity is judged on structural presence + the correct hardware-gated fallback.",
+  "features": [
+    {
+      "number": 1,
+      "title": "Connecting To Device",
+      "controls": ["Connect to device (Button)", "Disconnect from device (Button)", "Select a Hid Device (ListBox)", "Status (StatusBlock/Border)", "Description text"],
+      "gated": false,
+      "expected": "Connect/Disconnect buttons, device list, status 'No devices currently selected'."
+    },
+    {
+      "number": 2,
+      "title": "Feature Reports",
+      "controls": ["Get Led Blink Pattern (Button)", "Set Led Blink Pattern (Button)", "LedBlinkPatternInput (ComboBox 0-7)"],
+      "gated": true,
+      "expected": "Without device: 'Device is not connected' fallback; controls hidden until a device connects (matches UWP)."
+    },
+    {
+      "number": 3,
+      "title": "Input Report Events",
+      "controls": ["Register For Event (Button)", "Unregister From Event (Button)"],
+      "gated": true,
+      "expected": "Without device: 'Device is not connected' fallback (matches UWP)."
+    },
+    {
+      "number": 4,
+      "title": "Input and Output Reports",
+      "controls": ["Send Numeric Output Report (Button)", "NumericValueToWrite (ComboBox 0-9)", "Get Numeric Input Report (Button)", "Send Boolean Output Report (Button)", "BooleanValueToWrite (ComboBox)", "Get Boolean Input Report (Button)"],
+      "gated": true,
+      "expected": "Without device: 'Device is not connected' fallback (matches UWP)."
+    }
+  ]
+}

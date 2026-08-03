@@ -1,0 +1,51 @@
+{
+  "scenario": "CustomHidDeviceAccess",
+  "uwp_launchable": true,
+  "score": 25,
+  "features_total": 4,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 3,
+  "uwp_capture_status": "ok (scenario 1 captured live; UWP legacy CoreWindow does not expose inner UIA tree and rejected synthetic input, so scenarios 2-4 ground truth taken from source)",
+  "parity_result": "parity/winui3/parity-result.json",
+  "parity_gate_note": "Compare-Parity reported PASS(100) but this is a FALSE PASS: Extract-UwpFeatureChecklist parsed 0 controls per scenario, so structural coverage was n/a and all scenarios defaulted to pass. Overridden by direct visual + UIA + source evidence.",
+  "behavioral_regressions": 3,
+  "features": [
+    {
+      "name": "Connecting To Device",
+      "verdict": "pass",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Connecting_To_Device.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Connecting_To_Device.png",
+      "note": "Content renders; Connect/Disconnect buttons, device list, status region present and matching the UWP golden."
+    },
+    {
+      "name": "Feature Reports",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Feature_Reports.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Feature_Reports.png",
+      "note": "Dead scenario: nav item highlights but content pane never switches; still shows Scenario 1 UI. UIA tree (ui/02.json) contains only Scenario 1 controls. Missing: ButtonGetLedBlinkPattern, ButtonSetLedBlinkPattern, LedBlinkPatternInput."
+    },
+    {
+      "name": "Input Report Events",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Input_Report_Events.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Input_Report_Events.png",
+      "note": "Dead scenario: content pane never switches. Missing: ButtonRegisterForInputReportEvents, ButtonUnregisterFromInputReportEvents."
+    },
+    {
+      "name": "Input and Output Reports",
+      "verdict": "fail",
+      "uwp_responded": true,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/04_Input_and_Output_Reports.png",
+      "winui_screenshot": "parity/winui3/screenshots/04_Input_and_Output_Reports.png",
+      "note": "Dead scenario: content pane never switches. Missing: ButtonSendNumericOutputReport, NumericValueToWrite."
+    }
+  ]
+}
