@@ -275,6 +275,53 @@ private bool _navigated;
 
 Validator catches this race with a 10s smoke launch after the build healthcheck passes — see `Validate-UwpMigration.ps1` Section 7.
 
+<a id="navigationview-frame-wiring"></a>
+### NavigationView + Frame wiring (SDK-sample scenario list)
+
+The UWP SDK-sample idiom `MainPage` + `ListView`/scenario list + `Frame` maps to
+`NavigationView` + `Frame` (SKILL.md shell-mapping table). The most common **silent**
+failure here is a shell that renders its nav items but leaves the content `Frame` **blank
+on every page** — it builds and launches with no error, so nothing flags it. The cause is
+almost always a `SelectionChanged` type mismatch or a bad initial selection. Wire it like
+this:
+
+**When items come from `MenuItemsSource` (data-bound, e.g. `x:Bind Scenarios`):**
+`args.SelectedItem` is the **bound data item**, NOT a `NavigationViewItem`. Navigate off
+the data item, and set the initial selection from the source collection (`MenuItems` is
+empty when `MenuItemsSource` is used):
+
+```csharp
+public MainPage()
+{
+    InitializeComponent();
+    NavView.SelectedItem = Scenarios.Count > 0 ? Scenarios[0] : null; // source, not NavView.MenuItems
+}
+
+private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+{
+    if (args.SelectedItem is Scenario s)          // data item, NOT NavigationViewItem
+        ScenarioFrame.Navigate(s.ClassType);
+}
+```
+
+**When items are literal `NavigationViewItem`s in `MenuItems`:** then
+`args.SelectedItem` *is* a `NavigationViewItem`; read its `Tag`:
+
+```csharp
+if (args.SelectedItem is NavigationViewItem item && item.Tag is Type pageType)
+    ScenarioFrame.Navigate(pageType);
+```
+
+Do not mix the two: casting a `MenuItemsSource` selection to `NavigationViewItem` (or
+reading `NavView.MenuItems[0]` under `MenuItemsSource`) silently no-ops and yields the
+blank-frame bug.
+
+**Falsifiable check:** after the shell loads and the first item is selected, the content
+`Frame` must contain the first scenario's controls (not just the nav labels). If the UIA
+tree shows nav items but no scenario controls, the `SelectionChanged` navigation is
+broken.
+
+<a id="appwindow-api-replacements"></a>
 ### AppWindow API replacements
 
 | UWP API | WinUI 3 API |

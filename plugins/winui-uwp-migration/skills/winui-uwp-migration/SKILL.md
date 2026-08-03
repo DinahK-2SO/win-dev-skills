@@ -93,7 +93,7 @@ Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 
 | Source shell pattern (UWP) | Suggested WinUI 3 target |
 |---|---|
-| `MainPage` + `ListView` + `Frame` (SDK-sample idiom) | `NavigationView` + `Frame` |
+| `MainPage` + `ListView` + `Frame` (SDK-sample idiom) | `NavigationView` + `Frame` — wire it with `Get-MigrationPattern.ps1 -Anchor navigationview-frame-wiring` (the item-selection → content-`Frame` navigation is the #1 silent blank-content bug) |
 | `Pivot` | `TabView` (top), or `Pivot` from WinUI Community Toolkit if behaviour parity matters |
 | `Hub` | `NavigationView` with grouped items, or hand-rolled `ScrollViewer` |
 | `TabView` (UWP) | `TabView` (WinUI 3) — namespace change only |

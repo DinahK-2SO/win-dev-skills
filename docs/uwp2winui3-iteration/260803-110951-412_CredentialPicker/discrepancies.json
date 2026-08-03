@@ -1,0 +1,19 @@
+{
+  "scenario": "CredentialPicker",
+  "index": 0,
+  "score": 0,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Message scenario: form + Launch opens native credential dialog", "status": "fail", "reason": "WinUI content frame blank; no Launch/Message/Target/output controls in UIA tree (cov 1/9).", "suspected_skill_gap": "No NavigationView+Frame wiring pattern; SelectionChanged never navigates the content Frame." },
+    { "id": 2, "text": "Message+Caption scenario: form incl. Caption + Launch", "status": "fail", "reason": "Content frame blank; nav item selects but no page content; all controls absent (cov 2/10).", "suspected_skill_gap": "Same missing NavigationView+Frame wiring pattern." },
+    { "id": 3, "text": "CredentialPickerOptions scenario: Protocol combo, Custom Protocol, Always Show? checkbox + Launch", "status": "fail", "reason": "Content frame blank; Protocol combo, Custom Protocol, Always Show?, Launch and all fields absent (cov 2/14).", "suspected_skill_gap": "Same missing NavigationView+Frame wiring pattern." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "All scenarios", "uwp": "Full scenario form; Launch opens native Windows Security credential dialog", "winui": "NavigationView shell renders (3 nav items) but content Frame entirely blank on every scenario", "screenshot_ref": "parity/winui3/screenshots/01_Message.png vs parity/baseline/screenshots/01_Message__a01_Launch.png" }
+  ],
+  "missing_features": [
+    "All scenario input/output controls (Message/Caption/Target/Domain/Username/Password, Launch button, Protocol combo, Custom Protocol, Always Show checkbox) — the entire scenario UI never renders because the content Frame is never navigated."
+  ],
+  "summary": "App builds (0 errors) and launches, but the NavigationView content Frame is blank on every scenario. Root cause: SelectionChanged casts the MenuItemsSource-bound data item (Scenario) to NavigationViewItem, which fails silently so ScenarioFrame.Navigate is never called. Single generalizable skill-defect: missing NavigationView+Frame wiring pattern for the SDK-sample idiom."
+}
