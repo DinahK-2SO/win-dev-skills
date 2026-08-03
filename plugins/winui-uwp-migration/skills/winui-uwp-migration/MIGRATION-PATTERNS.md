@@ -50,6 +50,17 @@ Get-ChildItem -Path $Target -Recurse -Directory -Include bin,obj |
 
 Generated sources never belong in source control or the migrated tree — only `.xaml/.cs/.resw/.appxmanifest`/assets are real inputs.
 
+### `CS8803` / `CS0106` / `CS1022` — orphaned members after a partial class-body replace (often a leftover `#if WINDOWS_PHONE_APP` branch)
+
+A burst of `CS8803` ("Top-level statements must precede namespace and type declarations"), `CS0106` ("The modifier public/private is not valid for this item"), and `CS1022` ("Type or namespace definition, or end-of-file expected") in **one `.cs` file** — usually with **cascading** `WMC0909` / `WMC1111` / `WMC9999` XAML errors — almost always means a **large replace edit did not span the file's entire original class body**, so the tail of the old file survived *after* the new class's closing brace. The orphaned members sit outside any type, hence the "modifier not valid" / "end-of-file expected" cascade. The XAML errors are secondary: the aborted C# compile leaves the markup compiler without a `LocalAssembly` (`WMC1509`), so it can't resolve project types — **do not chase the XAML errors; fix the `.cs` first and they vanish.**
+
+Two things cause this, both common in UWP samples:
+
+- **A leftover `#if WINDOWS_PHONE_APP` (or other device-family) branch.** UWP sample classes often bracket phone/Xbox/HoloLens-only code in preprocessor branches — e.g. a phone picker-continuation path using `IFileOpenPickerContinuable`, `PickSingleFileAndContinue`, and `ContinueFileOpenPicker`. **None of this has a WinUI 3 desktop equivalent — delete the entire `#if …WINDOWS_PHONE_APP… #endif` branch wholesale rather than porting it** (the desktop `PickSingleFileAsync` + `InitializeWithWindow` path from [Pickers](#pickers) is the only path). These branches make the real class longer than it looks, so an `old_str` that stops at the visible class opening misses the tail.
+- **An `old_str` that only covered the class header/first members.** When you rewrite a whole class body, your `old_str` must extend to the file's final closing brace, or truncate the leftover tail in the same pass.
+
+Fix: after any large class-body replace, **confirm no orphaned members remain** — the file must end with exactly the class's (and namespace's) closing braces. Delete any surviving tail, then rebuild.
+
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
 `<CaptureElement>` does not exist in WinUI 3, but the **live camera preview is not a defer** — it has a standard replacement: render `MediaCapture` preview frames into an `<Image>` via `SoftwareBitmapSource`. See the [Camera preview](#capture) section below for the full recipe. Do **not** mark the camera page `defer` — that deletes the whole feature and leaves a blank window. (`MediaPlayerElement` is only for media playback, not the live camera surface.)
@@ -315,6 +326,8 @@ var file = await picker.PickSingleFileAsync();
 ```
 
 Apply the same `InitializeWithWindow.Initialize(obj, hwnd)` pattern to `FolderPicker`, `FileSavePicker`, `DataTransferManager` (Share), `PrintManager`, and other UI surfaces that target a window.
+
+> **Phone picker-continuation is dead code.** UWP samples often gate a phone-only picker path behind `#if WINDOWS_PHONE_APP`, using `IFileOpenPickerContinuable`, `PickSingleFileAndContinue`, and `ContinueFileOpenPicker`. WinUI 3 desktop has **no continuation model** — the async `PickSingleFileAsync` above is the only path. **Delete the entire `#if WINDOWS_PHONE_APP` branch** (interface, `…AndContinue` calls, `Continue…Picker` handlers) instead of porting it. Leaving it — or replacing only part of the surrounding class body — produces orphaned members (see the `CS8803`/`CS0106`/`CS1022` build-error entry above).
 
 <a id="startup-crashes"></a>
 ## Diagnosing Startup Crashes

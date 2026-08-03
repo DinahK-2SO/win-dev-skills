@@ -1,0 +1,17 @@
+{
+  "scenario": "Compression",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "UWP source class bodies wrapped in #if WINDOWS_PHONE_APP (phone-only picker continuation: IFileOpenPickerContinuable / PickSingleFileAndContinue / ContinueFileOpenPicker) are dead code on WinUI 3, but the skill gives no guidance to delete such preprocessor branches. The agent tried to port around them and left an orphaned file tail, causing 14 build errors.",
+      "evidence": "build/session-log: turns ~21-27 — CS8803/CS0106/CS1022 (Scenario1.xaml.cs 227,229,280..500) + cascading WMC0909/WMC1111/WMC9999; agent note 'Scenario1.xaml.cs has leftover content from the old file at line 227+ (the edit only replaced the beginning)'.",
+      "skill_search": "grepped winui-uwp-migration for '#if', 'WINDOWS_PHONE', 'preprocessor', 'Continuable', 'Continuation', 'PickSingleFileAndContinue', 'dead code' — no matches in SKILL.md, MIGRATION-PATTERNS.md, or scripts.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Two coupled gaps: (1) no rule that phone-only / device-family #if branches must be deleted wholesale (there is no continuation-picker model on WinUI 3 desktop); (2) no build-error entry mapping CS8803/CS0106/CS1022 to an orphaned file tail left by a partial class-body replace — so the agent burned ~5 turns diagnosing it.",
+      "proposed_fix": "Add a MIGRATION-PATTERNS.md 'Common build errors' entry for CS8803/CS0106/CS1022 explaining the orphaned-tail cause and the fix (ensure a class-body replace spans the ENTIRE original body; delete leftover members), and note that UWP #if WINDOWS_PHONE_APP / device-family branches (incl. IFileOpenPickerContinuable / PickSingleFileAndContinue / ContinueFileOpenPicker) are dead code to delete rather than port — the desktop PickSingleFileAsync path is the only path.",
+      "generalizes": "UWP SDK samples very commonly guard phone/Xbox/HoloLens code with #if WINDOWS_PHONE_APP (or other device-family symbols) and use the phone picker-continuation pattern. None of it has a WinUI 3 desktop equivalent, and partial replaces of long converted class bodies leaving an orphaned tail is a recurring, high-cost failure mode across scenarios."
+    }
+  ]
+}

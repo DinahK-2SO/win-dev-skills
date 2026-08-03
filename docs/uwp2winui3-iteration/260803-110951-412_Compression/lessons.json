@@ -1,0 +1,24 @@
+{
+  "scenario": "Compression",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap ran once, seeded TODO[migrate-001..004] markers and the mapping; agent used them to drive the port (session-log turns ~94-146)." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Final run reported PASS with 'No TODO[migrate-] markers remain' (session-log ~1786-1802), giving the agent a clean completion signal." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "FileOpenPicker (phone continuation: IFileOpenPickerContinuable / PickSingleFileAndContinue / ContinueFileOpenPicker)", "special_handling": "UWP source wrapped a phone-only picker path in #if WINDOWS_PHONE_APP. On WinUI 3 there is no continuation model; the desktop path (PickSingleFileAsync + InitializeWithWindow) is the only one. The whole #if WINDOWS_PHONE_APP branch is dead code and must be deleted, not ported." }
+  ],
+  "errors_encountered": [
+    { "error": "CS8803 'Top-level statements must precede namespace and type declarations', CS0106 'The modifier public/private is not valid for this item', CS1022 'Type or namespace definition, or end-of-file expected' (14 errors, Scenario1.xaml.cs)", "root_cause": "The agent replaced the class header/body of Scenario1.xaml.cs with a single large edit whose old_str began at the '#if WINDOWS_PHONE_APP ... #else ... #endif {' class-opening block but did NOT span the entire original body. The tail of the old file (the phone picker methods and later members) survived after the new class's closing brace, leaving orphaned members and an extra namespace close. The source's #if WINDOWS_PHONE_APP conditional-compilation branch made the class span longer/duplicated than the agent assumed.", "fix": "Truncated the file after the new class closing brace (Get-Content | [0..222] | Set-Content), i.e. deleted the orphaned tail. Rebuild then succeeded (warnings only)." },
+    { "error": "WMC0909 'Cannot resolve DataType local:Scenario' + WMC1111 + WMC9999 (MainPage.xaml)", "root_cause": "Secondary/cascading: the C# compile errors above aborted MarkupCompilePass, so the XAML compiler could not resolve project types (WMC1509 'No LocalAssembly parameter'). The x:DataType='local:Scenario' mapping was actually correct.", "fix": "Disappeared once the C# errors in Scenario1.xaml.cs were fixed; no XAML change needed." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario1.xaml.cs class-body port (session-log turns ~21-27)", "symptom": "14 build errors (CS8803/CS0106/CS1022 + cascading XAML WMC0909/WMC1111/WMC9999) after a large replace edit", "turns_or_retries": "~5 turns (build fail -> diagnose leftover tail -> view head -> view end -> truncate -> rebuild)", "root_cause": "Large old_str/new_str replace of a converted class body did not cover the file's full original extent; the source's #if WINDOWS_PHONE_APP dead branch made the real class longer than the replaced span, so orphaned members remained after the new closing brace.", "how_resolved": "Agent recognized 'leftover content from the old file', truncated everything after the intended closing brace with a PowerShell Set-Content, and rebuilt clean.", "preventable_by": "Skill guidance to (a) delete entire #if WINDOWS_PHONE_APP / phone-only preprocessor branches wholesale rather than porting them, and (b) when doing a large class-body replace, verify no orphaned members remain (rebuild / check file length) — plus a MIGRATION-PATTERNS build-error entry mapping CS8803/CS0106/CS1022 to 'orphaned tail from a partial replace / leftover #if branch'." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

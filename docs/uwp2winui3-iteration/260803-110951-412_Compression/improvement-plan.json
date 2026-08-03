@@ -1,0 +1,20 @@
+{
+  "scenario": "Compression",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Class bodies containing #if WINDOWS_PHONE_APP dead branches (phone picker-continuation) plus a partial class-body replace left orphaned members, producing 14 build errors (CS8803/CS0106/CS1022 + cascading WMC0909/WMC1111/WMC9999) and ~5 lost recovery turns.",
+      "evidence": "session-log turns ~21-27; agent note 'Scenario1.xaml.cs has leftover content from the old file at line 227+ (the edit only replaced the beginning)'; skill grep for '#if'/'WINDOWS_PHONE'/'Continuable' returned no matches.",
+      "root_cause": "Skill had (1) no rule to delete phone-only/device-family #if branches wholesale, and (2) no build-error signature mapping CS8803/CS0106/CS1022 to an orphaned tail from a partial class-body replace (with the WMC XAML errors being a red-herring cascade).",
+      "tier": 3,
+      "change": "Added a 'Common build errors' entry in MIGRATION-PATTERNS.md for CS8803/CS0106/CS1022 (orphaned-tail cause, delete-the-#if-branch rule, verify-no-orphans fix, and that the WMC XAML errors are secondary — fix .cs first). Added a cross-referencing note in the Pickers section that #if WINDOWS_PHONE_APP picker-continuation (IFileOpenPickerContinuable/PickSingleFileAndContinue/ContinueFileOpenPicker) is dead code to delete.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent recognizes the CS8803/CS0106/CS1022 signature immediately, deletes phone #if branches wholesale, and verifies no orphaned tail — avoiding the multi-turn recovery loop.",
+      "falsifiable_check": "On a re-run of a scenario with an #if WINDOWS_PHONE_APP branch, no CS8803/CS0106/CS1022 build failure occurs (the branch is deleted in one pass), and the agent does not spend turns chasing WMC0909/WMC9999 XAML errors."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-1 idea (risky, not auto-applied): Initialize-UwpMigration.ps1 could detect and flag/strip #if WINDOWS_PHONE_APP (and other device-family) branches at bootstrap. Deferred because blindly deleting preprocessor code is unsafe when the symbol may legitimately gate shared logic."
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "scenario": "Compression",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Migrated WinUI 3 app renders in the system-default (light) theme while the UWP golden renders dark. Cosmetic only; scoring marked it a non-defect.",
+      "evidence": "discrepancies.json: single 'cosmetic' 'theme' discrepancy — 'Layout, controls, header, footer, and text all match. Not a functional defect.'; migration-score.json score 100.",
+      "covered_clearly_at": "N/A — this is not a defect and not something the migration skill should force. Pinning RequestedTheme='Dark' to match a golden would be scenario-specific and wrong as a general rule (WinUI apps should follow the system theme). No skill change warranted.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The scorer itself classified it cosmetic with no functional impact; forcing a dark theme to match one golden would be a scenario-specific anti-pattern, not a generalizable migration rule. Following the system theme is correct WinUI 3 behavior."
+    }
+  ]
+}

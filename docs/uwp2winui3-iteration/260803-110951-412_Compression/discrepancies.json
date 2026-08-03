@@ -1,0 +1,15 @@
+{
+  "scenario": "Compression",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "Compression/Decompression sample", "status": "pass", "reason": "2/2 controls present; Compress File... button responds in both apps; file picker opens; DEFAULT status text matches.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Compression/Decompression sample", "uwp": "dark theme", "winui": "light (system default) theme", "screenshot_ref": "parity/winui3/screenshots/01_Compression_Decompression_sample.png" }
+  ],
+  "missing_features": [],
+  "summary": "Clean migration, score 100. Only a cosmetic theme difference (UWP dark vs WinUI system-default light) — not a functional defect. The single build-time struggle was orphaned members left after a partial class-body replace of a class containing an #if WINDOWS_PHONE_APP dead branch."
+}
