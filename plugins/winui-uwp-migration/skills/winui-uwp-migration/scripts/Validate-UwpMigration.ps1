@@ -401,6 +401,31 @@ if (Test-Path -LiteralPath $manifestPath) {
     Write-Host "[WARN] Package.appxmanifest not found at $manifestPath — skipping image-reference check"
 }
 
+# ─── 5d. Popup opened without a XamlRoot is a silent no-op ─────────────────────
+# In UWP a <Popup> attaches to the current CoreWindow automatically, so setting
+# Popup.IsOpen = true just works. In WinUI 3 a Popup that is NOT already in the
+# live visual tree (e.g. hosted inside a UserControl that was `new`ed up but never
+# added to a page/window — a common pattern for overlay bars, banners, teaching
+# tips) MUST have its XamlRoot assigned before it will render. Without it,
+# `IsOpen = true` silently does nothing: the app builds, launches, and the control
+# looks dead. This exact omission scored a Compass calibration-bar migration
+# partial (radio present, banner never appeared). Same class as ContentDialog,
+# which also needs XamlRoot — see MIGRATION-PATTERNS.md > 'Dialogs' / 'Popup'.
+$popupSuspects = New-Object System.Collections.Generic.List[string]
+foreach ($f in @($files | Where-Object { $_.Extension -eq '.cs' })) {
+    $t = [System.IO.File]::ReadAllText($f.FullName)
+    if (($t -match '\.IsOpen\s*=\s*true') -and ($t -match '\bPopup\b') -and
+        ($t -notmatch '\.XamlRoot\s*=')) {
+        [void]$popupSuspects.Add([System.IO.Path]::GetRelativePath($Target, $f.FullName))
+    }
+}
+if ($popupSuspects.Count -gt 0) {
+    Write-Host "[WARN] Popup.IsOpen = true found with no XamlRoot assignment in: $([string]::Join(', ', $popupSuspects))"
+    Write-Host "       In WinUI 3 a Popup not already in the live visual tree needs Popup.XamlRoot set (e.g. from the hosting Page/UserControl's XamlRoot, or App.MainWindow.Content.XamlRoot) before IsOpen = true renders. Without it the popup silently never appears."
+    Write-Host "       See MIGRATION-PATTERNS.md > 'Dialogs' (Popup subsection)."
+    Add-Diag 'Popup without XamlRoot' (($popupSuspects) -join "`n")
+}
+
 # ─── 6. dotnet build healthcheck ──────────────────────────────────────────────
 # The validator must gate on a clean build, otherwise common namespace-rewrite
 # fallout (CS0104 LaunchActivatedEventArgs ambiguity, CS0246 scaffold-vs-UWP

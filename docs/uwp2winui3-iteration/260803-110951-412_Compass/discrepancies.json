@@ -1,0 +1,22 @@
+{
+  "scenario": "Compass",
+  "index": 0,
+  "score": 83,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Data Events (Enable/Disable)", "status": "pass", "reason": "Buttons present and wired; both apps show 'No compass found' (no hardware) — identical behavior.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Polling (Enable/Disable)", "status": "pass", "reason": "Present and wired; identical defensive fallback in both apps.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Calibration (High/Approximate/Unreliable radios; Unreliable invokes calibration bar)", "status": "partial", "reason": "Radios present (3/3) but selecting 'Unreliable' shows no calibration bar (invokeOk=false). Popup opened without XamlRoot is a silent no-op in WinUI 3.", "suspected_skill_gap": "Skill documents XamlRoot for ContentDialog only, not for Popup; agent migrated the Popup without setting XamlRoot." }
+  ],
+  "visual_discrepancies": [
+    {
+      "feature": "Calibration bar",
+      "uwp": "Selecting 'Unreliable' shows a top banner prompting device calibration with a 'Do not show again' button.",
+      "winui": "Radio selects but no banner appears.",
+      "screenshot_ref": "parity/winui3/screenshots/03_Calibration__a03_Unreliable.png"
+    }
+  ],
+  "missing_features": ["Calibration bar Popup display on Unreliable accuracy"],
+  "summary": "83/100. Only regression: the calibration-bar Popup never renders because its XamlRoot was not set — a general WinUI 3 Popup migration pitfall not covered by the skill."
+}

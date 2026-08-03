@@ -1,0 +1,14 @@
+{
+  "scenario": "Compass",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: add 'Popup needs the same XamlRoot' subsection under Dialogs — a code-instantiated WinUI 3 Popup opened without XamlRoot silently never renders (UWP auto-attached to CoreWindow); generalizes to all popup/overlay/banner migrations.",
+    "Validate-UwpMigration.ps1: add WARN heuristic flagging Popup.IsOpen=true with no XamlRoot assignment (mirrors the background-task dead-control check) so this silent, build-clean no-op is caught before scoring."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": []
+}

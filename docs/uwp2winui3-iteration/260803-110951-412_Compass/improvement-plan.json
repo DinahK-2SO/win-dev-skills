@@ -1,0 +1,28 @@
+{
+  "scenario": "Compass",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "A code-instantiated WinUI 3 Popup opened via IsOpen=true with no XamlRoot silently never renders; the Compass calibration bar migrated but never appeared.",
+      "evidence": "migration-score.json Calibration verdict=partial (invokeOk=false); migrated CalibrationBar.xaml.cs RequestCalibration() sets CalibrationPopup.IsOpen=true without XamlRoot.",
+      "root_cause": "Skill documented XamlRoot for ContentDialog only; Popup has the identical WinUI 3 requirement but was uncovered.",
+      "tier": 1,
+      "change": "Added a WARN heuristic in Validate-UwpMigration.ps1 flagging .cs files that set Popup.IsOpen=true with no XamlRoot assignment (analogous to the existing background-task dead-control check). Tier 1 chosen because a silent no-op is invisible at build time and easy for prose to be ignored; a validator signal cannot be skipped.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Migration agent is warned to set Popup.XamlRoot before IsOpen=true, restoring popup/overlay display.",
+      "falsifiable_check": "On re-run, validator emits '[WARN] Popup.IsOpen = true found with no XamlRoot' for the unfixed CalibrationBar, and Calibration requirement goes partial->pass once XamlRoot is set (banner appears)."
+    },
+    {
+      "problem": "Same as above — documentation had no Popup+XamlRoot guidance to point the agent (and validator WARN) to.",
+      "evidence": "grep of winui-uwp-migration for 'Popup' returned only the ContentDialog section; no Popup mention.",
+      "root_cause": "Absent guidance for Popup XamlRoot.",
+      "tier": 3,
+      "change": "Added a 'Popup needs the same XamlRoot' subsection under the Dialogs pattern in MIGRATION-PATTERNS.md with a code example and reuse of the existing XamlRoot-selection table. Tier 3 supplements the Tier 1 signal so the agent knows the concrete fix; the validator WARN references this anchor.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent sets Popup.XamlRoot when migrating code-instantiated popups/overlays.",
+      "falsifiable_check": "Re-run: migrated code that opens a Popup assigns XamlRoot; validator Popup WARN does not fire."
+    }
+  ],
+  "deferred_to_human": []
+}

@@ -1,0 +1,40 @@
+{
+  "scenario": "Compass",
+  "index": 0,
+  "tools_helpful": [],
+  "tools_problematic": [],
+  "tool_limitations": [
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "No heuristic for a WinUI 3 Popup opened (IsOpen=true) without a XamlRoot; such a popup is a silent runtime no-op that builds cleanly, so the validator passed a dead calibration bar.",
+      "suggested_tweak": "Add a WARN heuristic flagging .cs files that set Popup.IsOpen=true with no XamlRoot assignment (mirrors the existing background-task dead-control check)."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    {
+      "api": "Windows.UI.Xaml.Controls.Primitives.Popup (overlay bar hosted in a UserControl)",
+      "special_handling": "In UWP a Popup auto-attaches to the current CoreWindow. In WinUI 3 a Popup not already in the live visual tree must have Popup.XamlRoot assigned before IsOpen=true renders; otherwise it silently never appears."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Calibration bar banner never appears when 'Unreliable' selected (invokeOk=false, responded=false).",
+      "root_cause": "CalibrationBar is a UserControl instantiated via `new CalibrationBar()` and never added to any visual tree; its inner <Popup> has no XamlRoot, so CalibrationPopup.IsOpen=true is a no-op in WinUI 3.",
+      "fix": "Assign the Popup's XamlRoot (from the hosting element's XamlRoot or App.MainWindow.Content.XamlRoot) before setting IsOpen=true."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "CalibrationBar.xaml.cs RequestCalibration()",
+      "symptom": "Migrated the Popup structure faithfully but the popup never displays at runtime; build is clean and no error surfaces.",
+      "turns_or_retries": "n/a (silent failure, not diagnosed during build)",
+      "root_cause": "Skill documented XamlRoot for ContentDialog only; Popup (which has the identical requirement) was not covered, so the agent did not set XamlRoot on the Popup.",
+      "how_resolved": "Not resolved during migration; caught only by parity scoring.",
+      "preventable_by": "Adding a Popup+XamlRoot subsection to MIGRATION-PATTERNS.md and a validator WARN for Popup.IsOpen without XamlRoot."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

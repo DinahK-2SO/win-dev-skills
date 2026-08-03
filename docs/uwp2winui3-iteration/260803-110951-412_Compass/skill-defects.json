@@ -1,0 +1,17 @@
+{
+  "scenario": "Compass",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "A WinUI 3 Popup (or a UserControl hosting one) opened via IsOpen=true without a XamlRoot silently never renders. The Compass calibration bar migrated structurally but never appeared on 'Unreliable'.",
+      "evidence": "migration-score.json feature 'Calibration' verdict=partial (invokeOk=false, responded=false); migrated CalibrationBar.xaml.cs RequestCalibration() sets CalibrationPopup.IsOpen=true with no XamlRoot; discrepancies.json screenshot 03_Calibration__a03_Unreliable.png.",
+      "skill_search": "grepped winui-uwp-migration for 'XamlRoot|Popup|ContentDialog'",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill documents XamlRoot only for ContentDialog (MIGRATION-PATTERNS.md 'Dialogs'). Popup has the identical requirement but was never mentioned, so the agent left the Popup's XamlRoot unset.",
+      "proposed_fix": "(1) Add a 'Popup needs the same XamlRoot' subsection under the Dialogs pattern in MIGRATION-PATTERNS.md with a code example. (2) Add a WARN heuristic in Validate-UwpMigration.ps1 flagging .cs files that set Popup.IsOpen=true with no XamlRoot assignment (mirrors the existing background-task dead-control check).",
+      "generalizes": "Popup-based overlays (banners, calibration/notification bars, custom teaching tips, flyout-like controls) are common in UWP samples and apps. UWP auto-attached popups to the CoreWindow; WinUI 3 requires XamlRoot on any popup not already in the live visual tree. This recurs in any migration that carries a code-instantiated Popup."
+    }
+  ]
+}

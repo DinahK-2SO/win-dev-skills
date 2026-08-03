@@ -184,6 +184,19 @@ var result = await dlg.ShowAsync();
 
 If `XamlRoot` is `null`, the call happened before the element was loaded — wire the dialog from `Loaded` or after `Window.Activate()`.
 
+### `Popup` needs the same `XamlRoot` — or it silently never shows
+
+A `<Popup>` (and any `UserControl` that hosts one — overlay bars, banners, custom teaching tips) has the **same requirement as `ContentDialog`**. In UWP a `Popup` auto-attached to the current `CoreWindow`, so `IsOpen = true` just worked. In WinUI 3, a `Popup` that is **not already in the live visual tree** — the common case where an overlay control is `new`ed up in code and never added to a page (`var bar = new CalibrationBar();` … `bar.RequestCalibration(...)`) — must have its `XamlRoot` assigned before it will render. Without it, `IsOpen = true` is a **silent no-op**: the build is clean, the app launches, and the control looks dead.
+
+```csharp
+// Assign XamlRoot before opening (once the hosting element is loaded).
+myPopup.XamlRoot = this.XamlRoot;              // from a Page/UserControl
+// or, from a detached helper: App.MainWindow!.Content.XamlRoot;
+myPopup.IsOpen = true;
+```
+
+Use the same "Picking the right `XamlRoot`" table above. If the popup lives in a control that is never added to the tree, source the `XamlRoot` from the active window's content (`App.MainWindow.Content.XamlRoot`) at the moment you open it — after `Window.Activate()`.
+
 <a id="windowing"></a>
 ## Windowing: Window.Current / ApplicationView / CoreWindow → AppWindow
 
