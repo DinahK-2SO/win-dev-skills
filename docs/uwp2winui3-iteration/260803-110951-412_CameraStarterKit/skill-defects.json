@@ -1,0 +1,17 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 67,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Get-MigrationPattern.ps1 fails opaquely on an unknown anchor and cannot reach sections that have no <a id>. The agent could not discover the correct anchor for the CaptureElement fix and wasted ~3 turns guessing ('media', 'camera-preview') before finding 'capture'.",
+      "evidence": "session-log.txt turns 30-34: `-Anchor media` -> \"Anchor '#media' not found\"; `-Anchor camera-preview` -> \"Anchor '#camera-preview' not found\"; then Select-String '^## ' + grep CaptureElement to discover the anchor is 'capture'.",
+      "skill_search": "Read Get-MigrationPattern.ps1 in full; grepped '<a id=' in MIGRATION-PATTERNS.md (14 anchors) vs '^## ' headings (21) — 7 sections have no anchor.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "if ($startIdx -lt 0) { Write-Error \"Anchor '#$Anchor' not found in $PatternsPath\"; exit 1 } — the not-found branch emits no recovery information; and matching is limited to exact '<a id>' anchors so unanchored '## ' sections are unreachable.",
+      "root_cause": "The helper is the sanctioned way to read patterns (its docstring warns against opening the whole file due to the content-safety filter), yet it offers zero discoverability: no anchor listing on failure and no heading-text matching. Anchor ids like 'capture' are not guessable from the UWP term ('camera preview').",
+      "proposed_fix": "In Get-MigrationPattern.ps1: (1) if the exact anchor is not found, fall back to a case-insensitive SUBSTRING match against both '<a id>' ids AND '## ' heading text; (2) if still not found, print the full list of available anchors + their heading text and exit 1. This makes every section (anchored or not) reachable and turns a dead end into a self-service recovery.",
+      "generalizes": "EVERY UWP->WinUI 3 migration drives pattern lookups through this one helper, and agents routinely guess anchor names from API/feature terms that don't match the terse ids. A discoverable helper removes wasted guess-loops on any scenario, and makes the 7 currently-unreachable sections usable."
+    }
+  ]
+}

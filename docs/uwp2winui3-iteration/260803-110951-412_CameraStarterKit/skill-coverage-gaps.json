@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 67,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The CaptureElement build-error entry cross-references '[Camera preview](#capture)' but the agent did not fetch that error entry first — it guessed anchors from feature terms. The build-error section (which names the exact fix anchor) is not the first thing an agent lands on when it sees WMC0001.",
+      "evidence": "session-log turns 30-34: agent went straight to guessing `-Anchor media`/`camera-preview` instead of fetching the 'Common build errors' section that maps WMC0001 -> #capture.",
+      "covered_at": "MIGRATION-PATTERNS.md '### CS0246 / WMC0001: CaptureElement could not be found' entry, which already links to (#capture).",
+      "why_missed": "grey-zone",
+      "proposed_improvement": "This is better solved by the Tier-1 tooling fix (skill-defects #1: heading-text substring matching means `-Anchor CaptureElement` or `-Anchor 'camera preview'` would both resolve). Do not add new prose; the script fix subsumes it.",
+      "generalizes": "Agents map errors/features to natural-language terms, not terse anchor ids; substring matching in the helper covers this class across all scenarios without prose that can be ignored."
+    }
+  ]
+}

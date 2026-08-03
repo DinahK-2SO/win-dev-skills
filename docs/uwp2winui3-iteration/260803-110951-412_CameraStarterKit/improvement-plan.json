@@ -1,0 +1,18 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 67,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Get-MigrationPattern.ps1 fails opaquely on an unknown anchor and can't reach the 7 sections lacking an <a id>. The agent wasted ~3 turns guessing 'media'/'camera-preview' before finding the CaptureElement fix lives under anchor 'capture'.",
+      "evidence": "session-log.txt turns 30-34 (two 'Anchor not found' errors, then heading enumeration + grep to discover 'capture').",
+      "root_cause": "Helper matches only exact <a id> anchors, prints no anchor list on failure, and does no heading-text matching; terse ids aren't guessable from API/feature/error terms.",
+      "tier": 1,
+      "change": "Add to Get-MigrationPattern.ps1: (1) case-insensitive SUBSTRING fallback matching against both <a id> ids AND '## ' heading text (so 'CaptureElement' or 'camera preview' resolve to 'capture', and unanchored headings become reachable); (2) on total miss, print the full catalog of every section (anchor id or heading) and exit 1.",
+      "file": "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Get-MigrationPattern.ps1",
+      "expected_effect": "Any pattern lookup resolves from a natural term in one call; a genuine miss yields a self-service catalog instead of a dead end. No more full-file opens (which risk the content-safety filter).",
+      "falsifiable_check": "On re-run of CameraStarterKit, `Get-MigrationPattern.ps1 -Anchor CaptureElement` (or 'camera preview') returns the #capture section on the FIRST call — zero failed anchor lookups in the log. Verified locally: exact 'capture', substring 'CaptureElement', 'camera preview', and unanchored 'Namespace Mapping' all resolve; a bogus anchor lists all sections."
+    }
+  ],
+  "deferred_to_human": []
+}

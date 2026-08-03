@@ -1,0 +1,35 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 67,
+  "tools_helpful": [
+    { "tool": "Get-MigrationPattern.ps1", "evidence": "Once the correct anchor 'capture' was found (turn 34), it returned the full CaptureElement -> Image + SoftwareBitmapSource recipe which the agent implemented verbatim to a passing result (score 100)." },
+    { "tool": "MIGRATION-PATTERNS.md CaptureElement section", "evidence": "The '### CS0246 / WMC0001: CaptureElement could not be found' entry correctly told the agent NOT to defer the camera page and to use the frame-pump pattern; final parity was a pass." }
+  ],
+  "tools_problematic": [
+    { "tool": "Get-MigrationPattern.ps1", "problem": "On an unknown anchor it prints only 'Anchor #<x> not found' with no list of valid anchors, so the agent cannot recover except by guessing again or opening the whole file.", "evidence": "Turns 30-33: agent guessed -Anchor media (fail), -Anchor camera-preview (fail), then had to Select-String the '## ' headings and grep CaptureElement before finding the real anchor is 'capture'." }
+  ],
+  "tool_limitations": [
+    { "tool": "Get-MigrationPattern.ps1", "limitation": "Matches ONLY exact '<a id=\"...\">' anchors; many '## ' sections in MIGRATION-PATTERNS.md have no <a id> at all (e.g. 'Common build errors', 'Namespace Mapping', 'Resources: MRT', 'Text Rendering', 'Test Projects') and are therefore unreachable by the helper, forcing a full-file open that the script's own docstring warns trips the content-safety filter.", "suggested_tweak": "On not-found, list all available anchors + their heading text; accept case-insensitive substring matches against both anchor ids and heading text as a fallback." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "CaptureElement", "special_handling": "Not available in WinUI 3. Replace with <Image> whose Source is a SoftwareBitmapSource pumped from MediaCapture.GetPreviewFrameAsync (Bgra8 + Premultiplied). Do NOT defer the camera page. Covered at MIGRATION-PATTERNS.md#capture." }
+  ],
+  "errors_encountered": [
+    { "error": "XamlCompiler error WMC0001: Unknown type 'CaptureElement'", "root_cause": "CaptureElement is a UWP-only XAML control with no WinUI 3 equivalent element.", "fix": "Replaced with <Image x:Name=PreviewImage> + SoftwareBitmapSource frame pump per MIGRATION-PATTERNS.md#capture. Resolved to a passing preview." },
+    { "error": "MainPage.xaml.cs contained duplicate/corrupted content after an edit", "root_cause": "An edit replaced a leading region but the original UWP body remained appended; a one-off edit mistake, not a skill gap.", "fix": "Agent rewrote the whole file cleanly via a here-string. Recovered without skill guidance." }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Resolving the CaptureElement build error via Get-MigrationPattern.ps1",
+      "symptom": "3 failed anchor lookups before finding the right section",
+      "turns_or_retries": "turns 30-34 (guessed 'media', 'camera-preview'; both errored; then listed headings + grepped before finding 'capture')",
+      "root_cause": "Get-MigrationPattern.ps1 gives no discoverability on failure: it neither lists valid anchors nor matches on heading text, and the anchor id 'capture' is not guessable from the UWP term 'camera preview'.",
+      "how_resolved": "Agent fell back to Select-String '^## ' to enumerate headings, then grepped 'CaptureElement', then re-ran with -Anchor capture.",
+      "preventable_by": "Make Get-MigrationPattern.ps1 print the full anchor+heading list on not-found and accept case-insensitive substring matches against anchor ids and heading text."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

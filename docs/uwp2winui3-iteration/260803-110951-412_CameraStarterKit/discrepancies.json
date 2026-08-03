@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 67,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "CameraStarterKit (camera preview + photo + video buttons)", "status": "pass", "reason": "All three controls present; preview migrated to Image/SoftwareBitmapSource; buttons disabled in BOTH UWP golden and WinUI candidate (no camera on host) = parity.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Camera preview", "uwp": "CaptureElement 'PreviewControl'", "winui": "Image 'PreviewImage' / AutomationName 'Camera preview' (role-equivalent)", "screenshot_ref": "parity/winui3/screenshots/01_CameraStarterKit.png" }
+  ],
+  "missing_features": [],
+  "summary": "Clean 100/100 pass. The only friction was in the migration PROCESS: resolving the CaptureElement build error cost ~3 wasted turns because Get-MigrationPattern.ps1 could not surface the correct anchor. No feature-level parity gaps."
+}

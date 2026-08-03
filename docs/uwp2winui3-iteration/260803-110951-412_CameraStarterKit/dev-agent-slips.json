@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraStarterKit",
+  "index": 67,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "MainPage.xaml.cs became duplicated/corrupted after an edit that replaced a leading block while the original UWP body remained appended, causing a build failure.",
+      "evidence": "session-log turns 39-40: 'The file has duplicate content — the original UWP body was appended after my replacement. I need to rewrite the whole file cleanly'.",
+      "covered_clearly_at": "N/A — this is an edit-mechanics mistake by the agent, not a migration-pattern topic. The agent detected it immediately and rewrote the file via a here-string, recovering to a passing build.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable model on re-run would apply the edit correctly or self-correct as it did here; there is no general migration rule to encode. Adding 'don't corrupt files during edits' guidance would be noise."
+    }
+  ]
+}
