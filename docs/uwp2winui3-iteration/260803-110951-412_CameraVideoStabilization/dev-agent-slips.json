@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "DisplayInformation.GetForCurrentView() was replaced by hard-coding Landscape orientation rather than reading XamlRoot.RasterizationScale / GetDpiForWindow.",
+      "evidence": "session-log L2625-2635: agent removed _displayInformation and substituted fixed Landscape values.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#getforcurrentview table row 'DisplayInformation.GetForCurrentView() | XamlRoot.RasterizationScale or Win32 GetDpiForWindow'.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The table already gives the correct replacement prominently; a capable model could apply it. For a desktop app locked to Landscape the simplification is also behaviorally acceptable, so no skill edit is warranted."
+    }
+  ]
+}

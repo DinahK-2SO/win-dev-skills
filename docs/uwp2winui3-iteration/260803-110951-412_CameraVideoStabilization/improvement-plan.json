@@ -1,0 +1,30 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "SystemMediaTransportControls.GetForCurrentView() has no replacement in the skill; agent left it as try/catch->null (dead feature + WUI0004).",
+      "evidence": "build-output.txt: 'warning WUI0004: SystemMediaTransportControls.GetForCurrentView() is UWP-only'; MainPage.xaml.cs L88-95; lessons.json.dev_agent_struggles[0].",
+      "root_cause": "#getforcurrentview table omitted SystemMediaTransportControls and gave no HWND-interop snippet, so the inventory-injected TODO pointed at an anchor with no answer.",
+      "tier": 3,
+      "change": "Added a SystemMediaTransportControls.GetForCurrentView() row + ISystemMediaTransportControlsInterop.GetForWindow(hwnd) code snippet to the #getforcurrentview table, with an explicit warning that try/catch->null leaves the feature dead.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent copies the interop replacement instead of nulling the field; SMTC handler is live; no WUI0004.",
+      "falsifiable_check": "On a re-run of any SMTC-using migration, build output shows 0 WUI0004 warnings and the field is initialized via GetForWindow(hwnd), not GetForCurrentView()."
+    },
+    {
+      "problem": "WUI0004 doc row hard-coded SystemNavigationManager as if it were the whole rule, so an agent hitting WUI0004 for a different singleton found no concrete fix.",
+      "evidence": "MIGRATION-PATTERNS.md L584 (old) vs actual warning firing for SystemMediaTransportControls.",
+      "root_cause": "Example-level description of a rule-level analyzer warning.",
+      "tier": 3,
+      "change": "Reworded the WUI0004 row to describe it as '<view-scoped>.GetForCurrentView() is UWP-only' covering multiple singletons and routing to the #getforcurrentview table for the specific replacement; added 'do not just try/catch'.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Any future WUI0004 (whatever the API) is routed to the correct per-API replacement.",
+      "falsifiable_check": "Re-run scenarios that trip WUI0004 for any singleton resolve it via the mapped replacement rather than dropping/nulling the call."
+    }
+  ],
+  "deferred_to_human": [
+    "Consider a Tier-1 signal in Validate-UwpMigration.ps1 to flag 'GetForCurrentView() inside a try/catch that assigns null' as a suspected dead-feature migration, since that swallow pattern compiles clean and hides the defect."
+  ]
+}

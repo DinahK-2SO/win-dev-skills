@@ -1,0 +1,27 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "SystemMediaTransportControls.GetForCurrentView() has no replacement in the migration skill, so the agent left it un-migrated (try/catch -> null), producing a dead feature and a WUI0004 warning.",
+      "evidence": "build-output.txt final line: 'warning WUI0004: SystemMediaTransportControls.GetForCurrentView() is UWP-only — use HWND-based COM interop in WinUI 3'. MainPage.xaml.cs L88-95 (try { GetForCurrentView() } catch { null }). session-log L2550-2557, L3893-3894.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md / SKILL.md / inventory for 'SystemMediaTransportControls', 'Interop', 'GetForWindow'",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The #getforcurrentview replacement table enumerates ApplicationView, UIViewSettings, DisplayInformation, CoreApplication, SystemNavigationManager but omits SystemMediaTransportControls, and no HWND-interop snippet for it exists anywhere in the skill. The inventory correctly injected a TODO to the anchor, but the anchor had no answer to copy.",
+      "proposed_fix": "Add a SystemMediaTransportControls.GetForCurrentView() row to the #getforcurrentview table mapping to ISystemMediaTransportControlsInterop.GetForWindow(hwnd), plus a short code snippet showing WindowNative.GetWindowHandle(App.MainWindow) -> As<ISystemMediaTransportControlsInterop>().GetForWindow(hwnd, iid). This is the same window-scoped-interop shape already documented for pickers.",
+      "generalizes": "SystemMediaTransportControls is used by every UWP media playback/recording sample (audio/video players, capture apps). GetForCurrentView() for it always breaks the same way on WinUI 3 desktop, so a canonical replacement recurs broadly."
+    },
+    {
+      "problem": "The WUI0004 documentation row is mislabeled as SystemNavigationManager-specific and gives only a vague fix, so an agent that hits WUI0004 for a different API (e.g. SystemMediaTransportControls) finds no concrete replacement.",
+      "evidence": "MIGRATION-PATTERNS.md L584: '| WUI0004 | SystemNavigationManager.GetForCurrentView() is UWP-only | Drop the system back button hookup, or use HWND-based COM interop...'. Actual warning in build-output.txt fired for SystemMediaTransportControls, not SystemNavigationManager.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md for 'WUI0004'",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "| `WUI0004` | `SystemNavigationManager.GetForCurrentView() is UWP-only` | Drop the system back button hookup, or use HWND-based COM interop; see \"GetForCurrentView Replacements\" above. |",
+      "root_cause": "WUI0004 is a general 'view-scoped GetForCurrentView() is UWP-only' rule covering multiple singletons; the row hard-codes one example as if it were the whole rule, so the reader does not realize it applies to other APIs and does not look up the right replacement.",
+      "proposed_fix": "Reword the WUI0004 symptom to '<any view-scoped>.GetForCurrentView() is UWP-only (SystemNavigationManager, SystemMediaTransportControls, ...)' and point the fix at the #getforcurrentview table for the specific API's replacement.",
+      "generalizes": "WUI0004 will fire for whichever GetForCurrentView() singleton a given app uses; a rule-level (not example-level) description routes any future scenario to the correct replacement."
+    }
+  ]
+}

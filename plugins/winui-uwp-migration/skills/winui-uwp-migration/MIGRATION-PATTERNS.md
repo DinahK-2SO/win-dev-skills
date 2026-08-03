@@ -300,6 +300,23 @@ None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is 
 | `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+| `SystemMediaTransportControls.GetForCurrentView()` | `ISystemMediaTransportControlsInterop.GetForWindow(hwnd)` (window-scoped interop, see snippet below) |
+
+`SystemMediaTransportControls` is **window-scoped** in WinUI 3 desktop — get it from the HWND, not the (missing) current view. Wrapping `GetForCurrentView()` in a `try/catch` that nulls the field compiles and "runs" but silently disables all media-transport handling and still trips `WUI0004`; migrate it instead:
+
+```csharp
+[System.Runtime.InteropServices.ComImport]
+[System.Runtime.InteropServices.Guid("ddb0472d-731e-4aef-9c0e-8b6f2ec1c2f4")]
+[System.Runtime.InteropServices.InterfaceType(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIInspectable)]
+interface ISystemMediaTransportControlsInterop
+{
+    SystemMediaTransportControls GetForWindow(IntPtr appWindow, in Guid riid);
+}
+
+var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+var interop = SystemMediaTransportControls.As<ISystemMediaTransportControlsInterop>();
+var smtc = interop.GetForWindow(hwnd, typeof(SystemMediaTransportControls).GUID);
+```
 
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces
@@ -581,7 +598,7 @@ The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` p
 | --- | --- | --- |
 | `WUI0002` | `Window.Current does not exist in WinUI 3 desktop apps` | Store the `Window` reference in `App.xaml.cs` (`App.Window`) and pass it where needed; see "Windowing" above. |
 | `WUI0003` | `CoreDispatcher is UWP-only` | Use `DispatcherQueue.GetForCurrentThread()` and `TryEnqueue(...)`; see "Threading" above. |
-| `WUI0004` | `SystemNavigationManager.GetForCurrentView() is UWP-only` | Drop the system back button hookup, or use HWND-based COM interop; see "GetForCurrentView Replacements" above. |
+| `WUI0004` | `<view-scoped>.GetForCurrentView() is UWP-only` (fires for `SystemNavigationManager`, `SystemMediaTransportControls`, and other per-view singletons) | Look up the specific API in the "GetForCurrentView() Replacements" table above and apply its replacement (e.g. HWND-based COM interop for `SystemMediaTransportControls`). Do NOT just `try/catch` the call — that leaves the feature dead and still warns. |
 
 Treat every `warning WUI000\d` line in the build output as a defect — the analyzer does not produce false positives. Search for the API name in this document for the recommended replacement.
 

@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 0, "text": "CameraVideoStabilization page with PreviewControl, VsToggleButton, VideoButton", "status": "pass", "reason": "3/3 controls present with matching AutomationIds; both action buttons disabled/non-responsive in BOTH apps (no camera hardware), so behavioral parity.", "suspected_skill_gap": "None at the scored level. Latent: SystemMediaTransportControls path is dead (WUI0004) but unobservable without a camera on this host." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "empty preview surface", "uwp": "blank preview", "winui": "defensive 'no camera device' fallback message", "screenshot_ref": "parity/winui3/screenshots/01_CameraVideoStabilization.png" }
+  ],
+  "missing_features": [],
+  "summary": "Full scored parity (100). One latent skill-defect surfaced only in build output: SystemMediaTransportControls.GetForCurrentView() left un-migrated (try/catch->null, WUI0004), which would silently disable media-transport handling on a camera-equipped host."
+}

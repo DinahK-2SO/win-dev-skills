@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Add SystemMediaTransportControls.GetForCurrentView() -> ISystemMediaTransportControlsInterop.GetForWindow(hwnd) to the GetForCurrentView replacements table so media apps migrate SMTC instead of nulling it (fixes WUI0004 + dead feature).",
+    "Reword the WUI0004 row from a SystemNavigationManager-specific example to the general 'any view-scoped GetForCurrentView() is UWP-only' rule, routing each API to its concrete replacement."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Optional Tier-1 validator signal to flag GetForCurrentView() wrapped in a null-swallowing try/catch as a suspected dead-feature migration."
+  ]
+}

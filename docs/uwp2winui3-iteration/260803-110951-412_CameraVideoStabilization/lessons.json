@@ -1,0 +1,29 @@
+{
+  "scenario": "CameraVideoStabilization",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 + unsupported-api-inventory.json", "evidence": "Injected inline TODO[migrate-*] comments routing GetForCurrentView, CoreDispatcher, Windows.Media.Capture to PATTERNS anchors; agent worked through them sequentially (session-log ~L1624, L2159)." },
+    { "tool": "MIGRATION-PATTERNS.md#threading", "evidence": "Agent converted every Dispatcher.RunAsync(CoreDispatcherPriority...) to DispatcherQueue.TryEnqueue correctly (session-log L2174-2224)." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "MIGRATION-PATTERNS.md#getforcurrentview table", "limitation": "Table enumerates ApplicationView/UIViewSettings/DisplayInformation/CoreApplication/SystemNavigationManager but omits SystemMediaTransportControls.GetForCurrentView(), the exact API in this app. Agent had no concrete replacement to copy.", "suggested_tweak": "Add a SystemMediaTransportControls row mapping to ISystemMediaTransportControlsInterop.GetForWindow(hwnd)." }
+  ],
+  "failed_apis": [
+    { "api": "SystemMediaTransportControls.GetForCurrentView()", "why_tried": "UWP source uses it to listen for SoundLevel/media property changes.", "root_cause": "GetForCurrentView() throws at runtime in WinUI 3 desktop (no per-view singleton); skill's getforcurrentview table had no row for it, so agent wrapped the call in try/catch and set _systemMediaControls = null on failure — silently disabling the feature instead of using the HWND interop replacement.", "fix": "Use ISystemMediaTransportControlsInterop.GetForWindow(hwnd) via WindowNative.GetWindowHandle(App.MainWindow)." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md WUI0004 row (L584)", "wrong": "WUI0004 symptom labeled 'SystemNavigationManager.GetForCurrentView() is UWP-only' with vague fix 'Drop the system back button hookup, or use HWND-based COM interop'.", "correct": "WUI0004 fires for multiple view-scoped UWP singletons including SystemMediaTransportControls.GetForCurrentView() (see actual build-output warning). Fix must name the concrete interop replacement, not just SystemNavigationManager." }
+  ],
+  "special_apis": [
+    { "api": "SystemMediaTransportControls", "special_handling": "In WinUI 3 desktop it is window-scoped: obtain via ISystemMediaTransportControlsInterop.GetForWindow(hwnd), not GetForCurrentView(). A try/catch that nulls it compiles and 'runs' but leaves the feature dead." }
+  ],
+  "errors_encountered": [
+    { "error": "warning WUI0004: SystemMediaTransportControls.GetForCurrentView() is UWP-only — use HWND-based COM interop in WinUI 3", "root_cause": "Agent kept GetForCurrentView() (in try/catch) because the getforcurrentview pattern table gave no SMTC replacement.", "fix": "Replace with ISystemMediaTransportControlsInterop.GetForWindow(hwnd)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "SystemMediaTransportControls initialization (session-log L2550-2557, L3373, L3893-3894)", "symptom": "Agent explicitly noted it must 'initialize it in SetupUiAsync using SystemMediaTransportControls.Get...' then settled on 'initialized with try/catch' — no interop replacement found.", "turns_or_retries": "Revisited across multiple turns; resolved by defensively nulling rather than migrating.", "root_cause": "getforcurrentview table missing the SMTC row + concrete HWND interop snippet.", "how_resolved": "try { GetForCurrentView() } catch { null } — left WUI0004 warning and a non-functional SMTC path.", "preventable_by": "Adding a SystemMediaTransportControls row + interop code snippet to MIGRATION-PATTERNS.md#getforcurrentview." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}
