@@ -1,0 +1,15 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Video Settings ComboBox not exposed in the WinUI UIA automation tree, so the structural parity gate could not confirm it and downgraded Scenario 3 (Match aspect ratios) from pass to partial (coverage 2/3, final score 83).",
+      "evidence": "migration-score.json feature 'Match aspect ratios' verdict=partial note 'not exposed in the WinUI UIA tree (missing AutomationId)'; discrepancies.json type 'missing-automationid'. Migrated Scenario3_AspectRatio.xaml: <ComboBox Name=\"VideoSettings\" PlaceholderText=\"Video Settings\" .../> with no AutomationProperties.Name. session-log turn 2236 shows the agent DID add AutomationProperties.Name to the nav ListBox, proving it knew the technique but did not generalize it.",
+      "covered_at": "MIGRATION-PATTERNS.md line 62 (Camera preview section): 'preserve the name/AutomationProperties so parity checks still match' shown only in the <CaptureElement> -> <Image> example (line 66-67).",
+      "why_missed": "buried",
+      "proposed_improvement": "Promote AutomationProperties preservation from a one-line aside inside the camera example to a first-class Critical Rule in SKILL.md: every interactive control must expose a stable AutomationProperties.Name (or Header / x:Name-backed AutomationId) after migration, with an explicit callout that placeholder-only controls (ComboBox/ListBox/TextBox whose only label is PlaceholderText or runtime-populated content) surface NO stable UIA Name and must be given an explicit AutomationProperties.Name. Note that screenshot-visible is not the same as automation-discoverable.",
+      "generalizes": "Automation/parity scoring across ALL UWP->WinUI 3 scenarios relies on controls exposing a stable Name in the UIA tree. Placeholder-labelled ComboBoxes/inputs and runtime-populated lists are a common UWP idiom; any scenario using them will silently lose structural coverage even when the control is visually present, so a general rule prevents recurring pass->partial downgrades."
+    }
+  ]
+}

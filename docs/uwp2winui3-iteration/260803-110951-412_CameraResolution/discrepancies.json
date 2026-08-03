@@ -1,0 +1,25 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "behavioral_regressions": 0,
+  "discrepancies": [
+    {
+      "scenario": "Change camera preview settings",
+      "verdict": "pass",
+      "type": "false-positive-behavioral",
+      "detail": "Initialize Camera hardware-gated; not a regression."
+    },
+    {
+      "scenario": "Change preview and photo settings",
+      "verdict": "pass",
+      "type": "none",
+      "detail": "Coverage 3/3."
+    },
+    {
+      "scenario": "Match aspect ratios",
+      "verdict": "partial",
+      "type": "missing-automationid",
+      "detail": "Video Settings ComboBox not exposed in WinUI UIA tree (placeholder-only, no AutomationProperties.Name)."
+    }
+  ]
+}

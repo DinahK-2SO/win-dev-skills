@@ -1,0 +1,3 @@
+# Skill Defects — CameraResolution
+
+None.

@@ -1,0 +1,30 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 bootstrap", "evidence": "session-log shows MIGRATION-MAPPING.md / TODO markers seeded; agent worked file-by-file without manual inventory" },
+    { "tool": "Defensive UI fallback (FallbackText)", "evidence": "Scenario3 code-behind wraps InitializeCameraAsync in try/catch and shows FallbackText on device-less machine; screenshots rendered non-blank" }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "CaptureElement -> Image + SoftwareBitmapSource", "special_handling": "Camera preview correctly migrated to Image with SoftwareBitmapSource per PATTERNS.md#capture" }
+  ],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    {
+      "where": "Scenario3_AspectRatio.xaml ComboBox controls (PreviewSettings, VideoSettings)",
+      "symptom": "Video Settings ComboBox not exposed in the WinUI UIA automation tree, so the scoring parity/structural gate could not confirm the control; scenario downgraded pass->partial (score 83, 2/3 coverage).",
+      "turns_or_retries": "none - not a stuck loop; the agent never added an automation Name to these ComboBoxes",
+      "root_cause": "The ComboBoxes carry only Name + PlaceholderText and no AutomationProperties.Name/Header. In WinUI 3 a ComboBox whose only visible label is PlaceholderText does not surface a stable UIA Name until an item is selected, so automation/parity tooling cannot find it. The agent did add AutomationProperties.Name to the ListBox nav control and to the preview Image, but not to the placeholder-labelled ComboBoxes.",
+      "how_resolved": "not resolved in-trial (still partial).",
+      "preventable_by": "A prominent skill rule that every interactive control must expose a stable AutomationProperties.Name (or Header/AutomationId) after migration, calling out placeholder-only ComboBox/ListBox/TextBox as the common trap. Currently the only mention of preserving AutomationProperties is buried in a single CaptureElement example."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No camera hardware in validation environment", "workaround": "Defensive UI fallback rendered; Initialize Camera 'dead button' was a hardware-gated false positive, identical in UWP golden." }
+  ]
+}

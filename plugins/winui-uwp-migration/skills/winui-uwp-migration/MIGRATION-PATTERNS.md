@@ -59,7 +59,7 @@ Generated sources never belong in source control or the migrated tree — only `
 
 `MediaCapture` itself carries over unchanged, but WinUI 3 has **no XAML preview element**. The live preview migrates to an `<Image>` whose source is a `SoftwareBitmapSource` that you refresh from `MediaCapture` frames. This is `adaptable`, not `defer` — deferring loses the entire camera feature. Keep the [Defensive UI](SKILL.md) fallback so a device-less machine still renders a non-blank frame.
 
-XAML — swap the element (preserve the name/`AutomationProperties` so parity checks still match):
+XAML — swap the element (preserve the name and set an explicit `AutomationProperties.Name` so parity checks still match — see [Automation discoverability](SKILL.md) for the general rule; every interactive control needs a stable UIA name, and placeholder-only controls need one added):
 
 ```xml
 <!-- was: <CaptureElement x:Name="PreviewControl" .../> -->

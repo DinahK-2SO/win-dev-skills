@@ -1,0 +1,14 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Initialize Camera button flagged as 'dead' by Compare-Parity.",
+      "evidence": "migration-score.json + discrepancies.json classify this as a false-positive-behavioral: UWP golden also recorded no response (no camera hardware); handler InitializeCameraButton_Click -> InitializeCameraAsync is wired in the migrated source.",
+      "covered_clearly_at": "SKILL.md 'Defensive UI for device-dependent features' (prominent Critical Rule); the agent already applied the try/catch fallback correctly.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Not a defect at all - a hardware-gated false positive identical in both apps. No skill edit could or should change it."
+    }
+  ]
+}

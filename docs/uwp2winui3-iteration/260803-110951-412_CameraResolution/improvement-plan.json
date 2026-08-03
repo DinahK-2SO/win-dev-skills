@@ -1,0 +1,29 @@
+{
+  "scenario": "CameraResolution",
+  "index": 0,
+  "score_before": 83,
+  "summary": "The single non-pass feature was a placeholder-only ComboBox (Video Settings) that never surfaced a stable UIA Name, so the structural parity gate could not confirm it and downgraded the scenario to partial. The skill mentioned preserving AutomationProperties only as a buried aside inside the CaptureElement camera example. Promoted it to a prominent, general Critical Rule.",
+  "changes": [
+    {
+      "file": "SKILL.md",
+      "location": "New 'Automation discoverability (parity depends on it)' subsection under Critical Rules (after 'Defensive UI', before Post-Migration)",
+      "edit": "Added a first-class rule: every interactive control must expose a stable UIA name via Header / AutomationProperties.Name / LabeledBy; x:Name alone is not enough; placeholder-only or runtime-populated controls surface no UIA name and MUST get an explicit AutomationProperties.Name. Included a ComboBox before/after example.",
+      "general_rule": "In WinUI 3, parity/automation checks read the UIA tree; controls without a stable UIA Name (especially placeholder-labelled ComboBox/ListBox/TextBox) are invisible to automation even when visually present. Always give every interactive control an explicit AutomationProperties.Name/Header.",
+      "addresses": "skill-coverage-gaps.json item 1"
+    },
+    {
+      "file": "MIGRATION-PATTERNS.md",
+      "location": "Camera preview section, XAML swap note (~line 62)",
+      "edit": "Rewrote the buried aside to instruct setting an explicit AutomationProperties.Name and cross-linked to the new SKILL.md Automation discoverability rule.",
+      "general_rule": "Same as above; the camera example now points to the general rule instead of being the only place the guidance appears.",
+      "addresses": "skill-coverage-gaps.json item 1"
+    }
+  ],
+  "not_changed": [
+    {
+      "item": "Initialize Camera 'dead button'",
+      "reason": "dev-agent-slip / false positive: hardware-gated, identical in UWP golden, handler wired, Defensive UI rule already applied. No skill change."
+    }
+  ],
+  "devils_advocate": "Could this be scenario-specific (only cameras)? No — placeholder-labelled inputs and runtime-populated lists are a broad UWP idiom (search/filter boxes, settings dropdowns, dynamic lists). Any such control fails UIA discovery on launch, so the rule generalizes. Falsifiable check: a re-run that adds AutomationProperties.Name to the placeholder ComboBoxes should raise Scenario 3 from partial to pass."
+}

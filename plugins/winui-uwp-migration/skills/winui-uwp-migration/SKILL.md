@@ -201,6 +201,30 @@ Pages that depend on physical hardware (camera, microphone, location, sensors, B
 
 This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1` Section 7) will still pass the process-alive gate, but the benchmark's later screenshot-diff check will penalise the trial. A two-line fallback prevents a ~20-point score loss.
 
+### Automation discoverability (parity depends on it)
+
+Migration parity is checked against the **UI Automation (UIA) tree**, not the pixels. A control that is visually present but has **no stable UIA `Name`** is invisible to the checker and silently costs structural coverage — a `pass` quietly drops to `partial`.
+
+**Rule:** every interactive control (`ComboBox`, `ListBox`, `ListView`, `Button`, `TextBox`, `ToggleSwitch`, `Slider`, etc.) in the migrated XAML must expose a **stable UIA name**. Give it one of, in order of preference:
+
+- a `Header="…"` (for input controls that support it), or
+- an explicit `AutomationProperties.Name="…"`, or
+- (only when a visible text label already sits next to it) `AutomationProperties.LabeledBy`.
+
+`x:Name` / `Name` alone is **not** guaranteed to surface as the UIA name, and it is not enough here.
+
+**Placeholder-only trap (most common miss):** a control whose only label is `PlaceholderText` (or whose content is populated at runtime) exposes **no** UIA name until the user selects/enters a value — so an empty `ComboBox PlaceholderText="Video Settings"` is undiscoverable on launch. Any such control **must** be given an explicit `AutomationProperties.Name` (mirror the placeholder text):
+
+```xml
+<!-- undiscoverable until a value is chosen -->
+<ComboBox Name="VideoSettings" PlaceholderText="Video Settings" .../>
+<!-- discoverable immediately -->
+<ComboBox Name="VideoSettings" PlaceholderText="Video Settings"
+          AutomationProperties.Name="Video Settings" .../>
+```
+
+Visible ≠ automation-discoverable. When in doubt, add `AutomationProperties.Name`.
+
 ## Post-Migration
 
 ### Restore sandboxing (if needed)
