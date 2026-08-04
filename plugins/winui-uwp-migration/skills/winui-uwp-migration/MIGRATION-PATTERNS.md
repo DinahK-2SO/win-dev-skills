@@ -377,6 +377,24 @@ None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is 
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
 
+**The table above is not exhaustive.** `GetForCurrentView()` is also exposed by many WinRT
+*feature-service* singletons (e.g. `AppCapture.GetForCurrentView()`, and other per-view
+service accessors for capture / sharing / print / input). These compile but throw
+`COMException` / `InvalidCastException` at runtime under WinUI 3 desktop. For a feature
+service, do **not** look for a "shared static" equivalent — there is none. Re-acquire it via
+**HWND-based COM interop** against the app window, the same way pickers are initialized:
+
+```csharp
+var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+// Use the service's desktop/window-scoped overload if one exists (e.g. *ForWindow(hwnd)),
+// otherwise cast the WinRT factory and initialize it with the window:
+var svc = SomeService.GetForCurrentView();            // UWP-only — remove this line
+// → replace with the window-scoped acquisition, or As<IInitializeWithWindow>().Initialize(hwnd)
+```
+
+If the target service genuinely has no desktop/HWND-scoped API, treat the feature as
+**unsupported** and surface that plainly in the UI — see the anti-pattern note below.
+
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces
 
@@ -657,9 +675,15 @@ The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` p
 | --- | --- | --- |
 | `WUI0002` | `Window.Current does not exist in WinUI 3 desktop apps` | Store the `Window` reference in `App.xaml.cs` (`App.Window`) and pass it where needed; see "Windowing" above. |
 | `WUI0003` | `CoreDispatcher is UWP-only` | Use `DispatcherQueue.GetForCurrentThread()` and `TryEnqueue(...)`; see "Threading" above. |
-| `WUI0004` | `SystemNavigationManager.GetForCurrentView() is UWP-only` | Drop the system back button hookup, or use HWND-based COM interop; see "GetForCurrentView Replacements" above. |
+| `WUI0004` | `<Type>.GetForCurrentView() is UWP-only` (any type, e.g. `SystemNavigationManager`, `AppCapture`) | For a view/window type, drop or replace per the table above. For a feature-service type, re-acquire via HWND-based COM interop; see "GetForCurrentView() Replacements" above. |
 
 Treat every `warning WUI000\d` line in the build output as a defect — the analyzer does not produce false positives. Search for the API name in this document for the recommended replacement.
+
+**Anti-pattern — never swallow a UWP-only call.** Do not "handle" a UWP-only API by wrapping
+it in a `try/catch` that only logs or calls `NotifyUser(...)`. The call still throws at
+runtime, the catch hides it, and the feature ships **dead** (its controls render but do
+nothing) while the build looks green. Every WUI000\d warning must be fixed by replacing the
+API, not by suppressing its exception.
 
 ### Bootstrap-neutralized helper classes (filter-prone)
 

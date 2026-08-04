@@ -1,0 +1,23 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "AppCapture.GetForCurrentView() left verbatim, throws at runtime under WinUI 3, leaving the ToggleSwitch and Status output dead (scenario 3 fail).",
+      "evidence": "build-output.txt Scenario3_AppCapture.xaml.cs(37,30) warning WUI0004; migration-score.json feature 'Managing AppCapture' verdict=fail (0/1 control coverage, 0/1 live); Scenario3_AppCapture.xaml.cs:30-45 shows the throwing call wrapped in a notifying try/catch.",
+      "covered_at": "MIGRATION-PATTERNS.md #getforcurrentview 'GetForCurrentView() Replacements' table, and the WUI0004 row in the 'WUI analyzer warnings' table.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "The getforcurrentview table only lists windowing/view singletons (ApplicationView, UIViewSettings, DisplayInformation, SystemNavigationManager), so the agent read it as exhaustive and had no recipe for a FEATURE-SERVICE singleton like AppCapture. Add a general row/note that any WinRT feature-service exposing GetForCurrentView() (e.g. AppCapture, and by extension other per-view service accessors) must be re-acquired via HWND-based COM interop against the app window (WindowNative.GetWindowHandle + WinRT interop factory / As<IInitializeWithWindow>), mirroring the existing Pickers/Win32-surfaces pattern. Also broaden the WUI0004 row so it does not read as SystemNavigationManager-only.",
+      "generalizes": "GetForCurrentView() appears on many WinRT feature services beyond the four view types (capture, sharing, print, etc.). A general 'feature-service singleton → HWND interop' rule prevents the same silent-dead-feature failure across any UWP sample that acquires a per-view service."
+    },
+    {
+      "problem": "The UWP-only call was silenced by a try/catch that only calls NotifyUser, shipping a dead feature instead of fixing the API.",
+      "evidence": "Scenario3_AppCapture.xaml.cs:35-44 — try { appCapture = AppCapture.GetForCurrentView(); ... } catch { rootPage.NotifyUser(...); }. The catch suppressed the runtime failure so the toggle/status silently did nothing.",
+      "covered_at": "MIGRATION-PATTERNS.md 'WUI analyzer warnings' table intro ('Treat every warning WUI000d line as a defect').",
+      "why_missed": "not prominent",
+      "proposed_improvement": "Add an explicit anti-pattern warning to the WUI/GetForCurrentView guidance: never wrap a UWP-only API in a try/catch that merely logs/notifies — that hides the WUI defect and ships a dead feature. Replace the API, don't swallow the exception.",
+      "generalizes": "Swallowing UWP-only runtime failures in try/catch is a tempting, framework-agnostic shortcut the agent will reach for on any unsupported API. An explicit prohibition prevents dead-but-'passing-build' features across all scenarios."
+    }
+  ]
+}

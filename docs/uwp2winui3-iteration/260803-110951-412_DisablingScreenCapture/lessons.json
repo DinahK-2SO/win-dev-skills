@@ -1,0 +1,26 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Microsoft.WindowsAppSDK.Analyzers (WUI0004)", "evidence": "build-output.txt flagged Scenario3_AppCapture.xaml.cs(37,30) WUI0004: AppCapture.GetForCurrentView() is UWP-only — use HWND-based COM interop in WinUI 3. The analyzer correctly identified the exact defect that later caused the scenario-3 functional regression." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 / unsupported-api-inventory.json", "limitation": "GetForCurrentView() is inventoried as tier 'safe' pointing at the getforcurrentview anchor, but that anchor's replacement table only covers view/window singletons (ApplicationView, UIViewSettings, DisplayInformation, SystemNavigationManager). It gives no guidance for feature-service singletons such as AppCapture.GetForCurrentView(), so the agent had no concrete replacement to apply.", "suggested_tweak": "Extend the getforcurrentview guidance to cover the general case of WinRT feature-service singletons that need HWND-based COM interop (As<IInitializeWithWindow> / interop factory), not just windowing types." }
+  ],
+  "failed_apis": [
+    { "api": "AppCapture.GetForCurrentView()", "why_tried": "Direct UWP source used it to obtain the per-view AppCapture service in Scenario3_AppCapture.", "root_cause": "GetForCurrentView() has no per-view singleton in WinUI 3 desktop; the call throws at runtime (COMException/InvalidCastException) even though it compiles. The migration agent left the call verbatim, added an incorrect comment claiming a shared static object exists, and wrapped it in a try/catch whose catch merely calls NotifyUser — so the failure was swallowed and the scenario silently rendered with no working toggle or status.", "fix": "Replace with HWND-based COM interop: obtain the window HWND (WindowNative.GetWindowHandle) and use the WinRT interop factory / As<IInitializeWithWindow> (or the desktop GetForWindow-style overload where one exists) to acquire the service against the active window." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "AppCapture.GetForCurrentView()", "special_handling": "Feature-service WinRT singleton (not a windowing type). In WinUI 3 desktop it must be re-acquired via HWND-based COM interop against the app window; never call GetForCurrentView() and never wrap the UWP-only call in a try/catch that only notifies." }
+  ],
+  "errors_encountered": [
+    { "error": "WUI0004 warning: AppCapture.GetForCurrentView() is UWP-only", "root_cause": "UWP-only per-view accessor retained verbatim; throws at runtime under WinUI 3 desktop.", "fix": "Acquire the AppCapture service through HWND-based COM interop against the active window instead of GetForCurrentView()." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Scenario3_AppCapture.xaml.cs OnNavigatedTo", "symptom": "Wrote a comment admitting 'AppCapture.GetForCurrentView() has no WinUI 3 equivalent' then called it anyway inside try/catch; runtime call fails, toggle+status non-functional, scenario 3 scores fail.", "turns_or_retries": "single-pass, no retry — the agent stopped at a try/catch fallback instead of applying interop", "root_cause": "Skill's GetForCurrentView guidance did not cover feature-service singletons, so the agent had no replacement recipe and defaulted to swallow-the-exception.", "how_resolved": "Not resolved — feature shipped dead (0/1 control coverage, 0/1 live).", "preventable_by": "Extending the GetForCurrentView replacement guidance to the general feature-service case (HWND interop) AND an explicit anti-pattern note: do not silence a UWP-only call with a notifying try/catch — that produces a dead feature and hides the defect." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

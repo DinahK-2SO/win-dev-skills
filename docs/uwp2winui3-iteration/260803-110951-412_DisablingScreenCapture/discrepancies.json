@@ -1,0 +1,28 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "uwp_launchable": true,
+  "discrepancies": [
+    {
+      "scenario": "Managing AppCapture",
+      "type": "missing-control",
+      "control": "AllowAppCaptureCheckBox (ToggleSwitch)",
+      "detail": "Present in UWP golden, absent from WinUI 3 UIA tree (0/1 coverage)."
+    },
+    {
+      "scenario": "Managing AppCapture",
+      "type": "dead-control",
+      "control": "AllowAppCaptureCheckBox",
+      "detail": "Invoke produced no response in WinUI (0/1 live actions)."
+    },
+    {
+      "scenario": "Managing AppCapture",
+      "type": "missing-output",
+      "detail": "UWP shows green Status block (audio/video capture status); WinUI shows none."
+    },
+    {
+      "scenario": "Managing AppCapture",
+      "type": "wrong-text",
+      "detail": "WinUI showed scenario 1's description instead of the Managing AppCapture text; scenario-specific content did not load."
+    }
+  ]
+}

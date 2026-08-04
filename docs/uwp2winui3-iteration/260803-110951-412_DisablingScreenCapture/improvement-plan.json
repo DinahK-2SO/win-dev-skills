@@ -1,0 +1,28 @@
+{
+  "scenario": "DisablingScreenCapture",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "GetForCurrentView() replacement table only covers view/window singletons, so the agent had no recipe for feature-service singletons like AppCapture.GetForCurrentView() and left it throwing at runtime.",
+      "evidence": "build-output.txt Scenario3_AppCapture.xaml.cs(37,30) WUI0004; migration-score.json feature 'Managing AppCapture' verdict=fail; lessons.json failed_apis[0].",
+      "root_cause": "getforcurrentview section reads as an exhaustive 4-row table of view types; no general 'feature-service → HWND interop' rule.",
+      "tier": 3,
+      "change": "Added a general note under the GetForCurrentView table: the table is not exhaustive; feature-service singletons (AppCapture, etc.) must be re-acquired via HWND-based COM interop (WindowNative.GetWindowHandle + window-scoped overload / As<IInitializeWithWindow>), with a code sketch. Tier-1 detection already exists (unsupported-api-inventory.json matches \\bGetForCurrentView\\s*\\(); the missing piece was the replacement recipe, which is inherently prose.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent re-acquires per-view feature services via HWND interop instead of leaving GetForCurrentView() throwing.",
+      "falsifiable_check": "On re-run, no WUI0004 on AppCapture.GetForCurrentView(); scenario 'Managing AppCapture' goes fail→pass (toggle present + live, status output rendered)."
+    },
+    {
+      "problem": "The UWP-only call was silenced by a try/catch that only notified, shipping a dead feature while the build stayed green.",
+      "evidence": "Scenario3_AppCapture.xaml.cs:35-44 (try/catch around AppCapture.GetForCurrentView() with catch calling NotifyUser).",
+      "root_cause": "No explicit prohibition against swallowing UWP-only runtime failures.",
+      "tier": 3,
+      "change": "Added an anti-pattern note to the WUI-analyzer-warnings section: never wrap a UWP-only API in a try/catch that only logs/notifies; fix the API instead. Broadened the WUI0004 row to read as any-type, not SystemNavigationManager-only.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent replaces unsupported APIs instead of suppressing their exceptions, eliminating silently-dead features.",
+      "falsifiable_check": "On re-run, no UWP-only call appears inside a notifying try/catch; features backed by unsupported APIs are either fixed or plainly surfaced as unsupported, not dead."
+    }
+  ],
+  "deferred_to_human": []
+}
