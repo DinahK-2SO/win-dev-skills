@@ -1,0 +1,17 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Data-bound NavigationView master/detail: selecting scenarios 2-9 highlights the item but never switches the content Frame, so 8/9 scenarios are unreachable at runtime.",
+      "evidence": "migration-score.json (8 fail); session-log NavView_ItemInvoked copied from skill snippet reads `args.InvokedItemContainer?.DataContext is Scenario s` (session-log turns ~3617-3624).",
+      "skill_search": "grep 'ItemInvoked', 'InvokedItem', 'MenuItemsSource', 'navigationview-frame-wiring' in winui-uwp-migration",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md #navigationview-frame-wiring MenuItemsSource snippet:\n    if (args.InvokedItem is string || args.InvokedItemContainer?.DataContext is not Scenario) { ... }\n    if (args.InvokedItemContainer?.DataContext is Scenario s)   // data item, NOT NavigationViewItem\n        ScenarioFrame.Navigate(s.ClassType);",
+      "root_cause": "The snippet resolves the invoked data item via the item CONTAINER's DataContext. Under a NavigationView.MenuItemTemplate the container's DataContext is not reliably the bound data object, so `is Scenario s` is false and Navigate never runs. Microsoft docs state NavigationViewItemInvokedEventArgs.InvokedItem IS the invoked data item — the snippet contradicts its own surrounding prose (which correctly says 'the invoked item is the bound data item').",
+      "proposed_fix": "Replace the buggy MenuItemsSource handler body with the direct, documented form: `private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args) { if (args.InvokedItem is Scenario s) ScenarioFrame.Navigate(s.ClassType); }` and delete the confusing empty first if-block. Keep the explicit initial navigation on Loaded.",
+      "generalizes": "Every UWP SDK-sample and most master/detail apps migrate their scenario/section list to a data-bound NavigationView (MenuItemsSource + MenuItemTemplate). Any migration that copies this snippet inherits the dead-scenario bug. Using args.InvokedItem is the correct, framework-guaranteed route for all data-bound NavigationViews."
+    }
+  ]
+}

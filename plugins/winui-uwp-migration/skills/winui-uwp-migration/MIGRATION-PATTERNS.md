@@ -297,8 +297,13 @@ the dead-scenario bug. Instead: **navigate the first item explicitly on `Loaded`
 handle `ItemInvoked`** (which fires reliably on every click, for data-bound items too).
 
 **When items come from `MenuItemsSource` (data-bound, e.g. `x:Bind Scenarios`):**
-the invoked/selected item is the **bound data item**, NOT a `NavigationViewItem`. Navigate
-off the data item's page type:
+the invoked item is the **bound data item itself**, NOT a `NavigationViewItem`. Read it
+from **`args.InvokedItem`** and cast it to your data type — `InvokedItem` is documented as
+"the data item that was invoked", so it is the reliable route. **Do NOT** read
+`args.InvokedItemContainer.DataContext`: under a `MenuItemTemplate` the container's
+`DataContext` is not reliably the bound data object, the cast silently fails, and
+`Navigate` never runs — that is the exact dead-scenario bug (only the first page, navigated
+on `Loaded`, ever renders). Navigate off the data item's page type:
 
 ```csharp
 public MainPage()
@@ -316,11 +321,8 @@ public MainPage()
 
 private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
 {
-    if (args.InvokedItem is string || args.InvokedItemContainer?.DataContext is not Scenario)
-    {
-        // InvokedItem is the bound data item's text; resolve the Scenario from the container.
-    }
-    if (args.InvokedItemContainer?.DataContext is Scenario s)   // data item, NOT NavigationViewItem
+    // args.InvokedItem IS the bound data item (a Scenario) — NOT the container's DataContext.
+    if (args.InvokedItem is Scenario s)
         ScenarioFrame.Navigate(s.ClassType);
 }
 ```
@@ -339,9 +341,9 @@ private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvoke
 }
 ```
 
-Do not mix the two: casting a `MenuItemsSource` selection to `NavigationViewItem` (or
-reading `NavView.MenuItems[0]` under `MenuItemsSource`) silently no-ops and yields the
-blank-frame bug.
+Do not mix the two: under `MenuItemsSource`, reading `InvokedItemContainer.DataContext`,
+casting the selection to `NavigationViewItem`, or reading `NavView.MenuItems[0]` all
+silently no-op and yield the dead-scenario / blank-frame bug — use `args.InvokedItem`.
 
 **Falsifiable check (must verify switching, not just first render):** after the shell loads,
 the content `Frame` must contain the **first** scenario's controls; then, selecting the

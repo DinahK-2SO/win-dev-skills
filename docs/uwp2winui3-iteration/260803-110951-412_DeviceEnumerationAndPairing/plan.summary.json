@@ -1,0 +1,16 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Fix data-bound NavigationView ItemInvoked snippet to use args.InvokedItem instead of the unreliable InvokedItemContainer.DataContext, which caused dead scenarios (8/9 features failed)",
+    "Sharpen SKILL.md shell-mapping hint to name args.InvokedItem as the reliable invoked-item source for MenuItemsSource-bound NavigationViews"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Eval smoke launch cannot detect dead scenarios (first-page-renders check passes); a future harness could assert Frame content switches across nav items."
+  ]
+}

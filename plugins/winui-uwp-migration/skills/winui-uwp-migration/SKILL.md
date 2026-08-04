@@ -93,7 +93,7 @@ Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 
 | Source shell pattern (UWP) | Suggested WinUI 3 target |
 |---|---|
-| `MainPage` + `ListView` + `Frame` (SDK-sample idiom) | `NavigationView` + `Frame` — wire it with `Get-MigrationPattern.ps1 -Anchor navigationview-frame-wiring` (navigate the first item explicitly on `Loaded` + handle `ItemInvoked`; do **not** rely on a constructor `SelectedItem` raising `SelectionChanged` — that dead-scenario switch bug is the #1 silent failure) |
+| `MainPage` + `ListView` + `Frame` (SDK-sample idiom) | `NavigationView` + `Frame` — wire it with `Get-MigrationPattern.ps1 -Anchor navigationview-frame-wiring` (navigate the first item explicitly on `Loaded` + handle `ItemInvoked`; for data-bound `MenuItemsSource` read the invoked item from **`args.InvokedItem`**, NOT `InvokedItemContainer.DataContext`; do **not** rely on a constructor `SelectedItem` raising `SelectionChanged` — that dead-scenario switch bug is the #1 silent failure) |
 | `Pivot` | `TabView` (top), or `Pivot` from WinUI Community Toolkit if behaviour parity matters |
 | `Hub` | `NavigationView` with grouped items, or hand-rolled `ScrollViewer` |
 | `TabView` (UWP) | `TabView` (WinUI 3) — namespace change only |

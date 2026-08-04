@@ -1,0 +1,26 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Get-MigrationPattern.ps1 -Anchor navigationview-frame-wiring", "evidence": "Dev-agent pulled the navigationview-frame-wiring pattern and copied its snippet nearly verbatim into MainPage.xaml.cs (session-log turns ~3600-3730), showing the pattern anchor is discoverable and used." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1 smoke launch", "limitation": "A 10s alive-only smoke launch and 'does the first scenario render?' check pass even when scenarios 2-9 never switch the Frame — the dead-scenario bug is invisible to it.", "suggested_tweak": "Not fixable in the migration skill without adding eval logic; the real fix is to make the copied nav snippet correct so the bug never occurs." }
+  ],
+  "failed_apis": [
+    { "api": "NavigationView.ItemInvoked (data-bound MenuItemsSource)", "why_tried": "Master/detail scenario switch driving ScenarioFrame.Navigate", "root_cause": "Handler resolved the invoked data item via args.InvokedItemContainer?.DataContext, which under a MenuItemTemplate is NOT reliably the bound data object, so 'is Scenario s' was false and navigation never fired for scenarios 2-9.", "fix": "Use args.InvokedItem (documented as 'the data item that was invoked') and cast that to Scenario." }
+  ],
+  "doc_errors": [
+    { "where": "MIGRATION-PATTERNS.md #navigationview-frame-wiring, the MenuItemsSource NavView_ItemInvoked snippet (lines ~317-325)", "wrong": "Snippet reads args.InvokedItemContainer?.DataContext is Scenario s and includes a confusing empty first if-block. The container DataContext is unreliable under a MenuItemTemplate, so this no-ops.", "correct": "Snippet must read the invoked data item directly: if (args.InvokedItem is Scenario s) ScenarioFrame.Navigate(s.ClassType);  InvokedItem is documented as the invoked data item." }
+  ],
+  "special_apis": [
+    { "api": "NavigationViewItemInvokedEventArgs.InvokedItem vs InvokedItemContainer.DataContext", "special_handling": "For data-bound MenuItemsSource, InvokedItem is the bound data object; InvokedItemContainer.DataContext is not a reliable route to it under a MenuItemTemplate." }
+  ],
+  "errors_encountered": [],
+  "dev_agent_struggles": [
+    { "where": "MainPage.xaml.cs NavView_ItemInvoked", "symptom": "Scenarios 2-9 highlight but never swap the content Frame; only Scenario 1 (navigated once on Loaded) renders.", "turns_or_retries": "Single-shot copy of the skill snippet; no retry because it built and launched cleanly.", "root_cause": "Copied the skill's own buggy snippet that reads InvokedItemContainer.DataContext instead of InvokedItem.", "how_resolved": "Not resolved in trial — shipped broken; 8/9 features failed.", "preventable_by": "Correcting the skill's navigationview-frame-wiring MenuItemsSource snippet to use args.InvokedItem." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

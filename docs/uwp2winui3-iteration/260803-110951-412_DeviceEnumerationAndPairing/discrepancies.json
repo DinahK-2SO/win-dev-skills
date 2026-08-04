@@ -1,0 +1,25 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 0,
+  "score": 11.0,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Device Picker Common Control", "status": "pass", "reason": "Renders own content; Pick Single Device button responds.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Enumerate and Watch Devices", "status": "fail", "reason": "Nav does not switch content frame; Scenario 1 shown; controls dead.", "suspected_skill_gap": "Skill's navigationview-frame-wiring ItemInvoked snippet reads InvokedItemContainer.DataContext (unreliable) instead of InvokedItem." },
+    { "id": 3, "text": "Enumerate and Watch Devices in a Background Task", "status": "fail", "reason": "Nav does not switch content frame.", "suspected_skill_gap": "Same nav snippet defect." },
+    { "id": 4, "text": "Enumerate Snapshot of Devices", "status": "fail", "reason": "Nav does not switch content frame.", "suspected_skill_gap": "Same nav snippet defect." },
+    { "id": 5, "text": "Get Single Device", "status": "fail", "reason": "Nav does not switch content frame.", "suspected_skill_gap": "Same nav snippet defect." },
+    { "id": 6, "text": "Custom Filter with Additional Properties", "status": "fail", "reason": "Nav does not switch content frame.", "suspected_skill_gap": "Same nav snippet defect." },
+    { "id": 7, "text": "Request Specific DeviceInformationKind", "status": "fail", "reason": "Nav does not switch content frame.", "suspected_skill_gap": "Same nav snippet defect." },
+    { "id": 8, "text": "Basic Device Pairing", "status": "fail", "reason": "Nav does not switch content frame.", "suspected_skill_gap": "Same nav snippet defect." },
+    { "id": 9, "text": "Custom Device Pairing", "status": "fail", "reason": "Nav does not switch content frame.", "suspected_skill_gap": "Same nav snippet defect." }
+  ],
+  "visual_discrepancies": [
+    { "feature": "Scenarios 2-9", "uwp": "Each scenario navigates to its own page/controls.", "winui": "Content pane stuck on Scenario 1 regardless of nav selection.", "screenshot_ref": "parity/winui3/screenshots/02..09_*.png" }
+  ],
+  "missing_features": [
+    "Working scenario navigation for items 2-9"
+  ],
+  "summary": "Single dominant defect: the data-bound NavigationView ItemInvoked handler resolves the invoked item via the container DataContext instead of args.InvokedItem, so 8/9 scenarios never navigate. The dev-agent copied this from the skill's own snippet."
+}

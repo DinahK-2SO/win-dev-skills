@@ -1,0 +1,20 @@
+{
+  "scenario": "DeviceEnumerationAndPairing",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Data-bound NavigationView master/detail navigation dead for scenarios 2-9 (8/9 features fail): ItemInvoked handler resolves the invoked item via InvokedItemContainer.DataContext, which is unreliable under a MenuItemTemplate.",
+      "evidence": "migration-score.json (8 fail, dead-scenario); discrepancies.json; session-log NavView_ItemInvoked copied verbatim from MIGRATION-PATTERNS.md #navigationview-frame-wiring.",
+      "root_cause": "The skill's own navigationview-frame-wiring MenuItemsSource snippet reads args.InvokedItemContainer?.DataContext instead of args.InvokedItem. Under a MenuItemTemplate the container DataContext is not reliably the bound data object, so the cast fails and Navigate never runs. Docs: NavigationViewItemInvokedEventArgs.InvokedItem IS the invoked data item.",
+      "tier": 2,
+      "change": "Rewrote the MenuItemsSource ItemInvoked snippet to `if (args.InvokedItem is Scenario s) ScenarioFrame.Navigate(s.ClassType);`, removed the confusing empty first if-block, added an explicit 'do NOT read InvokedItemContainer.DataContext' warning, and updated the closing 'do not mix' note. Sharpened the SKILL.md shell-mapping hint to name args.InvokedItem.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md, skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Migrations that copy this snippet get a working data-bound NavigationView: every scenario navigates on invoke, not just the first.",
+      "falsifiable_check": "On re-run of a master/detail SDK-sample migration, selecting scenarios 2..N switches ScenarioFrame content (parity requirements 2-9 go fail->pass), not just the Loaded-navigated first page."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/eval: the smoke launch (Validate-UwpMigration.ps1 Section 7 / eval skills) passes on an alive-only, first-page-renders check and cannot see dead scenarios. Not fixable in the migration skill; a future harness could assert Frame content changes across nav items."
+  ]
+}
