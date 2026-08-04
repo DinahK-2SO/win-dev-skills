@@ -27,6 +27,31 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0118: '<Name>' is a namespace but is used like a type`
+
+UWP SDK samples are conventionally named after the API they demonstrate, so the generated
+app **root namespace** ends up equal to a WinRT **type** name — e.g. project namespace
+`DatagramSocket` vs the type `Windows.Networking.Sockets.DatagramSocket`, or `StreamSocket`,
+`MediaCapture`, `Compositor`, etc. Any unqualified reference then binds to *your namespace*
+instead of the WinRT type, and the compiler emits `CS0118: 'DatagramSocket' is a namespace
+but is used like a type` (often with cascading `CS0246`/`CS0103` in the same files).
+
+Fix by disambiguating at the use sites — do **not** rename the app namespace (that churns
+every file). Either alias the WinRT namespace, or fully qualify the type:
+
+```csharp
+// Option A — alias the WinRT namespace once per file, then use the short name:
+using WinSock = Windows.Networking.Sockets;
+...
+var listener = new WinSock.DatagramSocket();
+
+// Option B — fully qualify the type at each use site:
+var listener = new Windows.Networking.Sockets.DatagramSocket();
+```
+
+The same collision applies to any sample whose subject type shares the app namespace name;
+alias or fully qualify the WinRT type rather than renaming the project.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -376,6 +401,24 @@ None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is 
 | `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+
+**`CoreApplication.Properties` (cross-page shared state).** The Windows-universal-samples
+`SampleConfiguration` pattern uses `CoreApplication.Properties` as a shared key-value store
+across the `ScenarioN` pages (the active socket, adapter list, connection, etc.). WinUI 3
+desktop has no per-view `CoreApplication` singleton, so this is unavailable. Replace it with
+an **app-level static dictionary** and update every access site:
+
+```csharp
+// Shared state that the scenario pages read/write (was CoreApplication.Properties):
+public static class AppState
+{
+    public static readonly Dictionary<string, object> Properties = new();
+}
+// CoreApplication.Properties["listener"] = sock;  ->  AppState.Properties["listener"] = sock;
+```
+
+Place the helper in the **same namespace** as the scenario pages (or add the matching
+`using`) so its references resolve.
 
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces

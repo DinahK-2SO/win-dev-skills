@@ -1,0 +1,29 @@
+{
+  "scenario": "DatagramSocket",
+  "index": 91,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bulk Windows.UI.Xaml -> Microsoft.UI.Xaml rewrite and scaffold set up the project; the agent proceeded straight to code-level fixes." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Gates on build errors generically but has no targeted diagnostic for the app-namespace-shadows-a-WinRT-type (CS0118) case, so the agent had to root-cause it by hand.", "suggested_tweak": "Covered by prose fix; a script hint could point CS0118 'is a namespace but is used like a type' at the new PATTERNS anchor." }
+  ],
+  "failed_apis": [
+    { "api": "CoreApplication.Properties", "why_tried": "UWP SDK sample uses it as a cross-page shared key-value store (holds the active socket, adapter list, etc.) across ScenarioN pages.", "root_cause": "CoreApplication.Properties does not exist in WinUI 3 desktop; there is no per-view CoreApplication singleton.", "fix": "Introduced a static AppState dictionary class and replaced every CoreApplication.Properties access with it." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Networking.Sockets.DatagramSocket", "special_handling": "The WinRT type name collides with the app's own root namespace (DatagramSocket), producing CS0118 'namespace but is used like a type'. Needed a using alias / full qualification." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0118: 'DatagramSocket' is a namespace but is used like a type", "root_cause": "UWP SDK samples are named after the API they demo, so the generated app root namespace (DatagramSocket) shadows the WinRT type Windows.Networking.Sockets.DatagramSocket; unqualified references bind to the namespace.", "fix": "Add a using alias (using WinSock = Windows.Networking.Sockets;) or fully qualify Windows.Networking.Sockets.DatagramSocket at each use site." },
+    { "error": "CS0103: The name 'AppState' does not exist in the current context", "root_cause": "Helper AppState class was created in namespace DatagramSocket while ScenarioN files live in DatagramSocketSample; missing using directive.", "fix": "Added 'using DatagramSocket;' to the scenario files (symptom of the same namespace layout issue)." },
+    { "error": "CS0246 / CS8618 (transient)", "root_cause": "Type resolution failures cascading from the unresolved CS0118 namespace collision and the CoreApplication.Properties removal until AppState was wired.", "fix": "Resolved once the namespace alias and AppState replacement were complete." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Compiling the migrated networking sample", "symptom": "CS0118 'DatagramSocket is a namespace but is used like a type' plus cascading CS0246/CS0103 across scenario files", "turns_or_retries": "~several build iterations around lines 9826-12440 of build-events.jsonl", "root_cause": "App root namespace equals the demonstrated WinRT type name; the skill had no guidance for this collision.", "how_resolved": "Agent diagnosed the collision manually and added a using alias / qualified the type.", "preventable_by": "A MIGRATION-PATTERNS.md build-error entry for CS0118 namespace-vs-WinRT-type collision (SDK samples named after their API)." },
+    { "where": "Cross-page shared state", "symptom": "CoreApplication.Properties references would not compile; app used it as a shared dictionary across scenario pages", "turns_or_retries": "lines 9142-11395", "root_cause": "CoreApplication.Properties is unavailable in WinUI 3 and not mapped in the skill.", "how_resolved": "Created a static AppState replacement dictionary.", "preventable_by": "A MIGRATION-PATTERNS.md entry mapping CoreApplication.Properties -> a static shared-state class." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

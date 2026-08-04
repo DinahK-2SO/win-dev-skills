@@ -1,0 +1,14 @@
+{
+  "scenario": "DatagramSocket",
+  "index": 91,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "CS0103: 'AppState' does not exist in the current context — helper placed in namespace DatagramSocket while scenario files are in DatagramSocketSample; needed a using directive.",
+      "evidence": "build-events.jsonl L11395: agent notes 'AppState is in namespace DatagramSocket but the scenario files are in DatagramSocketSample namespace — need a using DatagramSocket;'",
+      "covered_clearly_at": "General C# namespace/using resolution is basic language competence, not a UWP->WinUI migration pattern; MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' already teaches qualifying/using-directive resolution for CS0104.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "This is a self-inflicted namespace placement choice the agent immediately diagnosed and fixed; a capable model would place the helper in the same namespace or add the using without any skill edit. Adding skill prose for 'remember your using directives' would just bloat the skill."
+    }
+  ]
+}

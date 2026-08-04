@@ -1,0 +1,27 @@
+{
+  "scenario": "DatagramSocket",
+  "index": 91,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0118: 'DatagramSocket' is a namespace but is used like a type — the app root namespace shadows the WinRT type Windows.Networking.Sockets.DatagramSocket.",
+      "evidence": "build-events.jsonl L10858: agent states 'The main issue is the namespace conflict: DatagramSocket project namespace vs Windows.Networking.Sockets.DatagramSocket type'; 7x CS0118 in the log.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md and SKILL.md for 'CS0118', 'is a namespace but', 'namespace collision/shadow/conflict', 'RootNamespace', 'global::' — no hits.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "UWP SDK samples are conventionally named after the API they demonstrate, so the generated project root namespace equals the WinRT type name; unqualified references bind to the namespace, not the type.",
+      "proposed_fix": "Add a build-error subsection to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite' for CS0118 namespace-vs-WinRT-type collision, with the using-alias / full-qualification fix.",
+      "generalizes": "Any UWP SDK sample named after its subject type (DatagramSocket, StreamSocket, MediaCapture, Compositor, etc.) hits the same app-namespace-shadows-WinRT-type collision after migration."
+    },
+    {
+      "problem": "CoreApplication.Properties (cross-page shared key-value store used by SDK-sample scenario pages) has no WinUI 3 equivalent and is not mapped in the skill.",
+      "evidence": "build-events.jsonl L9142: 'CoreApplication.Properties is a UWP API used extensively in all scenario files as a cross-page shared dictionary. In WinUI 3, this doesn't exist. I need to replace it with a static dictionary... create an AppState class'.",
+      "skill_search": "grepped for 'CoreApplication.Properties', 'AppState', 'shared state/dict' — only CoreApplicationViewTitleBar and CoreApplication.GetCurrentView() are mapped; .Properties is absent.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "There is no per-view CoreApplication singleton in WinUI 3 desktop; the SampleConfiguration shared-state dictionary must become an app-level static.",
+      "proposed_fix": "Add a row/note to the GetForCurrentView() Replacements section mapping CoreApplication.Properties -> a static shared-state class (e.g. static Dictionary in App).",
+      "generalizes": "The Windows-universal-samples SampleConfiguration template uses CoreApplication.Properties as shared state across scenario pages in most multi-scenario UWP samples."
+    }
+  ]
+}

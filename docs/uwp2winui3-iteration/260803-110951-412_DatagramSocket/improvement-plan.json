@@ -1,0 +1,30 @@
+{
+  "scenario": "DatagramSocket",
+  "index": 91,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0118: app root namespace shadows a WinRT type (project namespace DatagramSocket vs Windows.Networking.Sockets.DatagramSocket), causing build failures with cascading CS0246/CS0103.",
+      "evidence": "build-events.jsonl L10858 'namespace conflict: DatagramSocket project namespace vs Windows.Networking.Sockets.DatagramSocket type'; 7x CS0118 in log.",
+      "root_cause": "UWP SDK samples are named after the API they demo, so the generated app namespace equals a WinRT type name; unqualified references bind to the namespace.",
+      "tier": 3,
+      "change": "Added a 'CS0118: is a namespace but is used like a type' subsection to MIGRATION-PATTERNS.md 'Common build errors after the namespace rewrite', with using-alias / full-qualification fix and explicit 'do not rename the app namespace' guidance.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Migration agent recognizes and fixes the collision immediately via alias/qualification instead of root-causing by hand.",
+      "falsifiable_check": "On a re-run of any sample whose subject type equals the app namespace, CS0118 is resolved with a using alias / fully-qualified type and 0 residual CS0118 errors, without renaming the project namespace."
+    },
+    {
+      "problem": "CoreApplication.Properties (cross-page shared state in SDK-sample scenario pages) has no WinUI 3 equivalent and was unmapped in the skill.",
+      "evidence": "build-events.jsonl L9142 'CoreApplication.Properties ... In WinUI 3, this doesn't exist. I need to replace it with a static dictionary ... AppState class'.",
+      "root_cause": "No per-view CoreApplication singleton in WinUI 3 desktop; the SampleConfiguration shared-state dictionary must become an app-level static.",
+      "tier": 3,
+      "change": "Added a CoreApplication.Properties -> static AppState dictionary mapping (with code) to the GetForCurrentView() Replacements section of MIGRATION-PATTERNS.md.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Migration agent replaces CoreApplication.Properties with a static shared-state class directly from the pattern.",
+      "falsifiable_check": "On a re-run of any multi-scenario SampleConfiguration sample, CoreApplication.Properties usages are all replaced by a static dictionary and the app builds with 0 CoreApplication.Properties references remaining."
+    }
+  ],
+  "deferred_to_human": [
+    "Tier-0/harness: the auto-extracted checklist.json parsed 0 controls/scenario because it does not read separate ScenarioN_*.xaml pages (eval-side extractor limitation) — noted, out of scope for the migration skill."
+  ]
+}
