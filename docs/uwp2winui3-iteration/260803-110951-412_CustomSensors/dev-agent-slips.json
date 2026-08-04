@@ -1,0 +1,21 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "WMC9997 'There are multiple root elements. Line 38' in Scenario1_DataEvents.xaml — a second root element appeared after an edit left trailing content.",
+      "evidence": "session-log.txt build error 'error WMC9997: There are multiple root elements. Line 38, position 8'; immediately preceded by the dev-agent's own note 'The edit left trailing content. Let me fix this by replacing the entire file'.",
+      "covered_clearly_at": "N/A — this is not a UWP→WinUI migration pattern at all; it is a self-inflicted malformed edit (duplicate XAML root) that the dev-agent introduced and then corrected in the next turn.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The error was caused by the dev-agent's own faulty edit (trailing content producing two roots), not by any migration guidance being absent or wrong. A capable model that applies edits cleanly would never hit it; no skill text could prevent an editing accident."
+    },
+    {
+      "problem": "Test-AppLaunch.ps1 reported 'No build output found under bin\\x64\\Debug' because the dev-agent compiled with bare `dotnet build` (output landed under bin\\Debug\\<tfm>\\win-x64).",
+      "evidence": "session-log ~turn 50: '==> Test-AppLaunch [WARN] status=unavailable / Detail : No build output found under bin\\x64\\Debug'. The validator's own smoke launch (same script) later PASSED, confirming the script works when the app is built the prescribed way.",
+      "covered_clearly_at": "SKILL.md Step 3 'Build, fix what tooling missed' — prominently instructs `winapp build` to compile (with the explicit note 'compile; never run the .exe directly') and `Test-AppLaunch.ps1` to launch, and Step 3's 'Build command discipline' box further warns against ad-hoc dotnet invocations.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already prescribes `winapp build` for compilation in a dedicated, prominent Step 3 block; the launcher works when that guidance is followed (the validator smoke launch passed). The WARN was recoverable and the agent recovered via dotnet run. A capable model following Step 3 would not hit it."
+    }
+  ]
+}

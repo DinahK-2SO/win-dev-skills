@@ -1,0 +1,15 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "A `DataTemplate` that uses `x:Bind` must declare `x:DataType`; without it the XAML compiler emits WMC1111 'DataTemplates containing x:Bind need a DataType to be specified using x:DataType'. The skill covers x:Bind generally but never states this DataTemplate requirement.",
+      "evidence": "build-events.jsonl line 16628 includes 'error WMC1111: DataTemplates containing x:Bind need a DataType to be specified using x:DataType'.",
+      "covered_at": "MIGRATION-PATTERNS.md '### `x:Bind` and compiled bindings' (line ~738) — states x:Bind is supported with the same syntax and mentions XLS0414/MC3074, but does not mention the DataTemplate x:DataType requirement or WMC1111.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add one sentence to the existing '`x:Bind` and compiled bindings' section: any `DataTemplate` that uses `x:Bind` must carry `x:DataType=\"local:Type\"` (WMC1111 if missing), and that DataType type must be resolvable via the `local:` xmlns — a frequent casualty of the SDKTemplate namespace mismatch.",
+      "generalizes": "x:Bind inside item templates is ubiquitous in SDK-sample scenario lists and any list/collection UI; stating the x:DataType requirement prevents WMC1111 across scenarios."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Bootstrap processed 6 source files, injected 8 TODO[migrate-NNN] markers, produced MIGRATION-MAPPING.md; validator later confirmed row count = 6 matches seed." },
+    { "tool": "Get-MigrationPattern.ps1 -Anchor windowing", "evidence": "Window.Current.VisibilityChanged +=/-= were converted to App.MainWindow!.VisibilityChanged in Scenario1_DataEvents.xaml.cs following the windowing pattern; build then progressed." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Final gate returned PASS (residue grep, TODO residue, mapping integrity, manifest, dotnet build 0 WUI warnings, smoke launch pid 84240 alive)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Test-AppLaunch.ps1", "problem": "Reported WARN status=unavailable 'No build output found under bin\\x64\\Debug' when the dev-agent's dotnet build had emitted output under bin\\Debug\\net10.0-windows10.0.26100.0\\win-x64 instead.", "evidence": "session-log ~turn 50: '==> Test-AppLaunch [WARN] status=unavailable / Detail : No build output found under bin\\x64\\Debug'. Agent recovered by using dotnet run." }
+  ],
+  "tool_limitations": [
+    { "tool": "Test-AppLaunch.ps1", "limitation": "Only probes the bin\\x64\\Debug output layout; a plain `dotnet build` (no explicit -p:Platform=x64) lands binaries under bin\\Debug\\<tfm>\\win-x64 and the launcher cannot find them.", "suggested_tweak": "Skill Step 3 already says to compile with `winapp build` rather than bare `dotnet build`; keep that guidance prominent so the output layout matches what Test-AppLaunch.ps1 expects." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Devices.Sensors.Custom.CustomSensor", "special_handling": "No physical custom CO2 sensor exists on the validation machine; the migrated handler correctly reports 'No custom sensor found' and keeps the Disable button greyed out, matching the UWP golden. Device-absent fallback path was exercised, not a crash." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0246: The type or namespace name 'MainPage' could not be found (MainWindow.xaml.cs)", "root_cause": "The Windows-Universal-Samples source puts every class (MainPage, Scenario, SampleConfiguration) in `namespace SDKTemplate`, but `dotnet new winui -n CustomSensors` scaffolds App/MainWindow in `namespace CustomSensors`. The scaffold's generated references to MainPage looked in CustomSensors and could not resolve the SDKTemplate.MainPage type.", "fix": "Align namespaces: keep the sample's `SDKTemplate` namespace on migrated files and add `using SDKTemplate;` to the scaffold's MainWindow.xaml.cs (or unify on one namespace) so MainPage resolves." },
+    { "error": "WMC0909: Cannot resolve DataType local:Scenario / WMC1111: DataTemplates containing x:Bind need a DataType / WMC1509: No LocalAssembly parameter", "root_cause": "Same namespace mismatch cascade. The XAML compiler could not resolve `x:DataType=\"local:Scenario\"` (local = using:SDKTemplate) because the unresolved MainPage/assembly-namespace confusion broke local-assembly type resolution. WMC1111 also flags that a DataTemplate using x:Bind must declare x:DataType.", "fix": "Resolve the SDKTemplate vs project-namespace mismatch (above); once MainPage/x:Class namespaces are consistent, local:Scenario resolves and WMC0909/WMC1509 clear. Ensure every DataTemplate that uses x:Bind carries x:DataType." },
+    { "error": "WMC9997: There are multiple root elements. Line 38 (Scenario1_DataEvents.xaml)", "root_cause": "Self-inflicted: an edit to the XAML left trailing content, producing a second root element. Not a migration-pattern gap.", "fix": "Dev-agent rewrote the file to a single root; build proceeded." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "MainWindow.xaml.cs / MainPage.xaml / Scenario1_DataEvents.xaml", "symptom": "Cascade of CS0246 (MainPage) + WMC0909/WMC1111/WMC1509 XAML type-resolution errors after wiring the SDK-sample shell.", "turns_or_retries": "several turns of hypothesizing about x:DataType, LocalAssembly, and assembly name before landing on the namespace mismatch", "root_cause": "The SDK sample's fixed `namespace SDKTemplate` (and `x:Class=\"SDKTemplate.MainPage\"`) did not match the scaffold's project namespace (`CustomSensors`), so both C# and the XAML compiler failed to resolve MainPage/Scenario.", "how_resolved": "Kept SDKTemplate namespace on migrated files and added `using SDKTemplate;` to the scaffold-generated MainWindow.xaml.cs so cross-file references resolved.", "preventable_by": "A migration-skill note (SDK-sample section) warning that Windows-Universal-Samples put ALL code under `namespace SDKTemplate` with `x:Class=\"SDKTemplate.MainPage\"`, which mismatches the scaffold namespace and produces CS0246 + WMC0909/WMC1111/WMC1509 — with the fix (unify the namespace / add the using)." },
+    { "where": "Test-AppLaunch.ps1 launch step", "symptom": "Launcher reported no build output under bin\\x64\\Debug", "turns_or_retries": "1 turn; recovered via dotnet run", "root_cause": "Dev-agent compiled with bare `dotnet build` which emitted to bin\\Debug\\<tfm>\\win-x64, not the bin\\x64\\Debug layout Test-AppLaunch.ps1 probes.", "how_resolved": "Switched to `dotnet run`; app launched (pid 63768). Later validator smoke launch (also via Test-AppLaunch.ps1) passed.", "preventable_by": "Following SKILL.md Step 3's existing instruction to use `winapp build` for compilation instead of bare `dotnet build`." }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    { "issue": "No physical custom CO2 sensor on the validation machine; UWP CoreWindow controls not actuable via ApplicationFrameHost UIA so the UWP behavioral golden was inconclusive.", "workaround": "Migrated app's device-absent fallback path produced 'No custom sensor found', matching the UWP golden layout; parity scored pass." }
+  ]
+}

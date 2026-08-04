@@ -276,6 +276,34 @@ private bool _navigated;
 Validator catches this race with a 10s smoke launch after the build healthcheck passes — see `Validate-UwpMigration.ps1` Section 7.
 
 <a id="navigationview-frame-wiring"></a>
+### SDK-sample `SDKTemplate` namespace mismatch (CS0246 + WMC0909/WMC1111/WMC1509)
+
+Windows-Universal-Samples C# apps put **every** class (`MainPage`, `Scenario`,
+`SampleConfiguration`, each scenario page) in a single fixed `namespace SDKTemplate`, and
+their XAML roots use `x:Class="SDKTemplate.MainPage"` etc. The scaffold created by
+`dotnet new winui -n <ProjectName>` instead puts `App`/`MainWindow` in
+`namespace <ProjectName>`. When `<ProjectName>` ≠ `SDKTemplate` the two do not see each
+other and you get a **cascade** the way this presents is misleading:
+
+- **`CS0246: 'MainPage' could not be found`** in the scaffold's `MainWindow.xaml.cs` /
+  `App.xaml.cs` (it looks for `MainPage` in the project namespace, but it lives in `SDKTemplate`).
+- **`WMC0909: Cannot resolve DataType local:Scenario`**, **`WMC1509: No LocalAssembly
+  parameter`**, and often **`WMC1111`** from the XAML compiler — because the unresolved
+  types break local-assembly type resolution. These are **not** a genuine `x:Bind` /
+  `x:DataType` bug; do not go hunting in the DataTemplate.
+
+**Fix — reconcile the namespaces (pick one and apply consistently):**
+
+- **Keep `SDKTemplate` on the migrated sample files** (least churn — the sample's `.cs`
+  and `x:Class` values already use it) and add `using SDKTemplate;` to the scaffold's
+  `App.xaml.cs` and `MainWindow.xaml.cs` so `MainPage`/`Scenario` resolve. Use
+  `x:Class="SDKTemplate.MainPage"` for any page you re-root.
+- **Or** rename every sample file's namespace and `x:Class` to `<ProjectName>` — but this
+  is more edits and more residue risk.
+
+Treat the CS0246-on-`MainPage`-plus-`WMC0909`/`WMC1509` signature as a **namespace
+mismatch first**, before theorizing about assembly names or compiled bindings.
+
 ### NavigationView + Frame wiring (SDK-sample scenario list)
 
 The UWP SDK-sample idiom `MainPage` + `ListView`/scenario list + `Frame` maps to
@@ -738,6 +766,8 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 ### `x:Bind` and compiled bindings
 
 `x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+
+Any `DataTemplate` that uses `x:Bind` must declare `x:DataType="local:Type"` — a missing one raises **`WMC1111` ("DataTemplates containing x:Bind need a DataType")**, and the named `DataType` must be resolvable through the template's `local:` xmlns. If `x:DataType` is present but still reported unresolvable (`WMC0909`), suspect the [SDK-sample `SDKTemplate` namespace mismatch](#sdk-sample-sdktemplate-namespace-mismatch-cs0246--wmc0909wmc1111wmc1509), not the template itself.
 
 ### Page root element
 

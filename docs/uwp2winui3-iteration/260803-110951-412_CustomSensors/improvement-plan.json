@@ -1,0 +1,32 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "SDK-sample source uses a fixed `namespace SDKTemplate` with `x:Class=\"SDKTemplate.MainPage\"` while `dotnet new winui -n <ProjectName>` scaffolds App/MainWindow under the project namespace; the mismatch produces CS0246 'MainPage' + WMC0909/WMC1111/WMC1509 XAML type-resolution errors that misleadingly look like an x:Bind/DataType bug.",
+      "evidence": "build-events.jsonl lines 16628/16630 (CS0246 MainPage; WMC0909 Cannot resolve DataType local:Scenario; WMC1111; WMC1509). lessons.json dev_agent_struggles[0]: agent theorized about x:DataType/LocalAssembly for several turns before finding the namespace mismatch.",
+      "root_cause": "The skill's SDK-sample guidance never warns that Windows-Universal-Samples hard-code `namespace SDKTemplate`, so the dev-agent could not recognize the CS0246+WMC signature as a namespace mismatch.",
+      "tier": 3,
+      "change": "Added a '### SDK-sample `SDKTemplate` namespace mismatch' subsection to MIGRATION-PATTERNS.md (immediately before the SDK-sample NavigationView+Frame section) documenting the SDKTemplate convention, the exact CS0246+WMC0909/WMC1111/WMC1509 symptom signature, and the two valid reconciliations (keep SDKTemplate + add `using SDKTemplate;` to scaffold App/MainWindow, or rename consistently).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On a re-run of any SDK-sample migration, the agent recognizes the CS0246-on-MainPage + WMC cascade as a namespace mismatch and reconciles it in one step instead of spending several turns theorizing about x:Bind/LocalAssembly.",
+      "falsifiable_check": "In a future SDK-sample trial log, the CS0246/WMC0909 cascade is resolved by a namespace reconciliation within one diagnostic turn (no multi-turn x:DataType/LocalAssembly theorizing), or the errors do not recur at all.",
+      "devils_advocate": "Tier 1 (bootstrap script auto-reconcile) was considered but rejected: choosing whether to unify on SDKTemplate vs the project name, and how to touch scaffold-generated files, is a judgment call that the bulk-rewrite bootstrap should not force; a prose pattern the agent can apply is the right tier. Ignore test: if ignored the CS0246+WMC cascade recurs, but the symptom signature makes the note high-signal."
+    },
+    {
+      "problem": "A DataTemplate using x:Bind must declare x:DataType (WMC1111); the x:Bind section did not state this.",
+      "evidence": "build-events.jsonl line 16628 'error WMC1111: DataTemplates containing x:Bind need a DataType to be specified using x:DataType'.",
+      "root_cause": "The '`x:Bind` and compiled bindings' section covered x:Bind generally but omitted the DataTemplate x:DataType requirement and did not connect a WMC0909 'unresolvable DataType' to the namespace-mismatch cause.",
+      "tier": 3,
+      "change": "Added two sentences to the existing '`x:Bind` and compiled bindings' section: DataTemplates using x:Bind require `x:DataType`, the DataType must resolve via `local:`, and a present-but-unresolvable DataType (WMC0909) points to the SDKTemplate namespace mismatch (cross-linked).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agent adds/keeps x:DataType on item templates and does not misdiagnose WMC0909 as a template bug.",
+      "falsifiable_check": "Future trials show WMC1111 resolved by adding x:DataType (not by editing bindings), and WMC0909 routed to the namespace fix.",
+      "devils_advocate": "Redundancy: the section existed but omitted this; this sharpens existing content rather than adding a new topic. Prose is the only feasible tier — the compiler already emits the code, but its message is opaque about the SDKTemplate root cause."
+    }
+  ],
+  "deferred_to_human": [
+    "Test-AppLaunch.ps1 only probes the bin\\x64\\Debug output layout; a bare `dotnet build` (no -p:Platform=x64) lands binaries under bin\\Debug\\<tfm>\\win-x64 and the launcher reports 'no build output'. SKILL.md Step 3 already prescribes `winapp build`, so this is a dev-agent slip, not applied here — but if bare dotnet build becomes common, consider teaching Test-AppLaunch.ps1 to also probe bin\\Debug\\<tfm>\\win-x64."
+  ]
+}

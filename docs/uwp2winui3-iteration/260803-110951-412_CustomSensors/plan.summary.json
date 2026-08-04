@@ -1,0 +1,15 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "MIGRATION-PATTERNS.md: document the SDK-sample `SDKTemplate` namespace mismatch (CS0246 MainPage + WMC0909/WMC1111/WMC1509 cascade) and its fix, so agents stop misreading it as an x:Bind bug",
+    "MIGRATION-PATTERNS.md: note that DataTemplates using x:Bind require x:DataType (WMC1111) and route an unresolvable DataType (WMC0909) to the namespace-mismatch fix"
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "Test-AppLaunch.ps1 only probes bin\\x64\\Debug; bare `dotnet build` lands output under bin\\Debug\\<tfm>\\win-x64. Not applied (SKILL.md already prescribes `winapp build`)."
+  ]
+}

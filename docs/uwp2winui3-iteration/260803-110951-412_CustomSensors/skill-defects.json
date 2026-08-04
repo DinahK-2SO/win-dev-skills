@@ -1,0 +1,17 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "SDK-sample source uses a fixed `namespace SDKTemplate` (and `x:Class=\"SDKTemplate.MainPage\"`) for every class, which does not match the scaffold's project namespace produced by `dotnet new winui -n <ProjectName>`. This produces a build cascade: CS0246 'MainPage' not found, plus WMC0909 'Cannot resolve DataType local:Scenario', WMC1111, and WMC1509 'No LocalAssembly parameter'.",
+      "evidence": "build-events.jsonl lines 16628/16630 (error CS0246 'MainPage'; error WMC0909 Cannot resolve DataType local:Scenario; WMC1111; WMC1509). session-log.txt turns 46-52 show the dev-agent theorizing about x:DataType/LocalAssembly/assembly name for several turns before identifying that x:Class=\"SDKTemplate.MainPage\" but the project namespace is CustomSensors, then fixing it by adding `using SDKTemplate;` to MainWindow.xaml.cs.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md and SKILL.md for 'SDKTemplate', 'namespace', 'RootNamespace', 'x:Class', 'CS0246', 'WMC0909', 'WMC1509', 'LocalAssembly'. SDKTemplate/RootNamespace/WMC0909/WMC1509 do not appear at all.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The shell-conversion guidance names the 'SDK-sample idiom' but never warns that Windows-Universal-Samples hard-code `namespace SDKTemplate` while the scaffold (dotnet new winui -n <ProjectName>) puts App/MainWindow under the project namespace. The two must be reconciled or MainPage and every XAML-referenced type (e.g. local:Scenario) fail to resolve, and the XAML compiler emits opaque WMC0909/WMC1509 rather than a clear namespace error.",
+      "proposed_fix": "Add a short subsection to the 'NavigationView + Frame wiring (SDK-sample scenario list)' area of MIGRATION-PATTERNS.md: warn that SDK samples place all code in `namespace SDKTemplate` with `x:Class=\"SDKTemplate.MainPage\"`; when the scaffold was created with a different -n <ProjectName>, either keep the sample's namespace on migrated files and add `using SDKTemplate;` to the scaffold-generated App.xaml.cs / MainWindow.xaml.cs (and use SDKTemplate in any new x:Class), OR rename the sample files to the project namespace consistently. Note that the tell-tale symptom is CS0246 on the sample's MainPage plus WMC0909/WMC1111/WMC1509 XAML type-resolution errors — treat these as a namespace mismatch, not a genuine x:Bind/DataType bug.",
+      "generalizes": "Every Windows-Universal-Samples C# app (the dominant source of UWP migration inputs) uses the identical `SDKTemplate` namespace convention. Any of them scaffolded with a project name other than 'SDKTemplate' hits this exact CS0246 + WMC cascade, so the note prevents a recurring multi-turn stall across scenarios."
+    }
+  ]
+}

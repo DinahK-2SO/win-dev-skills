@@ -1,0 +1,14 @@
+{
+  "scenario": "CustomSensors",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Data events scenario (Enable/Disable, CO2 output)", "status": "pass", "reason": "Layout matches UWP golden; Enable click responds 'No custom sensor found' (correct device-absent path); Disable stays greyed until Enable succeeds, matching UWP.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Polling scenario (Get CO2 level, CO2 output)", "status": "pass", "reason": "Layout matches UWP golden; button click responds 'No custom sensor found' (correct handler path).", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Perfect parity (100/100). Both scenarios render and respond correctly; device-absent fallback matches the UWP golden. No visual or behavioral regressions. Improvement opportunities come from the build-time struggle, not from parity gaps: the SDK-sample SDKTemplate namespace mismatch cascade (CS0246 + WMC0909/WMC1111/WMC1509)."
+}
