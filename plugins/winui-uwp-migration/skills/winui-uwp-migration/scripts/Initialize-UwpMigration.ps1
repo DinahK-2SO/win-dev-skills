@@ -429,15 +429,19 @@ $dlines = New-Object System.Collections.Generic.List[string]
 [void]$dlines.Add('more PATTERNS.md anchors that describe the WinUI 3 equivalent — refer to that section')
 [void]$dlines.Add('(via `Get-MigrationPattern.ps1 -Anchor <id>`) before deciding the final disposition.')
 [void]$dlines.Add('')
-[void]$dlines.Add('| File | Anchors |')
-[void]$dlines.Add('|---|---|')
 $deferredKeys = @($fileDeferRsn.Keys) | Sort-Object
-foreach ($rel in $deferredKeys) {
-    $anchorList = ($fileDeferRsn[$rel] | Sort-Object -Unique) -join ', '
-    [void]$dlines.Add("| $rel | $anchorList |")
-}
 if ($deferredKeys.Count -eq 0) {
-    [void]$dlines.Add('| (none) | — |')
+    # No files deferred — emit the exact sentinel Validate-UwpMigration.ps1 checks for
+    # ('No items deferred') so the zero-defer branch reports PASS instead of a spurious
+    # "content but no defer rows" WARN. Do NOT seed a table here.
+    [void]$dlines.Add('No items deferred.')
+} else {
+    [void]$dlines.Add('| File | Anchors |')
+    [void]$dlines.Add('|---|---|')
+    foreach ($rel in $deferredKeys) {
+        $anchorList = ($fileDeferRsn[$rel] | Sort-Object -Unique) -join ', '
+        [void]$dlines.Add("| $rel | $anchorList |")
+    }
 }
 Set-Content -LiteralPath $deferredPath -Value $dlines -Encoding UTF8
 

@@ -1,0 +1,14 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Validate-UwpMigration.ps1 [FAIL]: 4 MIGRATION-MAPPING.md rows still at Status=copied at final validation, forcing an extra edit + re-validate cycle.",
+      "evidence": "session-log.txt lines 2079-2090 (FAIL), 2095-2100 (agent bulk-flips copied→done), 2107-2123 (re-run PASS).",
+      "covered_clearly_at": "SKILL.md line 86 ('flip `Status` to `done` once the file appears in your final build'), line 90 ('Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished'), and Step 4 line 167 ('*`Status = copied` rows* → those files were never finished. Either complete the migration and flip to `done`...'). The validator explicitly checks this (line 154).",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill prominently and repeatedly instructs flipping copied→done as-you-go, and the mandatory validator deterministically catches any missed flips before 'done'. A capable model on re-run flips as it finishes each file (or simply fixes the FAIL as this run did) with no skill edit. Adding more prose would be 'tell the model not to slip' noise."
+    }
+  ]
+}

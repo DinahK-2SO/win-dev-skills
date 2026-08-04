@@ -1,0 +1,14 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Read and write simple structured data (Copy Strings).", "status": "pass", "reason": "Output 'Hello/World/1 2 3 4 5/Très bien!/Goodbye' matches UWP golden exactly.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Dump file contents using ReadBytes() (Hex Dump).", "status": "pass", "reason": "Hex dump matches UWP golden byte-for-byte in a monospaced font with the image shown.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "Perfect parity (100). No behavioral or visual discrepancies. The only friction was process/tooling hygiene inside the migration skill itself: a spurious DEFERRED.md consistency WARN on a zero-defer run, and a late batch of Status=copied flips."
+}

@@ -1,0 +1,17 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Validate-UwpMigration.ps1 emits a spurious '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency' on every migration that defers zero files (the common case).",
+      "evidence": "session-log.txt lines 2084 and 2115: the WARN persisted through the final PASS. Seeded app\\DataReaderWriter\\MIGRATION-DEFERRED.md contains the row '| (none) | — |' and no 'No items deferred' text.",
+      "skill_search": "grepped Validate-UwpMigration.ps1 for 'No items deferred'/'check consistency' and Initialize-UwpMigration.ps1 for the DEFERRED.md seeding block (lines 423-442).",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize-UwpMigration.ps1 (zero-defer branch): if ($deferredKeys.Count -eq 0) { [void]$dlines.Add('| (none) | — |') }  — while Validate-UwpMigration.ps1 line 266 only suppresses the warning when the file matches 'No items deferred'.",
+      "root_cause": "Producer/consumer contract mismatch between two scripts in the same skill: the initializer seeds a placeholder table row for the no-defer case, but the validator's zero-defer branch is satisfied only by the sentinel string 'No items deferred'. The two were written against different conventions.",
+      "proposed_fix": "In Initialize-UwpMigration.ps1, when deferredKeys.Count -eq 0, seed MIGRATION-DEFERRED.md with the exact sentinel line the validator expects ('No items deferred.') instead of a '| (none) | — |' table row. This makes the validator's zero-defer branch report the intended '[PASS] No defer rows...' instead of a spurious WARN.",
+      "generalizes": "The vast majority of UWP→WinUI 3 sample migrations defer zero files (no unsupported APIs). Every such run currently ends with a misleading consistency WARN that can nudge an agent to waste turns 'investigating' a non-problem or erode trust in the validator's other signals. Fixing the sentinel makes clean runs report cleanly across all scenarios."
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "scenario": "DataReaderWriter",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "session-log turn ~4: bootstrap copied source, rewrote namespaces, seeded MIGRATION-MAPPING.md (4 rows) and per-file modes; agent proceeded directly to editing." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "session-log line 2087-2088: ran residue grep + rebuild + WUI-analyzer check + smoke launch in one shot; caught rows stuck at Status=copied before the agent declared done (line 2090)." }
+  ],
+  "tools_problematic": [
+    { "tool": "Initialize-UwpMigration.ps1 + Validate-UwpMigration.ps1 (DEFERRED.md contract)", "problem": "Producer/consumer mismatch: when there are zero defer rows, Initialize seeds MIGRATION-DEFERRED.md with a table row '| (none) | — |', but Validate expects the literal sentinel 'No items deferred' — so a spurious [WARN] fires on every clean (no-defer) migration.", "evidence": "session-log line 2084 and 2115: '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency' persisted through the final PASS." }
+  ],
+  "tool_limitations": [
+    { "tool": "Validate-UwpMigration.ps1", "limitation": "Reports Status=copied rows as a hard [FAIL] only at final validation, forcing an extra validate→edit→re-validate cycle for a pure bookkeeping flip.", "suggested_tweak": "Skill already tells the agent to flip copied→done as each file is finished; no tooling change needed (dev-agent-slip). The DEFERRED.md sentinel mismatch, however, is a tooling defect to fix." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Windows.Storage.Streams.DataReader/DataWriter, StorageFile.GetFileFromApplicationUriAsync, OpenSequentialReadAsync", "special_handling": "These WinRT storage/stream APIs are usable as-is from WinUI 3 desktop; the migration kept them unchanged and parity scored 100. No adaptation required." }
+  ],
+  "errors_encountered": [
+    { "error": "Validate-UwpMigration [FAIL]: 4 rows still Status=copied", "root_cause": "Agent batched all Status flips to the end and forgot before running the validator.", "fix": "Edited MIGRATION-MAPPING.md to flip copied→done, re-ran validator → PASS (session-log 2095-2123)." },
+    { "error": "Validate-UwpMigration [WARN]: MIGRATION-DEFERRED.md exists with content but mapping has no defer rows", "root_cause": "Initialize seeds a '| (none) | — |' placeholder row instead of the 'No items deferred' sentinel the validator checks for.", "fix": "Not fixed by agent (only a WARN); requires aligning the two scripts." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Final validation (session-log turns 34-36)", "symptom": "Validator FAILed on 4 rows stuck at Status=copied; required an extra edit + re-run cycle.", "turns_or_retries": "2 extra turns (edit mapping, re-validate)", "root_cause": "Agent deferred all copied→done flips to the very end instead of flipping each row as its file was finished.", "how_resolved": "Bulk-flipped the 4 rows to done and re-ran the validator.", "preventable_by": "Skill already prescribes flipping as-you-go (SKILL.md lines 86/90/167) and the validator catches it — this is a dev-agent slip, not a skill gap." },
+    { "where": "Final validation WARN (session-log line 2084/2115)", "symptom": "Persistent [WARN] about MIGRATION-DEFERRED.md having content but no defer rows, on an otherwise perfect run.", "turns_or_retries": "unresolved (WARN, not FAIL)", "root_cause": "Initialize-UwpMigration seeds DEFERRED.md with '| (none) | — |' which does not match the validator's 'No items deferred' sentinel.", "how_resolved": "Left as WARN.", "preventable_by": "Make Initialize-UwpMigration seed the sentinel line 'No items deferred.' when deferredKeys.Count == 0, so the validator's zero-defer branch reports PASS." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}
