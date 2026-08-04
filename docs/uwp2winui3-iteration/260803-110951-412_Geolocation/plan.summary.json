@@ -1,0 +1,14 @@
+{
+  "scenario": "Geolocation",
+  "index": 0,
+  "applied": true,
+  "bullets": [
+    "Initialize-UwpMigration.ps1: skip UWP AssemblyInfo.cs / assembly-attribute-only .cs at copy time, since SDK-style WinUI 3 auto-generates those attributes and copying them causes a guaranteed CS0579 duplicate-assembly-attribute flood in every UWP migration.",
+    "MIGRATION-PATTERNS.md: add CS0579 (delete AssemblyInfo.cs) and single-file CS0111/CS0102/CS0106 duplicate-body (overwrite the whole file) entries so the agent maps these recurring build errors to their fix in one cycle."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

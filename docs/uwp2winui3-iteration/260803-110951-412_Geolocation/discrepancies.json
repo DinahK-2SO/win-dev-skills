@@ -1,0 +1,20 @@
+{
+  "scenario": "Geolocation",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Track position", "status": "pass", "reason": "2/2 controls; Start Tracking responded.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Get position", "status": "pass", "reason": "3/3 controls; Get Geolocation responded.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Background position", "status": "pass", "reason": "Register/Unregister responded.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Foreground geofencing", "status": "pass", "reason": "15/15 controls; geofence form renders.", "suspected_skill_gap": "" },
+    { "id": 5, "text": "Background geofencing", "status": "pass", "reason": "Register/Unregister responded.", "suspected_skill_gap": "" },
+    { "id": 6, "text": "Get last visit", "status": "pass", "reason": "Get last Visit responded.", "suspected_skill_gap": "" },
+    { "id": 7, "text": "Foreground visit monitoring", "status": "pass", "reason": "Start Monitoring responded.", "suspected_skill_gap": "" },
+    { "id": 8, "text": "Background visit monitoring", "status": "pass", "reason": "Register/Unregister responded.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No parity discrepancies (100/100, 8/8 pass). Improvement value is entirely in the build-time error floods the dev-agent worked through: CS0579 from a copied AssemblyInfo.cs (skill-defect) and a CS0111/CS0102/CS0106 duplicate-definition flood from header-only edits (skill-coverage-gap)."
+}

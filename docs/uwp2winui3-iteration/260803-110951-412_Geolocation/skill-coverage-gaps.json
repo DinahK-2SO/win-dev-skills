@@ -1,0 +1,15 @@
+{
+  "scenario": "Geolocation",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "700+ CS0111/CS0102/CS0106/CS0101/CS1022/CS8803 duplicate-definition errors self-inflicted by the dev-agent using header-only edits on copied UWP .cs files, which replaced the top of each file but left the original body, duplicating every type/member.",
+      "evidence": "build-events.jsonl assistant messages: 'the edit replaced the header but left the original body intact, duplicating it'; 'All remaining CS files still have duplicate content. The same pattern - the edit replaced the header but kept the old body. I need to truncate all affected files'; 359x CS0111, 127x CS0102, 109x CS0106 in transcript.",
+      "covered_at": "MIGRATION-PATTERNS.md #'XAML migration is mostly mechanical transformation of existing files' (~line 700): 'Copy each *.xaml from the source verbatim, then apply the rewrites below. Do not regenerate a page from scratch.' The same 'copy verbatim, then rewrite' expectation applies to .cs but is only stated for XAML, and there is no guidance on the failure mode (duplicated bodies) or its recovery.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add a short, prominent note in MIGRATION-PATTERNS.md's 'Common build errors' area: when adapting a copied UWP .cs file, replace the WHOLE file rather than editing a header — and if a build floods with CS0111/CS0102/CS0106 'already contains a definition', suspect a partial edit that left a duplicated body and overwrite the file in full.",
+      "generalizes": "Header-only / partial edits leaving duplicated bodies is a model-agnostic hazard whenever an agent adapts many copied source files; the CS0111/CS0102 duplicate-definition signature and the full-file-overwrite recovery apply to any UWP->WinUI 3 migration with more than a couple of code files."
+    }
+  ]
+}

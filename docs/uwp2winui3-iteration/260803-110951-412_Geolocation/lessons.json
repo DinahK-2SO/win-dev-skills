@@ -1,0 +1,26 @@
+{
+  "scenario": "Geolocation",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1", "evidence": "Namespace mass-rewrite Windows.UI.Xaml -> Microsoft.UI.Xaml landed cleanly; final build SUCCEEDED and scored 100/100." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Initialize-UwpMigration.ps1", "limitation": "Copies the UWP Properties\\AssemblyInfo.cs verbatim into the WinUI 3 tree. SDK-style WinUI projects auto-generate assembly-level attributes (GenerateAssemblyInfo=true by default), so the copied AssemblyInfo.cs produces CS0579 'Duplicate assembly attribute' errors.", "suggested_tweak": "Exclude/neutralize UWP AssemblyInfo.cs (and other assembly-attribute-only files) during copy." }
+  ],
+  "failed_apis": [],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Geolocator / Geofencing / Geovisit", "special_handling": "Device-gated; on a headless dev box these surface an 'Access denied.' status fallback. This is correct defensive UI and not a defect (confirmed pass in score)." }
+  ],
+  "errors_encountered": [
+    { "error": "CS0579 Duplicate assembly attribute (42 occurrences)", "root_cause": "UWP-era Properties\\AssemblyInfo.cs was copied into the migrated tree and conflicts with the SDK-generated assembly attributes emitted by the WinUI 3 SDK-style project.", "fix": "Delete the copied AssemblyInfo.cs (agent deleted it manually after diagnosing)." },
+    { "error": "CS0111/CS0102/CS0106/CS0101/CS1022/CS8803 duplicate-definition flood (700+ occurrences)", "root_cause": "The dev-agent used header-only edits on copied UWP .cs files that replaced the top of each file but left the original body intact, duplicating every type/member. Multiple scenario files affected.", "fix": "Agent overwrote each affected file completely (truncated the duplicated trailing body)." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "All Scenario*.xaml.cs, SampleConfiguration.cs, Tasks\\Helpers.cs", "symptom": "Hundreds of CS0111/CS0102/CS0106 duplicate-definition errors", "turns_or_retries": "many turns across several build cycles", "root_cause": "Edit that replaced a file header duplicated the body; the same edit pattern was repeated across many files before the agent switched to full-file overwrite.", "how_resolved": "Agent rewrote affected files wholesale via PowerShell overwrite.", "preventable_by": "Skill guidance to prefer full-file replacement (not header-only edits) when adapting copied UWP source, and to overwrite the whole file when a duplicate-definition flood appears." },
+    { "where": "Properties\\AssemblyInfo.cs", "symptom": "CS0579 Duplicate assembly attribute", "turns_or_retries": "1-2 turns after the duplicate-body flood cleared", "root_cause": "UWP AssemblyInfo.cs copied into an SDK-style project that auto-generates the same attributes.", "how_resolved": "Deleted the file.", "preventable_by": "Bootstrap should not copy AssemblyInfo.cs (Tier-1); a MIGRATION-PATTERNS.md entry mapping CS0579 -> delete AssemblyInfo.cs (Tier-3) as backstop." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

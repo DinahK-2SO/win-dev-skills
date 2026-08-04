@@ -1,0 +1,14 @@
+{
+  "scenario": "Geolocation",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Transient WMC/XamlCompiler errors ('Cannot resolve DataType local:Scenario') during the intermediate builds.",
+      "evidence": "build-events.jsonl: 117x 'error WMC', dev-agent message: 'the XAML compiler does a first pass before CS compilation completes ... the CS errors prevent XAML compilation'. These cleared automatically once the CS duplicate-definition errors were fixed.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'x:Bind' section (~line 753): 'If the build emits XLS0414/MC3074 type was not found, look for stale UWP namespace prefixes' — and the broader guidance that XAML compile failures cascade from CS errors. The WMC noise was a downstream symptom of the (separately-classified) duplicate-definition flood, not an independent problem.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "These XAML resolution errors were purely a cascade from the CS0111/CS0102 duplicate-definition flood; once that root cause (already captured as a coverage-gap) is fixed, the WMC errors do not occur. No separate skill edit is warranted."
+    }
+  ]
+}

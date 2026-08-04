@@ -77,6 +77,28 @@ $srcExcludePattern = '\\(' + ($srcExcludeDirs -join '|') + ')\\'
 
 $copied = New-Object System.Collections.Generic.List[string]
 
+# Never copy a UWP AssemblyInfo.cs (or any .cs that is *only* assembly-level attributes).
+# SDK-style WinUI 3 projects auto-generate assembly attributes (GenerateAssemblyInfo defaults
+# to true), so a hand-written AssemblyInfo.cs re-declaring [assembly: AssemblyTitle], etc.,
+# floods the build with CS0579 "Duplicate assembly attribute". Every UWP project ships one.
+function Test-IsAssemblyAttributeOnlyCs {
+    param([string]$Path)
+    if ([System.IO.Path]::GetFileName($Path).ToLowerInvariant() -eq 'assemblyinfo.cs') { return $true }
+    $text = [System.IO.File]::ReadAllText($Path)
+    # strip comments and whitespace-only lines, then check every remaining code line is an
+    # assembly-level attribute or a using directive.
+    $code = ($text -split "\r?\n") | Where-Object {
+        $t = $_.Trim()
+        $t -and -not $t.StartsWith('//')
+    }
+    if (-not $code) { return $false }
+    $nonAttr = $code | Where-Object {
+        $t = $_.Trim()
+        -not ($t -match '^\[assembly:' -or $t -match '^using\s' -or $t -eq '')
+    }
+    return -not $nonAttr
+}
+
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     if (('\' + $rel) -match $srcExcludePattern) { return $false }
@@ -84,6 +106,10 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
     $match = $false
     foreach ($ext in $patterns) {
         if ($name.EndsWith($ext)) { $match = $true; break }
+    }
+    if ($match -and $name.EndsWith('.cs') -and (Test-IsAssemblyAttributeOnlyCs $_.FullName)) {
+        Write-Host "    Skipped $rel (assembly-attribute-only .cs — WinUI 3 auto-generates these; copying it causes CS0579)"
+        return $false
     }
     $match
 } | ForEach-Object {

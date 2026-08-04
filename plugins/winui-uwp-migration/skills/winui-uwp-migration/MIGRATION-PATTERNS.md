@@ -50,6 +50,24 @@ Get-ChildItem -Path $Target -Recurse -Directory -Include bin,obj |
 
 Generated sources never belong in source control or the migrated tree — only `.xaml/.cs/.resw/.appxmanifest`/assets are real inputs.
 
+### `CS0579: Duplicate assembly attribute`
+
+If the build reports `CS0579` ("Duplicate '…' attribute", e.g. `AssemblyTitle`, `AssemblyVersion`, `ComVisible`), the cause is a UWP-era `Properties\AssemblyInfo.cs` that was copied into the migrated tree. SDK-style WinUI 3 projects **auto-generate** these assembly-level attributes (`GenerateAssemblyInfo` defaults to `true`), so a hand-written `AssemblyInfo.cs` that re-declares them collides. Every UWP project ships one.
+
+Fix: delete the copied `AssemblyInfo.cs` (do not try to reconcile it — the SDK owns these attributes now):
+
+```powershell
+Get-ChildItem -Path $Target -Recurse -File -Filter AssemblyInfo.cs |
+    Where-Object { $_.FullName -notmatch '\\(\.uwp-source)\\' } |
+    Remove-Item -Force
+```
+
+The current `Initialize-UwpMigration.ps1` already skips assembly-attribute-only `.cs` files at copy time; delete any that pre-date that fix or were copied by hand.
+
+### `CS0111` / `CS0102` / `CS0106` duplicate-definition flood (a *single* file, not `bin`/`obj`)
+
+Distinct from the `bin`/`obj` `CS0101` case above: if a **hand-adapted** `.cs` file reports `CS0111`/`CS0102`/`CS0106` ("already contains a definition for …") for many members at once, the file almost certainly has a **duplicated body** — a header-only edit replaced the top of the file but left the original content below it. When adapting a copied UWP `.cs` file, **replace the whole file** rather than editing just its header, and if this flood appears, **overwrite the offending file in full** instead of patching pieces.
+
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
 `<CaptureElement>` does not exist in WinUI 3, but the **live camera preview is not a defer** — it has a standard replacement: render `MediaCapture` preview frames into an `<Image>` via `SoftwareBitmapSource`. See the [Camera preview](#capture) section below for the full recipe. Do **not** mark the camera page `defer` — that deletes the whole feature and leaves a blank window. (`MediaPlayerElement` is only for media playback, not the live camera surface.)

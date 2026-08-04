@@ -1,0 +1,28 @@
+{
+  "scenario": "Geolocation",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "CS0579 'Duplicate assembly attribute' flood (×42) from a copied UWP Properties\\AssemblyInfo.cs colliding with SDK-auto-generated assembly attributes.",
+      "evidence": "build-output.txt: 42x error CS0579; build-events.jsonl agent: 'This UWP-era AssemblyInfo.cs conflicts with auto-generated attributes. I need to delete it'. lessons.json errors_encountered[0].",
+      "root_cause": "Initialize-UwpMigration.ps1 copies all .cs files verbatim, including UWP AssemblyInfo.cs. SDK-style WinUI 3 projects set GenerateAssemblyInfo=true and emit the same attributes, so they collide.",
+      "tier": 1,
+      "change": "Initialize-UwpMigration.ps1 now skips any .cs named AssemblyInfo.cs or whose only code lines are assembly-level [assembly: ...] attributes / using directives (Test-IsAssemblyAttributeOnlyCs helper), logging each skip. This removes the collision at the source before the agent ever builds.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Migrated tree no longer contains AssemblyInfo.cs; CS0579 does not occur on the first build.",
+      "falsifiable_check": "On re-run, a grep of build output shows 0 'CS0579' errors and Initialize output logs 'Skipped ...AssemblyInfo.cs (assembly-attribute-only .cs...)'."
+    },
+    {
+      "problem": "Same CS0579, plus a CS0111/CS0102/CS0106 duplicate-definition flood from header-only edits leaving duplicated file bodies — no PATTERNS.md guidance for either.",
+      "evidence": "build-events.jsonl: 359x CS0111, 127x CS0102, 109x CS0106; agent: 'the edit replaced the header but left the original body intact, duplicating it'. skill-defects.json + skill-coverage-gaps.json.",
+      "root_cause": "MIGRATION-PATTERNS.md 'Common build errors' lacks a CS0579 entry and lacks the single-file duplicate-body case (its existing CS0101 entry only covers stale bin/obj).",
+      "tier": 3,
+      "change": "Added two 'Common build errors' subsections to MIGRATION-PATTERNS.md: (a) CS0579 -> delete AssemblyInfo.cs (backstop to the Tier-1 script fix); (b) CS0111/CS0102/CS0106 single-file flood -> replace copied .cs files whole, and overwrite in full when the flood appears.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "When the agent still hits these errors, it maps them to the right fix immediately instead of diagnosing across many turns.",
+      "falsifiable_check": "On re-run, if CS0579 or a single-file duplicate-definition flood appears, the agent resolves it in <=1 build cycle (grep PATTERNS.md hit) rather than looping across many files."
+    }
+  ],
+  "deferred_to_human": []
+}

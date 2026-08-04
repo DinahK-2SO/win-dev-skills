@@ -1,0 +1,17 @@
+{
+  "scenario": "Geolocation",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "CS0579 'Duplicate assembly attribute' flood (×42) because the UWP Properties\\AssemblyInfo.cs was carried into the migrated tree.",
+      "evidence": "build-output.txt / build-events.jsonl: 42x 'error CS0579'; dev-agent message: 'This UWP-era AssemblyInfo.cs conflicts with auto-generated attributes. I need to delete it'.",
+      "skill_search": "Grepped SKILL.md, MIGRATION-PATTERNS.md, Initialize-UwpMigration.ps1 for 'AssemblyInfo', 'CS0579', 'GenerateAssemblyInfo', 'assembly attribute' — zero hits.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "SDK-style WinUI 3 projects auto-generate assembly-level attributes (GenerateAssemblyInfo defaults to true). The UWP project ships a hand-written Properties\\AssemblyInfo.cs with the same attributes. Initialize-UwpMigration.ps1 copies all .cs files verbatim, so the two collide.",
+      "proposed_fix": "Tier-1: in Initialize-UwpMigration.ps1, skip copying UWP AssemblyInfo.cs (and any .cs whose only content is assembly-level [assembly: ...] attributes). Tier-3 backstop: add a MIGRATION-PATTERNS.md 'CS0579 duplicate assembly attribute' entry pointing at deleting AssemblyInfo.cs / GenerateAssemblyInfo.",
+      "generalizes": "EVERY UWP C# project contains Properties\\AssemblyInfo.cs, and EVERY SDK-style WinUI 3 target auto-generates the same attributes. This CS0579 collision is guaranteed on every UWP->WinUI 3 migration, not specific to Geolocation."
+    }
+  ]
+}
