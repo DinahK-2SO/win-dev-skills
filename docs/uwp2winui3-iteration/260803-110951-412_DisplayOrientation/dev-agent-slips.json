@@ -1,0 +1,14 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The 'Apply preferences' button produced no visible change — but it was a no-op in the UWP golden too (0/1 live in both), so it is not a regression and not a skill issue.",
+      "evidence": "discrepancies.md 'Structural vs behavioral': 'Apply preferences produced no visible text change in both UWP and WinUI (0/1 live in each)'.",
+      "covered_clearly_at": "N/A — not a migration problem; parity of a UWP no-op is preserved correctly.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Behaviour matches the original UWP app; nothing to fix in the migration skill."
+    }
+  ]
+}

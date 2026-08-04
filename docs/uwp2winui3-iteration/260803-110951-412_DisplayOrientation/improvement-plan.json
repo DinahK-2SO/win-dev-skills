@@ -1,0 +1,18 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Migrated app degrades DisplayInformation orientation output to 'N/A' + raw exception because DisplayInformation.GetForCurrentView() throws on desktop and the skill offered no working replacement (only a DPI shortcut).",
+      "evidence": "migration-score.json feature 'Show and lock orientation' verdict=partial; discrepancies.md HIGH 'GetForCurrentView must be called on a thread associated with a CoreWindow'; lessons.json failed_apis[0].",
+      "root_cause": "MIGRATION-PATTERNS.md #getforcurrentview mapped DisplayInformation only to RasterizationScale/GetDpiForWindow and blanket-claimed 'None of the GetForCurrentView() patterns work', so the agent believed orientation had no desktop equivalent.",
+      "tier": 3,
+      "change": "Corrected the #getforcurrentview section: softened the 'None work' preamble to 'the GetForCurrentView() entry point is gone — use a window-scoped factory'; changed the DisplayInformation row to point at Microsoft.Graphics.Display.DisplayInformation.CreateForWindowId(windowId) with DPI shortcut noted as a subset; added a code snippet acquiring windowId and reading CurrentOrientation/NativeOrientation; noted the DispatcherQueue/caching requirement.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents replace DisplayInformation.GetForCurrentView() with CreateForWindowId(windowId) and report real orientation/DPI instead of a dead fallback.",
+      "falsifiable_check": "On a re-run of any DisplayInformation/orientation scenario, the WinUI app shows real orientation values (not 'N/A'/exception text) and the feature scores pass instead of partial; no GetForCurrentView() residue remains in the migrated code."
+    }
+  ],
+  "deferred_to_human": []
+}

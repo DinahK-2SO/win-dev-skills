@@ -1,0 +1,11 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 1,
+  "applied": true,
+  "bullets": [
+    "Fix #getforcurrentview: map DisplayInformation.GetForCurrentView() to Microsoft.Graphics.Display.DisplayInformation.CreateForWindowId(windowId) (keeps orientation/DPI), not just the DPI shortcut, so orientation/display-info migrations don't degrade to a broken try/catch.",
+    "Soften the section's 'None of the GetForCurrentView() patterns work' overstatement to 'the entry point is gone — use a window-scoped factory', and add a windowId+CurrentOrientation code snippet with the DispatcherQueue/caching note."
+  ],
+  "files_touched": ["skills/winui-uwp-migration/MIGRATION-PATTERNS.md"],
+  "deferred_to_human": []
+}
