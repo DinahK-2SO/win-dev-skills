@@ -1,0 +1,25 @@
+{
+  "scenario": "DisplayOrientation",
+  "discrepancies": [
+    {
+      "scenario": "Show and lock orientation",
+      "severity": "high",
+      "type": "wrong-output / broken-behavior",
+      "control": "NativeOrientationTextBlock / CurrentOrientationTextBlock / AutoRotationPreferencesTextBlock",
+      "uwp": "Native orientation: Landscape; Current orientation: Landscape; Auto-rotation preferences: None",
+      "winui": "Native orientation: N/A; Current orientation: N/A; Auto-rotation preferences: 'DisplayInformation not available on desktop: Element not found. GetForCurrentView must be called on a thread that is associated with a CoreWindow.'",
+      "note": "The migrated app uses DisplayInformation.GetForCurrentView(), which throws on WinUI 3 desktop. The sample's primary output (reporting native/current orientation) is non-functional and displays a raw exception message instead of orientation data. A visible fallback exists (non-blank), but the core feature does not work."
+    },
+    {
+      "scenario": "Show and lock orientation",
+      "severity": "low",
+      "type": "layout",
+      "control": "output text region",
+      "uwp": "Auto-rotation preferences fits on one line ('None').",
+      "winui": "The exception fallback text overflows/wraps and is clipped at the window edge.",
+      "note": "Consequence of the exception message being long; cosmetic relative to the functional defect above."
+    }
+  ],
+  "structural_coverage": "5/5 controls present in WinUI UIA tree",
+  "behavioral": "Apply preferences button produced no visible text change in BOTH UWP and WinUI (0/1 live in each) — not a regression by itself. The regression is in the orientation OUTPUTS, which are broken in WinUI."
+}

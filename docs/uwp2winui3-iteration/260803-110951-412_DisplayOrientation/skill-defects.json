@@ -1,0 +1,17 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Migrated app's orientation output is dead: NativeOrientation/CurrentOrientation show 'N/A' and AutoRotationPreferences shows a raw exception, because DisplayInformation.GetForCurrentView() throws on WinUI 3 desktop and the agent had no working replacement.",
+      "evidence": "migration-score.json feature 'Show and lock orientation' verdict=partial; discrepancies.md HIGH: 'DisplayInformation not available on desktop... GetForCurrentView must be called on a thread associated with a CoreWindow'; build-events shows agent shipped try/catch printing ex.Message.",
+      "skill_search": "grepped MIGRATION-PATTERNS.md for DisplayInformation / GetForCurrentView / orientation",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "| `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |  (also the section preamble 'None of the GetForCurrentView() patterns work in WinUI 3 desktop')",
+      "root_cause": "The #getforcurrentview mapping presents DPI as the ONLY replacement for DisplayInformation and the section blanket-claims none of these APIs 'work', so the agent concluded display orientation has no desktop equivalent and degraded to a broken fallback. In fact the Windows App SDK ships Microsoft.Graphics.Display.DisplayInformation with a CreateForWindowId(windowId) factory that preserves every member (orientation, DPI, color info).",
+      "proposed_fix": "In MIGRATION-PATTERNS.md #getforcurrentview: (1) soften the preamble from 'None ... work' to 'the GetForCurrentView() *entry point* is gone — replace each with a window-scoped factory or AppWindow'; (2) change the DisplayInformation row to point at `DisplayInformation.CreateForWindowId(windowId)` (Microsoft.Graphics.Display) with RasterizationScale/GetDpiForWindow noted as the DPI-only shortcut; (3) add a short code snippet showing windowId acquisition and CurrentOrientation.",
+      "generalizes": "Any UWP app that reads display metrics or orientation (DisplayInformation is the standard UWP path for DPI, orientation, and HDR/color info) hits GetForCurrentView() on desktop. A correct one-line mapping + snippet fixes the whole family, not just this sample."
+    }
+  ]
+}

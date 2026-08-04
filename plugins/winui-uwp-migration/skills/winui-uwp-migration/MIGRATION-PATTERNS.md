@@ -367,15 +367,28 @@ broken — do not ship it.
 <a id="getforcurrentview"></a>
 ## GetForCurrentView() Replacements
 
-None of the `GetForCurrentView()` patterns work in WinUI 3 desktop — there is no implicit per-view singleton.
+The `GetForCurrentView()` *entry point* is gone in WinUI 3 desktop — there is no implicit per-view singleton. But most of the underlying objects still exist; replace `GetForCurrentView()` with a **window-scoped factory** (or an `AppWindow` property), do **not** conclude the feature is unsupported and degrade to a `try/catch` stub.
 
 | UWP API | WinUI 3 Replacement |
 |---------|---------------------|
 | `ApplicationView.GetForCurrentView()` | `AppWindow.GetFromWindowId(windowId)` |
 | `UIViewSettings.GetForCurrentView()` | `AppWindow` properties (size, presenter) |
-| `DisplayInformation.GetForCurrentView()` | `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` |
+| `DisplayInformation.GetForCurrentView()` | `Microsoft.Graphics.Display.DisplayInformation.CreateForWindowId(windowId)` — keeps `NativeOrientation` / `CurrentOrientation` / DPI / color members. (For DPI *only*, `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` is a shortcut.) |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+
+`DisplayInformation.GetForCurrentView()` **throws** on desktop (`GetForCurrentView must be called on a thread associated with a CoreWindow`) — swap it for the window-scoped factory rather than catching the exception. `CreateForWindowId` must run on a thread with a running `DispatcherQueue`; cache the instance and de-register its events.
+
+```csharp
+using Microsoft.Graphics.Display; // WinApp SDK DisplayInformation
+using Microsoft.UI;               // Win32Interop
+
+var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow!);
+var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
+var displayInfo = DisplayInformation.CreateForWindowId(windowId);
+var current = displayInfo.CurrentOrientation; // DisplayOrientations
+var native  = displayInfo.NativeOrientation;
+```
 
 <a id="pickers"></a>
 ## Pickers and Win32 Surfaces

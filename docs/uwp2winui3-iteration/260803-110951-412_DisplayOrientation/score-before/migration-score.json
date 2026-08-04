@@ -1,0 +1,23 @@
+{
+  "scenario": "DisplayOrientation",
+  "uwp_launchable": true,
+  "score": 50,
+  "features_total": 1,
+  "features_pass": 0,
+  "features_partial": 1,
+  "features_fail": 0,
+  "uwp_capture_status": "ok",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 1,
+  "features": [
+    {
+      "name": "Show and lock orientation",
+      "verdict": "partial",
+      "uwp_responded": true,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Show_and_lock_orientation__a01_Apply_preferences.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Show_and_lock_orientation__a01_Apply_preferences.png",
+      "note": "All 5 controls present (structural parity 5/5, non-blank frame) and the page is reachable. But the sample's primary output is broken: UWP reports Native/Current orientation = 'Landscape' and Auto-rotation = 'None', while the migrated WinUI 3 app shows 'N/A' and a raw exception message ('DisplayInformation not available on desktop... GetForCurrentView must be called on a thread associated with a CoreWindow'). The migration used DisplayInformation.GetForCurrentView(), which throws on WinUI 3 desktop. The feature is non-functional though it degrades to a visible fallback, so it is partial, not pass. The 'Apply preferences' button was a no-op in both UWP and WinUI (0/1 live in each), so that alone is not a regression."
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "scenario": "DisplayOrientation",
+  "index": 1,
+  "tools_helpful": [
+    { "tool": "Initialize-UwpMigration.ps1 + unsupported-api-inventory.json", "evidence": "GetForCurrentView() was tagged in the file with a TODO routed to PATTERNS.md#getforcurrentview; the dev-agent found and cited the anchor ('// See PATTERNS.md#getforcurrentview')." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [],
+  "failed_apis": [
+    {
+      "api": "DisplayInformation.GetForCurrentView()",
+      "why_tried": "UWP source reported NativeOrientation / CurrentOrientation / AutoRotationPreferences via the per-view DisplayInformation singleton.",
+      "root_cause": "GetForCurrentView() throws on WinUI 3 desktop ('GetForCurrentView must be called on a thread associated with a CoreWindow') because there is no CoreWindow. The skill offered only a DPI replacement, so the agent believed orientation had no equivalent and kept the throwing call in a try/catch.",
+      "fix": "Use Microsoft.Graphics.Display.DisplayInformation.CreateForWindowId(windowId), obtaining windowId from the window HWND: Microsoft.UI.Win32Interop.GetWindowIdFromWindow(WindowNative.GetWindowHandle(App.MainWindow)). This exposes NativeOrientation / CurrentOrientation and works on desktop."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "MIGRATION-PATTERNS.md #getforcurrentview table, row for DisplayInformation.GetForCurrentView()",
+      "wrong": "Maps DisplayInformation.GetForCurrentView() ONLY to 'XamlRoot.RasterizationScale or Win32 GetDpiForWindow' (DPI only), implying no orientation/display-info replacement exists on desktop.",
+      "correct": "The Windows App SDK ships Microsoft.Graphics.Display.DisplayInformation with a CreateForWindowId(windowId) factory that provides the SAME members (NativeOrientation, CurrentOrientation, RawDpiX/Y, LogicalDpi, etc.). It is the correct replacement; RasterizationScale/GetDpiForWindow are only the DPI-subset shortcut."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Microsoft.Graphics.Display.DisplayInformation.CreateForWindowId",
+      "special_handling": "Must be called on a thread with a running DispatcherQueue; caller must cache the instance and de-register events. Requires WindowId from the window HWND via Microsoft.UI.Win32Interop.GetWindowIdFromWindow."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "GetForCurrentView must be called on a thread that is associated with a CoreWindow. / Element not found.",
+      "root_cause": "DisplayInformation.GetForCurrentView() has no CoreWindow on WinUI 3 desktop and throws at runtime; build was clean.",
+      "fix": "Replace with DisplayInformation.CreateForWindowId(windowId) (Microsoft.Graphics.Display) instead of catching and printing the exception."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Scenario1_Orientation.xaml.cs — orientation output binding",
+      "symptom": "Agent wrapped DisplayInformation.GetForCurrentView() in try/catch and printed the raw exception ('DisplayInformation not available on desktop: ...'), leaving NativeOrientation/CurrentOrientation = 'N/A'.",
+      "turns_or_retries": "Multiple edits iterating on the same try/catch fallback; agent explicitly noted 'for desktop we need an alternative' but had none.",
+      "root_cause": "The skill's getforcurrentview mapping only listed a DPI replacement for DisplayInformation, so the agent concluded orientation had no desktop equivalent and degraded gracefully instead of using the correct API.",
+      "how_resolved": "Not resolved — shipped a broken fallback that scored partial (feature output dead).",
+      "preventable_by": "Correcting the #getforcurrentview table row to point DisplayInformation.GetForCurrentView() at DisplayInformation.CreateForWindowId(windowId) and adding a short code snippet, plus fixing the anchor's 'None ... work' overstatement."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

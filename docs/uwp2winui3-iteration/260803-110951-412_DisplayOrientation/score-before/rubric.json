@@ -1,0 +1,23 @@
+{
+  "scenario": "DisplayOrientation",
+  "feature": "Display orientation",
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Show and lock orientation",
+      "controls": [
+        "PreferLandscape (CheckBox)",
+        "PreferPortrait (CheckBox)",
+        "PreferLandscapeFlipped (CheckBox)",
+        "PreferPortraitFlipped (CheckBox)",
+        "Apply preferences (Button)"
+      ],
+      "actions": ["Apply preferences (Button)"],
+      "expected_outputs": [
+        "NativeOrientationTextBlock shows real native orientation (e.g. 'Landscape')",
+        "CurrentOrientationTextBlock shows real current orientation (e.g. 'Landscape')",
+        "AutoRotationPreferencesTextBlock shows applied preference (e.g. 'None')"
+      ]
+    }
+  ]
+}
