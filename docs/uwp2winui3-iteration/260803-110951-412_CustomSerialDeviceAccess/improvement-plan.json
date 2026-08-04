@@ -1,0 +1,38 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "applied": true,
+  "items": [
+    {
+      "problem": "UWP Application.Suspending/Resuming events (copied into migrated resource-cleanup code) fail with CS1061 in WinUI 3.",
+      "evidence": "session-log.txt turns 79-97: CS1061 across Scenario1_ConnectDisconnect.xaml.cs + EventHandlerForDevice.cs; ~20-turn build loop.",
+      "root_cause": "#lifecycle anchor documented OnLaunched/activation replacement but never that Suspending/Resuming were removed or how to adapt.",
+      "tier": 3,
+      "change": "Added a 'Removed events' blockquote under the #lifecycle anchor: names the CS1061, the search terms, the signature change (SuspendingEventArgs -> object), that the logic is inert on desktop, and Window.Closed as the teardown equivalent. Tier 3 because this is missing conceptual guidance (an event that no longer exists) — no script or template mechanically emits Suspending code, so there is nothing lower-tier to fix; the pattern file is exactly where the agent already looks (it queried -Anchor lifecycle mid-failure).",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "On re-run of any app using suspend/resume cleanup, the agent finds the removal note at the anchor it already queries and deletes the subscriptions in one pass instead of a ~20-turn loop.",
+      "falsifiable_check": "Get-MigrationPattern.ps1 -Anchor lifecycle now returns the 'Removed events … Suspending/Resuming' text (verified); on re-run no CS1061 'Application does not contain a definition for Suspending' build loop."
+    },
+    {
+      "problem": "Custom shared-content styles referenced but not merged cause a clean build then a runtime XamlParseException / 0xC000027B startup crash.",
+      "evidence": "session-log.txt turns 109-118: Validate smoke-launch FAIL 0xc000027b; winapp run --debug-output => 'Cannot find a Resource … SampleHeaderTextStyle'; fixed by copying SharedContent styles into App.xaml.",
+      "root_cause": "Resources section covered dangling SYSTEM keys (compile-time WMC9999) but not missing CUSTOM shared styles (runtime), which is the far more common sample-migration failure.",
+      "tier": 3,
+      "change": "Added a runtime-failure-mode blockquote in the resources section: distinguishes the runtime XamlParseException/0xC000027B from the compile-time WMC9999, cross-links #startup-crashes, and prescribes merging the shared ResourceDictionary or copying styles into Application.Resources, plus a proactive pre-launch grep of {StaticResource} keys. Tier 3 because the general instruction ('merge/verify custom style keys') belongs in the pattern doc the agent consults; a Tier-1 validator check for this would require the eval-adjacent smoke-launch which already exists and is out of scope to extend here.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents migrating SharedContent-based samples merge/copy the shared styles up front (or immediately recognize the runtime crash), avoiding the ~9-turn native-crash diagnosis.",
+      "falsifiable_check": "On re-run of any Windows-universal-samples migration, no startup 0xC000027B/XamlParseException 'Cannot find a Resource' for shared style keys; Validate-UwpMigration smoke-launch passes first try."
+    },
+    {
+      "problem": "WMC0909/WMC1111 DataTemplate x:Bind/x:DataType resolution errors were misdiagnosable as resource errors.",
+      "evidence": "session-log.txt turns 79-98: MainPage.xaml WMC0909 Cannot resolve DataType local:Scenario; fixed via {Binding Title}.",
+      "root_cause": "The XAML failure-mode note covered WMC9999/WMC1509 but not the compiled-binding WMC0909/WMC1111 family.",
+      "tier": 3,
+      "change": "Added a one-paragraph blockquote clarifying WMC0909/WMC1111 are compiled-binding (not resource) errors and that classic {Binding Prop} without x:DataType is the reliable fix for simple item templates.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents disambiguate binding-DataType errors from dangling-resource errors and fix in one edit.",
+      "falsifiable_check": "On re-run of a migration with a list/NavigationView item template, WMC0909 is resolved in a single edit ({Binding}) with no resource-hunting detour."
+    }
+  ],
+  "deferred_to_human": []
+}

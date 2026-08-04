@@ -1,0 +1,15 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "WMC0909 'Cannot resolve DataType local:<Type>' (+ WMC1111/WMC1509) when a DataTemplate uses x:Bind/x:DataType on a project-local type (here inside NavigationView.MenuItemTemplate).",
+      "evidence": "session-log.txt turns 79-98: MainPage.xaml WMC0909 Cannot resolve DataType local:Scenario and WMC1111 'DataTemplates containing x:Bind need a DataType'; agent recovered by switching the template to {Binding Title} without x:DataType.",
+      "covered_at": "MIGRATION-PATTERNS.md id~='Resource references' failure-mode note discusses WMC9999/WMC1509 as dangling-key symptoms, but WMC0909/WMC1111 (compiled-binding DataType resolution in a template) is not addressed.",
+      "why_missed": "grey-zone",
+      "proposed_improvement": "Add one line to the existing XAML failure-mode note: WMC0909/WMC1111 mean a DataTemplate's x:Bind/x:DataType type could not be resolved on the markup pass — for a simple item template the reliable fix is classic {Binding Prop} without x:DataType; do not chase it as a missing resource.",
+      "generalizes": "Migrated UWP list/nav templates commonly use x:Bind with a local DataType and hit this on the first compile; a one-line disambiguation between WMC0909 (binding DataType) and WMC9999 (dangling resource key) saves repeated guessing."
+    }
+  ]
+}

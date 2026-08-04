@@ -1,0 +1,16 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "score": 100,
+  "builds": true,
+  "runs": true,
+  "requirements": [
+    { "id": 1, "text": "Connect/Disconnect scenario", "status": "pass", "reason": "Full control coverage (3/3), matches UWP golden disconnected state.", "suspected_skill_gap": "" },
+    { "id": 2, "text": "Configure Device scenario", "status": "pass", "reason": "All 9 controls present in ConfigureDeviceScrollViewer, device-gated collapsed exactly as UWP source.", "suspected_skill_gap": "" },
+    { "id": 3, "text": "Read/Write scenario", "status": "pass", "reason": "All 9 controls present in ReadWriteScollViewer, device-gated collapsed exactly as UWP source.", "suspected_skill_gap": "" },
+    { "id": 4, "text": "Events scenario", "status": "pass", "reason": "Header + toggle present, matches UWP golden disconnected state.", "suspected_skill_gap": "" }
+  ],
+  "visual_discrepancies": [],
+  "missing_features": [],
+  "summary": "No functional or visual regressions vs the original UWP app; 100/100. The structural coverage gate false-negatives on device-gated (collapsed) panels are a capture artifact, not a defect. Improvement signal is entirely in build/runtime friction the dev-agent overcame (removed lifecycle events, missing shared styles, DataTemplate DataType resolution)."
+}

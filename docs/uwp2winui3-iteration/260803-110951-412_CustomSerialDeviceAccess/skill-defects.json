@@ -1,0 +1,27 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "UWP Application.Suspending / Application.Resuming events do not exist on WinUI 3 Microsoft.UI.Xaml.Application; migrated code that copies them fails with CS1061.",
+      "evidence": "session-log.txt turns 79-97: CS1061 'Application' does not contain a definition for 'Suspending'/'Resuming' across Scenario1_ConnectDisconnect.xaml.cs and EventHandlerForDevice.cs; agent fixed by deleting subscriptions and changing SuspendingEventArgs to object.",
+      "skill_search": "grep 'Suspending|Resuming|App.Current|lifecycle' in winui-uwp-migration",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The lifecycle anchor (MIGRATION-PATTERNS.md id=lifecycle) documents OnLaunched/activation replacement but never states that the Suspending/Resuming events were removed, nor how to adapt code that used them.",
+      "proposed_fix": "Add a short 'Removed lifecycle events' note under the #lifecycle anchor: Application.Suspending/Resuming (and SuspendingEventArgs) do not exist in WinUI 3 desktop; delete the subscriptions and change handler signatures to (object sender, object args); a desktop app is not OS-suspended so the throttling logic is inert. Mention AppInstance/Window Closed as the nearest equivalents for cleanup.",
+      "generalizes": "Suspend/resume resource management is a standard UWP idiom (device, file, media, camera handles). Any UWP→WinUI 3 migration that touches EventHandlerForDevice-style code or app-lifecycle cleanup hits this exact CS1061."
+    },
+    {
+      "problem": "Custom styles referenced via {StaticResource} but defined only in a SharedContent Styles.xaml that is never merged into the migrated app cause a clean build but a startup XamlParseException ('Cannot find a Resource'), surfacing as native crash 0xC000027B.",
+      "evidence": "session-log.txt turns 109-118: Validate smoke-launch FAIL 0xc000027b; winapp run --debug-output reported Microsoft.UI.Xaml.Markup.XamlParseException 'Cannot find a Resource with the Name/Key SampleHeaderTextStyle'; agent fixed by copying SampleHeaderTextStyle/TagLine/Copyright/Separator/Hyperlink styles from SharedContent/xaml/Styles.xaml into App.xaml.",
+      "skill_search": "grep 'SharedContent|Styles.xaml|StaticResource|MergedDictionaries|Cannot find a Resource' in winui-uwp-migration",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The resources section (id ~ 'Resource references') covers dangling SYSTEM brush keys that fail at COMPILE time with WMC9999, but not the distinct case of a missing CUSTOM shared-content style that resolves at build and throws at RUNTIME because its ResourceDictionary was never merged.",
+      "proposed_fix": "Add a runtime failure-mode note to the resources section: a {StaticResource CustomKey} that names a style from a shared Styles.xaml (SharedContent) which was not merged into App.xaml builds clean but throws XamlParseException 'Cannot find a Resource' at first navigation (often a native 0xC000027B). Fix: merge the shared ResourceDictionary or copy the referenced style definitions into Application.Resources. Cross-link the startup-crashes anchor.",
+      "generalizes": "The Windows-universal-samples family (and most multi-scenario UWP apps) share a SharedContent/xaml/Styles.xaml. Every such migration references keys like SampleHeaderTextStyle; unless the dictionary is merged, they all crash identically at startup with a build that looked green."
+    }
+  ]
+}

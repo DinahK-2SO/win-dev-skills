@@ -1,0 +1,14 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Diagnosing the native startup crash 0xC000027B initially by considering File.WriteAllText traces before capturing the real exception.",
+      "evidence": "session-log.txt turns 110-113: agent read the startup-crashes pattern, then correctly used winapp run --debug-output to capture the managed XamlParseException.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md id=startup-crashes: 'Capture the real exception first ... The wrong way to chase it is to sprinkle File.WriteAllText traces', plus the 0xC000027B table row.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The skill already prominently prescribes capturing the exception first and lists 0xC000027B; the agent followed it within a couple of turns. A re-run would do the same with no edit needed."
+    }
+  ]
+}

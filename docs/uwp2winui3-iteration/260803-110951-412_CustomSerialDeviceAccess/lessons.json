@@ -1,0 +1,31 @@
+{
+  "scenario": "CustomSerialDeviceAccess",
+  "index": 0,
+  "tools_helpful": [
+    { "tool": "Get-MigrationPattern.ps1 -Anchor startup-crashes", "evidence": "Turn 110-112: gave the exception-code table (0xC000027B) and told the agent to capture the real managed exception via winapp run --debug-output instead of tracing, which surfaced the XamlParseException root cause." },
+    { "tool": "winapp run <layout> --debug-output", "evidence": "Turn 112-113: crash analysis printed 'Cannot find a Resource with the Name/Key SampleHeaderTextStyle', converting an opaque native 0xC000027B into an actionable missing-resource root cause." },
+    { "tool": "Validate-UwpMigration.ps1", "evidence": "Turn 109: smoke-launch step caught the startup crash (0xc000027b) that a clean build had hidden." }
+  ],
+  "tools_problematic": [],
+  "tool_limitations": [
+    { "tool": "Get-MigrationPattern.ps1 -Anchor lifecycle", "limitation": "Returned only OnLaunched/activation guidance; said nothing about Application.Suspending/Resuming being removed, so the agent had to reason it out itself.", "suggested_tweak": "Add removed-lifecycle-events guidance (Suspending/Resuming) to the lifecycle anchor." }
+  ],
+  "failed_apis": [
+    { "api": "Application.Suspending / Application.Resuming (App.Current.Suspending/Resuming)", "why_tried": "Copied verbatim from UWP EventHandlerForDevice.cs and Scenario1 to stop/restart device watchers across suspend.", "root_cause": "These events exist only on the UWP Windows.UI.Xaml.Application; Microsoft.UI.Xaml.Application (WinUI 3 desktop) has no Suspending/Resuming, causing CS1061.", "fix": "Removed the App.Current.Suspending/Resuming subscriptions and changed the handler signatures from SuspendingEventArgs to object; a desktop app has no OS-driven suspend so the resource-throttling logic is simply inert." }
+  ],
+  "doc_errors": [],
+  "special_apis": [
+    { "api": "Custom shared XAML styles (SampleHeaderTextStyle etc. from SharedContent/xaml/Styles.xaml)", "special_handling": "UWP SDK samples reference styles defined in a shared Styles.xaml that is merged via Package/shared project. In the migrated app that dictionary is not merged, so the keys resolve at build but throw XamlParseException at runtime. The referenced style definitions must be copied into App.xaml (or a merged ResourceDictionary)." }
+  ],
+  "errors_encountered": [
+    { "error": "CS1061: 'Application' does not contain a definition for 'Suspending'/'Resuming'", "root_cause": "WinUI 3 Microsoft.UI.Xaml.Application dropped the UWP Suspending/Resuming lifecycle events.", "fix": "Delete the subscriptions; drop SuspendingEventArgs usage; leave suspend-driven logic inert on desktop." },
+    { "error": "XamlCompiler error WMC0909: Cannot resolve DataType local:Scenario (+ WMC1111, WMC1509)", "root_cause": "A DataTemplate used x:DataType/x:Bind on a project-local type inside NavigationView.MenuItemTemplate; the compiled-binding type could not be resolved on the first markup pass.", "fix": "Switched the template to classic {Binding Title} without x:DataType, which resolves at runtime." },
+    { "error": "Native crash 0xC000027B in Microsoft.UI.Xaml.dll at startup (builds clean); managed inner: Microsoft.UI.Xaml.Markup.XamlParseException 'Cannot find a Resource with the Name/Key SampleHeaderTextStyle'", "root_cause": "Custom shared-content styles were referenced via {StaticResource} but never merged into the app's resource dictionary.", "fix": "Copied the SampleHeaderTextStyle/TagLine/Copyright/Separator/Hyperlink style definitions from SharedContent/xaml/Styles.xaml into App.xaml Application.Resources." }
+  ],
+  "dev_agent_struggles": [
+    { "where": "Turn 79-98 build loop", "symptom": "Repeated build failures on Application.Suspending/Resuming and DataTemplate DataType across several files.", "turns_or_retries": "~20 turns", "root_cause": "No skill entry for removed lifecycle events nor for x:Bind-in-DataTemplate type resolution.", "how_resolved": "Agent removed the lifecycle subscriptions and downgraded the template to {Binding}.", "preventable_by": "Adding a 'removed lifecycle events' note to the lifecycle anchor in MIGRATION-PATTERNS.md." },
+    { "where": "Turn 109-118 startup crash", "symptom": "App built and registered but crashed instantly (0xC000027B) with no managed event 1026; agent spent several turns diagnosing before winapp run --debug-output named the missing resource.", "turns_or_retries": "~9 turns", "root_cause": "Shared-content style keys referenced but the shared Styles.xaml was never merged into the migrated app.", "how_resolved": "Copied the needed style definitions into App.xaml.", "preventable_by": "Adding a runtime-missing-shared-style failure mode to the resources section of MIGRATION-PATTERNS.md so the agent merges SharedContent styles proactively." }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}
