@@ -1,0 +1,37 @@
+{
+  "scenario": "Geolocation",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap's directory scan was not a complete UWP project inventory: linked XAML/shared assets were omitted and legacy AssemblyInfo was copied.",
+      "evidence": "session-log turns 2-3 reported only 15 copied files and no scenario XAML; Geolocation.csproj lines 116-235 link shared Compile/Page/Content items. Turns 20-44 show the resulting missing-control and duplicate-attribute build cascade.",
+      "skill_search": "Initialize-UwpMigration.ps1 copy loop and SKILL.md claims that bootstrap is the complete inventory",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "The bootstrap is the inventory; source files are copied by recursively scanning only the supplied source directory.",
+      "root_cause": "UWP projects commonly use MSBuild Include/Link metadata for shared source; physical recursion does not represent evaluated project inputs, and SDK-style targets generate assembly attributes automatically.",
+      "proposed_fix": "Evaluate Compile/Page/ApplicationDefinition/Content Include and Link paths, copy linked inputs to Link destinations, and omit legacy AssemblyInfo.cs.",
+      "generalizes": "Shared-content links and legacy assembly metadata recur across Microsoft UWP samples and multi-project UWP applications."
+    },
+    {
+      "problem": "Bootstrap overwrote the WinUI scaffold manifest, background-task docs endorsed an invalid desktop carry-forward, and validator did not detect missing activatable classes.",
+      "evidence": "mapping labeled Package.appxmanifest migrate-as-is; session-log turn 45 and migration-score candidate_launch_status show 0x80080204 for BackgroundTask.GeofenceBackgroundTask without ActivatableClassId, making all eight features fail.",
+      "skill_search": "MIGRATION-PATTERNS.md #background-tasks and manifest checklist; Validate-UwpMigration.ps1 section 5c",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Keeping Windows.ApplicationModel.Background.BackgroundTaskBuilder plus a copied windows.backgroundTasks EntryPoint was described as the low-risk path, and validator passed when any extension existed.",
+      "root_cause": "A desktop non-audio background-task EntryPoint must resolve to an activatable packaged WinRT/COM class; compiling copied IBackgroundTask classes into the foreground executable is insufficient.",
+      "proposed_fix": "Keep the scaffold manifest as the base, preserve the UWP manifest only as reference, document supported WinRT-component/full-trust COM paths, and fail validation for UWP app entry points or missing ActivatableClassId.",
+      "generalizes": "Any packaged WinUI migration with UWP background tasks or copied activation declarations can build successfully yet fail package registration."
+    },
+    {
+      "problem": "The skill prescribed a nonexistent winapp build command.",
+      "evidence": "session-log turn 19: winapp rejected 'build'; the agent recovered with dotnet build in turn 20.",
+      "skill_search": "SKILL.md Step 3, build discipline, and final build",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer winapp build.",
+      "root_cause": "The installed winapp CLI handles run/identity/packaging but has no build subcommand.",
+      "proposed_fix": "Use dotnet build consistently and reserve Test-AppLaunch.ps1/winapp run for launch.",
+      "generalizes": "Every migration following the current build loop encounters the same invalid command."
+    }
+  ]
+}

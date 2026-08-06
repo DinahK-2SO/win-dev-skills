@@ -1,0 +1,28 @@
+{
+  "scenario": "Geolocation",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The scaffold, bootstrap, and self-check were launched in parallel, so bootstrap initially failed with Target not found.",
+      "evidence": "session-log turn 1 shows all three commands issued together; Test-Path returned False and bootstrap failed before dotnet new completed.",
+      "covered_clearly_at": "SKILL.md Step 0 numbers the commands 1-3, says scaffold first, and says not to proceed until the self-check is True.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The ordering and dependency are already explicit; the rerun succeeded immediately."
+    },
+    {
+      "problem": "The agent ended with 15 unresolved migration TODOs and never ran the mandatory validator.",
+      "evidence": "session-log turns 46-47 list the unresolved TODOs and declare the migration incomplete; migration-score records candidate launch failure and eight failed features.",
+      "covered_clearly_at": "SKILL.md Step 4 states 'You are NOT done until Validate-UwpMigration.ps1 reports PASS' and lists TODO residue as a failing check.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The completion gate is already the most prominent mandatory rule in the skill."
+    },
+    {
+      "problem": "The custom visibility tracker initially used an incompatible handler signature, causing CS0123.",
+      "evidence": "session-log turns 36-39 show CS0123 and the direct signature correction.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md #windowing directs replacement of Window.Current with an explicit window-scoped abstraction; the delegate mismatch was in the agent's bespoke implementation.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The error was a local type mismatch, was diagnosed directly by the compiler, and was fixed in one edit."
+    }
+  ]
+}

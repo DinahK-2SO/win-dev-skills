@@ -1,0 +1,151 @@
+{
+  "scenario": "Geolocation",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log turns 2-3: after the scaffold existed, bootstrap copied 15 local files, rewrote namespaces, injected 21 anchored TODOs, and generated mapping/meta artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log turns 3 and 5: targeted csproj, threading, windowing, background-tasks, and notifications anchors gave concise replacement guidance."
+    },
+    {
+      "tool": "dotnet build plus targeted rg",
+      "evidence": "session-log turns 20-44: dotnet build exposed concrete compiler/XAML errors, and rg reduced oversized logs to actionable error lines until the project built."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed CLI has no build subcommand.",
+      "evidence": "session-log turn 19: winapp reported that 'build' was unrecognized and listed run but no build command."
+    },
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "It copied only files physically below the source folder, missed csproj-linked XAML/shared assets, copied legacy AssemblyInfo, and overwrote the scaffold manifest with the UWP manifest.",
+      "evidence": "bootstrap reported only 15 copied files and no scenario XAML; Geolocation.csproj links MainPage/scenario XAML and assets outside cs, while the generated mapping incorrectly labeled Package.appxmanifest migrate-as-is."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "It checked only for a windows.backgroundTasks extension, not whether each desktop background-task EntryPoint had a matching activatable class, and it did not enforce the scaffold application EntryPoint.",
+      "suggested_tweak": "Fail pre-launch when a non-audio background task lacks matching ActivatableClassId or Application EntryPoint is not $targetentrypoint$."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "Windows.ApplicationModel.Background.BackgroundTaskBuilder with string TaskEntryPoint",
+      "why_tried": "The migration retained the UWP out-of-process task classes and copied their windows.backgroundTasks declarations.",
+      "root_cause": "The task classes were compiled into the foreground executable rather than packaged as activatable WinRT components; desktop AppX requires an activatable WinRT/COM class for each non-audio background-task EntryPoint.",
+      "fix": "Keep a genuine separate WinRT component, or migrate to Microsoft.Windows.ApplicationModel.Background.BackgroundTaskBuilder plus a packaged full-trust COM task and matching activation declarations."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build",
+      "wrong": "Use winapp build.",
+      "correct": "Use dotnet build; winapp run/Test-AppLaunch.ps1 handles registration and launch."
+    },
+    {
+      "where": "MIGRATION-PATTERNS.md Background Tasks and manifest checklist",
+      "wrong": "Classic string TaskEntryPoint plus copying the UWP windows.backgroundTasks extension was described as the low-risk preservation path.",
+      "correct": "That path is valid only for a separately packaged WinRT component with activation registration; copied task classes in the foreground project make the desktop manifest invalid."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows App SDK background tasks",
+      "special_handling": "Full-trust tasks require WindowsAppSDKBackgroundTask, SetTaskEntryPointClsid, a COM server, UniversalBGTask.Task manifest entry point, and for C# the matching in-process ActivatableClass registration."
+    },
+    {
+      "api": "UWP csproj linked items",
+      "special_handling": "Compile/Page/ApplicationDefinition/Content Include and Link metadata must be evaluated and copied; recursively scanning only the project directory is not a complete source inventory."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initialize-UwpMigration.ps1: Target not found",
+      "root_cause": "The scaffold and dependent bootstrap commands were launched in parallel, so bootstrap ran before dotnet new completed.",
+      "fix": "Run scaffold, bootstrap, and Test-Path sequentially."
+    },
+    {
+      "error": "winapp: unrecognized command or argument 'build'",
+      "root_cause": "The skill documented a nonexistent CLI subcommand.",
+      "fix": "Use dotnet build."
+    },
+    {
+      "error": "CS0117/CS1061 and hundreds of missing generated-control errors",
+      "root_cause": "Bootstrap omitted linked XAML, then reconstructed XAML used Geolocation x:Class while copied code-behind remained in SDKTemplate.",
+      "fix": "Copy evaluated linked Page items and keep x:Class/code-behind namespaces aligned."
+    },
+    {
+      "error": "NETSDK1022 duplicate Page items",
+      "root_cause": "Scenario XAML was manually added to the csproj even though SDK-style projects include Page items by default.",
+      "fix": "Remove explicit Page Include entries."
+    },
+    {
+      "error": "CS0246, CS0101, CS0102, CS0111, WMC0909, and WMC9999 after namespace edits",
+      "root_cause": "The newly authored MainPage duplicated the copied SampleConfiguration partial members and left stale SDKTemplate imports/data types.",
+      "fix": "Use one coherent partial class/namespace and remove duplicate definitions and stale compiled-binding types."
+    },
+    {
+      "error": "CS0123 visibility event delegate mismatch",
+      "root_cause": "A bespoke visibility tracker exposed a different event-args type than the retained handler expected.",
+      "fix": "Align the handler signature with the replacement event."
+    },
+    {
+      "error": "CS0579 duplicate assembly attributes",
+      "root_cause": "Legacy Tasks/Properties/AssemblyInfo.cs was compiled alongside SDK-generated assembly attributes.",
+      "fix": "Do not copy legacy AssemblyInfo.cs into the SDK-style target."
+    },
+    {
+      "error": "0x80080204 manifest validation: background task EntryPoint without ActivatableClassId",
+      "root_cause": "The UWP manifest and task entry points were copied into a desktop package without packaging/registering activatable WinRT or COM task classes.",
+      "fix": "Use a supported background-task migration shape and validate activation registration before launch."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log turns 3-35",
+      "symptom": "The agent searched generated obj XAML, recreated nine XAML files, then iterated through large cascades of missing-control, namespace, duplicate-item, and duplicate-member errors.",
+      "turns_or_retries": "More than 20 turns and seven failed builds before a successful build.",
+      "root_cause": "Bootstrap did not evaluate linked csproj source items.",
+      "how_resolved": "The agent manually reconstructed linked pages/assets and repeatedly reconciled namespaces and project items.",
+      "preventable_by": "Teach Initialize-UwpMigration.ps1 to evaluate and copy Include/Link items and omit legacy AssemblyInfo."
+    },
+    {
+      "where": "session-log turns 45-47",
+      "symptom": "The app built but package registration failed, leaving all eight scored features unavailable.",
+      "turns_or_retries": "One launch attempt; the trial ended incomplete.",
+      "root_cause": "Bootstrap replaced the scaffold manifest and guidance incorrectly treated copied UWP background-task extensions as sufficient.",
+      "how_resolved": "Not resolved in the migration trial.",
+      "preventable_by": "Preserve the scaffold manifest, correct background-task guidance, and add pre-launch activation validation."
+    },
+    {
+      "where": "session-log turn 19",
+      "symptom": "The prescribed build command failed immediately.",
+      "turns_or_retries": "One failed command, then immediate fallback.",
+      "root_cause": "Incorrect skill command.",
+      "how_resolved": "Switched to dotnet build.",
+      "preventable_by": "Replace winapp build instructions with dotnet build."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Evaluated linked-item copy during bootstrap",
+      "would_have_saved": "Manual recovery of all shared XAML/assets and most compile-error iterations."
+    },
+    {
+      "need": "Desktop background-task manifest activation check",
+      "would_have_saved": "The final build-success/launch-failure outcome and the resulting zero score."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "Installed winapp CLI does not expose a build command.",
+      "workaround": "Use dotnet build and reserve winapp/Test-AppLaunch for package registration and launch."
+    }
+  ]
+}

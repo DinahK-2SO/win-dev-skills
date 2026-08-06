@@ -10,8 +10,8 @@ workflow to confirm residue grep, mapping integrity, deferred consistency,
 build cleanliness, and runtime smoke.
 
 Steps:
-1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
-2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
+1. Copy local and linked .xaml/.cs/.resw/assets from the evaluated UWP project, preserving Link paths
+2. Preserve the UWP .csproj and manifest at .uwp-source/ as read-only references
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
 4b/4c. Per-file triage against unsupported-api-inventory.json + inline TODO injection
@@ -60,7 +60,6 @@ Write-Host "    Target : $Target"
 # ─── 1. Copy source files (everything except .csproj) ──────────────────────────
 $patterns = @(
     '.xaml', '.cs', '.resw', '.resjson',
-    '.appxmanifest',
     '.png', '.jpg', '.jpeg', '.svg', '.ico', '.gif'
 )
 
@@ -80,6 +79,7 @@ $copied = New-Object System.Collections.Generic.List[string]
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     if (('\' + $rel) -match $srcExcludePattern) { return $false }
+    if ($_.Name -ieq 'AssemblyInfo.cs') { return $false }
     $name = $_.Name.ToLowerInvariant()
     $match = $false
     foreach ($ext in $patterns) {
@@ -99,7 +99,7 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
 
 Write-Host "    Copied $($copied.Count) source files"
 
-# ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
+# ─── 2. Preserve UWP project inputs and copy linked items ──────────────────────
 $uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
 $refDir = Join-Path $Target '.uwp-source'
 if ($uwpCsprojs.Count -gt 0) {
@@ -113,6 +113,107 @@ if ($uwpCsprojs.Count -gt 0) {
     }
 } else {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
+}
+
+$sourceManifest = Get-ChildItem -Path $Source -Filter 'Package.appxmanifest' -File -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+if ($sourceManifest) {
+    if (-not (Test-Path -LiteralPath $refDir)) {
+        New-Item -ItemType Directory -Path $refDir -Force | Out-Null
+    }
+    Copy-Item -LiteralPath $sourceManifest.FullName -Destination (Join-Path $refDir 'Package.appxmanifest') -Force
+    if (Test-Path -LiteralPath (Join-Path $Target 'Package.appxmanifest')) {
+        [void]$copied.Add('Package.appxmanifest')
+        Write-Host "    Preserved UWP Package.appxmanifest at .uwp-source/; kept the WinUI scaffold manifest as the migration base"
+    }
+}
+
+function Expand-UwpProjectValue {
+    param(
+        [string]$Value,
+        [hashtable]$Properties,
+        [string]$ProjectDirectory
+    )
+
+    $expanded = $Value
+    $directoryFunction = '\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(\$\(MSBuildThisFileDirectory\),\s*([^)]+)\)\)'
+    $match = [regex]::Match($expanded, $directoryFunction)
+    while ($match.Success) {
+        $marker = $match.Groups[1].Value.Trim(" `"'")
+        $cursor = [System.IO.DirectoryInfo]::new($ProjectDirectory)
+        $found = $null
+        while ($cursor) {
+            if (Test-Path -LiteralPath (Join-Path $cursor.FullName $marker)) {
+                $found = $cursor.FullName
+                break
+            }
+            $cursor = $cursor.Parent
+        }
+        if (-not $found) { return $null }
+        $expanded = $expanded.Remove($match.Index, $match.Length).Insert($match.Index, $found)
+        $match = [regex]::Match($expanded, $directoryFunction)
+    }
+
+    for ($pass = 0; $pass -lt 10 -and $expanded -match '\$\(([^)]+)\)'; $pass++) {
+        $name = $matches[1]
+        if (-not $Properties.ContainsKey($name)) { return $null }
+        $expanded = $expanded -replace [regex]::Escape("`$($name)"), [string]$Properties[$name]
+    }
+    if ($expanded -match '\$\(') { return $null }
+    return $expanded
+}
+
+if ($uwpCsprojs.Count -gt 0) {
+    $project = $uwpCsprojs | Select-Object -First 1
+    $projectDir = $project.DirectoryName
+    [xml]$projectXml = Get-Content -LiteralPath $project.FullName -Raw
+    $ns = [System.Xml.XmlNamespaceManager]::new($projectXml.NameTable)
+    $ns.AddNamespace('m', $projectXml.Project.NamespaceURI)
+    $properties = @{
+        MSBuildThisFileDirectory = $projectDir.TrimEnd('\') + '\'
+        MSBuildProjectDirectory  = $projectDir
+    }
+
+    foreach ($property in $projectXml.SelectNodes('//m:PropertyGroup/*[not(@Condition)]', $ns)) {
+        if (-not $property.InnerText) { continue }
+        $value = Expand-UwpProjectValue -Value $property.InnerText -Properties $properties -ProjectDirectory $projectDir
+        if ($null -ne $value) { $properties[$property.LocalName] = $value }
+    }
+
+    $linkedCount = 0
+    foreach ($item in $projectXml.SelectNodes('//m:Compile|//m:Page|//m:ApplicationDefinition|//m:Content', $ns)) {
+        $include = Expand-UwpProjectValue -Value $item.Include -Properties $properties -ProjectDirectory $projectDir
+        if (-not $include -or $include -match '[*?]') { continue }
+        $sourcePath = if ([System.IO.Path]::IsPathRooted($include)) {
+            [System.IO.Path]::GetFullPath($include)
+        } else {
+            [System.IO.Path]::GetFullPath((Join-Path $projectDir $include))
+        }
+        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) { continue }
+
+        $linkNode = $item.SelectSingleNode('m:Link', $ns)
+        $relativeTarget = if ($linkNode -and $linkNode.InnerText) {
+            $linkNode.InnerText
+        } elseif ($sourcePath.StartsWith($Source, [System.StringComparison]::OrdinalIgnoreCase)) {
+            [System.IO.Path]::GetRelativePath($Source, $sourcePath)
+        } else {
+            [System.IO.Path]::GetFileName($sourcePath)
+        }
+        if ([System.IO.Path]::GetFileName($relativeTarget) -ieq 'AssemblyInfo.cs') { continue }
+        $extension = [System.IO.Path]::GetExtension($relativeTarget).ToLowerInvariant()
+        if ($patterns -notcontains $extension) { continue }
+        if ($copied -contains $relativeTarget) { continue }
+
+        $destination = Join-Path $Target $relativeTarget
+        $destinationDir = [System.IO.Path]::GetDirectoryName($destination)
+        if (-not (Test-Path -LiteralPath $destinationDir)) {
+            New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
+        }
+        Copy-Item -LiteralPath $sourcePath -Destination $destination -Force
+        [void]$copied.Add($relativeTarget)
+        $linkedCount++
+    }
+    Write-Host "    Copied $linkedCount linked project item(s) using evaluated Include/Link paths"
 }
 
 # ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────
@@ -266,6 +367,24 @@ $sortedFiles = $copied | Sort-Object
 
 foreach ($rel in $sortedFiles) {
     $ext = [System.IO.Path]::GetExtension($rel).ToLowerInvariant()
+    if ($rel -ieq 'Package.appxmanifest') {
+        $manifestPath = Join-Path $Target $rel
+        $manifestText = [System.IO.File]::ReadAllText($manifestPath)
+        $todoSeq++
+        $todoCountTotal++
+        $marker = "<!-- TODO[migrate-$($todoSeq.ToString('000'))]: see PATTERNS.md#csproj -->"
+        if ($manifestText -notmatch 'TODO\[migrate-') {
+            if ($manifestText -match '^\s*<\?xml[^?]*\?>') {
+                $manifestText = $manifestText.Insert($matches[0].Length, "`r`n$marker")
+            } else {
+                $manifestText = "$marker`r`n$manifestText"
+            }
+            [System.IO.File]::WriteAllText($manifestPath, $manifestText)
+        }
+        $fileTriage[$rel] = @{ Label = 'migrate-with-adaptation' }
+        $fileMode[$rel] = 'BATCH'
+        continue
+    }
     if ($ext -ne '.cs' -and $ext -ne '.xaml') {
         $fileTriage[$rel] = @{ Label = 'migrate-as-is' }
         continue

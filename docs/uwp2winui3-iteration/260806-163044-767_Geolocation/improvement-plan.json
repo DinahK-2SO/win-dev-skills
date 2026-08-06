@@ -1,0 +1,44 @@
+{
+  "scenario": "Geolocation",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap omitted linked project inputs and copied incompatible legacy assembly metadata.",
+      "evidence": "lessons.json dev_agent_struggles[0]; Geolocation.csproj linked Page/Compile/Content items; session-log missing-XAML build cascade.",
+      "root_cause": "Physical directory recursion is not an evaluated MSBuild project inventory.",
+      "tier": 1,
+      "change": "Resolve common MSBuild properties, copy linked Compile/Page/ApplicationDefinition/Content items to Link paths, and skip AssemblyInfo.cs.",
+      "file": "scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared XAML/assets arrive in the target automatically, avoiding reconstruction and duplicate assembly attributes.",
+      "falsifiable_check": "On a Geolocation rerun, bootstrap copies MainPage.xaml, all eight scenario XAML files, and shared assets while no legacy AssemblyInfo.cs exists."
+    },
+    {
+      "problem": "The scaffold manifest was overwritten and invalid UWP background-task declarations passed validation.",
+      "evidence": "migration-score candidate_launch_status and discrepancies.json: 0x80080204 prevented launch and failed all eight features.",
+      "root_cause": "The skill treated a copied TaskEntryPoint extension as sufficient without a packaged activatable WinRT/COM class.",
+      "tier": 1,
+      "change": "Preserve the scaffold manifest, store the UWP manifest as reference, mark manifest adaptation explicitly, validate $targetentrypoint$ and ActivatableClassId, and correct the background-task patterns.",
+      "file": "scripts/Initialize-UwpMigration.ps1; scripts/Validate-UwpMigration.ps1; MIGRATION-PATTERNS.md",
+      "expected_effect": "Invalid desktop activation shapes fail before launch with an actionable fix, while the scaffold's valid desktop package structure remains intact.",
+      "falsifiable_check": "A rerun no longer reaches 0x80080204; before launch, validator either passes a supported activation shape or reports each missing activatable class."
+    },
+    {
+      "problem": "The documented build loop invoked a nonexistent command.",
+      "evidence": "session-log turn 19: winapp rejected the build subcommand.",
+      "root_cause": "Build and launch responsibilities were assigned to the wrong CLI.",
+      "tier": 3,
+      "change": "Replace winapp build with dotnet build throughout the migration workflow.",
+      "file": "SKILL.md; MIGRATION-PATTERNS.md",
+      "expected_effect": "The first prescribed build command works in the supported environment.",
+      "falsifiable_check": "A rerun performs the first compile with dotnet build and has no unrecognized winapp build error."
+    }
+  ],
+  "deferred_to_human": [],
+  "files_touched": [
+    "SKILL.md",
+    "MIGRATION-PATTERNS.md",
+    "scripts/Initialize-UwpMigration.ps1",
+    "scripts/Validate-UwpMigration.ps1"
+  ]
+}

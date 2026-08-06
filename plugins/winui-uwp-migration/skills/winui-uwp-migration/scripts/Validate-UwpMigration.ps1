@@ -10,8 +10,7 @@ declare done with FAIL." All [FAIL] output is sanitized — full diagnostics
 root, not to stdout, to keep concentrated API-name lists out of the agent's
 assistant turn.
 
-Does NOT run `winapp build` itself — build cleanliness is a separate gate
-the agent invokes alongside this (`winapp build` then this script).
+Runs a native `dotnet build` healthcheck as part of the gate.
 
 Checks (numbering matches the `# ─── N.` sections in the code):
 1. Residue grep — leftover Windows.UI.Xaml using/xmlns, unsupported APIs not deferred, UWP-only csproj markers
@@ -364,6 +363,12 @@ if (Test-Path -LiteralPath $manifestPath) {
         Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
         $manifestFailures++
     }
+    if ($manifestText -notmatch '<Application\b[^>]*\bEntryPoint="\$targetentrypoint\$"') {
+        Write-Host "[FAIL] Package.appxmanifest uses a UWP application EntryPoint instead of `$targetentrypoint`$"
+        Write-Host "       Fix: keep the WinUI scaffold <Application EntryPoint=`"`$targetentrypoint`$`"> value."
+        Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
+        $manifestFailures++
+    }
     if ($manifestFailures -eq 0) {
         Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared"
     } else {
@@ -371,14 +376,9 @@ if (Test-Path -LiteralPath $manifestPath) {
     }
 
     # ─── 5c. Retained manifest <Extension>s must be carried into the build manifest ──
-    # UWP manifest <Extension> declarations are activation/registration prerequisites,
-    # not branding. If the migrated code keeps the classic out-of-process background-task
-    # model (Windows.ApplicationModel.Background.BackgroundTaskBuilder + a string
-    # TaskEntryPoint + .Register()) but the build manifest has no matching
-    # <Extension Category="windows.backgroundTasks">, Register() THROWS at runtime. With
-    # no try/catch (the SDK samples have none) the exception is swallowed and the button
-    # looks dead — the app builds and launches, so nothing else catches it. This exact
-    # omission scored a BackgroundTask migration 50 (all scenarios partial, Register dead).
+    # A desktop-target manifest cannot carry a UWP background-task declaration forward
+    # by itself. Each non-audio EntryPoint must resolve to a packaged WinRT/COM
+    # activatable class; otherwise AppX registration fails with 0x80080204 before launch.
     $bgFiles = @($files | Where-Object { $_.Extension -eq '.cs' } | Where-Object {
         $t = [System.IO.File]::ReadAllText($_.FullName)
         ($t -match 'Windows\.ApplicationModel\.Background') -and
@@ -387,13 +387,34 @@ if (Test-Path -LiteralPath $manifestPath) {
     })
     if ($bgFiles.Count -gt 0) {
         if ($manifestText -match 'Category\s*=\s*"windows\.backgroundTasks"') {
-            Write-Host "[PASS] Package.appxmanifest — windows.backgroundTasks <Extension> present for retained BackgroundTaskBuilder code"
+            Write-Host "[PASS] Package.appxmanifest — windows.backgroundTasks <Extension> present for retained registration code"
         } else {
-            Write-Host "[FAIL] Migrated code uses the classic BackgroundTaskBuilder model but Package.appxmanifest has no <Extension Category=`"windows.backgroundTasks`">"
+            Write-Host "[FAIL] Migrated code registers a background task but Package.appxmanifest has no <Extension Category=`"windows.backgroundTasks`">"
             Write-Host "       Effect: BackgroundTaskBuilder.Register() throws at runtime; without try/catch the Register control silently does nothing (app still builds and launches)."
-            Write-Host "       Fix: add an <Extensions><Extension Category=`"windows.backgroundTasks`" EntryPoint=`"<Namespace>.<TaskClass>`"> entry for every TaskEntryPoint used in code (copy from the UWP source manifest under .uwp-source/ or the copied UWP Package.appxmanifest)."
+            Write-Host "       Fix: use the supported WinRT-component or Windows App SDK full-trust COM manifest shape; do not copy the UWP extension as-is."
             Write-Host "       See MIGRATION-PATTERNS.md > 'Background Tasks' and 'Manifest migration checklist'."
             Add-Diag 'windows.backgroundTasks extension missing' (($bgFiles | ForEach-Object { $_.FullName }) -join "`n")
+            $failures++
+        }
+    }
+
+    $backgroundExtensionPattern = '<Extension\b(?=[^>]*\bCategory\s*=\s*"windows\.backgroundTasks")(?=[^>]*\bEntryPoint\s*=\s*"([^"]+)")[^>]*>(.*?)</Extension>'
+    $backgroundExtensions = [regex]::Matches(
+        $manifestText,
+        $backgroundExtensionPattern,
+        [System.Text.RegularExpressions.RegexOptions]::Singleline
+    )
+    foreach ($extension in $backgroundExtensions) {
+        $entryPoint = $extension.Groups[1].Value
+        $body = $extension.Groups[2].Value
+        if ($body -match '<Task\s+Type\s*=\s*"audio"') { continue }
+        $activationPattern = 'ActivatableClassId\s*=\s*"' + [regex]::Escape($entryPoint) + '"'
+        if ($manifestText -notmatch $activationPattern) {
+            Write-Host "[FAIL] Package.appxmanifest background-task EntryPoint '$entryPoint' has no matching ActivatableClassId"
+            Write-Host "       Effect: package registration fails with 0x80080204 before the app can launch."
+            Write-Host "       Fix: do not copy the UWP declaration as-is. Package the original task as a WinRT component, or migrate to the Windows App SDK full-trust COM task pattern."
+            Write-Host "       See MIGRATION-PATTERNS.md > 'Background Tasks'."
+            Add-Diag 'background-task activation registration missing' $extension.Value
             $failures++
         }
     }

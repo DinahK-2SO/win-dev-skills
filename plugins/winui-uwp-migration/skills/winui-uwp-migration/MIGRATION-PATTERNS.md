@@ -462,26 +462,15 @@ Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Prog
 <a id="background-tasks"></a>
 ## Background Tasks
 
-`IBackgroundTask` / `BackgroundTaskRegistration` are not the recommended model. Use the WinAppSDK [`BackgroundTaskBuilder`](https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.windows.applicationmodel.background.backgroundtaskbuilder) (introduced in 1.7), or move the work to push-driven activation / Windows Task Scheduler. See the [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy).
+Do **not** copy a UWP `windows.backgroundTasks` extension into a desktop manifest and compile its `IBackgroundTask` class into the main WinUI executable. A non-audio desktop background-task `EntryPoint` must resolve to an activatable WinRT/COM class. Without that registration, AppX rejects the package with `0x80080204` before the app launches.
 
-**If you keep the classic out-of-process model** (`Windows.ApplicationModel.Background.BackgroundTaskBuilder` with a string `TaskEntryPoint` such as `"Tasks.SampleBackgroundTask"` + `builder.Register()`) — which is the low-risk way to preserve existing behavior — then two things are **runtime prerequisites**, not optional:
+Choose one supported migration:
 
-1. The app must be **packaged** (keep `Package.appxmanifest`), and the **build** manifest must declare an `<Extension Category="windows.backgroundTasks" EntryPoint="<Namespace>.<TaskClass>">` for **every** `TaskEntryPoint` string used in code. This declaration lives in the UWP source manifest — carry it into the WinUI 3 project's root `Package.appxmanifest` (see the manifest checklist below). If it is missing, `builder.Register()` **throws at runtime** (`0x80070032`/class-not-registered) even though the app builds and launches fine.
+1. **Keep an existing out-of-process WinRT component.** This is valid only when the task is already a separate Windows Runtime component that is packaged with the desktop app. Preserve the component project/output and register its activatable class; a copied C# class in the foreground project is not a component.
+2. **Move to a full-trust COM task with Windows App SDK.** Use `Microsoft.Windows.ApplicationModel.Background.BackgroundTaskBuilder`, set `<WindowsAppSDKBackgroundTask>true</WindowsAppSDKBackgroundTask>`, call `SetTaskEntryPointClsid`, and package the COM server. The manifest background-task entry point is `Microsoft.Windows.ApplicationModel.Background.UniversalBGTask.Task`; C# apps also need the matching `windows.activatableClass.inProcessServer` registration for `Microsoft.Windows.ApplicationModel.Background.UniversalBGTask.dll`.
+3. **Redesign the work** around Task Scheduler, a separate process, or foreground thread-pool work when the trigger is unsupported (for example, `ApplicationTrigger`).
 
-   ```xml
-   <Application ...>
-     <Extensions>
-       <Extension Category="windows.backgroundTasks" EntryPoint="Tasks.SampleBackgroundTask">
-         <BackgroundTasks>
-           <Task Type="systemEvent" />
-           <Task Type="timer" />
-         </BackgroundTasks>
-       </Extension>
-     </Extensions>
-   </Application>
-   ```
-
-2. Wrap `Register()` in `try/catch` and surface the failure in the UI (e.g. the Status text). The SDK samples call `Register()` with no guard, so a missing-declaration failure otherwise presents as a **silent dead control** (the button click does nothing, Status never changes) — the hardest kind of regression to notice because there is no build error and no crash.
+See the official [background task migration strategy](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/background-task-migration-strategy) and the [Windows App SDK background-task sample](https://github.com/microsoft/WindowsAppSDK-Samples/tree/main/Samples/BackgroundTask). In every path, wrap registration in `try/catch` and surface the failure in the UI.
 
 <a id="notifications"></a>
 ## Notifications
@@ -650,21 +639,21 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
 
-5. **Carry over every UWP `<Extension>` the app's behavior depends on.** The scaffold manifest has none; the UWP manifest's `<Extensions>` are activation/registration prerequisites — omitting them makes the feature fail **at runtime** (often as a silently dead control), not at build time. Copy each `<Extension>` block from the UWP source manifest (under `.uwp-source/` or the copied UWP `Package.appxmanifest`) into the WinUI 3 root manifest's `<Application>`. Common ones:
+5. **Reconcile every UWP `<Extension>` the app's behavior depends on.** The scaffold manifest has none, but extension declarations are activation/registration prerequisites, not blocks to copy blindly. Protocol and file-association declarations usually carry over after their entry points are updated. Background tasks and app services require their feature-specific desktop activation model.
 
    | Extension `Category` | Feature it powers |
    |----------------------|-------------------|
-   | `windows.backgroundTasks` | out-of-process `BackgroundTaskBuilder` tasks (one `<Extension EntryPoint="...">` per `TaskEntryPoint`) |
+   | `windows.backgroundTasks` | Use the supported WinRT-component or Windows App SDK full-trust COM shape described in [Background Tasks](#background-tasks); never copy a UWP `EntryPoint` alone |
    | `windows.protocol` | custom URI-scheme activation |
    | `windows.fileTypeAssociation` | open-with / file activation |
    | `windows.appService` | background app services |
    | `windows.shareTarget` | receiving shared content |
 
-   `Validate-UwpMigration.ps1` FAILs if retained `BackgroundTaskBuilder` code has no `windows.backgroundTasks` extension; the other categories have no automated check, so verify them by diffing the UWP manifest's `<Extensions>` against the migrated one.
+   `Validate-UwpMigration.ps1` FAILs when retained registration code has no background-task extension or when a non-audio background-task entry point has no matching activatable class. The other categories have no automated check, so verify them by diffing and adapting the UWP declarations.
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The benchmark build injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |
