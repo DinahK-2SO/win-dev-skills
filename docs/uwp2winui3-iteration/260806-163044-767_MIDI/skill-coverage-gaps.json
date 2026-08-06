@@ -1,0 +1,15 @@
+{
+  "scenario": "MIDI",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The mandatory scaffold/bootstrap/self-check sequence was parallelized, causing bootstrap to run before its target existed.",
+      "evidence": "session-log.txt turn 1 issued all three PowerShell calls together; bootstrap threw Target not found and Test-Path returned False before dotnet new completed.",
+      "covered_at": "SKILL.md, Step 0 - Bootstrap (mandatory), especially 'your literal first three powershell commands' and 'Proceed past step 3 only if Test-Path returns True'.",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "State that the commands are strict dependencies and must run sequentially, one tool call at a time, waiting for success before issuing the next.",
+      "generalizes": "Scaffolding is asynchronous enough that any migration can race bootstrap and self-check when an agent follows general parallel-tool guidance."
+    }
+  ]
+}

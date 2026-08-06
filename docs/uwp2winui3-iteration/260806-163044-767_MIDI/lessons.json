@@ -1,0 +1,148 @@
+{
+  "scenario": "MIDI",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 2-3: copied 9 local source files, rewrote namespaces, injected 8 threading TODOs, and generated the mapping artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt turn 4: returned the threading anchor used to replace CoreDispatcher with DispatcherQueue."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 35-41: caught copied mapping rows, verified manifest/build health, and consistently rejected the startup crash."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "evidence": "session-log.txt turns 37 and 41: reported status=crashed with code 0xc000027b and module Microsoft.UI.Xaml.dll."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed winapp CLI has no build command, despite the skill prescribing it.",
+      "evidence": "session-log.txt turn 24: 'build' was not matched and the CLI listed no build command."
+    },
+    {
+      "tool": "parallel PowerShell bootstrap commands",
+      "problem": "Scaffold, bootstrap, and self-check ran concurrently, so bootstrap observed no target directory.",
+      "evidence": "session-log.txt turn 1: Initialize-UwpMigration threw 'Target not found' and Test-Path returned False before dotnet new completed."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It copied only files physically under the source directory and ignored Compile/Page/ApplicationDefinition/Content items linked from outside through the UWP project.",
+      "suggested_tweak": "Materialize resolvable linked project items at their Link paths and fail explicitly when a linked input cannot be resolved."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "For the native stowed exception it found only event 1000; managedType and message remained empty.",
+      "suggested_tweak": "Retain the conservative native-code result; do not claim a managed root cause when event 1026 is absent."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build instructions",
+      "wrong": "Use winapp build to compile.",
+      "correct": "Use dotnet build against the explicit csproj and platform; winapp provides run but no build command in this environment."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "MSBuild linked project items",
+      "special_handling": "Legacy UWP projects can compile shared code/XAML and package shared assets from outside the project directory using Include plus Link; migration must materialize those files in the standalone target."
+    },
+    {
+      "api": "DispatcherQueue",
+      "special_handling": "DeviceWatcher callbacks must enqueue UI updates through a queue captured on the UI thread; the threading anchor was sufficient for this conversion."
+    },
+    {
+      "api": "Package.appxmanifest",
+      "special_handling": "A desktop target requires Windows.Desktop, runFullTrust, the scaffold entry-point token, and image references that resolve in the produced package."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initialize-UwpMigration: Target not found; initial Test-Path=False",
+      "root_cause": "The three mandatory bootstrap commands were issued in parallel rather than waiting for the scaffold to finish.",
+      "fix": "Re-run bootstrap and self-check sequentially after dotnet new succeeds."
+    },
+    {
+      "error": "winapp: 'build' was not matched",
+      "root_cause": "The skill prescribed a command not implemented by the installed CLI.",
+      "fix": "Use dotnet build with the explicit csproj and platform."
+    },
+    {
+      "error": "MSB1003: current directory does not contain a project or solution",
+      "root_cause": "dotnet build was run from the parent app directory without a project path.",
+      "fix": "Pass the migrated csproj path explicitly."
+    },
+    {
+      "error": "CS0101/CS0102 plus WMC0909/WMC1111/WMC9999 in MainPage and SampleConfiguration",
+      "root_cause": "The bootstrap omitted externally linked shared shell files, and the manually reconstructed MainPage duplicated Scenario, FEATURE_NAME, and scenarios already supplied by SampleConfiguration.",
+      "fix": "The agent removed duplicate declarations and switched the item template to Binding; the reusable fix is to copy linked project inputs before migration."
+    },
+    {
+      "error": "CS0246 MainPage and CS0103 Colors",
+      "root_cause": "Manual shell reconstruction crossed MIDI and SDKTemplate namespaces and retained an invalid color namespace assumption.",
+      "fix": "Import SDKTemplate and qualify Microsoft.UI.Colors."
+    },
+    {
+      "error": "0x80070002 / 0x80073CF6: Splash-sdk.png cannot be located",
+      "root_cause": "The copied UWP manifest referenced a shared linked asset that bootstrap had omitted.",
+      "fix": "The agent changed references to scaffold assets and reconciled the desktop manifest; copying linked content would also preserve the source asset."
+    },
+    {
+      "error": "Validate-UwpMigration: 9 mapping rows still Status=copied",
+      "root_cause": "The agent did not update mapping statuses while completing files.",
+      "fix": "Flip completed rows to done before rerunning the validator."
+    },
+    {
+      "error": "Startup crash 0xc000027b in Microsoft.UI.Xaml.dll",
+      "root_cause": "Unresolved in the trial; no event 1026 managed stack was available. The final code still navigated RootFrame from MainWindow's constructor despite the skill's initialization-order rule.",
+      "fix": "Not resolved before the trial ended; the existing rule requires an inert constructor and first navigation only after activation."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log.txt turns 5-23",
+      "symptom": "The agent searched SharedContent and manually rebuilt MainPage XAML/code-behind, then repaired duplicate types and namespaces.",
+      "turns_or_retries": "Approximately 19 turns from discovering the blank scaffold MainPage through shell reconstruction.",
+      "root_cause": "Bootstrap ignored external csproj Link items, so the generated mapping falsely appeared complete with only 9 local files.",
+      "how_resolved": "The agent manually located shared templates and recreated the shell, with several follow-on compiler fixes.",
+      "preventable_by": "Initialize-UwpMigration should parse and copy linked Compile/Page/ApplicationDefinition/Content items."
+    },
+    {
+      "where": "session-log.txt turns 24-35",
+      "symptom": "Three separate command/deployment failures occurred before the first meaningful launch attempt.",
+      "turns_or_retries": "winapp build failed once, dotnet build failed once from the wrong directory, and package registration failed once for a missing splash asset.",
+      "root_cause": "Incorrect build-command guidance plus omitted linked package assets.",
+      "how_resolved": "The agent switched to an explicit csproj build and rewrote manifest image references.",
+      "preventable_by": "Prescribe explicit dotnet build commands and materialize linked content during bootstrap."
+    },
+    {
+      "where": "session-log.txt turns 36-42",
+      "symptom": "The app repeatedly crashed at startup; removing title-bar/backdrop features did not help.",
+      "turns_or_retries": "At least three launch/validator attempts reported 0xc000027b.",
+      "root_cause": "The native stowed exception lacked a managed stack, and the agent guessed at title-bar code while leaving constructor-time RootFrame navigation in place.",
+      "how_resolved": "Unresolved; the agent correctly reported that the migration was not launch-stable.",
+      "preventable_by": "Follow the existing constructor-inert and validate-until-PASS rules before trying unrelated window chrome changes."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Bootstrap support for external csproj Link items",
+      "would_have_saved": "Manual SharedContent discovery, shell recreation, duplicate-definition fixes, and missing linked asset diagnosis."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "The available winapp CLI exposes run but no build command.",
+      "workaround": "Use native dotnet build with an explicit project and platform."
+    }
+  ]
+}

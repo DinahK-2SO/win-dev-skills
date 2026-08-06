@@ -1,0 +1,27 @@
+{
+  "scenario": "MIDI",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap silently omitted UWP project inputs linked from outside the source directory, leading to an incomplete mapping, manual shell reconstruction, compiler errors, and a missing package asset.",
+      "evidence": "MIDI.csproj lines 96-179 link App/MainPage/styles/assets through Include+Link; bootstrap reported only 9 copied files; session-log.txt turns 5-23 rebuilt shared shell content manually; turn 33 failed because Splash-sdk.png was absent.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 and SKILL.md for linked, external, SharedContent, MSBuildThisFileDirectory, GetDirectoryNameOfFileAbove, and Link; no handling existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration recursively copied only the physical Source directory and treated that list as the authoritative project inventory.",
+      "proposed_fix": "Extend Initialize-UwpMigration.ps1 to resolve UWP csproj properties used by common linked items, copy linked Compile/Page/ApplicationDefinition/Content files to their Link destinations, include them in mapping/triage, and fail rather than silently omit unresolved links.",
+      "generalizes": "Legacy UWP applications and Microsoft SDK samples frequently centralize shell code, resource dictionaries, and package assets in shared directories linked into multiple projects."
+    },
+    {
+      "problem": "The skill prescribed winapp build even though the CLI has no build command, and its dotnet fallback did not require an explicit csproj/platform.",
+      "evidence": "session-log.txt turn 24: 'build' was not matched; turn 25: MSB1003 from dotnet build in the parent directory; turn 33: Test-AppLaunch could not find output under bin\\x64\\Debug after a platform-unspecified build.",
+      "skill_search": "SKILL.md lines 126, 138, and 170 explicitly prescribed winapp build; lines 139-140 treated dotnet build as a fallback.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer `winapp build` to compile.",
+      "root_cause": "The command contract was outdated and did not match either the installed CLI or the launch helper's platform-specific output discovery.",
+      "proposed_fix": "Use native dotnet build with the explicit csproj, Debug configuration, and host platform throughout Step 3 and final validation guidance.",
+      "generalizes": "Every migration uses the same build loop, and commands run from a benchmark parent directory cannot safely rely on current-directory project discovery."
+    }
+  ]
+}

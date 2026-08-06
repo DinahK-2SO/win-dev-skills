@@ -31,7 +31,7 @@ Four scripts do every mechanical step. Your job is the judgement work in between
 
 ### Step 0 — Bootstrap (mandatory)
 
-🛑 **Before any file edit, any `view` of the source, any analysis** — your literal first three powershell commands when this skill is invoked MUST be:
+🛑 **Before any file edit, any `view` of the source, any analysis** — your literal first three powershell commands when this skill is invoked MUST be run **sequentially, one command per tool call**. Wait for each command to succeed before starting the next; parallel execution races the bootstrap against a target directory that does not exist yet:
 
 ```powershell
 # 1. Scaffold the WinUI 3 shell in the target directory
@@ -120,10 +120,10 @@ Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are in
 
 ### Step 3 — Build, fix what tooling missed
 
-Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
+Work in a tight loop: **build → fix the first error → launch → repeat.** Build with the native .NET CLI and an explicit platform so the launch helper can find the layout. For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
 
 ```powershell
-winapp build                                                                # compile; never run the .exe directly
+dotnet build "<winui3-project.csproj>" -c Debug -p:Platform=x64             # use ARM64 on an ARM64 host
 & "<skill-root>/scripts/Test-AppLaunch.ps1" -Target "<winui3-project-root>"  # launch AND verify it survives startup
 ```
 
@@ -135,8 +135,8 @@ When the app **crashes at launch**, fix the frame the captured stack names — t
 
 > **Build command discipline (avoid agent stalls):**
 >
-> - Prefer `winapp build` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (A bare `winapp run` works too, but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
-> - If you must shell out to `dotnet build` / `dotnet run`, **do not** pipe the output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
+> - Use `dotnet build <csproj> -p:Platform=<host-arch>` to compile and `Test-AppLaunch.ps1` to launch. `winapp` has no `build` command.
+> - Do **not** pipe `dotnet build` / `dotnet run` output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
 > - When using `dotnet` from the powershell tool, either (a) run **sync**, or (b) leave output unfiltered, or (c) append an exit sentinel so there is always a final line to read, e.g. `dotnet build -c Debug; "BUILD_EXIT=$LASTEXITCODE"`.
 
 ### Step 4 — Validate (mandatory before declaring done)
@@ -167,7 +167,7 @@ If any check fails, read the diagnostic, fix the root cause, re-run. **Do not re
 - *`Status = copied` rows* → those files were never finished. Either complete the migration and flip to `done`, or defer with rationale.
 - *Build healthcheck FAIL* → open `.validator-diagnostics.txt`; for each unique CS#### code, look up the pattern in PATTERNS.md via `Get-MigrationPattern.ps1`.
 
-After PASS, do a final `winapp build` to confirm the build is still clean. Only then declare done.
+After PASS, do a final `dotnet build "<winui3-project.csproj>" -c Debug -p:Platform=<host-arch>` to confirm the build is still clean. Only then declare done.
 
 ## Critical Rules
 

@@ -1,0 +1,28 @@
+{
+  "scenario": "MIDI",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The UWP manifest was retained with unresolved sample-branded image references, causing package registration failure.",
+      "evidence": "session-log.txt turn 8 fetched the csproj anchor; its manifest section warned specifically about -sdk assets. Turn 33 then failed with Splash-sdk.png missing before turn 34 corrected the manifest.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md, Project File Updates > Package.appxmanifest - reconcile image references with the assets you actually have.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The dedicated section names this exact failure code and filename pattern, gives two valid fixes, and requires a pre-launch asset check."
+    },
+    {
+      "problem": "All mapping rows remained Status=copied until the validator rejected them.",
+      "evidence": "session-log.txt turn 35: validator listed all 9 copied rows; the agent then changed them to done.",
+      "covered_clearly_at": "SKILL.md Step 1 ('Flip Status from copied -> done') and Step 4 validator item 3 ('no row stuck at Status = copied').",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "The requirement is repeated in both the execution workflow and mandatory validation gate, and the existing validator reliably caught it."
+    },
+    {
+      "problem": "The migrated app remained non-running, so all three scored MIDI features failed; final code still navigated RootFrame from MainWindow's constructor and the agent stopped with validator FAIL.",
+      "evidence": "migration-score.json: score 0, features_fail 3, candidate exit 0xC000027B; final MainWindow.xaml.cs lines 16-20 navigate in the constructor; session-log.txt turns 37-42 show repeated crash results and final admission that validation still failed.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md > Windowing > Initialization order - keep MainWindow's constructor inert; SKILL.md Step 4 - 'You are NOT done until Validate-UwpMigration.ps1 reports PASS'.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill prominently forbids constructor-time first navigation, supplies the after-Activate pattern, and explicitly prevents declaring completion on validator failure."
+    }
+  ]
+}

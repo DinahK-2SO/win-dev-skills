@@ -1,0 +1,44 @@
+{
+  "scenario": "MIDI",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap omitted externally linked UWP project inputs.",
+      "evidence": "skill-defects.json item 1; MIDI.csproj linked shared App/MainPage/styles/assets while bootstrap copied only 9 local files.",
+      "root_cause": "The bootstrap inventory was based on recursive directory contents rather than the UWP project's evaluated Include/Link inputs.",
+      "tier": 1,
+      "change": "Parse common UWP csproj properties and linked Compile/Page/ApplicationDefinition/Content items, materialize each at its Link path, include it in triage/mapping, and throw on unresolved linked inputs.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared shell code, XAML, styles, and package assets enter the migration automatically instead of being silently omitted and manually recreated.",
+      "falsifiable_check": "Running bootstrap on the MIDI source reports 12 linked items copied, maps 21 total inputs, and produces App.xaml, MainPage.xaml/.cs, Styles/Styles.xaml, and Assets/splash-sdk.png in the target."
+    },
+    {
+      "problem": "The documented build loop used a nonexistent winapp build command and underspecified the dotnet alternative.",
+      "evidence": "skill-defects.json item 2; session-log.txt turns 24-25 and 33.",
+      "root_cause": "Outdated command guidance did not match the installed CLI or Test-AppLaunch's platform-specific layout.",
+      "tier": 3,
+      "change": "Replace winapp build guidance with explicit native dotnet build commands using csproj, configuration, and host platform; correct the related analyzer prose.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The first build runs from any working directory and produces output where the launch helper expects it.",
+      "falsifiable_check": "On rerun there is no 'build was not matched', MSB1003, or 'No build output found under bin\\x64\\Debug' diagnostic."
+    },
+    {
+      "problem": "The mandatory Step 0 commands were parallelized and raced.",
+      "evidence": "skill-coverage-gaps.json item 1; session-log.txt turn 1.",
+      "root_cause": "The prose specified ordinal commands but did not explicitly forbid one parallel tool batch.",
+      "tier": 3,
+      "change": "Require separate sequential tool calls and success waits for scaffold, bootstrap, and self-check.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Bootstrap cannot observe a target that dotnet new has not finished creating.",
+      "falsifiable_check": "On rerun the first bootstrap succeeds without a Target not found error and the first self-check returns True."
+    }
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}

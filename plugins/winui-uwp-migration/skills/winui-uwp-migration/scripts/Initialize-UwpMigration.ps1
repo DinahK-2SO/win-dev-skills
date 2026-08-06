@@ -11,6 +11,7 @@ build cleanliness, and runtime smoke.
 
 Steps:
 1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
+   and materialize external files linked by the UWP .csproj at their <Link> paths
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
@@ -99,8 +100,121 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
 
 Write-Host "    Copied $($copied.Count) source files"
 
-# ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
+# UWP SDK samples and older applications commonly link shared shell code, XAML,
+# styles, and assets from outside the project directory. A directory-only copy
+# silently omits those inputs, so use the project file's Link metadata to
+# materialize them inside the standalone target.
 $uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
+$linkedCopied = 0
+if ($uwpCsprojs.Count -gt 0) {
+    function Find-AncestorContaining {
+        param([string]$Start, [string]$Marker)
+        $cursor = Get-Item -LiteralPath $Start
+        while ($cursor) {
+            if (Test-Path -LiteralPath (Join-Path $cursor.FullName $Marker)) {
+                return $cursor.FullName
+            }
+            $cursor = $cursor.Parent
+        }
+        return $null
+    }
+
+    function Expand-UwpProjectValue {
+        param([string]$Value, [hashtable]$Properties, [string]$ProjectDir)
+        $expanded = $Value
+        for ($pass = 0; $pass -lt 10; $pass++) {
+            $before = $expanded
+            $expanded = [regex]::Replace(
+                $expanded,
+                '\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(\$\(MSBuildThisFileDirectory\),\s*([^)]+?)\)\)',
+                [System.Text.RegularExpressions.MatchEvaluator]{
+                    param($m)
+                    $root = Find-AncestorContaining -Start $ProjectDir -Marker $m.Groups[1].Value.Trim()
+                    if ($root) { return $root }
+                    return $m.Value
+                })
+            $expanded = [regex]::Replace(
+                $expanded,
+                '\$\(([^)]+)\)',
+                [System.Text.RegularExpressions.MatchEvaluator]{
+                    param($m)
+                    $name = $m.Groups[1].Value
+                    if ($Properties.ContainsKey($name)) { return [string]$Properties[$name] }
+                    return $m.Value
+                })
+            if ($expanded -eq $before) { break }
+        }
+        return $expanded
+    }
+
+    foreach ($project in $uwpCsprojs) {
+        [xml]$projectXml = Get-Content -LiteralPath $project.FullName -Raw
+        $projectDir = Split-Path -Parent $project.FullName
+        $ns = New-Object System.Xml.XmlNamespaceManager($projectXml.NameTable)
+        $ns.AddNamespace('msb', $projectXml.DocumentElement.NamespaceURI)
+
+        $properties = @{
+            MSBuildThisFileDirectory = $projectDir + [System.IO.Path]::DirectorySeparatorChar
+            MSBuildProjectDirectory  = $projectDir
+        }
+        $propertyNodes = $projectXml.SelectNodes('//msb:PropertyGroup/*', $ns)
+        for ($pass = 0; $pass -lt 10; $pass++) {
+            foreach ($node in $propertyNodes) {
+                $properties[$node.LocalName] = Expand-UwpProjectValue -Value $node.InnerText -Properties $properties -ProjectDir $projectDir
+            }
+        }
+
+        $itemNodes = $projectXml.SelectNodes(
+            '//msb:Compile[@Include] | //msb:Page[@Include] | //msb:ApplicationDefinition[@Include] | //msb:Content[@Include]',
+            $ns)
+        $unresolved = New-Object System.Collections.Generic.List[string]
+        foreach ($item in $itemNodes) {
+            $linkNode = $item.SelectSingleNode('msb:Link', $ns)
+            if (-not $linkNode) { continue }
+
+            $include = Expand-UwpProjectValue -Value $item.Include -Properties $properties -ProjectDir $projectDir
+            $link = Expand-UwpProjectValue -Value $linkNode.InnerText -Properties $properties -ProjectDir $projectDir
+            if ($include -match '\$\(' -or $link -match '\$\(') {
+                [void]$unresolved.Add("$($item.Include) -> $($linkNode.InnerText)")
+                continue
+            }
+
+            $src = if ([System.IO.Path]::IsPathRooted($include)) {
+                [System.IO.Path]::GetFullPath($include)
+            } else {
+                [System.IO.Path]::GetFullPath((Join-Path $projectDir $include))
+            }
+            if (-not (Test-Path -LiteralPath $src -PathType Leaf)) {
+                [void]$unresolved.Add("$src -> $link")
+                continue
+            }
+
+            # These are UWP build metadata, not application source.
+            if ($link -match '^(Properties[\\/])?(AssemblyInfo\.cs|Default\.rd\.xml)$') { continue }
+
+            $dst = [System.IO.Path]::GetFullPath((Join-Path $Target $link))
+            $targetPrefix = $Target.TrimEnd('\') + '\'
+            if (-not $dst.StartsWith($targetPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+                throw "Linked item escapes target directory: $link"
+            }
+            $dstDir = [System.IO.Path]::GetDirectoryName($dst)
+            if (-not (Test-Path -LiteralPath $dstDir)) {
+                New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $src -Destination $dst -Force
+            if (-not $copied.Contains($link)) { [void]$copied.Add($link) }
+            $linkedCopied++
+        }
+        if ($unresolved.Count -gt 0) {
+            throw "Could not resolve linked UWP project item(s):`n  $($unresolved -join "`n  ")"
+        }
+    }
+    if ($linkedCopied -gt 0) {
+        Write-Host "    Materialized $linkedCopied linked project item(s) from outside the source directory"
+    }
+}
+
+# ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
 $refDir = Join-Path $Target '.uwp-source'
 if ($uwpCsprojs.Count -gt 0) {
     if (-not (Test-Path -LiteralPath $refDir)) {
@@ -452,6 +566,7 @@ $meta = [ordered]@{
     timestamp           = (Get-Date).ToString('o')
     sourcePath          = $Source
     seededRowCount      = $copied.Count
+    linkedItemCount     = $linkedCopied
     todoCount           = $todoCountTotal
     sensitiveFileCount  = $sensitiveFileCount
     deferredCount       = $deferredKeys.Count
@@ -465,6 +580,7 @@ $labelOrder = @('migrate-as-is','migrate-with-adaptation','defer')
 Write-Host ""
 Write-Host "=== BOOTSTRAP COMPLETE ==="
 Write-Host "Source files copied   : $($copied.Count)"
+Write-Host "Linked items copied   : $linkedCopied"
 Write-Host "Namespace rewrites    : $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 Write-Host "Neutralized classes   : $($neutralizedFiles.Count) file(s)"
 Write-Host "Triage breakdown      :"
