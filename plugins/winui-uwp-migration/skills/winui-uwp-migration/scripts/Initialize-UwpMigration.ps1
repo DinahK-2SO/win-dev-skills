@@ -10,7 +10,7 @@ workflow to confirm residue grep, mapping integrity, deferred consistency,
 build cleanliness, and runtime smoke.
 
 Steps:
-1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
+1. Copy local and linked .xaml/.cs/.resw/asset/.appxmanifest project items to the target
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
@@ -57,6 +57,110 @@ Write-Host "==> Initialize-UwpMigration"
 Write-Host "    Source : $Source"
 Write-Host "    Target : $Target"
 
+$uwpCsprojs = @(Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue)
+
+function Expand-ProjectValue {
+    param(
+        [string]$Value,
+        [hashtable]$Properties,
+        [int]$Depth = 0
+    )
+
+    if ($Depth -gt 12) { return $Value }
+
+    $expanded = [regex]::Replace($Value, '\$\(([A-Za-z_][A-Za-z0-9_.-]*)\)', {
+        param($match)
+        $name = $match.Groups[1].Value
+        if (-not $Properties.ContainsKey($name)) { return $match.Value }
+        return Expand-ProjectValue -Value ([string]$Properties[$name]) -Properties $Properties -Depth ($Depth + 1)
+    })
+
+    return [regex]::Replace(
+        $expanded,
+        '\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(([^,]+),\s*([^)]+)\)\)',
+        {
+            param($match)
+            $directory = $match.Groups[1].Value.Trim().Trim('"', "'")
+            $fileName = $match.Groups[2].Value.Trim().Trim('"', "'")
+            while ($directory) {
+                if (Test-Path -LiteralPath (Join-Path $directory $fileName)) {
+                    return $directory.TrimEnd('\')
+                }
+                $parent = Split-Path -Path $directory -Parent
+                if (-not $parent -or $parent -eq $directory) { break }
+                $directory = $parent
+            }
+            return $match.Value
+        })
+}
+
+function Copy-LinkedProjectItems {
+    param(
+        [System.IO.FileInfo]$Project,
+        [string]$ProjectTarget,
+        [System.Collections.Generic.List[string]]$CopiedFiles,
+        [string[]]$AllowedExtensions
+    )
+
+    [xml]$projectXml = Get-Content -LiteralPath $Project.FullName -Raw
+    $properties = @{
+        MSBuildProjectDirectory = $Project.DirectoryName
+        MSBuildThisFileDirectory = $Project.DirectoryName.TrimEnd('\') + '\'
+    }
+    foreach ($node in $projectXml.SelectNodes("//*[local-name()='PropertyGroup']/*")) {
+        if ($node.Name -and -not $properties.ContainsKey($node.Name)) {
+            $properties[$node.Name] = $node.InnerText
+        }
+    }
+
+    $copiedCount = 0
+    $itemXPath = "//*[local-name()='Compile' or local-name()='ApplicationDefinition' or local-name()='Page' or local-name()='Content' or local-name()='EmbeddedResource']"
+    foreach ($item in $projectXml.SelectNodes($itemXPath)) {
+        $include = $item.GetAttribute('Include')
+        $linkNode = $item.SelectSingleNode("*[local-name()='Link']")
+        if (-not $include -or -not $linkNode) { continue }
+
+        $sourceValue = Expand-ProjectValue -Value $include -Properties $properties
+        if ($sourceValue -match '\$\(') {
+            throw "Linked project item could not be resolved: $include in $($Project.FullName)"
+        }
+
+        $sourcePath = if ([System.IO.Path]::IsPathRooted($sourceValue)) {
+            $sourceValue
+        } else {
+            Join-Path $Project.DirectoryName $sourceValue
+        }
+        $sourceFiles = @(Get-ChildItem -Path $sourcePath -File -ErrorAction SilentlyContinue)
+        if ($sourceFiles.Count -eq 0) {
+            throw "Linked project item does not exist: $sourcePath"
+        }
+        foreach ($sourceFile in $sourceFiles) {
+            if ($AllowedExtensions -notcontains $sourceFile.Extension.ToLowerInvariant()) { continue }
+
+            $link = $linkNode.InnerText -replace '/', '\'
+            $link = $link.Replace('%(Filename)', $sourceFile.BaseName).Replace('%(Extension)', $sourceFile.Extension)
+            if ($link -match '%\(') {
+                throw "Linked project item destination could not be resolved: $link"
+            }
+
+            $destination = [System.IO.Path]::GetFullPath((Join-Path $ProjectTarget $link))
+            $targetPrefix = $ProjectTarget.TrimEnd('\') + '\'
+            if (-not $destination.StartsWith($targetPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+                throw "Linked item destination escapes target: $link"
+            }
+
+            $destinationDirectory = Split-Path -Path $destination -Parent
+            if (-not (Test-Path -LiteralPath $destinationDirectory)) {
+                New-Item -ItemType Directory -Path $destinationDirectory -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $sourceFile.FullName -Destination $destination -Force
+            if (-not $CopiedFiles.Contains($link)) { [void]$CopiedFiles.Add($link) }
+            $copiedCount++
+        }
+    }
+    return $copiedCount
+}
+
 # ─── 1. Copy source files (everything except .csproj) ──────────────────────────
 $patterns = @(
     '.xaml', '.cs', '.resw', '.resjson',
@@ -97,10 +201,14 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
     [void]$copied.Add($rel)
 }
 
-Write-Host "    Copied $($copied.Count) source files"
+$linkedCount = 0
+foreach ($project in $uwpCsprojs) {
+    $linkedCount += Copy-LinkedProjectItems -Project $project -ProjectTarget $Target -CopiedFiles $copied -AllowedExtensions $patterns
+}
+
+Write-Host "    Copied $($copied.Count) source files ($linkedCount linked project item(s))"
 
 # ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
-$uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
 $refDir = Join-Path $Target '.uwp-source'
 if ($uwpCsprojs.Count -gt 0) {
     if (-not (Test-Path -LiteralPath $refDir)) {
@@ -437,7 +545,7 @@ foreach ($rel in $deferredKeys) {
     [void]$dlines.Add("| $rel | $anchorList |")
 }
 if ($deferredKeys.Count -eq 0) {
-    [void]$dlines.Add('| (none) | — |')
+    [void]$dlines.Add('No items deferred.')
 }
 Set-Content -LiteralPath $deferredPath -Value $dlines -Encoding UTF8
 

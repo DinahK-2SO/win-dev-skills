@@ -1,0 +1,110 @@
+{
+  "scenario": "MobileBroadband",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 400-427: copied 16 local files, rewrote namespaces, classified one adaptation, and injected one threading TODO."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt lines 779-780 and 1450-1460: the threading anchor supplied the DispatcherQueue replacement used for the only injected TODO."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 4692-4717 caught all 16 unfinished mapping rows; lines 4782-4798 later reported PASS with zero residue, zero unresolved TODOs, zero WUI warnings, and a surviving smoke launch."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "It copied only files physically below the source directory and ignored external project items with Link metadata.",
+      "evidence": "The bootstrap reported 16 files at session-log.txt lines 400-414, while the preserved csproj at lines 644-748 referenced linked App.xaml, App.xaml.cs, MainPage.xaml, MainPage.xaml.cs, Styles.xaml, and seven shared assets."
+    },
+    {
+      "tool": "dotnet run",
+      "problem": "The agent invoked it from the parent directory and later used it as a long-lived launch check instead of the bounded skill script.",
+      "evidence": "session-log.txt lines 4557-4622 failed because no project existed in the current directory; lines 4627-4672 launched but remained running after 180 seconds."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "Recursive filesystem copying did not compute the source closure declared by the UWP csproj.",
+      "suggested_tweak": "Resolve external Compile, ApplicationDefinition, Page, Content, and EmbeddedResource items with Link metadata and feed their target paths through copying, namespace rewriting, triage, TODO injection, and mapping."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "Its no-defer success test expected the phrase 'No items deferred', but the bootstrap emitted a '(none)' table row.",
+      "suggested_tweak": "Make the bootstrap emit the validator's canonical no-defer sentinel."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "Initialize-UwpMigration.ps1 no-defer output versus Validate-UwpMigration.ps1 section 4",
+      "wrong": "The bootstrap wrote '| (none) | - |', while the validator recognized only 'No items deferred.'",
+      "correct": "Both scripts must use the same canonical no-defer sentinel."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Networking.NetworkOperators mobile broadband APIs",
+      "special_handling": "The APIs remained usable in the packaged desktop app, but the manifest had to preserve cellular restricted capabilities and add runFullTrust; hardware-unavailable states had to remain visible and source-faithful."
+    },
+    {
+      "api": "Dispatcher.RunAsync",
+      "special_handling": "The account watcher callback required DispatcherQueue.TryEnqueue so watcher events could update WinUI controls on the UI thread."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Couldn't find a project to run.",
+      "root_cause": "dotnet run was executed from the trial's app parent while the csproj was under app\\MobileBroadband.",
+      "fix": "Run against the explicit MobileBroadband.csproj path; the preferred migration workflow is Test-AppLaunch.ps1 with the project target."
+    },
+    {
+      "error": "Validate-UwpMigration: 1 FAIL - 16 rows still Status=copied.",
+      "root_cause": "The agent completed code migration without updating the seeded migration ledger as each file finished.",
+      "fix": "Flip every completed mapping row to done, then rerun the validator."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log.txt turns 3-18",
+      "symptom": "The agent inspected the preserved csproj and shared tree, manually recreated App/MainPage/Styles, retried MainPage.xaml.cs replacement after an Add File collision, and copied seven assets one by one.",
+      "turns_or_retries": "About 15 turns from discovery through shared-shell and asset reconstruction; one failed overwrite attempt required delete-and-add.",
+      "root_cause": "The bootstrap omitted linked external project items, so its mapping was not the complete source closure.",
+      "how_resolved": "The agent manually read linked files and Link destinations from the UWP csproj, recreated the shell files, and copied each referenced asset.",
+      "preventable_by": "Extend Initialize-UwpMigration.ps1 to resolve and copy linked project items before namespace rewrite and triage."
+    },
+    {
+      "where": "session-log.txt turns 22-25",
+      "symptom": "The first launch failed from the wrong directory; the corrected bare dotnet run then remained alive beyond the 180-second tool wait and had to be stopped.",
+      "turns_or_retries": "Two launch attempts and one explicit stop.",
+      "root_cause": "The agent ignored the skill's bounded Test-AppLaunch.ps1 workflow.",
+      "how_resolved": "It supplied the explicit project path, stopped the long-lived process, and later relied on the validator smoke launch.",
+      "preventable_by": "No skill change: SKILL.md Step 3 already prominently requires Test-AppLaunch.ps1 and warns against bare launch loops."
+    },
+    {
+      "where": "session-log.txt turns 25-28",
+      "symptom": "The first final validation failed solely because every mapping row was still copied.",
+      "turns_or_retries": "One failed validation, one ledger edit, one successful rerun.",
+      "root_cause": "The agent did not flip row status while migrating files.",
+      "how_resolved": "All 16 rows were changed to done before rerunning validation.",
+      "preventable_by": "No skill change: SKILL.md Step 1 and Step 4 already state this requirement and the validator enforced it."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Project-aware linked-item source closure during bootstrap.",
+      "would_have_saved": "Manual reconstruction of the shared app shell, styles, and seven assets, including the overwrite retry."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "The scoring machine had no mobile broadband modem, account, or SIM.",
+      "workaround": "Preserve explicit unavailable/error states and disable dependent actions until hardware data exists; the scorer accepted these as source-faithful."
+    }
+  ]
+}

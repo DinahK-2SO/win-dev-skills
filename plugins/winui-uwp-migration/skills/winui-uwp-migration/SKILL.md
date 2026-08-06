@@ -62,7 +62,7 @@ The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you ex
 
 ### Step 1 — Migrate, file by file
 
-Open `MIGRATION-MAPPING.md`. Every row already has a final Triage label (`migrate-as-is`, `migrate-with-adaptation`, `defer`). The bootstrap also injected `// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` (or `<!-- … -->` in XAML) above every line that needs adaptation, and recorded a per-file execution mode in `.bootstrap-meta.json`.
+Open `MIGRATION-MAPPING.md`. Every row already has a final Triage label (`migrate-as-is`, `migrate-with-adaptation`, `defer`). The mapping includes files physically under the source directory **and external project items with `<Link>` metadata**; linked shared pages, app shell files, resource dictionaries, and assets are part of the source and must not be reconstructed by hand. The bootstrap also injected `// TODO[migrate-NNN]: see PATTERNS.md#<anchor>` (or `<!-- … -->` in XAML) above every line that needs adaptation, and recorded a per-file execution mode in `.bootstrap-meta.json`.
 
 **Per-file execution mode** — open `.bootstrap-meta.json` and find the entry for the file you're about to edit under `perFileMode`:
 
@@ -101,12 +101,14 @@ Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 
 If the source shell doesn't match anything above, preserve its structure as faithfully as controls allow.
 
-**Navigation invariants** (apply regardless of shell control choice):
+**Shell fidelity invariants** (apply regardless of shell control choice):
 
 1. Every non-deferred source scenario / page is reachable from the target's primary navigation surface.
 2. Order matches the source.
 3. Titles match the source (modulo trivial wording cleanup — capitalization, punctuation).
 4. Deferred items are **omitted** from the navigation surface — do not include disabled or broken entries. They are accounted for in `MIGRATION-DEFERRED.md`.
+5. Desktop chrome preserves identity: set `Window.Title` (or `AppWindow.Title`) from the source manifest's display name; never ship a scaffold title such as `WinUI Desktop`.
+6. Initial client geometry preserves usable content: migrate any explicit UWP preferred-size/resize call through the `windowing` pattern. If the source has no explicit size, choose a client size that shows the source shell's minimum intended viewport without clipping; do not inherit a smaller scaffold default blindly.
 
 ### Step 2 — Reconcile the project file
 

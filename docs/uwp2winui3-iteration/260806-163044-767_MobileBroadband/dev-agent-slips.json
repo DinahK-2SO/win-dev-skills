@@ -1,0 +1,21 @@
+{
+  "scenario": "MobileBroadband",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The agent used bare dotnet run, first from the wrong directory and then as a long-lived launch check.",
+      "evidence": "session-log.txt lines 4557-4622 show the no-project failure; lines 4627-4672 show the corrected command still running after 180 seconds.",
+      "covered_clearly_at": "SKILL.md Step 3 - Build, fix what tooling missed, especially lines 123-140: use Test-AppLaunch.ps1 for launch and prefer bounded commands with clear completion.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The required command, target argument, rationale, and bare-launch warning are already prominent and specific."
+    },
+    {
+      "problem": "All migration mapping rows remained at Status=copied until the validator failed.",
+      "evidence": "session-log.txt lines 4692-4717 show the validator failure for 16 copied rows.",
+      "covered_clearly_at": "SKILL.md Step 1 lines 84-90 requires flipping each row as it finishes; Step 4 lines 142-168 states that copied rows fail validation and gives the exact fix.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The instruction is repeated in the active workflow and mechanically enforced by the validator; the rerun succeeded after following it."
+    }
+  ]
+}

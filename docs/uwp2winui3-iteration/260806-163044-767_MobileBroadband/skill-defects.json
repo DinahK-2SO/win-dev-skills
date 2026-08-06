@@ -1,0 +1,37 @@
+{
+  "scenario": "MobileBroadband",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The bootstrap omitted external source files and assets referenced by the UWP csproj through Link metadata.",
+      "evidence": "session-log.txt lines 400-427 reported only 16 copied files; lines 644-748 show linked App/MainPage/Styles and assets; turns 4-18 manually reconstructed them.",
+      "skill_search": "Searched SKILL.md, MIGRATION-PATTERNS.md, and scripts for 'linked', '<Link>', 'SharedContent', and project-item source closure; no handling existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 recursively copied only the supplied directory and treated that filesystem subtree as the complete project.",
+      "proposed_fix": "Teach Initialize-UwpMigration.ps1 to expand project properties, resolve linked Compile/ApplicationDefinition/Page/Content/EmbeddedResource items, copy to each Link destination, and include those targets in rewrite, triage, TODO, and mapping stages.",
+      "generalizes": "Legacy UWP solutions commonly centralize App.xaml, MainPage, resource dictionaries, helpers, and branded assets in shared folders linked into many sample projects."
+    },
+    {
+      "problem": "The migrated desktop window retained generic scaffold chrome/title and opened with a smaller usable viewport than the UWP shell.",
+      "evidence": "score discrepancies.json: window title was 'WinUI Desktop' instead of 'MobileBroadband'; WinUI viewport was 760x510 versus UWP 800x600.",
+      "skill_search": "Searched for title, Window.Title, AppWindow.Title, viewport, resize, and shell fidelity. SKILL.md covered navigation item titles only; MIGRATION-PATTERNS.md covered replacement of explicit ApplicationView resize calls only.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The shell guidance did not require preserving desktop window identity or a non-clipping initial client viewport when converting the UWP host.",
+      "proposed_fix": "Add shell fidelity invariants requiring Window/AppWindow title from the source manifest display name and preservation of explicit or minimum usable initial client geometry.",
+      "generalizes": "Every UWP-to-desktop migration introduces desktop chrome and a new window-sizing model; scaffold defaults can leak into branding or clip layouts across unrelated apps."
+    },
+    {
+      "problem": "Bootstrap and validator disagreed on the canonical representation of an empty deferred-file list.",
+      "evidence": "session-log.txt lines 4710 and 4790: validator warned that MIGRATION-DEFERRED.md had content despite zero defer rows; the bootstrap emitted a '(none)' table row while validator code searched for 'No items deferred'.",
+      "skill_search": "Searched scripts for MIGRATION-DEFERRED, '(none)', and 'No items deferred'; Initialize-UwpMigration.ps1 and Validate-UwpMigration.ps1 contained conflicting values.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "| (none) | - |",
+      "root_cause": "Producer and consumer used different empty-state sentinels.",
+      "proposed_fix": "Emit 'No items deferred.' from Initialize-UwpMigration.ps1, matching Validate-UwpMigration.ps1.",
+      "generalizes": "Any migration with zero deferred files receives this false warning, reducing trust in the final gate."
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "scenario": "MobileBroadband",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap omitted linked shared source and assets.",
+      "evidence": "lessons.json dev_agent_struggles[0] and skill-defects.json items[0].",
+      "root_cause": "The bootstrap used directory recursion instead of the UWP project's declared item graph. Tier 1 is feasible and stronger than prose because the script can materialize linked items before the agent sees the mapping.",
+      "tier": 1,
+      "change": "Resolve project properties including GetDirectoryNameOfFileAbove, copy external linked source/resource/asset items to Link destinations, reject unresolved links, and include them in existing rewrite/triage/mapping stages.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared app shells, pages, dictionaries, helpers, and assets appear in the initial migration mapping and no longer require manual reconstruction.",
+      "falsifiable_check": "Rerunning bootstrap on MobileBroadband reports 29 files with 13 linked items, and the target contains mapped App.xaml.cs, MainPage.xaml, Styles\\Styles.xaml, and Assets\\windows-sdk.png."
+    },
+    {
+      "problem": "Zero-defer migrations always produced a false validator warning.",
+      "evidence": "lessons.json doc_errors[0] and skill-defects.json items[2].",
+      "root_cause": "The bootstrap and validator used different empty-list sentinels. Tier 1 is the highest reliable fix because changing the producer removes the warning without agent judgement.",
+      "tier": 1,
+      "change": "Emit the validator's canonical 'No items deferred.' text when no rows are deferred.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "The deferred consistency gate reports PASS rather than WARN for zero-defer projects.",
+      "falsifiable_check": "A fresh zero-defer bootstrap produces MIGRATION-DEFERRED.md containing 'No items deferred.' and validator section 4 prints its no-defer PASS line."
+    },
+    {
+      "problem": "Desktop scaffold title and initial viewport leaked into the migrated shell.",
+      "evidence": "score discrepancies.json and skill-defects.json items[1].",
+      "root_cause": "The skill specified navigation fidelity but not host-window fidelity. Existing tooling already routes explicit resize APIs; when no explicit size exists, title and minimum usable geometry require source-layout judgement that a generic Tier 1/2 transform cannot safely infer.",
+      "tier": 3,
+      "change": "Add shell fidelity invariants for Window/AppWindow title and explicit or minimum non-clipping initial client geometry.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Migrated apps do not ship generic scaffold branding or open with content clipped by a smaller desktop default.",
+      "falsifiable_check": "On rerun, the desktop title is 'MobileBroadband' rather than 'WinUI Desktop', and the initial client viewport exposes at least the source shell's 800x600 usable area."
+    }
+  ],
+  "deferred_to_human": []
+}
