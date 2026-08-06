@@ -1,0 +1,125 @@
+{
+  "scenario": "NumberFormatting",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log turns 1-3: scaffolding and bootstrap completed, produced MIGRATION-MAPPING.md, and rewrote the files it could see."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log turn 8: the csproj and navigation anchors supplied concrete manifest and frame-wiring guidance."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log turn 28: residue, mapping, manifest, build, and startup checks all completed with PASS."
+    },
+    {
+      "tool": "dotnet build/dotnet run --project",
+      "evidence": "session-log turns 14-27: project-qualified dotnet commands exposed compiler/deployment errors and ultimately launched the app."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "It recursively copied only files physically below the project directory and ignored explicit csproj Include/Link items outside that directory.",
+      "evidence": "session-log turn 2 reported only 9 copied files and zero XAML TODOs; NumberFormatting.csproj declares linked MainPage, scenario XAML, shared styles, code, and assets."
+    },
+    {
+      "tool": "winapp build",
+      "problem": "The installed CLI has no build subcommand.",
+      "evidence": "session-log turn 29: 'build' was not matched and the CLI listed run/package commands but no build command."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "The agent did not use it and instead left dotnet run active for 180 seconds.",
+      "suggested_tweak": "No tooling change: the skill already makes Test-AppLaunch.ps1 the required launch command."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3, build command discipline, and final build",
+      "wrong": "The skill recommended winapp build even though the installed winapp CLI has no build subcommand.",
+      "correct": "Compile with dotnet build <path-to-csproj>; use Test-AppLaunch.ps1 for launch diagnostics."
+    },
+    {
+      "where": "SKILL.md shell conversion and MIGRATION-PATTERNS.md navigationview-frame-wiring",
+      "wrong": "The skill mapped an SDK-sample ListView/Frame shell to NavigationView/Frame despite its own no-redesign rule and despite SplitView, ListView, and Frame being supported.",
+      "correct": "Add only the desktop Window host; preserve supported shell controls and use NavigationView only when it is already present or an unsupported shell requires it."
+    }
+  ],
+  "special_apis": [],
+  "errors_encountered": [
+    {
+      "error": "Couldn't find a project to run.",
+      "root_cause": "dotnet run was invoked from the parent app directory rather than the child project directory and no --project argument was supplied.",
+      "fix": "Run dotnet with --project pointing to NumberFormatting.csproj."
+    },
+    {
+      "error": "CS0101/CS0102 duplicate Scenario and FEATURE_NAME, followed by WMC0909/WMC1111/WMC9999.",
+      "root_cause": "The agent recreated declarations in MainPage.xaml.cs while retaining the copied SampleConfiguration.cs declarations, leaving x:DataType unresolved during XAML compilation.",
+      "fix": "Removed the duplicate declarations from SampleConfiguration.cs."
+    },
+    {
+      "error": "WMC0503: Compiled Bindings cannot be processed in Property Element form.",
+      "root_cause": "The newly authored NavigationView used x:Bind as a property-element child.",
+      "fix": "Moved the binding to MenuItemsSource=\"{x:Bind Scenarios}\"."
+    },
+    {
+      "error": "WMC0035: Duplication assignment to the Content property of NavigationView.",
+      "root_cause": "MenuItemsSource was inserted as text inside the NavigationView content after a Header property element, so XAML treated it as a second content assignment.",
+      "fix": "Moved Header and MenuItemsSource to attributes on NavigationView."
+    },
+    {
+      "error": "CS8629 nullable value type may be null on ParseDouble(...).Value.",
+      "root_cause": "The migrated project enabled nullable analysis while the UWP source dereferenced nullable parse results.",
+      "fix": "Added a typed helper that throws if parsing returns null."
+    },
+    {
+      "error": "0x80070002/0x80073CF6: Splash-sdk.png cannot be located.",
+      "root_cause": "The UWP manifest was copied without its linked shared assets, and its UWP desktop-incompatible shape was retained.",
+      "fix": "Reconciled the manifest to scaffold assets, Windows.Desktop, $targetentrypoint$, and runFullTrust."
+    },
+    {
+      "error": "winapp: 'build' was not matched.",
+      "root_cause": "The migration skill documented a nonexistent CLI subcommand.",
+      "fix": "Use dotnet build <path-to-csproj>."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log turns 6-23",
+      "symptom": "The agent searched generated obj XAML, manually recreated eight XAML files, and required four compile-fix iterations.",
+      "turns_or_retries": "18 turns from source discovery through the fourth XAML/compiler correction.",
+      "root_cause": "The bootstrap omitted csproj-linked shared XAML/code/assets, forcing manual reconstruction; the shell guidance also encouraged NavigationView instead of preserving supported controls.",
+      "how_resolved": "The agent reconstructed pages from generated XAML and fixed each compiler error individually.",
+      "preventable_by": "Resolve explicit Include/Link items during bootstrap and state that supported source shells must not be modernized."
+    },
+    {
+      "where": "session-log turns 24-27",
+      "symptom": "The first successful build failed package registration on a missing splash asset.",
+      "turns_or_retries": "One failed launch and one manifest rewrite.",
+      "root_cause": "Linked shared assets were absent and the existing csproj anchor was not applied before launch.",
+      "how_resolved": "The manifest was rebuilt around scaffold assets and desktop package requirements.",
+      "preventable_by": "Bootstrap linked Content items and follow the existing manifest checklist before first launch."
+    },
+    {
+      "where": "session-log turn 29",
+      "symptom": "The requested final build command failed immediately.",
+      "turns_or_retries": "One unrecovered command failure at the end of the session.",
+      "root_cause": "The skill named a winapp subcommand that does not exist.",
+      "how_resolved": "Not resolved in the trial; the prior validator's dotnet build had already passed.",
+      "preventable_by": "Replace every winapp build instruction with dotnet build <path-to-csproj>."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Bootstrap discovery and copying of explicit csproj Include/Link items.",
+      "would_have_saved": "Manual obj-tree discovery, eight hand-authored XAML files, missing shared assets, multiple XAML compiler retries, and the resulting visual redesign."
+    }
+  ],
+  "env_issues": []
+}

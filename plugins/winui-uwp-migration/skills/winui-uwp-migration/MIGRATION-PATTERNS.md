@@ -278,9 +278,13 @@ Validator catches this race with a 10s smoke launch after the build healthcheck 
 <a id="navigationview-frame-wiring"></a>
 ### NavigationView + Frame wiring (SDK-sample scenario list)
 
-The UWP SDK-sample idiom `MainPage` + `ListView`/scenario list + `Frame` maps to
-`NavigationView` + `Frame` (SKILL.md shell-mapping table). Two **silent** failures are
-common — they build and launch with no error, so nothing flags them:
+Use this pattern only when the source already uses `NavigationView`, or when an
+unsupported shell must be adapted to it. A source `SplitView`/`ListView` + `Frame`
+must remain `SplitView`/`ListView` + `Frame`; those controls are supported, and replacing
+them changes layout, theming, footer content, and available scenario viewport.
+
+When `NavigationView` is the faithful target, two **silent** failures are common — they
+build and launch with no error, so nothing flags them:
 
 1. **Blank Frame on every page** — a `SelectionChanged` type mismatch (see the wrong-cast
    warning below).
@@ -664,7 +668,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The benchmark build step injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |

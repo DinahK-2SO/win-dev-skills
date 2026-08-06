@@ -1,0 +1,57 @@
+{
+  "scenario": "NumberFormatting",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The bootstrap omitted csproj-linked shared source and content files.",
+      "evidence": "session-log turn 2 copied 9 files and no scenario XAML; NumberFormatting.csproj declares linked App/MainPage code, eight XAML resources/pages, styles, and seven assets. The improved fixture resolves 21 linked items.",
+      "skill_search": "Initialize-UwpMigration.ps1 Get-ChildItem $Source -Recurse; no Include/Link project-item resolution existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap treated physical containment under -Source as the complete project inventory.",
+      "proposed_fix": "Parse explicit Compile/ApplicationDefinition/Page/Content/resource Include and Link entries, expand common project path properties, and copy linked files to their logical Link paths before namespace rewrite and triage.",
+      "generalizes": "Legacy UWP projects frequently share XAML, code, resources, and assets through linked csproj items outside the project directory."
+    },
+    {
+      "problem": "The migrated shell changed from the original dark SplitView/ListBox shell with footer links to a light NavigationView shell with a Settings item and no footer.",
+      "evidence": "discrepancies.json all-features layout item; baseline and candidate screenshots; session-log turn 10 authored NavigationView after fetching the navigation anchor.",
+      "skill_search": "SKILL.md shell conversion table and MIGRATION-PATTERNS.md#navigationview-frame-wiring.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "The SDK-sample MainPage + ListView + Frame idiom was mapped to NavigationView + Frame.",
+      "root_cause": "The shell guidance contradicted the no-redesign principle and overlooked that SplitView, ListView, and Frame are supported in WinUI 3.",
+      "proposed_fix": "Require preservation of supported shell controls, resources, footer content, and links; reserve NavigationView adaptation for a source NavigationView or an actually unsupported shell.",
+      "generalizes": "Shell modernization changes visible hierarchy, theme, automation, and viewport in any migration whose UWP controls still have WinUI 3 equivalents."
+    },
+    {
+      "problem": "Large scenario headings extended beyond the right edge.",
+      "evidence": "discrepancies.json all-features heading layout item and the Unicode Extensions candidate screenshot.",
+      "skill_search": "SKILL.md fidelity and shell sections contained no explicit wrapping/sizing invariant and the shell table promoted a different host.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The replacement NavigationView header consumed different width and did not preserve the source shell's wrapping behavior.",
+      "proposed_fix": "Add a visual-layout invariant requiring long headings to wrap or scroll within the initial window and preserving source sizing behavior.",
+      "generalizes": "Desktop title bars and replacement navigation panes commonly reduce available width and expose latent clipping across migrated apps."
+    },
+    {
+      "problem": "All seven scenario outputs were below or partially clipped in the visible viewport.",
+      "evidence": "discrepancies.json: Percent/Decimal/Currency output below viewport; Number Parsing/Rounding/Numeral/Unicode output partially clipped. migration-score.json marks all seven features partial for this reason.",
+      "skill_search": "SKILL.md had no scroll-boundary/available-viewport invariant; source generated XAML placed each action and output inside a ScrollViewer.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The replacement shell added title/header/status regions and reduced scenario space without preserving the source page's effective scroll boundary.",
+      "proposed_fix": "Require preservation of each page's ScrollViewer boundary and prohibit new fixed rows that place actions or output outside the scrollable region.",
+      "generalizes": "Additional desktop chrome and replacement shells routinely reduce content height; long forms and generated output must remain reachable."
+    },
+    {
+      "problem": "The documented final build command failed because winapp has no build subcommand.",
+      "evidence": "session-log turn 29: 'build' was not matched; the installed CLI help listed no build command.",
+      "skill_search": "SKILL.md Step 3, build command discipline, and final build all said winapp build.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer winapp build; After PASS, do a final winapp build.",
+      "root_cause": "The skill conflated winapp launch/package operations with compilation.",
+      "proposed_fix": "Use dotnet build <path-to-csproj> for compilation and retain Test-AppLaunch.ps1 for launching.",
+      "generalizes": "Every migration using the current winapp CLI will hit the same deterministic command failure."
+    }
+  ]
+}

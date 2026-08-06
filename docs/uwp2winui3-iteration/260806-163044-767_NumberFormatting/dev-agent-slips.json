@@ -1,0 +1,35 @@
+{
+  "scenario": "NumberFormatting",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "dotnet run was first invoked from a directory with no project.",
+      "evidence": "session-log turn 13: 'Couldn't find a project to run'; turn 14 recovered with --project.",
+      "covered_clearly_at": "SKILL.md Step 0 defines the target project root and Step 3 commands operate on that root/target.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The agent immediately diagnosed the child-project location; a rerun can use the known project path without new guidance."
+    },
+    {
+      "problem": "Manual XAML reconstruction introduced duplicate declarations and malformed x:Bind/NavigationView content, causing CS0101, CS0102, WMC0909, WMC1111, WMC9999, WMC0503, and WMC0035.",
+      "evidence": "session-log turns 14-23 show four compile/fix cycles after the turn-10 wholesale XAML rewrite.",
+      "covered_clearly_at": "SKILL.md Critical Rules > Fidelity: 'Do not regenerate XAML from scratch. Copy each *.xaml verbatim, then transform.'",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The prohibition is explicit and prominent. The bootstrap defect that made source XAML unavailable is fixed separately; repeating the prohibition would add noise."
+    },
+    {
+      "problem": "The first launch retained missing UWP manifest image references and desktop-incompatible manifest fields.",
+      "evidence": "session-log turn 24 failed on Splash-sdk.png after turn 8 had printed the complete manifest checklist.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#csproj, 'Package.appxmanifest — reconcile image references' and 'Manifest migration checklist'.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The exact failure code, asset check, Windows.Desktop target, entry point, and runFullTrust fix were already supplied immediately before the mistake."
+    },
+    {
+      "problem": "The agent used long-running dotnet run instead of the required bounded startup diagnostic script.",
+      "evidence": "session-log turn 27 remained running after 180 seconds; turn 28 then ran the validator.",
+      "covered_clearly_at": "SKILL.md Step 3 says Test-AppLaunch.ps1 is the launch step and explains why bare launch commands are inferior.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The required command is already prominent and specific."
+    }
+  ]
+}

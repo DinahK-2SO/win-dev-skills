@@ -89,11 +89,12 @@ Walk each row by its Triage label:
 
 Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 
-**Shell conversion** is the one structural change LLM judgement decides. UWP's `Frame`-rooted app model has no direct WinUI 3 desktop equivalent. Pick the closest WinUI 3 idiom of the source shell:
+**Shell conversion** adds a desktop `Window`; it does not authorize a redesign of the content hosted inside it. Host the migrated `MainPage` in the scaffold's root `Frame`, then preserve the source page's shell controls whenever those controls exist in WinUI 3. Substitute structure only for a control that is actually unsupported.
 
 | Source shell pattern (UWP) | Suggested WinUI 3 target |
 |---|---|
-| `MainPage` + `ListView` + `Frame` (SDK-sample idiom) | `NavigationView` + `Frame` — wire it with `Get-MigrationPattern.ps1 -Anchor navigationview-frame-wiring` (navigate the first item explicitly on `Loaded` + handle `ItemInvoked`; do **not** rely on a constructor `SelectedItem` raising `SelectionChanged` — that dead-scenario switch bug is the #1 silent failure) |
+| `MainPage` + `SplitView`/`ListView` + `Frame` (SDK-sample idiom) | Preserve `SplitView`/`ListView` + `Frame`; all three controls exist in WinUI 3. Do not modernize it to `NavigationView`. |
+| Source already uses `NavigationView` + `Frame`, or an unsupported shell must become `NavigationView` | `NavigationView` + `Frame` — wire it with `Get-MigrationPattern.ps1 -Anchor navigationview-frame-wiring` (navigate the first item explicitly on `Loaded` + handle `ItemInvoked`). |
 | `Pivot` | `TabView` (top), or `Pivot` from WinUI Community Toolkit if behaviour parity matters |
 | `Hub` | `NavigationView` with grouped items, or hand-rolled `ScrollViewer` |
 | `TabView` (UWP) | `TabView` (WinUI 3) — namespace change only |
@@ -107,6 +108,12 @@ If the source shell doesn't match anything above, preserve its structure as fait
 2. Order matches the source.
 3. Titles match the source (modulo trivial wording cleanup — capitalization, punctuation).
 4. Deferred items are **omitted** from the navigation surface — do not include disabled or broken entries. They are accounted for in `MIGRATION-DEFERRED.md`.
+
+**Visual-layout invariants** (also part of fidelity):
+
+1. Preserve supported shell controls, theme resources, header/footer content, and links; do not add template affordances such as a default Settings item.
+2. Preserve each page's existing `ScrollViewer` boundary. Do not introduce fixed header/status rows that shrink the scenario viewport or place the action/output outside the scrollable region.
+3. Keep source wrapping and sizing behavior. Long headings and output must wrap or scroll within the initial window instead of extending past an edge or being clipped.
 
 ### Step 2 — Reconcile the project file
 
@@ -123,7 +130,7 @@ Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are in
 Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
 
 ```powershell
-winapp build                                                                # compile; never run the .exe directly
+dotnet build <path-to-csproj>                                               # compile; never run the .exe directly
 & "<skill-root>/scripts/Test-AppLaunch.ps1" -Target "<winui3-project-root>"  # launch AND verify it survives startup
 ```
 
@@ -135,7 +142,7 @@ When the app **crashes at launch**, fix the frame the captured stack names — t
 
 > **Build command discipline (avoid agent stalls):**
 >
-> - Prefer `winapp build` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (A bare `winapp run` works too, but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
+> - Prefer `dotnet build <path-to-csproj>` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (`winapp` has no `build` subcommand; a bare `winapp run` launches but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
 > - If you must shell out to `dotnet build` / `dotnet run`, **do not** pipe the output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
 > - When using `dotnet` from the powershell tool, either (a) run **sync**, or (b) leave output unfiltered, or (c) append an exit sentinel so there is always a final line to read, e.g. `dotnet build -c Debug; "BUILD_EXIT=$LASTEXITCODE"`.
 
@@ -167,7 +174,7 @@ If any check fails, read the diagnostic, fix the root cause, re-run. **Do not re
 - *`Status = copied` rows* → those files were never finished. Either complete the migration and flip to `done`, or defer with rationale.
 - *Build healthcheck FAIL* → open `.validator-diagnostics.txt`; for each unique CS#### code, look up the pattern in PATTERNS.md via `Get-MigrationPattern.ps1`.
 
-After PASS, do a final `winapp build` to confirm the build is still clean. Only then declare done.
+After PASS, do a final `dotnet build <path-to-csproj>` to confirm the build is still clean. Only then declare done.
 
 ## Critical Rules
 

@@ -1,0 +1,46 @@
+{
+  "scenario": "NumberFormatting",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap inventory omitted linked/shared UWP project items.",
+      "evidence": "lessons.json missing_tooling[0]; session-log turn 2 copied 9 files while the csproj linked XAML, code, styles, and assets.",
+      "root_cause": "Initialize-UwpMigration.ps1 only recursed below -Source and never evaluated explicit csproj Include/Link items.",
+      "tier": 1,
+      "change": "Resolve common project path properties and explicit Compile/ApplicationDefinition/Page/Content/resource Include+Link items, copy them to logical Link paths, and include them in rewrite/triage/mapping.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Agents start from authored shared XAML and assets rather than obj output or manual reconstruction.",
+      "falsifiable_check": "On this source the bootstrap reports 30 files with 21 linked items, and MainPage.xaml, all seven scenario XAML files, Styles/Styles.xaml, shared code, and linked assets exist in the target before any agent edit."
+    },
+    {
+      "problem": "Shell guidance encouraged redesign and omitted layout/scroll invariants.",
+      "evidence": "skill-defects.json items 1-3; discrepancies.json reports changed shell/footer/theme, clipped headings, and clipped output in all seven scenarios.",
+      "root_cause": "The prose incorrectly treated an SDK-sample ListView/Frame shell as a NavigationView migration even though its controls remain supported.",
+      "tier": 3,
+      "change": "Correct shell mapping to preserve supported controls; restrict NavigationView adaptation; add visual invariants for resources/footer, wrapping, scroll boundaries, and available viewport.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Migrated shells retain source hierarchy and keep actions/output reachable within the initial window.",
+      "falsifiable_check": "On rerun the candidate uses the source SplitView/ListBox/Frame shell with footer/resources; no heading crosses the right edge and every scenario output is reachable inside its preserved ScrollViewer.",
+      "tier_justification": "A template cannot safely choose visual structure for arbitrary source shells; after Tier 1 supplies the real XAML, semantic preservation remains judgement work. The prose must remove the actively wrong substitution."
+    },
+    {
+      "problem": "The skill prescribed nonexistent winapp build commands.",
+      "evidence": "session-log turn 29 and skill-defects.json item 4.",
+      "root_cause": "Compilation and winapp launch responsibilities were conflated.",
+      "tier": 3,
+      "change": "Replace winapp build with dotnet build <path-to-csproj> and explicitly state that winapp has no build subcommand.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Build steps terminate successfully using the supported compiler path.",
+      "falsifiable_check": "A rerun contains no 'build was not matched' CLI error and the final dotnet build exits 0.",
+      "tier_justification": "The validator already implements Tier 1 build enforcement correctly; the defect is the contradictory user-facing command text."
+    }
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}
