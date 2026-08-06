@@ -644,9 +644,10 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
    ```xml
    <Capabilities>
      <rescap:Capability Name="runFullTrust" />
+     <!-- CustomCapability and DeviceCapability entries follow this line. -->
    </Capabilities>
    ```
-   Packaged WinUI 3 desktop apps run outside the UWP AppContainer sandbox and must declare this. Keep any UWP `<Capability>` entries you actually use (e.g. `<DeviceCapability Name="webcam" />`) but add the `runFullTrust` line above no matter what.
+   Packaged WinUI 3 desktop apps run outside the UWP AppContainer sandbox and must declare this. The `<Capabilities>` content model is **order-sensitive**: capability choices (including `rescap:Capability`) come before custom-capability choices, which come before `DeviceCapability`. Put `runFullTrust` first, then retain the UWP custom/device capabilities. Appending it after a `<uap4:CustomCapability>` produces manifest validation errors `0xC00CE014` / `0x80080204` even though the XML is well-formed and the project builds.
 
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
 
@@ -664,7 +665,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The benchmark build injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |

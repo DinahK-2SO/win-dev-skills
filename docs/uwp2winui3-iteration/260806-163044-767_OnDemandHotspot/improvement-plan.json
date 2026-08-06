@@ -1,0 +1,45 @@
+{
+  "scenario": "OnDemandHotspot",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "An AppX-schema-invalid capability sequence prevented launch but the validator returned PASS.",
+      "evidence": "migration-score.json reports runs=false; session-log.txt lines 3508-3557 show 0xC00CE014/0x80080204 downgraded to WARN.",
+      "root_cause": "Capability order was undocumented and no-registration was always treated as environmental. Tier 1 is required because prose alone can be ignored; the deterministic validator and launch classification can enforce the rule.",
+      "tier": 1,
+      "change": "Check that runFullTrust precedes custom/device capabilities, return invalid-manifest for explicit registrar schema errors, fail validation for that status, and document the order.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1; skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Schema-invalid manifests cannot produce a successful migration result, while genuine environment-only registration failures remain warnings.",
+      "falsifiable_check": "On rerun, the original wrong-order manifest emits a validator FAIL before completion; after moving runFullTrust first, registration no longer returns 0xC00CE014/0x80080204."
+    },
+    {
+      "problem": "Bootstrap copied legacy AssemblyInfo.cs into an SDK-style target and caused CS0579 duplicate attributes.",
+      "evidence": "session-log.txt lines 3322-3369 show six duplicate assembly attribute errors from BackgroundTask\\Properties\\AssemblyInfo.cs.",
+      "root_cause": "The mechanical copy treated generated legacy assembly metadata as application source. A Tier 1 exclusion is stronger than adding another build-error paragraph and prevents the defect rather than teaching recovery.",
+      "tier": 1,
+      "change": "Exclude every legacy Properties\\AssemblyInfo.cs from bootstrap copy and mapping generation.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Classic UWP projects and folded child projects use SDK-generated assembly metadata without CS0579 conflicts.",
+      "falsifiable_check": "Bootstrapping this source no longer copies or maps BackgroundTask\\Properties\\AssemblyInfo.cs, and the first build has no duplicate assembly attribute errors."
+    },
+    {
+      "problem": "The skill prescribed winapp build, but the installed CLI has no build command.",
+      "evidence": "session-log.txt lines 2599-2665 show the command exiting 1 as unrecognized.",
+      "root_cause": "The instructions assigned compilation to the package-identity CLI. This is inherently a Tier 3 command correction; no new tool or scaffold is needed because dotnet build already exists and the validator already uses it.",
+      "tier": 3,
+      "change": "Replace migration-agent winapp build commands with explicit native dotnet build commands and clarify that winapp is used for run.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The build loop starts with a supported command and avoids a wasted recovery turn.",
+      "falsifiable_check": "A rerun contains no attempted winapp build invocation and reaches the first real compiler diagnostic through dotnet build."
+    }
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": []
+}

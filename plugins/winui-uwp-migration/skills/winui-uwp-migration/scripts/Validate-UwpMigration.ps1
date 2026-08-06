@@ -10,8 +10,7 @@ declare done with FAIL." All [FAIL] output is sanitized — full diagnostics
 root, not to stdout, to keep concentrated API-name lists out of the agent's
 assistant turn.
 
-Does NOT run `winapp build` itself — build cleanliness is a separate gate
-the agent invokes alongside this (`winapp build` then this script).
+Runs its own native `dotnet build` healthcheck; no `winapp build` command exists.
 
 Checks (numbering matches the `# ─── N.` sections in the code):
 1. Residue grep — leftover Windows.UI.Xaml using/xmlns, unsupported APIs not deferred, UWP-only csproj markers
@@ -357,12 +356,28 @@ if (Test-Path -LiteralPath $manifestPath) {
         Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
         $manifestFailures++
     }
-    if ($manifestText -notmatch '<rescap:Capability\s+Name="runFullTrust"\s*/>') {
+    $runFullTrustMatch = [regex]::Match($manifestText, '<rescap:Capability\s+Name="runFullTrust"\s*/>')
+    if (-not $runFullTrustMatch.Success) {
         Write-Host "[FAIL] Package.appxmanifest is missing <rescap:Capability Name=`"runFullTrust`" />"
         Write-Host "       Without it, `winapp run` fails registration: 'requires runFullTrust capability'."
         Write-Host "       Fix: add it inside <Capabilities> (create the element if absent)."
         Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
         $manifestFailures++
+    } else {
+        # Capabilities is schema-ordered: capability choices (including rescap)
+        # must precede custom and device capabilities.
+        $laterCapabilityMatch = [regex]::Match(
+            $manifestText,
+            '<(?:(?:[A-Za-z_][\w.-]*):)?(?:CustomCapability|DeviceCapability)\b'
+        )
+        if ($laterCapabilityMatch.Success -and $runFullTrustMatch.Index -gt $laterCapabilityMatch.Index) {
+            Write-Host "[FAIL] Package.appxmanifest has rescap:runFullTrust after a custom/device capability"
+            Write-Host "       Fix: move <rescap:Capability Name=`"runFullTrust`" /> to the start of <Capabilities>."
+            Write-Host "       AppX validates capability child groups in schema order; wrong order fails registration with 0xC00CE014 / 0x80080204."
+            Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
+            Add-Diag 'Package.appxmanifest capability order invalid' 'Move rescap:runFullTrust before CustomCapability and DeviceCapability entries.'
+            $manifestFailures++
+        }
     }
     if ($manifestFailures -eq 0) {
         Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared"
@@ -610,10 +625,11 @@ if ($failures -eq 0 -and -not $env:UWP_MIGRATION_SKIP_SMOKE_LAUNCH) {
 
                 # Delegate launch + crash classification + WER capture to the
                 # shared diagnose script (the same tool Step 3 uses). It returns
-                # JSON: status = running | crashed | unavailable. Map to:
-                #   running     -> [PASS]
-                #   crashed     -> [FAIL]  (registered then died at startup — a real defect)
-                #   unavailable -> [WARN]  (deploy/env problem, not a code defect)
+                # JSON: status = running | crashed | invalid-manifest | unavailable.
+                #   running          -> [PASS]
+                #   crashed          -> [FAIL]  (registered then died at startup)
+                #   invalid-manifest -> [FAIL]  (registration rejected project input)
+                #   unavailable      -> [WARN]  (deploy/env problem, not a code defect)
                 $testLaunch = Join-Path $PSScriptRoot 'Test-AppLaunch.ps1'
                 $launchJson = ''
                 try {
@@ -644,6 +660,12 @@ if ($failures -eq 0 -and -not $env:UWP_MIGRATION_SKIP_SMOKE_LAUNCH) {
                         $diagText += "`r`ncode: $($lr.crash.code)`r`nmodule: $($lr.crash.module)`r`nmanagedType: $($lr.crash.managedType)`r`nmessage: $($lr.crash.message)`r`nhint: $($lr.crash.hint)`r`nanchor: $($lr.crash.anchor)"
                     }
                     Add-Diag 'Smoke launch: startup crash' $diagText
+                    $failures++
+                } elseif ($lr.status -eq 'invalid-manifest') {
+                    Write-Host "[FAIL] Package registration rejected an invalid app manifest"
+                    Write-Host "       $($lr.detail)"
+                    Write-Host "       Fix the manifest schema error before declaring the migration complete."
+                    Add-Diag 'Smoke launch: invalid manifest' "status: invalid-manifest`r`ndetail: $($lr.detail)`r`nlayout: $($lr.layout)"
                     $failures++
                 } else {
                     # unavailable — inconclusive deploy/environment failure.

@@ -80,6 +80,10 @@ $copied = New-Object System.Collections.Generic.List[string]
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     if (('\' + $rel) -match $srcExcludePattern) { return $false }
+    # SDK-style projects generate assembly attributes. Carrying a legacy
+    # Properties\AssemblyInfo.cs forward causes CS0579 duplicate attributes,
+    # especially when a UWP solution's child project is folded into one target.
+    if ($rel -match '(^|\\)Properties\\AssemblyInfo\.cs$') { return $false }
     $name = $_.Name.ToLowerInvariant()
     $match = $false
     foreach ($ext in $patterns) {

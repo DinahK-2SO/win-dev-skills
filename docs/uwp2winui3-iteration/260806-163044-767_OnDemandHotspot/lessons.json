@@ -1,0 +1,137 @@
+{
+  "scenario": "OnDemandHotspot",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 106-134: copied five source files, rewrote namespaces, injected 17 anchored TODOs, and generated the mapping artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt lines 207-214 and 970-993: returned focused background-task, notification, and csproj guidance."
+    },
+    {
+      "tool": "dotnet build via Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 3538-3539: the native build healthcheck succeeded and reported zero WUI analyzer warnings."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed winapp CLI has no build command.",
+      "evidence": "session-log.txt lines 2610-2665: winapp rejected build as an unrecognized command."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "problem": "It passed an AppX-schema-invalid manifest and downgraded the registrar's explicit schema error to an environment warning.",
+      "evidence": "session-log.txt lines 3535-3557: manifest checks passed, registration returned 0xC00CE014/0x80080204, and the validator still returned PASS."
+    },
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "It copied legacy Properties\\AssemblyInfo.cs into an SDK-style target, causing duplicate generated assembly attributes.",
+      "evidence": "session-log.txt lines 3322-3327 and 3341-3369: six CS0579 errors traced to copied UWP assembly metadata."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "All no-registration failures were labeled unavailable even when winapp explicitly reported an invalid manifest.",
+      "suggested_tweak": "Classify manifest schema errors as a hard migration failure while keeping genuine developer-mode, framework, certificate, and path failures inconclusive."
+    },
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "The Source boundary did not include sibling shared XAML identified by the scenario prompt.",
+      "suggested_tweak": "Keep shared-content handling explicit: copy required shared UI into the target rather than linking absolute external paths or regenerating XAML."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build instructions",
+      "wrong": "Use winapp build.",
+      "correct": "Use native dotnet build against the target csproj; winapp provides run but not build in this environment."
+    },
+    {
+      "where": "MIGRATION-PATTERNS.md Manifest migration checklist",
+      "wrong": "The checklist said to add runFullTrust and retain custom/device capabilities without stating the schema-required child order.",
+      "correct": "Place rescap:Capability entries before CustomCapability entries, and place DeviceCapability entries last."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "uap4:CustomCapability with rescap:runFullTrust",
+      "special_handling": "AppX capability child groups are order-sensitive. runFullTrust must precede custom and device capabilities or package registration fails despite a clean build."
+    },
+    {
+      "api": "WiFiOnDemandHotspotNetwork",
+      "special_handling": "The sample requires a custom capability/SCCD and a visible fallback when the machine does not support hotspot acquisition."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Test-Path returned False immediately after bootstrap launch.",
+      "root_cause": "Bootstrap and self-check were invoked in parallel instead of as the skill's ordered commands.",
+      "fix": "Wait for bootstrap completion, then rerun Test-Path; it returned True."
+    },
+    {
+      "error": "winapp: unrecognized command or argument 'build'.",
+      "root_cause": "The skill prescribed a command absent from the installed winapp CLI.",
+      "fix": "Use dotnet build/dotnet run against the csproj."
+    },
+    {
+      "error": "dotnet run could not find a project.",
+      "root_cause": "It was run from the parent app directory while the scaffolded csproj was nested one level below.",
+      "fix": "Pass --project with the absolute csproj path."
+    },
+    {
+      "error": "NETSDK1022 duplicate Compile items.",
+      "root_cause": "The agent explicitly included .cs files already covered by SDK default item globs.",
+      "fix": "Remove explicit Compile items."
+    },
+    {
+      "error": "WMC9999 could not find linked Scenario1_ManageHotspot.xaml.",
+      "root_cause": "Brittle relative links to sibling shared content were resolved from an unexpected build location.",
+      "fix": "The agent tried absolute linking, then ultimately created a local target XAML file."
+    },
+    {
+      "error": "CS1061 InitializeComponent missing, CS0103 named controls missing, and CS0246 MainWindow missing.",
+      "root_cause": "Linked XAML did not generate the expected partial class and the scaffold MainWindow was deleted while App still referenced it.",
+      "fix": "Create a coherent local XAML/code-behind pair and host the root Frame directly in Window."
+    },
+    {
+      "error": "CS0579 duplicate assembly attributes.",
+      "root_cause": "Legacy BackgroundTask\\Properties\\AssemblyInfo.cs was compiled together with SDK-generated assembly metadata.",
+      "fix": "The trial disabled generated assembly info; the general fix is for bootstrap not to copy legacy Properties\\AssemblyInfo.cs."
+    },
+    {
+      "error": "0xC00CE014 / 0x80080204 manifest validation failure.",
+      "root_cause": "rescap:Capability runFullTrust was appended after uap4:CustomCapability, violating the Capabilities schema sequence.",
+      "fix": "Move runFullTrust before custom/device capabilities and treat explicit manifest schema rejection as a hard validator failure."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Shared Scenario1_ManageHotspot.xaml project integration",
+      "symptom": "Three successive project-file link approaches produced NETSDK1022, two WMC9999 path errors, then missing generated partial-class members.",
+      "turns_or_retries": "Turns 17-25; at least four build/fix iterations.",
+      "root_cause": "The agent linked external shared XAML instead of copying it verbatim into the target and keeping the XAML/code-behind pair local.",
+      "how_resolved": "It authored a local XAML file and removed the external Page link.",
+      "preventable_by": "Follow the existing fidelity rule to copy source XAML verbatim; do not regenerate it or use machine-specific absolute links."
+    },
+    {
+      "where": "Final launch validation",
+      "symptom": "The agent saw an explicit AppX schema validation error but declared the migration complete because the validator labeled it an environment warning.",
+      "turns_or_retries": "Final validation turn 35 and completion turn 36.",
+      "root_cause": "The validator collapsed every no-registration result into unavailable and did not check capability ordering.",
+      "how_resolved": "Not resolved in the migration trial; scoring recorded runs=false and score 0.",
+      "preventable_by": "A Tier 1 manifest-order check plus hard classification of explicit manifest schema errors."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "A hard AppX manifest schema gate before PASS.",
+      "would_have_saved": "It would have rejected the wrong capability order and prevented a false successful completion."
+    }
+  ],
+  "env_issues": []
+}

@@ -14,9 +14,11 @@ layout via 'winapp run --detach --json', waits for the cold-start window, and:
   - if the process is alive  -> status=running  (exit 0)
   - if it registered then died/threw at startup -> status=crashed (exit 1),
     with the captured WER signature + a pointer to PATTERNS.md#startup-crashes
-  - if it never registered (deploy/env failure: Developer Mode off, missing
-    framework, MAX_PATH, no winapp) -> status=unavailable (exit 2) - inconclusive,
-    NOT a code defect.
+  - if registration rejects an invalid manifest -> status=invalid-manifest
+    (exit 1) - a migration defect
+  - if it never registered for an environmental reason (Developer Mode off,
+    missing framework, MAX_PATH, no winapp) -> status=unavailable (exit 2) -
+    inconclusive, NOT a code defect.
 
 It NEVER throws on an operational failure; it returns a structured result and
 (with -Json) prints it as JSON. This is the single source of truth for the
@@ -50,7 +52,8 @@ Emit the structured result as JSON to stdout (for programmatic callers).
 PSCustomObject (and JSON with -Json):
   { ok, status, pid, aumid, layout, crash:{ code, module, managedType, message,
     hint, anchor } | $null, detail }
-status in { running, crashed, unavailable }.  exit: 0 running / 1 crashed / 2 unavailable.
+status in { running, crashed, invalid-manifest, unavailable }.
+exit: 0 running / 1 crashed or invalid-manifest / 2 unavailable.
 
 .EXAMPLE
 .\Test-AppLaunch.ps1 -Target "C:\out\MyWinUI3App"
@@ -84,12 +87,22 @@ function New-LaunchResult {
 
 function Write-LaunchOut {
     param([pscustomobject]$Result)
-    # exit code: running=0, crashed=1, unavailable=2
-    $exit = switch ($Result.status) { 'running' { 0 } 'crashed' { 1 } default { 2 } }
+    # exit code: running=0, defects=1, unavailable=2
+    $exit = switch ($Result.status) {
+        'running' { 0 }
+        'crashed' { 1 }
+        'invalid-manifest' { 1 }
+        default { 2 }
+    }
     if ($Json) {
         $Result | ConvertTo-Json -Depth 6
     } else {
-        $tag = switch ($Result.status) { 'running' { 'OK  ' } 'crashed' { 'FAIL' } default { 'WARN' } }
+        $tag = switch ($Result.status) {
+            'running' { 'OK  ' }
+            'crashed' { 'FAIL' }
+            'invalid-manifest' { 'FAIL' }
+            default { 'WARN' }
+        }
         Write-Host ""
         Write-Host "==> Test-AppLaunch [$tag] status=$($Result.status)"
         if ($Result.layout) { Write-Host "    Layout : $($Result.layout)" }
@@ -230,6 +243,12 @@ if ($thePid) {
         Write-LaunchOut (New-LaunchResult $false 'crashed' "App launched (pid $thePid) but exited within ${SettleSeconds}s - startup crash." @{ layout = $Layout; aumid = $aumid; crash = [pscustomobject]$crash })
     }
 } else {
+    if ($runErr -match '(?i)manifest is invalid|app manifest\s+validation error|0xC00CE014|0x80080204') {
+        $detail = "Package registration rejected an invalid app manifest"
+        if ($runErr) { $detail = $detail + " - '" + $runErr + "'" }
+        Write-LaunchOut (New-LaunchResult $false 'invalid-manifest' $detail @{ layout = $Layout })
+    }
+
     # No PID. Distinguish a startup crash from a deploy/env failure by whether the
     # app actually got REGISTERED/ACTIVATED (winapp emits an AUMID once it does).
     if ($aumid) {

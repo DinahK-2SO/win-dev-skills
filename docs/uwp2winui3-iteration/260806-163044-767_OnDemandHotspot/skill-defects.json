@@ -1,0 +1,37 @@
+{
+  "scenario": "OnDemandHotspot",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The migrated package could not register because runFullTrust followed a custom capability, yet validation returned PASS.",
+      "evidence": "migration-score.json migration_launch_status and session-log.txt lines 3508-3557: 0xC00CE014/0x80080204 identified an unexpected rescap:Capability under Capabilities.",
+      "skill_search": "Searched SKILL.md, MIGRATION-PATTERNS.md, Test-AppLaunch.ps1, and Validate-UwpMigration.ps1 for CustomCapability, capability order, 0xC00CE014, and 0x80080204.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "MIGRATION-PATTERNS.md said to keep UWP capabilities and add runFullTrust 'no matter what'; Test-AppLaunch.ps1 said never registered always means deployment/environment and Validate-UwpMigration.ps1 mapped unavailable to WARN.",
+      "root_cause": "The skill omitted AppX's ordered Capabilities content model and incorrectly treated explicit manifest schema rejection as environmental.",
+      "proposed_fix": "Document the order, add a deterministic validator order check, and classify explicit manifest schema rejection as invalid-manifest/FAIL.",
+      "generalizes": "Any packaged migration combining runFullTrust with custom or device capabilities can build successfully but fail package registration."
+    },
+    {
+      "problem": "The prescribed build command was unavailable.",
+      "evidence": "session-log.txt lines 2599-2665: winapp build exited 1 because build is not a winapp command.",
+      "skill_search": "Searched the migration skill for 'winapp build'; it appeared in Step 3, command discipline, final validation, and supporting prose.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer `winapp build` to compile.",
+      "root_cause": "The skill conflated winapp's package-identity launch role with native project compilation.",
+      "proposed_fix": "Use dotnet build against the target csproj and reserve winapp/Test-AppLaunch for launch.",
+      "generalizes": "Every migrated .NET WinUI project needs a reliable build command independent of winapp CLI command availability."
+    },
+    {
+      "problem": "Bootstrap copied legacy assembly metadata that conflicts with SDK-generated attributes.",
+      "evidence": "session-log.txt lines 3322-3369: copied BackgroundTask\\Properties\\AssemblyInfo.cs caused six CS0579 duplicate attribute errors.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 and MIGRATION-PATTERNS.md for AssemblyInfo and CS0579; no handling existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap copied every .cs file, including legacy Properties\\AssemblyInfo.cs files that SDK-style projects regenerate.",
+      "proposed_fix": "Exclude legacy Properties\\AssemblyInfo.cs during bootstrap copy.",
+      "generalizes": "Classic UWP projects and child projects commonly carry AssemblyInfo.cs and produce the same SDK-style duplicate attribute errors."
+    }
+  ]
+}

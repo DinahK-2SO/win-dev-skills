@@ -1,0 +1,49 @@
+{
+  "scenario": "OnDemandHotspot",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Bootstrap self-check ran before bootstrap completed and returned False.",
+      "evidence": "session-log.txt lines 97-135 show the two commands launched together; lines 137-202 show the sequential retry returned True.",
+      "covered_clearly_at": "SKILL.md Step 0 says the literal first three PowerShell commands are ordered and explicitly says not to proceed until Test-Path returns True.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The required ordering and gate are already explicit and prominent."
+    },
+    {
+      "problem": "dotnet run was first invoked from a directory with no project.",
+      "evidence": "session-log.txt lines 2677-2699: the first invocation failed, then --project with the csproj succeeded in locating the project.",
+      "covered_clearly_at": "SKILL.md Step 3 commands use the WinUI project root/target, and Test-AppLaunch's Target parameter is defined as the folder containing the csproj.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Passing the actual project path is normal command targeting, not a migration-specific knowledge gap."
+    },
+    {
+      "problem": "Explicit Compile items caused NETSDK1022 duplicate source inclusion.",
+      "evidence": "session-log.txt lines 2704-2707 and 2718-2818.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md 'Project File Updates' says UWP explicit Compile Include items do not build under the SDK-style target and says not to copy the UWP csproj.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The agent fetched the csproj anchor before adding the prohibited explicit Compile items."
+    },
+    {
+      "problem": "The agent linked shared XAML through brittle relative/absolute paths, then regenerated it, causing WMC9999 and missing generated members.",
+      "evidence": "session-log.txt lines 2812-2868 and 3295-3299 show repeated link changes followed by creation of a replacement local XAML file.",
+      "covered_clearly_at": "SKILL.md Critical Rules > Fidelity says not to regenerate XAML and to copy each XAML file verbatim before transforming it.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The existing fidelity rule directly prohibits both the eventual regeneration and failure to preserve the source XAML."
+    },
+    {
+      "problem": "Deleting MainWindow while App still referenced it caused CS0246 and an incoherent shell.",
+      "evidence": "session-log.txt lines 1967-1977 delete MainWindow; lines 2867-2868 report missing MainWindow.",
+      "covered_clearly_at": "SKILL.md Shell conversion and navigation invariants require choosing a coherent target shell and preserving reachability; the single-page option is a Page hosted directly under Window.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Deleting a referenced type without updating its caller is a local edit consistency error."
+    },
+    {
+      "problem": "All migration mapping rows remained copied until the validator failed.",
+      "evidence": "session-log.txt lines 3471-3498: validator found five copied rows and the agent then changed them to done.",
+      "covered_clearly_at": "SKILL.md Step 1 says to flip each row from copied to done/deferred, and Step 4 lists copied rows as a validator failure.",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "The validator caught the omission and the existing instructions already state the exact fix."
+    }
+  ]
+}
