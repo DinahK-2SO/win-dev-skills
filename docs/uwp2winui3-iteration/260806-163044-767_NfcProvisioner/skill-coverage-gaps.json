@@ -1,0 +1,15 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The UWP manifest Application EntryPoint remained and the migrated package could not activate.",
+      "evidence": "MIGRATION-PATTERNS.md was fetched in turn 8, but Package.appxmanifest still used EntryPoint=\"NfcProvisioner.App\"; turns 24-40 and migration-score.json show Arg_COMException activation failure.",
+      "covered_at": "MIGRATION-PATTERNS.md, Project File Updates > Manifest migration checklist, item 4",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Enforce the existing EntryPoint=\"$targetentrypoint$\" requirement in Validate-UwpMigration.ps1 so the long manifest checklist cannot be partially applied.",
+      "generalizes": "Every packaged UWP-to-WinUI migration starts with a UWP App-class entry point and must retain the scaffold's generated WinUI entry-point placeholder."
+    }
+  ]
+}

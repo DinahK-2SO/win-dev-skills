@@ -1,0 +1,38 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap omitted externally linked UWP project content.",
+      "evidence": "lessons.json dev_agent_struggles[0]; session-log turn 2 copied 4 files and turns 7-12 manually recovered linked SharedContent.",
+      "root_cause": "Initialize-UwpMigration.ps1 copied the directory tree but did not evaluate Include + Link project items.",
+      "tier": 1,
+      "change": "Resolve common linked-item properties, copy supported Compile/ApplicationDefinition/Page/Content/None items to their Link paths, include them in migration mapping, and fail on unresolved links.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared UWP shells, styles, helpers, and assets enter the normal namespace rewrite and TODO triage automatically.",
+      "falsifiable_check": "Running bootstrap on NfcProvisioner copies 17 items and creates App.xaml, App.xaml.cs, MainPage.xaml, MainPage.xaml.cs, Styles/Styles.xaml, and linked Assets without manual discovery."
+    },
+    {
+      "problem": "Manifest checks missed schema ordering and did not enforce the existing WinUI entry-point rule.",
+      "evidence": "skill-defects.json item 1 and skill-coverage-gaps.json item 0; turn 22 registration error and migration-score.json candidate_launchable=false.",
+      "root_cause": "Validation checked Desktop target and runFullTrust presence only, allowing both an invalid child order and UWP App entry point.",
+      "tier": 1,
+      "change": "Reject capabilities after DeviceCapability, reject Application EntryPoint values other than $targetentrypoint$, and document AppX capability ordering.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Registration-breaking manifest defects fail before runtime and point directly to the existing manifest checklist.",
+      "falsifiable_check": "The trial manifest fails validation for EntryPoint=\"NfcProvisioner.App\"; moving rescap:Capability after DeviceCapability independently fails with an ordering diagnostic."
+    },
+    {
+      "problem": "An unavailable smoke launch could satisfy the mandatory validation gate.",
+      "evidence": "skill-defects.json item 2; turn 40 validator PASS followed by scorer candidate_launchable=false.",
+      "root_cause": "Validate-UwpMigration mapped unavailable to WARN even though no live process had been observed.",
+      "tier": 1,
+      "change": "Map unavailable launch status to FAIL and clarify in SKILL.md that only an observed running process satisfies runtime validation.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1; skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Environment, registration, and output-lock failures remain distinguishable from crashes but cannot produce false completion.",
+      "falsifiable_check": "A resources.pri lock or any no-AUMID/no-PID result makes Validate-UwpMigration exit 1 rather than report PASS."
+    }
+  ],
+  "deferred_to_human": []
+}

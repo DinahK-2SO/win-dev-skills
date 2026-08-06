@@ -58,7 +58,7 @@ Do:
 
 - Only after step 3 returns `True` may you read source files, plan transformations, or edit anything.
 
-The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you exactly what it did, what artifacts now exist, and what to do next. Read that block; do not re-derive the same info by browsing the tree.
+The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you exactly what it did, what artifacts now exist, and what to do next. It also resolves legacy `.csproj` items with `<Link>` metadata so shared shells, styles, and assets outside the project folder are copied to their linked target paths; an unresolved link stops bootstrap rather than silently omitting part of the app. Read the summary block; do not re-derive the same info by browsing the tree.
 
 ### Step 1 — Migrate, file by file
 
@@ -155,7 +155,7 @@ The validator covers:
 4. **`MIGRATION-DEFERRED.md` consistency** — every defer row in mapping has a matching row in the deferred file.
 5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability.
 6. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
-7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
+7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** unless the app is observed alive. A startup crash reports the captured exception (native code + .NET type); an unavailable deployment is inconclusive and cannot satisfy the mandatory gate. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes).
 
 The validator's stdout is intentionally terse: `[FAIL]` lines show only `file:line` (plus an error code where applicable). The full diagnostic text — code snippets, compiler error messages — is written to `.validator-diagnostics.txt` at the project root. **Open that file** to read the details before deciding the fix.
 

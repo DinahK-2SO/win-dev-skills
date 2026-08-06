@@ -1,0 +1,167 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log turns 2-3: created MIGRATION-MAPPING.md, injected the picker TODO, and preserved the UWP project reference."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "turns 4 and 8: returned focused picker and project/manifest guidance without loading the full pattern file."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1 and Windows Application event log",
+      "evidence": "turns 25-26 and 35: distinguished a registered startup crash and exposed COMException 0x8001010E at Application.Start/Program.Main."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "turns 31 and 34: caught UWP residue, build failures, and repeated startup crashes."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "Copied only files physically under the project directory and omitted csproj-linked shared shell, styles, code, and assets.",
+      "evidence": "turn 2 reported 4 copied files; turns 7-12 manually discovered and copied SharedContent items referenced through <Link> metadata."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "problem": "Accepted an invalid/inconclusive package launch as PASS and did not validate the WinUI application entry point or capability element order.",
+      "evidence": "turn 22 passed despite manifest schema error; turn 40 passed after an unavailable user-mapped resources.pri launch; scoring later failed activation with Arg_COMException."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "Its structured crash result included exception type/message but not the event 1026 stack, so the agent had to query Get-WinEvent separately to see Program.Main.",
+      "suggested_tweak": "Preserve the full event 1026 stack in diagnostics while keeping stdout concise."
+    },
+    {
+      "tool": "dotnet run",
+      "limitation": "Running it from the parent app directory failed because no project existed there.",
+      "suggested_tweak": "Always pass --project or run from the scaffolded project root."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "Microsoft.UI.Xaml.Application.Start",
+      "why_tried": "Generated WinUI application startup.",
+      "root_cause": "The migrated package retained a UWP-style Application EntryPoint instead of the WinUI scaffold's $targetentrypoint$ placeholder; validation did not reject it.",
+      "fix": "Preserve EntryPoint=\"$targetentrypoint$\" and make the validator fail any packaged WinUI application entry point with a different value."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 4 runtime smoke launch",
+      "wrong": "A genuine deploy/environment failure was documented as a non-fatal WARN that still allowed validator PASS.",
+      "correct": "An unavailable launch is inconclusive and cannot satisfy a mandatory launchability gate."
+    },
+    {
+      "where": "MIGRATION-PATTERNS.md manifest migration checklist",
+      "wrong": "The checklist required runFullTrust but did not state AppX schema ordering among Capability, rescap:Capability, and DeviceCapability.",
+      "correct": "Ordinary and restricted capabilities must precede DeviceCapability elements."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Storage.Pickers.FileOpenPicker",
+      "special_handling": "Initialize the picker with the WinUI window HWND before PickSingleFileAsync."
+    },
+    {
+      "api": "Windows.Networking.Proximity.ProximityDevice",
+      "special_handling": "The API is hardware-dependent; preserve a visible status path when GetDefault returns null."
+    },
+    {
+      "api": "Package.appxmanifest Application/Capabilities",
+      "special_handling": "Keep the WinUI $targetentrypoint$ placeholder and schema-significant capability ordering."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initial Test-Path MIGRATION-MAPPING.md returned False.",
+      "root_cause": "The bootstrap and self-check were launched in parallel, so the check raced file creation.",
+      "fix": "Run bootstrap and then the self-check sequentially; the recheck returned True."
+    },
+    {
+      "error": "dotnet run: Couldn't find a project to run.",
+      "root_cause": "Command ran from the parent app directory.",
+      "fix": "Pass --project with the scaffolded csproj."
+    },
+    {
+      "error": "CS0246 MainPage, CS0103 App, WMC0909 local:Scenario, WMC1111, WMC9999.",
+      "root_cause": "Linked shared shell files were omitted, then manually reconstructed with namespaces that did not match the scaffold and a compiled binding that failed type resolution.",
+      "fix": "Reconcile namespaces/usings and replace the failing template x:Bind with Binding; the general prevention is to copy evaluated linked project items during bootstrap."
+    },
+    {
+      "error": "CS9035 required Scenario members from generated XamlTypeInfo.g.cs.",
+      "root_cause": "The agent added C# required members to a XAML-activated model type.",
+      "fix": "Use non-null default initializers instead of required on XAML-created types."
+    },
+    {
+      "error": "0xC00CE014 / 0x80080204: rescap:Capability unexpected after DeviceCapability.",
+      "root_cause": "AppX manifest capability children were in schema-invalid order.",
+      "fix": "Place ordinary and restricted capabilities before all DeviceCapability elements."
+    },
+    {
+      "error": "Arg_COMException / 0x8001010E at Application.Start and Program.Main.",
+      "root_cause": "The UWP-style manifest application entry point remained, while the validator checked only Desktop target and runFullTrust.",
+      "fix": "Restore EntryPoint=\"$targetentrypoint$\" and validate it mechanically."
+    },
+    {
+      "error": "resources.pri had a user-mapped section open.",
+      "root_cause": "dotnet run and the validator's build/launch were started concurrently against the same output.",
+      "fix": "Run build/launch gates sequentially and never treat an unavailable launch as proof of success."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "turns 7-12",
+      "symptom": "Searched a large SharedContent tree and manually copied/recreated shell files, styles, and assets.",
+      "turns_or_retries": "6 turns",
+      "root_cause": "Bootstrap ignored external items linked by the legacy csproj.",
+      "how_resolved": "The agent found the linked files from csproj references and copied them manually.",
+      "preventable_by": "Teach Initialize-UwpMigration.ps1 to resolve Include + Link items and stop on unresolved links."
+    },
+    {
+      "where": "turns 16-21",
+      "symptom": "Multiple compile/XAML retries for namespace, binding, nullability, and required-member errors.",
+      "turns_or_retries": "3 build attempts",
+      "root_cause": "Manual shell reconstruction introduced inconsistent namespaces and XAML model constraints.",
+      "how_resolved": "Added usings, changed x:Bind to Binding, and replaced required properties with defaults.",
+      "preventable_by": "Copy linked source verbatim during bootstrap so the normal namespace rewrite and TODO inventory operate on the complete source."
+    },
+    {
+      "where": "turns 22-24",
+      "symptom": "Validator first passed an invalid manifest, then launch failed registration.",
+      "turns_or_retries": "2 launch/validation attempts",
+      "root_cause": "Validator checked capability presence but not AppX schema ordering.",
+      "how_resolved": "Moved runFullTrust before DeviceCapability.",
+      "preventable_by": "Add a manifest capability-order check to Validate-UwpMigration.ps1."
+    },
+    {
+      "where": "turns 25-40",
+      "symptom": "Repeated startup crashes led to unrelated namespace/resource/bootstrap-property edits and ended with an unavailable launch reported as PASS.",
+      "turns_or_retries": "6 launch/validation attempts",
+      "root_cause": "The validator omitted the required WinUI application entry-point check and allowed an inconclusive launch to pass.",
+      "how_resolved": "Not resolved in the migration trial; the scorer reproduced Arg_COMException.",
+      "preventable_by": "Validate EntryPoint=\"$targetentrypoint$\" and fail the mandatory gate whenever launch status is unavailable."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Evaluated linked-item copy during bootstrap",
+      "would_have_saved": "Manual SharedContent discovery, shell reconstruction, asset copying, and several derivative compile errors."
+    },
+    {
+      "need": "Complete packaged-manifest validation",
+      "would_have_saved": "The registration-order retry and the unresolved UWP entry-point activation failure."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "Concurrent launch/build operations locked resources.pri.",
+      "workaround": "Serialize dotnet run, Test-AppLaunch, and Validate-UwpMigration invocations."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap silently omitted source, XAML, styles, and assets linked from outside the UWP project directory.",
+      "evidence": "session-log turn 2 copied 4 files; turns 7-12 manually recovered SharedContent files; the source csproj contains Compile/ApplicationDefinition/Page/Content items with Link metadata.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Link, Compile Include, ApplicationDefinition Include, and Content Include; the script only recursively copied physical files under -Source.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap treated the project directory as the complete source graph instead of honoring linked project items.",
+      "proposed_fix": "Resolve common csproj Include properties for items with Link metadata, copy them to the Link path, include them in mapping/triage, and stop on unresolved links.",
+      "generalizes": "Legacy UWP SDK samples commonly share App, MainPage, styles, helpers, and media through linked project items."
+    },
+    {
+      "problem": "Manifest validation omitted AppX capability child ordering.",
+      "evidence": "session-log turn 22: validator reported PASS while winapp registration failed with 0xC00CE014/0x80080204 because rescap:Capability followed DeviceCapability.",
+      "skill_search": "Searched MIGRATION-PATTERNS.md and Validate-UwpMigration.ps1 for C00CE014, 80080204, capability order, and DeviceCapability; no ordering rule/check existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill checked that runFullTrust existed but not whether capability children conformed to AppX schema order.",
+      "proposed_fix": "Document capability ordering and make the validator reject any non-device capability after the first DeviceCapability.",
+      "generalizes": "Any packaged hardware sample that combines runFullTrust with camera, proximity, Bluetooth, microphone, or other device capabilities can hit this registration failure."
+    },
+    {
+      "problem": "The mandatory validator allowed an unavailable launch to return PASS.",
+      "evidence": "session-log turn 40: resources.pri lock produced launch status unavailable, yet Validate-UwpMigration reported PASS; migration-score.json later recorded candidate_launchable=false with Arg_COMException.",
+      "skill_search": "SKILL.md Step 4 and Validate-UwpMigration.ps1 explicitly mapped genuine deploy/environment failure to non-fatal WARN.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.",
+      "root_cause": "An inconclusive launch was treated as successful completion even though the gate's purpose is to prove launchability.",
+      "proposed_fix": "Fail final validation unless the smoke helper observes the process alive; retain the diagnostic distinction between crash and unavailable.",
+      "generalizes": "Registration locks, certificate issues, missing dependencies, and developer-mode failures all prevent launch verification and must not produce success-shaped migration results."
+    }
+  ]
+}

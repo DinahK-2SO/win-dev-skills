@@ -1,0 +1,35 @@
+{
+  "scenario": "NfcProvisioner",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Bootstrap self-check raced bootstrap and initially returned False.",
+      "evidence": "session-log turn 2 launched Initialize-UwpMigration.ps1 and Test-Path in parallel; the subsequent turn 3 recheck returned True.",
+      "covered_clearly_at": "SKILL.md Step 0 lines 34-47: literal first three commands and self-check must print True; hard rule says do not proceed on False.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The sequencing and required result are already explicit and prominent."
+    },
+    {
+      "problem": "dotnet run was invoked from the parent directory without --project.",
+      "evidence": "session-log turn 15: Couldn't find a project to run; turn 16 succeeded in reaching compilation after adding --project.",
+      "covered_clearly_at": "SKILL.md Step 3 identifies <winui3-project-root> as the command target and all helper examples take the target project root.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The immediate error was self-explanatory and fixed in one retry."
+    },
+    {
+      "problem": "The agent added required members to a type instantiated by generated XAML metadata.",
+      "evidence": "session-log turns 19-21: required Scenario.Title/ClassType caused CS9035 in XamlTypeInfo.g.cs and was reverted to default initializers.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md XAML Migration > x:Bind and compiled bindings identifies generated compiled-binding/type metadata; this specific edit was unnecessary agent-created code.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable rerun need not introduce required members merely to clear nullable warnings."
+    },
+    {
+      "problem": "dotnet run and final validation were launched concurrently, locking resources.pri.",
+      "evidence": "session-log turn 40 started both commands together; validator reported a user-mapped section open for resources.pri.",
+      "covered_clearly_at": "SKILL.md Step 3 prescribes a sequential build -> launch -> repeat loop and Step 4 runs validation as the final gate.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The workflow is already sequential; the skill change instead prevents the resulting unavailable launch from being mistaken for PASS."
+    }
+  ]
+}

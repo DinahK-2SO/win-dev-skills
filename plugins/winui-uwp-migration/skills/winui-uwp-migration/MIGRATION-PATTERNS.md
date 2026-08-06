@@ -648,6 +648,8 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
    ```
    Packaged WinUI 3 desktop apps run outside the UWP AppContainer sandbox and must declare this. Keep any UWP `<Capability>` entries you actually use (e.g. `<DeviceCapability Name="webcam" />`) but add the `runFullTrust` line above no matter what.
 
+   AppX manifest child order is schema-significant: put ordinary `<Capability>` entries first, then `<rescap:Capability>`, then every `<DeviceCapability>`. Placing `runFullTrust` after a device capability fails registration with `0xC00CE014` / `0x80080204` even though the XML is well-formed.
+
 4. **`<Application EntryPoint="$targetentrypoint$">`** — the WinUI 3 scaffold uses an MSBuild placeholder that the build resolves to the real entry point. Don't replace it with a literal `<UwpAppName>.App` (that's a UWP entry-point pattern).
 
 5. **Carry over every UWP `<Extension>` the app's behavior depends on.** The scaffold manifest has none; the UWP manifest's `<Extensions>` are activation/registration prerequisites — omitting them makes the feature fail **at runtime** (often as a silently dead control), not at build time. Copy each `<Extension>` block from the UWP source manifest (under `.uwp-source/` or the copied UWP `Package.appxmanifest`) into the WinUI 3 root manifest's `<Application>`. Common ones:
