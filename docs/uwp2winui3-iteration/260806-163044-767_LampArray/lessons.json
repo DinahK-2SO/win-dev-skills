@@ -1,0 +1,134 @@
+{
+  "scenario": "LampArray",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "Migration session turn 2 reran the bootstrap successfully and produced MIGRATION-MAPPING.md, .bootstrap-meta.json, six threading TODOs, and file execution modes."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "Migration session turn 4 fetched only the threading anchor and gave the agent the intended CoreDispatcher-to-DispatcherQueue recipe."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Parallel execution of the mandatory scaffold/bootstrap/self-check commands",
+      "problem": "The bootstrap and self-check ran before dotnet new winui finished.",
+      "evidence": "Migration session turn 1 returned Target not found and False; turn 2 had to rerun both operations after scaffold completion."
+    },
+    {
+      "tool": "Source globbing",
+      "problem": "The source glob exposed 35 generated bin/obj files while the authored XAML was linked from outside the project directory.",
+      "evidence": "Migration session turn 6 listed 26 obj and 9 bin files but only three authored files at the project root; turns 7-10 then searched generated output and SharedContent manually."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It enumerated only files physically below -Source and ignored explicit MSBuild items whose Include path pointed outside that directory.",
+      "suggested_tweak": "Parse Compile, Page, ApplicationDefinition, Content, and AppxManifest items and copy existing linked files to their Link paths before triage."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "Microsoft.Graphics.Canvas / Win2D",
+      "why_tried": "The effects scenario retained its bitmap-generation feature from the UWP source.",
+      "root_cause": "The source referenced Win2D.uwp, but the target project did not replace it with the WinUI-compatible Microsoft.Graphics.Win2D package.",
+      "fix": "Replace the UWP package ID with Microsoft.Graphics.Win2D while retaining the Microsoft.Graphics.Canvas namespaces."
+    },
+    {
+      "api": "Microsoft.UI.Dispatching.DispatcherQueue",
+      "why_tried": "The six bootstrap TODOs correctly required replacing UI-thread dispatch calls.",
+      "root_cause": "Files also imported Windows.System, which defines another DispatcherQueue type, so the unqualified name was ambiguous.",
+      "fix": "Alias Microsoft.UI.Dispatching.DispatcherQueue and use that alias for fields and GetForCurrentThread calls."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 1 fidelity guidance and Initialize-UwpMigration.ps1 Step 1",
+      "wrong": "The mapping was treated as a complete inventory even though the bootstrap could not discover linked source items outside -Source.",
+      "correct": "The bootstrap must resolve explicit linked MSBuild items and map their Link destinations before claiming the inventory is complete."
+    },
+    {
+      "where": "MIGRATION-PATTERNS.md PackageReference reconciliation",
+      "wrong": "The generic instruction to carry third-party packages forward did not distinguish UWP-only integration package IDs.",
+      "correct": "UWP-specific packages require a WinUI-compatible replacement; Win2D.uwp maps to Microsoft.Graphics.Win2D."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Devices.Lights.LampArray",
+      "special_handling": "When the scaffold root namespace has the same identifier as a platform type, alias or fully qualify the platform type instead of renaming the whole project namespace."
+    },
+    {
+      "api": "DispatcherQueue with Windows.System",
+      "special_handling": "Retain Windows.System when needed for Launcher, but alias the Microsoft.UI.Dispatching type to avoid CS0104."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initialize-UwpMigration.ps1: Target not found; self-check returned False",
+      "root_cause": "The three ordered bootstrap commands were issued in parallel, so bootstrap raced project scaffolding.",
+      "fix": "Run scaffold, bootstrap, and self-check sequentially; the agent recovered with one rerun."
+    },
+    {
+      "error": "CS0234/CS0246 for Microsoft.Graphics.Canvas, CanvasDevice, CanvasRenderTarget, and CanvasDrawingSession",
+      "root_cause": "The target omitted the WinUI-compatible Win2D package while preserving code that depends on it.",
+      "fix": "Reference Microsoft.Graphics.Win2D."
+    },
+    {
+      "error": "CS0118: 'LampArray' is a namespace but is used like a type",
+      "root_cause": "The scaffold namespace LampArray shadowed Windows.Devices.Lights.LampArray.",
+      "fix": "Alias Windows.Devices.Lights.LampArray and use the alias at every type and static-call site."
+    },
+    {
+      "error": "CS0104: DispatcherQueue is ambiguous between Microsoft.UI.Dispatching and Windows.System",
+      "root_cause": "Both namespaces were imported and the migrated code used an unqualified type name.",
+      "fix": "Use a namespace alias for Microsoft.UI.Dispatching.DispatcherQueue."
+    },
+    {
+      "error": "WMC1509, WMC0909, WMC1111, and WMC9999 around local:Scenario",
+      "root_cause": "Markup pass 2 had no successfully compiled local assembly because preceding C# compilation failed, so the local Scenario type could not be resolved and later XAML errors cascaded.",
+      "fix": "Fix the C# dependency and type-resolution errors first, then rebuild before changing otherwise-correct x:DataType markup."
+    },
+    {
+      "error": "Migration timed out with builds=false and runs=false",
+      "root_cause": "The incomplete bootstrap forced manual recovery of linked shell/XAML/assets, consuming turns 6-15 before the agent ever built.",
+      "fix": "Copy linked project items during bootstrap and start the required build-fix loop immediately after each file batch."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Migration session turns 1-2",
+      "symptom": "Bootstrap failed because its target did not exist.",
+      "turns_or_retries": "One failed attempt and one successful retry.",
+      "root_cause": "Commands documented as ordered were dispatched concurrently.",
+      "how_resolved": "The agent reran bootstrap after dotnet new winui completed.",
+      "preventable_by": "Execute the mandatory scaffold/bootstrap/self-check sequence serially."
+    },
+    {
+      "where": "Migration session turns 6-15",
+      "symptom": "The agent searched generated obj XAML, browsed the large SharedContent tree, and manually recreated shell pages, styles, and assets.",
+      "turns_or_retries": "Approximately ten turns of discovery and reconstruction.",
+      "root_cause": "The bootstrap copied only four physical files and omitted 17 linked project items.",
+      "how_resolved": "The agent manually located SharedContent and authored replacement files, but timed out before a build.",
+      "preventable_by": "Teach Initialize-UwpMigration.ps1 to resolve linked MSBuild items automatically."
+    },
+    {
+      "where": "Migration session overall",
+      "symptom": "No migration-time build or mandatory validator run occurred; scoring discovered all compiler failures.",
+      "turns_or_retries": "Sixteen turns, then timeout.",
+      "root_cause": "Manual source recovery displaced the prominent build-fix-validate loop.",
+      "how_resolved": "Not resolved in the migration trial.",
+      "preventable_by": "Complete source inventory mechanically so the existing build-after-batch and mandatory validation rules can run within budget."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Linked MSBuild item materialization",
+      "would_have_saved": "Manual discovery and reconstruction of App.xaml, MainPage, scenario XAML, styles, shared code, and assets across turns 6-15."
+    }
+  ],
+  "env_issues": []
+}

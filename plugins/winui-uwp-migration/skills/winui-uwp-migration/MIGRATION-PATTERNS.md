@@ -27,6 +27,20 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0118: '<name>' is a namespace but is used like a type`
+
+This often appears when the scaffold's root namespace matches a platform type used by the source (for example, a project named after the device or control it demonstrates). Inside that namespace, the unqualified identifier resolves to the namespace before the imported type.
+
+Keep the project namespace and alias or fully qualify the platform type:
+
+```csharp
+using PlatformLampArray = Windows.Devices.Lights.LampArray;
+
+private readonly PlatformLampArray _device;
+```
+
+Apply the alias consistently to fields, parameters, return types, and static calls. Renaming the whole project namespace is a higher-risk fix because every `x:Class`, `xmlns:local`, and code-behind namespace must then change together.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -148,6 +162,15 @@ DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () => ProgressBar.Value
 ```
 
 Cache the queue off the UI thread via `DispatcherQueue.GetForCurrentThread()`. UWP's ASTA reentrancy protection is gone — watch for reentrancy in async code that pumps messages. See the official [threading guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/threading).
+
+If the file also imports `Windows.System` (commonly for `Launcher`), `DispatcherQueue` is ambiguous because both namespaces define that name. Alias the WinUI queue instead of removing a still-needed namespace:
+
+```csharp
+using UiDispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue;
+
+private readonly UiDispatcherQueue _dispatcherQueue =
+    UiDispatcherQueue.GetForCurrentThread();
+```
 
 <a id="dialogs"></a>
 ## Dialogs: MessageDialog → ContentDialog
@@ -581,6 +604,9 @@ public void Control_DefaultState_IsValid()
   - `Microsoft.Windows.SDK.BuildTools`
 - **Add** (project-specific — copy across, then update to a WinAppSDK-compatible version):
   - Third-party libraries the UWP project pulled in (`CommunityToolkit.*`, `Microsoft.Extensions.*`, `Newtonsoft.Json`, etc.). Pick the latest stable release; UWP-pinned versions are usually too old.
+  - Replace UWP-specific integration packages with their WinUI variants rather than copying the old package ID. In particular, replace `Win2D.uwp` with `Microsoft.Graphics.Win2D`; the `Microsoft.Graphics.Canvas` namespaces stay the same, but the UWP package does not supply WinUI 3 references.
+
+Do this reconciliation before the first build. An unresolved namespace from a package used in the UWP `.csproj` is a dependency-mapping problem, not a reason to delete the feature code.
 
 Do **not** copy the UWP `.csproj` over the scaffold's. The two formats are incompatible — the UWP csproj carries `<TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>`, `<OutputType>AppContainerExe</OutputType>`, explicit `<Compile Include="...">` items, and `Microsoft.Common.props` imports, none of which build under WinAppSDK.
 

@@ -10,7 +10,8 @@ workflow to confirm residue grep, mapping integrity, deferred consistency,
 build cleanliness, and runtime smoke.
 
 Steps:
-1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
+1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, including linked
+   project items outside the project directory and preserving their Link paths
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
@@ -76,6 +77,7 @@ $srcExcludeDirs = @('bin', 'obj', '.vs', '.git', '.github', '.copilot', 'package
 $srcExcludePattern = '\\(' + ($srcExcludeDirs -join '|') + ')\\'
 
 $copied = New-Object System.Collections.Generic.List[string]
+$sourceCsprojs = @(Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue)
 
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
@@ -97,16 +99,64 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
     [void]$copied.Add($rel)
 }
 
-Write-Host "    Copied $($copied.Count) source files"
+# Old-style UWP projects commonly link shared shell XAML, code, and assets from
+# directories outside the project root. Directory enumeration cannot see those
+# files, so resolve explicit MSBuild items and copy them to their Link paths.
+$linkedCopied = 0
+foreach ($project in $sourceCsprojs) {
+    [xml]$projectXml = Get-Content -LiteralPath $project.FullName -Raw
+    $projectItems = $projectXml.SelectNodes(
+        "//*[local-name()='Compile' or local-name()='Page' or local-name()='ApplicationDefinition' or local-name()='Content' or local-name()='AppxManifest']"
+    )
+
+    foreach ($item in $projectItems) {
+        $include = [string]$item.Include
+        if ([string]::IsNullOrWhiteSpace($include) -or $include -match '[$*?]') { continue }
+
+        $sourceFull = [System.IO.Path]::GetFullPath((Join-Path $project.DirectoryName $include))
+        if (-not [System.IO.File]::Exists($sourceFull)) {
+            Write-Warning "    Project item not found: $include"
+            continue
+        }
+        if (('\' + $sourceFull) -match $srcExcludePattern) { continue }
+
+        $linkNode = $item.SelectSingleNode("*[local-name()='Link']")
+        if ($linkNode -and -not [string]::IsNullOrWhiteSpace($linkNode.InnerText)) {
+            $rel = $linkNode.InnerText
+        } elseif ($sourceFull.StartsWith($Source + '\', [System.StringComparison]::OrdinalIgnoreCase)) {
+            $rel = [System.IO.Path]::GetRelativePath($Source, $sourceFull)
+        } else {
+            $rel = [System.IO.Path]::GetFileName($sourceFull)
+        }
+        $rel = $rel.Replace('/', '\')
+
+        $dst = [System.IO.Path]::GetFullPath((Join-Path $Target $rel))
+        $targetPrefix = $Target.TrimEnd('\') + '\'
+        if (-not $dst.StartsWith($targetPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "Linked project item escapes target directory: $rel"
+        }
+
+        $dstDir = [System.IO.Path]::GetDirectoryName($dst)
+        if (-not (Test-Path -LiteralPath $dstDir)) {
+            New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
+        }
+        Copy-Item -LiteralPath $sourceFull -Destination $dst -Force
+        if ($copied -notcontains $rel) {
+            [void]$copied.Add($rel)
+            $linkedCopied++
+        }
+    }
+}
+
+Write-Host "    Copied $($copied.Count) source files ($linkedCopied linked project items)"
 
 # ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
-$uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
 $refDir = Join-Path $Target '.uwp-source'
-if ($uwpCsprojs.Count -gt 0) {
+if ($sourceCsprojs.Count -gt 0) {
     if (-not (Test-Path -LiteralPath $refDir)) {
         New-Item -ItemType Directory -Path $refDir -Force | Out-Null
     }
-    foreach ($p in $uwpCsprojs) {
+    foreach ($p in $sourceCsprojs) {
         $dst = Join-Path $refDir $p.Name
         Copy-Item -LiteralPath $p.FullName -Destination $dst -Force
         Write-Host "    Preserved $($p.Name) at .uwp-source/ (reference only — do not edit, do not include in build)"

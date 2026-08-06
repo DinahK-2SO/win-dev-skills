@@ -1,0 +1,38 @@
+{
+  "scenario": "LampArray",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap inventory omitted linked MSBuild items outside the project directory.",
+      "evidence": "lessons.json dev_agent_struggles[1] and skill-defects.json items[0]: 4 files copied, 17 linked items omitted, approximately ten turns spent on manual recovery.",
+      "root_cause": "Initialize-UwpMigration.ps1 relied only on recursive directory enumeration below -Source.",
+      "tier": 1,
+      "change": "Parse explicit Compile, Page, ApplicationDefinition, Content, and AppxManifest items; resolve Include paths; copy existing files to validated Link destinations; include them in mapping and triage.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared UWP shell, page, code, and asset files arrive in the target automatically, eliminating generated-output archaeology and manual reconstruction.",
+      "falsifiable_check": "Running bootstrap on the same source reports 21 seeded rows, copies all 17 linked items, and leaves none of the nine representative linked destinations missing."
+    },
+    {
+      "problem": "Win2D UWP dependency was not translated to a WinUI-compatible package.",
+      "evidence": "skill-defects.json items[1] and scoring lines 726/730/735/739 show unresolved Canvas types while the source csproj references Win2D.uwp.",
+      "root_cause": "Package guidance treated project-specific libraries generically and omitted framework-specific package-ID replacement.",
+      "tier": 3,
+      "change": "Add an explicit Win2D.uwp to Microsoft.Graphics.Win2D mapping and dependency-first diagnosis rule.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents retain Win2D-backed features with the correct WinUI package instead of deleting code or carrying an incompatible UWP package.",
+      "falsifiable_check": "On rerun, the target csproj references Microsoft.Graphics.Win2D and emits no CS0234/CS0246 errors for Microsoft.Graphics.Canvas types."
+    },
+    {
+      "problem": "Common name collisions produced CS0118 for platform types and CS0104 for DispatcherQueue.",
+      "evidence": "skill-defects.json items[2], skill-coverage-gaps.json items[0], and scoring lines 727-740.",
+      "root_cause": "The app-name namespace shadowed a platform type, while the threading recipe did not address a retained Windows.System import.",
+      "tier": 3,
+      "change": "Add a CS0118 alias/qualification pattern and sharpen the existing threading section with a Microsoft.UI.Dispatching.DispatcherQueue alias example.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents resolve contextual compiler collisions surgically without risky namespace-wide renames or removing needed imports.",
+      "falsifiable_check": "On rerun, no CS0118 platform-type shadowing or CS0104 DispatcherQueue ambiguity remains."
+    }
+  ],
+  "deferred_to_human": []
+}

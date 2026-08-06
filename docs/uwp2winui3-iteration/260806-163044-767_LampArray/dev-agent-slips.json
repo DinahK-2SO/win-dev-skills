@@ -1,0 +1,21 @@
+{
+  "scenario": "LampArray",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The agent issued the mandatory scaffold, bootstrap, and self-check commands concurrently, causing a target-not-found failure and false self-check.",
+      "evidence": "Migration session turn 1 shows all three tool calls together; bootstrap failed with Target not found and Test-Path returned False. Turn 2 succeeded after rerunning sequentially.",
+      "covered_clearly_at": "SKILL.md Step 0 - Bootstrap (mandatory), especially the numbered commands and the rule not to proceed unless Test-Path returns True",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The sequence and success gate are already explicit and prominent; the agent recovered immediately once it followed them."
+    },
+    {
+      "problem": "The migration agent never ran the required build-fix loop or final validator, so both scored features failed and cascading XAML diagnostics were not investigated.",
+      "evidence": "Migration transcript ends at turn 16 immediately after edits; results.json records builds=false, runs=false, timeout=true. Scoring session turn 9 performed the first build and found the errors; migration-score.json marks both features fail.",
+      "covered_clearly_at": "SKILL.md Step 3 - Build, fix what tooling missed and Step 4 - Validate (mandatory before declaring done)",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The build loop and validator are already prominent mandatory gates. The linked-file tooling defect is being fixed separately so the existing gates fit within the run budget."
+    }
+  ]
+}

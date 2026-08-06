@@ -1,0 +1,37 @@
+{
+  "scenario": "LampArray",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The bootstrap omitted source, XAML, and asset items linked from outside the UWP project directory.",
+      "evidence": "Migration session turn 2 reported only 4 copied files and seeded 4 mapping rows, while .uwp-source/LampArray.csproj contains 17 external Compile, Page, ApplicationDefinition, and Content items. Turns 6-15 manually recovered them and results.json records timeout=true.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Link, Compile Include, Page Include, and ApplicationDefinition Include; Step 1 only used recursive directory enumeration below -Source.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The inventory treated the project directory as the complete source boundary instead of treating explicit MSBuild items as authoritative inputs.",
+      "proposed_fix": "Extend Initialize-UwpMigration.ps1 to parse explicit source/content items, resolve Include paths relative to the UWP csproj, and copy them to safe target Link paths before namespace rewriting and triage.",
+      "generalizes": "Legacy UWP projects and Microsoft SDK samples frequently share shell code, XAML, and assets through linked items outside the project folder."
+    },
+    {
+      "problem": "The skill did not map the UWP-only Win2D package to its WinUI-compatible package.",
+      "evidence": "The preserved UWP csproj references Win2D.uwp; scoring session lines 726, 730, 735, and 739 report unresolved Microsoft.Graphics.Canvas types.",
+      "skill_search": "Searched SKILL.md, MIGRATION-PATTERNS.md, and scripts for Win2D and Microsoft.Graphics.Canvas; no package mapping existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Generic third-party PackageReference guidance did not distinguish packages whose UWP and WinUI variants use different package IDs.",
+      "proposed_fix": "Add an explicit Win2D.uwp to Microsoft.Graphics.Win2D mapping and state that unresolved retained namespaces can indicate a framework-specific dependency replacement.",
+      "generalizes": "Graphics-heavy UWP apps commonly use Win2D, and carrying the UWP package ID into WinUI 3 consistently leaves Canvas types unresolved."
+    },
+    {
+      "problem": "The skill lacked guidance for CS0118 when the scaffold root namespace shadows a platform type.",
+      "evidence": "Scoring session lines 727-729, 732-734, 736-737, and 740 report that LampArray is a namespace but is used like a type.",
+      "skill_search": "Searched the skill for CS0118, namespace but is used like a type, using alias, and namespace collision; no matching pattern existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The scaffold used the app name as its namespace, which took precedence over an imported platform type with the same identifier.",
+      "proposed_fix": "Add a common-build-error pattern that aliases or fully qualifies the platform type and warns against broad project namespace renaming.",
+      "generalizes": "Samples and device-focused apps are often named after the API type they demonstrate, making namespace/type shadowing a recurring scaffold migration error."
+    }
+  ]
+}

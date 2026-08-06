@@ -1,0 +1,15 @@
+{
+  "scenario": "LampArray",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The threading recipe introduced an ambiguous DispatcherQueue name when Windows.System remained imported.",
+      "evidence": "Scoring session lines 731 and 738 report CS0104 between Microsoft.UI.Dispatching.DispatcherQueue and Windows.System.DispatcherQueue after migration turn 15 applied the threading recipe.",
+      "covered_at": "MIGRATION-PATTERNS.md#threading (Threading: CoreDispatcher to DispatcherQueue)",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "Keep the existing threading recipe but add a prominent alias example for files that also need Windows.System, especially for Launcher.",
+      "generalizes": "Windows.System is common in UWP shell and page code, so the otherwise-correct dispatcher migration repeatedly creates the same CS0104 collision."
+    }
+  ]
+}
