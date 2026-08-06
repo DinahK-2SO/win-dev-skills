@@ -1,0 +1,190 @@
+{
+  "scenario": "OCR",
+  "index": 1,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 917-1033: bootstrap completed, copied the local project inputs, injected migration TODOs, and seeded mapping metadata."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt lines 3970-4009: fetching anchor 'capture' returned the focused CaptureElement replacement recipe used in the next edit."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt lines 3698-3725 and 4026-4091 exposed concrete XAML and C# errors; lines 4276-4296 confirmed the fixes compiled."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 4331-4351: validator checked residue, mapping, manifest, build, and smoke launch and reported PASS."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1 via validator",
+      "evidence": "session-log.txt lines 4347-4348: smoke launch verified that the packaged process stayed alive."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed winapp CLI has no build command even though SKILL.md prescribed it.",
+      "evidence": "session-log.txt lines 3635-3694: winapp rejected 'build' as an unrecognized command, and the agent switched to dotnet build."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "problem": "The agent guessed the nonexistent anchor 'media-capture' instead of using the bootstrap TODO's 'capture' anchor.",
+      "evidence": "session-log.txt lines 3729-3737: the tool returned \"Anchor '#media-capture' not found\"; the agent then searched the full pattern file."
+    },
+    {
+      "tool": "PowerShell Add-Type",
+      "problem": "It could not load Microsoft.WindowsAppSDK by assembly name from the project directory, so runtime reflection did not verify the DisplayInformation surface.",
+      "evidence": "session-log.txt lines 4137-4145: Add-Type failed because Microsoft.WindowsAppSDK.dll was not found."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It inventories only files physically below -Source and ignores external MSBuild-linked Compile, Page, ApplicationDefinition, and Content items.",
+      "suggested_tweak": "Resolve linked project items into their Link destinations during bootstrap and fail with an actionable diagnostic when a migration input cannot be resolved."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "CaptureElement",
+      "why_tried": "The UWP camera page was copied with its original live preview control.",
+      "root_cause": "CaptureElement is not available in WinUI 3.",
+      "fix": "Replace the preview surface with Image plus SoftwareBitmapSource and request preview frames from MediaCapture."
+    },
+    {
+      "api": "Microsoft.Graphics.Display.DisplayInformation.CurrentOrientation / OrientationChanged",
+      "why_tried": "The migration skill claimed the window-scoped Windows App SDK DisplayInformation retained UWP orientation members.",
+      "root_cause": "Microsoft.Graphics.Display.DisplayInformation exposes color/stereo display data, not CurrentOrientation, NativeOrientation, or OrientationChanged.",
+      "fix": "Do not map UWP orientation members to Microsoft.Graphics.Display.DisplayInformation; use XamlRoot for scale and a purpose-specific monitor/device orientation solution only when required."
+    },
+    {
+      "api": "Microsoft.UI.Xaml.Application.Suspending / Resuming",
+      "why_tried": "The UWP camera page subscribed to Application.Current lifecycle events.",
+      "root_cause": "WinUI 3 desktop Application does not expose the UWP Suspending and Resuming events.",
+      "fix": "Move cleanup/restart to explicit window/page lifetime events or use Windows App SDK lifecycle activation where applicable."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build instructions",
+      "wrong": "Use winapp build to compile.",
+      "correct": "Use native dotnet build <project.csproj>; reserve winapp run/Test-AppLaunch.ps1 for package registration and launch."
+    },
+    {
+      "where": "MIGRATION-PATTERNS.md#getforcurrentview",
+      "wrong": "The table says Microsoft.Graphics.Display.DisplayInformation.CreateForWindowId keeps NativeOrientation / CurrentOrientation / DPI members.",
+      "correct": "The Windows App SDK type supports window-scoped color/stereo information but not UWP orientation or DPI properties; XamlRoot.RasterizationScale covers XAML scaling, while physical orientation needs a separate platform-specific design."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "MediaCapture preview",
+      "special_handling": "WinUI 3 has no CaptureElement; render requested VideoFrame data through SoftwareBitmapSource and keep a visible no-device fallback."
+    },
+    {
+      "api": "UWP MSBuild Link items",
+      "special_handling": "Shared code, XAML, and assets can live outside the project directory; migration inventory must follow Include plus Link metadata rather than relying only on recursive file enumeration."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "winapp: unrecognized command or argument 'build'",
+      "root_cause": "The skill documented a command that is not part of the installed winapp CLI.",
+      "fix": "Switched compilation to dotnet build."
+    },
+    {
+      "error": "WMC0001 Unknown type 'CaptureElement'",
+      "root_cause": "The unsupported UWP preview control remained in XAML after the agent recreated the page without resolving its injected migration TODO.",
+      "fix": "Applied the #capture pattern and replaced it with an Image-backed preview."
+    },
+    {
+      "error": "CS0103 Win32Interop does not exist",
+      "root_cause": "The camera edit used Win32Interop without importing or qualifying Microsoft.UI.",
+      "fix": "The agent ultimately removed the unused window-display initialization."
+    },
+    {
+      "error": "CS1061 DisplayInformation has no OrientationChanged/CurrentOrientation and CS0103 DisplayOrientations",
+      "root_cause": "The skill incorrectly mapped UWP orientation APIs to Microsoft.Graphics.Display.DisplayInformation.",
+      "fix": "The agent removed orientation-dependent code and used a neutral rotation path."
+    },
+    {
+      "error": "CS1061 Application has no Suspending/Resuming",
+      "root_cause": "UWP lifecycle event subscriptions were retained against Microsoft.UI.Xaml.Application.",
+      "fix": "Removed the unsupported subscriptions and handlers."
+    },
+    {
+      "error": "CS0104 DispatcherQueuePriority is ambiguous",
+      "root_cause": "Adding Windows.System for Launcher introduced a second DispatcherQueuePriority type.",
+      "fix": "Fully qualified Microsoft.UI.Dispatching.DispatcherQueuePriority."
+    },
+    {
+      "error": "WMC0909/WMC1111 could not resolve local:Scenario for x:DataType",
+      "root_cause": "The reconstructed shell's compiled-binding DataTemplate did not resolve during a build already containing multiple code and XAML failures.",
+      "fix": "Changed the template to runtime Binding without x:DataType."
+    },
+    {
+      "error": "CS0103 PreviewControl does not exist",
+      "root_cause": "The element swap renamed the XAML control but left two code-behind references.",
+      "fix": "Changed the remaining size references to PreviewImage."
+    },
+    {
+      "error": "CS0103 Launcher does not exist",
+      "root_cause": "The Windows.System using was removed to resolve an ambiguity while an unqualified Launcher call remained.",
+      "fix": "Fully qualified Windows.System.Launcher."
+    },
+    {
+      "error": "WMC9999 Xaml Internal Error",
+      "root_cause": "It accompanied unresolved XAML type/binding failures rather than identifying an independent runtime defect.",
+      "fix": "Resolved the concrete XAML and code errors; the internal compiler error disappeared."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "First build command, turn 15",
+      "symptom": "The prescribed winapp build command printed CLI help and exited 1.",
+      "turns_or_retries": "One failed command before switching to dotnet build.",
+      "root_cause": "Stale skill documentation.",
+      "how_resolved": "The agent used dotnet build for all subsequent compile passes.",
+      "preventable_by": "Replace every migration-skill winapp build instruction with dotnet build."
+    },
+    {
+      "where": "Bootstrap and shell reconstruction, turns 1-15",
+      "symptom": "Bootstrap mapped only five local files, while the agent manually browsed and recreated linked SharedContent App/MainPage/styles/assets.",
+      "turns_or_retries": "Multiple source reads followed by four large manual patches before the first build.",
+      "root_cause": "The bootstrap did not follow external MSBuild Link items, despite claiming to be the complete inventory.",
+      "how_resolved": "The agent manually copied selected shared files and assets.",
+      "preventable_by": "Teach Initialize-UwpMigration.ps1 to resolve linked migration inputs and include them in mapping/TODO processing."
+    },
+    {
+      "where": "Camera preview build, turns 16-20",
+      "symptom": "The first build failed on CaptureElement; the agent guessed a nonexistent pattern anchor before finding the correct one.",
+      "turns_or_retries": "One failed build, one failed anchor lookup, then a grep and successful anchor fetch.",
+      "root_cause": "The agent regenerated the XAML and did not follow the bootstrap TODO anchor.",
+      "how_resolved": "Fetched #capture and applied the Image/SoftwareBitmapSource pattern.",
+      "preventable_by": "Follow the existing TODO anchor and preserve TODOs until each adaptation is complete."
+    },
+    {
+      "where": "Post-capture compile pass, turns 21-27",
+      "symptom": "One build emitted a large batch of orientation, lifecycle, namespace ambiguity, binding, and stale-name errors.",
+      "turns_or_retries": "Three failed builds and two corrective patches before success.",
+      "root_cause": "The camera adaptation was applied as a broad rewrite using one incorrect API mapping and without checking all renamed references.",
+      "how_resolved": "Removed unsupported orientation/lifecycle code, qualified ambiguous APIs, downgraded one binding, and fixed stale names.",
+      "preventable_by": "Correct the DisplayInformation guidance, document desktop lifecycle events, and make element-swap reference cleanup explicit."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Bootstrap support for external MSBuild-linked source/XAML/content.",
+      "would_have_saved": "Manual discovery and reconstruction of App.xaml, MainPage, styles, helper code, and assets, and would have preserved source theme metadata."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "The validation machine had no camera device.",
+      "workaround": "The migrated captured-image scenario displayed a visible no-camera status, allowing the feature to remain reachable and non-blank."
+    }
+  ]
+}

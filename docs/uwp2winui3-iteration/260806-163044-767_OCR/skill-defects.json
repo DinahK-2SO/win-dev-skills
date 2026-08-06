@@ -1,0 +1,47 @@
+{
+  "scenario": "OCR",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The skill prescribes winapp build, but the installed winapp CLI has no build command.",
+      "evidence": "session-log.txt lines 3635-3694: winapp rejected 'build' and exited 1; dotnet build then performed compilation successfully.",
+      "skill_search": "SKILL.md Step 3, build command discipline, and final build all say winapp build; Validate-UwpMigration.ps1 comments also referenced it.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer winapp build to compile.",
+      "root_cause": "The migration instructions use a stale/nonexistent winapp subcommand instead of the native .NET build command.",
+      "proposed_fix": "Use dotnet build <project.csproj> consistently and reserve winapp run/Test-AppLaunch.ps1 for launch.",
+      "generalizes": "Every migrated C# WinUI 3 project must compile, so this stale command costs a failed tool turn in every scenario."
+    },
+    {
+      "problem": "Bootstrap silently omits source, XAML, and assets brought into a legacy UWP project through external MSBuild Link items.",
+      "evidence": "session-log.txt lines 917-1033 and 4339: bootstrap/mapping contained only five local rows; lines 11-227 and 2523-3386 show the agent separately discovering and reconstructing SharedContent files referenced by OCR.csproj.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Link, external, SharedContent, ApplicationDefinition, and project item evaluation; copying is only Get-ChildItem -Recurse under -Source.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap equates directory membership with project membership, which is false for non-SDK UWP projects that use Include plus Link metadata.",
+      "proposed_fix": "Extend Initialize-UwpMigration.ps1 to resolve supported linked Compile/Page/ApplicationDefinition/Content items into their Link destinations and stop on unresolved migration inputs.",
+      "generalizes": "Legacy UWP apps and SDK samples commonly share shell code, resource dictionaries, and assets through linked project items outside the project folder."
+    },
+    {
+      "problem": "The DisplayInformation replacement table recommends members that do not exist on the Windows App SDK type.",
+      "evidence": "session-log.txt lines 4052-4084: CS1061/CS0103 failures for OrientationChanged, CurrentOrientation, and DisplayOrientations after using Microsoft.Graphics.Display.DisplayInformation.",
+      "skill_search": "MIGRATION-PATTERNS.md#getforcurrentview lines 376-390 says CreateForWindowId keeps NativeOrientation / CurrentOrientation / DPI and demonstrates CurrentOrientation.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Microsoft.Graphics.Display.DisplayInformation.CreateForWindowId(windowId) — keeps NativeOrientation / CurrentOrientation / DPI / color members.",
+      "root_cause": "Microsoft.Graphics.Display.DisplayInformation is a window-scoped color/stereo API and does not mirror the UWP view-scoped orientation/DPI surface.",
+      "proposed_fix": "Correct the table and sample, explicitly split supported color information from XAML scaling and physical orientation requirements.",
+      "generalizes": "Any UWP app that reads display orientation or DPI through GetForCurrentView will otherwise receive compile-breaking migration guidance."
+    },
+    {
+      "problem": "The lifecycle section does not cover UWP Application.Current.Suspending and Resuming event subscriptions.",
+      "evidence": "session-log.txt lines 4053-4058: CS1061 reported that Microsoft.UI.Xaml.Application has no Suspending or Resuming; lines 4149-4152 removed those subscriptions.",
+      "skill_search": "MIGRATION-PATTERNS.md#lifecycle covers activation and single-instancing but contains no Suspending or Resuming guidance.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The skill addresses activation entry points but not page/service cleanup code subscribed to UWP application lifetime events.",
+      "proposed_fix": "Add a concise lifecycle mapping that moves resource cleanup/restart to explicit page/window lifetime events or Windows App SDK lifecycle facilities as appropriate.",
+      "generalizes": "Camera, media, sensor, and background-resource pages frequently subscribe to UWP suspend/resume events."
+    }
+  ]
+}

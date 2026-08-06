@@ -1,0 +1,46 @@
+{
+  "scenario": "OCR",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap omitted externally linked UWP project inputs and forced incomplete manual shell reconstruction.",
+      "evidence": "lessons.json dev_agent_struggles[0]; skill-defects.json items[0]; session-log.txt mapping contained 5 local files while OCR.csproj linked 15 shared inputs.",
+      "root_cause": "Initialize-UwpMigration.ps1 enumerated only files physically under -Source and did not follow MSBuild Include + Link metadata.",
+      "tier": 1,
+      "change": "Resolve common legacy MSBuild properties, copy linked Compile/ApplicationDefinition/Page/Content inputs to safe target-relative Link paths, include them in mapping/TODO processing, and stop on unresolved links.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared App.xaml, shell, styles, helpers, and assets enter the normal mechanical migration path instead of being selectively recreated.",
+      "falsifiable_check": "Running bootstrap on the OCR source reports 15 externally linked inputs, maps MainPage.xaml and Styles\\Styles.xaml, and preserves App.xaml RequestedTheme=\"Dark\"."
+    },
+    {
+      "problem": "Incorrect/unclear command and API guidance caused a failed build command, orientation/lifecycle compile errors, and stale references after a control swap.",
+      "evidence": "skill-defects.json command/display/lifecycle items, skill-coverage-gaps.json items[1], and lessons.json errors for winapp build, DisplayInformation, Suspending/Resuming, and PreviewControl.",
+      "root_cause": "The skill prescribed a nonexistent build subcommand, overstated the Windows App SDK DisplayInformation surface, omitted suspend/resume subscription migration, and contradicted itself about preserving versus renaming CaptureElement.",
+      "tier": 3,
+      "change": "Use dotnet build consistently, correct DisplayInformation capability mapping, add explicit page/window lifetime guidance, and require a scoped old-name search after element swaps.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Agents avoid a guaranteed failed command and nonexistent display/lifecycle members, then finish all references when replacing XAML controls.",
+      "falsifiable_check": "On re-run, compilation starts with dotnet build and no CS1061/CS0103 errors mention DisplayInformation orientation, Application Suspending/Resuming, or the replaced preview element name.",
+      "tier_justification": "These replacements depend on whether code needs color, scale, physical orientation, page lifetime, or window lifetime; a mechanical rewrite would silently change behavior, so focused decision guidance is safer than Tier 1/2 automation."
+    },
+    {
+      "problem": "Both scored features changed from the source's dark/lightweight presentation to light/bold WinUI defaults.",
+      "evidence": "migration-score.json marks both features partial; discrepancies.json records two major visual differences; source SharedContent/xaml/App.xaml has RequestedTheme=\"Dark\" and the target omitted it.",
+      "root_cause": "Fidelity prose emphasized element preservation but did not explicitly protect root theme metadata or effective values inherited from platform styles/resources.",
+      "tier": 3,
+      "change": "Promote RequestedTheme, explicit visual properties, and effective inherited typography/brush values to fidelity invariants in SKILL.md and the XAML pattern.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Migrations preserve source theme and pin values where same-named WinUI defaults render differently.",
+      "falsifiable_check": "On re-run, App.xaml retains RequestedTheme=\"Dark\" and both OCR features no longer receive the light/bold visual discrepancy.",
+      "tier_justification": "Static tooling can preserve explicit metadata but cannot infer whether two framework styles have equivalent rendered semantics across theme, state, DPI, and OS versions; the agent must compare intent/effective values."
+    }
+  ],
+  "deferred_to_human": [],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ]
+}

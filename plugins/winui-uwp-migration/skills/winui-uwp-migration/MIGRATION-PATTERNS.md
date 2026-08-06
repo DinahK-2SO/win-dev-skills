@@ -59,13 +59,22 @@ Generated sources never belong in source control or the migrated tree — only `
 
 `MediaCapture` itself carries over unchanged, but WinUI 3 has **no XAML preview element**. The live preview migrates to an `<Image>` whose source is a `SoftwareBitmapSource` that you refresh from `MediaCapture` frames. This is `adaptable`, not `defer` — deferring loses the entire camera feature. Keep the [Defensive UI](SKILL.md) fallback so a device-less machine still renders a non-blank frame.
 
-XAML — swap the element (preserve the name/`AutomationProperties` so parity checks still match):
+XAML — swap the element and preserve its automation identity. If the replacement uses a
+different `x:Name`, search the XAML and code-behind for the old name and update **every**
+reference (bindings, event handlers, transforms, visibility changes, and visual-state
+targets) before building:
 
 ```xml
 <!-- was: <CaptureElement x:Name="PreviewControl" .../> -->
 <Image x:Name="PreviewImage" Stretch="Uniform"
        AutomationProperties.Name="Camera preview"/>
 ```
+
+```powershell
+Select-String -Path .\*.xaml,.\*.cs -Pattern '\bPreviewControl\b'
+```
+
+That search must return no live references after this example's rename.
 
 C# — pump frames into the `Image` (`SoftwareBitmapSource` requires **Bgra8 + Premultiplied**):
 
@@ -373,11 +382,13 @@ The `GetForCurrentView()` *entry point* is gone in WinUI 3 desktop — there is 
 |---------|---------------------|
 | `ApplicationView.GetForCurrentView()` | `AppWindow.GetFromWindowId(windowId)` |
 | `UIViewSettings.GetForCurrentView()` | `AppWindow` properties (size, presenter) |
-| `DisplayInformation.GetForCurrentView()` | `Microsoft.Graphics.Display.DisplayInformation.CreateForWindowId(windowId)` — keeps `NativeOrientation` / `CurrentOrientation` / DPI / color members. (For DPI *only*, `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` is a shortcut.) |
+| `DisplayInformation.GetForCurrentView()` for color profile / advanced color / stereo | `Microsoft.Graphics.Display.DisplayInformation.CreateForWindowId(windowId)` |
+| `DisplayInformation.GetForCurrentView()` for XAML scale / effective DPI | `XamlRoot.RasterizationScale` (or Win32 `GetDpiForWindow` when physical DPI is specifically required) |
+| `DisplayInformation.CurrentOrientation` / `NativeOrientation` / `OrientationChanged` | No member-for-member Windows App SDK replacement. Desktop windows are not CoreWindow views; use a purpose-specific monitor/device-orientation design only when the feature requires it. |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
 
-`DisplayInformation.GetForCurrentView()` **throws** on desktop (`GetForCurrentView must be called on a thread associated with a CoreWindow`) — swap it for the window-scoped factory rather than catching the exception. `CreateForWindowId` must run on a thread with a running `DispatcherQueue`; cache the instance and de-register its events.
+`DisplayInformation.GetForCurrentView()` **throws** on desktop (`GetForCurrentView must be called on a thread associated with a CoreWindow`). Do not blindly swap the type: first identify which information the code consumes. `Microsoft.Graphics.Display.DisplayInformation` is the window-scoped replacement only for its documented color/stereo surface; it does **not** expose UWP `CurrentOrientation`, `NativeOrientation`, `OrientationChanged`, or logical-DPI members. `CreateForWindowId` must run on a thread with a running `DispatcherQueue`; cache and dispose the instance.
 
 ```csharp
 using Microsoft.Graphics.Display; // WinApp SDK DisplayInformation
@@ -386,8 +397,8 @@ using Microsoft.UI;               // Win32Interop
 var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow!);
 var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
 var displayInfo = DisplayInformation.CreateForWindowId(windowId);
-var current = displayInfo.CurrentOrientation; // DisplayOrientations
-var native  = displayInfo.NativeOrientation;
+var advancedColor = displayInfo.GetAdvancedColorInfo();
+var scale = page.XamlRoot.RasterizationScale;
 ```
 
 <a id="pickers"></a>
@@ -458,6 +469,20 @@ switch (args.Kind)
 ```
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
+
+### UWP suspend/resume event subscriptions
+
+`Microsoft.UI.Xaml.Application` does not expose UWP's `Suspending` or `Resuming` events.
+Do not retain `Application.Current.Suspending += ...` or `.Resuming += ...`.
+
+- For resources owned by a page (camera, microphone, sensors, media), acquire on
+  `Loaded`/`OnNavigatedTo` and release on `Unloaded`/`OnNavigatedFrom`.
+- For window-owned resources, release on `Window.Closed`; restart from the explicit
+  command or window activation path that needs the resource.
+- Use Windows App SDK `AppInstance` activation only for activation/redirection scenarios;
+  it is not a drop-in suspend/resume event pair.
+
+Keep cleanup idempotent because navigation and window closure can occur in either order.
 
 <a id="background-tasks"></a>
 ## Background Tasks
@@ -664,7 +689,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The validator's `dotnet build` healthcheck surfaces `Microsoft.WindowsAppSDK.Analyzers` warnings when that analyzer is referenced by the project. These warnings flag UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. `Validate-UwpMigration.ps1` fails the build healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |
@@ -698,6 +723,17 @@ If you really want ALT+Left back-nav, add a single declarative XAML element to t
 ## XAML Migration
 
 XAML migration is mostly **mechanical transformation of existing files**, not re-authoring. Copy each `*.xaml` from the source verbatim, then apply the rewrites below. Do not regenerate a page from scratch — controls, names, and event handlers must be preserved so the code-behind continues to compile.
+
+### Visual fidelity invariants
+
+Namespace-correct XAML can still be visually wrong. Preserve the root
+`Application.RequestedTheme` and all explicit colors, font weights, font sizes, margins,
+and control states unless a removed resource forces a substitution. When a source style
+is `BasedOn` a platform style such as `TitleTextBlockStyle`, do not assume the WinUI 3
+style has the same effective typography: compare the rendered/effective weight and size,
+then add explicit setters to the app style when needed. The same rule applies to renamed
+system brushes—choose the Fluent resource whose effective color matches the source
+intent, rather than whichever key happens to compile.
 
 ### xmlns root rewrites
 

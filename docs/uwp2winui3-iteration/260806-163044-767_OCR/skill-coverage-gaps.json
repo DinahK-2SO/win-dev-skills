@@ -1,0 +1,23 @@
+{
+  "scenario": "OCR",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The migrated UI preserved structure but changed the source's dark theme and lightweight heading treatment to light/bold defaults.",
+      "evidence": "migration-score.json: both features partial; discrepancies.json: two major visual discrepancies. Source SharedContent/xaml/App.xaml line 18 has RequestedTheme=\"Dark\" while migrated App.xaml has no RequestedTheme; migrated styles still inherit WinUI TitleTextBlockStyle.",
+      "covered_at": "SKILL.md#Principles and #Critical-Rules / Fidelity; MIGRATION-PATTERNS.md#xaml and Resource references",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Make visual semantics an explicit fidelity invariant: preserve RequestedTheme, explicit colors/weights/sizes, and verify inherited platform styles because same-named UWP and WinUI theme resources can resolve to different effective typography or brushes.",
+      "generalizes": "Theme roots and platform style aliases occur in most XAML apps; namespace-correct markup can still produce a broad visual redesign."
+    },
+    {
+      "problem": "The CaptureElement replacement renamed the element but left stale PreviewControl references in code-behind.",
+      "evidence": "session-log.txt lines 4208-4209 and 4238-4265: CS0103 remained for two PreviewControl references after applying #capture.",
+      "covered_at": "MIGRATION-PATTERNS.md#capture, especially the XAML swap at lines 62-68",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "Remove the contradictory instruction to preserve the XAML name while the sample renames it, and require a scoped search that updates every code-behind reference after an element-level swap.",
+      "generalizes": "Any XAML control replacement with a changed name or type can leave compile-time or runtime references in event handlers, transforms, bindings, and visual-state targets."
+    }
+  ]
+}

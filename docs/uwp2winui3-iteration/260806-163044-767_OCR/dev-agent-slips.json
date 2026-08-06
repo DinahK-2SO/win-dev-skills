@@ -1,0 +1,42 @@
+{
+  "scenario": "OCR",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The first build retained CaptureElement and the agent guessed the nonexistent 'media-capture' anchor.",
+      "evidence": "session-log.txt lines 3714-3737: WMC0001 followed by failed anchor lookup; lines 3959-4009 show the existing dedicated #capture guidance.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#capture and unsupported-api-inventory.json CaptureElement entry",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "Bootstrap already injects the exact #capture anchor and the pattern opens with the matching WMC0001 error."
+    },
+    {
+      "problem": "Win32Interop was used without the Microsoft.UI namespace.",
+      "evidence": "session-log.txt line 4048 reports CS0103 after the agent wrote the display replacement.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#getforcurrentview sample explicitly includes 'using Microsoft.UI; // Win32Interop'",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The exact required namespace is adjacent to the copied API sample."
+    },
+    {
+      "problem": "Adding Windows.System made DispatcherQueuePriority ambiguous.",
+      "evidence": "session-log.txt line 4061 reports CS0104; lines 4149-4152 qualify Microsoft.UI.Dispatching.DispatcherQueuePriority.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#threading uses the Microsoft.UI.Dispatching replacement and SKILL.md Step 3 directs fixing the first compiler error.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "This arose from an unnecessary broad using added during manual reconstruction; normal qualification resolves it."
+    },
+    {
+      "problem": "The reconstructed DataTemplate's x:DataType did not resolve during the multi-error build.",
+      "evidence": "session-log.txt lines 4087-4089 report WMC0909/WMC1111/WMC9999; lines 4149-4152 switch this one template to runtime Binding.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#xbind-and-compiled-bindings states x:Bind is supported and directs checking namespace/type resolution.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The source type was public and the error occurred amid many independent compile failures in manually reconstructed XAML; no repeatable missing migration rule was established."
+    },
+    {
+      "problem": "Launcher remained unqualified after removing the Windows.System using.",
+      "evidence": "session-log.txt lines 4210 and 4254-4272: CS0103 was fixed by Windows.System.Launcher qualification.",
+      "covered_clearly_at": "SKILL.md Step 3 build-fix loop and MIGRATION-PATTERNS.md Namespace Mapping; Windows.System.Launcher itself carries over.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The agent introduced the unresolved symbol in the immediately preceding ambiguity fix; the API needs no migration-specific replacement."
+    }
+  ]
+}

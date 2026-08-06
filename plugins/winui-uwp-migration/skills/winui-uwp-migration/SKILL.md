@@ -7,6 +7,8 @@ description: "Migrate **C# UWP** applications to WinUI 3 / Windows App SDK, pres
 
 This skill migrates code, it does not redesign it. Every page, UserControl, helper class, and XAML element in the source must appear in the target — **unless** it touches an API unsupported on WinUI 3 desktop, in which case it must be explicitly deferred with a written reason. Silent omission is a defect.
 
+Visual semantics are part of that contract. Preserve the source `RequestedTheme`, explicit brushes, typography, spacing, and control states. A same-named platform style or theme resource can have different effective values in UWP and WinUI 3; when a migrated element inherits a visibly different weight, size, or color, pin the source's effective value in the app style instead of accepting the WinUI default.
+
 ## Prerequisites
 
 - **.NET SDK** matching the target TFM (read `<TargetFramework>` from the project `.csproj`).
@@ -59,6 +61,8 @@ Do:
 - Only after step 3 returns `True` may you read source files, plan transformations, or edit anything.
 
 The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you exactly what it did, what artifacts now exist, and what to do next. Read that block; do not re-derive the same info by browsing the tree.
+
+Legacy UWP projects can bring files from outside the project directory into the build with MSBuild `Include` + `Link` metadata. The bootstrap resolves those linked `Compile`, `ApplicationDefinition`, `Page`, and `Content` inputs into their target-relative `Link` paths. If it cannot resolve one, it stops rather than producing a knowingly incomplete mapping; fix the project property/path named in the error and re-run.
 
 ### Step 1 — Migrate, file by file
 
@@ -123,7 +127,7 @@ Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are in
 Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
 
 ```powershell
-winapp build                                                                # compile; never run the .exe directly
+dotnet build "<winui3-project.csproj>"                                      # compile; never run the .exe directly
 & "<skill-root>/scripts/Test-AppLaunch.ps1" -Target "<winui3-project-root>"  # launch AND verify it survives startup
 ```
 
@@ -135,7 +139,7 @@ When the app **crashes at launch**, fix the frame the captured stack names — t
 
 > **Build command discipline (avoid agent stalls):**
 >
-> - Prefer `winapp build` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (A bare `winapp run` works too, but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
+> - Prefer `dotnet build <project.csproj>` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (A bare `winapp run` works too, but `Test-AppLaunch.ps1` also tells you *why* on a crash.) The `winapp` CLI has no `build` command.
 > - If you must shell out to `dotnet build` / `dotnet run`, **do not** pipe the output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
 > - When using `dotnet` from the powershell tool, either (a) run **sync**, or (b) leave output unfiltered, or (c) append an exit sentinel so there is always a final line to read, e.g. `dotnet build -c Debug; "BUILD_EXIT=$LASTEXITCODE"`.
 
@@ -167,7 +171,7 @@ If any check fails, read the diagnostic, fix the root cause, re-run. **Do not re
 - *`Status = copied` rows* → those files were never finished. Either complete the migration and flip to `done`, or defer with rationale.
 - *Build healthcheck FAIL* → open `.validator-diagnostics.txt`; for each unique CS#### code, look up the pattern in PATTERNS.md via `Get-MigrationPattern.ps1`.
 
-After PASS, do a final `winapp build` to confirm the build is still clean. Only then declare done.
+After PASS, do a final `dotnet build <project.csproj>` to confirm the build is still clean. Only then declare done.
 
 ## Critical Rules
 
@@ -176,6 +180,7 @@ After PASS, do a final `winapp build` to confirm the build is still clean. Only 
 - Every page, UserControl, helper class, and XAML element in the source must appear in the target — unless explicitly deferred with a cited unsupported API.
 - Silent omission is a defect. If `MIGRATION-MAPPING.md` is missing a file you expected, the bootstrap input was wrong — fix the `-Source` path and re-run, do not patch by hand.
 - Do not regenerate XAML from scratch. Copy each `*.xaml` verbatim, then transform — controls, names, and event handlers must be preserved so the code-behind continues to compile.
+- Preserve root `RequestedTheme` and explicit visual values. After replacing obsolete platform resources, compare their effective foreground, background, font size, and font weight with the source; compatibility is not permission to adopt new defaults.
 
 ### API-level
 
