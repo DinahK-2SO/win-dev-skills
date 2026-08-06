@@ -1,0 +1,45 @@
+{
+  "scenario": "LinguisticServices",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "The bootstrap destroyed the scaffold activation manifest and the validator/diagnostic path could not identify the remaining entry-point failure.",
+      "evidence": "lessons.json packaging/startup struggle; migration-score.json candidate_launch_status; active manifest EntryPoint=\"LinguisticServices.App\".",
+      "root_cause": "Tier-1 automation contradicted the correct Tier-3 manifest guidance and omitted a falsifiable entry-point check and managed stack.",
+      "tier": 1,
+      "change": "Keep the scaffold manifest active, preserve the UWP manifest as reference, validate $targetentrypoint$, retain managed stack frames, and classify wrong-thread COMException messages specifically. Tier 1 was chosen because prose already existed and was ignored/undermined by tooling.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1; skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Packaged migrations retain a valid WinUI activation contract and startup failures name an actionable managed frame instead of a generic CLR hint.",
+      "falsifiable_check": "On rerun, bootstrap leaves scaffold Package.appxmanifest active; validator fails any literal UWP App EntryPoint before launch; a wrong-thread crash result contains a non-empty stack and RPC_E_WRONG_THREAD hint."
+    },
+    {
+      "problem": "Directory copying omitted linked shared inputs and concealed a native runtime dependency.",
+      "evidence": "lessons.json source-discovery struggle; source csproj linked items and RuntimeComponent.vcxproj.",
+      "root_cause": "Bootstrap modeled filesystem containment rather than MSBuild dependency closure.",
+      "tier": 1,
+      "change": "Import external Compile/Page/ApplicationDefinition/Content items to their Link targets and stop explicitly on non-C# ProjectReference dependencies. Tier 1 is necessary because templates/prose cannot reliably reconstruct an arbitrary project graph.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1; skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Shared source, XAML, and assets enter mapping automatically, while unsupported mixed-language closure is surfaced before lossy substitutions.",
+      "falsifiable_check": "A linked-item fixture produces target files at every Link path and mapping rows for them; a vcxproj ProjectReference terminates bootstrap with the dependency path."
+    },
+    {
+      "problem": "Build instructions invoked a nonexistent command.",
+      "evidence": "lessons.json doc_errors; session-log.txt lines 3094-3150.",
+      "root_cause": "Tier-3 guidance confused benchmark nomenclature with standalone CLI capabilities.",
+      "tier": 3,
+      "change": "Replace winapp build with dotnet build using an explicit csproj path. No Tier-1/2 change is needed because dotnet already provides the correct build tool and the defect is solely the command text.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "The first build executes successfully from parent target directories and launch remains delegated to Test-AppLaunch.",
+      "falsifiable_check": "A rerun contains no 'build was not matched' output and the first compile command is dotnet build with a csproj path."
+    }
+  ],
+  "deferred_to_human": [],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1"
+  ]
+}

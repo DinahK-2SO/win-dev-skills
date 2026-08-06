@@ -1,0 +1,15 @@
+{
+  "scenario": "LinguisticServices",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "A C# entry project depended on a C++ runtime component, but the C++/WinRT scope exclusion was not applied transitively.",
+      "evidence": "source LinguisticServices.csproj lines 189-193 references RuntimeComponent.vcxproj; session-log.txt turns 19 and 34-36 show the agent inventing managed linguistic substitutes.",
+      "covered_at": "SKILL.md frontmatter: '**C++/WinRT and VB UWP projects are out of scope**'",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "Make bootstrap inspect ProjectReference items and stop with an explicit prerequisite when a C# app has a non-C# dependency; state that silent omission or fabricated replacement is forbidden.",
+      "generalizes": "C# UWP applications frequently consume native Windows Runtime components even though the entry project itself appears in scope."
+    }
+  ]
+}

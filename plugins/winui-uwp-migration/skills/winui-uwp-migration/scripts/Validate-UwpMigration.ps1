@@ -10,8 +10,7 @@ declare done with FAIL." All [FAIL] output is sanitized — full diagnostics
 root, not to stdout, to keep concentrated API-name lists out of the agent's
 assistant turn.
 
-Does NOT run `winapp build` itself — build cleanliness is a separate gate
-the agent invokes alongside this (`winapp build` then this script).
+Runs `dotnet build` as its build-cleanliness gate before the runtime smoke launch.
 
 Checks (numbering matches the `# ─── N.` sections in the code):
 1. Residue grep — leftover Windows.UI.Xaml using/xmlns, unsupported APIs not deferred, UWP-only csproj markers
@@ -339,6 +338,8 @@ if (Test-Path -LiteralPath $manifestPath) {
     #      stripped and the runFullTrust check below silently fails).
     #   3) <rescap:Capability Name="runFullTrust" /> present — packaged WinUI 3
     #      apps run elevated relative to AppContainer and must declare it.
+    #   4) <Application EntryPoint="$targetentrypoint$"> — a literal UWP App class
+    #      can register successfully and then fail activation with Arg_COMException.
     # Real-world impact: run18 Printing and run19 BasicSuspension both built
     # cleanly but failed `winapp run` registration with "requires runFullTrust
     # capability" — the agent migrated code but never touched the manifest.
@@ -364,8 +365,15 @@ if (Test-Path -LiteralPath $manifestPath) {
         Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
         $manifestFailures++
     }
+    if ($manifestText -notmatch '<Application\b[^>]*\bEntryPoint\s*=\s*"\$targetentrypoint\$"') {
+        Write-Host '[FAIL] Package.appxmanifest <Application> does not use EntryPoint="$targetentrypoint$"'
+        Write-Host '       A literal UWP App entry point can register and then crash during WinUI activation with Arg_COMException.'
+        Write-Host '       Fix: preserve the scaffold value EntryPoint="$targetentrypoint$"; merge UWP extensions and capabilities around it.'
+        Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
+        $manifestFailures++
+    }
     if ($manifestFailures -eq 0) {
-        Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared"
+        Write-Host '[PASS] Package.appxmanifest — desktop target, runFullTrust, and WinUI entry point declared'
     } else {
         $failures += $manifestFailures
     }

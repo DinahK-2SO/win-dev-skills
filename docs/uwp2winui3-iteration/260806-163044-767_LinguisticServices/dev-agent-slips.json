@@ -1,0 +1,35 @@
+{
+  "scenario": "LinguisticServices",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Bootstrap self-check ran concurrently and initially returned False.",
+      "evidence": "session-log.txt lines 317-354: bootstrap and Test-Path launched together; Test-Path returned False before bootstrap completed.",
+      "covered_clearly_at": "SKILL.md Step 0: numbered commands require bootstrap followed by a self-check that MUST print True.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The ordering and gate are already explicit; sequential execution fixes it."
+    },
+    {
+      "problem": "dotnet build and dotnet run compiled concurrently, locking XAML input.json.",
+      "evidence": "session-log.txt lines 3170-3201: build and run launched together; XAML compiler reported the file was used by another process.",
+      "covered_clearly_at": "SKILL.md Step 3: 'build -> fix the first error -> launch -> repeat' defines a serial loop.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "A capable rerun following the stated loop will not race two compilers."
+    },
+    {
+      "problem": "The agent invented LanguageFinder, Transliterator, and UnicodeCharacters call shapes.",
+      "evidence": "session-log.txt turns 19-21 and build failures at lines 4054-4076 show speculative calls that did not compile.",
+      "covered_clearly_at": "SKILL.md Critical Rules / API-level: 'Never fabricate API calls. If unsure ... consult the official API mapping table.'",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The prohibition and prescribed verification path are already prominent."
+    },
+    {
+      "problem": "A navigation edit omitted the Frame namespace and duplicated title-bar/icon calls.",
+      "evidence": "session-log.txt lines 4426-4475 show CS0246 for Frame; final MainWindow.xaml.cs contains duplicate SetTitleBar and SetIcon calls.",
+      "covered_clearly_at": "SKILL.md Step 3 requires fixing the first build error and only proceeding after a clean build.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "These are local edit defects, not missing migration knowledge."
+    }
+  ]
+}

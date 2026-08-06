@@ -20,6 +20,8 @@ This skill migrates code, it does not redesign it. Every page, UserControl, help
 
 Some UWP features have no WinUI 3 desktop equivalent. See the [Unsupported on WinUI 3 Desktop](./MIGRATION-PATTERNS.md#unsupported-on-winui-3-desktop-no-migration-path) section of MIGRATION-PATTERNS.md for the inventory; the machine-readable form lives at [`scripts/unsupported-api-inventory.json`](./scripts/unsupported-api-inventory.json) and is used by both the bootstrap and the validator.
 
+This skill accepts a C# UWP entry project only. The bootstrap imports external files with explicit MSBuild `<Link>` targets, but stops on non-C# `<ProjectReference>` dependencies (for example, a C++ Windows Runtime component). Migrating or replacing that dependency is a separate prerequisite; do not silently omit it or fabricate managed substitutes.
+
 ## Process
 
 Four scripts do every mechanical step. Your job is the judgement work in between — fixing each TODO at the marked line, the shell conversion, and reading the diagnostics.
@@ -123,7 +125,7 @@ Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are in
 Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
 
 ```powershell
-winapp build                                                                # compile; never run the .exe directly
+dotnet build "<winui3-project-root>\<project>.csproj"                       # compile; never run the .exe directly
 & "<skill-root>/scripts/Test-AppLaunch.ps1" -Target "<winui3-project-root>"  # launch AND verify it survives startup
 ```
 
@@ -135,7 +137,7 @@ When the app **crashes at launch**, fix the frame the captured stack names — t
 
 > **Build command discipline (avoid agent stalls):**
 >
-> - Prefer `winapp build` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (A bare `winapp run` works too, but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
+> - Use `dotnet build "<path-to-csproj>"` to compile and `Test-AppLaunch.ps1` to launch. The standalone `winapp` CLI has no `build` command. (A bare `winapp run` works for launch, but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
 > - If you must shell out to `dotnet build` / `dotnet run`, **do not** pipe the output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
 > - When using `dotnet` from the powershell tool, either (a) run **sync**, or (b) leave output unfiltered, or (c) append an exit sentinel so there is always a final line to read, e.g. `dotnet build -c Debug; "BUILD_EXIT=$LASTEXITCODE"`.
 
@@ -153,7 +155,7 @@ The validator covers:
 2. **TODO marker residue** — every `TODO[migrate-NNN]` from the bootstrap is resolved.
 3. **`MIGRATION-MAPPING.md` integrity** — `.bootstrap-meta.json` present + parses; row count matches the seeded count; every row has a resolved Triage label; no row stuck at `Status = copied`.
 4. **`MIGRATION-DEFERRED.md` consistency** — every defer row in mapping has a matching row in the deferred file.
-5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability.
+5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust`; scaffold `EntryPoint="$targetentrypoint$"`.
 6. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
 7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
 
@@ -167,7 +169,7 @@ If any check fails, read the diagnostic, fix the root cause, re-run. **Do not re
 - *`Status = copied` rows* → those files were never finished. Either complete the migration and flip to `done`, or defer with rationale.
 - *Build healthcheck FAIL* → open `.validator-diagnostics.txt`; for each unique CS#### code, look up the pattern in PATTERNS.md via `Get-MigrationPattern.ps1`.
 
-After PASS, do a final `winapp build` to confirm the build is still clean. Only then declare done.
+After PASS, do a final `dotnet build "<path-to-csproj>"` to confirm the build is still clean. Only then declare done.
 
 ## Critical Rules
 

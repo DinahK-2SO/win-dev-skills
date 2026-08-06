@@ -48,7 +48,7 @@ Emit the structured result as JSON to stdout (for programmatic callers).
 
 .OUTPUTS
 PSCustomObject (and JSON with -Json):
-  { ok, status, pid, aumid, layout, crash:{ code, module, managedType, message,
+  { ok, status, pid, aumid, layout, crash:{ code, module, managedType, message, stack,
     hint, anchor } | $null, detail }
 status in { running, crashed, unavailable }.  exit: 0 running / 1 crashed / 2 unavailable.
 
@@ -98,6 +98,7 @@ function Write-LaunchOut {
             Write-Host "    Crash  : code=$($Result.crash.code)  module=$($Result.crash.module)"
             if ($Result.crash.managedType) { Write-Host "    .NET   : $($Result.crash.managedType)" }
             if ($Result.crash.message)     { Write-Host "    Message: $($Result.crash.message)" }
+            if ($Result.crash.stack)       { Write-Host "    Frame  : $(($Result.crash.stack -split "`r?`n")[0].Trim())" }
             if ($Result.crash.hint)        { Write-Host "    Hint   : $($Result.crash.hint)" }
             if ($Result.crash.anchor)      { Write-Host "    Fix    : Get-MigrationPattern.ps1 -Anchor $($Result.crash.anchor)" }
         }
@@ -167,7 +168,7 @@ if ($run) {
 # Match on the layout's exe base name(s) within a short recent window.
 function Get-CrashSignature {
     param([string[]]$Names)
-    $sig = [ordered]@{ code = $null; module = $null; managedType = $null; message = $null; hint = $null; anchor = $null }
+    $sig = [ordered]@{ code = $null; module = $null; managedType = $null; message = $null; stack = $null; hint = $null; anchor = $null }
     if (-not $Names -or $Names.Count -eq 0) { return $sig }
     $namePattern = ($Names | ForEach-Object { [regex]::Escape($_ + '.exe') }) -join '|'
     $events = Get-WinEvent -LogName Application -MaxEvents 80 -ErrorAction SilentlyContinue |
@@ -187,6 +188,8 @@ function Get-CrashSignature {
         } elseif ($e1026.Message -match 'Exception Info:\s*([^\r\n]+)') {
             $sig.message = $matches[1].Trim()
         }
+        $stackLines = @($e1026.Message -split "`r?`n" | Where-Object { $_ -match '^\s+at\s' })
+        if ($stackLines.Count -gt 0) { $sig.stack = ($stackLines -join "`n") }
     }
 
     # Map the native exception code to a conservative hint + pattern anchor.
@@ -213,6 +216,11 @@ function Get-CrashSignature {
             $sig.hint   = "Startup crash - read the captured exception (event 1026) to find the throwing frame."
             $sig.anchor = 'startup-crashes'
         }
+    }
+    if ($sig.managedType -eq 'System.Runtime.InteropServices.COMException' -and
+        $sig.message -match 'marshalled for a different thread') {
+        $sig.hint = 'RPC_E_WRONG_THREAD - inspect the captured managed frame. Verify Package.appxmanifest uses EntryPoint="$targetentrypoint$"; otherwise move the named apartment-affined access to the UI thread after activation.'
+        $sig.anchor = 'startup-crashes'
     }
     return $sig
 }

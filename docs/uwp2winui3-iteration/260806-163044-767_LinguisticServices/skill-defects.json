@@ -1,0 +1,37 @@
+{
+  "scenario": "LinguisticServices",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap overwrote the WinUI scaffold manifest, while validation omitted the required scaffold entry point and startup diagnostics discarded the managed frame.",
+      "evidence": "session-log.txt lines 407-412 map Package.appxmanifest as migrate-as-is; lines 4123-4127 show missing UWP assets; lines 4190-4197 show repeated Arg_COMException; final active manifest used EntryPoint=\"LinguisticServices.App\".",
+      "skill_search": "Package.appxmanifest, $targetentrypoint$, startup-crashes, managed stack",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize-UwpMigration.ps1 step 1 copied .appxmanifest directly to target even though MIGRATION-PATTERNS.md says to keep scaffold manifest values.",
+      "root_cause": "Tier-1 bootstrap behavior contradicted the prose, and Tier-1 gates did not enforce or diagnose the remaining activation invariant.",
+      "proposed_fix": "Preserve the UWP manifest under .uwp-source, keep the scaffold manifest active, validate EntryPoint=\"$targetentrypoint$\", and retain/message-classify event 1026 stack evidence.",
+      "generalizes": "Every packaged UWP-to-WinUI migration has an activation manifest, and copied UWP entry points/assets routinely build before failing registration or activation."
+    },
+    {
+      "problem": "Bootstrap ignored external files represented by MSBuild Include/Link metadata.",
+      "evidence": "session-log.txt lines 329-346 report six copied files; source csproj lines 91-181 defines linked App/MainPage/styles/scenario XAML and assets; the agent spent turns 4-16 finding and recreating them.",
+      "skill_search": "Link, linked files, external Include, SharedContent",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The initializer recursively copied only the source directory instead of reading the project item graph.",
+      "proposed_fix": "Resolve external Compile/Page/ApplicationDefinition/Content Includes and copy them to explicit Link targets before rewrite/mapping.",
+      "generalizes": "UWP solutions commonly share XAML, code, and assets through linked project items outside the entry-project directory."
+    },
+    {
+      "problem": "The skill instructed agents to run a nonexistent standalone `winapp build` command.",
+      "evidence": "session-log.txt lines 3094-3150: command was not matched; CLI help exposed run but no build.",
+      "skill_search": "winapp build",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer `winapp build` to compile.",
+      "root_cause": "The prose conflated benchmark build tooling with the standalone winapp CLI.",
+      "proposed_fix": "Use `dotnet build <explicit-csproj>` throughout SKILL.md; reserve winapp/Test-AppLaunch for launch.",
+      "generalizes": "Every migration must compile, and invalid command guidance wastes the first build cycle in any environment with the current CLI."
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "scenario": "LinguisticServices",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 326-353: copied six local files, rewrote namespaces, and generated mapping/deferred/meta artifacts."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 4145-4166 and 4534-4556: found manifest defects, confirmed a clean build, and refused PASS for the startup crash."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "evidence": "session-log.txt lines 4190-4197: distinguished a registered-then-crashed app and captured 0xe0434352 plus the managed COMException message."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt lines 4227-4251: returned the focused startup-crashes anchor without loading the full pattern file."
+    },
+    {
+      "tool": "dotnet build with an explicit csproj path",
+      "evidence": "session-log.txt lines 4523-4532: produced a clean zero-warning, zero-error build."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "It copied Package.appxmanifest over the scaffold manifest and ignored linked files and a native ProjectReference outside the source directory.",
+      "evidence": "session-log.txt lines 329-346 and 399-412 show only six local files mapped, including the UWP manifest; source csproj lines 91-193 contain linked SharedContent items and RuntimeComponent.vcxproj."
+    },
+    {
+      "tool": "winapp build guidance",
+      "problem": "The installed standalone winapp CLI has no build command.",
+      "evidence": "session-log.txt lines 3094-3150: 'build' was not matched and the CLI listed run but no build command."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "problem": "It claimed to capture a managed stack but exposed only type/message, then classified a wrong-thread COMException under a generic package-reference hint.",
+      "evidence": "session-log.txt lines 4190-4197 and 4239-4251 contain no throwing frame and suggest TypeLoad/FileNotFound despite 'marshalled for a different thread'."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "A directory-only copy does not represent the MSBuild project graph; linked Compile/Page/Content items can live outside the project folder.",
+      "suggested_tweak": "Parse project items, copy external files to their Link paths, and stop explicitly on non-C# project dependencies."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "It checked desktop target and runFullTrust but not the scaffold WinUI Application EntryPoint.",
+      "suggested_tweak": "Fail when the active manifest does not use EntryPoint=\"$targetentrypoint$\"."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "Event 1026 stack frames were discarded and message-specific wrong-thread evidence was ignored.",
+      "suggested_tweak": "Retain managed frames and prioritize the COMException message over generic 0xe0434352 guidance."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "LanguageFinder.DetectLanguages",
+      "why_tried": "The linked Sample.LinguisticServices runtime component was absent, so the agent invented a managed replacement.",
+      "root_cause": "LanguageFinder was not available in the referenced projection and the skill had not surfaced the missing native project dependency.",
+      "fix": "Do not fabricate a replacement; detect the native ProjectReference and require it to be migrated or replaced explicitly."
+    },
+    {
+      "api": "Windows.Globalization.Transliterator",
+      "why_tried": "The agent attempted to replace the missing runtime component's transliteration method.",
+      "root_cause": "The proposed type was not available for this target; it was speculative API substitution.",
+      "fix": "Use verified platform contracts or preserve a compatible runtime component; otherwise defer with a written reason."
+    },
+    {
+      "api": "UnicodeCharacters.GetTextSegments/GetScript",
+      "why_tried": "The agent attempted a direct script-detection replacement after Sample.LinguisticServices was missing.",
+      "root_cause": "The call shape was invented without verifying the API surface.",
+      "fix": "Verify API signatures before editing, or retain/migrate the original component."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build guidance",
+      "wrong": "Use winapp build.",
+      "correct": "Use dotnet build with the explicit csproj path; standalone winapp is used for launch/identity, not compilation."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "C# UWP projects with linked MSBuild items",
+      "special_handling": "Resolve Include relative to the source csproj and copy external items to their Link paths before namespace rewriting and mapping."
+    },
+    {
+      "api": "C# UWP projects with native ProjectReference dependencies",
+      "special_handling": "Treat a non-C# project dependency as an explicit mixed-language prerequisite; never omit it or replace its behavior heuristically."
+    },
+    {
+      "api": "Packaged WinUI 3 Application EntryPoint",
+      "special_handling": "Keep the scaffold EntryPoint=\"$targetentrypoint$\" and merge UWP capabilities/extensions without replacing the WinUI activation contract."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initial Test-Path returned False while bootstrap was still running.",
+      "root_cause": "The dependent self-check was launched in parallel with initialization.",
+      "fix": "Run scaffold, bootstrap, and self-check sequentially."
+    },
+    {
+      "error": "'build' was not matched by winapp.",
+      "root_cause": "Skill guidance named a command absent from the standalone CLI.",
+      "fix": "Use dotnet build with the explicit csproj."
+    },
+    {
+      "error": "MSB1003: current directory does not contain a project or solution.",
+      "root_cause": "dotnet build ran from the parent app directory without a project path.",
+      "fix": "Pass the generated csproj path explicitly."
+    },
+    {
+      "error": "XAML input.json locked and WMC9999/output.json missing.",
+      "root_cause": "dotnet build and dotnet run compiled the same project concurrently.",
+      "fix": "Serialize build and launch."
+    },
+    {
+      "error": "CS0246 Sample and WMC0909/WMC1111 for local:Scenario.",
+      "root_cause": "Bootstrap omitted linked shared code/XAML and the app namespace had not yet been reconciled.",
+      "fix": "Import linked items using csproj Link metadata, then perform namespace/XAML adaptation."
+    },
+    {
+      "error": "CS0234/CS0103 for invented linguistic methods and Launcher.",
+      "root_cause": "The native runtime component and some source dependencies were absent, leading to speculative replacements.",
+      "fix": "Detect project dependencies, verify APIs, and use a supported launch pattern."
+    },
+    {
+      "error": "0x80073CF6 because Splash-sdk.png was missing.",
+      "root_cause": "Bootstrap overwrote the scaffold manifest with UWP asset references.",
+      "fix": "Keep the scaffold manifest active and preserve the UWP manifest only as merge reference."
+    },
+    {
+      "error": "Validator reported missing rescap namespace and runFullTrust.",
+      "root_cause": "The active manifest remained UWP-shaped.",
+      "fix": "Preserve the scaffold manifest and validate desktop packaging requirements."
+    },
+    {
+      "error": "CS0246 Frame after moving navigation.",
+      "root_cause": "A one-off edit omitted Microsoft.UI.Xaml.Controls.",
+      "fix": "Add the correct namespace before rebuilding."
+    },
+    {
+      "error": "Arg_COMException / COMException: interface marshalled for a different thread.",
+      "root_cause": "The active manifest retained the literal UWP EntryPoint=\"LinguisticServices.App\"; the validator did not check the required scaffold entry point, and diagnostics omitted the managed frame.",
+      "fix": "Require EntryPoint=\"$targetentrypoint$\" and retain/message-classify event 1026 stack evidence."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Source discovery and shell reconstruction, turns 4-16",
+      "symptom": "The agent searched generated obj XAML and manually reconstructed shared UI/resources after bootstrap mapped only six files.",
+      "turns_or_retries": "Approximately 12 turns before the first build.",
+      "root_cause": "Linked Compile/Page/Content items outside the source directory were invisible to the bootstrap.",
+      "how_resolved": "The agent manually found SharedContent and copied/recreated selected files and assets.",
+      "preventable_by": "Parse csproj Include/Link items in Initialize-UwpMigration.ps1."
+    },
+    {
+      "where": "Build loop, turns 17-36",
+      "symptom": "Invalid winapp build, wrong-directory dotnet build, concurrent-build file lock, then several speculative linguistic API rewrites.",
+      "turns_or_retries": "About 20 turns.",
+      "root_cause": "Incorrect build command guidance plus an undisclosed native ProjectReference whose API implementation had been omitted.",
+      "how_resolved": "The agent switched to explicit dotnet build and hand-wrote approximate managed algorithms.",
+      "preventable_by": "Correct build instructions and make bootstrap stop on mixed-language project dependencies."
+    },
+    {
+      "where": "Packaging and startup, turns 37-48",
+      "symptom": "The agent fixed assets and runFullTrust, then guessed at window initialization while the app repeatedly crashed with the same COMException.",
+      "turns_or_retries": "Four launch/validator cycles.",
+      "root_cause": "Bootstrap replaced the scaffold manifest, validator omitted the WinUI entry-point invariant, and Test-AppLaunch discarded the managed stack/misclassified the message.",
+      "how_resolved": "Not resolved before budget ended; all four scored features remained unreachable.",
+      "preventable_by": "Keep the scaffold manifest, validate $targetentrypoint$, and surface the first/full managed stack."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}

@@ -10,8 +10,8 @@ workflow to confirm residue grep, mapping integrity, deferred consistency,
 build cleanliness, and runtime smoke.
 
 Steps:
-1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
-2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
+1. Copy .xaml/.cs/.resw/assets from source to target, preserving folder structure
+2. Preserve the UWP .csproj/manifest at .uwp-source/ and import linked project items
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
 4b/4c. Per-file triage against unsupported-api-inventory.json + inline TODO injection
@@ -60,7 +60,6 @@ Write-Host "    Target : $Target"
 # ─── 1. Copy source files (everything except .csproj) ──────────────────────────
 $patterns = @(
     '.xaml', '.cs', '.resw', '.resjson',
-    '.appxmanifest',
     '.png', '.jpg', '.jpeg', '.svg', '.ico', '.gif'
 )
 
@@ -99,17 +98,63 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
 
 Write-Host "    Copied $($copied.Count) source files"
 
-# ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
+# ─── 2. Preserve project metadata and import linked source items ───────────────
 $uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
 $refDir = Join-Path $Target '.uwp-source'
+if (-not (Test-Path -LiteralPath $refDir)) {
+    New-Item -ItemType Directory -Path $refDir -Force | Out-Null
+}
+
+$uwpManifests = Get-ChildItem -Path $Source -Filter '*.appxmanifest' -File -ErrorAction SilentlyContinue
+foreach ($manifest in $uwpManifests) {
+    Copy-Item -LiteralPath $manifest.FullName -Destination (Join-Path $refDir $manifest.Name) -Force
+    Write-Host "    Preserved $($manifest.Name) at .uwp-source/; kept the WinUI scaffold manifest active"
+}
+
 if ($uwpCsprojs.Count -gt 0) {
-    if (-not (Test-Path -LiteralPath $refDir)) {
-        New-Item -ItemType Directory -Path $refDir -Force | Out-Null
-    }
     foreach ($p in $uwpCsprojs) {
         $dst = Join-Path $refDir $p.Name
         Copy-Item -LiteralPath $p.FullName -Destination $dst -Force
         Write-Host "    Preserved $($p.Name) at .uwp-source/ (reference only — do not edit, do not include in build)"
+
+        [xml]$projectXml = Get-Content -LiteralPath $p.FullName -Raw
+        $nativeProjectRefs = @($projectXml.SelectNodes("//*[local-name()='ProjectReference'][@Include]") | Where-Object {
+            [System.IO.Path]::GetExtension([string]$_.Include) -ne '.csproj'
+        })
+        if ($nativeProjectRefs.Count -gt 0) {
+            $nativeList = ($nativeProjectRefs | ForEach-Object { [string]$_.Include }) -join ', '
+            throw "Unsupported mixed-language dependency in $($p.Name): $nativeList. This skill migrates C# UWP projects only; migrate or replace the native project dependency before rerunning the bootstrap."
+        }
+
+        $linkedItems = @($projectXml.SelectNodes(
+            "//*[local-name()='Compile' or local-name()='Page' or local-name()='ApplicationDefinition' or local-name()='Content'][@Include]"
+        ))
+        foreach ($item in $linkedItems) {
+            $include = [string]$item.Include
+            $sourceItem = [System.IO.Path]::GetFullPath((Join-Path $p.DirectoryName $include))
+            if (-not (Test-Path -LiteralPath $sourceItem -PathType Leaf)) { continue }
+            if ($sourceItem.StartsWith($Source, [System.StringComparison]::OrdinalIgnoreCase)) { continue }
+
+            $linkNode = $item.SelectSingleNode("*[local-name()='Link']")
+            if (-not $linkNode -or [string]::IsNullOrWhiteSpace($linkNode.InnerText)) {
+                Write-Warning "External project item has no <Link> target and was not copied: $include"
+                continue
+            }
+            $targetRel = $linkNode.InnerText.Trim() -replace '/', '\'
+            if ($targetRel -match '(^|\\)AssemblyInfo\.cs$') {
+                Write-Host "    Skipped linked $targetRel (SDK-style projects generate assembly metadata)"
+                continue
+            }
+
+            $targetItem = Join-Path $Target $targetRel
+            $targetItemDir = Split-Path -Parent $targetItem
+            if (-not (Test-Path -LiteralPath $targetItemDir)) {
+                New-Item -ItemType Directory -Path $targetItemDir -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $sourceItem -Destination $targetItem -Force
+            if (-not $copied.Contains($targetRel)) { [void]$copied.Add($targetRel) }
+            Write-Host "    Imported linked item: $targetRel"
+        }
     }
 } else {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"

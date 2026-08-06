@@ -425,7 +425,7 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 ```
 
 - **Event 1000** — faulting module + native **Exception code** (e.g. `0x8001010E`).
-- **Event 1026** — *.NET Runtime*: the managed **exception type, message, and stack**. This is the one that names the actual throwing frame. Read it before changing any code.
+- **Event 1026** — *.NET Runtime*: the managed **exception type, message, and stack**. `Test-AppLaunch.ps1` prints the first managed frame and retains the full stack in JSON/validator diagnostics. Read it before changing any code.
 
 **Known native codes and what they usually mean** (the code names the error *class*; the real fix is whatever the captured stack points at):
 
@@ -435,6 +435,8 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
 | `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
+
+If the managed exception is `COMException` with *"marshalled for a different thread"*, treat it as `RPC_E_WRONG_THREAD` even when event 1000 reports the generic CLR code `0xE0434352`. First verify the packaged manifest retained the scaffold `EntryPoint="$targetentrypoint$"`; a literal UWP `<Namespace>.App` entry point can register and then fail during WinUI activation. If the entry point is correct, use the captured managed frame to move the named apartment-affined access onto the UI thread after activation.
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 
@@ -571,7 +573,7 @@ public void Control_DefaultState_IsValid()
 
 ### PackageReference reconciliation cheat-sheet
 
-`Initialize-UwpMigration.ps1` preserves the UWP `.csproj` at `<Target>/.uwp-source/` and leaves the WinUI 3 scaffold's `.csproj` intact. Open both side-by-side and merge:
+`Initialize-UwpMigration.ps1` preserves the UWP `.csproj` and manifest at `<Target>/.uwp-source/`, leaves the WinUI 3 scaffold project/manifest active, and imports external project items that have explicit `<Link>` targets. Open both project files side-by-side and merge:
 
 - **Drop** (UWP-only — never carry over):
   - `Microsoft.NETCore.UniversalWindowsPlatform`
