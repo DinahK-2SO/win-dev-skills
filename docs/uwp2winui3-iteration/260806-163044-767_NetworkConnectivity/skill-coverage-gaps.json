@@ -1,0 +1,15 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "CS0104 guidance was present but framed only around stale UWP/WinUI XAML namespaces, not SDK implicit-using collisions.",
+      "evidence": "session-log.txt lines 3829-3844: HttpClient was ambiguous between System.Net.Http and Windows.Web.Http.",
+      "covered_at": "MIGRATION-PATTERNS.md, 'Common build errors after the namespace rewrite' -> 'CS0104: LaunchActivatedEventArgs is an ambiguous reference'",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Extend the existing CS0104 section to call out implicit .NET usings, fully qualifying the intended API family, and avoiding a global implicit-using disable for one collision.",
+      "generalizes": "SDK-style WinUI projects enable implicit usings, so retained Windows API types can collide with modern .NET types in many migrations."
+    }
+  ]
+}

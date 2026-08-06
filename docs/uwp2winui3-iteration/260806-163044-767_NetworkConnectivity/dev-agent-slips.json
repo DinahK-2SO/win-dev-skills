@@ -1,0 +1,21 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The bootstrap self-check was launched concurrently with the bootstrap and returned False.",
+      "evidence": "session-log.txt turn 2 lines 320-358; Test-Path ran before Initialize-UwpMigration.ps1 completed, then returned True when repeated in turn 3.",
+      "covered_clearly_at": "SKILL.md Step 0 lines 34-47 and Hard rules lines 49-59 require commands 1, 2, then 3 and prohibit proceeding until Test-Path is True.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The required order and success gate are already explicit and prominent; executing dependent commands sequentially fixes it."
+    },
+    {
+      "problem": "The agent opened a broad MIGRATION-PATTERNS.md range instead of using only the required anchor.",
+      "evidence": "session-log.txt turn 1 lines 15-238 loaded lines 1-220 before the TODO anchor was known.",
+      "covered_clearly_at": "SKILL.md Process lines 27-29 and Step 1 lines 74-82 explicitly prefer Get-MigrationPattern.ps1 and say not to open the full patterns file.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The anchored lookup workflow is already repeated prominently; a capable rerun can follow it without more prose."
+    }
+  ]
+}

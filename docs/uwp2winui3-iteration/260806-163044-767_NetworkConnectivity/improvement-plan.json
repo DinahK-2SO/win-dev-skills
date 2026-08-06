@@ -1,0 +1,45 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "External UWP project items with Link metadata were absent from bootstrap output.",
+      "evidence": "lessons.json dev_agent_struggles[0] and skill-defects.json items[0]",
+      "root_cause": "Directory recursion cannot discover project files linked from shared folders. Tier 1 is feasible and stronger than telling agents to reconstruct links manually.",
+      "tier": 1,
+      "change": "Resolve common UWP project properties, materialize safe Include/Link items at logical target paths, and include them in namespace rewrite, triage, and mapping.",
+      "file": "scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared shell code/XAML, scenario XAML, styles, and assets enter the migration map automatically.",
+      "falsifiable_check": "Running bootstrap on NetworkConnectivity copies App.xaml, MainPage.xaml, Styles/Styles.xaml, all three scenario XAML files, and linked assets; .bootstrap-meta.json reports 21 seeded rows and residue scan finds zero Windows.UI.Xaml references."
+    },
+    {
+      "problem": "The validator warned on the bootstrap-generated empty deferred table.",
+      "evidence": "lessons.json errors_encountered[4] and skill-defects.json items[1]",
+      "root_cause": "Tier 1 parser logic did not recognize the bootstrap's '(none)' sentinel; prose cannot prevent a deterministic false warning.",
+      "tier": 1,
+      "change": "Exclude '(none)' rows when counting deferred entries and when deciding whether the file has content.",
+      "file": "scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "No-defer migrations receive a clean PASS message instead of a warning.",
+      "falsifiable_check": "A MIGRATION-DEFERRED.md containing only the generated '(none)' row yields '[PASS] No defer rows' and no consistency warning."
+    },
+    {
+      "problem": "Common SDK-style migration build diagnostics lacked actionable root-cause guidance.",
+      "evidence": "lessons.json errors_encountered[0..3], skill-defects.json items[2..3], and skill-coverage-gaps.json items[0]",
+      "root_cause": "The correct choice depends on source API semantics, binding requirements, and intended OS support, so Tier 1 automation would be unsafe; a targeted Tier 3 diagnostic table is the highest reliable option.",
+      "tier": 3,
+      "change": "Extend existing common-error and project sections for implicit-using CS0104 collisions, WMC0909-led x:Bind cascades, and CA1416/minimum-OS reconciliation.",
+      "file": "MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents fix the first root error directly and avoid ineffective warning-suppression edits.",
+      "falsifiable_check": "On rerun, the first build has no HttpClient ambiguity or x:DataType cascade, and CA1416 is resolved by project reconciliation without an intermediate unused using or unsupported annotation-only fix."
+    }
+  ],
+  "files_touched": [
+    "scripts/Initialize-UwpMigration.ps1",
+    "scripts/Validate-UwpMigration.ps1",
+    "MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": [
+    "UWP baseline capture remained on the splash screen and exposed no feature controls through UI Automation; this is an evaluation-instrument limitation and must not be addressed in the migration skill."
+  ]
+}

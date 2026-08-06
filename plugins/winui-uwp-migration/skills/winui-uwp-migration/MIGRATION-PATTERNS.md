@@ -27,6 +27,24 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+SDK-style WinUI projects also enable implicit .NET usings, which can introduce a collision even when the source has only one explicit import. A common example is `HttpClient` becoming ambiguous between `System.Net.Http.HttpClient` and `Windows.Web.Http.HttpClient`. Preserve the source API's behavior by fully qualifying that type (and its related result types), or remove the unused namespace; do not disable all implicit usings just to hide one collision.
+
+### `WMC0909` followed by `WMC1111` / `WMC9999` in an `x:Bind` DataTemplate
+
+Treat the first error as the root cause. When `x:DataType="local:Model"` cannot resolve, the compiler then reports that the template has no data type and can end in the opaque internal error. Verify that:
+
+- the model is `public`;
+- the XAML `xmlns:local` matches the model's CLR namespace after shell/namespace conversion;
+- the file containing the model is included in the target build.
+
+If the original binding is simple property display and compiled binding is not required, the behavior-preserving fallback is to remove `x:DataType` and change `{x:Bind Property}` to `{Binding Property}`. Do not investigate the trailing `WMC9999` independently until `WMC0909` is fixed.
+
+### `CA1416` after moving source into the scaffold
+
+The WinUI scaffold can target an older minimum OS than the UWP project. If copied code calls an API introduced after the scaffold's `<TargetPlatformMinVersion>`, the build emits `CA1416` even though the original app had already required the newer OS.
+
+Compare the source UWP `<TargetPlatformMinVersion>` with the target value during project reconciliation. If the source minimum is higher, carry that minimum forward. Only add `SupportedOSPlatform` attributes or runtime version guards when the migrated app intentionally supports an older OS; an attribute alone must not claim support that the package manifest and project minimum contradict.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -563,6 +581,7 @@ public void Control_DefaultState_IsValid()
   - `net8.0-windows10.0.19041.0` (LTS)
   - `net9.0-windows10.0.19041.0`
   - `net10.0-windows10.0.26100.0` (current `dotnet new winui` default in this repo)
+- Preserve the UWP project's minimum supported OS when it is higher than the scaffold's `<TargetPlatformMinVersion>`; see the `CA1416` guidance above.
 - Add `<UseWinUI>true</UseWinUI>`.
 - Add `<EnableMsixTooling>true</EnableMsixTooling>` for packaged builds.
 - Reference `Microsoft.WindowsAppSDK` and `Microsoft.Windows.SDK.BuildTools`.

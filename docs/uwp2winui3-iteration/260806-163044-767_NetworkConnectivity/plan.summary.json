@@ -1,0 +1,28 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 2,
+  "applied": true,
+  "bullets": [
+    "Materialize linked UWP project items during bootstrap so shared XAML, code, and assets are not silently omitted.",
+    "Recognize the generated empty deferred placeholder so validation no longer emits a false consistency warning.",
+    "Add root-cause guidance for implicit-using ambiguity, x:Bind diagnostic cascades, and minimum-OS CA1416 warnings."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "notes/lessons.json",
+    "notes/lessons.md",
+    "notes/skill-defects.json",
+    "notes/skill-defects.md",
+    "notes/skill-coverage-gaps.json",
+    "notes/skill-coverage-gaps.md",
+    "notes/dev-agent-slips.json",
+    "notes/dev-agent-slips.md",
+    "notes/improvement-plan.json",
+    "notes/plan.summary.json"
+  ],
+  "deferred_to_human": [
+    "UWP baseline capture remained on the splash screen and exposed no feature controls through UI Automation; this is an evaluation-instrument limitation."
+  ]
+}

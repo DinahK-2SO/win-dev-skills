@@ -1,0 +1,139 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 2-4: copied six local files, rewrote namespaces, generated MIGRATION-MAPPING.md/.bootstrap-meta.json, and injected the threading TODO."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt turn 4: -Anchor threading returned the exact DispatcherQueue replacement used for the network-status callback."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt turns 19, 21, and 26: surfaced the ambiguous HttpClient, XAML binding failures, nullable/OS warnings, then confirmed a zero-warning build."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1 and Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt turn 27: startup stayed alive for 10 seconds and the validator reported PASS."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "parallel powershell calls",
+      "problem": "The bootstrap and its dependent Test-Path self-check ran concurrently, so the check returned False before bootstrap completed.",
+      "evidence": "session-log.txt turn 2 lines 320-358; the same check returned True in turn 3."
+    },
+    {
+      "tool": "view",
+      "problem": "Reading the shared Styles.xaml without a range exceeded the file-size limit.",
+      "evidence": "session-log.txt turn 5 lines 1148-1172; the agent recovered by reading ranges in turn 7."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It recursively copied only the supplied project directory and ignored external MSBuild Include items with Link metadata, omitting the shared shell XAML/code, scenario XAML, styles, and assets.",
+      "suggested_tweak": "Parse UWP project Include/Link metadata and materialize resolvable linked source files at their logical target paths before triage."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "It warned that MIGRATION-DEFERRED.md had content when the bootstrap-generated table contained only the '(none)' placeholder.",
+      "suggested_tweak": "Treat the generated '(none)' row as an empty deferred set."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "Windows.UI.Core.CoreDispatcher / Dispatcher.RunAsync",
+      "why_tried": "The UWP NetworkStatusChanged callback marshalled work to the UI thread with the UWP dispatcher.",
+      "root_cause": "CoreDispatcher is UWP-only in WinUI 3.",
+      "fix": "Use the Page DispatcherQueue and TryEnqueue the UI update."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "MIGRATION-PATTERNS.md, x:Bind and compiled bindings",
+      "wrong": "The text implied namespace rewrites were sufficient for compiled binding types and separately treated WMC9999 as a dangling resource-key signal.",
+      "correct": "When WMC0909 precedes WMC1111/WMC9999, unresolved x:DataType is the root cause; verify type visibility/namespace/build inclusion or use ordinary Binding for simple display templates."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "NetworkInformation.NetworkStatusChanged",
+      "special_handling": "The callback is not guaranteed to run on the UI thread; marshal UI changes through DispatcherQueue and unsubscribe when navigating away."
+    },
+    {
+      "api": "Windows.Web.Http.HttpClient.TryGetStringAsync",
+      "special_handling": "SDK-style implicit usings can make HttpClient ambiguous with System.Net.Http.HttpClient, and these result APIs require Windows 10 version 18362 or later."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "CS0104: HttpClient is ambiguous between System.Net.Http.HttpClient and Windows.Web.Http.HttpClient.",
+      "root_cause": "The SDK-style target's implicit System.Net.Http import collided with the retained Windows.Web.Http import.",
+      "fix": "Fully qualify Windows.Web.Http.HttpClient."
+    },
+    {
+      "error": "WMC0909, WMC1111, and WMC9999 in MainPage.xaml DataTemplate.",
+      "root_cause": "The XAML compiler could not resolve local:Scenario for x:DataType; the later missing-data-type and internal errors were cascading diagnostics.",
+      "fix": "For this simple title template, remove x:DataType and replace x:Bind with Binding."
+    },
+    {
+      "error": "CS8602 nullable dereference warnings for connection profiles.",
+      "root_cause": "The source dereferenced a nullable ConnectionProfile after a connectivity-level check that did not prove non-null to the compiler.",
+      "fix": "Include profile != null in the branch condition before GetConnectionCost."
+    },
+    {
+      "error": "CA1416 warnings for HttpGetStringResult APIs introduced in Windows 10 version 18362.",
+      "root_cause": "The scaffold minimum was 17763 while the source UWP project minimum was 22621.",
+      "fix": "Carry forward an adequate TargetPlatformMinVersion; use annotations/guards only when older-OS support is intentional."
+    },
+    {
+      "error": "Validate-UwpMigration warning: MIGRATION-DEFERRED.md exists with content but mapping has no defer rows.",
+      "root_cause": "The validator counted the bootstrap's '(none)' placeholder as content.",
+      "fix": "Exclude the placeholder from deferred data rows."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log.txt turns 5-18",
+      "symptom": "The agent manually located, read in chunks, recreated, and wired shared shell XAML/code/styles/assets that were absent from the bootstrap map.",
+      "turns_or_retries": "Approximately 14 turns before the first build.",
+      "root_cause": "The bootstrap ignored linked project items outside the supplied source directory.",
+      "how_resolved": "The agent inspected the UWP csproj and sibling SharedContent tree, then manually copied/reconstructed the linked items.",
+      "preventable_by": "Teach Initialize-UwpMigration.ps1 to copy Include items with Link metadata."
+    },
+    {
+      "where": "session-log.txt turns 2-3",
+      "symptom": "The mandatory mapping self-check first returned False and had to be repeated.",
+      "turns_or_retries": "One retry.",
+      "root_cause": "The dependent check was launched in parallel with the bootstrap.",
+      "how_resolved": "The agent reran Test-Path after bootstrap completed.",
+      "preventable_by": "Follow the existing sequential Step 0 command order."
+    },
+    {
+      "where": "session-log.txt turns 19-20",
+      "symptom": "The first build failed with one ambiguous type and a three-error XAML diagnostic chain.",
+      "turns_or_retries": "One build retry.",
+      "root_cause": "SDK implicit-using collision and unresolved DataTemplate x:DataType were not covered by the migration diagnostics.",
+      "how_resolved": "The agent qualified HttpClient and changed the simple compiled binding to Binding.",
+      "preventable_by": "Add targeted CS0104 and WMC0909/WMC1111/WMC9999 guidance."
+    },
+    {
+      "where": "session-log.txt turns 21-24",
+      "symptom": "Six CA1416 warnings led to three edits: an unused using, an attribute, then the effective minimum-OS project fix.",
+      "turns_or_retries": "Three edit turns.",
+      "root_cause": "Project reconciliation guidance did not say to preserve a higher UWP TargetPlatformMinVersion.",
+      "how_resolved": "The target minimum was raised to 18362.",
+      "preventable_by": "Document source/target minimum-OS reconciliation and when annotations are inappropriate."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "MSBuild linked-item materialization during bootstrap",
+      "would_have_saved": "Manual discovery and reconstruction of the shared shell, three scenario XAML files, styles, and assets across turns 5-18."
+    }
+  ],
+  "env_issues": []
+}

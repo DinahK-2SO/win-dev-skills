@@ -1,0 +1,47 @@
+{
+  "scenario": "NetworkConnectivity",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap omitted external files referenced by UWP project Include/Link metadata.",
+      "evidence": "session-log.txt turns 2 and 5-18: bootstrap copied six files, while the csproj linked the shared App/MainPage code and XAML, Styles.xaml, three scenario XAML files, and assets.",
+      "skill_search": "Initialize-UwpMigration.ps1 searched for Include, Link, Compile, Page, Content, and SharedContent; no linked-item handling existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The script used only Get-ChildItem -Recurse under -Source, so project items outside that directory were invisible.",
+      "proposed_fix": "Parse resolvable Include/Link items from the UWP csproj and copy them to their logical Link paths before namespace rewrite and triage.",
+      "generalizes": "Linked files and shared content projects are common in UWP SDK samples and multi-project UWP applications."
+    },
+    {
+      "problem": "Validator emitted a false deferred-file warning for the bootstrap's empty placeholder row.",
+      "evidence": "session-log.txt lines 3951-3964 and 3970-3981: validation passed but warned even though MIGRATION-DEFERRED.md contained only '| (none) | — |'.",
+      "skill_search": "Validate-UwpMigration.ps1 search for '(none)' and 'mapping has no defer rows'; the placeholder was not excluded.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize-UwpMigration.ps1 writes '| (none) | — |', while Validate-UwpMigration.ps1 treated any file lacking 'No items deferred' as non-empty.",
+      "root_cause": "Bootstrap and validator used incompatible empty-state representations.",
+      "proposed_fix": "Exclude '(none)' from deferred data-row parsing in both zero-row and row-count branches.",
+      "generalizes": "Every migration with no deferred files receives this bootstrap-generated placeholder."
+    },
+    {
+      "problem": "Compiled-binding guidance did not distinguish a WMC0909 root error from cascading WMC1111/WMC9999 errors.",
+      "evidence": "session-log.txt lines 3833-3847; changing the unresolved DataTemplate x:Bind to Binding cleared the complete diagnostic chain.",
+      "skill_search": "MIGRATION-PATTERNS.md searches for WMC0909, WMC1111, DataTemplate, and x:DataType returned no diagnostic recipe; the x:Bind section claimed types resolve automatically.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Compiled bindings against Windows.UI.Xaml.* types resolve to Microsoft.UI.Xaml.* automatically once the namespace rewrites land.",
+      "root_cause": "The documentation treated WMC9999 as an independent resource-key failure and omitted local model resolution failures.",
+      "proposed_fix": "Document the WMC0909-first diagnostic chain, type visibility/namespace/build checks, and the Binding fallback for simple templates.",
+      "generalizes": "UWP pages frequently use x:Bind DataTemplates whose local model namespaces or build inclusion change during shell conversion."
+    },
+    {
+      "problem": "Project reconciliation omitted source minimum-OS preservation and CA1416 handling.",
+      "evidence": "session-log.txt turns 21-24: six CA1416 warnings caused three edits before TargetPlatformMinVersion was raised.",
+      "skill_search": "MIGRATION-PATTERNS.md searches for CA1416 and TargetPlatformMinVersion found no guidance.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The scaffold minimum was lower than the UWP source minimum, making retained Windows APIs appear unsupported.",
+      "proposed_fix": "Tell agents to compare source and target minimum OS versions, carry forward the higher source requirement, and reserve annotations/guards for intentional older-OS support.",
+      "generalizes": "WinUI scaffolds and UWP projects commonly have different minimum Windows versions."
+    }
+  ]
+}

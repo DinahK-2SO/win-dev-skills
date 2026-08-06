@@ -249,7 +249,7 @@ if (-not (Test-Path -LiteralPath $mapPath)) {
             $deferText = Get-Content -LiteralPath $deferPath -Raw
             $deferTextRows = @()
             foreach ($line in ($deferText -split "`n")) {
-                if ($line -match '^\|' -and $line -notmatch '^\|\s*-+\s*\|' -and $line -notmatch '^\|\s*(Source file|File)\s*\|') {
+                if ($line -match '^\|' -and $line -notmatch '^\|\s*-+\s*\|' -and $line -notmatch '^\|\s*(Source file|File|\(none\))\s*\|') {
                     $deferTextRows += $line
                 }
             }
@@ -263,10 +263,15 @@ if (-not (Test-Path -LiteralPath $mapPath)) {
     } else {
         if (Test-Path -LiteralPath $deferPath) {
             $deferText = Get-Content -LiteralPath $deferPath -Raw
-            if ($deferText -notmatch 'No items deferred') {
+            $deferTextRows = @($deferText -split "`n" | Where-Object {
+                $_ -match '^\|' -and
+                $_ -notmatch '^\|\s*-+\s*\|' -and
+                $_ -notmatch '^\|\s*(Source file|File|\(none\))\s*\|'
+            })
+            if ($deferTextRows.Count -gt 0) {
                 Write-Host "[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency"
             } else {
-                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes 'No items deferred.'"
+                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md contains no deferred items"
             }
         } else {
             Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md not required"

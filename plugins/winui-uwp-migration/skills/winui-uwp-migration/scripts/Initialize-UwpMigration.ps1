@@ -10,7 +10,7 @@ workflow to confirm residue grep, mapping integrity, deferred consistency,
 build cleanliness, and runtime smoke.
 
 Steps:
-1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
+1. Copy local and project-linked .xaml/.cs/.resw/asset/.appxmanifest files to the target
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
@@ -76,6 +76,7 @@ $srcExcludeDirs = @('bin', 'obj', '.vs', '.git', '.github', '.copilot', 'package
 $srcExcludePattern = '\\(' + ($srcExcludeDirs -join '|') + ')\\'
 
 $copied = New-Object System.Collections.Generic.List[string]
+$uwpCsprojs = @(Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue)
 
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
@@ -97,10 +98,111 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
     [void]$copied.Add($rel)
 }
 
-Write-Host "    Copied $($copied.Count) source files"
+function Expand-UwpProjectValue {
+    param(
+        [string]$Value,
+        [hashtable]$Properties,
+        [string]$ProjectDirectory
+    )
+
+    $expanded = $Value.Replace('$(MSBuildThisFileDirectory)', $ProjectDirectory + '\')
+    for ($pass = 0; $pass -lt 10; $pass++) {
+        $before = $expanded
+        foreach ($name in $Properties.Keys) {
+            $expanded = $expanded.Replace('$(' + $name + ')', [string]$Properties[$name])
+        }
+        if ($expanded -eq $before) { break }
+    }
+
+    $functionPattern = '\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(([^,]+),\s*([^)]+)\)\)'
+    while ($expanded -match $functionPattern) {
+        $start = $matches[1].Trim().Trim("'`"")
+        $marker = $matches[2].Trim().Trim("'`"")
+        $cursor = [System.IO.Path]::GetFullPath($start)
+        $found = $null
+        while ($cursor) {
+            if (Test-Path -LiteralPath (Join-Path $cursor $marker)) {
+                $found = $cursor
+                break
+            }
+            $parent = [System.IO.Directory]::GetParent($cursor)
+            $cursor = if ($parent) { $parent.FullName } else { $null }
+        }
+        if (-not $found) { break }
+        $expanded = [regex]::Replace($expanded, $functionPattern, {
+            param($match)
+            $found
+        }, 1)
+    }
+
+    return $expanded
+}
+
+# UWP projects commonly link shared XAML, code, and assets from outside the project
+# directory. A recursive directory copy cannot see those files, so honor project
+# Include + Link metadata and materialize each linked item at its logical target path.
+$linkedCopied = 0
+foreach ($project in $uwpCsprojs) {
+    [xml]$projectXml = Get-Content -LiteralPath $project.FullName -Raw
+    $projectDir = $project.DirectoryName
+    $properties = @{}
+
+    foreach ($propertyGroup in @($projectXml.Project.PropertyGroup)) {
+        foreach ($property in @($propertyGroup.ChildNodes)) {
+            if ($property.NodeType -ne [System.Xml.XmlNodeType]::Element) { continue }
+            $properties[$property.LocalName] = [string]$property.InnerText
+        }
+    }
+    for ($pass = 0; $pass -lt 10; $pass++) {
+        foreach ($name in @($properties.Keys)) {
+            $properties[$name] = Expand-UwpProjectValue -Value $properties[$name] -Properties $properties -ProjectDirectory $projectDir
+        }
+    }
+
+    foreach ($itemGroup in @($projectXml.Project.ItemGroup)) {
+        foreach ($item in @($itemGroup.ChildNodes)) {
+            if ($item.NodeType -ne [System.Xml.XmlNodeType]::Element) { continue }
+            if ($item.LocalName -notin @('Compile', 'ApplicationDefinition', 'Page', 'Content', 'Resource', 'PRIResource', 'AppxManifest')) { continue }
+
+            $include = [string]$item.GetAttribute('Include')
+            $linkNode = @($item.ChildNodes | Where-Object { $_.LocalName -eq 'Link' } | Select-Object -First 1)
+            if (-not $include -or $linkNode.Count -eq 0) { continue }
+
+            $sourcePath = Expand-UwpProjectValue -Value $include -Properties $properties -ProjectDirectory $projectDir
+            if (-not [System.IO.Path]::IsPathRooted($sourcePath)) {
+                $sourcePath = Join-Path $projectDir $sourcePath
+            }
+            $sourcePath = [System.IO.Path]::GetFullPath($sourcePath)
+            if ($sourcePath -match '\$\(' -or -not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+                Write-Warning "    Linked project item could not be resolved: $include"
+                continue
+            }
+
+            $rel = ([string]$linkNode[0].InnerText).Replace('/', '\')
+            if ([System.IO.Path]::IsPathRooted($rel) -or $rel -match '(^|\\)\.\.(\\|$)') {
+                Write-Warning "    Ignoring unsafe Link path: $rel"
+                continue
+            }
+            if ([System.IO.Path]::GetFileName($rel) -eq 'AssemblyInfo.cs') { continue }
+
+            $name = [System.IO.Path]::GetFileName($sourcePath).ToLowerInvariant()
+            if (-not ($patterns | Where-Object { $name.EndsWith($_) } | Select-Object -First 1)) { continue }
+
+            $dst = Join-Path $Target $rel
+            $dstDir = [System.IO.Path]::GetDirectoryName($dst)
+            if (-not (Test-Path -LiteralPath $dstDir)) {
+                New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $sourcePath -Destination $dst -Force
+            if (-not $copied.Contains($rel)) { [void]$copied.Add($rel) }
+            $linkedCopied++
+        }
+    }
+}
+
+Write-Host "    Copied $($copied.Count) source files ($linkedCopied linked project item(s))"
 
 # ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
-$uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
 $refDir = Join-Path $Target '.uwp-source'
 if ($uwpCsprojs.Count -gt 0) {
     if (-not (Test-Path -LiteralPath $refDir)) {
