@@ -1,0 +1,163 @@
+{
+  "scenario": "MobileHotspot",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 121-148: after the scaffold existed, bootstrap completed and produced mapping, deferred, metadata, and namespace-rewrite artifacts."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt lines 3857-3872 and 4228-4237: native builds exposed actionable compiler/platform diagnostics and the final rebuild succeeded with zero warnings and errors."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 4206-4222: the validator rebuilt x64, smoke-launched the app, and reported PASS."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt lines 3927-4042: the startup-crashes anchor supplied the crash-code lookup and event-log workflow."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed standalone CLI has no build command.",
+      "evidence": "session-log.txt lines 3340-3400: winapp rejected build and listed only init/restore/package/run and related commands."
+    },
+    {
+      "tool": "parallel build/launch/validation invocations",
+      "problem": "Commands that mutate/read the same bin and obj trees raced.",
+      "evidence": "session-log.txt lines 4168-4223: concurrent dotnet build, Test-AppLaunch, and validator produced transient CS2001 generated-file failures and a stale crash result while the validator's serialized rebuild and launch passed."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It copied only files physically below Source and ignored csproj Include/Link items from sibling SharedContent directories.",
+      "suggested_tweak": "Resolve project-linked Compile, ApplicationDefinition, Page, Content, and AppxManifest items and copy them to their Link paths."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "It initially searched only bin\\x64\\Debug/bin\\x64\\Debug and missed the default dotnet build layout under bin\\Debug.",
+      "suggested_tweak": "Search both Platform-qualified and default dotnet build layouts."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "winapp build",
+      "why_tried": "SKILL.md prescribed it as the preferred compile command.",
+      "root_cause": "The current standalone winapp CLI does not expose a build verb.",
+      "fix": "Use dotnet build; retain winapp run only inside the launch helper."
+    },
+    {
+      "api": "Windows.UI.Colors",
+      "why_tried": "The shared UWP shell used color constants after the bootstrap's XAML-only namespace rewrite.",
+      "root_cause": "The bootstrap rewrote Windows.UI.Xaml but not the documented Windows.UI.Colors mapping.",
+      "fix": "Mechanically rewrite Windows.UI.Colors to Microsoft.UI.Colors."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build",
+      "wrong": "Prefer/finalize with winapp build.",
+      "correct": "Build with dotnet build and launch through Test-AppLaunch.ps1."
+    },
+    {
+      "where": "SKILL.md Defensive UI for device-dependent features",
+      "wrong": "Swap the page's main content for a fallback.",
+      "correct": "Keep named feature controls visible, disable unavailable actions, and add an adjacent status message."
+    },
+    {
+      "where": "SKILL.md fidelity guidance for a mapping missing expected files",
+      "wrong": "A missing mapping file necessarily means the bootstrap Source path was wrong.",
+      "correct": "The bootstrap must also honor csproj Include/Link items that intentionally live outside the project directory."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Networking.NetworkOperators.NetworkOperatorTetheringManager",
+      "special_handling": "Preserve wiFiControl in Package.appxmanifest, reconcile the minimum Windows contract, and catch device/capability unavailability without removing the feature controls."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initialize-UwpMigration.ps1: Target not found; Test-Path returned False",
+      "root_cause": "The scaffold, bootstrap, and self-check were launched concurrently despite their dependency order.",
+      "fix": "Wait for dotnet new to finish, then run bootstrap, then run the self-check."
+    },
+    {
+      "error": "winapp: 'build' was not matched",
+      "root_cause": "Outdated skill command for the installed CLI.",
+      "fix": "Switch to dotnet build."
+    },
+    {
+      "error": "CS0246 scenario page types plus WMC0909/WMC1111/WMC9999",
+      "root_cause": "Bootstrap omitted linked scenario/shared XAML, so generated partial classes and the original typed template context were absent; manual reconstruction introduced follow-on type mismatches.",
+      "fix": "Copy evaluated csproj Include/Link files before namespace rewriting and triage."
+    },
+    {
+      "error": "CS0117 MainPage.Current and CS0103 NotifyType",
+      "root_cause": "Manual reconstruction split source shell/helpers across inconsistent namespaces and duplicate locations after linked shared files were omitted.",
+      "fix": "Preserve linked shared files at their project Link paths and transform them in place."
+    },
+    {
+      "error": "CS0234/CS0103 for Colors",
+      "root_cause": "The bootstrap did not apply the documented Windows.UI.Colors namespace mapping.",
+      "fix": "Rewrite it mechanically to Microsoft.UI.Colors."
+    },
+    {
+      "error": "CA1416 warnings for tethering band APIs",
+      "root_cause": "The scaffold minimum 10.0.17763.0 was lower than the retained API contract (10.0.19041.0+).",
+      "fix": "Raise TargetPlatformMinVersion and manifest MinVersion together, or guard optional APIs."
+    },
+    {
+      "error": "0xc000027b startup crash during page navigation",
+      "root_cause": "Device-dependent initialization ran without an exception boundary on a machine where tethering was unavailable.",
+      "fix": "Catch initialization failure and present status while retaining the original controls."
+    },
+    {
+      "error": "CS2001 missing *.g.i.cs and contradictory launch results",
+      "root_cause": "dotnet build, launch, and validator rebuild ran concurrently against the same generated-output tree.",
+      "fix": "Serialize build, launch, and validation."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Turns 1-3",
+      "symptom": "Bootstrap and both self-checks raced the scaffold/bootstrap and returned Target not found/False.",
+      "turns_or_retries": "2 bootstrap attempts and 2 premature self-checks",
+      "root_cause": "Dependent commands were parallelized.",
+      "how_resolved": "The agent used the bootstrap result after it eventually completed.",
+      "preventable_by": "Follow the existing mandatory sequential Step 0 gate."
+    },
+    {
+      "where": "Turns 13-20",
+      "symptom": "The first build emitted 13 errors; the agent manually rebuilt shared XAML/shell structure and retried color mapping.",
+      "turns_or_retries": "3 build attempts",
+      "root_cause": "Project-linked shared files were absent from bootstrap output and one documented namespace mapping was not automated.",
+      "how_resolved": "The agent manually created linked XAML equivalents, consolidated helpers, and changed color references.",
+      "preventable_by": "Make bootstrap honor Include/Link metadata and apply safe namespace rewrites."
+    },
+    {
+      "where": "Turns 21-27",
+      "symptom": "Launch was unavailable, then crashed; shell chrome was removed speculatively; concurrent final commands produced transient generated-file errors.",
+      "turns_or_retries": "3 launch attempts, 2 validator runs, and 1 speculative shell rewrite",
+      "root_cause": "Launch layout assumptions, unavailable-device initialization, and concurrent output-tree access obscured diagnosis.",
+      "how_resolved": "A serialized validator rebuild/launch passed after initialization was guarded and the platform minimum was reconciled.",
+      "preventable_by": "Support default dotnet output layouts, preserve controls in defensive UI, reconcile API contracts, and serialize lifecycle commands."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Bootstrap support for UWP csproj Include/Link items",
+      "would_have_saved": "Manual discovery/recreation of App.xaml, MainPage, Styles, scenario XAML, code-behind, and shared assets."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "The validation machine did not expose usable Mobile Hotspot capability/hardware.",
+      "workaround": "Show an unavailable status while retaining and disabling the migrated controls."
+    }
+  ]
+}

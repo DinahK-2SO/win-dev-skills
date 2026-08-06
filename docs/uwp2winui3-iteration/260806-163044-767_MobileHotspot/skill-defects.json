@@ -1,0 +1,47 @@
+{
+  "scenario": "MobileHotspot",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap omitted UWP project items linked from outside the Source directory.",
+      "evidence": "session-log.txt lines 121-148 reports only 4 copied files and zero TODOs; source MobileHotspot.csproj lines 94-165 links shared App/MainPage/Styles/scenario XAML/assets; build lines 3564-3608 show missing scenario types and XAML compiler failures.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Link, Include, shared, and external; copy logic only recursively enumerated $Source.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap treated physical directory membership as the complete project inventory rather than honoring evaluated Include/Link metadata.",
+      "proposed_fix": "Teach Initialize-UwpMigration.ps1 to resolve common project properties and copy linked supported files to their Link target paths before rewrite/triage.",
+      "generalizes": "UWP SDK samples and shared-code solutions routinely link XAML, code-behind, resources, and assets from sibling SharedContent directories."
+    },
+    {
+      "problem": "Defensive UI guidance explicitly told the agent to replace the primary feature surface when hardware was unavailable.",
+      "evidence": "session-log.txt lines 4161-4164 implements ShowUnavailable by collapsing HotspotPanel; migration-score.json records both features fail because all named controls are absent.",
+      "skill_search": "SKILL.md section 'Defensive UI for device-dependent features', former line 200.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "on catch, swap the page's main content for the fallback",
+      "root_cause": "The fallback rule optimized for non-blank screenshots but contradicted the higher-priority fidelity rule and removed the UI surface under test.",
+      "proposed_fix": "Require original named controls to remain visible and identifiable, disable device-dependent actions, and add an adjacent status message.",
+      "generalizes": "Camera, microphone, location, sensor, Bluetooth, NFC, networking, and other hardware-dependent migrations are frequently validated on machines without the device."
+    },
+    {
+      "problem": "The skill prescribed a nonexistent winapp build command and the launch helper ignored default dotnet output layout.",
+      "evidence": "session-log.txt lines 3340-3403 shows winapp build rejected; lines 3892-3900 shows Test-AppLaunch unavailable because it searched only bin\\x64\\Debug after a successful default dotnet build.",
+      "skill_search": "SKILL.md Step 3/final build and Test-AppLaunch.ps1 binCandidates.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer winapp build to compile",
+      "root_cause": "Command and output-layout assumptions no longer matched the installed CLI and native dotnet workflow.",
+      "proposed_fix": "Use dotnet build in the workflow and search both Platform-qualified and default bin\\Debug layouts.",
+      "generalizes": "Every migrated project uses the same current WinUI scaffold and build/launch workflow."
+    },
+    {
+      "problem": "Project reconciliation did not explicitly preserve or derive the minimum Windows version required by retained APIs.",
+      "evidence": "session-log.txt lines 3861-3869 and 4130-4153 show repeated CA1416 warnings until TargetPlatformMinVersion and manifest MinVersion moved from 17763 to 19041.",
+      "skill_search": "MIGRATION-PATTERNS.md #csproj mentioned current TFMs but did not instruct how to reconcile TargetPlatformMinVersion or CA1416.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The scaffold minimum was retained even though migrated API contracts required a newer minimum.",
+      "proposed_fix": "Document that source/API requirements govern TargetPlatformMinVersion and manifest MinVersion, with CA1416 as the check signal.",
+      "generalizes": "Many UWP APIs were introduced after the WinUI scaffold's broad default minimum and emit CA1416 when migrated unchanged."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "scenario": "MobileHotspot",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The documented Windows.UI.Colors mapping was not surfaced through bootstrap TODOs or the safe mechanical rewrite.",
+      "evidence": "session-log.txt lines 3578-3605 and 3829-3852: color references caused two build failures/retries before manual conversion to Microsoft.UI.Colors.",
+      "covered_at": "MIGRATION-PATTERNS.md #namespace-mapping table: Windows.UI.Colors -> Microsoft.UI.Colors",
+      "why_missed": "buried",
+      "proposed_improvement": "Apply this deterministic namespace mapping in Initialize-UwpMigration.ps1 alongside Windows.UI.Xaml.",
+      "generalizes": "Shared UWP shells commonly use Windows.UI.Colors for status and error brushes."
+    }
+  ]
+}

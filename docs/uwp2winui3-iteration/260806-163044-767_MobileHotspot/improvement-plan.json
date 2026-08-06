@@ -1,0 +1,38 @@
+{
+  "scenario": "MobileHotspot",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap omitted linked shared files and left a deterministic namespace mapping manual.",
+      "evidence": "lessons.json errors_encountered entries for CS0246/WMC0909/WMC1111/WMC9999 and Colors; skill-defects.json item 1; skill-coverage-gaps.json item 1.",
+      "root_cause": "The mechanical inventory used only recursive filesystem enumeration, and its safe rewrite set covered XAML namespaces but not Colors.",
+      "tier": 1,
+      "change": "Resolve common csproj properties, copy supported Include/Link items to Link paths, deduplicate mapping rows, constrain links to the target, and rewrite Windows.UI.Colors mechanically.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared XAML/code/assets are present before triage, typed pages generate normally, and color constants do not consume build retries.",
+      "falsifiable_check": "On a rerun bootstrap copies Scenario1_ConfigureMobileHotspot.xaml, MainPage.xaml, and Styles/Styles.xaml; mapping has rows for them; the first build has no missing scenario type, typed DataTemplate, or Colors errors."
+    },
+    {
+      "problem": "Unavailable-device fallback removed the entire feature surface and caused both scored features to fail.",
+      "evidence": "migration-score.json features 1-2 and discrepancies.json missing-controls entries; skill-defects.json item 2.",
+      "root_cause": "Existing guidance explicitly prioritized swapping out main content rather than preserving fidelity.",
+      "tier": 3,
+      "change": "Correct defensive UI guidance to retain named controls and automation properties, disable only unavailable actions, and show an adjacent status.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Hardware absence remains understandable without erasing the migrated interaction surface.",
+      "falsifiable_check": "On a device without hotspot support, UIA still finds SsidTextBox, PassphraseTextBox, BandComboBox, AuthenticationComboBox, Apply changes, Discard changes, and MobileHotspotToggle; actions are disabled/status-qualified as appropriate."
+    },
+    {
+      "problem": "Build, launch-layout, analyzer attribution, and minimum-contract guidance assumed outdated tooling/defaults.",
+      "evidence": "skill-defects.json items 3-4; session-log.txt lines 3340-3403, 3892-3900, and CA1416 lines 3861-3869.",
+      "root_cause": "Workflow prose and launch lookup lagged the native dotnet build path, while project guidance did not tie minimum versions to retained API contracts.",
+      "tier": 1,
+      "change": "Use dotnet build in SKILL.md, let Test-AppLaunch search bin/Debug as well as Platform layouts, update validator/pattern wording, and add TargetPlatformMinVersion/CA1416 reconciliation guidance.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The prescribed command exists, launch finds native build output, and retained APIs target a valid Windows contract.",
+      "falsifiable_check": "A default dotnet build is accepted by Test-AppLaunch, no 'winapp build was not matched' error occurs, and the rerun has no CA1416 warnings for APIs required by the migrated feature."
+    }
+  ],
+  "deferred_to_human": []
+}

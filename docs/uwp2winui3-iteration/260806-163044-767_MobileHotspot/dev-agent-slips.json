@@ -1,0 +1,28 @@
+{
+  "scenario": "MobileHotspot",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The scaffold, bootstrap, and self-check were launched concurrently, producing Target not found and False checks.",
+      "evidence": "session-log.txt lines 12-31 and 109-152.",
+      "covered_clearly_at": "SKILL.md Step 0 'Bootstrap (mandatory)', especially the numbered command order, 'Proceed past step 3 only if True', and hard rules.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The dependency order and stop gate are already explicit and prominent."
+    },
+    {
+      "problem": "The agent deleted/reduced SampleConfiguration.cs and manually reconstructed shared shell/page content after bootstrap omitted links, creating avoidable namespace/type mismatches.",
+      "evidence": "session-log.txt lines 3799-3813; earlier errors at 3564-3608.",
+      "covered_clearly_at": "SKILL.md Principles and Critical Rules/Fidelity: preserve every helper and copy XAML verbatim, then transform.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The fidelity rule is already the highest-priority principle; linked-file tooling is fixed separately, while destructive reconstruction itself needs no additional prose."
+    },
+    {
+      "problem": "dotnet build, Test-AppLaunch, and Validate-UwpMigration ran concurrently against the same output tree.",
+      "evidence": "session-log.txt lines 4168-4223: direct build failed with missing generated files and direct launch reported a crash while the validator's rebuild and smoke launch passed.",
+      "covered_clearly_at": "SKILL.md Step 3 states the ordered loop 'build -> fix -> launch -> repeat'; Step 4 runs validation as a final gate.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "A capable rerun following the explicit ordered lifecycle will not overlap writers/readers of bin and obj."
+    }
+  ]
+}

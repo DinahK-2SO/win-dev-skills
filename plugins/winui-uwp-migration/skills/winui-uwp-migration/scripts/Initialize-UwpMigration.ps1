@@ -10,7 +10,8 @@ workflow to confirm residue grep, mapping integrity, deferred consistency,
 build cleanliness, and runtime smoke.
 
 Steps:
-1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
+1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, including
+   project-linked files outside the source directory and preserving each Link path
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
@@ -76,31 +77,135 @@ $srcExcludeDirs = @('bin', 'obj', '.vs', '.git', '.github', '.copilot', 'package
 $srcExcludePattern = '\\(' + ($srcExcludeDirs -join '|') + ')\\'
 
 $copied = New-Object System.Collections.Generic.List[string]
+$copiedSet = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
+
+function Test-MigrationSourceFile([string]$name) {
+    $lowerName = $name.ToLowerInvariant()
+    foreach ($ext in $patterns) {
+        if ($lowerName.EndsWith($ext)) { return $true }
+    }
+    return $false
+}
+
+function Copy-MigrationSourceFile([string]$fullPath, [string]$relativeTarget) {
+    if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) { return $false }
+    if (-not (Test-MigrationSourceFile ([System.IO.Path]::GetFileName($fullPath)))) { return $false }
+
+    $relativeTarget = $relativeTarget.Replace('/', '\').TrimStart('\')
+    $destination = [System.IO.Path]::GetFullPath((Join-Path $Target $relativeTarget))
+    $targetPrefix = $Target.TrimEnd('\') + '\'
+    if (-not $destination.StartsWith($targetPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Project Link path escapes the migration target: $relativeTarget"
+    }
+
+    $destinationDir = [System.IO.Path]::GetDirectoryName($destination)
+    if (-not (Test-Path -LiteralPath $destinationDir)) {
+        New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
+    }
+    Copy-Item -LiteralPath $fullPath -Destination $destination -Force
+    if ($copiedSet.Add($relativeTarget)) { [void]$copied.Add($relativeTarget) }
+    return $true
+}
+
+function Resolve-UwpProjectValue([string]$value, [hashtable]$properties, [string]$projectDir) {
+    $resolved = $value
+    for ($pass = 0; $pass -lt 10; $pass++) {
+        $before = $resolved
+        $directorySearch = [regex]::Match(
+            $resolved,
+            '^\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(\$\(MSBuildThisFileDirectory\),\s*([^)]+)\)\)(.*)$'
+        )
+        if ($directorySearch.Success) {
+            $marker = $directorySearch.Groups[1].Value.Trim().Trim('"', "'")
+            $suffix = $directorySearch.Groups[2].Value.TrimStart('\', '/')
+            $cursor = [System.IO.DirectoryInfo]::new($projectDir)
+            while ($cursor -and -not (Test-Path -LiteralPath (Join-Path $cursor.FullName $marker))) {
+                $cursor = $cursor.Parent
+            }
+            if ($cursor) {
+                $resolved = if ($suffix) { Join-Path $cursor.FullName $suffix } else { $cursor.FullName }
+            }
+        }
+
+        $resolved = [regex]::Replace($resolved, '\$\(([A-Za-z_][A-Za-z0-9_.-]*)\)', {
+            param($match)
+            $propertyName = $match.Groups[1].Value
+            if ($properties.ContainsKey($propertyName)) { return [string]$properties[$propertyName] }
+            return $match.Value
+        })
+        if ($resolved -eq $before) { break }
+    }
+    return $resolved
+}
 
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
     if (('\' + $rel) -match $srcExcludePattern) { return $false }
-    $name = $_.Name.ToLowerInvariant()
-    $match = $false
-    foreach ($ext in $patterns) {
-        if ($name.EndsWith($ext)) { $match = $true; break }
-    }
-    $match
+    Test-MigrationSourceFile $_.Name
 } | ForEach-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
-    $dst = Join-Path $Target $rel
-    $dstDir = [System.IO.Path]::GetDirectoryName($dst)
-    if (-not (Test-Path -LiteralPath $dstDir)) {
-        New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
-    }
-    Copy-Item -LiteralPath $_.FullName -Destination $dst -Force
-    [void]$copied.Add($rel)
+    [void](Copy-MigrationSourceFile $_.FullName $rel)
 }
 
-Write-Host "    Copied $($copied.Count) source files"
+# UWP SDK samples commonly keep XAML, code-behind, styles, and assets in sibling
+# SharedContent folders. The project file's Include + Link metadata is authoritative:
+# copy the evaluated source to its Link path so SDK-style default globs see the same tree.
+$uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
+foreach ($projectFile in $uwpCsprojs) {
+    try {
+        [xml]$projectXml = Get-Content -LiteralPath $projectFile.FullName -Raw
+        $projectDir = $projectFile.DirectoryName
+        $properties = @{
+            MSBuildThisFileDirectory = $projectDir.TrimEnd('\') + '\'
+            MSBuildProjectDirectory  = $projectDir
+        }
+
+        $propertyNodes = $projectXml.SelectNodes(
+            "/*[local-name()='Project']/*[local-name()='PropertyGroup' and not(@Condition)]/*"
+        )
+        for ($pass = 0; $pass -lt 10; $pass++) {
+            $changed = $false
+            foreach ($node in $propertyNodes) {
+                $resolvedValue = Resolve-UwpProjectValue $node.InnerText $properties $projectDir
+                if (-not $properties.ContainsKey($node.LocalName) -or $properties[$node.LocalName] -ne $resolvedValue) {
+                    $properties[$node.LocalName] = $resolvedValue
+                    $changed = $true
+                }
+            }
+            if (-not $changed) { break }
+        }
+
+        $itemNodes = $projectXml.SelectNodes(
+            "/*[local-name()='Project']/*[local-name()='ItemGroup']/*[@Include]"
+        )
+        foreach ($item in $itemNodes) {
+            $include = Resolve-UwpProjectValue $item.Include $properties $projectDir
+            if ($include -match '[*?]' -or $include -match '\$\(') { continue }
+            $sourcePath = if ([System.IO.Path]::IsPathRooted($include)) {
+                [System.IO.Path]::GetFullPath($include)
+            } else {
+                [System.IO.Path]::GetFullPath((Join-Path $projectDir $include))
+            }
+            if (-not (Test-MigrationSourceFile ([System.IO.Path]::GetFileName($sourcePath)))) { continue }
+
+            $linkNode = $item.SelectSingleNode("./*[local-name()='Link']")
+            $relativeTarget = if ($linkNode -and $linkNode.InnerText) {
+                Resolve-UwpProjectValue $linkNode.InnerText $properties $projectDir
+            } elseif ($sourcePath.StartsWith($Source.TrimEnd('\') + '\', [System.StringComparison]::OrdinalIgnoreCase)) {
+                [System.IO.Path]::GetRelativePath($Source, $sourcePath)
+            } else {
+                [System.IO.Path]::GetFileName($sourcePath)
+            }
+            [void](Copy-MigrationSourceFile $sourcePath $relativeTarget)
+        }
+    } catch {
+        Write-Warning "    Could not resolve linked files from $($projectFile.Name): $($_.Exception.Message)"
+    }
+}
+
+Write-Host "    Copied $($copied.Count) source and project-linked files"
 
 # ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
-$uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
 $refDir = Join-Path $Target '.uwp-source'
 if ($uwpCsprojs.Count -gt 0) {
     if (-not (Test-Path -LiteralPath $refDir)) {
@@ -115,7 +220,7 @@ if ($uwpCsprojs.Count -gt 0) {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
 }
 
-# ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────
+# ─── 3. Safe namespace mass-replacements ───────────────────────────────────────
 $excludeDirs = @('bin', 'obj', '.uwp-source', '.vs', '.git', '.github', '.copilot')
 $excludePattern = '\\(' + ($excludeDirs -join '|') + ')\\'
 $nsFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.cs,*.xaml -ErrorAction SilentlyContinue |
@@ -123,13 +228,15 @@ $nsFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.cs,*.xaml -Erro
 $nsChanged = 0
 foreach ($f in $nsFiles) {
     $orig = [System.IO.File]::ReadAllText($f.FullName)
-    $new = $orig -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml'
+    $new = $orig `
+        -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml' `
+        -replace 'Windows\.UI\.Colors', 'Microsoft.UI.Colors'
     if ($new -ne $orig) {
         [System.IO.File]::WriteAllText($f.FullName, $new)
         $nsChanged++
     }
 }
-Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+Write-Host "    Applied safe namespace rewrites in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 
 # ─── 4a. Filter-prone class neutralization ────────────────────────────────────
 # Some SDK Samples boilerplate helpers contain UWP-specific patterns whose

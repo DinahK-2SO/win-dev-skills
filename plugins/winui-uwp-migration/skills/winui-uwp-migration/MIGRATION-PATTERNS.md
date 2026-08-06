@@ -563,6 +563,7 @@ public void Control_DefaultState_IsValid()
   - `net8.0-windows10.0.19041.0` (LTS)
   - `net9.0-windows10.0.19041.0`
   - `net10.0-windows10.0.26100.0` (current `dotnet new winui` default in this repo)
+- Reconcile `<TargetPlatformMinVersion>` with the source project and the APIs retained by the migration. Do not lower it to the scaffold default when the source required a newer contract. Treat `CA1416` warnings as evidence that the minimum is too low (or that the call needs an `ApiInformation` guard); raise the project and manifest minimum together when the feature itself requires that contract.
 - Add `<UseWinUI>true</UseWinUI>`.
 - Add `<EnableMsixTooling>true</EnableMsixTooling>` for packaged builds.
 - Reference `Microsoft.WindowsAppSDK` and `Microsoft.Windows.SDK.BuildTools`.
@@ -664,7 +665,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The scaffold references `Microsoft.WindowsAppSDK.Analyzers`, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL its `dotnet build` healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |
