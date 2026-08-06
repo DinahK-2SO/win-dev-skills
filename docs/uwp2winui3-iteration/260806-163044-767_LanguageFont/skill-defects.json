@@ -1,0 +1,47 @@
+{
+  "scenario": "LanguageFont",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap omitted legacy csproj Link items outside the supplied source folder, producing an incomplete migration map.",
+      "evidence": "session-log.txt lines 989-1015 reported 4 copied/mapped files; LanguageFont.csproj lines 93-168 declared linked App, MainPage, scenario XAML, Styles, shared code, and assets.",
+      "skill_search": "Initialize-UwpMigration.ps1 copy logic and searches for Link, ApplicationDefinition, SharedContentDir",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap recursively copied the filesystem below -Source but never parsed project items or their Link destinations.",
+      "proposed_fix": "Resolve linked Compile/Page/ApplicationDefinition/Content/Resource items, copy them to their Link paths, and include them in mapping/triage.",
+      "generalizes": "Legacy UWP projects commonly share shell code, XAML, and assets through non-SDK csproj Link items in sibling directories."
+    },
+    {
+      "problem": "Directly hosted Page skipped required OnNavigatedTo initialization, leaving an alive but empty shell.",
+      "evidence": "MainWindow.xaml directly contained sdk:MainPage; MainPage.xaml.cs populated ScenarioControl only in OnNavigatedTo; migration-score.json failed both features and UIA showed an empty 0x0 ScenarioControl.",
+      "skill_search": "SKILL.md shell conversion table and searches for direct host, OnNavigatedTo, Loaded",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "| Plain `Frame` (single page) | Single `Page` hosted directly under the `Window` |",
+      "root_cause": "Direct hosting does not perform Frame navigation and therefore never raises OnNavigatedTo.",
+      "proposed_fix": "Correct the shell guidance and add a validator failure for directly hosted Pages that override OnNavigatedTo.",
+      "generalizes": "Many UWP Pages populate controls, restore state, or select initial content in navigation lifecycle overrides."
+    },
+    {
+      "problem": "Test-AppLaunch could not discover default dotnet build output.",
+      "evidence": "session-log.txt lines 3641-3649 showed a successful default build under bin\\Debug; lines 3661-3663 reported no output under bin\\x64\\Debug.",
+      "skill_search": "Test-AppLaunch.ps1 binCandidates",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Layout discovery only searched platform-qualified output roots.",
+      "proposed_fix": "Add bin\\Debug to target layout candidates.",
+      "generalizes": "Developers frequently run dotnet build without an explicit Platform property before invoking the launch helper."
+    },
+    {
+      "problem": "Bootstrap and validator disagreed on the no-deferred-items sentinel.",
+      "evidence": "Bootstrap wrote '| (none) | - |'; validator emitted a consistency warning at session-log.txt line 3673 because it only recognized 'No items deferred'.",
+      "skill_search": "Initialize-UwpMigration.ps1 deferred output and Validate-UwpMigration.ps1 No items deferred check",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Validator accepted only the phrase 'No items deferred' while bootstrap emits a '(none)' table row.",
+      "root_cause": "Producer and consumer used different empty-state formats.",
+      "proposed_fix": "Teach the validator to accept the bootstrap's canonical '(none)' row.",
+      "generalizes": "Every migration with zero deferred files otherwise emits this misleading warning."
+    }
+  ]
+}

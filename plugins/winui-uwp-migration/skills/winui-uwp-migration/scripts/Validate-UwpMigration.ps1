@@ -175,6 +175,41 @@ if ($todoHits.Count -eq 0) {
     $failures++
 }
 
+# A Page hosted directly as Window content is never navigated, so OnNavigatedTo
+# does not run. Catch this silent empty-shell failure before the alive-only smoke test.
+$windowXaml = @($files | Where-Object {
+    $_.Extension -eq '.xaml' -and ([System.IO.File]::ReadAllText($_.FullName) -match '<Window\b')
+})
+$directHostedNavigationPages = New-Object System.Collections.Generic.List[object]
+$pageCodeBehind = @($files | Where-Object {
+    $_.Name.EndsWith('.xaml.cs') -and ([System.IO.File]::ReadAllText($_.FullName) -match 'override\s+void\s+OnNavigatedTo\s*\(')
+})
+foreach ($codeFile in $pageCodeBehind) {
+    $codeText = [System.IO.File]::ReadAllText($codeFile.FullName)
+    $classMatch = [regex]::Match($codeText, '\bclass\s+([A-Za-z_][A-Za-z0-9_]*)\s*:\s*Page\b')
+    if (-not $classMatch.Success) { continue }
+    $className = $classMatch.Groups[1].Value
+    foreach ($windowFile in $windowXaml) {
+        $windowText = [System.IO.File]::ReadAllText($windowFile.FullName)
+        if ($windowText -match "<[A-Za-z_][A-Za-z0-9_]*:$([regex]::Escape($className))\b") {
+            [void]$directHostedNavigationPages.Add([PSCustomObject]@{
+                Page = [System.IO.Path]::GetRelativePath($Target, $codeFile.FullName)
+                Window = [System.IO.Path]::GetRelativePath($Target, $windowFile.FullName)
+            })
+        }
+    }
+}
+if ($directHostedNavigationPages.Count -eq 0) {
+    Write-Host "[PASS] Page lifecycle — no directly hosted Page relies on OnNavigatedTo"
+} else {
+    Write-Host "[FAIL] $($directHostedNavigationPages.Count) Page(s) are hosted directly in a Window but initialize in OnNavigatedTo:"
+    foreach ($hit in $directHostedNavigationPages) {
+        Write-Host "       $($hit.Page) (hosted by $($hit.Window))"
+    }
+    Write-Host "       Direct hosting never raises OnNavigatedTo. Navigate through a Frame, or move initialization to Loaded."
+    $failures++
+}
+
 # ─── 3. MIGRATION-MAPPING.md integrity ─────────────────────────────────────────
 if (-not (Test-Path -LiteralPath $mapPath)) {
     Write-Host "[FAIL] MIGRATION-MAPPING.md not found at target root"
@@ -263,10 +298,10 @@ if (-not (Test-Path -LiteralPath $mapPath)) {
     } else {
         if (Test-Path -LiteralPath $deferPath) {
             $deferText = Get-Content -LiteralPath $deferPath -Raw
-            if ($deferText -notmatch 'No items deferred') {
+            if ($deferText -notmatch 'No items deferred' -and $deferText -notmatch '\|\s*\(none\)\s*\|') {
                 Write-Host "[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency"
             } else {
-                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes 'No items deferred.'"
+                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md correctly records none."
             }
         } else {
             Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md not required"

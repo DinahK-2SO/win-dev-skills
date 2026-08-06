@@ -115,6 +115,109 @@ if ($uwpCsprojs.Count -gt 0) {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
 }
 
+# Legacy UWP projects frequently link source, XAML, and assets from sibling folders.
+# A filesystem-only copy misses those files even though they are part of the project.
+function Expand-UwpProjectValue {
+    param(
+        [string]$Value,
+        [string]$ProjectDirectory,
+        [hashtable]$Properties
+    )
+
+    $expanded = $Value.Trim()
+    $expanded = $expanded.Replace('$(MSBuildThisFileDirectory)', $ProjectDirectory.TrimEnd('\') + '\')
+
+    $abovePattern = '\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(([^,]+),\s*([^)]+)\)\)'
+    $aboveMatch = [regex]::Match($expanded, $abovePattern)
+    while ($aboveMatch.Success) {
+        $start = $aboveMatch.Groups[1].Value.Trim().Trim('"', "'")
+        $marker = $aboveMatch.Groups[2].Value.Trim().Trim('"', "'")
+        $cursor = if (Test-Path -LiteralPath $start -PathType Container) {
+            (Resolve-Path -LiteralPath $start).ProviderPath
+        } else {
+            Split-Path -Parent $start
+        }
+        $found = $null
+        while ($cursor) {
+            if (Test-Path -LiteralPath (Join-Path $cursor $marker)) {
+                $found = $cursor
+                break
+            }
+            $parent = Split-Path -Parent $cursor
+            if (-not $parent -or $parent -eq $cursor) { break }
+            $cursor = $parent
+        }
+        if (-not $found) { break }
+        $expanded = $expanded.Substring(0, $aboveMatch.Index) + $found +
+            $expanded.Substring($aboveMatch.Index + $aboveMatch.Length)
+        $aboveMatch = [regex]::Match($expanded, $abovePattern)
+    }
+
+    for ($pass = 0; $pass -lt 10; $pass++) {
+        $before = $expanded
+        foreach ($name in $Properties.Keys) {
+            $expanded = $expanded.Replace('$(' + $name + ')', [string]$Properties[$name])
+        }
+        if ($expanded -eq $before) { break }
+    }
+    return $expanded
+}
+
+$linkedCopied = 0
+foreach ($uwpCsproj in $uwpCsprojs) {
+    [xml]$projectXml = Get-Content -LiteralPath $uwpCsproj.FullName -Raw
+    $projectDir = Split-Path -Parent $uwpCsproj.FullName
+    $properties = @{}
+    foreach ($group in $projectXml.Project.PropertyGroup) {
+        foreach ($property in $group.ChildNodes) {
+            if ($property.NodeType -ne [System.Xml.XmlNodeType]::Element) { continue }
+            $properties[$property.LocalName] = Expand-UwpProjectValue `
+                -Value $property.InnerText -ProjectDirectory $projectDir -Properties $properties
+        }
+    }
+
+    foreach ($group in $projectXml.Project.ItemGroup) {
+        foreach ($item in $group.ChildNodes) {
+            if ($item.NodeType -ne [System.Xml.XmlNodeType]::Element) { continue }
+            if ($item.LocalName -notin @('Compile', 'ApplicationDefinition', 'Page', 'Content', 'Resource', 'PRIResource')) { continue }
+            $include = [string]$item.GetAttribute('Include')
+            if (-not $include) { continue }
+            $expanded = Expand-UwpProjectValue -Value $include -ProjectDirectory $projectDir -Properties $properties
+            if ($expanded -match '\$\(') {
+                Write-Warning "    Could not resolve linked project item: $include"
+                continue
+            }
+            $sourceItem = if ([System.IO.Path]::IsPathRooted($expanded)) {
+                [System.IO.Path]::GetFullPath($expanded)
+            } else {
+                [System.IO.Path]::GetFullPath((Join-Path $projectDir $expanded))
+            }
+            if (-not (Test-Path -LiteralPath $sourceItem -PathType Leaf)) { continue }
+
+            $linkNode = @($item.ChildNodes | Where-Object { $_.LocalName -eq 'Link' } | Select-Object -First 1)
+            $targetRel = if ($linkNode.Count -gt 0 -and $linkNode[0].InnerText.Trim()) {
+                $linkNode[0].InnerText.Trim()
+            } else {
+                [System.IO.Path]::GetFileName($sourceItem)
+            }
+            $targetRel = $targetRel -replace '/', '\'
+            if ($copied -contains $targetRel) { continue }
+
+            $destination = Join-Path $Target $targetRel
+            $destinationDir = Split-Path -Parent $destination
+            if (-not (Test-Path -LiteralPath $destinationDir)) {
+                New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $sourceItem -Destination $destination -Force
+            [void]$copied.Add($targetRel)
+            $linkedCopied++
+        }
+    }
+}
+if ($linkedCopied -gt 0) {
+    Write-Host "    Copied $linkedCopied linked project item(s) declared outside the source folder"
+}
+
 # ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────
 $excludeDirs = @('bin', 'obj', '.uwp-source', '.vs', '.git', '.github', '.copilot')
 $excludePattern = '\\(' + ($excludeDirs -join '|') + ')\\'

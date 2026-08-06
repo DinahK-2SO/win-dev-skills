@@ -1,0 +1,21 @@
+{
+  "scenario": "LanguageFont",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Manual shell reconstruction duplicated members already owned by another partial MainPage declaration and introduced ambiguous imports.",
+      "evidence": "session-log.txt lines 3144-3166 reported duplicate Scenario/FEATURE_NAME/scenarios/ApplyLanguageFont members and ambiguous DispatcherQueue after the turn-6 manual file creation.",
+      "covered_clearly_at": "SKILL.md Critical Rules > Fidelity: 'Do not regenerate XAML from scratch. Copy each *.xaml verbatim, then transform' and Step 1 requires file-by-file migration.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already prominently requires copy-and-transform fidelity; the linked-item tooling defect is being fixed separately so this one-off reconstruction error does not justify more prose."
+    },
+    {
+      "problem": "The second build retained cross-namespace App references and a missing Launcher alias.",
+      "evidence": "session-log.txt lines 3289-3313 reported CS0103 for App and Launcher; the next surgical edit fully qualified App and restored the alias.",
+      "covered_clearly_at": "SKILL.md Step 3: 'build -> fix the first error -> launch -> repeat' and 'When a build error points at a UWP API, fetch the relevant anchor and apply the pattern.'",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The normal build-error loop immediately exposed and resolved these local namespace mistakes."
+    }
+  ]
+}

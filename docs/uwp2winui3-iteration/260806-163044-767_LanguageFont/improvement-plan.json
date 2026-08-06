@@ -1,0 +1,38 @@
+{
+  "scenario": "LanguageFont",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap inventory and its validator contract were incomplete for legacy linked project items.",
+      "evidence": "lessons.json dev_agent_struggles[0] and skill-defects.json items[0,3]",
+      "root_cause": "Filesystem recursion ignored evaluated csproj Link items, and the empty deferred sentinel differed between producer and consumer.",
+      "tier": 1,
+      "change": "Parse legacy project item groups, expand common MSBuild properties including GetDirectoryNameOfFileAbove, copy linked items to Link destinations, seed them into mapping, and accept the canonical '(none)' deferred row.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Shared shell/scenario files become mandatory mapped work instead of manual, untracked reconstruction.",
+      "falsifiable_check": "Re-running bootstrap on LanguageFont reports 20 mapped files including App.xaml, MainPage.xaml, both scenario XAML files, and Styles\\Styles.xaml; zero-defer validation emits PASS rather than WARN."
+    },
+    {
+      "problem": "A directly hosted Page could rely on OnNavigatedTo and silently render an empty shell.",
+      "evidence": "migration-score.json failed 2/2 features; lessons.json dev_agent_struggles[2]",
+      "root_cause": "The shell table endorsed direct Page hosting without its navigation-lifecycle constraint, and validation only checked process survival.",
+      "tier": 1,
+      "change": "Correct the shell guidance and add a static validation failure when a Window directly hosts a Page that overrides OnNavigatedTo.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Agents must use Frame.Navigate or move required initialization to Loaded before validation can pass.",
+      "falsifiable_check": "The trial's direct <sdk:MainPage /> plus OnNavigatedTo combination reports FAIL; after Frame navigation or Loaded initialization, both scenario items and their controls are reachable."
+    },
+    {
+      "problem": "Launch diagnosis rejected a valid default dotnet build layout.",
+      "evidence": "lessons.json errors_encountered[4]",
+      "root_cause": "Target discovery searched only platform-qualified Debug directories.",
+      "tier": 1,
+      "change": "Add bin\\Debug to layout candidates while retaining platform-qualified precedence.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+      "expected_effect": "The prescribed launch diagnosis works immediately after default dotnet build.",
+      "falsifiable_check": "With an executable and AppxManifest under bin\\Debug\\<tfm>\\win-x64, -Target resolves that layout instead of returning 'No build output found'."
+    }
+  ],
+  "deferred_to_human": []
+}

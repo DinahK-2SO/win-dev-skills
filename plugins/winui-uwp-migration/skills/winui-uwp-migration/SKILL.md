@@ -97,9 +97,16 @@ Flip `Status` from `copied` → `done` (or `deferred`) as each row is finished.
 | `Pivot` | `TabView` (top), or `Pivot` from WinUI Community Toolkit if behaviour parity matters |
 | `Hub` | `NavigationView` with grouped items, or hand-rolled `ScrollViewer` |
 | `TabView` (UWP) | `TabView` (WinUI 3) — namespace change only |
-| Plain `Frame` (single page) | Single `Page` hosted directly under the `Window` |
+| Plain `Frame` (single page) | Keep a `Frame` and call `Navigate`, or host the `Page` directly **only if it does not rely on navigation lifecycle methods** |
 
 If the source shell doesn't match anything above, preserve its structure as faithfully as controls allow.
+
+> **Direct-host lifecycle trap:** assigning `<local:MainPage />` directly as `Window`
+> content does not navigate the page, so `OnNavigatedTo` never runs. If that override
+> populates navigation items, selects the first scenario, or performs other required
+> initialization, the app stays alive with an empty shell. Keep a `Frame` and call
+> `Navigate(typeof(MainPage))`, or move that initialization to `Loaded`. The validator
+> rejects a directly hosted page that still overrides `OnNavigatedTo`.
 
 **Navigation invariants** (apply regardless of shell control choice):
 

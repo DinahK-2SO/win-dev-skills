@@ -1,0 +1,125 @@
+{
+  "scenario": "LanguageFont",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 989-1016: bootstrap copied the four physical project-folder files, rewrote namespaces, and produced mapping artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt turn 4 fetched the csproj and navigationview-frame-wiring anchors before shell work."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt lines 3144-3166 and 3289-3313 exposed duplicate partial members, namespace ambiguity, and XAML type-resolution failures; lines 3641-3649 confirmed the fixes."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "It inventoried only files physically below the source folder and ignored csproj Link items from sibling SharedContent/shared folders.",
+      "evidence": "Bootstrap reported 'Copied 4 source files' and seeded four mapping rows, while LanguageFont.csproj declared linked App.xaml, MainPage, both scenario XAML files, Styles.xaml, shared code, and assets."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "problem": "It passed an alive shell whose directly hosted MainPage never received OnNavigatedTo, leaving the scenario list empty.",
+      "evidence": "session-log.txt lines 3665-3681 reported PASS; migration-score.json scored both features fail and parity UIA showed ScenarioControl at 0x0 with no items."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "problem": "Target discovery did not recognize the default bin\\Debug output produced by dotnet build without Platform.",
+      "evidence": "session-log.txt lines 3661-3663: 'No build output found under bin\\x64\\Debug' immediately after a successful default dotnet build."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Runtime smoke validation",
+      "limitation": "Process-alive validation cannot detect a navigable shell with no initialized scenarios.",
+      "suggested_tweak": "Add a static gate for directly hosted Page types that still rely on OnNavigatedTo."
+    },
+    {
+      "tool": "Bootstrap project inventory",
+      "limitation": "Filesystem recursion is not equivalent to the evaluated item set of a legacy non-SDK csproj.",
+      "suggested_tweak": "Resolve Compile, Page, ApplicationDefinition, Content, Resource, and PRIResource Link items and include them in mapping."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "SKILL.md shell conversion table, Plain Frame row",
+      "wrong": "Recommended a Page hosted directly under the Window without warning that navigation lifecycle methods will not run.",
+      "correct": "Keep Frame.Navigate when initialization lives in OnNavigatedTo, or move required initialization to Loaded before direct hosting."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Globalization.Fonts.LanguageFontGroup",
+      "special_handling": "The API carried over; its LanguageFont properties can be applied to WinUI TextBlock FontFamily, FontWeight, FontStyle, and FontStretch. The migration failures were shell lifecycle failures, not an API replacement problem."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "CS0101, CS0102, and CS0111 duplicate Scenario, FEATURE_NAME, scenarios, and ApplyLanguageFont declarations",
+      "root_cause": "The manually reconstructed MainPage code duplicated members already supplied by the copied SampleConfiguration partial class.",
+      "fix": "Remove the duplicate members from MainPage.xaml.cs and keep the original partial-class ownership."
+    },
+    {
+      "error": "CS0104 DispatcherQueue ambiguous between Microsoft.UI.Dispatching and Windows.System",
+      "root_cause": "Both namespaces were imported while the type was referenced without qualification.",
+      "fix": "Use Microsoft.UI.Dispatching.DispatcherQueue explicitly and narrow Windows.System to a Launcher alias."
+    },
+    {
+      "error": "WMC0909, WMC1111, WMC0001, and WMC9999 XAML compiler failures",
+      "root_cause": "Earlier C# duplicate/type-resolution failures prevented local XAML types from resolving; the typed DataTemplate then cascaded.",
+      "fix": "Fix the C# errors and use a normal Binding DataTemplate where compiled type resolution was unnecessary."
+    },
+    {
+      "error": "CS0103 App and Launcher not found",
+      "root_cause": "MainPage lived in SDKTemplate while App lived in LanguageFontWinUI3, and the broad Windows.System import had been removed.",
+      "fix": "Fully qualify LanguageFontWinUI3.App and add an explicit Windows.System.Launcher alias."
+    },
+    {
+      "error": "Test-AppLaunch unavailable after successful build",
+      "root_cause": "The helper searched only bin\\x64\\Debug/bin\\win-x64\\Debug, but default dotnet build emitted bin\\Debug\\<tfm>\\win-x64.",
+      "fix": "Also discover bin\\Debug."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Turns 3-6",
+      "symptom": "The agent had to inspect the UWP csproj and manually recreate linked App/MainPage/scenario/style files and copy shared assets.",
+      "turns_or_retries": "Approximately four turns before the first build.",
+      "root_cause": "Bootstrap mapping omitted all external Link items.",
+      "how_resolved": "The agent read sibling SharedContent and shared files and added equivalents by hand.",
+      "preventable_by": "Make Initialize-UwpMigration resolve legacy csproj Link items and seed them into MIGRATION-MAPPING.md."
+    },
+    {
+      "where": "Turns 14-17",
+      "symptom": "Two failed build rounds produced duplicate partial declarations, namespace ambiguity, unresolved local XAML types, then namespace/alias errors.",
+      "turns_or_retries": "Two failed builds before the clean build.",
+      "root_cause": "Manual reconstruction after incomplete bootstrap inventory duplicated existing partial-class responsibilities and mixed namespaces.",
+      "how_resolved": "Removed duplicates, qualified DispatcherQueue/App, simplified the DataTemplate binding, and restored the Launcher alias.",
+      "preventable_by": "Copy and transform every linked source/XAML item mechanically instead of reconstructing the shell from fragments."
+    },
+    {
+      "where": "Turn 19 and scored result",
+      "symptom": "The agent declared preserved scenario behavior after validator PASS, but both scenarios were absent at runtime.",
+      "turns_or_retries": "No recovery; discovered by scoring.",
+      "root_cause": "MainPage was hosted directly in MainWindow while scenario population remained in OnNavigatedTo, which direct hosting never raises.",
+      "how_resolved": "Not resolved in the migration trial.",
+      "preventable_by": "Document the direct-host lifecycle rule and make Validate-UwpMigration fail this static pattern."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Legacy csproj Link-item inventory and copy",
+      "would_have_saved": "Manual discovery/recreation of 16 linked code, XAML, resource, and asset items."
+    },
+    {
+      "need": "Direct-host Page lifecycle validation",
+      "would_have_saved": "The zero-score alive-but-empty shell."
+    }
+  ],
+  "env_issues": []
+}
