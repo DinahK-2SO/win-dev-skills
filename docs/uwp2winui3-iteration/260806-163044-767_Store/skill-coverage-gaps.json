@@ -1,0 +1,15 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "G1: CS0104 guidance was framed around UWP/WinUI XAML type collisions and was easy to miss for System.Net.Http versus Windows.Web.Http.",
+      "evidence": "Turn 27 reported ambiguous HttpClient and HttpResponseMessage; turn 29 resolved them by fully qualifying Windows.Web.Http.",
+      "covered_at": "MIGRATION-PATTERNS.md, `CS0104: 'LaunchActivatedEventArgs' is an ambiguous reference`, especially the final fully-qualify/remove-stale-using rule.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Generalize the existing final sentence to all same-simple-name namespace collisions, with System/Windows projections as a second example.",
+      "generalizes": "Implicit usings in SDK-style projects commonly collide with retained Windows namespaces."
+    }
+  ]
+}

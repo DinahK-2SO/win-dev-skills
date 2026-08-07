@@ -1,0 +1,76 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "score": 0,
+  "builds": true,
+  "runs": false,
+  "requirements": [
+    {
+      "id": "trial-mode",
+      "text": "Trial-mode displays the current license mode and updates trial-period information.",
+      "status": "fail",
+      "reason": "The UWP feature rendered; the migrated app crashed before presenting a frame.",
+      "suspected_skill_gap": "Bootstrap omitted linked shared files and validation did not catch the unresolved /Styles/Styles.xaml dictionary URI."
+    },
+    {
+      "id": "in-app-purchase",
+      "text": "Retrieve associated add-ons and purchase the selected add-on.",
+      "status": "fail",
+      "reason": "The migrated app crashed before the product list or actions could be exercised.",
+      "suspected_skill_gap": "The common startup XAML resource-path defect prevented every scenario from loading."
+    },
+    {
+      "id": "unmanaged-consumable-product",
+      "text": "Retrieve, purchase, check, and fulfill an unmanaged consumable.",
+      "status": "fail",
+      "reason": "The migrated app crashed before the product list or four actions could be exercised.",
+      "suspected_skill_gap": "The common startup XAML resource-path defect prevented every scenario from loading."
+    },
+    {
+      "id": "managed-consumable-product",
+      "text": "Retrieve, purchase, check, and fulfill a managed consumable with quantity selection.",
+      "status": "fail",
+      "reason": "The migrated app crashed before the selector, product list, or actions could be exercised.",
+      "suspected_skill_gap": "The common startup XAML resource-path defect prevented every scenario from loading."
+    },
+    {
+      "id": "user-collection",
+      "text": "Retrieve the current user's owned Store products.",
+      "status": "fail",
+      "reason": "The migrated app crashed before the collection action or product list could be exercised.",
+      "suspected_skill_gap": "The common startup XAML resource-path defect prevented every scenario from loading."
+    },
+    {
+      "id": "app-listing-uri",
+      "text": "Open the Store listing used to rate the app.",
+      "status": "fail",
+      "reason": "The migrated app crashed before Rate this app could be exercised.",
+      "suspected_skill_gap": "The common startup XAML resource-path defect prevented every scenario from loading."
+    },
+    {
+      "id": "business-to-business",
+      "text": "Retrieve customer collections and purchase identifiers.",
+      "status": "fail",
+      "reason": "The migrated app crashed before either action or output could be exercised.",
+      "suspected_skill_gap": "The common startup XAML resource-path defect prevented every scenario from loading."
+    }
+  ],
+  "visual_discrepancies": [
+    {
+      "feature": "Trial-mode",
+      "uwp": "Rendered Trial-mode frame.",
+      "winui": "No frame; startup crash.",
+      "screenshot_ref": "score notes/parity/baseline/screenshots/01_Trial_mode_corewindow.png"
+    }
+  ],
+  "missing_features": [
+    "Trial-mode",
+    "In-app purchase",
+    "Unmanaged consumable product",
+    "Managed consumable product",
+    "User collection",
+    "App listing URI",
+    "Business to Business"
+  ],
+  "summary": "The candidate built cleanly but crashed during XAML startup, making all seven Store scenarios unavailable."
+}

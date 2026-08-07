@@ -1,0 +1,165 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "build-events.jsonl turns 2-4: bootstrap completed, rewrote eight local XAML/C# files, injected one threading TODO, and seeded migration artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "turn 4 fetched only the threading anchor; the agent then replaced CoreDispatcher use with DispatcherQueue."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "turns 25, 27, and 32 exposed deterministic project/XAML/C# errors and eventually produced a zero-warning, zero-error build."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "turn 36 caught ten unfinished mapping rows; turns 39 and 46 caught the startup crash after the build was clean."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed winapp CLI has no build command, although SKILL.md instructed the agent to use it.",
+      "evidence": "session-log.txt turn 24: \"'build' was not matched\" and exit code 1."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "problem": "Target discovery only searched bin/<arch>/Debug, so it missed native dotnet build output under bin/Debug.",
+      "evidence": "turn 33: status=unavailable, \"No build output found under bin\\x64\\Debug\" immediately after turn 32's successful build under bin\\Debug."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It walked only the project directory and omitted external MSBuild Include+Link items.",
+      "suggested_tweak": "Resolve linked Compile/ApplicationDefinition/Page/Content items and materialize supported files at their Link paths before triage."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "It did not verify local ResourceDictionary Source paths and therefore reached only a generic 0xc000027b smoke-crash diagnostic.",
+      "suggested_tweak": "Fail preflight with the referring XAML file and line when a local merged dictionary does not exist."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "A native stowed exception produced event 1000 but no event 1026 managed stack.",
+      "suggested_tweak": "Keep the native-code fallback, but add deterministic preflight checks for common XAML package-path failures."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "winui-uwp-migration/SKILL.md Step 3 and final build instruction",
+      "wrong": "Use `winapp build`.",
+      "correct": "Use native `dotnet build`; reserve winapp for registering/launching packaged output."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "DispatcherQueue",
+      "special_handling": "StoreContext.OfflineLicensesChanged can arrive off the UI thread; marshal UI updates with DispatcherQueue.TryEnqueue."
+    },
+    {
+      "api": "MSBuild Include + Link",
+      "special_handling": "Legacy UWP projects may keep App.xaml, code-behind, shared styles, pages, and assets outside the project directory; copy the Include file to the logical Link path."
+    },
+    {
+      "api": "ResourceDictionary.Source",
+      "special_handling": "A package-root URI such as /Styles/Styles.xaml must have a file at that exact logical package path; a root Styles.xaml is not equivalent."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "winapp: 'build' was not matched (turn 24)",
+      "root_cause": "The migration skill documented a command absent from the installed winapp CLI.",
+      "fix": "Use `dotnet build <project> -p:Platform=x64`."
+    },
+    {
+      "error": "NETSDK1022 duplicate Page items for Styles.xaml and seven scenario XAML files (turn 25)",
+      "root_cause": "The agent explicitly added Page items to an SDK-style project that already includes XAML pages by default.",
+      "fix": "Remove the explicit Page Include entries."
+    },
+    {
+      "error": "CS0103 InitializeComponent/AppTitleBar not found in MainWindow.xaml.cs (turn 27)",
+      "root_cause": "MainWindow.xaml used x:Class=Store.MainWindow while its code-behind namespace had been changed to SDKTemplate.",
+      "fix": "Make the XAML x:Class and code-behind fully qualified type match."
+    },
+    {
+      "error": "CS0104 HttpClient and HttpResponseMessage ambiguous (turn 27)",
+      "root_cause": "Implicit System.Net.Http imports collided with explicit Windows.Web.Http imports.",
+      "fix": "Fully qualify the intended Windows.Web.Http types or remove the competing using."
+    },
+    {
+      "error": "WMC1509 warning plus WMC0909/WMC1111/WMC9999 errors for local:Scenario DataTemplate (turn 27)",
+      "root_cause": "The recreated DataTemplate used x:Bind/x:DataType that the XAML compiler could not resolve in the migrated namespace/project shape.",
+      "fix": "Preserve the source's classic Binding DataTemplate instead of introducing x:Bind during migration."
+    },
+    {
+      "error": "CS8625/CS8618 nullable warnings (turn 27)",
+      "root_cause": "Copied UWP declarations were compiled with nullable reference types enabled by the new scaffold.",
+      "fix": "Use nullable fields where initialization is deferred and initialize required properties/static references explicitly."
+    },
+    {
+      "error": "Test-AppLaunch status=unavailable despite a successful build (turn 33)",
+      "root_cause": "The helper did not search the default bin/Debug layout.",
+      "fix": "Search both platform-qualified and native dotnet output roots."
+    },
+    {
+      "error": "Validate-UwpMigration: ten rows still Status=copied (turn 36)",
+      "root_cause": "The agent built before completing the migration mapping statuses.",
+      "fix": "Flip each completed row to done or deferred, then rerun validation."
+    },
+    {
+      "error": "dotnet run exit -1073741189; validator startup crash 0xc000027b in Microsoft.UI.Xaml.dll (turns 35, 39, 43, 46)",
+      "root_cause": "App.xaml referenced /Styles/Styles.xaml, but the agent copied the linked style dictionary to root Styles.xaml; the local package URI was unresolved. This is the concrete XAML path defect left in the final tree and matches a native XAML activation failure.",
+      "fix": "Materialize the linked file at Styles/Styles.xaml or update ResourceDictionary Source to the actual package-relative path; validate every local dictionary URI before launch."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "turns 5-23, shared shell and content reconstruction",
+      "symptom": "The agent manually opened and recreated App/MainPage/styles/seven pages and copied assets after bootstrap reported only ten files.",
+      "turns_or_retries": "Approximately 18 turns before the first build.",
+      "root_cause": "Bootstrap ignored external Include+Link items in Store.csproj.",
+      "how_resolved": "Most shared files were manually copied, but Styles.xaml was placed at the wrong logical path.",
+      "preventable_by": "Materialize external linked items at their Link paths in Initialize-UwpMigration.ps1."
+    },
+    {
+      "where": "turns 24-32, first build loop",
+      "symptom": "One nonexistent build command and two failing dotnet builds preceded a clean build.",
+      "turns_or_retries": "Three build attempts after winapp build failed.",
+      "root_cause": "Wrong build guidance plus manual project/XAML reconstruction errors.",
+      "how_resolved": "Switched to dotnet build; removed duplicate Page items; fixed namespace, binding, ambiguity, and nullable issues.",
+      "preventable_by": "Native dotnet build guidance and linked-file bootstrap."
+    },
+    {
+      "where": "turn 33, launch helper",
+      "symptom": "The helper reported no build output, forcing the agent to fall back to dotnet run.",
+      "turns_or_retries": "One false-unavailable result.",
+      "root_cause": "The helper assumed bin/x64/Debug while dotnet emitted bin/Debug.",
+      "how_resolved": "The agent bypassed the helper; the underlying startup problem remained.",
+      "preventable_by": "Search both output layouts in Test-AppLaunch.ps1."
+    },
+    {
+      "where": "turns 35-46, startup diagnosis",
+      "symptom": "Four launch attempts and three validator runs repeatedly produced 0xc000027b; removing MicaBackdrop did not help.",
+      "turns_or_retries": "Four launch attempts; three validator runs.",
+      "root_cause": "No managed event 1026 was available and the validator did not identify the broken local style dictionary URI.",
+      "how_resolved": "Not resolved in the trial; the agent correctly reported incomplete.",
+      "preventable_by": "A deterministic ResourceDictionary Source existence check."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "MSBuild linked-item materialization",
+      "would_have_saved": "The manual shared-content reconstruction and the wrong Styles.xaml location."
+    },
+    {
+      "need": "Local XAML resource URI validation",
+      "would_have_saved": "Repeated blind startup-crash diagnosis and the zero parity score."
+    }
+  ],
+  "env_issues": []
+}

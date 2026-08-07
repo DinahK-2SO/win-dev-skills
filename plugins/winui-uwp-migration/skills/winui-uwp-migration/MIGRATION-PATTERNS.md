@@ -25,7 +25,13 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 }
 ```
 
-The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
+Apply this to **any same-simple-name collision**, not only UWP/WinUI XAML types. SDK-style projects enable implicit `System.*` usings that can collide with retained Windows projections—for example, `System.Net.Http.HttpClient` versus `Windows.Web.Http.HttpClient`. Fully qualify the intended type or remove the competing explicit/implicit using; do not select a type only to silence the compiler.
+
+### `NETSDK1022: Duplicate 'Page' items were included`
+
+SDK-style WinUI 3 projects include local `.xaml` files as `Page` items by default. Do not copy a legacy UWP project's explicit local `<Page Include="...">` list into the migrated project, because each file will then be included twice.
+
+Remove the explicit local `Page` entries and keep only metadata that is genuinely required. Disable default page items with `<EnableDefaultPageItems>false</EnableDefaultPageItems>` only when intentionally managing the complete page list yourself; otherwise that workaround can silently omit newly added XAML files.
 
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
@@ -664,7 +670,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The benchmark build gate injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the native `dotnet build` healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |

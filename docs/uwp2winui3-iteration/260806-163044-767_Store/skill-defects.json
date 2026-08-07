@@ -1,0 +1,67 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "D1: Bootstrap omitted externally linked shared source, XAML, and assets.",
+      "evidence": "Turn 2 reported only 10 copied files; Store.csproj contains 19 supported external Include+Link items, and turns 5-23 manually reconstructed them.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Link, SharedContent, and external Include handling.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap used only a recursive directory walk beneath -Source.",
+      "proposed_fix": "Parse legacy project Include+Link items, expand common project properties, and copy supported files to Link paths before rewrite/triage.",
+      "generalizes": "Linked shared code and content are common in UWP solutions and SDK samples."
+    },
+    {
+      "problem": "D2: The skill instructed agents to run nonexistent `winapp build`.",
+      "evidence": "Turn 24 failed with \"'build' was not matched\".",
+      "skill_search": "Searched SKILL.md and MIGRATION-PATTERNS.md for winapp build and dotnet build.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer `winapp build` to compile.",
+      "root_cause": "Build instructions were stale relative to the installed CLI and the validator's native dotnet build.",
+      "proposed_fix": "Use native dotnet build consistently; reserve winapp for package registration/launch.",
+      "generalizes": "Every migration must compile, and the command fails independently of app features."
+    },
+    {
+      "problem": "D3: Validation missed a broken local ResourceDictionary URI, causing startup failure and all seven scored feature failures.",
+      "evidence": "Final App.xaml references /Styles/Styles.xaml while only root Styles.xaml exists; turns 39/46 report 0xc000027b in Microsoft.UI.Xaml.dll; migration-score.json marks all seven features fail.",
+      "skill_search": "Searched SKILL.md, MIGRATION-PATTERNS.md, and Validate-UwpMigration.ps1 for ResourceDictionary Source/path validation.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "No deterministic check ensured local merged dictionaries existed at package-relative Source paths.",
+      "proposed_fix": "Validate local ResourceDictionary Source values before build/launch and report the referring file/line.",
+      "generalizes": "Moved shared dictionaries and package-root resource URIs recur in UWP project conversions."
+    },
+    {
+      "problem": "D4: Test-AppLaunch could not discover native dotnet's default bin/Debug output.",
+      "evidence": "Turn 32 built successfully to bin/Debug; turn 33 immediately reported no output under bin/x64/Debug.",
+      "skill_search": "Searched Test-AppLaunch.ps1 binCandidates.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Only bin/<arch>/Debug and bin/<rid>/Debug were searched.",
+      "root_cause": "Layout discovery assumed an explicit Platform build.",
+      "proposed_fix": "Also search bin/Debug/<tfm>/win-<rid>.",
+      "generalizes": "Native dotnet build commonly uses the unqualified bin/Debug path."
+    },
+    {
+      "problem": "D5: Migration patterns did not cover NETSDK1022 duplicate XAML Page items.",
+      "evidence": "Turn 25 failed because the agent added explicit Page Include entries to an SDK-style project.",
+      "skill_search": "Searched MIGRATION-PATTERNS.md for NETSDK1022, EnableDefaultPageItems, and duplicate Page.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The project guidance did not state that SDK-style WinUI projects include local XAML pages by default.",
+      "proposed_fix": "Add a compact common-error mapping: remove explicit local Page includes unless default items are intentionally disabled.",
+      "generalizes": "Explicit UWP Page lists frequently collide with SDK default items."
+    },
+    {
+      "problem": "D6: Bootstrap and validator disagreed about the no-deferred-items sentinel.",
+      "evidence": "Initialize seeded `| (none) | — |`; validator warned on turns 36, 39, and 46 that deferred content was inconsistent.",
+      "skill_search": "Compared Initialize-UwpMigration.ps1 no-item output with Validate-UwpMigration.ps1 no-item recognition.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Validator recognized only the phrase `No items deferred`, not the bootstrap table sentinel.",
+      "root_cause": "Producer and consumer used different sentinel formats.",
+      "proposed_fix": "Teach the validator to recognize the bootstrap's `(none)` row.",
+      "generalizes": "Every migration with zero deferred files otherwise emits the same false warning."
+    }
+  ]
+}

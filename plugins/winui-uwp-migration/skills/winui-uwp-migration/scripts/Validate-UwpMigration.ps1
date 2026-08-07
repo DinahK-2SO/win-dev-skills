@@ -10,15 +10,15 @@ declare done with FAIL." All [FAIL] output is sanitized — full diagnostics
 root, not to stdout, to keep concentrated API-name lists out of the agent's
 assistant turn.
 
-Does NOT run `winapp build` itself — build cleanliness is a separate gate
-the agent invokes alongside this (`winapp build` then this script).
+Runs a native `dotnet build` healthcheck itself; no separate build wrapper is
+required before invoking this script.
 
 Checks (numbering matches the `# ─── N.` sections in the code):
 1. Residue grep — leftover Windows.UI.Xaml using/xmlns, unsupported APIs not deferred, UWP-only csproj markers
 2. TODO[migrate-NNN] residue — every injected marker must be resolved
 3. MIGRATION-MAPPING.md integrity — .bootstrap-meta.json present, row count, labels filled, no row stuck at Status=copied
 4. MIGRATION-DEFERRED.md consistency — every defer row in mapping has a row here, and vice versa
-5. Package.appxmanifest image refs + WinAppSDK packaging (TargetDeviceFamily=Windows.Desktop, rescap, runFullTrust) + retained manifest <Extension>s (e.g. windows.backgroundTasks) required by kept code
+5. Local XAML ResourceDictionary Source paths resolve; Package.appxmanifest image refs + WinAppSDK packaging (TargetDeviceFamily=Windows.Desktop, rescap, runFullTrust) + retained manifest <Extension>s (e.g. windows.backgroundTasks) required by kept code
 6. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
 7. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
 
@@ -263,10 +263,10 @@ if (-not (Test-Path -LiteralPath $mapPath)) {
     } else {
         if (Test-Path -LiteralPath $deferPath) {
             $deferText = Get-Content -LiteralPath $deferPath -Raw
-            if ($deferText -notmatch 'No items deferred') {
+            if ($deferText -notmatch 'No items deferred' -and $deferText -notmatch '(?m)^\|\s*\(none\)\s*\|') {
                 Write-Host "[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency"
             } else {
-                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes 'No items deferred.'"
+                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md has the bootstrap no-items sentinel"
             }
         } else {
             Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md not required"
@@ -274,7 +274,45 @@ if (-not (Test-Path -LiteralPath $mapPath)) {
     }
 }
 
-# ─── 5. Package.appxmanifest image references ─────────────────────────────────
+# ─── 5a. Local XAML ResourceDictionary references ─────────────────────────────
+# XAML compilation can succeed even when an App.xaml merged dictionary points at
+# a package path that was copied to a different logical location. Activation then
+# dies in Microsoft.UI.Xaml.dll with a native stowed exception and no managed stack.
+# Validate local dictionary paths directly so the diagnostic names the bad URI.
+$dictionaryHits = New-Object System.Collections.Generic.List[object]
+$xamlFiles = @($files | Where-Object { $_.Extension -eq '.xaml' })
+foreach ($f in $xamlFiles) {
+    $text = [System.IO.File]::ReadAllText($f.FullName)
+    foreach ($m in [regex]::Matches($text, '<ResourceDictionary\b[^>]*\bSource\s*=\s*"([^"]+)"', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)) {
+        $source = $m.Groups[1].Value.Trim()
+        # Explicit URI schemes and assembly-component resources are resolved by
+        # the package/framework, not by a file under this project root.
+        if ($source -match '^[a-zA-Z][a-zA-Z0-9+.-]*:' -or $source -match ';component/') { continue }
+        $relative = $source -replace '/', '\'
+        if ($relative.StartsWith('\')) {
+            $candidate = Join-Path $Target $relative.TrimStart('\')
+        } else {
+            $candidate = Join-Path (Split-Path -Parent $f.FullName) $relative
+        }
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { continue }
+        $prefix = $text.Substring(0, $m.Index)
+        $line = ([regex]::Matches($prefix, "`n")).Count + 1
+        $relFile = [System.IO.Path]::GetRelativePath($Target, $f.FullName)
+        [void]$dictionaryHits.Add([PSCustomObject]@{ File = $relFile; Line = $line; Source = $source; Expected = $candidate })
+    }
+}
+if ($dictionaryHits.Count -eq 0) {
+    Write-Host "[PASS] XAML ResourceDictionary Source paths — all local references resolve"
+} else {
+    Write-Host "[FAIL] XAML references $($dictionaryHits.Count) local ResourceDictionary file(s) that do not exist:"
+    foreach ($hit in $dictionaryHits) { Write-Host "       $($hit.File):$($hit.Line)" }
+    $diagBlock = $dictionaryHits | ForEach-Object { "$($_.File):$($_.Line) Source=`"$($_.Source)`" expected `"$($_.Expected)`"" }
+    Add-Diag 'XAML ResourceDictionary Source missing' ($diagBlock -join "`r`n")
+    Write-Host "       Fix: copy/move each dictionary to its Source path, or update Source to its actual package-relative path."
+    $failures++
+}
+
+# ─── 5b. Package.appxmanifest image references ────────────────────────────────
 # AppX deployment (winapp run) fails with 0x80073CF6 / "image cannot be located"
 # when the manifest references image files that don't exist on disk. UWP samples
 # typically use names like `Splash-sdk.png` / `StoreLogo-sdk.png` while the
@@ -328,7 +366,7 @@ if (Test-Path -LiteralPath $manifestPath) {
         $failures++
     }
 
-    # ─── 5b. Package.appxmanifest WinUI 3 packaging requirements ──────────────
+    # ─── 5c. Package.appxmanifest WinUI 3 packaging requirements ──────────────
     # `winapp run` refuses to register the AppX when the manifest still looks
     # UWP-shaped. Three things must be true for the packaged desktop app to
     # deploy and activate on Windows 10/11:
@@ -370,7 +408,7 @@ if (Test-Path -LiteralPath $manifestPath) {
         $failures += $manifestFailures
     }
 
-    # ─── 5c. Retained manifest <Extension>s must be carried into the build manifest ──
+    # ─── 5d. Retained manifest <Extension>s must be carried into the build manifest ──
     # UWP manifest <Extension> declarations are activation/registration prerequisites,
     # not branding. If the migrated code keeps the classic out-of-process background-task
     # model (Windows.ApplicationModel.Background.BackgroundTaskBuilder + a string

@@ -1,0 +1,51 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "applied": true,
+  "items": [
+    {
+      "problem": "External MSBuild Include+Link items were invisible to bootstrap, forcing lossy manual reconstruction.",
+      "evidence": "D1; turn 2 copied 10 files while Store.csproj declared 19 additional supported linked files.",
+      "root_cause": "Initialize-UwpMigration.ps1 only walked descendants of -Source.",
+      "tier": 1,
+      "change": "Materialize resolvable linked Compile/ApplicationDefinition/Page/Content files at safe Link paths before rewrite and triage; report unresolved links.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared App/MainPage/styles/pages/assets enter the migration mapping at their correct logical paths without manual copying.",
+      "hierarchy_rationale": "Tier 1 is feasible and deterministic; a template cannot predict arbitrary legacy Link graphs, and prose would remain skippable.",
+      "devils_advocate": "The parser intentionally handles only supported linked files, skips legacy AssemblyInfo.cs, rejects unsafe Link paths, and reports unresolved properties rather than inventing locations.",
+      "falsifiable_check": "Running bootstrap on Store reports 19 externally linked files, zero unresolved, and creates Styles/Styles.xaml plus App/MainPage linked files."
+    },
+    {
+      "problem": "Validator missed broken local merged-dictionary paths and disagreed with bootstrap's no-defer sentinel.",
+      "evidence": "D3 and D6; final App.xaml points to absent /Styles/Styles.xaml, and turns 36/39/46 show the false no-defer warning.",
+      "root_cause": "Validator checked manifest images but not local XAML dictionary paths, and its sentinel parser did not accept the producer's `(none)` row.",
+      "tier": 1,
+      "change": "Fail on missing local ResourceDictionary Source files with file/line diagnostics; accept the bootstrap no-items row.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "A deterministic pre-launch failure names the resource path instead of a generic 0xc000027b; zero-defer migrations are warning-free.",
+      "hierarchy_rationale": "Tier 1 directly observes package-path invariants; adding startup-crash prose would still leave agents guessing.",
+      "devils_advocate": "The check ignores explicit URI schemes and assembly-component resources to avoid rejecting framework/package dictionaries.",
+      "falsifiable_check": "A fixture with Source=/Styles/Missing.xaml fails at App.xaml:1; a fixture with the `(none)` defer row passes consistency."
+    },
+    {
+      "problem": "Build guidance used a nonexistent command, missed default dotnet output, and did not cover recurring SDK default-item or implicit-using collisions.",
+      "evidence": "D2, D4, D5, and G1; turn 24 rejected winapp build, turn 25 hit NETSDK1022, turn 27 hit CS0104 for System.Net.Http versus Windows.Web.Http, and turn 33 missed bin/Debug after a successful build.",
+      "root_cause": "Instructions and launch tooling assumed obsolete/platform-qualified workflows, while common SDK-style project defaults were absent or too narrowly explained.",
+      "tier": 1,
+      "change": "Use native dotnet build consistently, make Test-AppLaunch search bin/Debug as well as platform-qualified paths, document that local XAML Page items are implicit by default, and generalize CS0104 guidance to retained Windows projections colliding with SDK implicit usings.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+      "expected_effect": "The documented build command exists, its normal output is immediately consumable by launch diagnostics, and agents can resolve the first SDK-style build failures without trial-and-error project rewrites.",
+      "hierarchy_rationale": "Layout discovery is Tier 1; the minimal Tier 3 edits are required for compiler diagnostics whose correct fix depends on project intent and type semantics rather than a safe automatic rewrite.",
+      "devils_advocate": "Platform-qualified paths remain first; explicit Page management remains supported when default items are deliberately disabled; CS0104 guidance requires choosing the intended API rather than blindly removing namespaces.",
+      "falsifiable_check": "No `winapp build` remains in migration guidance, a bin/Debug fixture is discovered, and the common-errors section maps NETSDK1022 plus non-XAML CS0104 collisions to deterministic fixes."
+    }
+  ],
+  "deferred_to_human": [],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ]
+}

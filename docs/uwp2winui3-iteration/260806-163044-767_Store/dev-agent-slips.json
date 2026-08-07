@@ -1,0 +1,42 @@
+{
+  "scenario": "Store",
+  "index": 1,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "S1: MainWindow XAML/code-behind namespaces diverged, producing CS0103 errors.",
+      "evidence": "Turn 27 errors; turn 28 showed x:Class=Store.MainWindow versus namespace SDKTemplate; turn 29 fixed both values.",
+      "covered_clearly_at": "SKILL.md `Fidelity (highest priority)`: copy XAML verbatim and preserve names/event handlers; Step 3 requires fixing the first build error before continuing.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The mismatch was introduced during manual reconstruction and was immediately diagnosable from the paired files."
+    },
+    {
+      "problem": "S2: The agent introduced an unnecessary x:Bind DataTemplate and triggered WMC1509/WMC0909/WMC1111/WMC9999.",
+      "evidence": "Turn 27 compiler warning/errors; turn 29 restored the source's Binding DataTemplate.",
+      "covered_clearly_at": "SKILL.md `Fidelity (highest priority)`: do not regenerate XAML; copy verbatim, then transform only what is required.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "A faithful copy would not have introduced this error."
+    },
+    {
+      "problem": "S3: Nullable warnings remained on the first build.",
+      "evidence": "Turn 27 CS8625/CS8618 warnings; turns 30-31 initialized or marked the declarations nullable; turn 32 had zero warnings.",
+      "covered_clearly_at": "SKILL.md Step 3 tight build/fix loop and Step 4 zero-warning build healthcheck.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The existing build gate exposed the warnings and the agent fixed them in the next edit cycle."
+    },
+    {
+      "problem": "S4: All migration mapping rows remained copied at the first validation.",
+      "evidence": "Turn 36 listed ten copied rows; turn 39 validation passed mapping integrity after statuses were updated.",
+      "covered_clearly_at": "SKILL.md Step 1: flip Status from copied to done/deferred; Step 4 validator explicitly fails copied rows.",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "The requirement and automated gate were already explicit and effective."
+    },
+    {
+      "problem": "S5: The agent removed MicaBackdrop as an unsupported startup-crash guess, but the crash persisted.",
+      "evidence": "Turn 45 removed MicaBackdrop; turn 46 reproduced the identical 0xc000027b failure.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md `Diagnosing Startup Crashes`: capture evidence first and fix the named cause rather than guessing.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The speculative edit was not supported by the crash evidence; the durable missing-resource detector is addressed separately as D3."
+    }
+  ]
+}
