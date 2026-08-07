@@ -48,8 +48,8 @@ Emit the structured result as JSON to stdout (for programmatic callers).
 
 .OUTPUTS
 PSCustomObject (and JSON with -Json):
-  { ok, status, pid, aumid, layout, crash:{ code, module, managedType, message,
-    hint, anchor } | $null, detail }
+  { ok, status, pid, aumid, layout, crash:{ code, managedCode, module,
+    managedType, message, hint, anchor } | $null, detail }
 status in { running, crashed, unavailable }.  exit: 0 running / 1 crashed / 2 unavailable.
 
 .EXAMPLE
@@ -96,6 +96,7 @@ function Write-LaunchOut {
         if ($Result.pid)    { Write-Host "    PID    : $($Result.pid)   AUMID: $($Result.aumid)" }
         if ($Result.crash) {
             Write-Host "    Crash  : code=$($Result.crash.code)  module=$($Result.crash.module)"
+            if ($Result.crash.managedCode) { Write-Host "    HRESULT: $($Result.crash.managedCode)" }
             if ($Result.crash.managedType) { Write-Host "    .NET   : $($Result.crash.managedType)" }
             if ($Result.crash.message)     { Write-Host "    Message: $($Result.crash.message)" }
             if ($Result.crash.hint)        { Write-Host "    Hint   : $($Result.crash.hint)" }
@@ -167,7 +168,7 @@ if ($run) {
 # Match on the layout's exe base name(s) within a short recent window.
 function Get-CrashSignature {
     param([string[]]$Names)
-    $sig = [ordered]@{ code = $null; module = $null; managedType = $null; message = $null; hint = $null; anchor = $null }
+    $sig = [ordered]@{ code = $null; managedCode = $null; module = $null; managedType = $null; message = $null; hint = $null; anchor = $null }
     if (-not $Names -or $Names.Count -eq 0) { return $sig }
     $namePattern = ($Names | ForEach-Object { [regex]::Escape($_ + '.exe') }) -join '|'
     $events = Get-WinEvent -LogName Application -MaxEvents 80 -ErrorAction SilentlyContinue |
@@ -182,6 +183,7 @@ function Get-CrashSignature {
     if ($e1026) {
         # ".NET Runtime" event: "Exception Info: <Type>: <message>"
         if ($e1026.Message -match 'Exception Info:\s*([A-Za-z0-9_.]+Exception)') { $sig.managedType = $matches[1].Trim() }
+        if ($e1026.Message -match 'Exception Info:[^\r\n]*\((0x[0-9a-fA-F]{8})\)') { $sig.managedCode = $matches[1].ToLower() }
         if ($e1026.Message -match 'Exception Info:\s*[A-Za-z0-9_.]+Exception[^\r\n:]*:\s*([^\r\n]+)') {
             $sig.message = $matches[1].Trim()
         } elseif ($e1026.Message -match 'Exception Info:\s*([^\r\n]+)') {
@@ -192,13 +194,20 @@ function Get-CrashSignature {
     # Map the native exception code to a conservative hint + pattern anchor.
     # These name the error CLASS and point at the captured stack / the doc; they
     # do not assert a single fix, since the real frame is in the captured exception.
-    switch ($sig.code) {
+    # A managed crash is wrapped by native code 0xe0434352. Prefer the HRESULT
+    # embedded in event 1026 so the hint identifies the actual failure class.
+    $effectiveCode = if ($sig.managedCode) { $sig.managedCode } else { $sig.code }
+    switch ($effectiveCode) {
         '0x80004003' {
             $sig.hint   = "E_POINTER - most often the static-window init-order race: a Page read App.MainWindow (or another static window ref) before OnLaunched assigned it. Keep MainWindow's ctor inert; navigate after Activate."
             $sig.anchor = 'windowing'
         }
         '0x8001010e' {
-            $sig.hint   = "RPC_E_WRONG_THREAD - a thread/apartment-affined object was accessed during startup (commonly a view/CoreWindow-affined UWP API touched from a static initializer or off the UI thread). Construct/access it on the UI thread after Activate; if the API is unsupported on WinUI 3 desktop, defer it."
+            if ($e1026 -and $e1026.Message -match 'Application Object must initially be accessed') {
+                $sig.hint = "RPC_E_WRONG_THREAD occurred inside Application.Start before the app callback ran. Do not replace the SDK-generated entry point with an equivalent Program.cs. Reproduce with a pristine scaffold using the same template/package versions; if it also fails, repair or update that matched toolchain and regenerate the scaffold."
+            } else {
+                $sig.hint = "RPC_E_WRONG_THREAD - a thread/apartment-affined object was accessed during startup (commonly a view/CoreWindow-affined UWP API touched from a static initializer or off the UI thread). Construct/access it on the UI thread after Activate; if the API is unsupported on WinUI 3 desktop, defer it."
+            }
             $sig.anchor = 'startup-crashes'
         }
         '0xe0434352' {

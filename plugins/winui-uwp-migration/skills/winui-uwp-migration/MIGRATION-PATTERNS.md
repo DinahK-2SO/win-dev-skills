@@ -6,6 +6,20 @@ Reference for API replacements and patterns that the `Initialize-UwpMigration.ps
 
 These are the build errors that almost always surface first, before any of the deeper API replacements come into play. Fix them inline as you encounter them.
 
+### `CS0246` / `CS0103` at the scaffold-to-source namespace boundary
+
+The WinUI scaffold's `App` and `MainWindow` use the new project's root namespace, while copied UWP pages often intentionally retain their original namespace because XAML `x:Class`, code-behind, and helper references already agree on it. This can leave scaffold code unable to resolve the copied `MainPage`, and copied pages unable to resolve the scaffold's `App`.
+
+Add an explicit `using` (or fully qualify the type) at each boundary. Do not globally rename the copied source namespace merely to clear one compiler error unless you also update every matching XAML `x:Class` and cross-file reference.
+
+```csharp
+// MainWindow.xaml.cs: copied page lives in the source namespace.
+using OriginalSampleNamespace;
+
+// Copied MainPage.xaml.cs: App lives in the scaffold namespace.
+using NewProjectNamespace;
+```
+
 ### `CS0104: 'LaunchActivatedEventArgs' is an ambiguous reference`
 
 After the script rewrites `Windows.UI.Xaml` → `Microsoft.UI.Xaml`, an `App.xaml.cs` (or any other file) that still has `using Windows.ApplicationModel.Activation;` ends up with **two** `LaunchActivatedEventArgs` types in scope — the UWP one in `Windows.ApplicationModel.Activation`, and the WinUI 3 one in `Microsoft.UI.Xaml`. The two are not interchangeable: `OnLaunched` in WinUI 3 receives `Microsoft.UI.Xaml.LaunchActivatedEventArgs`.
@@ -436,7 +450,9 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
 | `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
 
-> Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
+> Do **not** assume the entry point is authored application code. The SDK-generated entry point also appears as `<ProjectNamespace>.Program.Main` in a crash stack. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
+>
+> **If the stack stops at `Application.Start` / generated `Program.Main` before the initialization callback runs**, do not add `DISABLE_XAML_GENERATED_MAIN` and hand-copy the same entry point. That cannot repair a failure which occurs before app code runs. Record the template and `Microsoft.WindowsAppSDK` package versions, then reproduce with a pristine scaffold using that same matched set. If the pristine scaffold fails too, repair/update the template-package toolchain together and regenerate the target; do not mutate the migrated app's apartment attribute. If the pristine scaffold launches, diff project properties and package versions before touching app code.
 
 The Step 4 validator runs this same check (`Validate-UwpMigration.ps1` Section 7) and **fails** when the app registers but dies at startup, surfacing the captured signature in `.validator-diagnostics.txt`.
 

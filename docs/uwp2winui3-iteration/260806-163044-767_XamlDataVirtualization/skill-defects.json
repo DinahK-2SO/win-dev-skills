@@ -1,0 +1,37 @@
+{
+  "scenario": "XamlDataVirtualization",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The prescribed build command did not exist and did not produce the host-architecture layout required by the launch helper.",
+      "evidence": "session-log.txt lines 4039-4044: winapp build exited 1; lines 4164-4166: launch helper found no bin/x64/Debug output.",
+      "skill_search": "SKILL.md Step 3 contained 'winapp build' and repeated it as the preferred/final command.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer winapp build to compile.",
+      "root_cause": "The prose assigned compilation to the winapp CLI even though the installed CLI has no build command, and omitted the helper's host-architecture layout precondition.",
+      "proposed_fix": "Replace the command with native dotnet build -p:Platform=<host-arch> and state that launch must run only after build completion.",
+      "generalizes": "Every migrated project uses the same compile-to-packaged-layout handoff before runtime validation."
+    },
+    {
+      "problem": "Startup diagnostics discarded the managed HRESULT and selected a generic hint from the native .NET wrapper exception code.",
+      "evidence": "session-log.txt lines 4635-4642 showed code 0xe0434352 and a generic hint; lines 4921-4933 showed managed HRESULT 0x8001010E and failure inside Application.Start.",
+      "skill_search": "Test-AppLaunch.ps1 parsed the managed type/message but not the '(0x...)' HRESULT in event 1026; hint selection switched only on event 1000 code.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Managed exceptions are surfaced in event 1000 as wrapper code 0xe0434352, so ignoring event 1026's HRESULT loses the actionable failure class.",
+      "proposed_fix": "Parse and report managedCode, prefer it for hint selection, and surface it through Validate-UwpMigration.ps1.",
+      "generalizes": "Any managed WinUI startup crash can be wrapped by 0xe0434352, including apartment, activation, and interop failures."
+    },
+    {
+      "problem": "The common scaffold-to-copied-source namespace mismatch had no documented repair pattern.",
+      "evidence": "session-log.txt lines 4106-4111: MainWindow could not resolve copied MainPage and copied MainPage could not resolve scaffold App; lines 4135-4138 fixed both with imports.",
+      "skill_search": "MIGRATION-PATTERNS.md had namespace rewrites and ambiguous-type guidance but no scaffold root namespace versus retained UWP x:Class namespace pattern.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The scaffold and copied UWP source legitimately use different root namespaces after bootstrap.",
+      "proposed_fix": "Add a common-build-error section recommending explicit imports/qualification and warning against partial global namespace renames.",
+      "generalizes": "Most migrations combine newly scaffolded App/MainWindow types with copied pages whose XAML and code-behind must retain a consistent original namespace."
+    }
+  ]
+}

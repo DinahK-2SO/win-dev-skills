@@ -1,0 +1,46 @@
+{
+  "scenario": "XamlDataVirtualization",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Startup diagnostics hid managed HRESULT 0x8001010E and did not distinguish an SDK-generated Program.Main failure from authored app code.",
+      "evidence": "lessons.json errors_encountered COMException entry; session-log.txt lines 4635-4642 and 4921-4933; migration-score.json score 0 because both features were unavailable.",
+      "root_cause": "Event 1000 wrapper code drove hint selection while event 1026's actionable HRESULT was discarded; prose did not identify generated entry-point provenance.",
+      "tier": 1,
+      "change": "Parse/report managedCode, select the apartment hint from it, and direct pre-callback Application.Start failures to a same-version pristine scaffold comparison instead of a speculative Program.cs rewrite. Tier 1 carries the non-ignorable signal; targeted Tier 3 text is still needed because deciding whether the frame is generated and repairing a matched toolchain requires judgment.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The next managed apartment startup crash reports 0x8001010E and sends the agent directly to scaffold/toolchain isolation, avoiding ineffective entry-point rewrites.",
+      "falsifiable_check": "Given an event 1000 code 0xe0434352 plus event 1026 HRESULT 0x8001010E and the Application Object message, Test-AppLaunch JSON contains managedCode=0x8001010e and the hint says not to replace generated Program.cs."
+    },
+    {
+      "problem": "The skill prescribed nonexistent winapp build and omitted the launch helper's completed host-architecture layout requirement.",
+      "evidence": "skill-defects.json item 1; session-log.txt lines 4039-4044 and 4164-4166.",
+      "root_cause": "Compilation responsibility was assigned to the wrong CLI.",
+      "tier": 3,
+      "change": "Use copyable native dotnet build -p:Platform=<host-arch> commands and explicitly serialize build before launch. No Tier 1 change was chosen because Validate-UwpMigration already performs the enforced host-architecture build; this gap was in the interactive Step 3 command contract.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Interactive validation creates the layout Test-AppLaunch expects without an invalid command or stale-output race.",
+      "falsifiable_check": "On re-run, no winapp build invocation occurs and the first Test-AppLaunch call does not report missing bin/x64/Debug or an incomplete in-flight layout."
+    },
+    {
+      "problem": "No repair pattern covered scaffold root namespace versus retained copied-page namespace errors.",
+      "evidence": "skill-defects.json item 3; session-log.txt lines 4106-4138.",
+      "root_cause": "Bootstrap preserves internally consistent copied XAML class namespaces while the new shell uses the target root namespace.",
+      "tier": 3,
+      "change": "Add a focused common-build-error pattern for explicit imports/qualification and warn against partial global renaming. A script rewrite was not chosen because selecting which namespace boundary to import depends on XAML x:Class and source topology.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents resolve the first namespace-boundary build cleanly without destabilizing XAML/code-behind identity.",
+      "falsifiable_check": "When copied MainPage and scaffold App use different namespaces, the next migration fixes CS0246/CS0103 with imports or qualification in one edit and leaves matching x:Class namespaces unchanged."
+    }
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ],
+  "deferred_to_human": [
+    "Tier 0: verify the benchmark's installed Microsoft.WindowsAppSDK.WinUI.CSharp.Templates 0.0.5-alpha is intentionally paired with the post-action Microsoft.WindowsAppSDK 2.3.1; update the setup image/template pin as a matched set if a pristine scaffold reproduces 0x8001010E."
+  ]
+}

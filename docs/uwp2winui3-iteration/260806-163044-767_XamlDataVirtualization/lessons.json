@@ -1,0 +1,129 @@
+{
+  "scenario": "XamlDataVirtualization",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 105-120: copied 14 files, rewrote 10 files, inventoried 11 migrate-as-is and 3 adaptation rows, and injected 8 TODOs."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt lines 4078-4111 exposed the scaffold/source namespace errors; after explicit using directives, the rebuild exited 0 at lines 4143-4152."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "evidence": "session-log.txt lines 4635-4642 captured the startup COMException, native wrapper code, managed type, message, and startup-crashes anchor."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 4367-4389 passed residue, TODO, mapping, manifest, and build gates while correctly failing the startup smoke launch."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed winapp CLI has no build command, so the skill-prescribed command printed help and exited 1.",
+      "evidence": "session-log.txt lines 4039-4044."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "Event 1000 supplied wrapper code 0xe0434352, while event 1026 contained the actionable managed HRESULT 0x8001010E. The helper discarded that HRESULT and emitted a generic managed-exception hint.",
+      "suggested_tweak": "Parse the event 1026 HRESULT, preserve it separately, and use it to select the startup hint."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "Target discovery expects a completed host-architecture packaged layout; a default non-platform build or a concurrent rebuild can produce unavailable/incomplete-layout results.",
+      "suggested_tweak": "Document and enforce native host-architecture build completion before launch."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "Microsoft.UI.Xaml.Application.Start",
+      "why_tried": "It is the SDK-generated WinUI application entry path.",
+      "root_cause": "The process failed before the application initialization callback with RPC_E_WRONG_THREAD. The exact template/package compatibility cause was not resolved in the trial.",
+      "fix": "Do not replace the generated entry point with an equivalent Program.cs. Reproduce a pristine scaffold with the same template/package set, then repair or update that matched toolchain if the scaffold also fails."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build instruction",
+      "wrong": "Use winapp build.",
+      "correct": "Use dotnet build with the host Platform, then run Test-AppLaunch.ps1 only after the build exits successfully."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "IItemsRangeInfo and ISelectionInfo",
+      "special_handling": "The copied data sources compiled after moving their XAML data namespace to Microsoft.UI.Xaml.Data; no scenario-specific rewrite was evidenced. Runtime behavior remained untestable because startup failed before a window rendered."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "CS0246 MainPage and CS0103 App",
+      "root_cause": "The scaffold types used the new project namespace while copied UWP pages retained the original sample namespace.",
+      "fix": "Add explicit using directives across the scaffold/source namespace boundary rather than globally renaming copied XAML classes."
+    },
+    {
+      "error": "winapp build exited 1 and printed CLI help",
+      "root_cause": "The migration skill prescribed a command not supported by the installed CLI.",
+      "fix": "Use dotnet build -p:Platform=<host-arch>."
+    },
+    {
+      "error": "Test-AppLaunch unavailable: no bin/x64/Debug output",
+      "root_cause": "The preceding default build did not create the host-architecture layout the helper searches.",
+      "fix": "Build with -p:Platform=x64 on this host before launching."
+    },
+    {
+      "error": "0x80073CF6 missing Splash-sdk.png during package registration",
+      "root_cause": "The copied UWP manifest referenced sample-branded assets absent from the scaffold Assets directory; a concurrent launch also observed stale pre-rebuild output.",
+      "fix": "Point every manifest image reference at an existing scaffold asset and complete the rebuild before launch."
+    },
+    {
+      "error": "COMException 0x8001010E in Application.Start",
+      "root_cause": "The WinUI application failed before its initialization callback; the trial did not establish whether the installed alpha template and resolved Windows App SDK package were compatible.",
+      "fix": "Compare against a pristine scaffold with the same versions; repair the matched toolchain rather than hand-copying the generated entry point."
+    },
+    {
+      "error": "CS0029 in custom Program.cs",
+      "root_cause": "The lambda parameter was named underscore, so '_ = new App()' assigned App to ApplicationInitializationCallbackParams instead of acting as a discard.",
+      "fix": "Use 'new App();' or rename the callback parameter."
+    },
+    {
+      "error": "Test-AppLaunch unavailable: incomplete layout",
+      "root_cause": "The agent launched while the dependent rebuild was still in flight.",
+      "fix": "Run build and launch sequentially."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Turns 16-21",
+      "symptom": "The documented build command failed, then the first launch helper call could not find x64 output.",
+      "turns_or_retries": "Two build commands and one unavailable launch.",
+      "root_cause": "The skill used a nonexistent winapp build command and did not state the helper's host-architecture build contract prominently.",
+      "how_resolved": "The agent switched to dotnet build and then added -p:Platform=x64.",
+      "preventable_by": "A correct, copyable dotnet build -p:Platform=<host-arch> command immediately before the launch helper."
+    },
+    {
+      "where": "Turns 26-43",
+      "symptom": "Repeated startup launches, event-log inspection, a speculative custom Program.cs, another compile error, and packaged/unpackaged retries did not resolve the crash.",
+      "turns_or_retries": "At least four crash/unavailable launch attempts after manifest repair.",
+      "root_cause": "The helper hid managed HRESULT 0x8001010E behind native wrapper code 0xe0434352, and the startup guidance did not distinguish SDK-generated Program.Main from authored code.",
+      "how_resolved": "Unresolved; the agent correctly reported the migration incomplete.",
+      "preventable_by": "Managed-HRESULT-aware diagnostics plus a generated-entry-point decision rule that requires a pristine scaffold comparison before app-code edits."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "A pristine scaffold compatibility preflight or explicit scaffold comparison workflow.",
+      "would_have_saved": "It would have separated template/package startup failure from migrated application code before the agent spent multiple turns rewriting Program.cs."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "dotnet new reported Microsoft.WindowsAppSDK.WinUI.CSharp.Templates 0.0.5-alpha with 0.0.6-alpha available, while post-actions resolved Microsoft.WindowsAppSDK 2.3.1.",
+      "workaround": "Treat template and Windows App SDK versions as a matched toolchain and verify a pristine scaffold before migration-specific diagnosis."
+    }
+  ]
+}

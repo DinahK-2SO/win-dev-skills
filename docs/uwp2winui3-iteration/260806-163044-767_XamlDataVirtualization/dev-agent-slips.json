@@ -1,0 +1,35 @@
+{
+  "scenario": "XamlDataVirtualization",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The mandatory bootstrap self-check ran concurrently with initialization and initially returned False.",
+      "evidence": "session-log.txt lines 94-103 show Initialize-UwpMigration.ps1 and Test-Path issued together; the check completed before bootstrap.",
+      "covered_clearly_at": "SKILL.md Step 0 numbers scaffold, bootstrap, and self-check as ordered commands and says not to proceed until Test-Path returns True.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The order and required True result were already explicit; the agent reran the check successfully."
+    },
+    {
+      "problem": "The copied manifest retained missing UWP-branded image references and a launch raced the correcting rebuild.",
+      "evidence": "session-log.txt lines 4340-4364 shows the manifest correction followed by a launch that still consumed stale Splash-sdk.png output.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md #csproj, 'Package.appxmanifest - reconcile image references with the assets you actually have', explicitly names Splash-sdk.png, 0x80073CF6, and requires Test-Path checks before first launch; Validate-UwpMigration also checks all image references.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The existing section predicts the exact error and gives both valid fixes; following it before launch would prevent the failure."
+    },
+    {
+      "problem": "The first custom Program.cs build failed with CS0029 because '_ = new App()' assigned to a lambda parameter named underscore.",
+      "evidence": "session-log.txt lines 5127-5149.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md #startup-crashes shows the custom entry-point shape and the trial's own compiler message identified the local type mismatch.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "This was ordinary C# variable shadowing, fixed immediately, and does not require migration-specific guidance."
+    },
+    {
+      "problem": "A rebuild and its dependent launch were issued concurrently, causing an incomplete-layout warning.",
+      "evidence": "session-log.txt lines 5153-5162.",
+      "covered_clearly_at": "SKILL.md Step 3 defined the loop as build then launch and presented the commands in that order.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "Build output must exist before any launcher can inspect it; the existing ordered workflow was sufficient, though the corrected command now makes the dependency even more explicit."
+    }
+  ]
+}

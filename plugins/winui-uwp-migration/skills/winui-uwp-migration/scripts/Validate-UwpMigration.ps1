@@ -10,8 +10,9 @@ declare done with FAIL." All [FAIL] output is sanitized — full diagnostics
 root, not to stdout, to keep concentrated API-name lists out of the agent's
 assistant turn.
 
-Does NOT run `winapp build` itself — build cleanliness is a separate gate
-the agent invokes alongside this (`winapp build` then this script).
+Runs its own native `dotnet build` healthcheck before the smoke launch. The
+agent should also run the same host-architecture build before invoking this
+final gate.
 
 Checks (numbering matches the `# ─── N.` sections in the code):
 1. Residue grep — leftover Windows.UI.Xaml using/xmlns, unsupported APIs not deferred, UWP-only csproj markers
@@ -634,6 +635,7 @@ if ($failures -eq 0 -and -not $env:UWP_MIGRATION_SKIP_SMOKE_LAUNCH) {
                     Write-Host "[FAIL] App crashed at startup — it registered, then died before showing a window (full diagnostics in .validator-diagnostics.txt):"
                     if ($lr.crash) {
                         if ($lr.crash.code)        { Write-Host "       Exception code : $($lr.crash.code)" }
+                        if ($lr.crash.managedCode) { Write-Host "       Managed HRESULT: $($lr.crash.managedCode)" }
                         if ($lr.crash.managedType) { Write-Host "       .NET exception : $($lr.crash.managedType)" }
                         if ($lr.crash.hint)        { Write-Host "       $($lr.crash.hint)" }
                         if ($lr.crash.anchor)      { Write-Host "       Fix pattern    : Get-MigrationPattern.ps1 -Anchor $($lr.crash.anchor)" }
@@ -641,7 +643,7 @@ if ($failures -eq 0 -and -not $env:UWP_MIGRATION_SKIP_SMOKE_LAUNCH) {
                     Write-Host "       Diagnose / reproduce: scripts/Test-AppLaunch.ps1 -Target `"$Target`""
                     $diagText = "status: crashed`r`ndetail: $($lr.detail)`r`nlayout: $($lr.layout)"
                     if ($lr.crash) {
-                        $diagText += "`r`ncode: $($lr.crash.code)`r`nmodule: $($lr.crash.module)`r`nmanagedType: $($lr.crash.managedType)`r`nmessage: $($lr.crash.message)`r`nhint: $($lr.crash.hint)`r`nanchor: $($lr.crash.anchor)"
+                        $diagText += "`r`ncode: $($lr.crash.code)`r`nmanagedCode: $($lr.crash.managedCode)`r`nmodule: $($lr.crash.module)`r`nmanagedType: $($lr.crash.managedType)`r`nmessage: $($lr.crash.message)`r`nhint: $($lr.crash.hint)`r`nanchor: $($lr.crash.anchor)"
                     }
                     Add-Diag 'Smoke launch: startup crash' $diagText
                     $failures++

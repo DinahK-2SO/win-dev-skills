@@ -1,0 +1,15 @@
+{
+  "scenario": "XamlDataVirtualization",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Both scored features were unavailable because a pre-callback Application.Start crash was treated as a reason to hand-author an equivalent Program.cs instead of isolating the scaffold/toolchain.",
+      "evidence": "migration-score.json marks Data Virtualization and Selection Management fail because the app did not launch; session-log.txt lines 4921-4933 show the stack stopped at generated Program.Main/Application.Start, and lines 5084-5157 show an equivalent custom entry point was added and retried.",
+      "covered_at": "MIGRATION-PATTERNS.md #startup-crashes said a custom Program.Main with STAThread is valid and suggested deleting an unnecessary hand-written entry point, but did not explain that an SDK-generated entry point has the same stack name or require a pristine scaffold comparison.",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "Distinguish generated from authored Program.Main and require same-version pristine scaffold reproduction when Application.Start fails before its callback; prohibit speculative DISABLE_XAML_GENERATED_MAIN rewrites.",
+      "generalizes": "Framework/template/package incompatibilities fail before application code in any WinUI project and otherwise look like an app entry-point defect."
+    }
+  ]
+}

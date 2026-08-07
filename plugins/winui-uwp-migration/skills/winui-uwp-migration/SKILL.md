@@ -123,8 +123,8 @@ Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are in
 Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
 
 ```powershell
-winapp build                                                                # compile; never run the .exe directly
-& "<skill-root>/scripts/Test-AppLaunch.ps1" -Target "<winui3-project-root>"  # launch AND verify it survives startup
+dotnet build "<project.csproj>" -c Debug -p:Platform=x64                    # use ARM64 on an ARM64 host
+& "<skill-root>/scripts/Test-AppLaunch.ps1" -Target "<winui3-project-root>"  # run only after the build exits successfully
 ```
 
 A WinUI 3 app can build cleanly and still crash the instant it starts, so "it compiled" is not "it runs." `Test-AppLaunch.ps1` is your launch step *because* it answers both questions at once: it launches the built app and reports whether it stayed alive — and if it didn't, it captures the real reason from Windows Error Reporting (native exception **code** from event 1000 + managed .NET exception **type + stack** from event 1026) and points you at the matching cause in [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). Making this your normal launch command means a startup crash hands you its exception immediately — you never end up guessing.
@@ -135,7 +135,8 @@ When the app **crashes at launch**, fix the frame the captured stack names — t
 
 > **Build command discipline (avoid agent stalls):**
 >
-> - Prefer `winapp build` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (A bare `winapp run` works too, but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
+> - Use native `dotnet build -p:Platform=<host-arch>` to compile and `Test-AppLaunch.ps1` to launch. The `winapp` CLI has no `build` command.
+> - Build and launch are dependent steps: never issue them in parallel. The launch helper must inspect the completed host-architecture layout, not stale or half-written output.
 > - If you must shell out to `dotnet build` / `dotnet run`, **do not** pipe the output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
 > - When using `dotnet` from the powershell tool, either (a) run **sync**, or (b) leave output unfiltered, or (c) append an exit sentinel so there is always a final line to read, e.g. `dotnet build -c Debug; "BUILD_EXIT=$LASTEXITCODE"`.
 
@@ -167,7 +168,7 @@ If any check fails, read the diagnostic, fix the root cause, re-run. **Do not re
 - *`Status = copied` rows* → those files were never finished. Either complete the migration and flip to `done`, or defer with rationale.
 - *Build healthcheck FAIL* → open `.validator-diagnostics.txt`; for each unique CS#### code, look up the pattern in PATTERNS.md via `Get-MigrationPattern.ps1`.
 
-After PASS, do a final `winapp build` to confirm the build is still clean. Only then declare done.
+After PASS, do a final `dotnet build "<project.csproj>" -c Debug -p:Platform=<host-arch>` to confirm the build is still clean. Only then declare done.
 
 ## Critical Rules
 
