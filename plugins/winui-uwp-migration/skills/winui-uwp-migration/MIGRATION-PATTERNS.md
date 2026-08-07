@@ -35,6 +35,24 @@ UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.Get
 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 ```
 
+<a id="nullable"></a>
+### `CS86xx` warnings after moving into a nullable-enabled scaffold
+
+Current WinUI 3 templates enable nullable reference types, while older UWP projects
+usually did not. Do not disable `<Nullable>enable</Nullable>` or suppress the warnings.
+Model the lifecycle explicitly:
+
+- initialize collections and always-present bindable properties at declaration or in
+  the constructor;
+- mark device handles and other values obtained asynchronously as nullable, then guard
+  every event/button path that can run before acquisition succeeds;
+- make `INotifyPropertyChanged.PropertyChanged` nullable;
+- use `null!` only for framework-populated fields whose invariant is established before
+  use, not as a blanket warning fix.
+
+For device-dependent pages, a failed access request must leave controls in a safe state
+and surface the visible fallback described in SKILL.md.
+
 ### Thousands of `CS0101` duplicate-type / `CS0227` / `CS0234` errors (often a build that hangs)
 
 If `dotnet build` floods with **tens of thousands** of `CS0101` ("already contains a definition for …"), `CS0227`, or `CS0234` errors — or the build appears to hang for minutes — the cause is almost always **stale UWP build output that was copied into the migrated tree**. A previously-built UWP project (especially a multi-project sample with sub-folders) leaves machine-generated sources under `bin/` and `obj/`, e.g. .NET-Native ILC files at `obj\<arch>\Release\ilc\**\*.g.cs` and `*.McgInterop\ImplTypes.g.cs`. The SDK-style WinUI `.csproj` globs `**/*.cs`, and MSBuild's default `bin`/`obj` exclusion only covers the **project-root** `bin`/`obj` — any **nested** sub-project `bin`/`obj` is still compiled, producing the duplicate types.
@@ -434,7 +452,7 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | `0x80004003` | `E_POINTER` | Static-window **init-order race** — a `Page` read `App.MainWindow` (or another static window reference) before `OnLaunched` assigned it. Keep `MainWindow`'s constructor inert and navigate after `Activate`. See [Initialization order](#windowing). |
 | `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
-| `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
+| `0xC000027B` | Native stowed exception | First verify every merged `ResourceDictionary Source` resolves to a deployed XAML file and that referenced theme/static resources exist. Then inspect legacy API activation at startup; defer only an API confirmed unsupported. |
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 

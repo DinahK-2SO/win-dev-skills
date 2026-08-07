@@ -58,7 +58,7 @@ Do:
 
 - Only after step 3 returns `True` may you read source files, plan transformations, or edit anything.
 
-The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you exactly what it did, what artifacts now exist, and what to do next. Read that block; do not re-derive the same info by browsing the tree.
+The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you exactly what it did, including any csproj `Include` + `Link` items copied from shared folders outside the UWP project directory, what artifacts now exist, and what to do next. Read that block; do not re-derive the same info by browsing the tree.
 
 ### Step 1 — Migrate, file by file
 
@@ -129,7 +129,7 @@ winapp build                                                                # co
 
 A WinUI 3 app can build cleanly and still crash the instant it starts, so "it compiled" is not "it runs." `Test-AppLaunch.ps1` is your launch step *because* it answers both questions at once: it launches the built app and reports whether it stayed alive — and if it didn't, it captures the real reason from Windows Error Reporting (native exception **code** from event 1000 + managed .NET exception **type + stack** from event 1026) and points you at the matching cause in [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). Making this your normal launch command means a startup crash hands you its exception immediately — you never end up guessing.
 
-When a **build** error points at a UWP API, fetch the relevant anchor and apply the pattern. For example, a CS0246 on `Window.Current` → `Get-MigrationPattern.ps1 -Anchor windowing`; an analyzer warning about `CoreDispatcher` → `Get-MigrationPattern.ps1 -Anchor threading`. Open `MIGRATION-PATTERNS.md` directly only as a last resort — one anchor at a time keeps each turn small.
+When a **build** error points at a UWP API, fetch the relevant anchor and apply the pattern. For example, a CS0246 on `Window.Current` → `Get-MigrationPattern.ps1 -Anchor windowing`; an analyzer warning about `CoreDispatcher` → `Get-MigrationPattern.ps1 -Anchor threading`; nullable `CS86xx` warnings introduced by the scaffold → `Get-MigrationPattern.ps1 -Anchor nullable`. Open `MIGRATION-PATTERNS.md` directly only as a last resort — one anchor at a time keeps each turn small.
 
 When the app **crashes at launch**, fix the frame the captured stack names — then build and launch again. Do **not** sprinkle `File.WriteAllText` traces through `Program.cs` / `App.xaml.cs` and re-run in a loop: blind tracing is the single biggest time sink in this phase, and the exception `Test-AppLaunch.ps1` already captured tells you where the throw is. (Note: a custom `Program.Main` for WinUI 3 **correctly** uses `[STAThread]` — that is not the bug.)
 

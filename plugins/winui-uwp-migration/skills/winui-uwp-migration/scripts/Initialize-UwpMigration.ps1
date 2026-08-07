@@ -10,7 +10,8 @@ workflow to confirm residue grep, mapping integrity, deferred consistency,
 build cleanliness, and runtime smoke.
 
 Steps:
-1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
+1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure,
+   including project items linked from shared folders outside the project directory
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
@@ -99,8 +100,105 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
 
 Write-Host "    Copied $($copied.Count) source files"
 
+# UWP SDK samples frequently keep App.xaml, MainPage, styles, helpers, and assets in a
+# shared directory referenced through csproj Include + Link metadata. A recursive copy
+# rooted at $Source cannot see those files, so resolve the common MSBuild property forms
+# and copy linked items to their logical Link paths before inventorying the target.
+function Find-FileAbove([string]$start, [string]$name) {
+    $cursor = [System.IO.Path]::GetFullPath($start)
+    while ($cursor) {
+        if (Test-Path -LiteralPath (Join-Path $cursor $name)) { return $cursor }
+        $parent = [System.IO.Directory]::GetParent($cursor)
+        if (-not $parent) { break }
+        $cursor = $parent.FullName
+    }
+    return $null
+}
+
+function Expand-ProjectValue([string]$value, [string]$projectDir, [hashtable]$properties) {
+    if ([string]::IsNullOrWhiteSpace($value)) { return $value }
+    $expanded = $value.Replace('$(MSBuildThisFileDirectory)', $projectDir.TrimEnd('\') + '\')
+    for ($pass = 0; $pass -lt 8; $pass++) {
+        $before = $expanded
+        $abovePattern = '\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(([^,]+),\s*([^)]+)\)\)'
+        $expanded = [regex]::Replace($expanded, $abovePattern, {
+            param($m)
+            $start = $m.Groups[1].Value.Trim().Trim('"', "'")
+            $marker = $m.Groups[2].Value.Trim().Trim('"', "'")
+            $found = Find-FileAbove -start $start -name $marker
+            if ($found) { return $found }
+            return $m.Value
+        })
+        $expanded = [regex]::Replace($expanded, '\$\(([^)]+)\)', {
+            param($m)
+            $name = $m.Groups[1].Value
+            if ($properties.ContainsKey($name)) { return [string]$properties[$name] }
+            return $m.Value
+        })
+        if ($expanded -eq $before) { break }
+    }
+    return $expanded
+}
+
+$linkedCount = 0
+$sourceCsprojs = @(Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue)
+foreach ($project in $sourceCsprojs) {
+    try { [xml]$projectXml = Get-Content -LiteralPath $project.FullName -Raw } catch {
+        Write-Warning "    Could not parse linked items from $($project.Name): $_"
+        continue
+    }
+    $projectDir = Split-Path -Parent $project.FullName
+    $properties = @{}
+    foreach ($property in $projectXml.SelectNodes('//*[local-name()="PropertyGroup"]/*')) {
+        if (-not $property.Name -or [string]::IsNullOrWhiteSpace($property.InnerText)) { continue }
+        $properties[$property.Name] = $property.InnerText.Trim()
+    }
+    for ($pass = 0; $pass -lt 8; $pass++) {
+        foreach ($name in @($properties.Keys)) {
+            $properties[$name] = Expand-ProjectValue -value ([string]$properties[$name]) -projectDir $projectDir -properties $properties
+        }
+    }
+
+    $itemXPath = '//*[local-name()="Compile" or local-name()="Page" or local-name()="ApplicationDefinition" or local-name()="Content" or local-name()="None"]'
+    foreach ($item in $projectXml.SelectNodes($itemXPath)) {
+        $include = Expand-ProjectValue -value ([string]$item.Include) -projectDir $projectDir -properties $properties
+        if ([string]::IsNullOrWhiteSpace($include) -or $include -match '[*?]' -or $include -match '\$\(') { continue }
+        foreach ($includePart in ($include -split ';')) {
+            $candidate = $includePart.Trim()
+            if ([string]::IsNullOrWhiteSpace($candidate)) { continue }
+            $full = if ([System.IO.Path]::IsPathRooted($candidate)) {
+                [System.IO.Path]::GetFullPath($candidate)
+            } else {
+                [System.IO.Path]::GetFullPath((Join-Path $projectDir $candidate))
+            }
+            if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { continue }
+            if ($full.StartsWith($Source.TrimEnd('\') + '\', [System.StringComparison]::OrdinalIgnoreCase)) { continue }
+
+            $ext = [System.IO.Path]::GetExtension($full).ToLowerInvariant()
+            if ($patterns -notcontains $ext) { continue }
+            $linkNode = $item.SelectSingleNode('./*[local-name()="Link"]')
+            $link = if ($linkNode) {
+                Expand-ProjectValue -value $linkNode.InnerText.Trim() -projectDir $projectDir -properties $properties
+            } else {
+                [System.IO.Path]::GetFileName($full)
+            }
+            if ([string]::IsNullOrWhiteSpace($link) -or $link -match '\$\(|%\(') { continue }
+
+            $dst = Join-Path $Target $link
+            $dstDir = [System.IO.Path]::GetDirectoryName($dst)
+            if (-not (Test-Path -LiteralPath $dstDir)) {
+                New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $full -Destination $dst -Force
+            if (-not $copied.Contains($link)) { [void]$copied.Add($link) }
+            $linkedCount++
+        }
+    }
+}
+if ($linkedCount -gt 0) { Write-Host "    Copied $linkedCount linked project item(s) from shared folders" }
+
 # ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
-$uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
+$uwpCsprojs = $sourceCsprojs
 $refDir = Join-Path $Target '.uwp-source'
 if ($uwpCsprojs.Count -gt 0) {
     if (-not (Test-Path -LiteralPath $refDir)) {

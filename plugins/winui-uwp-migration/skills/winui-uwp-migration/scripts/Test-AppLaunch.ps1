@@ -33,7 +33,8 @@ as ANSI; non-ASCII characters would corrupt parsing under 5.1.
 
 .PARAMETER Target
 The migrated WinUI 3 project root (the folder with the .csproj). The build-output
-layout is discovered under bin/<arch>/Debug/<tfm>/win-<rid>. Use this OR -Layout.
+layout is discovered recursively under bin so both platform-qualified and ordinary
+dotnet build layouts are supported. Use this OR -Layout.
 
 .PARAMETER Layout
 An explicit build-output layout folder (the one containing AppxManifest.xml +
@@ -117,21 +118,19 @@ if ($PSCmdlet.ParameterSetName -eq 'Target') {
     $csprojDir = Split-Path -Parent $csproj
     $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'ARM64' } else { 'x64' }
     $rid = $arch.ToLower()
-    # Walk bin/<arch>/Debug and one level into the newest TFM dir, then win-<rid>.
-    $binCandidates = @(
-        (Join-Path $csprojDir "bin\$arch\Debug"),
-        (Join-Path $csprojDir "bin\$rid\Debug")
-    )
-    foreach ($bin in $binCandidates) {
-        if (-not (Test-Path -LiteralPath $bin)) { continue }
-        $tfmDir = Get-ChildItem -LiteralPath $bin -Directory -ErrorAction SilentlyContinue |
-            Sort-Object LastWriteTime -Descending | Select-Object -First 1
-        if (-not $tfmDir) { continue }
-        $ridDir = Join-Path $tfmDir.FullName "win-$rid"
-        $Layout = if (Test-Path -LiteralPath $ridDir) { $ridDir } else { $tfmDir.FullName }
-        break
+    $binRoot = Join-Path $csprojDir 'bin'
+    if (Test-Path -LiteralPath $binRoot) {
+        $Layout = Get-ChildItem -LiteralPath $binRoot -Recurse -Directory -ErrorAction SilentlyContinue |
+            Where-Object {
+                $hasExe = @(Get-ChildItem -LiteralPath $_.FullName -Filter '*.exe' -File -ErrorAction SilentlyContinue).Count -gt 0
+                $hasManifest = (Test-Path -LiteralPath (Join-Path $_.FullName 'AppxManifest.xml')) -or
+                    (Test-Path -LiteralPath (Join-Path $_.FullName 'AppX\AppxManifest.xml'))
+                $hasExe -and $hasManifest
+            } |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1 -ExpandProperty FullName
     }
-    if (-not $Layout) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No build output found under bin\$arch\Debug - build the project first.") }
+    if (-not $Layout) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No complete build output found under bin - build the project first.") }
 }
 
 if (-not (Test-Path -LiteralPath $Layout)) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "Layout folder not found: $Layout") }
@@ -206,7 +205,7 @@ function Get-CrashSignature {
             $sig.anchor = 'startup-crashes'
         }
         '0xc000027b' {
-            $sig.hint   = "Native stowed exception - frequently a legacy projection/activation incompatibility. If a UWP API/contract used at startup is unsupported on this OS, defer it per MIGRATION-DEFERRED.md."
+            $sig.hint   = "Native stowed exception - first verify every merged ResourceDictionary Source resolves and all XAML resources exist. Then inspect startup API activation; defer only an API confirmed unsupported."
             $sig.anchor = 'startup-crashes'
         }
         default {

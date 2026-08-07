@@ -1,0 +1,47 @@
+{
+  "scenario": "WiFiScan",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap omitted source/code/resources declared as external csproj Include + Link items, causing manual shell reconstruction, lost dark theme/layout fidelity, and a missing ResourceDictionary startup crash.",
+      "evidence": "session-log.txt lines 604-724 show linked $(SharedContentDir) items; .bootstrap-meta.json lines 501-507 omits them. Original App.xaml lines 2012-2029 contains RequestedTheme=\"Dark\" and /Styles/Styles.xaml, while candidate App.xaml lacks RequestedTheme. migration-score.json gives all four features partial/fail for theme/spacing and discrepancies.json marks the theme mismatch major.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Include, Link, SharedContentDir, and external project-item handling; only recursive Get-ChildItem rooted at Source existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap treated physical descendants as the complete source instead of materializing resolvable linked project items to their logical Link paths.",
+      "proposed_fix": "Extend Initialize-UwpMigration.ps1 to resolve common UWP csproj properties and copy external Compile/Page/ApplicationDefinition/Content/None items to their Link paths before rewrite and inventory.",
+      "generalizes": "UWP SDK samples and multi-project apps commonly centralize App.xaml, MainPage, styles, helpers, and branded assets in shared linked folders."
+    },
+    {
+      "problem": "Test-AppLaunch.ps1 -Target could not discover a valid ordinary dotnet build layout.",
+      "evidence": "session-log.txt lines 4258-4261: status=unavailable and 'No build output found under bin\\x64\\Debug'; the valid layout was under bin\\Debug and worked when supplied explicitly in turn 36.",
+      "skill_search": "Searched Test-AppLaunch.ps1 for binCandidates and layout discovery; it only checked bin\\<arch>\\Debug and bin\\<rid>\\Debug.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "The build-output layout is discovered under bin/<arch>/Debug/<tfm>/win-<rid>.",
+      "root_cause": "Layout discovery assumed a platform segment that is absent from a normal dotnet build when Platform is not passed.",
+      "proposed_fix": "Discover the newest complete exe + AppxManifest layout recursively below bin.",
+      "generalizes": "WinUI projects produce platform-qualified or ordinary output paths depending on the build command and project properties."
+    },
+    {
+      "problem": "The skill had no focused guidance for nullable warnings introduced by the modern WinUI scaffold.",
+      "evidence": "session-log.txt turns 19-32 show 128 then eight CS86xx warnings and repeated edits before a zero-warning build.",
+      "skill_search": "Searched SKILL.md and MIGRATION-PATTERNS.md for Nullable, CS86, INotifyPropertyChanged, and asynchronous device initialization; no migration pattern existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Legacy UWP code assumed nullable analysis was disabled, while the scaffold enables it and device handles are assigned only after asynchronous access succeeds.",
+      "proposed_fix": "Add a nullable anchor covering initialization, nullable acquired handles, guarded callbacks, and nullable PropertyChanged without disabling analysis.",
+      "generalizes": "Most older UWP projects predate nullable reference types, while current WinUI templates enable them."
+    },
+    {
+      "problem": "The 0xc000027b startup-crash guidance overemphasized unsupported API activation and omitted unresolved XAML resources.",
+      "evidence": "session-log.txt lines 4524-4529 and 4852-4857 repeated the unsupported-API hint; changing ResourceDictionary Source in turn 49 made Test-AppLaunch pass in turn 50.",
+      "skill_search": "Searched Test-AppLaunch.ps1 and MIGRATION-PATTERNS.md startup-crashes for 0xc000027b and ResourceDictionary; the code mapped only to legacy projection/activation incompatibility.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Native stowed exception - frequently a legacy projection/activation incompatibility. If a UWP API/contract used at startup is unsupported on this OS, defer it.",
+      "root_cause": "Native stowed XAML parse/resource failures can expose only event 1000, so the existing hint directed diagnosis away from the actual deployed-XAML cause.",
+      "proposed_fix": "Make resource dictionary deployment/URI validation the first 0xc000027b diagnostic step and defer APIs only after confirmation.",
+      "generalizes": "Missing merged dictionaries and invalid resource URIs are common when UWP XAML/resource layouts move into single-project WinUI packaging."
+    }
+  ]
+}

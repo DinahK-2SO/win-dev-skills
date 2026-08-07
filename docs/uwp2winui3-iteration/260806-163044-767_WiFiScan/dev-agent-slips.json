@@ -1,0 +1,28 @@
+{
+  "scenario": "WiFiScan",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "All 21 MIGRATION-MAPPING.md rows remained Status=copied until final validation.",
+      "evidence": "session-log.txt lines 5088-5110 shows the validator failure; turn 53 changes every row to done.",
+      "covered_clearly_at": "SKILL.md Step 1 lines 84-90 requires walking every row and flipping Status from copied to done/deferred; Step 4 lines 142-167 makes validator PASS mandatory.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The generated artifact and two prominent mandatory instructions already make the required state transition explicit."
+    },
+    {
+      "problem": "A copied comment retained a Windows.UI.Xaml namespace and failed residue validation.",
+      "evidence": "session-log.txt lines 5125-5130 identifies Styles.xaml line 313; turn 53 removes the namespace.",
+      "covered_clearly_at": "SKILL.md Critical Rules / Comment hygiene lines 185-194 explicitly forbids naming UWP API identifiers in comments because residue grep matches them.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The exact comment failure mode is already called out prominently and the validator caught it."
+    },
+    {
+      "problem": "Connect credential controls were absent from UIA while WiFi access was denied.",
+      "evidence": "migration-score.json Connect verdict fail says NetworkKey and IsAutomaticReconnection remained absent because the connection bar stayed collapsed; discrepancies.json records 1/3 controls. Original and candidate behavior both depended on selecting an enumerated network, which denied access prevented.",
+      "covered_clearly_at": "SKILL.md Fidelity lines 172-183 requires preserving every source XAML element and behavior; the migrated Scenario4_Connect.xaml retained the controls and source Visibility=\"Collapsed\" state.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "This is an environment-gated state, not evidence of a missing migration pattern; both captures lacked usable WiFi access and the source-defined controls were preserved."
+    }
+  ]
+}

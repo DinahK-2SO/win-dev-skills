@@ -1,0 +1,161 @@
+{
+  "scenario": "WiFiScan",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 2-4: generated MIGRATION-MAPPING.md and four threading TODOs in DisplayHelpers.cs, Scenario3_RegisterForUpdates.xaml.cs, and Scenario4_Connect.xaml.cs."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt turn 4 returned focused threading and csproj guidance used for the dispatcher and package conversion."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt turns 19-32 exposed nullable-reference warnings, then confirmed a zero-warning build."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "evidence": "session-log.txt turns 36 and 46 reliably detected the immediate 0xc000027b Microsoft.UI.Xaml.dll crash; turn 50 confirmed the process stayed alive after the resource fix."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt turn 51 caught one UWP namespace mention in a comment and all 21 mapping rows still marked copied; turn 54 passed after correction."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "Copied only files physically below the UWP project folder and omitted csproj-linked shared App.xaml, MainPage, Styles.xaml, code, and assets.",
+      "evidence": "The preserved csproj in session-log.txt lines 604-724 declares external $(SharedContentDir) items with Link metadata, while .bootstrap-meta.json at lines 501-507 contains only project-local files. The agent manually located and copied shared content in turns 5-16 and 42-44."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1 -Target",
+      "problem": "Assumed a platform-qualified bin\\x64\\Debug layout and missed the ordinary bin\\Debug layout emitted by dotnet build.",
+      "evidence": "session-log.txt lines 4258-4261 reported 'No build output found under bin\\x64\\Debug'; the agent had to inspect the script and rerun with -Layout in turn 36."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1 crash hint",
+      "problem": "The 0xc000027b hint emphasized unsupported API activation even though the recurring cause was an unresolved merged ResourceDictionary.",
+      "evidence": "session-log.txt lines 4524-4529 and 4852-4857 repeated the generic hint. Changing App.xaml ResourceDictionary Source in turn 49 made launch pass in turn 50."
+    },
+    {
+      "tool": "glob with absolute patterns",
+      "problem": "Returned no files for source and shared-content absolute patterns.",
+      "evidence": "session-log.txt turn 0 lines 7-22 shows three 'No files matched' results even though the paths were later read directly."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Get-WinEvent / Test-AppLaunch.ps1",
+      "limitation": "Only event 1000 was available for the native stowed XAML crash; no event 1026 managed stack existed.",
+      "suggested_tweak": "For 0xc000027b without a managed stack, prioritize deployed XAML resource dictionaries and missing resource keys before suggesting unsupported API deferral."
+    },
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "Recursive filesystem copying does not represent the evaluated UWP project item graph.",
+      "suggested_tweak": "Resolve common csproj property expressions and Include/Link metadata, then copy external linked source and content to their logical target paths."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "Test-AppLaunch.ps1 .PARAMETER Target and layout discovery",
+      "wrong": "Documented and searched only bin/<arch>/Debug/<tfm>/win-<rid>.",
+      "correct": "A normal dotnet build can emit bin/Debug/<tfm>/win-<rid>; discover complete layouts recursively under bin."
+    },
+    {
+      "where": "MIGRATION-PATTERNS.md startup-crashes 0xC000027B row",
+      "wrong": "Directed the agent primarily toward legacy API incompatibility and deferral.",
+      "correct": "First check merged ResourceDictionary URIs and deployed XAML resources, then investigate API activation and defer only confirmed unsupported APIs."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Devices.WiFi.WiFiAdapter",
+      "special_handling": "Retains the UWP Windows API projection in packaged WinUI 3, requires the wiFiControl device capability, calls RequestAccessAsync on the UI thread, and must visibly handle non-Allowed access."
+    },
+    {
+      "api": "Microsoft.UI.Dispatching.DispatcherQueue",
+      "special_handling": "Cache the UI-thread queue before background WiFi callbacks and use TryEnqueue for collection, property-change, and status UI updates."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Test-AppLaunch [WARN] status=unavailable: No build output found under bin\\x64\\Debug.",
+      "root_cause": "The helper's -Target discovery did not support the non-platform-qualified dotnet build output.",
+      "fix": "The agent passed the known layout explicitly; the skill script now searches recursively under bin."
+    },
+    {
+      "error": "128 nullable-reference warnings including CS8612, CS8618, CS8600, CS8601, CS8602, CS8604, and CS8625.",
+      "root_cause": "The modern scaffold enables nullable reference types while the legacy UWP source assumed disabled nullable analysis and asynchronous device initialization.",
+      "fix": "Initialize collections/properties, mark asynchronously acquired adapters nullable, guard event/button paths, and use a nullable PropertyChanged event."
+    },
+    {
+      "error": "Packaged app exited immediately with 0xc000027b in Microsoft.UI.Xaml.dll.",
+      "root_cause": "App.xaml merged /Styles/Styles.xaml, but the bootstrap omitted the externally linked Styles.xaml; after copying it to a different path, the URI still did not resolve.",
+      "fix": "Copy the linked resource and point ResourceDictionary Source at its deployed ms-appx URI."
+    },
+    {
+      "error": "Get-WinEvent: No events were found for provider .NET Runtime.",
+      "root_cause": "The native stowed XAML exception emitted event 1000 but no event 1026 managed exception.",
+      "fix": "The agent inspected resource deployment and XAML references instead of relying on a managed stack."
+    },
+    {
+      "error": "Validate-UwpMigration: residue grep failed at Styles.xaml:313.",
+      "root_cause": "A copied comment named Windows.UI.Xaml.Controls.ListBoxItem.",
+      "fix": "Remove the obsolete namespace from the comment."
+    },
+    {
+      "error": "Validate-UwpMigration: 21 mapping rows still had Status=copied.",
+      "root_cause": "The agent completed the files but did not update generated mapping status as each row finished.",
+      "fix": "Set all completed rows to done and rerun validation."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log.txt turns 5-16",
+      "symptom": "Manually searched the shared-content tree, reconstructed the linked shell, and copied six shared assets.",
+      "turns_or_retries": "Approximately 11 turns.",
+      "root_cause": "Bootstrap inventory omitted external csproj Include/Link items.",
+      "how_resolved": "Read the UWP csproj and shared files directly, then manually copied/re-authored the shell and assets.",
+      "preventable_by": "Teach Initialize-UwpMigration.ps1 to copy resolvable linked project items into their Link paths."
+    },
+    {
+      "where": "session-log.txt turns 19-32",
+      "symptom": "Repeatedly reduced a large nullable-warning set across several device-dependent pages.",
+      "turns_or_retries": "About 13 turns and three build passes.",
+      "root_cause": "The nullable-enabled target exposed legacy lifecycle assumptions, but the patterns had no focused CS86xx guidance.",
+      "how_resolved": "Added nullable device handles, guards, initial values, and a nullable PropertyChanged event.",
+      "preventable_by": "Add a focused nullable migration pattern that preserves enabled analysis and models asynchronous acquisition."
+    },
+    {
+      "where": "session-log.txt turns 33-50",
+      "symptom": "The app crashed repeatedly; -Target could not find the layout, the crash hint was generic, and adding Styles.xaml alone did not fix launch.",
+      "turns_or_retries": "Two failed launch diagnostics and roughly 17 turns.",
+      "root_cause": "Launch layout discovery was too narrow and a linked ResourceDictionary was absent/misaddressed.",
+      "how_resolved": "Passed -Layout manually, copied Styles.xaml, then corrected ResourceDictionary Source to a deployed ms-appx URI.",
+      "preventable_by": "Recursive layout discovery plus resource-first 0xc000027b guidance and linked-item bootstrap copying."
+    },
+    {
+      "where": "session-log.txt turns 51-54",
+      "symptom": "Final validation failed on a namespace in a comment and all mapping statuses.",
+      "turns_or_retries": "One validation failure and one rerun.",
+      "root_cause": "The agent postponed the explicit per-row status workflow and left a copied legacy namespace in prose.",
+      "how_resolved": "Read .validator-diagnostics.txt, cleaned the comment, and marked rows done.",
+      "preventable_by": "No skill change: SKILL.md already makes both requirements mandatory and prominent."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "UWP csproj linked-item materialization",
+      "would_have_saved": "Manual discovery/copying of the shared shell, styles, helper code, and assets, while preserving RequestedTheme and layout."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "WiFi access was denied in both baseline and candidate captures.",
+      "workaround": "The app surfaced Access denied; adapter-dependent actions and the Connect credential state could not be exercised."
+    }
+  ]
+}

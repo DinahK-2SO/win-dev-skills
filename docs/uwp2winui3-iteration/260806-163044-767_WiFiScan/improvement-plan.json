@@ -1,0 +1,38 @@
+{
+  "scenario": "WiFiScan",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap omitted linked shared project items, leading to manual shell reconstruction, lost RequestedTheme/layout fidelity, and a missing resource dictionary.",
+      "evidence": "skill-defects.json item 1; session-log.txt csproj lines 604-724 versus .bootstrap-meta.json lines 501-507; migration-score.json visual notes for all four features.",
+      "root_cause": "Initialize-UwpMigration.ps1 copied physical descendants only rather than resolvable csproj Include/Link items.",
+      "tier": 1,
+      "change": "Resolve common project properties, materialize external linked Compile/Page/ApplicationDefinition/Content/None files at their Link paths, include them in rewrite/triage, and surface the linked copy count.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1; skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Shared shell XAML, theme declarations, code, styles, and assets enter the mapping automatically and are transformed rather than manually recreated.",
+      "falsifiable_check": "On a WiFiScan rerun, bootstrap mapping includes linked App.xaml/MainPage/Styles and assets, App.xaml retains RequestedTheme=\"Dark\", and the all-feature visual theme discrepancy is absent."
+    },
+    {
+      "problem": "Launch diagnostics missed ordinary dotnet output and misdirected 0xc000027b XAML-resource failures.",
+      "evidence": "skill-defects.json items 2 and 4; session-log.txt lines 4258-4261, 4524-4529, 4852-4857, and turn 50.",
+      "root_cause": "Hard-coded platform-qualified layout assumptions and an incomplete native stowed-exception mapping.",
+      "tier": 1,
+      "change": "Search recursively for the newest complete layout under bin and make merged ResourceDictionary/resource deployment the first 0xc000027b diagnostic.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The normal -Target workflow reaches the real app layout and gives an actionable first diagnostic for native XAML resource crashes.",
+      "falsifiable_check": "After a plain dotnet build, Test-AppLaunch.ps1 -Target no longer reports layout unavailable; a forced 0xc000027b result mentions ResourceDictionary resolution before API deferral."
+    },
+    {
+      "problem": "Nullable-enabled target scaffolds produced a large, repetitive CS86xx cleanup without focused migration guidance.",
+      "evidence": "skill-defects.json item 3; session-log.txt turns 19-32.",
+      "root_cause": "Current WinUI templates enable nullable analysis while legacy UWP device lifecycle code assumes non-null fields assigned after async initialization.",
+      "tier": 3,
+      "change": "Add a nullable anchor and route CS86xx warnings to it, covering initialized stable state, nullable acquired handles, guarded callbacks, and nullable PropertyChanged.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agents resolve nullable warnings coherently without disabling analysis or scattering unsafe null-forgiving operators.",
+      "falsifiable_check": "On a legacy device-dependent UWP rerun, the first nullable-warning pass applies the anchor and reaches zero CS86xx warnings without setting Nullable=disable."
+    }
+  ],
+  "deferred_to_human": []
+}
