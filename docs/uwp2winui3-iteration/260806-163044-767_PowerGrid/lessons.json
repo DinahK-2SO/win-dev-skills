@@ -1,0 +1,166 @@
+{
+  "scenario": "PowerGrid",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "dotnet new winui",
+      "evidence": "session-log.txt lines 12-92: the WinUI scaffold and package references were created successfully."
+    },
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 105-133: bootstrap completed, preserved the UWP project, rewrote namespaces, and seeded migration artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt lines 2738-2848: focused windowing and threading guidance was retrieved without loading the entire patterns file."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 3202-3218: residue, mapping, manifest, build, analyzer, and smoke-launch checks all passed."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "It inventoried only files physically below -Source and ignored csproj Include/Link items from sibling shared folders.",
+      "evidence": "session-log.txt lines 108-124 reported only 4 copied files; PowerGrid.csproj lines 94-169 declares linked App, MainPage, scenario XAML, styles, and assets."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "problem": "It only searched bin\\x64\\Debug and missed a valid default dotnet-build layout under bin\\Debug.",
+      "evidence": "session-log.txt lines 3193-3200: status=unavailable with 'No build output found under bin\\x64\\Debug'; the validator then rebuilt with Platform=x64 and launched successfully."
+    },
+    {
+      "tool": "PowerShell Add-Type",
+      "problem": "It could not inspect a .NET Native UWP assembly.",
+      "evidence": "session-log.txt lines 2595-2603: Add-Type returned 'Bad IL format' for the UWP ILC PowerGrid.dll."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "Directory-only discovery is incomplete for old-style projects that use external Include plus Link metadata.",
+      "suggested_tweak": "Parse project items, expand common MSBuild properties, and copy external items to their logical Link paths before triage."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "Build output discovery assumed an explicit Platform path.",
+      "suggested_tweak": "Find the newest complete exe plus AppxManifest layout recursively under bin."
+    },
+    {
+      "tool": "MIGRATION-PATTERNS.md diagnostics",
+      "limitation": "WMC9999 was described as uniquely indicating a missing resource even when earlier compiler errors caused the secondary crash.",
+      "suggested_tweak": "Require fixing preceding CS/WMC diagnostics first and treat missing resources as one fallback hypothesis."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "MIGRATION-PATTERNS.md, Resources failure-mode note",
+      "wrong": "Treat WMC9999 as a dangling resource key.",
+      "correct": "WMC9999 is a secondary XAML compiler crash; fix earlier actionable diagnostics first, then investigate resource keys if no earlier cause remains."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Devices.Power.PowerGridForecast",
+      "special_handling": "The Windows API carried over and compiled in WinUI 3; device/service unavailability was represented by the sample's existing visible error states."
+    },
+    {
+      "api": "DispatcherQueue",
+      "special_handling": "When Windows.System and Microsoft.UI.Dispatching are both imported, qualify Microsoft.UI.Dispatching.DispatcherQueue to avoid CS0104."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initial MIGRATION-MAPPING.md self-check returned False.",
+      "root_cause": "The bootstrap and self-check were launched concurrently, so the check raced artifact creation.",
+      "fix": "The agent reran Test-Path after bootstrap completed and received True."
+    },
+    {
+      "error": "Python was not found (exit code 9009).",
+      "root_cause": "The environment had no Python command, and the agent attempted to use it for assembly inspection.",
+      "fix": "The agent switched to PowerShell, then abandoned binary reflection and searched generated source."
+    },
+    {
+      "error": "Add-Type reported Bad IL format.",
+      "root_cause": "The selected DLL was .NET Native UWP output, not a normal managed assembly loadable by Add-Type.",
+      "fix": "The agent inspected generated SafeTypes.g.cs instead."
+    },
+    {
+      "error": "CS0104 LaunchActivatedEventArgs ambiguity.",
+      "root_cause": "Windows.ApplicationModel.Activation and Microsoft.UI.Xaml both supplied a type with that name.",
+      "fix": "The WinUI parameter was fully qualified and the stale activation import was later removed."
+    },
+    {
+      "error": "CS0104 DispatcherQueue ambiguity.",
+      "root_cause": "Windows.System and Microsoft.UI.Dispatching were both imported.",
+      "fix": "The field and factory call were fully qualified as Microsoft.UI.Dispatching.DispatcherQueue."
+    },
+    {
+      "error": "WMC0909/WMC1111 followed by WMC9999.",
+      "root_cause": "The XAML compiler could not resolve the local DataTemplate type; WMC9999 was a secondary internal failure, not proof of a missing resource.",
+      "fix": "The agent replaced that template binding with DisplayMemberPath after inspecting generated XAML output."
+    },
+    {
+      "error": "CS0103 Launcher does not exist in the current context.",
+      "root_cause": "The reconstructed shared shell omitted the Windows.System qualification/import.",
+      "fix": "The call was changed to Windows.System.Launcher.LaunchUriAsync."
+    },
+    {
+      "error": "Test-AppLaunch status=unavailable after a successful build.",
+      "root_cause": "The script searched only platform-qualified output while dotnet build emitted bin\\Debug\\...\\win-x64.",
+      "fix": "Validate-UwpMigration rebuilt with Platform=x64 and its smoke launch passed."
+    },
+    {
+      "error": "Migration trial results recorded timeout=true, builds=false, runs=false.",
+      "root_cause": "After validator PASS, the agent started foreground dotnet run and ended while it remained running.",
+      "fix": "The scoring trial independently rebuilt and exercised the candidate; future runs should stop after the validated detached smoke launch."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Shared shell and scenario discovery, turns 4-18",
+      "symptom": "The agent browsed SharedContent, generated UWP files, and ILC metadata, then manually recreated App, MainPage, scenario XAML, styles, and assets.",
+      "turns_or_retries": "Approximately 15 turns before the first build.",
+      "root_cause": "Bootstrap copied only 4 local files and omitted 16 linked project items.",
+      "how_resolved": "The agent inferred linked inputs from the csproj and reconstructed/copied them manually.",
+      "preventable_by": "Make Initialize-UwpMigration.ps1 resolve csproj Include/Link items into the bootstrap inventory."
+    },
+    {
+      "where": "Compiled API inspection, turns 9-13",
+      "symptom": "Python was unavailable, Add-Type rejected native IL, and the agent searched large generated sources.",
+      "turns_or_retries": "Two failed tool attempts followed by generated-source grep.",
+      "root_cause": "Manual reconstruction led the agent to verify an API surface from build artifacts instead of migrating complete source inputs.",
+      "how_resolved": "SafeTypes.g.cs confirmed the PowerGrid API shape.",
+      "preventable_by": "Complete linked-item bootstrap inventory so binary reverse inspection is unnecessary."
+    },
+    {
+      "where": "XAML build diagnosis, turns 25-36",
+      "symptom": "The agent inspected multiple generated files and output.json across several turns after WMC9999.",
+      "turns_or_retries": "Three failed builds and roughly 10 diagnostic/edit turns.",
+      "root_cause": "WMC9999 was secondary to earlier specific compiler errors, while skill text presented it as a missing-resource diagnosis.",
+      "how_resolved": "The agent fixed earlier type/binding and Launcher errors; the next build succeeded.",
+      "preventable_by": "Tell agents to resolve preceding CS/WMC diagnostics before interpreting WMC9999."
+    },
+    {
+      "where": "Final launch, turns 38-40",
+      "symptom": "Standalone Test-AppLaunch missed the build, then foreground dotnet run remained active until the trial timed out.",
+      "turns_or_retries": "One false unavailable result and one non-terminating final command.",
+      "root_cause": "Layout discovery assumed bin\\x64\\Debug, followed by a redundant foreground launch after validator PASS.",
+      "how_resolved": "Validator's platform-qualified rebuild and detached smoke launch passed; the foreground process itself did not finish in-budget.",
+      "preventable_by": "Make Test-AppLaunch discover both default and platform-qualified layouts; follow the existing validator/Test-AppLaunch launch discipline."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": [
+    {
+      "issue": "Python command unavailable.",
+      "workaround": "Use repository-native PowerShell/search tools rather than introducing Python for inspection."
+    },
+    {
+      "issue": "Original UWP baseline remained on the platform sample splash screen.",
+      "workaround": "The scoring trial limited both feature verdicts to partial despite the candidate parity tool reporting 2/2 pass; this is evaluation context, not a migration-skill change."
+    }
+  ]
+}

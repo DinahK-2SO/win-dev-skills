@@ -1,0 +1,47 @@
+{
+  "scenario": "PowerGrid",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap inventory omitted linked/shared project inputs and emitted an empty-defer marker inconsistent with its validator.",
+      "evidence": "lessons.json dev_agent_struggles[0]; skill-defects.json items[0] and [3]; session-log.txt bootstrap copied 4 files and validator later emitted a false defer warning.",
+      "root_cause": "Directory traversal was used as a proxy for the project source graph, and bootstrap/validator empty-state contracts diverged.",
+      "tier": 1,
+      "change": "Parse old-style csproj Compile/ApplicationDefinition/Page/Content/None/PRIResource/AppxManifest items, expand common properties including GetDirectoryNameOfFileAbove, honor Link target paths, report linked counts, and emit the validator's exact no-defer sentence.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared shell, scenario XAML, styles, and assets enter the normal mapping/triage pipeline automatically, eliminating manual reconstruction and false defer warnings.",
+      "falsifiable_check": "On the same PowerGrid source, bootstrap copies 20 mapped files with linkedFileCount=16; App.xaml, MainPage.xaml, both scenario XAML files, Styles/Styles.xaml, and shared assets exist without manual additions, and zero-defer validation emits PASS rather than WARN."
+    },
+    {
+      "problem": "Standalone launch validation rejected valid builds produced without an explicit Platform property.",
+      "evidence": "skill-defects.json item[1]; session-log.txt Test-AppLaunch returned unavailable immediately before validator rebuilt and smoke-launched successfully.",
+      "root_cause": "The launcher hard-coded bin/<arch>/Debug instead of identifying complete output layouts.",
+      "tier": 1,
+      "change": "Recursively find the newest directory under bin containing both an executable and AppxManifest, normalizing AppX subfolders.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+      "expected_effect": "The same launcher works for bin/Debug and bin/<Platform>/Debug layouts and no longer sends agents into redundant foreground runs.",
+      "falsifiable_check": "After plain dotnet build and after dotnet build -p:Platform=x64, Test-AppLaunch -Target resolves a complete layout instead of returning 'No build output found'."
+    },
+    {
+      "problem": "Build-diagnostic guidance misidentified secondary WMC9999 failures and omitted a common DispatcherQueue collision.",
+      "evidence": "skill-defects.json item[2] and skill-coverage-gaps.json item[0]; the run spent multiple turns inspecting generated XAML and hit CS0104 for the two DispatcherQueue types.",
+      "root_cause": "The prose overfit one WMC9999 cause and showed unqualified threading examples without the Windows.System collision caveat.",
+      "tier": 3,
+      "change": "State that earlier CS/specific WMC diagnostics take precedence over WMC9999, and add explicit Microsoft.UI.Dispatching.DispatcherQueue qualification guidance.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents fix the primary diagnostic first and resolve the common type collision directly instead of inspecting generated output or chasing resource keys.",
+      "falsifiable_check": "On a rerun with the same diagnostics, DispatcherQueue is qualified before build and WMC9999 investigation begins with preceding CS/WMC errors; the generated-file inspection detour is absent.",
+      "tier_3_justification": "Neither transformation is safe to automate mechanically: import usage and the primary cause of an internal XAML compiler failure require local semantic context. A template would encode the same fallible assumption, so focused diagnostic instructions are the highest feasible tier."
+    }
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "Tier 0/evaluation: investigate why the launchable UWP reference remains on the platform sample splash screen. Do not address this by changing migration or evaluation skills in this improvement."
+  ]
+}

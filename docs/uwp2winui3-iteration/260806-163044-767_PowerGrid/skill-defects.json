@@ -1,0 +1,47 @@
+{
+  "scenario": "PowerGrid",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap omitted source, XAML, styles, and assets linked from outside the -Source directory.",
+      "evidence": "session-log.txt lines 108-124 copied 4 files; PowerGrid.csproj lines 94-169 declares 16 external Include/Link items; turns 4-18 manually reconstructed the omissions.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Link, shared, project items, Compile Include, and Page Include; discovery was only Get-ChildItem -Recurse under -Source.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap treated the physical project directory as the complete source graph instead of treating evaluated project items and Link metadata as authoritative.",
+      "proposed_fix": "Parse old-style csproj project items, expand common properties, and copy external items to their logical Link paths before namespace rewrite and triage.",
+      "generalizes": "Old-style UWP samples and enterprise projects commonly share App/MainPage, resources, assets, or scenario XAML through linked project items."
+    },
+    {
+      "problem": "Test-AppLaunch could not find output from a valid default dotnet build.",
+      "evidence": "session-log.txt lines 3193-3200 returned unavailable for bin\\x64\\Debug; the preceding successful build emitted bin\\Debug\\net10.0...\\win-x64 and validator later launched successfully.",
+      "skill_search": "Searched Test-AppLaunch.ps1 for bin, Platform, Debug, and launchFolder; only bin\\<arch>\\Debug candidates were searched.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "The build-output layout is discovered under bin/<arch>/Debug/<tfm>/win-<rid>.",
+      "root_cause": "Output discovery assumed callers always supplied an explicit Platform property.",
+      "proposed_fix": "Recursively select the newest complete exe plus AppxManifest layout under bin.",
+      "generalizes": "Native dotnet builds may place WinUI output under either bin\\Debug or bin\\<Platform>\\Debug depending on command and project properties."
+    },
+    {
+      "problem": "WMC9999 guidance asserted a unique missing-resource root cause.",
+      "evidence": "session-log.txt lines 3017-3031 and 3063-3075 show specific CS/WMC errors preceding WMC9999; fixing those earlier errors made the build pass.",
+      "skill_search": "Searched MIGRATION-PATTERNS.md for WMC9999; the Resources note said to treat it as a dangling resource key.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Treat WMC9999 on a XAML build as a dangling resource key.",
+      "root_cause": "WMC9999 is a secondary compiler crash shared by multiple upstream XAML/code failures.",
+      "proposed_fix": "Require resolving preceding CS#### and specific WMC#### diagnostics first; retain missing resources only as a fallback hypothesis.",
+      "generalizes": "Opaque XAML compiler internal errors routinely accompany more specific primary diagnostics in WinUI migrations."
+    },
+    {
+      "problem": "Bootstrap and validator disagreed on the no-deferred-items marker.",
+      "evidence": "session-log.txt line 3210 warned that MIGRATION-DEFERRED.md had content despite no defer rows; bootstrap emitted a '(none)' table row while validator expected 'No items deferred'.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 and Validate-UwpMigration.ps1 for no-defer handling; their sentinel formats differed.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Initialize wrote '| (none) | - |' while Validate looked for 'No items deferred'.",
+      "root_cause": "Producer and consumer used inconsistent empty-state contracts.",
+      "proposed_fix": "Have bootstrap emit the exact no-items sentence recognized by the validator.",
+      "generalizes": "Every migration with zero deferred rows otherwise produces the same false warning."
+    }
+  ]
+}

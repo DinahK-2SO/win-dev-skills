@@ -1,0 +1,15 @@
+{
+  "scenario": "PowerGrid",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Threading guidance did not warn that DispatcherQueue is ambiguous when Windows.System remains imported.",
+      "evidence": "session-log.txt lines 3017-3031: CS0104 named Microsoft.UI.Dispatching.DispatcherQueue and Windows.System.DispatcherQueue; qualification fixed it.",
+      "covered_at": "MIGRATION-PATTERNS.md#threading (Threading: CoreDispatcher -> DispatcherQueue)",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Add a collision note instructing removal of the unused import or full qualification of Microsoft.UI.Dispatching.DispatcherQueue.",
+      "generalizes": "Windows.System is common in UWP pages for Launcher and other APIs, so both DispatcherQueue types frequently enter scope after migration."
+    }
+  ]
+}

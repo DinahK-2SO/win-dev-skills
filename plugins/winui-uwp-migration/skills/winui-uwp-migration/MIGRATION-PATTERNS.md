@@ -149,6 +149,8 @@ DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () => ProgressBar.Value
 
 Cache the queue off the UI thread via `DispatcherQueue.GetForCurrentThread()`. UWP's ASTA reentrancy protection is gone — watch for reentrancy in async code that pumps messages. See the official [threading guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/threading).
 
+If the file also imports `Windows.System`, `DispatcherQueue` is ambiguous because that namespace defines a different type with the same name. Remove the unused import or fully qualify `Microsoft.UI.Dispatching.DispatcherQueue`; do not let an IDE choose the `Windows.System` type.
+
 <a id="dialogs"></a>
 ## Dialogs: MessageDialog → ContentDialog
 
@@ -735,7 +737,7 @@ WinUI 3 ships Fluent theme resources under `ThemeResource`. UWP code that used `
 
 The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-reference with the [Fluent Design colour palette](https://learn.microsoft.com/windows/apps/design/style/xaml-theme-resources).
 
-> **Failure mode — a removed key crashes the XAML compiler, it does not warn.** If a `{ThemeResource X}` / `{StaticResource X}` names a key that **no longer exists** in WinUI 3 (many UWP `System*` / `SystemControl*` brush and colour keys were removed or renamed — e.g. `SystemErrorTextColor`, `SystemControlForegroundBaseHighBrush`), the markup compiler does **not** emit a clear "resource not found". It throws an opaque **`Xaml Internal Error WMC9999: Object reference not set to an instance of an object`** (often alongside `WMC1509`). Treat `WMC9999` on a XAML build as a **dangling resource key**, not a code bug — do not go hunting in `.cs`. **Verify every theme/static resource key exists in WinUI 3**; replace unknown UWP keys with a Fluent equivalent or an explicit literal brush (`Foreground="Red"` / `<SolidColorBrush .../>`).
+> **Failure mode — a removed key can crash the XAML compiler instead of warning.** If a `{ThemeResource X}` / `{StaticResource X}` names a key that **no longer exists** in WinUI 3 (many UWP `System*` / `SystemControl*` brush and colour keys were removed or renamed — e.g. `SystemErrorTextColor`, `SystemControlForegroundBaseHighBrush`), the markup compiler may emit opaque **`WMC9999: Object reference not set to an instance of an object`** (often alongside `WMC1509`). `WMC9999` is a secondary compiler crash, not a unique diagnosis: **fix every preceding CS#### or specific WMC#### error first**. Only when no earlier actionable error remains should you suspect a dangling resource key and verify each theme/static resource against WinUI 3.
 
 ### Controls that need element-level swaps
 

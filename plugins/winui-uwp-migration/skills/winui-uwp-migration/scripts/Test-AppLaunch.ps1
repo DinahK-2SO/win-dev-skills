@@ -33,7 +33,8 @@ as ANSI; non-ASCII characters would corrupt parsing under 5.1.
 
 .PARAMETER Target
 The migrated WinUI 3 project root (the folder with the .csproj). The build-output
-layout is discovered under bin/<arch>/Debug/<tfm>/win-<rid>. Use this OR -Layout.
+layout is discovered recursively under bin, regardless of whether the build used
+an explicit Platform property. Use this OR -Layout.
 
 .PARAMETER Layout
 An explicit build-output layout folder (the one containing AppxManifest.xml +
@@ -117,21 +118,22 @@ if ($PSCmdlet.ParameterSetName -eq 'Target') {
     $csprojDir = Split-Path -Parent $csproj
     $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'ARM64' } else { 'x64' }
     $rid = $arch.ToLower()
-    # Walk bin/<arch>/Debug and one level into the newest TFM dir, then win-<rid>.
-    $binCandidates = @(
-        (Join-Path $csprojDir "bin\$arch\Debug"),
-        (Join-Path $csprojDir "bin\$rid\Debug")
-    )
-    foreach ($bin in $binCandidates) {
-        if (-not (Test-Path -LiteralPath $bin)) { continue }
-        $tfmDir = Get-ChildItem -LiteralPath $bin -Directory -ErrorAction SilentlyContinue |
-            Sort-Object LastWriteTime -Descending | Select-Object -First 1
-        if (-not $tfmDir) { continue }
-        $ridDir = Join-Path $tfmDir.FullName "win-$rid"
-        $Layout = if (Test-Path -LiteralPath $ridDir) { $ridDir } else { $tfmDir.FullName }
-        break
+    $binRoot = Join-Path $csprojDir 'bin'
+    if (Test-Path -LiteralPath $binRoot) {
+        $layoutCandidates = @(Get-ChildItem -LiteralPath $binRoot -Recurse -Filter 'AppxManifest.xml' -File -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                $candidate = $_.Directory
+                if ($candidate.Name -eq 'AppX') { $candidate = $candidate.Parent }
+                if (Get-ChildItem -LiteralPath $candidate.FullName -Filter '*.exe' -File -ErrorAction SilentlyContinue) {
+                    $candidate
+                }
+            } |
+            Sort-Object LastWriteTime -Descending -Unique)
+        if ($layoutCandidates.Count -gt 0) {
+            $Layout = $layoutCandidates[0].FullName
+        }
     }
-    if (-not $Layout) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No build output found under bin\$arch\Debug - build the project first.") }
+    if (-not $Layout) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No complete build output found under bin - build the project first.") }
 }
 
 if (-not (Test-Path -LiteralPath $Layout)) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "Layout folder not found: $Layout") }

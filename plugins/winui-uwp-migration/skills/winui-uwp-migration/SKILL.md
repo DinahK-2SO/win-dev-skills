@@ -58,7 +58,7 @@ Do:
 
 - Only after step 3 returns `True` may you read source files, plan transformations, or edit anything.
 
-The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you exactly what it did, what artifacts now exist, and what to do next. Read that block; do not re-derive the same info by browsing the tree.
+The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you exactly what it did, including how many project items were linked from outside `-Source`, what artifacts now exist, and what to do next. It resolves old-style `.csproj` `Include` + `<Link>` entries so sibling shared source, XAML, and assets are copied to their logical project paths. Read that block; do not re-derive the same info by browsing the tree.
 
 ### Step 1 — Migrate, file by file
 

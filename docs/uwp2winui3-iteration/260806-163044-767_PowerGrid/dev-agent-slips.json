@@ -1,0 +1,42 @@
+{
+  "scenario": "PowerGrid",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The mandatory bootstrap self-check was run concurrently and initially returned False.",
+      "evidence": "session-log.txt lines 96-103 launched bootstrap and Test-Path together; lines 135-203 reran the check after completion and returned True.",
+      "covered_clearly_at": "SKILL.md, Step 0 - Bootstrap (mandatory), especially the ordered first three commands and prohibition on proceeding when False.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The ordering and required True result are already explicit and prominent; the agent recovered by following them."
+    },
+    {
+      "problem": "LaunchActivatedEventArgs was left ambiguous for the first build.",
+      "evidence": "session-log.txt lines 3017-3031 reported CS0104; the parameter was then fully qualified.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md, Common build errors after the namespace rewrite, dedicated CS0104 LaunchActivatedEventArgs section.",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "The exact compiler code, cause, and two fixes already have a prominent dedicated section."
+    },
+    {
+      "problem": "Launcher was used without a resolvable qualification/import.",
+      "evidence": "session-log.txt lines 3063-3075 reported CS0103; line 3149 changed it to Windows.System.Launcher.",
+      "covered_clearly_at": "SKILL.md, Step 3 - Build, fix what tooling missed: fix the first compiler error and repeat.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "This was ordinary C# namespace resolution in manually reconstructed code, not a missing migration pattern."
+    },
+    {
+      "problem": "A redundant foreground dotnet run remained active and caused the authoritative migration trial to time out.",
+      "evidence": "results.json metrics.timeout=true; session-log.txt lines 3221-3244 started dotnet run after validator PASS and it was still running after 180 seconds.",
+      "covered_clearly_at": "SKILL.md, Step 3 launch command uses Test-AppLaunch.ps1; Step 4 says validator PASS plus final build, not a foreground dotnet run.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already provides a terminating detached launch tool and a mandatory validator; adding more prose would only repeat it."
+    },
+    {
+      "problem": "Both scored features remained partial because the original UWP reference never advanced past its splash screen.",
+      "evidence": "migration-score.json gives 2 partial features solely because uwp_responded=false; parity/winui3/parity-result.json reports the candidate itself passed 2/2 with all controls and actions.",
+      "covered_clearly_at": "SKILL.md Principles and Fidelity require preserving all pages, controls, and behavior; the candidate evidence shows those requirements were met.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The limitation belongs to the external baseline/evaluation environment, not migration behavior; changing the migration skill or evaluation instruments would not make that UWP capture responsive."
+    }
+  ]
+}
