@@ -1,0 +1,38 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "The bootstrap omitted UWP project inputs linked from outside -Source.",
+      "evidence": "lessons.json dev_agent_struggles[0]; session-log.txt lines 181-208 and 2402-3391",
+      "root_cause": "Initialize-UwpMigration.ps1 inventoried only the physical source subtree and ignored evaluated Link metadata.",
+      "tier": 1,
+      "change": "Locate Visual Studio MSBuild, evaluate safe Compile/Page/ApplicationDefinition/Content/Resource/None items, and copy external linked XAML/C#/resource/asset inputs to their Link destinations before namespace rewrite and mapping. Skip legacy linked AssemblyInfo.cs and fail rather than emit an incomplete inventory when linked-item evaluation is unavailable.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared App/MainPage/styles/assets become first-class mapped inputs instead of being manually reconstructed, preserving explicit theme and shell resources.",
+      "falsifiable_check": "On TextSuggestion, bootstrap reports 12 linked project items copied and App.xaml, MainPage.xaml, Styles/Styles.xaml, and both SDK shell assets exist in the target."
+    },
+    {
+      "problem": "The documented build loop used nonexistent winapp build and omitted common SDK-style XAML diagnostics.",
+      "evidence": "lessons.json errors_encountered[1-3]; session-log.txt lines 3611-3672, 3951-3962, and 4122-4189",
+      "root_cause": "Build prose was outdated; project/XAML guidance did not make implicit Page items or markup-extension syntax explicit.",
+      "tier": 3,
+      "change": "Use native platform-qualified dotnet build throughout and add NETSDK1022 duplicate-Page and WMC0503 property-element x:Bind recipes.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The normal build produces the layout expected by Test-AppLaunch and agents resolve these two deterministic errors without exploratory retries.",
+      "falsifiable_check": "A re-run contains no rejected winapp build command, no unavailable launch caused by bin\\Debug layout, and fixes NETSDK1022/WMC0503 from the named recipes if encountered."
+    },
+    {
+      "problem": "NavigationView shell substitution preserved behavior but changed theme, Settings visibility, pane geometry, title-bar chrome, and heading wrapping.",
+      "evidence": "discrepancies.json entries 1-3; migration-score.json marks all three features partial at score 50",
+      "root_cause": "The existing navigation anchor specifies event wiring but not the source shell's visible contract or replacement-control defaults.",
+      "tier": 3,
+      "change": "Extend the existing NavigationView anchor with source-derived RequestedTheme, IsSettingsVisible, OpenPaneLength, text wrapping/width, and title-bar/template-chrome rules.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Shell replacements retain source visuals while still using WinUI 3 navigation behavior.",
+      "falsifiable_check": "On re-run, App.xaml retains RequestedTheme=Dark, no Settings navigation item appears, pane/heading geometry matches the source, and the three visual/layout discrepancies are absent."
+    }
+  ],
+  "deferred_to_human": []
+}

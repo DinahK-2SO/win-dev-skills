@@ -1,0 +1,15 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "An explicit Page Include for a newly copied XAML dictionary caused NETSDK1022.",
+      "evidence": "session-log.txt lines 3951-3962 identify Styles\\Styles.xaml as a duplicate Page item; lines 3964-3969 remove it.",
+      "covered_at": "MIGRATION-PATTERNS.md > Project File Updates > PackageReference reconciliation cheat-sheet",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "State that SDK-style WinUI projects implicitly include local .xaml Page items and add the NETSDK1022 remove-explicit-item recipe.",
+      "generalizes": "Agents frequently copy UWP explicit item declarations into SDK-style projects when adding pages or resource dictionaries."
+    }
+  ]
+}

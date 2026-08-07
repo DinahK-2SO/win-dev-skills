@@ -10,7 +10,7 @@ workflow to confirm residue grep, mapping integrity, deferred consistency,
 build cleanliness, and runtime smoke.
 
 Steps:
-1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
+1. Copy local and externally linked .xaml/.cs/.resw/asset/.appxmanifest inputs to the target
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
@@ -99,8 +99,89 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
 
 Write-Host "    Copied $($copied.Count) source files"
 
-# ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
+# UWP projects commonly link shared files from outside the project directory. A
+# recursive copy cannot see those inputs, so ask Visual Studio MSBuild for the
+# evaluated project items and materialize safe linked files at their Link paths.
+function Find-VisualStudioMSBuild {
+    $command = Get-Command msbuild.exe -ErrorAction SilentlyContinue
+    if ($command) { return $command.Source }
+
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+    if (-not (Test-Path -LiteralPath $vswhere)) { return $null }
+
+    $result = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild `
+        -find 'MSBuild\**\Bin\MSBuild.exe' 2>$null | Select-Object -First 1
+    if ($result) { return [string]$result }
+    return $null
+}
+
 $uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
+$msbuild = Find-VisualStudioMSBuild
+$linkedCopied = 0
+foreach ($project in $uwpCsprojs) {
+    if (-not $msbuild) {
+        $rawProject = [System.IO.File]::ReadAllText($project.FullName)
+        if ($rawProject -match '<Link>') {
+            throw "$($project.Name) contains linked project items outside Source, but Visual Studio MSBuild was not found. Install the MSBuild component and re-run so the inventory is complete."
+        }
+        continue
+    }
+
+    try {
+        $jsonText = (& $msbuild $project.FullName `
+            '-getItem:Compile,Page,ApplicationDefinition,Content,Resource,None' `
+            '-verbosity:quiet' 2>&1 | Out-String)
+        if ($LASTEXITCODE -ne 0) {
+            throw "MSBuild item evaluation exited with code $LASTEXITCODE"
+        }
+        $evaluated = $jsonText | ConvertFrom-Json
+    } catch {
+        $rawProject = [System.IO.File]::ReadAllText($project.FullName)
+        if ($rawProject -match '<Link>') {
+            throw "Could not evaluate linked items in $($project.Name); refusing to create an incomplete inventory. $($_.Exception.Message)"
+        }
+        Write-Warning "    Could not evaluate project items in $($project.Name): $($_.Exception.Message)"
+        continue
+    }
+
+    foreach ($itemType in @('Compile', 'Page', 'ApplicationDefinition', 'Content', 'Resource', 'None')) {
+        foreach ($item in @($evaluated.Items.$itemType)) {
+            $link = [string]$item.Link
+            $fullPath = [string]$item.FullPath
+            if (-not $link -or -not $fullPath -or -not (Test-Path -LiteralPath $fullPath -PathType Leaf)) { continue }
+            if ($fullPath.StartsWith($Source + '\', [System.StringComparison]::OrdinalIgnoreCase)) { continue }
+
+            # SDK-style projects generate assembly metadata and do not need the
+            # legacy linked Properties\AssemblyInfo.cs file.
+            if ($itemType -eq 'Compile' -and [System.IO.Path]::GetFileName($fullPath) -eq 'AssemblyInfo.cs') { continue }
+
+            $name = [System.IO.Path]::GetFileName($fullPath).ToLowerInvariant()
+            $copyable = $false
+            foreach ($ext in $patterns) {
+                if ($name.EndsWith($ext)) { $copyable = $true; break }
+            }
+            if (-not $copyable) { continue }
+
+            $dst = [System.IO.Path]::GetFullPath((Join-Path $Target ($link -replace '/', '\')))
+            if (-not $dst.StartsWith($Target + '\', [System.StringComparison]::OrdinalIgnoreCase)) {
+                Write-Warning "    Skipping linked item with destination outside Target: $link"
+                continue
+            }
+            $dstDir = [System.IO.Path]::GetDirectoryName($dst)
+            if (-not (Test-Path -LiteralPath $dstDir)) {
+                New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $fullPath -Destination $dst -Force
+            if (-not $copied.Contains($link)) { [void]$copied.Add($link) }
+            $linkedCopied++
+        }
+    }
+}
+if ($linkedCopied -gt 0) {
+    Write-Host "    Copied $linkedCopied linked project item(s) from outside Source"
+}
+
+# ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
 $refDir = Join-Path $Target '.uwp-source'
 if ($uwpCsprojs.Count -gt 0) {
     if (-not (Test-Path -LiteralPath $refDir)) {

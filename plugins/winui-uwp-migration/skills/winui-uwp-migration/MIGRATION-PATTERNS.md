@@ -328,6 +328,29 @@ private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvoke
 Wire `ItemInvoked="NavView_ItemInvoked"` on the `NavigationView` in XAML. `ItemInvoked`
 fires on every tap even when re-selecting, which is what keeps the switch reliable.
 
+**Preserve the source shell's visible contract; do not accept NavigationView/template
+defaults as a redesign.** Before replacing a `SplitView`/scenario list, record its pane
+width, theme, title/header wrapping, footer items, and whether it has a settings entry.
+Carry those decisions into the replacement:
+
+```xml
+<NavigationView
+    IsSettingsVisible="False"
+    IsPaneOpen="True"
+    OpenPaneLength="320"
+    PaneDisplayMode="Left">
+```
+
+- Set `IsSettingsVisible="False"` unless the source actually had a Settings destination.
+- Set `OpenPaneLength` from the source pane width/content instead of accepting the
+  NavigationView default. Preserve source `MinWidth`/`MaxWidth` and `TextWrapping`
+  choices so headings do not wrap merely because the replacement consumed more width.
+- Preserve an explicit source `RequestedTheme` on the target root. If the source has no
+  explicit theme, do not hard-code one just to match the developer machine.
+- The desktop title bar is a migration constraint, but scaffold chrome is not: remove
+  template-only `TitleBar`/Mica content. Extend content into a custom title bar only when
+  the source already had equivalent branded header content that can supply drag regions.
+
 **When items are literal `NavigationViewItem`s in `MenuItems`:** the invoked item container
 *is* a `NavigationViewItem`; read its `Tag`:
 
@@ -584,6 +607,12 @@ public void Control_DefaultState_IsValid()
 
 Do **not** copy the UWP `.csproj` over the scaffold's. The two formats are incompatible — the UWP csproj carries `<TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>`, `<OutputType>AppContainerExe</OutputType>`, explicit `<Compile Include="...">` items, and `Microsoft.Common.props` imports, none of which build under WinAppSDK.
 
+SDK-style WinUI projects implicitly include local `*.cs` and `*.xaml` files. Do not add
+`<Compile Include="...">` or `<Page Include="...">` for files copied under the project
+directory. If the build reports `NETSDK1022: Duplicate 'Page' items`, remove the explicit
+item; set `EnableDefaultPageItems=false` only when intentionally taking ownership of the
+entire Page item list.
+
 ### Package.appxmanifest — reconcile image references with the assets you actually have
 
 The WinUI 3 scaffold ships with a default `Package.appxmanifest` that references assets the template provides under `Assets/` (`SplashScreen.scale-200.png`, `Square150x150Logo.scale-200.png`, `Square44x44Logo.scale-200.png`, `StoreLogo.png`, `Wide310x150Logo.scale-200.png`, `LockScreenLogo.scale-200.png`). The UWP SDK sample's manifest usually points at sample-branded assets with a `-sdk` suffix (`Splash-sdk.png`, `squareTile-sdk.png`, `SmallTile-sdk.png`, `StoreLogo-sdk.png`).
@@ -664,7 +693,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The validator's native `dotnet build` surfaces `Microsoft.WindowsAppSDK.Analyzers` warnings when the analyzer package is referenced by the project. These warnings flag UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |
@@ -751,6 +780,18 @@ The system brush names also changed in many cases (Fluent v2 vs UWP v1). Cross-r
 ### `x:Bind` and compiled bindings
 
 `x:Bind` is supported in WinUI 3 with the same syntax. Compiled bindings against `Windows.UI.Xaml.*` types resolve to `Microsoft.UI.Xaml.*` automatically once the namespace rewrites land. If the build emits `XLS0414`/`MC3074` "type was not found", look for stale UWP namespace prefixes in the XAML.
+
+`x:Bind` is a markup extension, not an object element. This property-element form fails
+with `WMC0503: Compiled Bindings cannot be processed in Property Element form`:
+
+```xml
+<NavigationView.MenuItemsSource>
+    <x:Bind Path="Scenarios" />
+</NavigationView.MenuItemsSource>
+```
+
+Use attribute syntax (`MenuItemsSource="{x:Bind Scenarios}"`) or assign the property in
+code after `InitializeComponent()` when initialization order makes that clearer.
 
 ### Page root element
 

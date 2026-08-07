@@ -1,0 +1,42 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The bootstrap self-check raced the bootstrap and initially returned False.",
+      "evidence": "session-log.txt lines 172-209 show Test-Path ran before the bootstrap result completed.",
+      "covered_clearly_at": "SKILL.md > Step 0 - Bootstrap (mandatory), lines 34-59: literal first three commands and do not proceed unless Test-Path is True.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The required ordering and success gate are already explicit and prominent."
+    },
+    {
+      "problem": "Nullable warnings remained after the first successful build.",
+      "evidence": "session-log.txt lines 4204-4234 show ten warnings; lines 4432-4435 apply the final guards.",
+      "covered_clearly_at": "SKILL.md > Step 4 - Validate: clean build and zero warnings are part of the mandatory PASS gate.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The agent corrected the warnings before the mandatory validator pass."
+    },
+    {
+      "problem": "Eight completed mapping rows were left at Status=copied before validation.",
+      "evidence": "session-log.txt lines 4450-4469 show the validator failure; lines 4476-4482 update all rows.",
+      "covered_clearly_at": "SKILL.md Step 1 line 90 and Step 4 lines 154-167 explicitly require flipping copied rows and describe this exact failure.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The validator and prose already caught and explained the mistake deterministically."
+    },
+    {
+      "problem": "Execute controls were absent from the initial UIA tree because the source intentionally reveals them only after generator creation.",
+      "evidence": "discrepancies.json entry 4 and migration-score.json feature notes report 1/2 initial control coverage while the WinUI generator actions respond.",
+      "covered_clearly_at": "SKILL.md > Fidelity (highest priority): preserve every source control and behavior rather than redesigning conditional UI.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "This is an evaluation-state limitation, not a migration defect; making Execute unconditional would reduce source fidelity."
+    },
+    {
+      "problem": "The UWP CoreWindow exposed no actionable UIA descendants, so baseline post-action states were unverified.",
+      "evidence": "discrepancies.json entry 5 and migration-score.json uwp_capture_status.",
+      "covered_clearly_at": "SKILL.md > Fidelity (highest priority): migration guidance requires preserving the source and does not own evaluation capture.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "The limitation belongs to the fixed evaluation instrument and provides no valid migration-skill change."
+    }
+  ]
+}

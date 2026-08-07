@@ -1,0 +1,47 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The bootstrap omitted source files and assets linked from outside the project directory.",
+      "evidence": "session-log.txt lines 181-208 copied only 8 local files; lines 2402-3391 show manual discovery of SharedContent. The source csproj links App.xaml, MainPage, Styles.xaml, and assets through Link metadata.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Link, SharedContent, Compile Include, and external; no support was found.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The script inventories with Get-ChildItem -Recurse under -Source rather than evaluated project items.",
+      "proposed_fix": "Evaluate external linked project items with Visual Studio MSBuild and copy safe source/XAML/resource/asset inputs to their Link destinations before mapping.",
+      "generalizes": "Legacy UWP SDK samples and shared-code solutions commonly use linked files outside each project folder."
+    },
+    {
+      "problem": "The skill instructs agents to run a nonexistent winapp build command and thereby creates an incompatible launch-output path when they fall back to plain dotnet build.",
+      "evidence": "session-log.txt lines 3611-3672 show winapp build rejected; lines 4424-4427 show Test-AppLaunch could not find bin\\x64\\Debug.",
+      "skill_search": "winapp build appears in SKILL.md lines 126, 138, and 170 and MIGRATION-PATTERNS.md line 667.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer `winapp build` to compile.",
+      "root_cause": "The prose predates the current CLI and does not match the validator/launcher platform layout.",
+      "proposed_fix": "Replace build instructions with native dotnet build using Debug and an explicit current-architecture Platform.",
+      "generalizes": "Every migration uses the same build/launch loop and current winapp CLI surface."
+    },
+    {
+      "problem": "The NavigationView shell pattern lacks concrete visual-fidelity rules, producing a light theme, extra Settings item, wider pane, desktop title-bar drift, and wrapped headings.",
+      "evidence": "discrepancies.json entries 1-3 and migration-score.json: all three features partial due to theme and shell differences; Conversion and ReverseConversion headings wrapped.",
+      "skill_search": "Searched SKILL.md and MIGRATION-PATTERNS.md for IsSettingsVisible, OpenPaneLength, RequestedTheme, title bar, and wrapping; no shell-fidelity checklist was found.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The replacement pattern specifies navigation event wiring but leaves new-control defaults and window chrome unchecked.",
+      "proposed_fix": "Add a source-derived shell-fidelity checklist to the existing NavigationView pattern: theme, Settings visibility, pane width/display mode, title-bar strategy, and text wrapping/min-width.",
+      "generalizes": "Replacing UWP SplitView/ListView shells with NavigationView introduces the same WinUI defaults in many SDK-sample migrations."
+    },
+    {
+      "problem": "The x:Bind section omits WMC0503 and does not state that markup extensions cannot be authored as object elements.",
+      "evidence": "session-log.txt lines 4122-4146 show WMC0503; lines 4165-4189 show the invalid property-element binding and fix.",
+      "skill_search": "MIGRATION-PATTERNS.md x:Bind section only covers stale namespace type errors.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The guidance says x:Bind has the same syntax but gives no diagnostic recipe for invalid property-element form.",
+      "proposed_fix": "Add WMC0503 guidance with valid attribute syntax and code-assignment fallback.",
+      "generalizes": "Compiled bindings are common in migrated UWP XAML and WMC0503 is otherwise terse."
+    }
+  ]
+}

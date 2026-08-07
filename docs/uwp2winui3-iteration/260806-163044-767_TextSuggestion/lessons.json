@@ -1,0 +1,144 @@
+{
+  "scenario": "TextSuggestion",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 181-208: copied 8 local source files, rewrote four XAML namespaces, and generated the mapping/deferred/meta artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt line 1157: the agent fetched the csproj and navigationview-frame-wiring anchors and used the navigation pattern successfully."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt lines 3951-3962 and 4105-4146: produced actionable NETSDK1022 and WMC0503 diagnostics; lines 4492-4500 show the final clean build."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 4445-4469 caught eight mapping rows still marked copied; lines 4503-4520 passed after correction and smoke-launched the app."
+    },
+    {
+      "tool": "dotnet run",
+      "evidence": "session-log.txt lines 4471-4474 and 4524-4530: launched the packaged application successfully after Test-AppLaunch could not find the plain dotnet build layout."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed winapp CLI has no build command although SKILL.md directs agents to use it.",
+      "evidence": "session-log.txt lines 3611-3672: 'build' was not matched and the command exited 1."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "problem": "It only searched the platform-qualified output layout, while the agent's plain dotnet build emitted bin\\Debug.",
+      "evidence": "session-log.txt lines 4424-4427: status=unavailable, 'No build output found under bin\\x64\\Debug'."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It recursively copies only files physically below -Source and does not evaluate external project items with Link metadata.",
+      "suggested_tweak": "Evaluate Compile/Page/ApplicationDefinition/Content/Resource items with Visual Studio MSBuild and copy external linked inputs to their Link destinations."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "A non-platform-qualified dotnet build is not discoverable.",
+      "suggested_tweak": "Document and use dotnet build -c Debug -p:Platform=<current architecture> before launch."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3, build-command discipline, and final build",
+      "wrong": "Use winapp build.",
+      "correct": "Use native dotnet build with Debug and an explicit Platform; use Test-AppLaunch.ps1 for launch."
+    },
+    {
+      "where": "SKILL.md Step 0 claim that the bootstrap is the complete inventory",
+      "wrong": "The bootstrap inventory was treated as complete even when the UWP csproj linked shared files outside -Source.",
+      "correct": "The bootstrap must evaluate and copy external linked project inputs before producing its mapping."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Data.Text TextConversionGenerator/TextPredictionGenerator/TextReverseConversionGenerator",
+      "special_handling": "The Windows namespace APIs carried over unchanged; only the WinUI shell, status surface, and nullable generator lifecycle needed adaptation."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initial Test-Path returned False immediately after bootstrap.",
+      "root_cause": "The agent launched the bootstrap and self-check in parallel instead of waiting for the mandatory bootstrap command.",
+      "fix": "Re-ran Test-Path after bootstrap completed; the mapping existed."
+    },
+    {
+      "error": "winapp: 'build' was not matched.",
+      "root_cause": "The skill documented a command absent from the installed winapp CLI.",
+      "fix": "Switched to dotnet build."
+    },
+    {
+      "error": "NETSDK1022 Duplicate 'Page' items: Styles\\Styles.xaml.",
+      "root_cause": "The SDK-style project already includes XAML Page items implicitly, but the agent added an explicit Page Include.",
+      "fix": "Removed the explicit Page Include."
+    },
+    {
+      "error": "WMC0503 Compiled Bindings cannot be processed in Property Element form.",
+      "root_cause": "The agent authored x:Bind as an object element under NavigationView.MenuItemsSource instead of using attribute syntax or assigning the source in code.",
+      "fix": "Removed the property-element x:Bind and assigned NavView.MenuItemsSource in the constructor."
+    },
+    {
+      "error": "CS8618/CS8600/CS8602 nullable warnings in all three scenario pages.",
+      "root_cause": "Generator fields and ComboBoxItem casts retained UWP-era non-null assumptions under a nullable-enabled WinUI project.",
+      "fix": "Made generator fields nullable and added selected-item/tag guards."
+    },
+    {
+      "error": "Test-AppLaunch status=unavailable: no output under bin\\x64\\Debug.",
+      "root_cause": "The preceding plain dotnet build wrote bin\\Debug rather than the platform-qualified layout expected by the launcher.",
+      "fix": "Used dotnet run for the immediate launch; the validator later rebuilt with -p:Platform=x64 and its smoke launch passed."
+    },
+    {
+      "error": "Validate-UwpMigration failed because eight mapping rows remained Status=copied.",
+      "root_cause": "The agent completed the files but did not update migration bookkeeping before the first validation.",
+      "fix": "Changed all eight rows to done and re-ran validation."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Source inventory and shell reconstruction, turns 4-12",
+      "symptom": "The agent searched outside the project, opened SharedContent files, recreated shared styles manually, and copied shared assets itself.",
+      "turns_or_retries": "Approximately nine turns from source inspection through the first large patch.",
+      "root_cause": "The bootstrap omitted csproj-linked files located outside -Source, including App.xaml, MainPage, Styles.xaml, and shell assets.",
+      "how_resolved": "The agent discovered SharedContent via repository search and manually rebuilt/copied the dependencies.",
+      "preventable_by": "Teach Initialize-UwpMigration.ps1 to evaluate and copy external linked project items to their Link destinations."
+    },
+    {
+      "where": "Build and launch loop, turns 13-23",
+      "symptom": "The documented build command failed, two subsequent builds exposed avoidable project/XAML errors, and Test-AppLaunch could not find output.",
+      "turns_or_retries": "Four build attempts plus one unavailable launch.",
+      "root_cause": "Incorrect build-command guidance plus missing concise SDK-style Page and x:Bind syntax diagnostics.",
+      "how_resolved": "The agent switched to dotnet build, removed the duplicate Page item, assigned MenuItemsSource in code, and eventually used dotnet run.",
+      "preventable_by": "Use an explicit platform-qualified dotnet build command and add NETSDK1022/WMC0503 recipes."
+    },
+    {
+      "where": "Visual shell conversion",
+      "symptom": "The app functioned but scored partial on all features because theme, desktop chrome, NavigationView defaults, pane width, and heading wrapping diverged.",
+      "turns_or_retries": "Not detected during migration; reported by the scoring trial.",
+      "root_cause": "The shell guidance covered navigation behavior but not concrete visual-fidelity defaults for a substituted NavigationView/window.",
+      "how_resolved": "Unresolved in the migration; migration-score.json remained 50 with three partial features.",
+      "preventable_by": "Add a shell-fidelity checklist covering RequestedTheme, Settings visibility, pane geometry, title-bar choice, and source text wrapping."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Automatic inventory/copy of csproj-linked inputs outside the source directory.",
+      "would_have_saved": "Repository-wide SharedContent discovery, manual style recreation, manual asset copies, and the visual drift introduced during reconstruction."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "The installed winapp CLI exposed run but not build.",
+      "workaround": "Use native dotnet build; use winapp only indirectly for packaged launch."
+    }
+  ]
+}
