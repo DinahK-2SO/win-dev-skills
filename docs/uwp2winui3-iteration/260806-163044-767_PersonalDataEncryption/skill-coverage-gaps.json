@@ -1,0 +1,15 @@
+{
+  "scenario": "PersonalDataEncryption",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Project reconciliation did not clearly require preserving or raising TargetPlatformMinVersion for retained APIs.",
+      "evidence": "session-log.txt turn 26 shows repeated CA1416 warnings because the scaffold minimum was 10.0.17763 while protection APIs require 10.0.18362; turn 27 raised the minimum and turn 28 built with zero warnings.",
+      "covered_at": "MIGRATION-PATTERNS.md#csproj, Project File Updates and PackageReference reconciliation cheat-sheet",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "State that TargetPlatformMinVersion is reconciled separately from the TFM, begins at the higher source/scaffold minimum, and must be raised rather than suppressing CA1416.",
+      "generalizes": "Many retained Windows Runtime APIs have minimum OS contracts newer than a blank WinUI scaffold's declared minimum."
+    }
+  ]
+}

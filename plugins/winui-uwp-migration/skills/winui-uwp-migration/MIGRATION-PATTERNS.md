@@ -98,6 +98,12 @@ Code touching these APIs has no WinUI 3 desktop equivalent. The corresponding fi
 
 No equivalent (defer the file):
 
+- `Windows.Security.DataProtection.UserDataProtectionManager` — its lock-state
+  availability levels are tied to the UWP process model. The projection compiles
+  in a packaged desktop app, but `TryGetDefault()` returns `null`; do not treat a
+  build-only check or an always-visible "not enabled" fallback as a migrated
+  feature. Desktop DPAPI can provide user-scoped encryption, but it cannot
+  preserve `AfterFirstUnlock` / `WhileUnlocked` behavior.
 - `CoreWindow` and related view-scoped APIs (use `AppWindow` + HWND APIs)
 - `InkCanvas`
 - Virtual key support for gamepad input (`Windows.Gaming.Input.*` VK paths)
@@ -563,6 +569,11 @@ public void Control_DefaultState_IsValid()
   - `net8.0-windows10.0.19041.0` (LTS)
   - `net9.0-windows10.0.19041.0`
   - `net10.0-windows10.0.26100.0` (current `dotnet new winui` default in this repo)
+- Reconcile `<TargetPlatformMinVersion>` separately from the TFM. Start with the
+  higher of the UWP project's minimum and the scaffold's minimum, then raise it
+  if `CA1416` identifies a retained Windows API with a newer minimum. Do not
+  suppress `CA1416`; a clean build must prove every retained call is reachable
+  only on a supported OS version.
 - Add `<UseWinUI>true</UseWinUI>`.
 - Add `<EnableMsixTooling>true</EnableMsixTooling>` for packaged builds.
 - Reference `Microsoft.WindowsAppSDK` and `Microsoft.Windows.SDK.BuildTools`.
@@ -664,7 +675,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The benchmark build injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |

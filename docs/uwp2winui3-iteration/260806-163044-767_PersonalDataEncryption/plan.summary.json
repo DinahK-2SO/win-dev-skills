@@ -1,0 +1,20 @@
+{
+  "scenario": "PersonalDataEncryption",
+  "index": 2,
+  "applied": true,
+  "bullets": [
+    "Materialize csproj-linked UWP source and assets during bootstrap so shared XAML is preserved instead of reconstructed from generated output.",
+    "Pre-classify UserDataProtectionManager as desktop-unsupported so fallback-only pages cannot pass as migrated features.",
+    "Use dotnet build and explicitly reconcile TargetPlatformMinVersion to eliminate invalid commands and CA1416 warnings."
+  ],
+  "files_touched": [
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "plugins/winui-uwp-migration/skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "The evaluator's original UWP capture remained on the splash frame; evaluation instruments are out of scope for this improvement."
+  ]
+}

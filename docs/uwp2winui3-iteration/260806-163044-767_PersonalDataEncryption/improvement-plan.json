@@ -1,0 +1,47 @@
+{
+  "scenario": "PersonalDataEncryption",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap silently omitted UWP project-linked source and assets.",
+      "evidence": "lessons.json dev_agent_struggles[1]; source csproj linked App/MainPage/scenario XAML/styles/assets while bootstrap reported only four copied files.",
+      "root_cause": "A directory walk under Source cannot discover external files represented by csproj Include/Link metadata.",
+      "tier": 1,
+      "change": "Parse common declared UWP project item types, resolve project properties including GetDirectoryNameOfFileAbove, validate Link destinations, and materialize linked files before namespace rewrite and triage.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Agents receive the actual source XAML, code, styles, and assets and no longer reconstruct UI from generated obj artifacts.",
+      "falsifiable_check": "Running bootstrap on this source reports project-linked files and produces App.xaml, MainPage.xaml, both scenario XAML files, Styles/Styles.xaml, and linked assets in the target."
+    },
+    {
+      "problem": "UserDataProtectionManager compiled but yielded fallback-only pages in WinUI desktop.",
+      "evidence": "migration-score.json: both features fail with only the unavailable fallback; skill-defects.json item 3.",
+      "root_cause": "The unsupported inventory lacked an AppContainer-bound API whose runtime unavailability is invisible to build and process-alive checks.",
+      "tier": 1,
+      "change": "Add UserDataProtectionManager to the unsupported inventory and document why DPAPI is not a behavior-equivalent replacement for lock-state availability levels.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Affected files are explicitly deferred during bootstrap instead of being marked done while exposing no functional controls.",
+      "falsifiable_check": "Bootstrap maps both scenario code-behind files to defer and the validator rejects retained non-deferred UserDataProtectionManager references."
+    },
+    {
+      "problem": "Build instructions named a nonexistent command and did not make minimum-OS reconciliation explicit.",
+      "evidence": "session-log.txt turn 25 `winapp build` failure; turn 26 CA1416 warnings; turn 27 minimum-version correction.",
+      "root_cause": "Prose conflated winapp launch tooling with compilation and discussed TFM without separately directing TargetPlatformMinVersion handling.",
+      "tier": 3,
+      "change": "Use dotnet build consistently and strengthen the existing csproj section with a CA1416-driven TargetPlatformMinVersion rule.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The first compile command works and retained Windows APIs build without platform-compatibility warnings.",
+      "falsifiable_check": "On rerun there is no `winapp build` invocation or unrecognized-command error, and final dotnet build reports zero CA1416 warnings."
+    }
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/SKILL.md"
+  ],
+  "deferred_to_human": [
+    "The evaluator's original UWP capture remained on the splash frame; evaluation instruments are out of scope for this improvement."
+  ]
+}

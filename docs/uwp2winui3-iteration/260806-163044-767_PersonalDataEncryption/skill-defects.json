@@ -1,0 +1,37 @@
+{
+  "scenario": "PersonalDataEncryption",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap omitted project-linked source files outside the supplied Source directory.",
+      "evidence": "PersonalDataEncryption.csproj declares linked App.xaml, MainPage, scenario XAML, styles, code, and assets; session-log.txt turns 8-16 show missing source globs followed by generated-obj XAML reconstruction.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 and SKILL.md for Link, linked, SharedContent, Page Include, and Compile Include.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 used only a recursive directory walk under Source and never evaluated declared project items or their Link destinations.",
+      "proposed_fix": "Extend bootstrap to resolve common UWP project properties and copy declared external Compile/Page/ApplicationDefinition/Content/Resource items to their Link paths.",
+      "generalizes": "Legacy UWP solutions and Microsoft SDK samples routinely share shell XAML, styles, code, and assets through linked csproj items."
+    },
+    {
+      "problem": "The skill instructed agents to compile with nonexistent `winapp build`.",
+      "evidence": "session-log.txt turn 25: winapp returned \"'build' was not matched\" and listed no build subcommand.",
+      "skill_search": "Searched the migration skill for `winapp build`; found it in SKILL.md Step 3/final validation and Validate-UwpMigration.ps1 comments.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer `winapp build` to compile.",
+      "root_cause": "The guidance conflated winapp's run/package surface with .NET compilation.",
+      "proposed_fix": "Replace compile instructions with `dotnet build <project.csproj>` and state that winapp has no build subcommand.",
+      "generalizes": "Every C# WinUI migration needs a reliable compile command before launch and validation."
+    },
+    {
+      "problem": "The skill did not classify UserDataProtectionManager as unavailable for preserving UWP lock-state protection semantics in WinUI desktop.",
+      "evidence": "migration-score.json reports both features failed because only the unavailable fallback rendered; migrated Scenario1_Files.xaml.cs and Scenario2_Memory.xaml.cs hide AvailablePanel when TryGetDefault returns null.",
+      "skill_search": "Searched SKILL.md, MIGRATION-PATTERNS.md, scripts, and unsupported-api-inventory.json for UserDataProtectionManager, UserDataAvailability, and DataProtection; no migration guidance or inventory entry existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The Windows projection compiles, but runtime availability differs in the full-trust desktop process and no desktop API preserves AfterFirstUnlock/WhileUnlocked semantics; build/process-alive checks therefore produced a false success.",
+      "proposed_fix": "Add UserDataProtectionManager to the machine-readable unsupported inventory and explain the compile-versus-runtime trap and non-equivalent DPAPI fallback in MIGRATION-PATTERNS.md.",
+      "generalizes": "Other UWP apps use personal-data protection APIs that compile in desktop projects but become permanently unavailable at runtime."
+    }
+  ]
+}

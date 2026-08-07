@@ -1,0 +1,28 @@
+{
+  "scenario": "PersonalDataEncryption",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The scaffold, bootstrap, and bootstrap self-check were executed concurrently.",
+      "evidence": "session-log.txt turns 1-2: bootstrap reported Target not found and Test-Path returned False before dotnet new and the retry completed.",
+      "covered_clearly_at": "SKILL.md Step 0 — Bootstrap (mandatory), numbered commands 1-3 and hard rule not to proceed when Test-Path is False",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already defines an explicit ordered gate and names scaffold completion as the bootstrap precondition."
+    },
+    {
+      "problem": "Test-AppLaunch.ps1 was executed concurrently with dotnet build.",
+      "evidence": "session-log.txt turn 25: launch validation reported no build output while the parallel build later exited successfully.",
+      "covered_clearly_at": "SKILL.md Step 3 — Build, fix what tooling missed: \"build → fix the first error → launch → repeat\"",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The build-before-launch order is already explicit and the launch helper's error identified the violated precondition."
+    },
+    {
+      "problem": "The original UWP visual baseline remained on its splash frame, preventing like-for-like visual comparison.",
+      "evidence": "migration-score.json uwp_capture_status and both visual-mismatch entries in discrepancies.json.",
+      "covered_clearly_at": "Not a migration-skill responsibility; this occurred in the fixed evaluation instrument after migration.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "Changing migration guidance cannot alter the evaluator's original-UWP capture, and evaluation skills are explicitly out of scope."
+    }
+  ]
+}

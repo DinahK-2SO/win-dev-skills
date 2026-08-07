@@ -1,0 +1,155 @@
+{
+  "scenario": "PersonalDataEncryption",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 2-3: after the scaffold completed, bootstrap copied four physical source files, rewrote namespaces, injected two picker TODOs, and produced mapping metadata."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt turn 4: the pickers anchor supplied the required InitializeWithWindow pattern, which the agent applied to both picker types."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt turns 25-28: dotnet build exposed CA1416 minimum-version warnings, then completed with zero warnings after TargetPlatformMinVersion was corrected."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt turn 28: validator confirmed residue, TODO, mapping, manifest, build, and process-alive launch checks and reported PASS."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed winapp CLI has no build subcommand, despite the migration skill instructing the agent to use it.",
+      "evidence": "session-log.txt turn 25: \"'build' was not matched\" and the CLI command list omitted build."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "problem": "It was launched concurrently with the build and therefore reported an unavailable layout before build output existed.",
+      "evidence": "session-log.txt turn 25: \"No build output found under bin\\x64\\Debug - build the project first\" while the parallel dotnet build later succeeded."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "The directory-only copy missed UWP project items linked from sibling SharedContent and shared directories, including App.xaml, MainPage, both scenario XAML files, styles, and assets.",
+      "suggested_tweak": "Parse declared Compile/Page/ApplicationDefinition/Content items and materialize external files at their Link paths before namespace rewriting and triage."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "A clean build and process-alive smoke launch could pass while both feature pages exposed only an unavailable fallback.",
+      "suggested_tweak": "Route known desktop-incompatible APIs through the unsupported inventory so validator cannot treat retained fallback-only code as a completed migration."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "winapp build",
+      "why_tried": "The migration skill named it as the preferred compile command.",
+      "root_cause": "The installed WinApp CLI supports run and packaging commands but not build.",
+      "fix": "Use dotnet build with the target csproj."
+    },
+    {
+      "api": "Windows.Security.DataProtection.UserDataProtectionManager.TryGetDefault",
+      "why_tried": "Both UWP scenarios use it for storage-item and in-memory protection at lock-state availability levels.",
+      "root_cause": "The projection compiles in the packaged WinUI desktop process, but the manager is unavailable there and TryGetDefault returns null; the original code then hides all functional controls.",
+      "fix": "Classify the API as unsupported during bootstrap and explicitly defer affected feature code rather than claiming an always-unavailable page is migrated."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build instruction",
+      "wrong": "Prefer winapp build.",
+      "correct": "Use dotnet build <project.csproj>; winapp has no build subcommand."
+    },
+    {
+      "where": "SKILL.md statement that bootstrap is the complete inventory",
+      "wrong": "The bootstrap inventory was treated as complete even though it only walked files physically under Source.",
+      "correct": "Inventory must also materialize external files declared by the UWP csproj through Include and Link metadata."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Storage.Pickers.FileOpenPicker and FolderPicker",
+      "special_handling": "Initialize each picker with the WinUI window HWND before calling its async picker method."
+    },
+    {
+      "api": "UserDataProtectionManager",
+      "special_handling": "A successful compile does not establish desktop runtime support. TryGetDefault can return null and its AfterFirstUnlock/WhileUnlocked semantics have no desktop equivalent."
+    },
+    {
+      "api": "Windows APIs guarded by SupportedOSPlatform metadata",
+      "special_handling": "Reconcile TargetPlatformMinVersion with both the UWP source minimum and retained API minimums; treat CA1416 as actionable rather than suppressing it."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initialize-UwpMigration.ps1: Target not found",
+      "root_cause": "The scaffold, bootstrap, and self-check were issued concurrently, so bootstrap ran before dotnet new completed.",
+      "fix": "Wait for scaffold completion, then run bootstrap, then run the self-check."
+    },
+    {
+      "error": "Test-Path MIGRATION-MAPPING.md returned False twice",
+      "root_cause": "Each self-check raced the bootstrap command instead of waiting for it.",
+      "fix": "Execute the three bootstrap commands strictly sequentially."
+    },
+    {
+      "error": "winapp: 'build' was not matched",
+      "root_cause": "The skill documented a nonexistent CLI subcommand.",
+      "fix": "Build with dotnet build <project.csproj>."
+    },
+    {
+      "error": "Test-AppLaunch status=unavailable: no build output under bin\\x64\\Debug",
+      "root_cause": "Launch validation raced the concurrent build.",
+      "fix": "Wait for a successful build before invoking Test-AppLaunch.ps1."
+    },
+    {
+      "error": "CA1416 warnings for UserDataProtectionManager and UserDataAvailability",
+      "root_cause": "The scaffold minimum was Windows 10.0.17763 while the retained APIs require 10.0.18362 or later.",
+      "fix": "Raise TargetPlatformMinVersion to a supported version; the agent used 10.0.18362."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log.txt turns 1-2",
+      "symptom": "Bootstrap failed once and both mapping self-checks returned False despite bootstrap eventually succeeding.",
+      "turns_or_retries": "2 turns; one bootstrap retry and two premature self-checks",
+      "root_cause": "Commands with explicit dependencies were parallelized.",
+      "how_resolved": "The bootstrap was retried after scaffold completion and its successful output was used.",
+      "preventable_by": "Execute scaffold, bootstrap, and Test-Path as strict sequential gates."
+    },
+    {
+      "where": "session-log.txt turns 8-16",
+      "symptom": "Source XAML appeared missing, so the agent searched obj output and manually reconstructed MainPage and both scenario pages.",
+      "turns_or_retries": "9 turns from failed source globs through page reconstruction",
+      "root_cause": "Bootstrap ignored csproj-linked files outside the supplied Source directory even though the project declared their Link paths.",
+      "how_resolved": "The agent read generated obj XAML and recreated target XAML manually.",
+      "preventable_by": "Materialize external project items from csproj Include/Link metadata during bootstrap."
+    },
+    {
+      "where": "session-log.txt turns 25-28",
+      "symptom": "The preferred build command failed, launch validation raced the fallback build, and the first successful build emitted many CA1416 warnings.",
+      "turns_or_retries": "4 turns",
+      "root_cause": "Wrong build-command guidance, parallel build/launch ordering, and unclear minimum-OS reconciliation guidance.",
+      "how_resolved": "The agent switched to dotnet build, used dotnet run, raised TargetPlatformMinVersion, and reran validation.",
+      "preventable_by": "Document dotnet build as the compile command, require build-before-launch ordering, and make TargetPlatformMinVersion reconciliation explicit."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Bootstrap support for linked UWP project items",
+      "would_have_saved": "The entire generated-XAML discovery and manual page reconstruction sequence while preserving original event wiring and resources."
+    },
+    {
+      "need": "Machine-readable classification for UserDataProtectionManager",
+      "would_have_saved": "A false successful migration in which all functional controls were hidden at runtime."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "The installed winapp CLI version did not provide a build subcommand.",
+      "workaround": "Use dotnet build for compilation and Test-AppLaunch.ps1 or dotnet run for packaged launch."
+    }
+  ]
+}
