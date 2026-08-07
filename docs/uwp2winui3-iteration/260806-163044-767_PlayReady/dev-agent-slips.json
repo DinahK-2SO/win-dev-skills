@@ -1,0 +1,35 @@
+{
+  "scenario": "PlayReady",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The initial package registration failed because manifest image references pointed to assets that were not present.",
+      "evidence": "session-log turns 62-63 show 0x80070002 for Splash-sdk.png followed by the manifest asset-reference fix.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md > 'Package.appxmanifest — reconcile image references with the assets you actually have' and Validate-UwpMigration Section 5.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill has a dedicated checklist, exact error example, and automated validator for this condition; running the mandatory validator would have reported it."
+    },
+    {
+      "problem": "The agent added WindowsPackageType=None to a migration that retained package identity and a Package.appxmanifest.",
+      "evidence": "session-log turn 78 added the property; the scoring task then reported winapp run found no package manifest in build output.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md > 'Project File Migration': keep Package.appxmanifest for packaged scenarios; set WindowsPackageType=None for unpackaged.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The existing rule clearly distinguishes packaged from unpackaged projects; the tool change is justified only as enforcement of the separate manifest-entrypoint coverage gap."
+    },
+    {
+      "problem": "The agent stopped without running the mandatory final validator and with the app known not to launch.",
+      "evidence": "No Validate-UwpMigration invocation appears after the bootstrap; the final response explicitly says launch is still blocked.",
+      "covered_clearly_at": "SKILL.md Step 4 — 'You are NOT done until Validate-UwpMigration.ps1 reports PASS.'",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The completion gate is already explicit, prominent, and mandatory."
+    },
+    {
+      "problem": "Authored edits introduced namespace/import/color errors and placed a temporary XAML reference file under the project compile glob.",
+      "evidence": "session-log turns 40-60 show CS0234/CS0246/CS0103 and WMC0909/WMC1111; all were resolved by turn 61.",
+      "covered_clearly_at": "SKILL.md Step 3 — build, fix the first error, launch, repeat; MIGRATION-PATTERNS.md > 'Common build errors after the namespace rewrite'.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "These were ordinary local edit mistakes caught and resolved by the already-prescribed compiler loop."
+    }
+  ]
+}

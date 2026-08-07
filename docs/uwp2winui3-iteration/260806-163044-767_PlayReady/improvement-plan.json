@@ -1,0 +1,38 @@
+{
+  "scenario": "PlayReady",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "A copied UWP manifest could pass validation but crash packaged WinUI activation, and an unpackaged workaround could silently suppress the build manifest.",
+      "evidence": "lessons.json errors_encountered for COMException 0x8001010E; skill-coverage-gaps.json item 1; migration-score.json candidate_launch_status failed.",
+      "root_cause": "The correct manifest entry-point and packaging-mode rules existed only as prose; the mandatory validator did not enforce them.",
+      "tier": 1,
+      "change": "Validate every Application uses EntryPoint=\"$targetentrypoint$\" and reject WindowsPackageType=None when Package.appxmanifest is retained. Tier 1 is preferred because prose was already correct and was ignored.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1; skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "The migration cannot reach a clean validation result with the activation-breaking manifest or contradictory package mode.",
+      "falsifiable_check": "On a rerun or fixture with a literal <Namespace>.App entry point and WindowsPackageType=None, Validate-UwpMigration reports both failures before smoke launch; after correction, neither failure appears."
+    },
+    {
+      "problem": "The launch helper missed default SDK output and gave a generic hint for a known manifest-activation signature.",
+      "evidence": "lessons.json tools_problematic and dev_agent_struggles; session-log turns 65 and 69-71.",
+      "root_cause": "The helper encoded one bin path convention and classified only the outer CLR exception code.",
+      "tier": 1,
+      "change": "Discover the newest directory under bin containing an executable plus AppxManifest.xml, centralize validator discovery through target mode, and recognize the Application.Start apartment message.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "A normal default build is diagnosable without an extra platform build, and this activation failure points directly to the manifest invariant.",
+      "falsifiable_check": "Given a packaged default dotnet build outside bin\\x64\\Debug, Test-AppLaunch resolves its layout; given the recorded WER message, its JSON hint names EntryPoint=\"$targetentrypoint$\"."
+    },
+    {
+      "problem": "The WMC9999 guidance asserted a unique root cause that the trial disproved.",
+      "evidence": "skill-defects.json item 2 and session-log build errors in turns 40-57.",
+      "root_cause": "The documentation confused a generic markup-compiler cascade with a diagnostic.",
+      "tier": 3,
+      "change": "Correct the existing paragraph to prioritize specific CS####/WMC#### errors and audit resources only when WMC9999 remains alone. A lower tier cannot reliably infer the root cause from this compiler's generic secondary error.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents stop making speculative resource edits while actionable compiler errors remain.",
+      "falsifiable_check": "On a rerun with WMC9999 plus explicit errors, the agent fixes the explicit errors first and does not start a resource-key search unless WMC9999 persists."
+    }
+  ],
+  "deferred_to_human": []
+}

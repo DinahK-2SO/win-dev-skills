@@ -1,0 +1,15 @@
+{
+  "scenario": "PlayReady",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "All four migrated features were unreachable because packaged activation crashed, and the final unpackaged workaround removed AppxManifest.xml from build output.",
+      "evidence": "Package.appxmanifest lines 32-34 retained EntryPoint=\"PlayReady.App\"; session-log turns 69-71 captured COMException 0x8001010E at Application.Start; migration-score.json records candidate_launch_status failed and all four features failed.",
+      "covered_at": "MIGRATION-PATTERNS.md > 'Manifest migration checklist (Windows.Desktop + runFullTrust)', item 4, and 'Project File Migration' packaging guidance.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Promote the documented invariant into Validate-UwpMigration: require EntryPoint=\"$targetentrypoint$\" for every Application and reject WindowsPackageType=None when Package.appxmanifest is retained. Also map the specific Application.Start apartment message to this check.",
+      "generalizes": "The bootstrap copies UWP manifests, whose literal app-class entry points are incompatible with packaged WinUI activation; the same silent build-success/startup-crash pattern can recur in any packaged migration."
+    }
+  ]
+}

@@ -18,7 +18,7 @@ Checks (numbering matches the `# ─── N.` sections in the code):
 2. TODO[migrate-NNN] residue — every injected marker must be resolved
 3. MIGRATION-MAPPING.md integrity — .bootstrap-meta.json present, row count, labels filled, no row stuck at Status=copied
 4. MIGRATION-DEFERRED.md consistency — every defer row in mapping has a row here, and vice versa
-5. Package.appxmanifest image refs + WinAppSDK packaging (TargetDeviceFamily=Windows.Desktop, rescap, runFullTrust) + retained manifest <Extension>s (e.g. windows.backgroundTasks) required by kept code
+5. Package.appxmanifest image refs + WinAppSDK packaging (Windows.Desktop, rescap, runFullTrust, scaffold EntryPoint, package-mode consistency) + retained manifest <Extension>s required by kept code
 6. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
 7. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
 
@@ -339,6 +339,8 @@ if (Test-Path -LiteralPath $manifestPath) {
     #      stripped and the runFullTrust check below silently fails).
     #   3) <rescap:Capability Name="runFullTrust" /> present — packaged WinUI 3
     #      apps run elevated relative to AppContainer and must declare it.
+    #   4) <Application EntryPoint="$targetentrypoint$"> retained from the WinUI
+    #      scaffold; a literal UWP <Namespace>.App entry point crashes activation.
     # Real-world impact: run18 Printing and run19 BasicSuspension both built
     # cleanly but failed `winapp run` registration with "requires runFullTrust
     # capability" — the agent migrated code but never touched the manifest.
@@ -364,8 +366,23 @@ if (Test-Path -LiteralPath $manifestPath) {
         Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
         $manifestFailures++
     }
+    $applicationDeclarations = @([regex]::Matches(
+        $manifestText,
+        '<Application\b[^>]*>',
+        [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+    ))
+    $staleEntryPoints = @($applicationDeclarations | Where-Object {
+        $_.Value -notmatch '\bEntryPoint\s*=\s*"\$targetentrypoint\$"'
+    })
+    if ($applicationDeclarations.Count -eq 0 -or $staleEntryPoints.Count -gt 0) {
+        Write-Host '[FAIL] Package.appxmanifest <Application> does not use EntryPoint="$targetentrypoint$"'
+        Write-Host '       A literal UWP app-class entry point can build and register, then crash in Application.Start with RPC_E_WRONG_THREAD.'
+        Write-Host '       Fix: restore EntryPoint="$targetentrypoint$" from the WinUI 3 scaffold.'
+        Write-Host "       See MIGRATION-PATTERNS.md > 'Manifest migration checklist'."
+        $manifestFailures++
+    }
     if ($manifestFailures -eq 0) {
-        Write-Host "[PASS] Package.appxmanifest — Windows.Desktop target + rescap:runFullTrust capability declared"
+        Write-Host '[PASS] Package.appxmanifest — desktop target, WinUI entry point, and runFullTrust declared'
     } else {
         $failures += $manifestFailures
     }
@@ -429,6 +446,16 @@ if ($candidates.Count -eq 0) {
     }
 } else {
     $csproj = $candidates[0].FullName
+}
+
+if ($csproj -and (Test-Path -LiteralPath $manifestPath)) {
+    $projectText = Get-Content -LiteralPath $csproj -Raw
+    if ($projectText -match '<WindowsPackageType>\s*None\s*</WindowsPackageType>') {
+        Write-Host '[FAIL] Packaged migration has <WindowsPackageType>None</WindowsPackageType>'
+        Write-Host '       This suppresses AppxManifest.xml in build output, so winapp cannot register or launch the app.'
+        Write-Host '       Fix: remove WindowsPackageType=None when Package.appxmanifest is retained.'
+        $failures++
+    }
 }
 
 if (-not $csproj) {
@@ -567,91 +594,44 @@ if ($failures -eq 0 -and -not $env:UWP_MIGRATION_SKIP_SMOKE_LAUNCH) {
     if (-not $csproj -or -not $hasManifest -or -not $haveWinapp) {
         # Silent skip — not an applicable environment.
     } else {
-        # Discover the most recently written build-output layout.
-        # Prefer the host-arch x64/ARM64 Debug bin/<arch>/Debug/<tfm>/win-<rid>
-        # but fall back to whatever the newest TFM dir is. We always anchor to
-        # bin/<arch>/Debug and walk one level into the TFM dir.
-        $archSmoke = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'ARM64' } else { 'x64' }
-        $ridSmoke = $archSmoke.ToLower()
-        $launchFolder = $null
-        $binCandidates = @(
-            (Join-Path $csprojDirSmoke "bin\$archSmoke\Debug"),
-            (Join-Path $csprojDirSmoke "bin\$($archSmoke.ToLower())\Debug")
-        )
-        foreach ($bc in $binCandidates) {
-            if (-not (Test-Path -LiteralPath $bc)) { continue }
-            $tfmDir = Get-ChildItem -LiteralPath $bc -Directory -ErrorAction SilentlyContinue |
-                Where-Object { $_.Name -match '^net\d' } |
-                Sort-Object LastWriteTime -Descending |
-                Select-Object -First 1
-            if (-not $tfmDir) { continue }
-            $ridDir = Join-Path $tfmDir.FullName "win-$ridSmoke"
-            if (Test-Path -LiteralPath $ridDir) { $launchFolder = $ridDir; break }
-            $launchFolder = $tfmDir.FullName
-            break
+        Write-Host "[INFO] Smoke-launching app via Test-AppLaunch.ps1 (~10s settle)..."
+
+        # Delegate launch discovery + crash classification + WER capture to the
+        # shared diagnose script so Step 3 and validation use one implementation.
+        $testLaunch = Join-Path $PSScriptRoot 'Test-AppLaunch.ps1'
+        $launchJson = ''
+        try {
+            $launchJson = & powershell -NoProfile -ExecutionPolicy Bypass -File $testLaunch -Target $Target -Json 2>&1 | Out-String
+        } catch {
+            $launchJson = ''
         }
+        $lr = $null
+        if ($launchJson.Trim()) { try { $lr = $launchJson.Trim() | ConvertFrom-Json -ErrorAction Stop } catch { } }
 
-        if (-not $launchFolder) {
-            # Silent skip — the build hasn't produced a layout we can launch.
-            # This shouldn't normally happen because the build healthcheck just
-            # passed, but rather than emit a misleading FAIL we let the build
-            # step own that signal.
-        } else {
-            # Confirm the folder actually contains the .exe + AppxManifest.xml
-            # (winapp run will fail noisily otherwise, which we'd interpret as
-            # a launch crash). If either is missing, silent skip.
-            $hasExe = @(Get-ChildItem -LiteralPath $launchFolder -Filter '*.exe' -File -ErrorAction SilentlyContinue).Count -gt 0
-            $hasMfst = (Test-Path -LiteralPath (Join-Path $launchFolder 'AppxManifest.xml')) -or
-                       (Test-Path -LiteralPath (Join-Path $launchFolder 'AppX\AppxManifest.xml'))
-            if (-not ($hasExe -and $hasMfst)) {
-                # Silent skip — incomplete layout.
-            } else {
-                Write-Host "[INFO] Smoke-launching app via Test-AppLaunch.ps1 (~10s settle)..."
-
-                # Delegate launch + crash classification + WER capture to the
-                # shared diagnose script (the same tool Step 3 uses). It returns
-                # JSON: status = running | crashed | unavailable. Map to:
-                #   running     -> [PASS]
-                #   crashed     -> [FAIL]  (registered then died at startup — a real defect)
-                #   unavailable -> [WARN]  (deploy/env problem, not a code defect)
-                $testLaunch = Join-Path $PSScriptRoot 'Test-AppLaunch.ps1'
-                $launchJson = ''
-                try {
-                    $launchJson = & powershell -NoProfile -ExecutionPolicy Bypass -File $testLaunch -Layout $launchFolder -Json 2>&1 | Out-String
-                } catch {
-                    $launchJson = ''
-                }
-                $lr = $null
-                if ($launchJson.Trim()) { try { $lr = $launchJson.Trim() | ConvertFrom-Json -ErrorAction Stop } catch { } }
-
-                if (-not $lr) {
-                    # No parseable result — don't invent a verdict.
-                    Write-Host "[WARN] Smoke launch — diagnose helper returned no parseable result; skipping"
-                    Add-Diag 'Smoke launch: no parseable result' $launchJson
-                } elseif ($lr.status -eq 'running') {
-                    Write-Host "[PASS] Smoke launch — app stayed alive after launch (pid $($lr.pid))"
-                } elseif ($lr.status -eq 'crashed') {
-                    Write-Host "[FAIL] App crashed at startup — it registered, then died before showing a window (full diagnostics in .validator-diagnostics.txt):"
-                    if ($lr.crash) {
-                        if ($lr.crash.code)        { Write-Host "       Exception code : $($lr.crash.code)" }
-                        if ($lr.crash.managedType) { Write-Host "       .NET exception : $($lr.crash.managedType)" }
-                        if ($lr.crash.hint)        { Write-Host "       $($lr.crash.hint)" }
-                        if ($lr.crash.anchor)      { Write-Host "       Fix pattern    : Get-MigrationPattern.ps1 -Anchor $($lr.crash.anchor)" }
-                    }
-                    Write-Host "       Diagnose / reproduce: scripts/Test-AppLaunch.ps1 -Target `"$Target`""
-                    $diagText = "status: crashed`r`ndetail: $($lr.detail)`r`nlayout: $($lr.layout)"
-                    if ($lr.crash) {
-                        $diagText += "`r`ncode: $($lr.crash.code)`r`nmodule: $($lr.crash.module)`r`nmanagedType: $($lr.crash.managedType)`r`nmessage: $($lr.crash.message)`r`nhint: $($lr.crash.hint)`r`nanchor: $($lr.crash.anchor)"
-                    }
-                    Add-Diag 'Smoke launch: startup crash' $diagText
-                    $failures++
-                } else {
-                    # unavailable — inconclusive deploy/environment failure.
-                    Write-Host "[WARN] Smoke launch — could not launch the app (environment/deploy issue, not a code defect); skipping"
-                    if ($lr.detail) { Write-Host "       $($lr.detail)" }
-                    Add-Diag 'Smoke launch: unavailable (env)' "status: unavailable`r`ndetail: $($lr.detail)"
-                }
+        if (-not $lr) {
+            Write-Host "[WARN] Smoke launch — diagnose helper returned no parseable result; skipping"
+            Add-Diag 'Smoke launch: no parseable result' $launchJson
+        } elseif ($lr.status -eq 'running') {
+            Write-Host "[PASS] Smoke launch — app stayed alive after launch (pid $($lr.pid))"
+        } elseif ($lr.status -eq 'crashed') {
+            Write-Host "[FAIL] App crashed at startup — it registered, then died before showing a window (full diagnostics in .validator-diagnostics.txt):"
+            if ($lr.crash) {
+                if ($lr.crash.code)        { Write-Host "       Exception code : $($lr.crash.code)" }
+                if ($lr.crash.managedType) { Write-Host "       .NET exception : $($lr.crash.managedType)" }
+                if ($lr.crash.hint)        { Write-Host "       $($lr.crash.hint)" }
+                if ($lr.crash.anchor)      { Write-Host "       Fix pattern    : Get-MigrationPattern.ps1 -Anchor $($lr.crash.anchor)" }
             }
+            Write-Host "       Diagnose / reproduce: scripts/Test-AppLaunch.ps1 -Target `"$Target`""
+            $diagText = "status: crashed`r`ndetail: $($lr.detail)`r`nlayout: $($lr.layout)"
+            if ($lr.crash) {
+                $diagText += "`r`ncode: $($lr.crash.code)`r`nmodule: $($lr.crash.module)`r`nmanagedType: $($lr.crash.managedType)`r`nmessage: $($lr.crash.message)`r`nhint: $($lr.crash.hint)`r`nanchor: $($lr.crash.anchor)"
+            }
+            Add-Diag 'Smoke launch: startup crash' $diagText
+            $failures++
+        } else {
+            Write-Host "[WARN] Smoke launch — could not launch the app (environment/deploy issue, not a code defect); skipping"
+            if ($lr.detail) { Write-Host "       $($lr.detail)" }
+            Add-Diag 'Smoke launch: unavailable (env)' "status: unavailable`r`ndetail: $($lr.detail)"
         }
     }
 }

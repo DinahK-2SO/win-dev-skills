@@ -1,0 +1,27 @@
+{
+  "scenario": "PlayReady",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Test-AppLaunch could not discover a valid default dotnet build layout.",
+      "evidence": "session-log.txt turn 65 reported status=unavailable after turn 61's successful build; it worked only after turn 68 rebuilt with Platform=x64.",
+      "skill_search": "Test-AppLaunch.ps1 lines 118-134 searched only bin\\x64\\Debug and bin\\ARM64\\Debug.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "No build output found under bin\\x64\\Debug - build the project first.",
+      "root_cause": "The script inferred one output path convention instead of locating a directory containing both the executable and package manifest.",
+      "proposed_fix": "Search recursively under the project's bin directory for the newest launchable layout and make Validate-UwpMigration delegate target-mode discovery to the same helper.",
+      "generalizes": "SDK-style WinUI builds vary by explicit Platform, configuration, TFM, and RID; default builds commonly omit the platform directory."
+    },
+    {
+      "problem": "The skill gave an absolute and incorrect diagnosis for XAML Internal Error WMC9999.",
+      "evidence": "WMC9999 appeared beside CS0234/CS0246/CS0103 and explicit WMC0909/WMC1111 errors in turns 40-57, then disappeared after those errors and a temporary XAML file were fixed.",
+      "skill_search": "MIGRATION-PATTERNS.md section 'Resource references: DynamicResource -> ThemeResource'.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Treat WMC9999 on a XAML build as a dangling resource key, not a code bug.",
+      "root_cause": "WMC9999 is a generic markup-compiler cascade and does not uniquely identify a missing resource.",
+      "proposed_fix": "Tell agents to fix all specific CS####/WMC#### errors first and audit resources only if WMC9999 remains by itself.",
+      "generalizes": "Many WinUI XAML compiler failures emit WMC9999 as a secondary error, so premature resource-key edits waste time across unrelated migrations."
+    }
+  ]
+}

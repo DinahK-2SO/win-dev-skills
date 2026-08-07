@@ -32,8 +32,8 @@ via 'powershell -File' (Windows PowerShell 5.1), which reads a UTF-8-no-BOM file
 as ANSI; non-ASCII characters would corrupt parsing under 5.1.
 
 .PARAMETER Target
-The migrated WinUI 3 project root (the folder with the .csproj). The build-output
-layout is discovered under bin/<arch>/Debug/<tfm>/win-<rid>. Use this OR -Layout.
+The migrated WinUI 3 project root (the folder with the .csproj). The newest
+launchable build-output layout is discovered recursively under bin. Use this OR -Layout.
 
 .PARAMETER Layout
 An explicit build-output layout folder (the one containing AppxManifest.xml +
@@ -115,23 +115,18 @@ if ($PSCmdlet.ParameterSetName -eq 'Target') {
         Where-Object { $_.FullName -notmatch '\\(bin|obj|\.uwp-source)\\' } | Select-Object -First 1 -ExpandProperty FullName
     if (-not $csproj) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No .csproj found under $Target") }
     $csprojDir = Split-Path -Parent $csproj
-    $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'ARM64' } else { 'x64' }
-    $rid = $arch.ToLower()
-    # Walk bin/<arch>/Debug and one level into the newest TFM dir, then win-<rid>.
-    $binCandidates = @(
-        (Join-Path $csprojDir "bin\$arch\Debug"),
-        (Join-Path $csprojDir "bin\$rid\Debug")
-    )
-    foreach ($bin in $binCandidates) {
-        if (-not (Test-Path -LiteralPath $bin)) { continue }
-        $tfmDir = Get-ChildItem -LiteralPath $bin -Directory -ErrorAction SilentlyContinue |
-            Sort-Object LastWriteTime -Descending | Select-Object -First 1
-        if (-not $tfmDir) { continue }
-        $ridDir = Join-Path $tfmDir.FullName "win-$rid"
-        $Layout = if (Test-Path -LiteralPath $ridDir) { $ridDir } else { $tfmDir.FullName }
-        break
+    $binRoot = Join-Path $csprojDir 'bin'
+    if (Test-Path -LiteralPath $binRoot) {
+        $Layout = Get-ChildItem -LiteralPath $binRoot -Directory -Recurse -ErrorAction SilentlyContinue |
+            Where-Object {
+                @(Get-ChildItem -LiteralPath $_.FullName -Filter '*.exe' -File -ErrorAction SilentlyContinue).Count -gt 0 -and
+                ((Test-Path -LiteralPath (Join-Path $_.FullName 'AppxManifest.xml')) -or
+                 (Test-Path -LiteralPath (Join-Path $_.FullName 'AppX\AppxManifest.xml')))
+            } |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1 -ExpandProperty FullName
     }
-    if (-not $Layout) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No build output found under bin\$arch\Debug - build the project first.") }
+    if (-not $Layout) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No launchable build output found under bin - build the packaged project first.") }
 }
 
 if (-not (Test-Path -LiteralPath $Layout)) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "Layout folder not found: $Layout") }
@@ -187,6 +182,12 @@ function Get-CrashSignature {
         } elseif ($e1026.Message -match 'Exception Info:\s*([^\r\n]+)') {
             $sig.message = $matches[1].Trim()
         }
+    }
+
+    if ($sig.message -match 'Application Object must initially be accessed from the multi-thread apartment') {
+        $sig.hint = "Package activation is using a UWP app-class entry point. In Package.appxmanifest, restore the WinUI 3 scaffold value EntryPoint=`"`$targetentrypoint`$`" instead of a literal <Namespace>.App."
+        $sig.anchor = 'csproj'
+        return $sig
     }
 
     # Map the native exception code to a conservative hint + pattern anchor.

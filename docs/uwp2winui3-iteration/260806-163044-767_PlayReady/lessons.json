@@ -1,0 +1,136 @@
+{
+  "scenario": "PlayReady",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "The bootstrap copied the source, preserved the UWP project reference, generated MIGRATION-MAPPING.md, and the required Test-Path check returned true near the start of session-log.txt."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "Incremental builds exposed concrete namespace, import, color, and XAML errors; turn 61 ended with Build succeeded and 0 errors."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "evidence": "After an x64-specific rebuild, turn 69 classified the launch as crashed and captured System.Runtime.InteropServices.COMException with the wrong-thread message."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "Turn 70 returned only the startup-crashes section, including the WER event-log workflow used in the next turn."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "problem": "Its target-mode layout resolver only searched bin\\x64\\Debug or bin\\ARM64\\Debug, so a normal default dotnet build under bin\\Debug was reported as unavailable.",
+      "evidence": "Turn 65: status=unavailable, 'No build output found under bin\\x64\\Debug'; the tool only worked after turn 68 rebuilt with -p:Platform=x64."
+    },
+    {
+      "tool": "dotnet run",
+      "problem": "The packaged launch surfaced only Arg_COMException, and diagnostic verbosity produced 11.4 MB without the actionable WER stack.",
+      "evidence": "Turns 64 and 75-76; the actionable exception appeared in Application event 1026 instead."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "The manifest checks covered desktop target, rescap, runFullTrust, and images but not the WinUI scaffold EntryPoint placeholder or a contradictory WindowsPackageType=None.",
+      "suggested_tweak": "Fail when a retained Package.appxmanifest does not use EntryPoint=\"$targetentrypoint$\" or the project suppresses packaging with WindowsPackageType=None."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "Layout discovery depended on an explicit Platform build and its generic CLR-exception hint did not recognize the specific Application.Start apartment message.",
+      "suggested_tweak": "Discover the newest launchable layout recursively under bin and map the known message to the manifest entry-point invariant."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "Windows.UI.Colors",
+      "why_tried": "The migrated status UI retained the UWP color helper while using a WinUI SolidColorBrush.",
+      "root_cause": "Windows.UI.Colors was not available in the target projection.",
+      "fix": "The agent replaced named colors with Color.FromArgb values in MainPage.xaml.cs."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "MIGRATION-PATTERNS.md, XAML Migration > Resource references",
+      "wrong": "The text said to treat WMC9999 as a dangling resource key rather than a code bug.",
+      "correct": "WMC9999 is a cascade. Fix explicit CS#### and WMC#### errors first; audit resource keys only if WMC9999 remains alone."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "MediaElement / MediaPlayerElement with PlayReady",
+      "special_handling": "The XAML control was replaced with MediaPlayerElement while the Windows.Media.Playback.MediaPlayer retained its MediaProtectionManager/PlayReady wiring through a small host object."
+    },
+    {
+      "api": "Package.appxmanifest Application EntryPoint",
+      "special_handling": "A packaged WinUI 3 app must retain the scaffold placeholder EntryPoint=\"$targetentrypoint$\"; copying the UWP literal <Namespace>.App entry point can register and then crash in Application.Start."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "CS0234/CS0246 for SDKTemplate.ViewModels and RelayCommand",
+      "root_cause": "Copied files mixed the UWP SDKTemplate namespace with the target PlayReady root namespace.",
+      "fix": "Normalize C# namespaces, XAML x:Class/xmlns declarations, and using directives to PlayReady."
+    },
+    {
+      "error": "CS0103 DispatcherQueue and CS0246 Page/NavigationView",
+      "root_cause": "Authored shell code referenced an unqualified dispatcher variable and then accidentally removed the Microsoft.UI.Xaml.Controls import.",
+      "fix": "Use _window.DispatcherQueue and restore the WinUI controls using directive."
+    },
+    {
+      "error": "CS0234/CS0103 for Colors",
+      "root_cause": "The shell retained a UWP color helper that was not projected in the target.",
+      "fix": "Use explicit Color.FromArgb values."
+    },
+    {
+      "error": "WMC0909/WMC1111 in _ref_MainPage.xaml",
+      "root_cause": "A temporary UWP reference XAML file was copied into the SDK project's default compile glob.",
+      "fix": "Delete the temporary _ref_MainPage.xaml file."
+    },
+    {
+      "error": "AppxManifest 0x80070002 / 0x80073CF6 for Splash-sdk.png",
+      "root_cause": "The copied UWP manifest referenced branded assets that were not copied into the target.",
+      "fix": "Point manifest image attributes at the scaffold assets that exist."
+    },
+    {
+      "error": "COMException 0x8001010E at Microsoft.UI.Xaml.Application.Start",
+      "root_cause": "Package.appxmanifest retained the UWP literal EntryPoint=\"PlayReady.App\" instead of the WinUI scaffold EntryPoint=\"$targetentrypoint$\".",
+      "fix": "Restore the WinUI entry-point placeholder; prevent recurrence with a validator check."
+    },
+    {
+      "error": "winapp run found no package manifest in the final build output",
+      "root_cause": "The agent added <WindowsPackageType>None</WindowsPackageType> while retaining a packaged migration.",
+      "fix": "Remove WindowsPackageType=None for packaged projects and make the validator reject this contradiction."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Turns 62-80, launch diagnosis",
+      "symptom": "The agent retried packaged and unpackaged launches, rebuilt for x64, emitted a huge diagnostic log, inspected generated Main, and changed package type without fixing startup.",
+      "turns_or_retries": "Approximately 19 turns and four launch attempts.",
+      "root_cause": "The manifest used a UWP literal application entry point, while validation did not enforce the already-documented WinUI placeholder.",
+      "how_resolved": "Not resolved during migration; scoring confirmed the app remained unreachable.",
+      "preventable_by": "Validate the Application EntryPoint and packaging-mode consistency before build/launch, and give the specific Application.Start apartment message a manifest-focused hint."
+    },
+    {
+      "where": "Turns 65-69, launch helper",
+      "symptom": "Test-AppLaunch reported no output after a successful default build, forcing another platform-specific build.",
+      "turns_or_retries": "One failed diagnostic and one extra build before retry.",
+      "root_cause": "Hard-coded bin\\<arch>\\Debug layout assumptions.",
+      "how_resolved": "The agent rebuilt with -p:Platform=x64.",
+      "preventable_by": "Discover launchable layouts by their executable and AppxManifest.xml rather than by one path convention."
+    },
+    {
+      "where": "Turns 40-61, compile loop",
+      "symptom": "Several rebuilds were needed for namespace mismatches, accidentally removed imports, stale colors, and a temporary XAML file included in compilation.",
+      "turns_or_retries": "Roughly 21 turns before the first clean build.",
+      "root_cause": "One-off editing mistakes and a temporary file placed under the project default glob.",
+      "how_resolved": "The compiler's specific errors were fixed sequentially and the temporary file was removed.",
+      "preventable_by": "Follow the existing first-error build loop and keep reference artifacts outside the project compile tree."
+    }
+  ],
+  "missing_tooling": [],
+  "env_issues": []
+}
