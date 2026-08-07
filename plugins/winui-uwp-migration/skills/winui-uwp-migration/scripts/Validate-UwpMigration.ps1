@@ -18,9 +18,10 @@ Checks (numbering matches the `# ─── N.` sections in the code):
 2. TODO[migrate-NNN] residue — every injected marker must be resolved
 3. MIGRATION-MAPPING.md integrity — .bootstrap-meta.json present, row count, labels filled, no row stuck at Status=copied
 4. MIGRATION-DEFERRED.md consistency — every defer row in mapping has a row here, and vice versa
-5. Package.appxmanifest image refs + WinAppSDK packaging (TargetDeviceFamily=Windows.Desktop, rescap, runFullTrust) + retained manifest <Extension>s (e.g. windows.backgroundTasks) required by kept code
-6. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
-7. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
+5. Merged ResourceDictionary Source URIs resolve to XAML files in the target
+6. Package.appxmanifest image refs + WinAppSDK packaging (TargetDeviceFamily=Windows.Desktop, rescap, runFullTrust) + retained manifest <Extension>s (e.g. windows.backgroundTasks) required by kept code
+7. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
+8. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
 
 .PARAMETER Target
 Migrated WinUI 3 project root (same folder used as -Target for
@@ -274,7 +275,48 @@ if (-not (Test-Path -LiteralPath $mapPath)) {
     }
 }
 
-# ─── 5. Package.appxmanifest image references ─────────────────────────────────
+# ─── 5. Merged ResourceDictionary Source URIs ─────────────────────────────────
+# A missing dictionary file is accepted by the XAML compiler but crashes during
+# Application.InitializeComponent with a native stowed exception. Catch the
+# deterministic path error before the less-specific runtime smoke result.
+$dictionaryHits = New-Object System.Collections.Generic.List[object]
+$xamlFiles = Get-ChildItem -Path $Target -Recurse -File -Filter *.xaml -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch $excludePattern }
+foreach ($f in $xamlFiles) {
+    $rel = [System.IO.Path]::GetRelativePath($Target, $f.FullName)
+    if ($deferredFiles.ContainsKey($rel)) { continue }
+    $text = [System.IO.File]::ReadAllText($f.FullName)
+    foreach ($match in [regex]::Matches($text, '<ResourceDictionary\b[^>]*\bSource\s*=\s*"([^"]+)"', 'IgnoreCase')) {
+        $uri = $match.Groups[1].Value.Trim()
+        if (($uri -match '^\{') -or (($uri -match '^[a-z]+://') -and ($uri -notmatch '^ms-appx:///'))) { continue }
+        if ($uri -match ';component/') { continue }
+
+        $pathPart = ((($uri -replace '^ms-appx:///', '/') -split '[?#]', 2)[0]).Replace('/', '\')
+        $resolved = if ($pathPart.StartsWith('\')) {
+            Join-Path $Target $pathPart.TrimStart('\')
+        } else {
+            Join-Path $f.DirectoryName $pathPart
+        }
+        if (-not (Test-Path -LiteralPath $resolved -PathType Leaf)) {
+            $line = ($text.Substring(0, $match.Index) -split "`r?`n").Count
+            [void]$dictionaryHits.Add([PSCustomObject]@{ File = $rel; Line = $line; Uri = $uri; Expected = $resolved })
+        }
+    }
+}
+if ($dictionaryHits.Count -eq 0) {
+    Write-Host "[PASS] ResourceDictionary Source URIs resolve to target XAML files"
+} else {
+    Write-Host "[FAIL] $($dictionaryHits.Count) ResourceDictionary Source URI(s) point to missing target files (full diagnostics in .validator-diagnostics.txt):"
+    $diagBlock = New-Object System.Collections.Generic.List[string]
+    foreach ($h in $dictionaryHits) {
+        Write-Host "       $($h.File):$($h.Line)"
+        [void]$diagBlock.Add("$($h.File):$($h.Line)  Source='$($h.Uri)'  expected='$($h.Expected)'")
+    }
+    Add-Diag 'ResourceDictionary Source URIs' (($diagBlock) -join "`r`n")
+    $failures++
+}
+
+# ─── 6. Package.appxmanifest image references ─────────────────────────────────
 # AppX deployment (winapp run) fails with 0x80073CF6 / "image cannot be located"
 # when the manifest references image files that don't exist on disk. UWP samples
 # typically use names like `Splash-sdk.png` / `StoreLogo-sdk.png` while the
@@ -328,7 +370,7 @@ if (Test-Path -LiteralPath $manifestPath) {
         $failures++
     }
 
-    # ─── 5b. Package.appxmanifest WinUI 3 packaging requirements ──────────────
+    # ─── 6b. Package.appxmanifest WinUI 3 packaging requirements ──────────────
     # `winapp run` refuses to register the AppX when the manifest still looks
     # UWP-shaped. Three things must be true for the packaged desktop app to
     # deploy and activate on Windows 10/11:
@@ -401,7 +443,7 @@ if (Test-Path -LiteralPath $manifestPath) {
     Write-Host "[WARN] Package.appxmanifest not found at $manifestPath — skipping image-reference check"
 }
 
-# ─── 6. dotnet build healthcheck ──────────────────────────────────────────────
+# ─── 7. dotnet build healthcheck ──────────────────────────────────────────────
 # The validator must gate on a clean build, otherwise common namespace-rewrite
 # fallout (CS0104 LaunchActivatedEventArgs ambiguity, CS0246 scaffold-vs-UWP
 # namespace mismatch like MainWindow.xaml.cs referencing a moved MainPage, etc.)
@@ -438,7 +480,7 @@ if (-not $csproj) {
     # no external wrapper. `-t:Rebuild` forces a fresh compile so analyzers
     # re-emit on every run. WUI* analyzer warnings (UWP-only API residue) surface
     # here when the WindowsAppSDK analyzer is referenced by the project; the
-    # Step 7 runtime smoke launch is the backstop that catches the same residue
+    # Step 8 runtime smoke launch is the backstop that catches the same residue
     # at startup (those APIs compile, then throw at activation).
     $haveDotnet = [bool](Get-Command dotnet -ErrorAction SilentlyContinue)
 
@@ -529,7 +571,7 @@ if (-not $csproj) {
     }
 }
 
-# ─── 7. Runtime smoke launch ──────────────────────────────────────────────────
+# ─── 8. Runtime smoke launch ──────────────────────────────────────────────────
 # A packaged WinUI 3 app can build cleanly and still crash on startup. A common
 # UWP→WinUI 3 culprit is the static-window init-order race (a Page reads
 # App.MainWindow before OnLaunched assigns it → E_POINTER 0x80004003), but there

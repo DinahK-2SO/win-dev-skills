@@ -1,0 +1,21 @@
+{
+  "scenario": "PenHaptics",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The deferred inking scenario remained partially referenced and its manually added XAML was not excluded, causing CS0246 and three residue-cleanup iterations.",
+      "evidence": "session-log.txt turns 24-29 left Scenario1 type references after Compile removal; turns 35-41 edited and then deleted its XAML.",
+      "covered_clearly_at": "SKILL.md Step 1 defer rule: 'exclude from build and navigation'; Navigation invariants item 4: deferred items are omitted; MIGRATION-PATTERNS.md#controls explicitly says InkCanvas has no replacement and must be deferred.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The required full exclusion is already explicit and prominent; the linked-file tooling defect explains why the XAML lacked the same defer mapping, while remaining type references were a one-off cleanup miss."
+    },
+    {
+      "problem": "The agent made ordinary compiler-directed reconstruction mistakes: ambiguous DispatcherQueue, unresolved x:Bind model, projected-type operator use, style keys treated as fields, an unassigned local, and required members on a XAML-activated model.",
+      "evidence": "session-log.txt turns 25-32 show the compiler errors and direct fixes over five builds.",
+      "covered_clearly_at": "SKILL.md Fidelity says copy XAML verbatim then transform and Step 3 says build, fix the first error, and repeat; MIGRATION-PATTERNS.md#threading names Microsoft.UI.Dispatching.DispatcherQueue and #x:Bind states XAML types must resolve.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "These errors arose in manually reconstructed scenario-specific code and were resolved directly from precise compiler diagnostics; adding prose for each would not improve the core migration workflow."
+    }
+  ]
+}

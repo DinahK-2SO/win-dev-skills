@@ -21,7 +21,7 @@ layout via 'winapp run --detach --json', waits for the cold-start window, and:
 It NEVER throws on an operational failure; it returns a structured result and
 (with -Json) prints it as JSON. This is the single source of truth for the
 "did the migrated app launch" question - both Step 3 (interactive, when the app
-first crashes) and the Step 4 validator (Section 7) call it.
+first crashes) and the Step 4 validator (Section 8) call it.
 
 WHY THIS MATTERS: the common failure mode is an agent that sees a startup crash
 and hand-rolls File.WriteAllText tracing for the rest of its budget. Don't. Run
@@ -33,7 +33,8 @@ as ANSI; non-ASCII characters would corrupt parsing under 5.1.
 
 .PARAMETER Target
 The migrated WinUI 3 project root (the folder with the .csproj). The build-output
-layout is discovered under bin/<arch>/Debug/<tfm>/win-<rid>. Use this OR -Layout.
+layout is discovered under both bin/<arch>/Debug and the default dotnet
+bin/Debug layout. Use this OR -Layout.
 
 .PARAMETER Layout
 An explicit build-output layout folder (the one containing AppxManifest.xml +
@@ -117,21 +118,29 @@ if ($PSCmdlet.ParameterSetName -eq 'Target') {
     $csprojDir = Split-Path -Parent $csproj
     $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'ARM64' } else { 'x64' }
     $rid = $arch.ToLower()
-    # Walk bin/<arch>/Debug and one level into the newest TFM dir, then win-<rid>.
+    # winapp build normally emits bin/<arch>/Debug, while a plain dotnet build
+    # emits bin/Debug. Search both shapes for the newest launchable layout.
     $binCandidates = @(
         (Join-Path $csprojDir "bin\$arch\Debug"),
-        (Join-Path $csprojDir "bin\$rid\Debug")
+        (Join-Path $csprojDir "bin\$rid\Debug"),
+        (Join-Path $csprojDir "bin\Debug")
     )
+    $layoutCandidates = New-Object System.Collections.Generic.List[System.IO.DirectoryInfo]
     foreach ($bin in $binCandidates) {
         if (-not (Test-Path -LiteralPath $bin)) { continue }
-        $tfmDir = Get-ChildItem -LiteralPath $bin -Directory -ErrorAction SilentlyContinue |
-            Sort-Object LastWriteTime -Descending | Select-Object -First 1
-        if (-not $tfmDir) { continue }
-        $ridDir = Join-Path $tfmDir.FullName "win-$rid"
-        $Layout = if (Test-Path -LiteralPath $ridDir) { $ridDir } else { $tfmDir.FullName }
-        break
+        Get-ChildItem -LiteralPath $bin -Directory -Recurse -ErrorAction SilentlyContinue |
+            ForEach-Object { [void]$layoutCandidates.Add($_) }
     }
-    if (-not $Layout) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No build output found under bin\$arch\Debug - build the project first.") }
+    foreach ($candidate in ($layoutCandidates | Sort-Object LastWriteTime -Descending)) {
+        $candidateExes = @(Get-ChildItem -LiteralPath $candidate.FullName -Filter '*.exe' -File -ErrorAction SilentlyContinue)
+        $candidateHasManifest = (Test-Path -LiteralPath (Join-Path $candidate.FullName 'AppxManifest.xml')) -or
+                                (Test-Path -LiteralPath (Join-Path $candidate.FullName 'AppX\AppxManifest.xml'))
+        if ($candidateExes.Count -gt 0 -and $candidateHasManifest) {
+            $Layout = $candidate.FullName
+            break
+        }
+    }
+    if (-not $Layout) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No launchable build output found under bin\$arch\Debug or bin\Debug - build the project first.") }
 }
 
 if (-not (Test-Path -LiteralPath $Layout)) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "Layout folder not found: $Layout") }

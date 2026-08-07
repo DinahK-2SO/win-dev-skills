@@ -1,0 +1,189 @@
+{
+  "scenario": "PenHaptics",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 2-3: bootstrap completed, rewrote namespaces, identified one unsupported code-behind file, and seeded mapping artifacts."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt turns 25-32: compiler diagnostics exposed each concrete C#/XAML incompatibility and the build eventually succeeded."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 35-42: validator found residue, confirmed mapping/manifest/build health, and correctly failed the startup smoke gate."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt turns 4 and 42: focused anchors supplied project, windowing, threading, navigation, and startup-crash guidance without loading the whole patterns file."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "It copied only files physically below the project directory and ignored explicit UWP csproj Include+Link items.",
+      "evidence": "session-log.txt turn 2 reports only 7 copied files; the preserved csproj lines 130-190 reference MainPage.xaml, Styles/Styles.xaml, five scenario XAML files, and assets outside the project directory."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "problem": "It did not discover the default bin/Debug output produced by dotnet build.",
+      "evidence": "session-log.txt turn 33 returned status=unavailable and 'No build output found under bin\\x64\\Debug' immediately after a successful build at bin\\Debug in turn 32."
+    },
+    {
+      "tool": "startup crash diagnostics",
+      "problem": "The 0xc000027b hint only suggested legacy API/projection incompatibility and provided no check for missing XAML resource files.",
+      "evidence": "session-log.txt turns 41-47 repeatedly reported Microsoft.UI.Xaml.dll code 0xc000027b without a managed stack; generated App.xaml referenced /Styles/Styles.xaml while the agent placed Styles.xaml at the project root."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "Recursive source-root copying cannot preserve files linked from sibling shared-content directories.",
+      "suggested_tweak": "Parse explicit Compile/Page/ApplicationDefinition/Content/Resource Include items and materialize them at their Link paths."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "Build and generic smoke launch did not detect a ResourceDictionary Source URI whose target file was absent.",
+      "suggested_tweak": "Resolve local ResourceDictionary Source URIs against the target tree and fail with the exact XAML line before launch."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "Layout discovery assumed architecture-segmented output.",
+      "suggested_tweak": "Search both bin/<arch>/Debug and bin/Debug recursively for the newest exe+manifest layout."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "InkCanvas / InkToolbar",
+      "why_tried": "The source's first scenario uses the UWP inking controls.",
+      "root_cause": "These controls have no WinUI 3 desktop equivalent.",
+      "fix": "Defer the complete scenario, exclude both XAML and code-behind from build and navigation, and record it in MIGRATION-DEFERRED.md."
+    },
+    {
+      "api": "PointerDeviceType operator comparison",
+      "why_tried": "Copied pointer handlers compared the projected device type with !=.",
+      "root_cause": "The projected PointerDeviceType operands did not support the != operator in this target.",
+      "fix": "Use Equals(PointerDeviceType.Pen), as applied in session-log.txt turn 29."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "Initialize-UwpMigration.ps1 synopsis/Step 1",
+      "wrong": "It claimed to copy project source while only scanning descendants of -Source.",
+      "correct": "Project fidelity also requires resolving explicit csproj Include+Link items outside -Source and preserving their Link destinations."
+    },
+    {
+      "where": "MIGRATION-PATTERNS.md#startup-crashes, 0xc000027b row",
+      "wrong": "The only actionable cause offered was legacy projection/activation incompatibility.",
+      "correct": "A native stowed XAML exception can also result from a local merged ResourceDictionary URI that points to a missing packaged XAML file; validate those paths mechanically."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "PenDevice.GetFromPointerId / PenDevice.SimpleHapticsController",
+      "special_handling": "Guard use for Windows 10 version 1903 (10.0.18362) or later and retain a visible unsupported-hardware path; the build emitted CA1416 for an app minimum of 10.0.17763."
+    },
+    {
+      "api": "ResourceDictionary Source",
+      "special_handling": "The URI must match the packaged target path exactly; a clean XAML build does not prove that a merged dictionary will load at Application.InitializeComponent."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "WMC0001 unknown InkToolbar/InkCanvas",
+      "root_cause": "The manually restored linked XAML contained controls unsupported by WinUI 3.",
+      "fix": "Exclude/defer the entire scenario XAML and code-behind."
+    },
+    {
+      "error": "CS0104 DispatcherQueue ambiguous between Microsoft.UI.Dispatching and Windows.System",
+      "root_cause": "Both namespaces were in scope after shell migration.",
+      "fix": "Fully qualify Microsoft.UI.Dispatching.DispatcherQueue."
+    },
+    {
+      "error": "WMC0909/WMC1111 could not resolve local:Scenario for x:Bind",
+      "root_cause": "The manually reconstructed template could not resolve the moved data type during XAML compilation.",
+      "fix": "Use ordinary Binding for the simple Title template or expose a XAML-resolvable public model type."
+    },
+    {
+      "error": "CS0246 Scenario1_InkCanvasTactileFeedback not found",
+      "root_cause": "The deferred class was removed from compilation but remained referenced in the scenario list and skip logic.",
+      "fix": "Remove every deferred type reference from navigation/configuration."
+    },
+    {
+      "error": "CS0019 PointerDeviceType != PointerDeviceType",
+      "root_cause": "The projected type did not define the inequality operator.",
+      "fix": "Compare with Equals."
+    },
+    {
+      "error": "CS0103 MovableRectangle/MovableRectangleDragged not found",
+      "root_cause": "XAML resource keys were treated as generated code-behind fields.",
+      "fix": "The agent added names to the resources; a resource lookup is the safer general pattern when code needs a keyed Style."
+    },
+    {
+      "error": "CS0165 snappedPoint unassigned",
+      "root_cause": "Control flow did not definitely assign the local before use.",
+      "fix": "Initialize the Point before conditional snap calculations."
+    },
+    {
+      "error": "CS9035 required Scenario members from XamlTypeInfo.g.cs",
+      "root_cause": "The XAML generator activates the model through a parameterless construction path incompatible with required members.",
+      "fix": "Use default-initialized non-required properties for XAML-activatable model types."
+    },
+    {
+      "error": "WMC9999 with legacy resource keys",
+      "root_cause": "Copied UWP theme/style resource keys were not valid in the WinUI 3 resource set.",
+      "fix": "Replace them with current Fluent resources or explicit style values."
+    },
+    {
+      "error": "0xc000027b in Microsoft.UI.Xaml.dll at startup",
+      "root_cause": "The migrated App.xaml referenced /Styles/Styles.xaml, but manual reconstruction placed Styles.xaml at the project root; the generic crash signal did not expose the missing URI.",
+      "fix": "Preserve the csproj Link path Styles/Styles.xaml during bootstrap and validate every local merged-dictionary Source URI before launch."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log.txt turns 4-24",
+      "symptom": "The agent searched sibling SharedContent folders and manually recreated the shell, styles, five XAML pages, and assets.",
+      "turns_or_retries": "About 20 turns before the first meaningful build.",
+      "root_cause": "Bootstrap omitted explicit linked project items and seeded an incomplete 7-row mapping.",
+      "how_resolved": "The agent manually read and recreated linked content, introducing path and compilation differences.",
+      "preventable_by": "Resolve csproj Include+Link items in Initialize-UwpMigration.ps1."
+    },
+    {
+      "where": "session-log.txt turns 25-32",
+      "symptom": "Five build iterations exposed ambiguity, XAML binding, deferred-reference, projected-type, style-resource, definite-assignment, and required-member errors.",
+      "turns_or_retries": "Five builds.",
+      "root_cause": "Manual reconstruction replaced the intended copy-then-transform workflow and left cross-file inconsistencies.",
+      "how_resolved": "The agent applied compiler-directed fixes until the build succeeded.",
+      "preventable_by": "Copy linked source verbatim and include it in bootstrap triage/TODO injection."
+    },
+    {
+      "where": "session-log.txt turns 35-41",
+      "symptom": "Validator repeatedly flagged unsupported identifiers inside a deferred XAML file, leading first to text edits and then file deletion.",
+      "turns_or_retries": "Three validator runs.",
+      "root_cause": "Only the code-behind was in the bootstrap mapping; its linked XAML counterpart had been manually added and was therefore not recognized as deferred.",
+      "how_resolved": "The agent deleted the XAML file.",
+      "preventable_by": "Include linked XAML as its own mapped/deferred row during bootstrap."
+    },
+    {
+      "where": "session-log.txt turns 33-47",
+      "symptom": "The launch helper first missed the build, then three launches crashed with the same native stowed exception; resource-key rewrites did not resolve it.",
+      "turns_or_retries": "One unavailable launch plus three crashing launches.",
+      "root_cause": "Layout discovery omitted bin/Debug, and crash diagnostics did not mechanically check the mismatched merged-dictionary path.",
+      "how_resolved": "Unresolved at trial end.",
+      "preventable_by": "Search both output layouts and add a ResourceDictionary Source path validator."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "UWP csproj linked-item materialization",
+      "would_have_saved": "Manual recreation of shared shell/XAML/assets and most downstream build errors."
+    },
+    {
+      "need": "Merged ResourceDictionary URI validation",
+      "would_have_saved": "The unresolved startup-crash investigation and the zero candidate score."
+    }
+  ],
+  "env_issues": []
+}

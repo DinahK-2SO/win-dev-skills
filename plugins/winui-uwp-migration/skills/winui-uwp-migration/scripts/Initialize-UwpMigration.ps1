@@ -10,7 +10,8 @@ workflow to confirm residue grep, mapping integrity, deferred consistency,
 build cleanliness, and runtime smoke.
 
 Steps:
-1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
+1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure,
+   including explicit linked files declared outside the project directory by the UWP .csproj
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
@@ -76,6 +77,29 @@ $srcExcludeDirs = @('bin', 'obj', '.vs', '.git', '.github', '.copilot', 'package
 $srcExcludePattern = '\\(' + ($srcExcludeDirs -join '|') + ')\\'
 
 $copied = New-Object System.Collections.Generic.List[string]
+$copiedSet = New-Object System.Collections.Generic.HashSet[string] ([System.StringComparer]::OrdinalIgnoreCase)
+
+function Copy-MigrationInput {
+    param(
+        [Parameter(Mandatory)][string]$SourcePath,
+        [Parameter(Mandatory)][string]$TargetRelativePath
+    )
+
+    $rel = $TargetRelativePath.Replace('/', '\').TrimStart('\')
+    if ([System.IO.Path]::IsPathRooted($rel) -or $rel -match '(^|\\)\.\.(\\|$)') {
+        throw "Refusing unsafe target-relative path '$TargetRelativePath' for '$SourcePath'"
+    }
+
+    $dst = Join-Path $Target $rel
+    $dstDir = [System.IO.Path]::GetDirectoryName($dst)
+    if (-not (Test-Path -LiteralPath $dstDir)) {
+        New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
+    }
+    Copy-Item -LiteralPath $SourcePath -Destination $dst -Force
+    if ($copiedSet.Add($rel)) {
+        [void]$copied.Add($rel)
+    }
+}
 
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
@@ -88,16 +112,8 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
     $match
 } | ForEach-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
-    $dst = Join-Path $Target $rel
-    $dstDir = [System.IO.Path]::GetDirectoryName($dst)
-    if (-not (Test-Path -LiteralPath $dstDir)) {
-        New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
-    }
-    Copy-Item -LiteralPath $_.FullName -Destination $dst -Force
-    [void]$copied.Add($rel)
+    Copy-MigrationInput -SourcePath $_.FullName -TargetRelativePath $rel
 }
-
-Write-Host "    Copied $($copied.Count) source files"
 
 # ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
 $uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
@@ -110,10 +126,38 @@ if ($uwpCsprojs.Count -gt 0) {
         $dst = Join-Path $refDir $p.Name
         Copy-Item -LiteralPath $p.FullName -Destination $dst -Force
         Write-Host "    Preserved $($p.Name) at .uwp-source/ (reference only — do not edit, do not include in build)"
+
+        # UWP SDK samples commonly keep shared XAML, code, and assets outside the
+        # project directory and import them with Include + Link. A recursive copy
+        # rooted at -Source cannot see those files, so resolve explicit project
+        # items and materialize them at their linked target paths.
+        [xml]$projectXml = Get-Content -LiteralPath $p.FullName -Raw
+        $projectDir = $p.DirectoryName
+        $linkedItemTypes = @('Compile', 'Page', 'ApplicationDefinition', 'Content', 'Resource', 'EmbeddedResource')
+        foreach ($item in $projectXml.SelectNodes('//*[local-name()="ItemGroup"]/*[@Include]')) {
+            if ($linkedItemTypes -notcontains $item.LocalName) { continue }
+            $include = [string]$item.Include
+            if ([string]::IsNullOrWhiteSpace($include) -or $include -match '[$*?]') { continue }
+
+            $inputPath = [System.IO.Path]::GetFullPath((Join-Path $projectDir $include))
+            if (-not (Test-Path -LiteralPath $inputPath -PathType Leaf)) { continue }
+
+            $linkNode = $item.SelectSingleNode('*[local-name()="Link"]')
+            if ($linkNode -and -not [string]::IsNullOrWhiteSpace($linkNode.InnerText)) {
+                $targetRel = $linkNode.InnerText
+            } elseif ($inputPath.StartsWith($Source + '\', [System.StringComparison]::OrdinalIgnoreCase)) {
+                $targetRel = [System.IO.Path]::GetRelativePath($Source, $inputPath)
+            } else {
+                $targetRel = [System.IO.Path]::GetFileName($inputPath)
+            }
+
+            Copy-MigrationInput -SourcePath $inputPath -TargetRelativePath $targetRel
+        }
     }
 } else {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
 }
+Write-Host "    Copied $($copied.Count) source files (including explicit linked project items)"
 
 # ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────
 $excludeDirs = @('bin', 'obj', '.uwp-source', '.vs', '.git', '.github', '.copilot')

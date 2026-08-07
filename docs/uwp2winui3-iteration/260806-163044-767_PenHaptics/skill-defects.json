@@ -1,0 +1,37 @@
+{
+  "scenario": "PenHaptics",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap omitted UWP project items linked from sibling shared-content directories, producing an incomplete mapping and cascading manual-reconstruction errors.",
+      "evidence": "session-log.txt turn 2 copied 7 files and mapped no linked XAML; the preserved PenHaptics.csproj lines 130-190 declares linked MainPage, Styles, five scenario pages, and assets; turns 4-32 show manual recreation and repeated build errors.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Link, Compile Include, Page Include, Content Include, and SharedContent; only recursive Get-ChildItem under -Source existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap treated the project directory tree as the complete project instead of honoring explicit MSBuild Include+Link inputs.",
+      "proposed_fix": "Parse explicit source-bearing csproj items, copy external inputs to their Link paths, and include those target paths in namespace rewrite, triage, mapping, and deferred artifacts.",
+      "generalizes": "UWP SDK samples and multi-project apps commonly link shared XAML, helpers, resources, and media from sibling directories."
+    },
+    {
+      "problem": "A missing merged ResourceDictionary target survived build and produced an opaque startup crash that made all five scored features unavailable.",
+      "evidence": "migration-score.json reports candidate launch failed and 5/5 features failed; session-log.txt turns 41-47 show repeated 0xc000027b Microsoft.UI.Xaml.dll crashes; generated App.xaml references /Styles/Styles.xaml while the generated file was at root Styles.xaml.",
+      "skill_search": "Searched SKILL.md, MIGRATION-PATTERNS.md, and validator for ResourceDictionary, MergedDictionaries, Source URI, and resource URI; only theme resource-key guidance existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "No deterministic validation connected local ResourceDictionary Source URIs to packaged target files; the 0xc000027b guidance over-focused on legacy API activation.",
+      "proposed_fix": "Add a validator gate that resolves local and ms-appx ResourceDictionary Source URIs and reports missing target files before build/launch diagnosis.",
+      "generalizes": "Shared UWP resource dictionaries are frequently linked or moved during migration, and URI/path mismatches commonly build successfully but fail during XAML initialization."
+    },
+    {
+      "problem": "Test-AppLaunch.ps1 could not discover a valid default dotnet build output.",
+      "evidence": "session-log.txt turn 32 built successfully to bin\\Debug; turn 33 immediately returned status=unavailable because it only searched bin\\x64\\Debug.",
+      "skill_search": "Inspected Test-AppLaunch.ps1 layout discovery and found only bin/<arch>/Debug and bin/<rid>/Debug candidates.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "No build output found under bin\\x64\\Debug - build the project first.",
+      "root_cause": "The helper assumed winapp/Platform-segmented output even though the skill also permits native dotnet build.",
+      "proposed_fix": "Search both architecture-segmented and default bin/Debug trees for the newest directory containing an executable and AppxManifest.",
+      "generalizes": "Any migration using ordinary dotnet build before the smoke launch can emit the default non-Platform-segmented layout."
+    }
+  ]
+}

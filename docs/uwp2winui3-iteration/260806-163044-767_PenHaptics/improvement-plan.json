@@ -1,0 +1,45 @@
+{
+  "scenario": "PenHaptics",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Linked shared project files were omitted from bootstrap.",
+      "evidence": "lessons.json dev_agent_struggles[0]; skill-defects.json items[0]",
+      "root_cause": "Initialize-UwpMigration.ps1 only recursively copied -Source and ignored explicit csproj Include+Link items.",
+      "tier": 1,
+      "change": "Resolve explicit Compile/Page/ApplicationDefinition/Content/Resource/EmbeddedResource items, materialize them at safe Link paths, and feed them through existing rewrite/triage/mapping.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared shell, styles, scenario XAML, helpers, and assets are copied verbatim and triaged without manual reconstruction.",
+      "falsifiable_check": "Re-running bootstrap on PenHaptics copies MainPage.xaml, Styles\\Styles.xaml, all five scenario XAML files, and linked assets; both inking XAML and code-behind receive defer rows."
+    },
+    {
+      "problem": "Missing merged ResourceDictionary files were only visible as an opaque startup crash.",
+      "evidence": "migration-score.json score=0 and candidate launch failed; lessons.json errors_encountered final item; skill-defects.json items[1]",
+      "root_cause": "Validator did not resolve ResourceDictionary Source URIs against target files.",
+      "tier": 1,
+      "change": "Add a pre-build validator gate for local, rooted, relative, and ms-appx merged-dictionary URIs, skipping external component dictionaries.",
+      "file": "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Path mismatches fail with an exact XAML file, line, URI, and expected path instead of consuming launch-debug iterations.",
+      "falsifiable_check": "A target with App.xaml Source=/Styles/Styles.xaml and only root Styles.xaml fails the ResourceDictionary gate before smoke launch; a correctly linked Styles\\Styles.xaml passes."
+    },
+    {
+      "problem": "Launch helper missed default dotnet build output.",
+      "evidence": "session-log.txt turns 32-33; skill-defects.json items[2]",
+      "root_cause": "Layout discovery only searched architecture-segmented Debug directories.",
+      "tier": 1,
+      "change": "Search bin/<arch>/Debug, bin/<rid>/Debug, and bin/Debug recursively for the newest executable+manifest layout.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+      "expected_effect": "The standard smoke helper remains usable after either winapp build or native dotnet build.",
+      "falsifiable_check": "Given a valid layout under bin\\Debug\\<tfm>\\win-x64, Test-AppLaunch resolves that layout rather than returning 'build output not found'."
+    }
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1"
+  ],
+  "deferred_to_human": []
+}

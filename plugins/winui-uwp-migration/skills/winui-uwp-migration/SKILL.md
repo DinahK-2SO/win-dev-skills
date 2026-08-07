@@ -153,9 +153,10 @@ The validator covers:
 2. **TODO marker residue** — every `TODO[migrate-NNN]` from the bootstrap is resolved.
 3. **`MIGRATION-MAPPING.md` integrity** — `.bootstrap-meta.json` present + parses; row count matches the seeded count; every row has a resolved Triage label; no row stuck at `Status = copied`.
 4. **`MIGRATION-DEFERRED.md` consistency** — every defer row in mapping has a matching row in the deferred file.
-5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability.
-6. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
-7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
+5. **Merged resource dictionaries** — every local `ResourceDictionary Source` URI resolves to a XAML file at the same target/package path.
+6. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability.
+7. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
+8. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
 
 The validator's stdout is intentionally terse: `[FAIL]` lines show only `file:line` (plus an error code where applicable). The full diagnostic text — code snippets, compiler error messages — is written to `.validator-diagnostics.txt` at the project root. **Open that file** to read the details before deciding the fix.
 
@@ -163,6 +164,7 @@ If any check fails, read the diagnostic, fix the root cause, re-run. **Do not re
 
 - *TODO residue* → open the file at the reported line, fetch the anchor via `Get-MigrationPattern.ps1`, apply, delete the marker.
 - *Residue grep hit in a file* → check `.validator-diagnostics.txt` for the offending line; either fix in place or move the row to `defer` (and add to DEFERRED).
+- *ResourceDictionary Source URI* → preserve the source project's linked target path (for example `Styles\Styles.xaml`), or update the URI and file location together; a missing dictionary can compile cleanly and crash in XAML startup.
 - *Mapping row count mismatch* → you added or deleted rows. Restore the seed; edit only `Triage label` and `Status`.
 - *`Status = copied` rows* → those files were never finished. Either complete the migration and flip to `done`, or defer with rationale.
 - *Build healthcheck FAIL* → open `.validator-diagnostics.txt`; for each unique CS#### code, look up the pattern in PATTERNS.md via `Get-MigrationPattern.ps1`.
@@ -199,7 +201,7 @@ Pages that depend on physical hardware (camera, microphone, location, sensors, B
 
 **Rule:** every device-dependent page must show a visible fallback when device acquisition or initialization throws. The fallback can be as simple as a centred `TextBlock` saying *"This sample requires a <device-kind> device that is not available on this machine."* plus the exception's `Message` underneath. Wrap the init call in `try/catch`; on catch, swap the page's main content for the fallback (don't only log and return).
 
-This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1` Section 7) will still pass the process-alive gate, but the benchmark's later screenshot-diff check will penalise the trial. A two-line fallback prevents a ~20-point score loss.
+This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1` Section 8) will still pass the process-alive gate, but the benchmark's later screenshot-diff check will penalise the trial. A two-line fallback prevents a ~20-point score loss.
 
 ## Post-Migration
 

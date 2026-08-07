@@ -273,7 +273,7 @@ public MainWindow()
 private bool _navigated;
 ```
 
-Validator catches this race with a 10s smoke launch after the build healthcheck passes — see `Validate-UwpMigration.ps1` Section 7.
+Validator catches this race with a 10s smoke launch after the build healthcheck passes — see `Validate-UwpMigration.ps1` Section 8.
 
 <a id="navigationview-frame-wiring"></a>
 ### NavigationView + Frame wiring (SDK-sample scenario list)
@@ -438,7 +438,7 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 
-The Step 4 validator runs this same check (`Validate-UwpMigration.ps1` Section 7) and **fails** when the app registers but dies at startup, surfacing the captured signature in `.validator-diagnostics.txt`.
+The Step 4 validator runs this same check (`Validate-UwpMigration.ps1` Section 8) and **fails** when the app registers but dies at startup, surfacing the captured signature in `.validator-diagnostics.txt`.
 
 <a id="lifecycle"></a>
 ## Application Lifecycle and Activation
