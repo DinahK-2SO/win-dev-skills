@@ -33,7 +33,7 @@ as ANSI; non-ASCII characters would corrupt parsing under 5.1.
 
 .PARAMETER Target
 The migrated WinUI 3 project root (the folder with the .csproj). The build-output
-layout is discovered under bin/<arch>/Debug/<tfm>/win-<rid>. Use this OR -Layout.
+layout is discovered under bin/[<arch>/]Debug/<tfm>/win-<rid>. Use this OR -Layout.
 
 .PARAMETER Layout
 An explicit build-output layout folder (the one containing AppxManifest.xml +
@@ -117,10 +117,12 @@ if ($PSCmdlet.ParameterSetName -eq 'Target') {
     $csprojDir = Split-Path -Parent $csproj
     $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'ARM64' } else { 'x64' }
     $rid = $arch.ToLower()
-    # Walk bin/<arch>/Debug and one level into the newest TFM dir, then win-<rid>.
+    # Platform-qualified builds use bin/<arch>/Debug; a normal `dotnet build`
+    # uses bin/Debug. Support both rather than forcing a project-file workaround.
     $binCandidates = @(
         (Join-Path $csprojDir "bin\$arch\Debug"),
-        (Join-Path $csprojDir "bin\$rid\Debug")
+        (Join-Path $csprojDir "bin\$rid\Debug"),
+        (Join-Path $csprojDir 'bin\Debug')
     )
     foreach ($bin in $binCandidates) {
         if (-not (Test-Path -LiteralPath $bin)) { continue }
@@ -131,7 +133,7 @@ if ($PSCmdlet.ParameterSetName -eq 'Target') {
         $Layout = if (Test-Path -LiteralPath $ridDir) { $ridDir } else { $tfmDir.FullName }
         break
     }
-    if (-not $Layout) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No build output found under bin\$arch\Debug - build the project first.") }
+    if (-not $Layout) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "No Debug build output found under bin - build the project first.") }
 }
 
 if (-not (Test-Path -LiteralPath $Layout)) { Write-LaunchOut (New-LaunchResult $false 'unavailable' "Layout folder not found: $Layout") }

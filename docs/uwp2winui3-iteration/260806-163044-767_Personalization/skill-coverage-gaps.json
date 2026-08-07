@@ -1,0 +1,15 @@
+{
+  "scenario": "Personalization",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Dependent bootstrap commands and later build/run/validation commands were issued concurrently, causing races and locked intermediate files.",
+      "evidence": "session-log.txt turns 1-2: bootstrap raced dotnet new and self-check; turns 23-29: concurrent dotnet run/build/validator operations caused restore collisions and a locked XAML input.json.",
+      "covered_at": "SKILL.md Step 0 numbered bootstrap commands; Step 3 'build -> fix -> launch -> repeat' and Build command discipline.",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "State explicitly that dependent bootstrap steps and all commands touching one project's build artifacts must be awaited and run serially, never batched or parallelized.",
+      "generalizes": "Scaffold/bootstrap dependencies and MSBuild/NuGet/XAML intermediate-file contention affect all migrations, especially agents optimized to batch tool calls."
+    }
+  ]
+}

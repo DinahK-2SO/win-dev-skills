@@ -1,0 +1,37 @@
+{
+  "scenario": "Personalization",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap omitted authored files linked from the UWP csproj, forcing manual reconstruction and secondary XAML/C# build errors.",
+      "evidence": "session-log.txt turns 2-12: bootstrap reported only 3 files; the UWP project linked App.xaml(.cs), MainPage.xaml(.cs), Styles.xaml, and assets; turns 14-18 then hit CS1503, WMC0001, WMC0909/WMC1111/WMC9999, and NETSDK1022.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Link, SharedContent, ApplicationDefinition, Page Include, and Compile Include; no linked-item handling existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 recursively copied only below -Source even though legacy UWP projects commonly use external linked project items.",
+      "proposed_fix": "Teach bootstrap to resolve common project properties and copy linked Compile/Page/ApplicationDefinition/Content items to their Link paths before triage.",
+      "generalizes": "UWP SDK samples and multi-project apps routinely share shells, resource dictionaries, helpers, and assets through linked MSBuild items."
+    },
+    {
+      "problem": "The skill instructed the agent to compile with a nonexistent winapp build command.",
+      "evidence": "session-log.txt turn 13: WinApp CLI returned 'build was not matched' and listed no build command.",
+      "skill_search": "Searched SKILL.md and MIGRATION-PATTERNS.md for 'winapp build'; SKILL.md prescribed it in Step 3 and after validation.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer `winapp build` to compile; After PASS, do a final `winapp build`.",
+      "root_cause": "The workflow conflated WinApp CLI launch/identity responsibilities with native .NET compilation.",
+      "proposed_fix": "Replace compile guidance with synchronous dotnet build commands and remove residual wording that names winapp build.",
+      "generalizes": "Every C# WinUI 3 migration needs a reliable compile command, independent of which WinApp CLI version is installed."
+    },
+    {
+      "problem": "Test-AppLaunch.ps1 could not discover output produced by a normal unqualified dotnet build.",
+      "evidence": "session-log.txt turn 19: status=unavailable because no output was found under bin\\x64\\Debug, while turn 18 built successfully to bin\\Debug\\net10.0-windows10.0.26100.0\\win-x64.",
+      "skill_search": "Searched Test-AppLaunch.ps1 for bin output discovery; candidates included only bin\\<arch>\\Debug and bin\\<rid>\\Debug.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "The build-output layout is discovered under bin/<arch>/Debug/<tfm>/win-<rid>.",
+      "root_cause": "The script assumed Platform-qualified output even though SKILL.md also allowed ordinary dotnet build.",
+      "proposed_fix": "Add bin\\Debug as a candidate while retaining platform-qualified candidates.",
+      "generalizes": "SDK-style .NET projects commonly emit either qualified or unqualified output depending on whether Platform was passed."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "scenario": "Personalization",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The feature received a partial score solely because the original UWP baseline remained on its splash screen; the migrated app exposed both required controls and opened the picker.",
+      "evidence": "migration-score.json feature verdict partial: structural coverage 2/2 and migrated picker responded; discrepancies.json type visual-baseline-unavailable.",
+      "covered_clearly_at": "SKILL.md 'Fidelity (highest priority)' and mandatory Validate step; the migrated implementation satisfied those gates.",
+      "slip_type": "random-flake",
+      "why_no_skill_change": "There is no migrated behavior defect to correct. The unavailable original-app feature frame is an evaluation-environment limitation, and migration-skill changes must not modify or absorb evaluation logic."
+    }
+  ]
+}

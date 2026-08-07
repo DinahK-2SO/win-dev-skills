@@ -1,0 +1,144 @@
+{
+  "scenario": "Personalization",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 2-3: after rerun it copied three local source files, generated MIGRATION-MAPPING.md, and injected the picker TODO."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt turn 4: the pickers anchor supplied the required HWND initialization pattern, which the agent applied."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt turns 14-18 and 27: native builds exposed actionable C#/XAML errors and ultimately succeeded with zero warnings."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1 and Test-AppLaunch.ps1",
+      "evidence": "session-log.txt turns 23-30: validation caught manifest/build issues; the final isolated run passed and confirmed the app stayed alive."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed WinApp CLI has no build command.",
+      "evidence": "session-log.txt turn 13: 'build was not matched' and exit code 1."
+    },
+    {
+      "tool": "parallel PowerShell invocations against one project",
+      "problem": "Dependent bootstrap commands raced, and later overlapping run/build/validation commands contended for NuGet and XAML compiler files.",
+      "evidence": "session-log.txt turns 1-2 and 23-29: Target not found, restore collision, and locked obj\\x64\\...\\input.json."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It inventoried only files physically below -Source and omitted authored Compile/Page/ApplicationDefinition/Content items linked from the UWP project.",
+      "suggested_tweak": "Resolve common MSBuild properties and copy linked project items to their Link destinations before triage."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "It searched only bin\\x64\\Debug or bin\\win-x64\\Debug, while a normal dotnet build emitted bin\\Debug\\<tfm>\\win-x64.",
+      "suggested_tweak": "Search both platform-qualified and standard SDK-style Debug output roots."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build guidance",
+      "wrong": "Use winapp build.",
+      "correct": "Use synchronous native dotnet build; WinApp CLI is used for launch/identity, not compilation."
+    },
+    {
+      "where": "SKILL.md bootstrap inventory guarantees",
+      "wrong": "The generated map was presented as a complete source inventory even when the UWP csproj linked authored files outside -Source.",
+      "correct": "Bootstrap must include linked project items before claiming mapping completeness."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Storage.Pickers.FileOpenPicker",
+      "special_handling": "Initialize the picker with the WinUI window HWND before PickSingleFileAsync."
+    },
+    {
+      "api": "Windows.System.UserProfile.LockScreen",
+      "special_handling": "The packaged desktop migration retained SetImageFileAsync/GetImageStream behavior; package identity and a desktop-compatible manifest were required."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initialize-UwpMigration.ps1: Target not found; Test-Path returned False.",
+      "root_cause": "Scaffold, bootstrap, and self-check were issued concurrently even though bootstrap depends on scaffold completion.",
+      "fix": "Waited for dotnet new to finish, reran bootstrap, then consumed its artifacts."
+    },
+    {
+      "error": "winapp build: unrecognized command or argument 'build'.",
+      "root_cause": "The skill documented a command absent from the installed WinApp CLI.",
+      "fix": "Used dotnet build."
+    },
+    {
+      "error": "CS1503 converting Windows.System.DispatcherQueuePriority to Microsoft.UI.Dispatching.DispatcherQueuePriority.",
+      "root_cause": "The reconstructed shared shell resolved an unqualified priority enum to the wrong namespace.",
+      "fix": "Fully qualified Microsoft.UI.Dispatching.DispatcherQueuePriority."
+    },
+    {
+      "error": "WMC0001 unknown local:Styles.",
+      "root_cause": "A shared ResourceDictionary omitted by bootstrap was manually recreated as a local XAML class instead of merged by URI.",
+      "fix": "Removed x:Class/code-behind and merged ms-appx:///Styles.xaml."
+    },
+    {
+      "error": "WMC0909/WMC1111 could not resolve local:Scenario for x:Bind; WMC9999 followed.",
+      "root_cause": "Manual reconstruction of omitted shared XAML introduced a compiled-binding type-resolution failure.",
+      "fix": "Used runtime Binding for the scenario title; the internal compiler error disappeared with the root XAML errors."
+    },
+    {
+      "error": "NETSDK1022 duplicate Page item Styles.xaml.",
+      "root_cause": "The SDK-style project already includes local XAML pages implicitly; the agent added a redundant explicit Page item while repairing omitted shared styles.",
+      "fix": "Removed the explicit Page Include."
+    },
+    {
+      "error": "Test-AppLaunch status=unavailable: no build output under bin\\x64\\Debug.",
+      "root_cause": "The script did not search the standard unqualified dotnet build output under bin\\Debug.",
+      "fix": "The agent later produced a platform-qualified build; the skill script was improved to search both layouts."
+    },
+    {
+      "error": "Validator build failed with 'Cannot create a file when that file already exists' and locked input.json.",
+      "root_cause": "dotnet run, a manual build, and validation rebuilds overlapped against the same project artifacts.",
+      "fix": "Stopped the long-running command/build processes and reran validation in isolation."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log.txt turns 5-12",
+      "symptom": "The agent searched generated obj XAML/code and SharedContent, then manually rebuilt the shell, styles, and assets.",
+      "turns_or_retries": "Eight turns before the first build.",
+      "root_cause": "Bootstrap copied only three local files and ignored fourteen linked authored project items.",
+      "how_resolved": "Recovered shared sources and assets from sibling directories/generated metadata and recreated the WinUI shell.",
+      "preventable_by": "Import linked Compile/Page/ApplicationDefinition/Content project items during bootstrap."
+    },
+    {
+      "where": "session-log.txt turns 14-18",
+      "symptom": "Two build-fix cycles handled dispatcher, resource dictionary, binding, and duplicate Page errors.",
+      "turns_or_retries": "Two failed builds before success.",
+      "root_cause": "Manual reconstruction of files omitted from the migration inventory introduced secondary C#/XAML mistakes.",
+      "how_resolved": "Qualified the enum, changed binding strategy, merged the dictionary by URI, and removed the duplicate item.",
+      "preventable_by": "Preserve linked authored files and their Link paths mechanically instead of reconstructing them."
+    },
+    {
+      "where": "session-log.txt turns 23-30",
+      "symptom": "Validation failed three times around restore/XAML intermediate collisions before passing.",
+      "turns_or_retries": "Three validation attempts.",
+      "root_cause": "Build, run, and validator commands were started concurrently against shared obj output.",
+      "how_resolved": "Stopped competing processes and ran validation alone.",
+      "preventable_by": "Prominent serialized build-launch-validation command discipline."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Linked UWP project-item importer",
+      "would_have_saved": "The generated-source investigation and manual recreation of the shared shell, resource dictionary, and assets."
+    }
+  ],
+  "env_issues": []
+}

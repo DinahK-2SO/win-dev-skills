@@ -1,0 +1,46 @@
+{
+  "scenario": "Personalization",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap silently omitted linked authored project items.",
+      "evidence": "lessons.json dev_agent_struggles[0]; session-log.txt turns 2-12; skill-defects.json items[0].",
+      "root_cause": "The bootstrap inventoried the filesystem below -Source rather than the UWP project's effective authored item set.",
+      "tier": 1,
+      "change": "Parse UWP project properties and linked Compile/Page/ApplicationDefinition/Content items, copy supported authored files to Link destinations, include them in triage/mapping/meta, and report the linked count.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared shells, resource dictionaries, code, XAML, and assets enter the normal TODO/mapping workflow instead of being manually reconstructed.",
+      "falsifiable_check": "Against Personalization, bootstrap reports 17 mapped files including 14 linked items and creates App.xaml, MainPage.xaml, Styles\\Styles.xaml, and Assets\\windows-sdk.png."
+    },
+    {
+      "problem": "The documented compile command was invalid, and command ordering did not prevent project-artifact contention.",
+      "evidence": "session-log.txt turns 13 and 23-29; skill-defects.json items[1]; skill-coverage-gaps.json items[0].",
+      "root_cause": "Workflow prose named a nonexistent WinApp CLI command and only implied serialization despite agents batching tool calls.",
+      "tier": 3,
+      "change": "Use native synchronous dotnet build commands and explicitly prohibit parallel scaffold/bootstrap/self-check or build/run/validation operations against one project.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "No unrecognized build command, target-creation race, NuGet restore collision, or locked XAML input.json in a rerun.",
+      "falsifiable_check": "A rerun contains zero 'build was not matched', 'Target not found', restore-collision, or locked-input.json errors.",
+      "tier_justification": "Compilation and orchestration order are agent workflow choices; existing scripts already use dotnet internally, so no template can select and sequence all interactive commands for the agent."
+    },
+    {
+      "problem": "Launch diagnostics rejected valid standard dotnet build output.",
+      "evidence": "session-log.txt turns 18-19; skill-defects.json items[2].",
+      "root_cause": "Test-AppLaunch.ps1 searched only platform-qualified Debug roots.",
+      "tier": 1,
+      "change": "Search bin\\Debug after platform-qualified candidates and update diagnostics/documentation accordingly.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+      "expected_effect": "A normal dotnet build can be smoke-launched without adding Platform solely to satisfy layout discovery.",
+      "falsifiable_check": "Given an app layout at bin\\Debug\\<tfm>\\win-x64, Test-AppLaunch resolves that layout instead of returning 'No build output found under bin\\x64\\Debug'."
+    }
+  ],
+  "deferred_to_human": [],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1"
+  ]
+}

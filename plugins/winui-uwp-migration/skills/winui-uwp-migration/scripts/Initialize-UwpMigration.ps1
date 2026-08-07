@@ -10,7 +10,8 @@ workflow to confirm residue grep, mapping integrity, deferred consistency,
 build cleanliness, and runtime smoke.
 
 Steps:
-1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure
+1. Copy .xaml/.cs/.resw/asset/.appxmanifest from source to target, preserving folder structure,
+   including files linked from the UWP .csproj through Compile/Page/ApplicationDefinition/Content
 2. Preserve the UWP .csproj at .uwp-source/ as a read-only reference
 3. Namespace mass-rewrite: Windows.UI.Xaml → Microsoft.UI.Xaml across all copied .cs/.xaml
 4a. Filter-prone class neutralization (RootFrameNavigationHelper → no-op stub, etc.)
@@ -76,6 +77,7 @@ $srcExcludeDirs = @('bin', 'obj', '.vs', '.git', '.github', '.copilot', 'package
 $srcExcludePattern = '\\(' + ($srcExcludeDirs -join '|') + ')\\'
 
 $copied = New-Object System.Collections.Generic.List[string]
+$uwpCsprojs = @(Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue)
 
 Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
     $rel = [System.IO.Path]::GetRelativePath($Source, $_.FullName)
@@ -97,10 +99,133 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
     [void]$copied.Add($rel)
 }
 
-Write-Host "    Copied $($copied.Count) source files"
+# SDK samples commonly keep their shell, styles, and assets outside the project
+# directory and link them through the UWP csproj. Those are authored inputs, not
+# optional dependencies, so include them in the same inventory as local files.
+function Expand-UwpProjectValue {
+    param(
+        [string]$Value,
+        [string]$ProjectDir,
+        [hashtable]$Properties
+    )
+
+    $expanded = $Value
+    $findAbovePattern = '\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(\$\(MSBuildThisFileDirectory\),\s*([^)]+)\)\)'
+    $expanded = [regex]::Replace($expanded, $findAbovePattern, {
+        param($match)
+        $marker = $match.Groups[1].Value.Trim().Trim("'`"")
+        $cursor = $ProjectDir
+        while ($cursor) {
+            if (Test-Path -LiteralPath (Join-Path $cursor $marker)) { return $cursor }
+            $parent = [System.IO.Directory]::GetParent($cursor)
+            if (-not $parent) { break }
+            $cursor = $parent.FullName
+        }
+        return $match.Value
+    })
+
+    for ($pass = 0; $pass -lt 10; $pass++) {
+        $before = $expanded
+        $expanded = [regex]::Replace($expanded, '\$\(([A-Za-z_][A-Za-z0-9_.-]*)\)', {
+            param($match)
+            $name = $match.Groups[1].Value
+            if ($Properties.ContainsKey($name)) { return [string]$Properties[$name] }
+            return $match.Value
+        })
+        if ($expanded -eq $before) { break }
+    }
+    return $expanded
+}
+
+$linkedCount = 0
+foreach ($project in $uwpCsprojs) {
+    try {
+        [xml]$projectXml = Get-Content -LiteralPath $project.FullName -Raw
+    } catch {
+        Write-Warning "    Could not parse $($project.Name) for linked project items: $($_.Exception.Message)"
+        continue
+    }
+
+    $projectDir = Split-Path -Parent $project.FullName
+    $properties = @{
+        MSBuildThisFileDirectory = $projectDir.TrimEnd('\') + '\'
+        MSBuildProjectDirectory  = $projectDir
+    }
+    foreach ($group in @($projectXml.Project.PropertyGroup)) {
+        foreach ($property in @($group.ChildNodes)) {
+            if ($property.NodeType -ne [System.Xml.XmlNodeType]::Element) { continue }
+            $properties[$property.LocalName] = Expand-UwpProjectValue -Value $property.InnerText -ProjectDir $projectDir -Properties $properties
+        }
+    }
+
+    foreach ($group in @($projectXml.Project.ItemGroup)) {
+        if ($group.GetAttribute('Condition')) {
+            Write-Warning "    Conditional ItemGroup skipped while importing linked items from $($project.Name)"
+            continue
+        }
+        foreach ($item in @($group.ChildNodes)) {
+            if ($item.NodeType -ne [System.Xml.XmlNodeType]::Element) { continue }
+            if ($item.LocalName -notin @('Compile', 'Page', 'ApplicationDefinition', 'Content')) { continue }
+            if ($item.GetAttribute('Condition')) {
+                Write-Warning "    Conditional $($item.LocalName) item skipped: $($item.GetAttribute('Include'))"
+                continue
+            }
+            $include = [string]$item.GetAttribute('Include')
+            if (-not $include -or $include -match '[*?]') { continue }
+            $include = Expand-UwpProjectValue -Value $include -ProjectDir $projectDir -Properties $properties
+            if ($include -match '\$\(') {
+                Write-Warning "    Could not resolve linked item '$include' from $($project.Name)"
+                continue
+            }
+
+            $sourcePath = if ([System.IO.Path]::IsPathRooted($include)) {
+                [System.IO.Path]::GetFullPath($include)
+            } else {
+                [System.IO.Path]::GetFullPath((Join-Path $projectDir $include))
+            }
+            if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+                Write-Warning "    Linked project item not found: $include"
+                continue
+            }
+
+            $name = [System.IO.Path]::GetFileName($sourcePath).ToLowerInvariant()
+            $supported = $false
+            foreach ($ext in $patterns) {
+                if ($name.EndsWith($ext)) { $supported = $true; break }
+            }
+            if (-not $supported) { continue }
+
+            $linkNode = @($item.ChildNodes | Where-Object { $_.LocalName -eq 'Link' } | Select-Object -First 1)
+            $targetRel = if ($linkNode.Count -gt 0 -and $linkNode[0].InnerText) {
+                Expand-UwpProjectValue -Value $linkNode[0].InnerText -ProjectDir $projectDir -Properties $properties
+            } elseif ($sourcePath.StartsWith($Source, [System.StringComparison]::OrdinalIgnoreCase)) {
+                [System.IO.Path]::GetRelativePath($Source, $sourcePath)
+            } else {
+                Join-Path 'Linked' ([System.IO.Path]::GetFileName($sourcePath))
+            }
+            $targetRel = $targetRel.TrimStart('\', '/')
+            if ($targetRel -match '\.\.[\\/]') {
+                Write-Warning "    Unsafe linked target path ignored: $targetRel"
+                continue
+            }
+
+            $destination = Join-Path $Target $targetRel
+            $destinationDir = [System.IO.Path]::GetDirectoryName($destination)
+            if (-not (Test-Path -LiteralPath $destinationDir)) {
+                New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $sourcePath -Destination $destination -Force
+            if ($copied -notcontains $targetRel) {
+                [void]$copied.Add($targetRel)
+                $linkedCount++
+            }
+        }
+    }
+}
+
+Write-Host "    Copied $($copied.Count) source files ($linkedCount linked through UWP project items)"
 
 # ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
-$uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
 $refDir = Join-Path $Target '.uwp-source'
 if ($uwpCsprojs.Count -gt 0) {
     if (-not (Test-Path -LiteralPath $refDir)) {
@@ -452,6 +577,7 @@ $meta = [ordered]@{
     timestamp           = (Get-Date).ToString('o')
     sourcePath          = $Source
     seededRowCount      = $copied.Count
+    linkedProjectItems  = $linkedCount
     todoCount           = $todoCountTotal
     sensitiveFileCount  = $sensitiveFileCount
     deferredCount       = $deferredKeys.Count
@@ -464,7 +590,7 @@ Set-Content -LiteralPath $metaPath -Value $meta -Encoding UTF8
 $labelOrder = @('migrate-as-is','migrate-with-adaptation','defer')
 Write-Host ""
 Write-Host "=== BOOTSTRAP COMPLETE ==="
-Write-Host "Source files copied   : $($copied.Count)"
+Write-Host "Source files copied   : $($copied.Count) ($linkedCount linked through UWP project items)"
 Write-Host "Namespace rewrites    : $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 Write-Host "Neutralized classes   : $($neutralizedFiles.Count) file(s)"
 Write-Host "Triage breakdown      :"
