@@ -21,7 +21,7 @@ layout via 'winapp run --detach --json', waits for the cold-start window, and:
 It NEVER throws on an operational failure; it returns a structured result and
 (with -Json) prints it as JSON. This is the single source of truth for the
 "did the migrated app launch" question - both Step 3 (interactive, when the app
-first crashes) and the Step 4 validator (Section 7) call it.
+first crashes) and the Step 4 validator (Section 8) call it.
 
 WHY THIS MATTERS: the common failure mode is an agent that sees a startup crash
 and hand-rolls File.WriteAllText tracing for the rest of its budget. Don't. Run

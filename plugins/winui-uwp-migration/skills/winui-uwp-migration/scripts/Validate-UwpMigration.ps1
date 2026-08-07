@@ -19,8 +19,9 @@ Checks (numbering matches the `# ─── N.` sections in the code):
 3. MIGRATION-MAPPING.md integrity — .bootstrap-meta.json present, row count, labels filled, no row stuck at Status=copied
 4. MIGRATION-DEFERRED.md consistency — every defer row in mapping has a row here, and vice versa
 5. Package.appxmanifest image refs + WinAppSDK packaging (TargetDeviceFamily=Windows.Desktop, rescap, runFullTrust) + retained manifest <Extension>s (e.g. windows.backgroundTasks) required by kept code
-6. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
-7. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
+6. Navigation structure — rejects nested NavigationViewItem containers in a data-bound MenuItemTemplate
+7. dotnet build healthcheck — native `dotnet build`; surfaces WUI analyzer warnings (UWP-only API residue) when the WindowsAppSDK analyzer is referenced by the project
+8. Runtime smoke launch — delegates to Test-AppLaunch.ps1: `winapp run --detach` + alive check, and on a startup crash captures the real WER signature (event 1000 native code + event 1026 .NET exception). FAILs on a registered-then-crashed app; WARNs only on a genuine deploy/environment failure
 
 .PARAMETER Target
 Migrated WinUI 3 project root (same folder used as -Target for
@@ -401,7 +402,62 @@ if (Test-Path -LiteralPath $manifestPath) {
     Write-Host "[WARN] Package.appxmanifest not found at $manifestPath — skipping image-reference check"
 }
 
-# ─── 6. dotnet build healthcheck ──────────────────────────────────────────────
+# ─── 6. Navigation structure ──────────────────────────────────────────────────
+# NavigationView creates containers for MenuItemsSource entries. A
+# NavigationViewItem inside MenuItemTemplate creates a second container: selection can
+# highlight correctly while ItemInvoked receives a container/data context that makes
+# the navigation handler silently no-op.
+$nestedNavItemHits = New-Object System.Collections.Generic.List[object]
+foreach ($f in @($files | Where-Object { $_.Extension -eq '.xaml' })) {
+    $text = [System.IO.File]::ReadAllText($f.FullName)
+    if ($text -notmatch '(?:MenuItemsSource\s*=|<NavigationView\.MenuItemsSource\b)' -or
+        $text -notmatch '<NavigationView\.MenuItemTemplate\b') {
+        continue
+    }
+
+    try {
+        [xml]$xaml = $text
+    } catch {
+        # The build healthcheck owns malformed XAML diagnostics.
+        continue
+    }
+
+    $badTemplates = @($xaml.SelectNodes(
+        "//*[local-name()='NavigationView' and " +
+        "(@MenuItemsSource or *[local-name()='NavigationView.MenuItemsSource'])]" +
+        "/*[local-name()='NavigationView.MenuItemTemplate']" +
+        "//*[local-name()='NavigationViewItem']"))
+    if ($badTemplates.Count -eq 0) { continue }
+
+    $lines = $text -split "`r?`n"
+    $lineNumber = 1
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match '<NavigationView\.MenuItemTemplate\b') {
+            $lineNumber = $i + 1
+            break
+        }
+    }
+    $rel = [System.IO.Path]::GetRelativePath($Target, $f.FullName)
+    [void]$nestedNavItemHits.Add([PSCustomObject]@{ File = $rel; Line = $lineNumber })
+}
+
+if ($nestedNavItemHits.Count -eq 0) {
+    Write-Host "[PASS] Navigation structure — no nested NavigationViewItem in data-bound MenuItemTemplate"
+} else {
+    Write-Host "[FAIL] Navigation structure — data-bound MenuItemTemplate contains nested NavigationViewItem container(s):"
+    foreach ($h in $nestedNavItemHits) {
+        Write-Host "       $($h.File):$($h.Line)"
+    }
+    Write-Host "       Effect: selection can highlight while the content Frame remains on the first page."
+    Write-Host "       Fix: make the DataTemplate root a content element such as TextBlock; NavigationView creates the item container."
+    Write-Host "       See: Get-MigrationPattern.ps1 -Anchor navigationview-frame-wiring"
+    Add-Diag 'NavigationView nested item containers' (($nestedNavItemHits | ForEach-Object {
+        "$($_.File):$($_.Line) MenuItemTemplate must render content, not NavigationViewItem"
+    }) -join "`r`n")
+    $failures++
+}
+
+# ─── 7. dotnet build healthcheck ──────────────────────────────────────────────
 # The validator must gate on a clean build, otherwise common namespace-rewrite
 # fallout (CS0104 LaunchActivatedEventArgs ambiguity, CS0246 scaffold-vs-UWP
 # namespace mismatch like MainWindow.xaml.cs referencing a moved MainPage, etc.)
@@ -529,7 +585,7 @@ if (-not $csproj) {
     }
 }
 
-# ─── 7. Runtime smoke launch ──────────────────────────────────────────────────
+# ─── 8. Runtime smoke launch ──────────────────────────────────────────────────
 # A packaged WinUI 3 app can build cleanly and still crash on startup. A common
 # UWP→WinUI 3 culprit is the static-window init-order race (a Page reads
 # App.MainWindow before OnLaunched assigns it → E_POINTER 0x80004003), but there

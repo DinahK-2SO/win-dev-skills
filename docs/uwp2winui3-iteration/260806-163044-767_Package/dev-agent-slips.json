@@ -1,0 +1,28 @@
+{
+  "scenario": "Package",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The bootstrap self-check ran in parallel with the bootstrap, returned False, and the agent continued.",
+      "evidence": "session-log.txt turn 2 lines 321-357 shows Test-Path completed False before Initialize-UwpMigration completed.",
+      "covered_clearly_at": "SKILL.md > Step 0 - Bootstrap (mandatory), lines 34-59: the literal first three commands are ordered and proceeding after False is forbidden.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The ordering and stop condition are already explicit hard rules; a capable rerun should execute them sequentially."
+    },
+    {
+      "problem": "The agent launched dotnet run and final validation concurrently, causing an empty-signature startup-crash result and an unrelated code edit.",
+      "evidence": "session-log.txt turns 38-43: package-run5 remained active during validation; after it was stopped, both launch helper and validation passed.",
+      "covered_clearly_at": "SKILL.md > Step 3 says build -> fix -> launch -> repeat, and Step 4 defines validation as the final gate after that loop.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The workflow is already sequential and prominent; parallelizing two launches contradicted it."
+    },
+    {
+      "problem": "The agent declared all three scenarios preserved without verifying that selecting a second navigation item changed Frame content.",
+      "evidence": "session-log.txt final response lines 3470-3474 versus migration-score.json, where Installed Location and Dependencies both fail and Identity remains visible.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md#navigationview-frame-wiring > Falsifiable check: select the second item and require distinct second-page controls in the UIA tree.",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "The required observable second-item check was already explicit; the separate structural skill defect is addressed without repeating this instruction."
+    }
+  ]
+}

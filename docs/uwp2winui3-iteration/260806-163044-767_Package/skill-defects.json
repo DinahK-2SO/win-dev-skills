@@ -1,0 +1,17 @@
+{
+  "scenario": "Package",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The documented data-bound NavigationView recipe could compile yet leave every later scenario stuck on the first page.",
+      "evidence": "migration-score.json features Installed Location and Dependencies fail; final MainPage.xaml nests NavigationViewItem in MenuItemTemplate and MainPage.xaml.cs only navigates when InvokedItemContainer.DataContext is MainPageScenario.",
+      "skill_search": "navigationview-frame-wiring, MenuItemTemplate, NavigationViewItem, ItemInvoked",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "The skill said the generated container DataContext is the bound item but omitted the content-only XAML template precondition and did not reject nested NavigationViewItem containers.",
+      "root_cause": "NavigationView already creates containers for MenuItemsSource; nesting a second container makes the ItemInvoked data-context assumption unreliable while selection still highlights.",
+      "proposed_fix": "Correct the anchor with a complete content-only template and add a validator failure for nested NavigationViewItem under a data-bound MenuItemTemplate.",
+      "generalizes": "Data-bound NavigationView plus Frame is the recommended conversion for UWP SDK-sample scenario lists, so the same silent first-page-sticks failure can recur in many samples."
+    }
+  ]
+}

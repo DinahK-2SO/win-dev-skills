@@ -27,6 +27,25 @@ protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs ar
 
 The same pattern applies to any other type name that exists in both `Windows.UI.Xaml.*` and `Microsoft.UI.Xaml.*` namespaces (e.g. `Application`, `RoutedEventArgs`) — fully qualify, or remove the stale UWP `using`.
 
+### `CS0234: The type or namespace name 'Current' does not exist in the namespace '<ProjectName>'`
+
+This commonly appears when the scaffold project/namespace has the same name as a WinRT
+type used by the sample. For example, inside `namespace Package`, an unqualified
+`Package.Current` resolves `Package` as the current namespace instead of
+`Windows.ApplicationModel.Package`.
+
+Alias or fully qualify the WinRT type; do not rename the project just to avoid the
+collision:
+
+```csharp
+using AppPackage = Windows.ApplicationModel.Package;
+
+var current = AppPackage.Current;
+```
+
+Apply the same rule whenever the first identifier in `Type.Member` resolves to the
+project namespace: add a descriptive type alias and use it consistently in that file.
+
 ### `CS0227: Unsafe code may only appear if compiling with /unsafe`
 
 UWP SDK samples that touch pixel buffers (`IMemoryBufferReference`, `Marshal.GetIUnknownForObject`, `byte*` access) commonly use `unsafe` blocks. The scaffold's `.csproj` does not enable unsafe code. Add this to the `<PropertyGroup>`:
@@ -273,7 +292,7 @@ public MainWindow()
 private bool _navigated;
 ```
 
-Validator catches this race with a 10s smoke launch after the build healthcheck passes — see `Validate-UwpMigration.ps1` Section 7.
+Validator catches this race with a 10s smoke launch after the build healthcheck passes — see `Validate-UwpMigration.ps1` Section 8.
 
 <a id="navigationview-frame-wiring"></a>
 ### NavigationView + Frame wiring (SDK-sample scenario list)
@@ -297,8 +316,30 @@ the dead-scenario bug. Instead: **navigate the first item explicitly on `Loaded`
 handle `ItemInvoked`** (which fires reliably on every click, for data-bound items too).
 
 **When items come from `MenuItemsSource` (data-bound, e.g. `x:Bind Scenarios`):**
-the invoked/selected item is the **bound data item**, NOT a `NavigationViewItem`. Navigate
-off the data item's page type:
+`NavigationView` creates the item container. The `MenuItemTemplate` must render only the
+container's content; **never put another `NavigationViewItem` inside the template**.
+Nesting a second container can still update the selection highlight while leaving
+`InvokedItemContainer.DataContext` unusable, so the handler silently skips navigation.
+
+Use a non-container root such as `TextBlock`:
+
+```xml
+<NavigationView x:Name="NavView"
+                MenuItemsSource="{x:Bind Scenarios}"
+                ItemInvoked="NavView_ItemInvoked"
+                IsSettingsVisible="False">
+    <NavigationView.MenuItemTemplate>
+        <DataTemplate x:DataType="local:Scenario">
+            <TextBlock Text="{x:Bind Title}" />
+        </DataTemplate>
+    </NavigationView.MenuItemTemplate>
+    <Frame x:Name="ScenarioFrame" />
+</NavigationView>
+```
+
+Set `IsSettingsVisible="False"` only when the source shell has no settings destination.
+With the content-only template above, the generated container's `DataContext` is the
+bound item. Navigate from that item:
 
 ```csharp
 public MainPage()
@@ -316,11 +357,7 @@ public MainPage()
 
 private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
 {
-    if (args.InvokedItem is string || args.InvokedItemContainer?.DataContext is not Scenario)
-    {
-        // InvokedItem is the bound data item's text; resolve the Scenario from the container.
-    }
-    if (args.InvokedItemContainer?.DataContext is Scenario s)   // data item, NOT NavigationViewItem
+    if (args.InvokedItemContainer?.DataContext is Scenario s)
         ScenarioFrame.Navigate(s.ClassType);
 }
 ```
@@ -339,9 +376,10 @@ private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvoke
 }
 ```
 
-Do not mix the two: casting a `MenuItemsSource` selection to `NavigationViewItem` (or
-reading `NavView.MenuItems[0]` under `MenuItemsSource`) silently no-ops and yields the
-blank-frame bug.
+Do not mix the two: nesting a `NavigationViewItem` in `MenuItemTemplate`, casting a
+`MenuItemsSource` selection to `NavigationViewItem`, or reading `NavView.MenuItems[0]`
+under `MenuItemsSource` can silently no-op and yield the blank-frame/first-page-sticks
+bug. `Validate-UwpMigration.ps1` rejects the nested-container form.
 
 **Falsifiable check (must verify switching, not just first render):** after the shell loads,
 the content `Frame` must contain the **first** scenario's controls; then, selecting the
@@ -438,7 +476,7 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 
-The Step 4 validator runs this same check (`Validate-UwpMigration.ps1` Section 7) and **fails** when the app registers but dies at startup, surfacing the captured signature in `.validator-diagnostics.txt`.
+The Step 4 validator runs this same check (`Validate-UwpMigration.ps1` Section 8) and **fails** when the app registers but dies at startup, surfacing the captured signature in `.validator-diagnostics.txt`.
 
 <a id="lifecycle"></a>
 ## Application Lifecycle and Activation

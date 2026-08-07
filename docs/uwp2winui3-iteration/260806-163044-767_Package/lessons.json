@@ -1,0 +1,115 @@
+{
+  "scenario": "Package",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 2-3: copied 8 source files, rewrote namespaces, and produced MIGRATION-MAPPING.md plus .bootstrap-meta.json."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 35-43: exposed WMC0035, enforced a clean build, and eventually reported zero residue, zero warnings, and a surviving startup."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt turn 3 fetched only the navigation and project-file anchors needed for the shell conversion."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "navigationview-frame-wiring pattern",
+      "problem": "Its data-bound example depended on InvokedItemContainer.DataContext but did not prohibit a nested NavigationViewItem in MenuItemTemplate. The generated UI highlighted later items while the handler silently skipped Frame.Navigate.",
+      "evidence": "session-log.txt lines 447-520 and final MainPage.xaml/.cs; migration-score.json marks Installed Location and Dependencies fail because Identity content remained visible."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1 via concurrent validation",
+      "problem": "A validator launch ran while dotnet run was already holding the packaged app, producing an empty-signature startup-crash result.",
+      "evidence": "session-log.txt turns 38-43: package-run5 remained running while validation reported crashed with blank code/type/message; after that run was stopped, Test-AppLaunch and validation passed."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "The final PASS checked source residue, build health, and process survival but did not reject the nested NavigationView container structure that caused dead scenario switching.",
+      "suggested_tweak": "Add a static XAML gate for NavigationView with MenuItemsSource whose MenuItemTemplate contains NavigationViewItem."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "MIGRATION-PATTERNS.md#navigationview-frame-wiring",
+      "wrong": "The data-bound recipe implied that InvokedItemContainer.DataContext would be the scenario item without showing the required content-only MenuItemTemplate.",
+      "correct": "NavigationView must create the sole item container; a data-bound MenuItemTemplate should render content such as TextBlock, after which the generated container DataContext is the scenario item."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.ApplicationModel.Package",
+      "special_handling": "When the project namespace is also Package, alias the WinRT type (for example AppPackage) because Package.Current otherwise binds to the namespace and produces CS0234."
+    },
+    {
+      "api": "NavigationView.MenuItemsSource and ItemInvoked",
+      "special_handling": "Use a content-only item template, explicitly navigate the first item on Loaded, and navigate later items from the generated container's bound data item."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "CS0234: Current does not exist in namespace Package in all three scenario files",
+      "root_cause": "The scaffold namespace Package shadowed Windows.ApplicationModel.Package.",
+      "fix": "Alias Windows.ApplicationModel.Package as AppPackage and use AppPackage.Current."
+    },
+    {
+      "error": "WMC0909/WMC1111/WMC9999 resolving local:Scenario and x:Bind",
+      "root_cause": "The hand-authored data template referenced a model name the XAML compiler could not resolve in the migrated project.",
+      "fix": "Rename the model consistently to MainPageScenario in XAML and C#."
+    },
+    {
+      "error": "WMC0503: Compiled Bindings cannot be processed in Property Element form",
+      "root_cause": "MenuItemsSource was expressed as a property element containing x:Bind rather than as an attribute.",
+      "fix": "Use MenuItemsSource=\"{x:Bind Scenarios}\" on NavigationView."
+    },
+    {
+      "error": "WMC0035: duplicate assignment to NavigationView.Content",
+      "root_cause": "MenuItemsSource text was accidentally placed inside NavigationView content instead of on the start tag.",
+      "fix": "Move MenuItemsSource onto the NavigationView start tag."
+    },
+    {
+      "error": "Validator reported startup crash with blank exception fields",
+      "root_cause": "The same packaged app was already running under a concurrent dotnet run invocation.",
+      "fix": "Stop the existing run and execute Test-AppLaunch/validation sequentially."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Navigation shell implementation, turns 26-37",
+      "symptom": "Four build/run attempts cycled through model resolution and malformed MenuItemsSource XAML before compiling.",
+      "turns_or_retries": "package-run2 through package-run5",
+      "root_cause": "The navigation anchor lacked a complete compile-safe XAML example and did not forbid a nested NavigationViewItem template.",
+      "how_resolved": "The agent repaired each compiler error, but retained the nested-container runtime defect.",
+      "preventable_by": "Provide a complete content-only data-template recipe and statically reject nested NavigationViewItem containers."
+    },
+    {
+      "where": "Final launch diagnosis, turns 38-43",
+      "symptom": "Validation reported a startup crash without a code, type, message, or stack while another launch was still running.",
+      "turns_or_retries": "one false crash, one unrelated code edit, then a sequential retest",
+      "root_cause": "Concurrent launch commands contended for the same packaged identity.",
+      "how_resolved": "The long-running dotnet run process was stopped before Test-AppLaunch and validation were rerun.",
+      "preventable_by": "Follow the skill's sequential build-launch-validate loop and do not launch the same packaged app concurrently."
+    },
+    {
+      "where": "Completion claim after turn 43",
+      "symptom": "The agent claimed all three scenarios were preserved although only startup survival had been checked.",
+      "turns_or_retries": "final response",
+      "root_cause": "It skipped the navigation anchor's explicit second-item switching check.",
+      "how_resolved": "Not resolved in the migration trial; scoring found two dead scenarios.",
+      "preventable_by": "A mechanical nested-container validator gate plus the existing second-item switching requirement."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Static detection of nested NavigationViewItem inside a data-bound MenuItemTemplate",
+      "would_have_saved": "Prevented a validator PASS for a shell where selection changed but Frame content did not."
+    }
+  ],
+  "env_issues": []
+}

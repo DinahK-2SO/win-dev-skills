@@ -1,0 +1,46 @@
+{
+  "scenario": "Package",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Data-bound NavigationView shells can highlight later items while leaving the first Frame page visible.",
+      "evidence": "migration-score.json: 2/3 scenarios fail; final MainPage.xaml nests NavigationViewItem in MenuItemTemplate and the ItemInvoked handler depends on its DataContext.",
+      "root_cause": "The skill's recipe omitted the content-only template precondition, and validation had no structural gate for the known silent anti-pattern.",
+      "tier": 1,
+      "change": "Correct the complete data-bound XAML/C# recipe and make Validate-UwpMigration fail when MenuItemsSource is combined with a MenuItemTemplate containing NavigationViewItem.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The recommended shell produces one generated item container, and the exact first-page-sticks structure cannot pass final validation.",
+      "falsifiable_check": "The prior migrated MainPage.xaml is reported as a navigation-structure failure at its MenuItemTemplate; a content-only TextBlock template produces no hit."
+    },
+    {
+      "problem": "A project namespace can shadow the WinRT type demonstrated by the sample and produce misleading CS0234 member errors.",
+      "evidence": "session-log.txt lines 3106-3108: Package.Current bound to namespace Package in all three pages.",
+      "root_cause": "Existing collision guidance covered ambiguous imported types but did not clearly cover current-namespace precedence.",
+      "tier": 3,
+      "change": "Add the CS0234 namespace-shadow form and a descriptive WinRT type-alias fix beside the existing collision guidance.",
+      "file": "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents resolve this compiler diagnostic directly without renaming the project or repeatedly patching call sites.",
+      "falsifiable_check": "On rerun, the first build contains no CS0234 for Current under a project namespace matching a WinRT type.",
+      "tier_justification": "The compiler already provides the non-ignorable Tier 1 signal; prose is the appropriate mapping from that diagnostic to the migration-specific fix."
+    },
+    {
+      "problem": "WinUI scaffold defaults added Settings and custom desktop chrome absent from the source shell.",
+      "evidence": "discrepancies.json Application shell layout-difference and migrated MainWindow/MainPage XAML.",
+      "root_cause": "General fidelity rules did not explicitly identify synthetic NavigationView defaults and scaffold chrome as redesign.",
+      "tier": 3,
+      "change": "Strengthen shell invariants to disable absent Settings UI, remove scaffold-only title bar/backdrop/icon chrome, and preserve source pane/content proportions.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Migrated shells retain source navigation destinations and visual hierarchy instead of template defaults.",
+      "falsifiable_check": "On rerun, no Settings item appears unless present in the UWP source, and no custom title bar/backdrop is added when absent from the source.",
+      "tier_justification": "A static tool cannot infer whether a source app intentionally had Settings or custom chrome without becoming a parity evaluator; this remains a judgement rule."
+    }
+  ],
+  "deferred_to_human": [],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1"
+  ]
+}

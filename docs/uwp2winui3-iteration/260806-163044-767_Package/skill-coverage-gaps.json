@@ -1,0 +1,23 @@
+{
+  "scenario": "Package",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The scaffold namespace Package shadowed Windows.ApplicationModel.Package, producing CS0234 in all three scenario files.",
+      "evidence": "session-log.txt lines 3106-3108; turns 27-29 fixed each use with an AppPackage alias.",
+      "covered_at": "MIGRATION-PATTERNS.md > Common build errors > CS0104 ambiguity, final paragraph about fully qualifying colliding type names",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "Extend the existing name-collision guidance with the namespace-shadows-WinRT-type CS0234 form and a type-alias example.",
+      "generalizes": "Samples and projects are often named for the API they demonstrate, so names such as Package can shadow imported WinRT types after scaffolding."
+    },
+    {
+      "problem": "The migrated shell added a Settings destination, custom title bar, backdrop/icon chrome, and changed pane/content proportions absent from the UWP source.",
+      "evidence": "discrepancies.json Application shell layout-difference; migrated MainWindow.xaml contains TitleBar and MicaBackdrop, and MainPage NavigationView leaves IsSettingsVisible at its default.",
+      "covered_at": "SKILL.md > Principles, Shell conversion, Navigation invariants, and Critical Rules > Fidelity",
+      "why_missed": "under-emphasized",
+      "proposed_improvement": "Make shell invariants explicitly prohibit synthetic destinations and scaffold-only visual chrome, name IsSettingsVisible=False when no source settings page exists, and require preserving source proportions.",
+      "generalizes": "WinUI scaffolds and NavigationView defaults routinely add UI that was not present in a migrated UWP shell."
+    }
+  ]
+}

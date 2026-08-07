@@ -107,6 +107,8 @@ If the source shell doesn't match anything above, preserve its structure as fait
 2. Order matches the source.
 3. Titles match the source (modulo trivial wording cleanup — capitalization, punctuation).
 4. Deferred items are **omitted** from the navigation surface — do not include disabled or broken entries. They are accounted for in `MIGRATION-DEFERRED.md`.
+5. Do not add destinations the source did not have. In particular, set `NavigationView.IsSettingsVisible="False"` unless the UWP shell had a settings destination.
+6. Remove scaffold-only visual chrome that is absent from the source (custom `TitleBar`, icon strip, Mica/backdrop, extra headers/footers), and preserve the source pane/content proportions. The required desktop window border is not custom chrome; keep it.
 
 ### Step 2 — Reconcile the project file
 
@@ -154,8 +156,9 @@ The validator covers:
 3. **`MIGRATION-MAPPING.md` integrity** — `.bootstrap-meta.json` present + parses; row count matches the seeded count; every row has a resolved Triage label; no row stuck at `Status = copied`.
 4. **`MIGRATION-DEFERRED.md` consistency** — every defer row in mapping has a matching row in the deferred file.
 5. **`Package.appxmanifest`** — image references resolve; `Windows.Desktop` target; rescap namespace + `runFullTrust` capability.
-6. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
-7. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
+6. **Navigation structure** — data-bound `NavigationView.MenuItemTemplate` does not create nested `NavigationViewItem` containers that highlight without switching content.
+7. **`dotnet build` healthcheck** — clean build, zero WUI analyzer warnings.
+8. **Runtime smoke launch** — launches the built app (via `Test-AppLaunch.ps1`) and **fails** if it registers but crashes at startup, capturing the real exception (native code + .NET type) so you can fix the named frame. See [Diagnosing Startup Crashes](./MIGRATION-PATTERNS.md#startup-crashes). A genuine deploy/environment failure (e.g. Developer Mode off) is reported as a non-fatal WARN, not a FAIL.
 
 The validator's stdout is intentionally terse: `[FAIL]` lines show only `file:line` (plus an error code where applicable). The full diagnostic text — code snippets, compiler error messages — is written to `.validator-diagnostics.txt` at the project root. **Open that file** to read the details before deciding the fix.
 
@@ -199,7 +202,7 @@ Pages that depend on physical hardware (camera, microphone, location, sensors, B
 
 **Rule:** every device-dependent page must show a visible fallback when device acquisition or initialization throws. The fallback can be as simple as a centred `TextBlock` saying *"This sample requires a <device-kind> device that is not available on this machine."* plus the exception's `Message` underneath. Wrap the init call in `try/catch`; on catch, swap the page's main content for the fallback (don't only log and return).
 
-This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1` Section 7) will still pass the process-alive gate, but the benchmark's later screenshot-diff check will penalise the trial. A two-line fallback prevents a ~20-point score loss.
+This is not optional polish — without it, the runtime smoke check (`Validate-UwpMigration.ps1` Section 8) will still pass the process-alive gate, but the benchmark's later screenshot-diff check will penalise the trial. A two-line fallback prevents a ~20-point score loss.
 
 ## Post-Migration
 
