@@ -1,0 +1,28 @@
+{
+  "scenario": "TextSegmentation",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The UWP manifest reached the first validation with a missing image and Windows.Universal target.",
+      "evidence": "session-log.txt lines 3021-3029; the validator supplied both exact fixes and the agent applied them in turn 21.",
+      "covered_clearly_at": "SKILL.md Step 4 validator item 5 and MIGRATION-PATTERNS.md Project File Updates -> Package.appxmanifest checklist.",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "The dedicated validator and manifest section already identified the exact defects and fixes."
+    },
+    {
+      "problem": "Build, run, launch helper, and validator were repeatedly launched concurrently, causing incomplete-layout results and an input.json file lock.",
+      "evidence": "session-log.txt turns 19, 22, 25, and 27; lines 3483-3491 show launch before layout completion and concurrent XAML compiler access.",
+      "covered_clearly_at": "SKILL.md Step 3: 'build -> fix the first error -> launch -> repeat' and Step 4 validation after fixes.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The operations were explicitly ordered and share build outputs; a capable rerun should not treat them as independent."
+    },
+    {
+      "problem": "A newly added Frame property failed CS0246 because Microsoft.UI.Xaml.Controls was not imported.",
+      "evidence": "session-log.txt lines 3416-3428; turn 26 added the missing using and the next build succeeded.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md -> Namespace Mapping maps Windows.UI.Xaml.Controls to Microsoft.UI.Xaml.Controls.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The compiler named the missing type and the namespace mapping is explicit; adding a Frame-specific warning would be one-off noise."
+    }
+  ]
+}

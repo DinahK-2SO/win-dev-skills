@@ -1,0 +1,15 @@
+{
+  "scenario": "TextSegmentation",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "The scaffold, bootstrap, and self-check were launched concurrently, producing Target not found and false self-check results.",
+      "evidence": "session-log.txt lines 12-31 shows all three calls issued together; the scaffold completed only after bootstrap and self-check had already failed.",
+      "covered_at": "SKILL.md Step 0 - Bootstrap (mandatory), especially the numbered first-three-command block and Target description.",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "Call the commands a dependency chain and explicitly forbid batching/parallelization; require successful exit before the next command.",
+      "generalizes": "Scaffolding must finish before any migration bootstrap can resolve the target in every scenario."
+    }
+  ]
+}

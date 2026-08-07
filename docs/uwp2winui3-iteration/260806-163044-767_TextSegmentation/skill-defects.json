@@ -1,0 +1,37 @@
+{
+  "scenario": "TextSegmentation",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The mandatory bootstrap omitted external project inputs represented by Include plus Link metadata, so its supposedly complete mapping contained only 4 of 19 migration inputs.",
+      "evidence": "TextSegmentation.csproj lines 93-169 link shared App, MainPage, scenario XAML, styles, code, and assets; session-log.txt lines 122-149 reports only 4 copied files.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for Link, Compile Include, Page Include, linked, and SharedContent; no linked-item handling existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 used only a recursive directory crawl rooted at Source and never evaluated external project items.",
+      "proposed_fix": "Extend Initialize-UwpMigration.ps1 to resolve common MSBuild properties, copy external items to their Link targets, and include them in mapping/triage.",
+      "generalizes": "Legacy UWP projects commonly share XAML, code, and assets through linked project items outside the project folder."
+    },
+    {
+      "problem": "The skill required winapp build although the installed WinApp CLI has no build command.",
+      "evidence": "session-log.txt lines 2915-2973: the command was rejected and the CLI command list contained run but not build.",
+      "skill_search": "Searched SKILL.md and MIGRATION-PATTERNS.md for winapp build and dotnet build; SKILL.md prescribed winapp build in Step 3 and after validation.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer winapp build to compile.",
+      "root_cause": "The skill conflated WinApp launch/package commands with native .NET compilation.",
+      "proposed_fix": "Use dotnet build consistently and retain Test-AppLaunch.ps1 for packaged launch.",
+      "generalizes": "Every C# WinUI migration must compile, and the standalone WinApp CLI command surface does not provide build."
+    },
+    {
+      "problem": "Startup diagnostics classified a managed 0x8001010E failure as generic 0xe0434352 and the docs categorically dismissed the generated entry point, causing repeated irrelevant edits.",
+      "evidence": "session-log.txt lines 3337-3346 reports generic managed-exception advice; lines 3716-3728 show COMException 0x8001010E with only Program.Main and Application.Start; turns 24-33 changed navigation and UseRidGraph without effect.",
+      "skill_search": "Searched Test-AppLaunch.ps1 and MIGRATION-PATTERNS.md for 0xe0434352, 0x8001010E, STAThread, and Program.Main.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Do not assume the entry point is the problem... [STAThread] is required, not a bug.",
+      "root_cause": "Test-AppLaunch selected hints from event 1000's CLR wrapper instead of event 1026's HRESULT, while prose lacked an entry-point-only/toolchain branch.",
+      "proposed_fix": "Prefer the managed HRESULT and direct entry-point-only stacks to an untouched-scaffold comparison and toolchain alignment before migrated-code changes.",
+      "generalizes": "Managed WinUI startup crashes routinely use outer code 0xe0434352; the inner HRESULT and first application frame are required to distinguish migration defects from scaffold/runtime incompatibility."
+    }
+  ]
+}

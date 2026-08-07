@@ -31,7 +31,7 @@ Four scripts do every mechanical step. Your job is the judgement work in between
 
 ### Step 0 — Bootstrap (mandatory)
 
-🛑 **Before any file edit, any `view` of the source, any analysis** — your literal first three powershell commands when this skill is invoked MUST be:
+🛑 **Before any file edit, any `view` of the source, any analysis** — your literal first three powershell commands when this skill is invoked MUST be the following **dependency chain**. Run them sequentially; do not batch or parallelize them. Wait for each command to exit successfully before starting the next:
 
 ```powershell
 # 1. Scaffold the WinUI 3 shell in the target directory
@@ -123,7 +123,7 @@ Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are in
 Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
 
 ```powershell
-winapp build                                                                # compile; never run the .exe directly
+dotnet build "<winui3-project-root>/<project>.csproj" -p:Platform=x64       # compile; never run the .exe directly
 & "<skill-root>/scripts/Test-AppLaunch.ps1" -Target "<winui3-project-root>"  # launch AND verify it survives startup
 ```
 
@@ -131,12 +131,14 @@ A WinUI 3 app can build cleanly and still crash the instant it starts, so "it co
 
 When a **build** error points at a UWP API, fetch the relevant anchor and apply the pattern. For example, a CS0246 on `Window.Current` → `Get-MigrationPattern.ps1 -Anchor windowing`; an analyzer warning about `CoreDispatcher` → `Get-MigrationPattern.ps1 -Anchor threading`. Open `MIGRATION-PATTERNS.md` directly only as a last resort — one anchor at a time keeps each turn small.
 
-When the app **crashes at launch**, fix the frame the captured stack names — then build and launch again. Do **not** sprinkle `File.WriteAllText` traces through `Program.cs` / `App.xaml.cs` and re-run in a loop: blind tracing is the single biggest time sink in this phase, and the exception `Test-AppLaunch.ps1` already captured tells you where the throw is. (Note: a custom `Program.Main` for WinUI 3 **correctly** uses `[STAThread]` — that is not the bug.)
+When the app **crashes at launch**, fix the first migrated frame the captured stack names — then build and launch again. Do **not** sprinkle `File.WriteAllText` traces through `Program.cs` / `App.xaml.cs` and re-run in a loop: blind tracing is the single biggest time sink in this phase.
+
+If the stack contains only generated `Program.Main` → `Application.Start` and no migrated frame, do not guess at page code or change the entry-point apartment attribute. Reproduce an untouched scaffold with the same TFM and package versions. If that scaffold fails identically, refresh/recreate the scaffold with a mutually compatible template, Windows App SDK package, and runtime; this is a toolchain mismatch. If the scaffold runs, diff startup-related project properties and any custom `Program` before touching migrated UI code.
 
 > **Build command discipline (avoid agent stalls):**
 >
-> - Prefer `winapp build` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (A bare `winapp run` works too, but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
-> - If you must shell out to `dotnet build` / `dotnet run`, **do not** pipe the output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
+> - Use `dotnet build` to compile and `Test-AppLaunch.ps1` to launch. The standalone `winapp` CLI has no `build` command; `winapp run` is used internally by the launch helper.
+> - Do not pipe `dotnet build` / `dotnet run` output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
 > - When using `dotnet` from the powershell tool, either (a) run **sync**, or (b) leave output unfiltered, or (c) append an exit sentinel so there is always a final line to read, e.g. `dotnet build -c Debug; "BUILD_EXIT=$LASTEXITCODE"`.
 
 ### Step 4 — Validate (mandatory before declaring done)
@@ -167,7 +169,7 @@ If any check fails, read the diagnostic, fix the root cause, re-run. **Do not re
 - *`Status = copied` rows* → those files were never finished. Either complete the migration and flip to `done`, or defer with rationale.
 - *Build healthcheck FAIL* → open `.validator-diagnostics.txt`; for each unique CS#### code, look up the pattern in PATTERNS.md via `Get-MigrationPattern.ps1`.
 
-After PASS, do a final `winapp build` to confirm the build is still clean. Only then declare done.
+After PASS, do a final `dotnet build "<project>.csproj" -p:Platform=x64` to confirm the build is still clean. Only then declare done.
 
 ## Critical Rules
 

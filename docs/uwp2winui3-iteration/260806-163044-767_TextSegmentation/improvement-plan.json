@@ -1,0 +1,38 @@
+{
+  "scenario": "TextSegmentation",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap silently omitted external UWP project inputs.",
+      "evidence": "lessons.json tool_limitations[0] and skill-defects.json items[0]: 15 linked files were absent from the four-row mapping.",
+      "root_cause": "Initialize-UwpMigration.ps1 crawled only Source and ignored Include/Link project metadata.",
+      "tier": 1,
+      "change": "Resolve common UWP MSBuild properties and external Link items, copy them to their linked target paths, and include them in mapping and triage.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared XAML, code, and assets enter the mechanical migration pipeline instead of requiring manual reconstruction.",
+      "falsifiable_check": "Running bootstrap on TextSegmentation reports 19 copied inputs including 15 external links, and mapping contains App.xaml, MainPage.xaml, both scenario XAML files, styles, and linked assets."
+    },
+    {
+      "problem": "Startup helper and prose misdiagnosed inner HRESULT 0x8001010E as generic managed failure.",
+      "evidence": "lessons.json tools_problematic[1] and skill-defects.json items[2].",
+      "root_cause": "Hint selection used event 1000's 0xe0434352 wrapper and prose lacked a branch for stacks containing no migrated frame.",
+      "tier": 1,
+      "change": "Extract event 1026 managed HRESULTs, prefer them for hints, and document pristine-scaffold comparison for Program.Main -> Application.Start-only stacks.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "Agents stop changing pages/navigation for failures that never enter migrated code and instead isolate toolchain compatibility.",
+      "falsifiable_check": "For an event 1000 0xe0434352 plus event 1026 COMException 0x8001010E, Test-AppLaunch prints managedCode=0x8001010e and the scaffold-comparison hint."
+    },
+    {
+      "problem": "Workflow prose prescribed a nonexistent build command and allowed dependent bootstrap commands to be interpreted as parallelizable.",
+      "evidence": "skill-defects.json items[1] and skill-coverage-gaps.json items[0].",
+      "root_cause": "The instructions conflated WinApp launch with compilation and did not explicitly state the Step 0 dependency barrier.",
+      "tier": 3,
+      "change": "Replace winapp build with dotnet build and state that scaffold -> bootstrap -> self-check must run sequentially after successful exits.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "The migration starts deterministically and reaches compilation without an invalid CLI command.",
+      "falsifiable_check": "On rerun, no Target not found bootstrap error occurs and no winapp build invocation appears in the transcript."
+    }
+  ],
+  "deferred_to_human": []
+}

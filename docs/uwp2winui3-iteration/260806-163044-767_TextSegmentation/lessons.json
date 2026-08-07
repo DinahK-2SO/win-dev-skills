@@ -1,0 +1,177 @@
+{
+  "scenario": "TextSegmentation",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 122-149: after a sequential rerun it created MIGRATION-MAPPING.md, MIGRATION-DEFERRED.md, .bootstrap-meta.json, and copied four in-folder inputs."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 3015-3039 and 3227-3246: it identified manifest assets, Windows.Desktop targeting, build errors, and the startup crash with file/error pointers."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt lines 3213-3221 and build-output.txt: it produced a clean build with zero warnings and zero errors after source fixes."
+    },
+    {
+      "tool": "Windows Application event log",
+      "evidence": "session-log.txt lines 3703-3728: event 1026 exposed COMException 0x8001010E and the Program.Main -> Application.Start stack."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed WinApp CLI has no build command.",
+      "evidence": "session-log.txt lines 2915-2973: winapp rejected 'build' and listed run but no build command."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1 crash classification",
+      "problem": "It reported event 1000's generic managed wrapper code 0xe0434352 and a TypeLoad/FileNotFound hint instead of event 1026's embedded 0x8001010E.",
+      "evidence": "session-log.txt lines 3337-3346 versus lines 3716-3728."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It crawled only the source directory and ignored external project items with Link metadata, so the mapping contained 4 files although the project linked shared App, MainPage, scenario XAML, styles, code, and assets.",
+      "suggested_tweak": "Parse UWP project Link items, resolve common MSBuild properties, copy each external input to its Link path, and include it in triage."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "For managed crashes, its hint selection used the outer event 1000 code rather than the HRESULT embedded in event 1026.",
+      "suggested_tweak": "Extract managed HRESULTs and prefer them when event 1000 reports 0xe0434352."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "Microsoft.UI.Xaml.Application.Start",
+      "why_tried": "The generated WinUI entry point invokes it before constructing the application.",
+      "root_cause": "Unresolved in the trial. Event 1026 showed 0x8001010E with only generated Program.Main and Application.Start frames, while the skill incorrectly directed the agent away from entry-point/toolchain comparison.",
+      "fix": "No code fix was proven in the trial. The reusable diagnostic is to reproduce an untouched scaffold with the same TFM/package versions, then align template/package/runtime if it fails identically."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final validation",
+      "wrong": "Use winapp build.",
+      "correct": "Use native dotnet build; the standalone WinApp CLI exposes run but not build."
+    },
+    {
+      "where": "SKILL.md Step 3 and MIGRATION-PATTERNS.md Diagnosing Startup Crashes",
+      "wrong": "A generated/custom STA Program.Main is categorically not the problem.",
+      "correct": "When event 1026 contains only Program.Main -> Application.Start, compare an untouched scaffold before changing migrated UI or entry-point apartment code."
+    },
+    {
+      "where": "SKILL.md Step 0 and Initialize-UwpMigration.ps1",
+      "wrong": "The bootstrap is a complete inventory of the UWP project.",
+      "correct": "A complete inventory must include external project items represented by Include plus Link metadata, not only files physically beneath the source folder."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.Data.Text.WordsSegmenter and SelectableWordsSegmenter",
+      "special_handling": "They remained usable from WinUI 3; the migration preserved their calls and required no API replacement."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initialize-UwpMigration.ps1: Target not found; the immediate Test-Path returned False.",
+      "root_cause": "The scaffold, bootstrap, and self-check were launched in parallel even though each depends on the preceding command.",
+      "fix": "Wait for dotnet new to exit successfully, then run bootstrap, then run Test-Path."
+    },
+    {
+      "error": "winapp: unrecognized command or argument 'build'.",
+      "root_cause": "The skill documented a command absent from the installed WinApp CLI.",
+      "fix": "Use dotnet build."
+    },
+    {
+      "error": "CS0103 InitializeComponent missing in App.xaml.cs.",
+      "root_cause": "The manually reconstructed linked App.xaml retained x:Class TextSegmentation.App while App.xaml.cs used SDKTemplate.App.",
+      "fix": "Align App.xaml x:Class and xmlns with the code-behind namespace."
+    },
+    {
+      "error": "WMC0909 could not resolve local:Scenario, WMC1111 x:Bind DataTemplate requires x:DataType, followed by WMC9999.",
+      "root_cause": "The manually reconstructed shared shell referenced Scenario through the wrong XAML namespace.",
+      "fix": "The trial removed the invalid x:DataType and used Binding Title."
+    },
+    {
+      "error": "Manifest referenced missing Assets\\StoreLogo-sdk.png and targeted Windows.Universal.",
+      "root_cause": "The UWP manifest was copied without completing the documented desktop manifest reconciliation.",
+      "fix": "Reference an existing StoreLogo.png and set TargetDeviceFamily to Windows.Desktop."
+    },
+    {
+      "error": "CS0246 Frame not found, with secondary WMC9999.",
+      "root_cause": "A newly added Frame property lacked using Microsoft.UI.Xaml.Controls.",
+      "fix": "Add the controls namespace import."
+    },
+    {
+      "error": "XAML compiler input.json was in use by another process.",
+      "root_cause": "dotnet build, dotnet run, Test-AppLaunch, and the validator were launched concurrently against the same obj directory.",
+      "fix": "Run build, launch, and validation sequentially."
+    },
+    {
+      "error": "Test-AppLaunch reported no build output or an incomplete layout.",
+      "root_cause": "Launch checks ran concurrently before their corresponding build completed.",
+      "fix": "Wait for a successful build before launching."
+    },
+    {
+      "error": "COMException 0x8001010E: Application Object must initially be accessed from the multi-thread apartment.",
+      "root_cause": "Unresolved; event 1026 contained only generated Program.Main -> Application.Start frames, and the skill's generic managed-exception hint sent diagnosis toward migrated startup code.",
+      "fix": "No trial fix. First compare an untouched scaffold using the exact toolchain; align template/package/runtime if the scaffold reproduces it."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Turns 1-3",
+      "symptom": "Bootstrap failed once and both self-checks printed False around a successful scaffold/bootstrap.",
+      "turns_or_retries": "One failed parallel attempt, then one successful bootstrap rerun.",
+      "root_cause": "Dependent commands were batched concurrently.",
+      "how_resolved": "The agent reran bootstrap after scaffold completion and then reread its artifacts.",
+      "preventable_by": "State explicitly that the three bootstrap commands are a sequential dependency chain and must not be parallelized."
+    },
+    {
+      "where": "Bootstrap output and turns 4-17",
+      "symptom": "The generated mapping had only four rows, forcing manual discovery and reconstruction of the shared shell, XAML, styles, and assets.",
+      "turns_or_retries": "Most of the pre-build migration work reconstructed files omitted from the bootstrap.",
+      "root_cause": "The bootstrap ignored external csproj Link items.",
+      "how_resolved": "The agent manually read the UWP project and sibling shared content and created the missing target files.",
+      "preventable_by": "Teach Initialize-UwpMigration.ps1 to copy and map linked external project inputs."
+    },
+    {
+      "where": "Turns 18-19",
+      "symptom": "The mandated build command failed before compilation.",
+      "turns_or_retries": "One failed winapp build, then a switch to dotnet build.",
+      "root_cause": "The skill documented a nonexistent WinApp CLI command.",
+      "how_resolved": "The agent used dotnet build.",
+      "preventable_by": "Replace every winapp build instruction with dotnet build."
+    },
+    {
+      "where": "Turns 22-28",
+      "symptom": "Launch checks saw incomplete layouts and one run failed on a locked XAML compiler input.",
+      "turns_or_retries": "Three multi-command batches mixed build, launch, run, and validation.",
+      "root_cause": "Operations sharing bin/obj and requiring build output were incorrectly treated as independent.",
+      "how_resolved": "Later builds completed, but the pattern recurred.",
+      "preventable_by": "Prominent sequential build -> launch -> validate wording."
+    },
+    {
+      "where": "Turns 23-34",
+      "symptom": "The agent changed navigation timing and UseRidGraph, but the same entry-point-only COMException persisted.",
+      "turns_or_retries": "At least four launch attempts reported the same startup failure.",
+      "root_cause": "The helper surfaced the generic outer CLR code and the docs asserted the generated STA entry point was not the issue, despite an event 1026 stack with no migrated frame.",
+      "how_resolved": "Unresolved; the final response correctly reported runs=false.",
+      "preventable_by": "Prefer event 1026's HRESULT and require a pristine-scaffold comparison when no migrated stack frame exists."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Automatic import of external csproj Link items.",
+      "would_have_saved": "Manual reconstruction of the shared application shell, both scenario XAML files, styles, and linked assets."
+    },
+    {
+      "need": "Managed HRESULT-aware startup crash classification.",
+      "would_have_saved": "Repeated page/navigation/project edits for an exception whose stack never entered migrated code."
+    }
+  ],
+  "env_issues": []
+}
