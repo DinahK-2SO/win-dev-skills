@@ -1,0 +1,46 @@
+{
+  "scenario": "SimpleImaging",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Folder-only bootstrap omitted externally linked UWP source and resources.",
+      "evidence": "session-log.txt lines 399-415 versus UWP csproj linked items at lines 692-739; manual recovery consumed turns 7-25.",
+      "root_cause": "The claimed complete inventory did not inspect old-style MSBuild Include/Link items.",
+      "tier": 1,
+      "change": "Extend bootstrap tooling to expand project properties, copy resolvable external Compile/Page/ApplicationDefinition/Content/Resource items to Link destinations, include them in mapping/TODO processing, and fail on unresolved inputs. Tooling is preferred over prose because omission must be mechanically impossible; no existing script covered it.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared shell, styles, and assets are present and annotated before the agent edits, eliminating the manual copy and namespace/XAML cascade.",
+      "falsifiable_check": "Re-running bootstrap on SimpleImaging reports 13 externally linked items, 20 seeded rows, and copied App.xaml.cs, MainPage.xaml.cs, and Styles\\Styles.xaml with rewritten XAML namespaces."
+    },
+    {
+      "problem": "UWP suspension code compiled only after a fake event was added, silently losing persistence behavior.",
+      "evidence": "session-log.txt lines 3409-3412 and 3537-3539; turn 17 added an event that was never raised.",
+      "root_cause": "Suspension constructs were absent from both inventory and lifecycle guidance.",
+      "tier": 1,
+      "change": "Add suspension patterns to the machine-readable inventory so TODO injection cannot be ignored, backed by a lifecycle recipe explaining incremental saves and Window.Closed/AppWindow.Closing. A prose-only fix was rejected because the inventory can route every occurrence.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents replace suspension persistence intentionally instead of fabricating a compile-only event.",
+      "falsifiable_check": "Bootstrap injects a lifecycle TODO above each retained suspension subscription/deferral, and migrated source contains no fake Application.Suspending member."
+    },
+    {
+      "problem": "Build guidance assumed winapp build and launch discovery assumed only platform-qualified output.",
+      "evidence": "session-log.txt lines 3301-3349 and 3354-3362.",
+      "root_cause": "Instructions and scripts encoded one CLI version and one bin layout.",
+      "tier": 1,
+      "change": "Make native dotnet build the documented path and add bin\\Debug fallback discovery to both launch helper and validator. Tooling carries output-shape compatibility; prose only selects the supported build command.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The build command exists across environments and launch diagnosis finds either standard Debug layout.",
+      "falsifiable_check": "No skill instruction invokes winapp build, and Test-AppLaunch -Target resolves an app built under either bin\\x64\\Debug or bin\\Debug."
+    }
+  ],
+  "deferred_to_human": [],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json"
+  ]
+}

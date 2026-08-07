@@ -1,0 +1,151 @@
+{
+  "scenario": "SimpleImaging",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 399-427: copied seven project-local files, rewrote namespaces, injected three picker TODOs, and seeded migration artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt lines 503-939: returned the picker and project-file guidance used to initialize all three file pickers with an HWND."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt lines 3466-3487 and 3506-3569: repeatedly produced actionable C#/XAML diagnostics; build-output.txt line 70 records the eventual successful build."
+    },
+    {
+      "tool": "Get-WinEvent",
+      "evidence": "session-log.txt lines 3992-4054: exposed the startup crash as Microsoft.ui.xaml.dll exception 0xc000027b."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed CLI had no build command.",
+      "evidence": "session-log.txt lines 3301-3349 list the available commands and show exit code 1."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1 -Target",
+      "problem": "It searched only platform-qualified bin paths, while a plain dotnet build can emit bin\\Debug; the first invocation also raced a parallel build.",
+      "evidence": "session-log.txt lines 3354-3362: returned 'No build output found under bin\\x64\\Debug'."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "Recursive copying under the project directory omitted csproj-linked App, MainPage, styles, and media stored in SharedContent outside that directory.",
+      "suggested_tweak": "Resolve external Compile/Page/ApplicationDefinition/Content/Resource Include items and copy their Link destinations before namespace rewrite and TODO injection."
+    },
+    {
+      "tool": "unsupported-api-inventory.json",
+      "limitation": "It did not identify UWP suspension subscriptions, handlers, or deferrals.",
+      "suggested_tweak": "Route suspension lifecycle constructs to the lifecycle migration pattern."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "Application.Suspending / SuspendingOperation",
+      "why_tried": "The copied UWP scenario pages subscribed to App.Current.Suspending to persist image state.",
+      "root_cause": "WinUI 3 desktop Application has no UWP suspension event or deferral contract.",
+      "fix": "Remove the subscription and deferral, persist incrementally, and use Window.Closed or AppWindow.Closing for a final best-effort save."
+    },
+    {
+      "api": "App.MainWindow during MainWindow construction",
+      "why_tried": "MainWindow navigated immediately to MainPage, whose OnNavigatedTo read App.MainWindow.Bounds.",
+      "root_cause": "The right-hand side of App.MainWindow = new MainWindow() completes before the static property is assigned.",
+      "fix": "Keep the constructor inert and navigate only after assigning and activating the window."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build instruction",
+      "wrong": "Preferred and required winapp build even though the installed winapp CLI exposes run but not build.",
+      "correct": "Use native dotnet build with an explicit Debug platform; reserve winapp for packaged launch."
+    },
+    {
+      "where": "Initialize-UwpMigration.ps1 bootstrap-complete contract",
+      "wrong": "Claimed the folder walk was a complete inventory although old UWP csproj files can link source outside the project directory.",
+      "correct": "Resolve linked project items into the copied-file list and fail if a linked input cannot be resolved."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "FileOpenPicker / FileSavePicker",
+      "special_handling": "Initialize each picker with the owning window HWND before PickSingleFileAsync or PickSaveFileAsync."
+    },
+    {
+      "api": "Old-style MSBuild linked items",
+      "special_handling": "Expand project properties and Link metadata so external shared source enters the normal namespace-rewrite, TODO, and mapping pipeline."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "CS0103 InitializeComponent and generated control fields missing; CS0117/CS1061 MainPage.Current and NotifyUser missing",
+      "root_cause": "Externally linked shared shell files were omitted by bootstrap, then manually copied with mismatched x:Class and CLR namespaces.",
+      "fix": "Bootstrap linked files using their Link paths before migration so XAML/code-behind pairs and namespaces are transformed together."
+    },
+    {
+      "error": "CS1061 Application has no definition for Suspending",
+      "root_cause": "UWP suspension lifecycle does not carry to WinUI 3 desktop.",
+      "fix": "Replace suspension persistence rather than adding a never-raised compatibility event."
+    },
+    {
+      "error": "CS0246 MainWindow; CS0103 App and ComWrappersSupport",
+      "root_cause": "Manual shell and custom entry-point edits split types across SDKTemplate and SimpleImaging namespaces and omitted the required WinRT import.",
+      "fix": "Keep scaffold entry-point generation and align XAML/code-behind namespaces; avoid a custom Main unless activation logic requires it."
+    },
+    {
+      "error": "WMC0909/WMC1111 and cascading WMC9999",
+      "root_cause": "The DataTemplate x:DataType prefix did not resolve the namespace containing Scenario after manual shell copying.",
+      "fix": "Point x:DataType at the actual Scenario CLR namespace; do not treat the cascading WMC9999 as an unrelated code failure."
+    },
+    {
+      "error": "Process exit 0xC000027B in Microsoft.ui.xaml.dll",
+      "root_cause": "MainWindow navigated to MainPage in its constructor; MainPage.OnNavigatedTo dereferenced App.MainWindow before OnLaunched assigned it.",
+      "fix": "Assign and activate MainWindow before initial navigation."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log.txt turns 7-25",
+      "symptom": "The agent manually located SharedContent, copied shell files, and iterated through multiple namespace/XAML build failures.",
+      "turns_or_retries": "About 19 turns and four build attempts.",
+      "root_cause": "Bootstrap omitted csproj-linked external source and therefore did not map, rewrite, or annotate it.",
+      "how_resolved": "The agent manually aligned x:Class, namespaces, DataTemplate types, and shell references until the build succeeded.",
+      "preventable_by": "Resolve external linked project items in Initialize-UwpMigration.ps1."
+    },
+    {
+      "where": "session-log.txt turns 14-16",
+      "symptom": "winapp build failed, then Test-AppLaunch reported no build output.",
+      "turns_or_retries": "Two command paths.",
+      "root_cause": "Skill guidance assumed a nonexistent winapp build command, Test-AppLaunch did not support bin\\Debug, and build/launch were started in parallel.",
+      "how_resolved": "The agent switched to dotnet build and later dotnet run with Platform=x64.",
+      "preventable_by": "Use native dotnet build guidance and support both platform-qualified and default Debug layouts."
+    },
+    {
+      "where": "session-log.txt turns 28-31",
+      "symptom": "The app built but crashed at startup; the agent gathered only native event 1000 and stopped without fixing it.",
+      "turns_or_retries": "Four turns; unresolved.",
+      "root_cause": "Constructor-time navigation reached MainPage before App.MainWindow assignment.",
+      "how_resolved": "Not resolved in the trial.",
+      "preventable_by": "Follow the existing MIGRATION-PATTERNS.md 'Initialization order - keep MainWindow's constructor inert' section."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Linked MSBuild item discovery in bootstrap",
+      "would_have_saved": "The manual SharedContent search/copy and the namespace/XAML error cascade."
+    },
+    {
+      "need": "Suspension lifecycle TODO injection",
+      "would_have_saved": "The compile-only fake Suspending event that silently discarded persistence behavior."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "Installed winapp CLI did not provide a build command.",
+      "workaround": "Use dotnet build; use winapp only through packaged run/launch tooling."
+    }
+  ]
+}

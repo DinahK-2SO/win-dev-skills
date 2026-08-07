@@ -1,0 +1,28 @@
+{
+  "scenario": "SimpleImaging",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Both scored features failed because constructor-time navigation dereferenced App.MainWindow before assignment and crashed startup.",
+      "evidence": "migration-score.json marks both features fail; final MainWindow.xaml.cs lines 9-15 navigate in the constructor and MainPage.xaml.cs lines 35-52 read App.MainWindow.Bounds; session-log.txt lines 4042-4054 record 0xc000027b.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md, Windowing > 'Initialization order - keep MainWindow's constructor inert' and 'Diagnosing Startup Crashes'.",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "The skill explicitly explains assignment order, constructor-time navigation, the startup symptom, and the safe sequence."
+    },
+    {
+      "problem": "The first launch diagnostic ran concurrently with the build and checked output before it existed.",
+      "evidence": "session-log.txt lines 3354-3364 show dotnet build and Test-AppLaunch issued together; launch returned before the failing build completed.",
+      "covered_clearly_at": "SKILL.md Step 3: 'build -> fix the first error -> launch -> repeat'.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The required order is already concise and explicit."
+    },
+    {
+      "problem": "The agent introduced a custom Program.Main and then hit a missing ComWrappersSupport symbol.",
+      "evidence": "session-log.txt turn 17 added Main; lines 3539 and 3563 show the resulting compile issue and unused compatibility event.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md > Diagnosing Startup Crashes: delete a hand-written entry point when single-instancing/redirection is not required and let the SDK generate Main.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The existing guidance already identifies the simpler and safer entry-point choice."
+    }
+  ]
+}

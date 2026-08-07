@@ -459,6 +459,22 @@ switch (args.Kind)
 
 Single-instancing: call `AppInstance.FindOrRegisterForKey` + `Redirect` in `Program.Main`.
 
+### Suspension and state persistence
+
+WinUI 3 desktop `Application` has no UWP `Suspending` event or `SuspendingOperation`.
+Do not add a same-named event merely to make old subscriptions compile; it will never be
+raised and silently drops state persistence. Save important state incrementally, and use
+the main window's `Closed` event (or `AppWindow.Closing` when cancellation is required)
+for a final best-effort save:
+
+```csharp
+MainWindow.Closed += (_, _) => SaveState();
+```
+
+Remove the old suspension subscription, handler, and deferral. Desktop process
+termination is not guaranteed to deliver a final callback, so `Closed` supplements
+rather than replaces incremental persistence.
+
 <a id="background-tasks"></a>
 ## Background Tasks
 
@@ -664,7 +680,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The build harness may inject the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |

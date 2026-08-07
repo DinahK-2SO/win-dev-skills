@@ -47,6 +47,42 @@ function Resolve-FullPath([string]$p) {
     return (Resolve-Path -LiteralPath $p).ProviderPath
 }
 
+function Expand-UwpProjectValue {
+    param(
+        [string]$Value,
+        [hashtable]$Properties,
+        [string]$ProjectDirectory
+    )
+
+    $expanded = $Value
+    for ($pass = 0; $pass -lt 10; $pass++) {
+        $before = $expanded
+        foreach ($name in $Properties.Keys) {
+            $expanded = $expanded.Replace("`$($name)", [string]$Properties[$name])
+        }
+
+        if ($expanded -match '^\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(([^,]+),\s*([^)]+)\)\)(.*)$') {
+            $start = $matches[1].Trim().Trim('"', "'")
+            $marker = $matches[2].Trim().Trim('"', "'")
+            $suffix = $matches[3]
+            if (-not [System.IO.Path]::IsPathFullyQualified($start)) {
+                $start = Join-Path $ProjectDirectory $start
+            }
+            $cursor = [System.IO.Path]::GetFullPath($start)
+            while ($cursor -and -not (Test-Path -LiteralPath (Join-Path $cursor $marker))) {
+                $parent = [System.IO.Directory]::GetParent($cursor)
+                $cursor = if ($parent) { $parent.FullName } else { $null }
+            }
+            if ($cursor) {
+                $expanded = $cursor + $suffix
+            }
+        }
+
+        if ($expanded -eq $before) { break }
+    }
+    return $expanded
+}
+
 if (-not (Test-Path -LiteralPath $Source)) { throw "Source not found: $Source" }
 if (-not (Test-Path -LiteralPath $Target)) { throw "Target not found: $Target (scaffold the WinUI 3 project first with 'dotnet new winui')" }
 
@@ -99,8 +135,88 @@ Get-ChildItem -Path $Source -Recurse -File -ErrorAction SilentlyContinue | Where
 
 Write-Host "    Copied $($copied.Count) source files"
 
-# ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
+# Old-style UWP projects often link shared App/MainPage/resources from outside the
+# project directory. A recursive folder copy cannot see those inputs, so resolve
+# the csproj's linked source items and feed them through the same migration pipeline.
 $uwpCsprojs = Get-ChildItem -Path $Source -Filter '*.csproj' -File -ErrorAction SilentlyContinue
+$linkedCopied = 0
+$unresolvedLinkedItems = New-Object System.Collections.Generic.List[string]
+foreach ($projectFile in $uwpCsprojs) {
+    [xml]$projectXml = Get-Content -LiteralPath $projectFile.FullName -Raw
+    $projectDir = Split-Path -Parent $projectFile.FullName
+    $properties = @{
+        MSBuildThisFileDirectory = $projectDir.TrimEnd('\') + '\'
+        MSBuildProjectDirectory  = $projectDir
+    }
+
+    foreach ($property in $projectXml.SelectNodes("//*[local-name()='PropertyGroup']/*")) {
+        if ($property.Name -and $property.InnerText) {
+            $properties[$property.Name] = $property.InnerText.Trim()
+        }
+    }
+    for ($pass = 0; $pass -lt 10; $pass++) {
+        foreach ($name in @($properties.Keys)) {
+            $properties[$name] = Expand-UwpProjectValue -Value ([string]$properties[$name]) -Properties $properties -ProjectDirectory $projectDir
+        }
+    }
+
+    $itemNodes = $projectXml.SelectNodes("//*[local-name()='Compile' or local-name()='Page' or local-name()='ApplicationDefinition' or local-name()='Content' or local-name()='Resource']")
+    foreach ($item in $itemNodes) {
+        $include = [string]$item.Include
+        if (-not $include -or $include -match '[*?]') { continue }
+        $expandedInclude = Expand-UwpProjectValue -Value $include -Properties $properties -ProjectDirectory $projectDir
+        if ($expandedInclude -match '\$\(') {
+            [void]$unresolvedLinkedItems.Add("$($projectFile.Name): $include")
+            continue
+        }
+
+        $full = if ([System.IO.Path]::IsPathFullyQualified($expandedInclude)) {
+            [System.IO.Path]::GetFullPath($expandedInclude)
+        } else {
+            [System.IO.Path]::GetFullPath((Join-Path $projectDir $expandedInclude))
+        }
+        $sourcePrefix = $Source.TrimEnd('\') + '\'
+        if ($full.StartsWith($sourcePrefix, [System.StringComparison]::OrdinalIgnoreCase)) { continue }
+        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) {
+            [void]$unresolvedLinkedItems.Add("$($projectFile.Name): $include -> $full")
+            continue
+        }
+
+        $name = [System.IO.Path]::GetFileName($full).ToLowerInvariant()
+        $supported = $false
+        foreach ($ext in $patterns) {
+            if ($name.EndsWith($ext)) { $supported = $true; break }
+        }
+        if (-not $supported) { continue }
+
+        $linkNode = $item.SelectSingleNode("*[local-name()='Link']")
+        $rel = if ($linkNode -and $linkNode.InnerText) {
+            Expand-UwpProjectValue -Value $linkNode.InnerText.Trim() -Properties $properties -ProjectDirectory $projectDir
+        } else {
+            [System.IO.Path]::GetFileName($full)
+        }
+        if ([System.IO.Path]::IsPathFullyQualified($rel) -or $rel -match '^\.\.') {
+            throw "Linked item destination must stay inside the target: $include -> $rel"
+        }
+
+        $dst = Join-Path $Target $rel
+        $dstDir = [System.IO.Path]::GetDirectoryName($dst)
+        if (-not (Test-Path -LiteralPath $dstDir)) {
+            New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
+        }
+        Copy-Item -LiteralPath $full -Destination $dst -Force
+        if (-not $copied.Contains($rel)) { [void]$copied.Add($rel) }
+        $linkedCopied++
+    }
+}
+if ($unresolvedLinkedItems.Count -gt 0) {
+    throw "Could not resolve linked UWP project item(s). The bootstrap cannot produce a complete mapping:`n  $($unresolvedLinkedItems -join "`n  ")"
+}
+if ($linkedCopied -gt 0) {
+    Write-Host "    Copied $linkedCopied externally linked project item(s)"
+}
+
+# ─── 2. Preserve UWP .csproj as read-only reference ────────────────────────────
 $refDir = Join-Path $Target '.uwp-source'
 if ($uwpCsprojs.Count -gt 0) {
     if (-not (Test-Path -LiteralPath $refDir)) {
@@ -465,6 +581,7 @@ $labelOrder = @('migrate-as-is','migrate-with-adaptation','defer')
 Write-Host ""
 Write-Host "=== BOOTSTRAP COMPLETE ==="
 Write-Host "Source files copied   : $($copied.Count)"
+Write-Host "  Externally linked   : $linkedCopied"
 Write-Host "Namespace rewrites    : $nsChanged of $($nsFiles.Count) .cs/.xaml files"
 Write-Host "Neutralized classes   : $($neutralizedFiles.Count) file(s)"
 Write-Host "Triage breakdown      :"

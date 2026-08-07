@@ -1,0 +1,37 @@
+{
+  "scenario": "SimpleImaging",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap silently omitted source linked from outside the UWP project directory.",
+      "evidence": "session-log.txt lines 399-415 copied only 7 files; lines 692-739 show external SharedContent Compile/Page/ApplicationDefinition entries; turns 7-25 manually copied and repaired those files.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 for SharedContent, Link, Compile Include, ApplicationDefinition Include, and Page Include; no linked-item handling existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap inventory was a recursive directory walk rather than the union of project-local files and csproj-linked inputs.",
+      "proposed_fix": "Resolve external project item Include paths and Link destinations, copy them before rewrite/triage, and fail on unresolved linked inputs.",
+      "generalizes": "Old non-SDK UWP projects commonly share App, shell, styles, and assets through linked MSBuild items."
+    },
+    {
+      "problem": "The skill required a nonexistent winapp build command and launch discovery rejected default dotnet Debug layouts.",
+      "evidence": "session-log.txt lines 3301-3349 show no winapp build command; lines 3354-3362 show Test-AppLaunch reporting no bin\\x64\\Debug output.",
+      "skill_search": "Searched SKILL.md, Validate-UwpMigration.ps1, and Test-AppLaunch.ps1 for winapp build, dotnet build, binCandidates, and bin\\Debug.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer `winapp build` to compile; Test-AppLaunch searched only bin/<arch>/Debug.",
+      "root_cause": "Build instructions and output discovery assumed a winapp CLI surface and one platform-qualified output shape.",
+      "proposed_fix": "Use native dotnet build guidance and accept both platform-qualified and default Debug output roots.",
+      "generalizes": "winapp command versions vary, and plain dotnet builds commonly emit bin\\Debug."
+    },
+    {
+      "problem": "UWP suspension persistence was neither detected nor explained.",
+      "evidence": "session-log.txt lines 3409-3412 and 3537-3539 show missing Application.Suspending; turn 17 added a never-raised event to compile.",
+      "skill_search": "Searched SKILL.md, MIGRATION-PATTERNS.md, and unsupported-api-inventory.json for Suspending, SuspendingEventHandler, and SuspendingOperation; no matches existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The lifecycle pattern covered activation but not UWP suspension, and the inventory injected no lifecycle TODO.",
+      "proposed_fix": "Route suspension constructs to the lifecycle anchor and document incremental persistence plus Window.Closed/AppWindow.Closing.",
+      "generalizes": "UWP apps frequently save state from Application.Suspending, while WinUI 3 desktop has no equivalent event."
+    }
+  ]
+}
