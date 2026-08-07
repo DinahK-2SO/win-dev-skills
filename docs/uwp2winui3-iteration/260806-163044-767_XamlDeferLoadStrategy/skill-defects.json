@@ -1,0 +1,47 @@
+{
+  "scenario": "XamlDeferLoadStrategy",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "All three scored feature areas were unavailable because the candidate crashed during native XAML startup while four legacy deferral directives remained untouched.",
+      "evidence": "migration-score.json: 3/3 features fail; session-log.txt turns 36 and 46: repeated 0xc000027b in Microsoft.UI.Xaml.dll; turn 38 grep: four x:DeferLoadStrategy occurrences.",
+      "skill_search": "Searched SKILL.md, MIGRATION-PATTERNS.md, scripts, and inventory for x:DeferLoadStrategy and x:Load; no migration rule existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The bootstrap treated the superseded directive as migrate-as-is and the validator did not flag it, so the agent never applied the equivalent modern XAML form.",
+      "proposed_fix": "Mechanically rewrite x:DeferLoadStrategy=\"Lazy\" to x:Load=\"False\", add a focused pattern section, and fail validation on residue.",
+      "generalizes": "Older UWP applications commonly use the legacy lazy-loading directive in pages and control templates."
+    },
+    {
+      "problem": "The documented build command does not exist in the installed winapp CLI.",
+      "evidence": "session-log.txt turn 8: winapp build exited 1 with ''build' was not matched'.",
+      "skill_search": "Searched skill markdown for winapp build and dotnet build; SKILL.md prescribed winapp build in Step 3 and after validation.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer `winapp build` to compile.",
+      "root_cause": "Build and launch responsibilities were conflated even though the validator already uses native dotnet build.",
+      "proposed_fix": "Use dotnet build <project> -p:Platform=x64 consistently and reserve winapp for packaged launch.",
+      "generalizes": "Every migration must compile, and the same installed CLI surface is shared across scenarios."
+    },
+    {
+      "problem": "A no-deferred-files migration always produced a validator consistency warning.",
+      "evidence": "session-log.txt turns 36 and 46: '[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows'.",
+      "skill_search": "Initialize-UwpMigration.ps1 emitted '| (none) |'; Validate-UwpMigration.ps1 searched for 'No items deferred'.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Producer sentinel `(none)` did not match validator sentinel `No items deferred`.",
+      "root_cause": "The two migration scripts used different representations for the same empty state.",
+      "proposed_fix": "Make the bootstrap emit the validator's canonical No items deferred sentinel.",
+      "generalizes": "Any migration with zero deferred files hits this producer/consumer mismatch."
+    },
+    {
+      "problem": "The bootstrap did not identify XAML-referenced assets stored in a sibling shared-content tree.",
+      "evidence": "session-log.txt turns 10-22: rainier.jpg and valley.jpg were referenced by copied XAML but absent until the agent searched SharedContent and copied them.",
+      "skill_search": "Searched the migration skill for SharedContent, linked assets, and unresolved ms-appx references; no guidance or check existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Source copying is limited to the selected UWP project directory and does not inventory unresolved content URIs.",
+      "proposed_fix": "Add an unresolved ms-appx asset inventory that reports missing paths and prompts resolution from linked/shared source locations.",
+      "generalizes": "UWP SDK samples and multi-project apps frequently link media and resources from shared sibling directories."
+    }
+  ]
+}

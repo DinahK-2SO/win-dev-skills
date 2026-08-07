@@ -40,6 +40,7 @@
     { "pattern": "xmlns:[a-zA-Z]+=\"using:Windows\\.UI\\.Xaml",                "name": "xmlns: using:Windows.UI.Xaml",   "reason": "XAML xmlns clause should have been rewritten" },
     { "pattern": "Microsoft\\.NETCore\\.UniversalWindowsPlatform",             "name": "Microsoft.NETCore.UniversalWindowsPlatform PackageReference", "reason": "UWP-only NuGet — drop and use Microsoft.WindowsAppSDK" },
     { "pattern": "<TargetPlatformIdentifier>\\s*UAP",                          "name": "<TargetPlatformIdentifier>UAP", "reason": "UWP csproj marker — should not appear in WinAppSDK project" },
-    { "pattern": "<OutputType>\\s*AppContainerExe",                            "name": "<OutputType>AppContainerExe",   "reason": "UWP csproj marker — should not appear in WinAppSDK project" }
+    { "pattern": "<OutputType>\\s*AppContainerExe",                            "name": "<OutputType>AppContainerExe",   "reason": "UWP csproj marker — should not appear in WinAppSDK project" },
+    { "pattern": "x:DeferLoadStrategy\\s*=",                                   "name": "x:DeferLoadStrategy",           "reason": "Superseded by the equivalent x:Load attribute; bootstrap should rewrite Lazy to False" }
   ]
 }

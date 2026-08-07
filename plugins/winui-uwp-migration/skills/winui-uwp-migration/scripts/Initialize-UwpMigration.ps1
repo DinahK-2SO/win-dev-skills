@@ -115,21 +115,32 @@ if ($uwpCsprojs.Count -gt 0) {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
 }
 
-# ─── 3. Namespace mass-replace: Windows.UI.Xaml → Microsoft.UI.Xaml ────────────
+# ─── 3. Safe mechanical XAML rewrites ─────────────────────────────────────────
 $excludeDirs = @('bin', 'obj', '.uwp-source', '.vs', '.git', '.github', '.copilot')
 $excludePattern = '\\(' + ($excludeDirs -join '|') + ')\\'
-$nsFiles = Get-ChildItem -Path $Target -Recurse -File -Include *.cs,*.xaml -ErrorAction SilentlyContinue |
-    Where-Object { $_.FullName -notmatch $excludePattern }
+$nsFiles = Get-ChildItem -Path $Target -Recurse -File -ErrorAction SilentlyContinue |
+    Where-Object {
+        ($_.Extension -eq '.cs' -or $_.Extension -eq '.xaml') -and
+        $_.FullName -notmatch $excludePattern
+    }
 $nsChanged = 0
+$deferLoadChanged = 0
 foreach ($f in $nsFiles) {
     $orig = [System.IO.File]::ReadAllText($f.FullName)
     $new = $orig -replace 'Windows\.UI\.Xaml', 'Microsoft.UI.Xaml'
     if ($new -ne $orig) {
-        [System.IO.File]::WriteAllText($f.FullName, $new)
         $nsChanged++
+    }
+    if ($f.Extension -eq '.xaml' -and $new -match 'x:DeferLoadStrategy\s*=\s*"Lazy"') {
+        $new = $new -replace 'x:DeferLoadStrategy\s*=\s*"Lazy"', 'x:Load="False"'
+        $deferLoadChanged++
+    }
+    if ($new -ne $orig) {
+        [System.IO.File]::WriteAllText($f.FullName, $new)
     }
 }
 Write-Host "    Rewrote Windows.UI.Xaml -> Microsoft.UI.Xaml in $nsChanged of $($nsFiles.Count) .cs/.xaml files"
+Write-Host "    Rewrote x:DeferLoadStrategy=Lazy -> x:Load=False in $deferLoadChanged XAML file(s)"
 
 # ─── 4a. Filter-prone class neutralization ────────────────────────────────────
 # Some SDK Samples boilerplate helpers contain UWP-specific patterns whose
@@ -437,7 +448,7 @@ foreach ($rel in $deferredKeys) {
     [void]$dlines.Add("| $rel | $anchorList |")
 }
 if ($deferredKeys.Count -eq 0) {
-    [void]$dlines.Add('| (none) | — |')
+    [void]$dlines.Add('| No items deferred | — |')
 }
 Set-Content -LiteralPath $deferredPath -Value $dlines -Encoding UTF8
 

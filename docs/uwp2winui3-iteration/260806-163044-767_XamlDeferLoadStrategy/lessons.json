@@ -1,0 +1,137 @@
+{
+  "scenario": "XamlDeferLoadStrategy",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 2-3: copied 16 files, rewrote six namespace-bearing files, injected six TODOs, and produced mapping/meta artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt turns 4 and 37: returned focused windowing, GetForCurrentView, csproj, and startup-crash guidance."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt turns 32 and 34: produced a clean build and the required bin\\x64\\Debug layout when invoked with -p:Platform=x64."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1 and Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 36 and 46: consistently detected the registered-then-crashed process and prevented a false success report."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed winapp CLI has no build subcommand.",
+      "evidence": "session-log.txt turn 8: 'build' was not matched and exited 1."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It copied only the selected source subtree, so XAML-referenced images supplied through the repository's sibling SharedContent tree were absent.",
+      "suggested_tweak": "Inventory unresolved ms-appx asset references and report them explicitly, including likely linked/shared source locations."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "It initially ignored the default bin\\Debug output and, for 0xc000027b with no event 1026, returned only a broad legacy-projection hint.",
+      "suggested_tweak": "Standardize the documented build on -p:Platform=x64 and enrich native-stowed-exception diagnostics when no managed event exists."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "x:DeferLoadStrategy=\"Lazy\"",
+      "why_tried": "The bootstrap classified all four occurrences as migrate-as-is, so the legacy directive remained in page and control-template XAML.",
+      "root_cause": "The migration inventory and patterns had no rule for the superseded XAML directive; the app then failed during native XAML startup with 0xc000027b.",
+      "fix": "Mechanically rewrite the exact legacy value to x:Load=\"False\" and reject residue. This equivalent was not attempted in the trial."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build instructions",
+      "wrong": "Use winapp build.",
+      "correct": "Use native dotnet build with -p:Platform=x64; reserve winapp for packaged launch."
+    },
+    {
+      "where": "Initialize-UwpMigration.ps1 / Validate-UwpMigration.ps1 deferred-file contract",
+      "wrong": "The bootstrap emitted '| (none) |' while the validator recognized only 'No items deferred'.",
+      "correct": "The producer and validator must use the same no-items sentinel."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "x:DeferLoadStrategy",
+      "special_handling": "Replace Lazy with x:Load=False while preserving x:Name and realization through FindName, GetTemplateChild, VisualState targeting, or binding; Window-root realization requires x:Bind rather than FindName."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initialize-UwpMigration.ps1: Target not found",
+      "root_cause": "The scaffold, bootstrap, and Test-Path commands were launched concurrently despite their dependency order.",
+      "fix": "The agent reran bootstrap after dotnet new completed."
+    },
+    {
+      "error": "winapp: 'build' was not matched",
+      "root_cause": "The skill prescribed a subcommand absent from the installed CLI.",
+      "fix": "The agent switched to dotnet build."
+    },
+    {
+      "error": "CS0246 MainPage; WMC0001 ScenarioBindingConverter; WMC9999",
+      "root_cause": "The agent temporarily split related partial classes and converter types across inconsistent SDKTemplate and XamlDeferLoadStrategy namespaces.",
+      "fix": "It reconciled x:Class, code-behind, converter, and shell references to a consistent namespace."
+    },
+    {
+      "error": "CS9035 required members in generated XamlTypeInfo.g.cs",
+      "root_cause": "The agent added required properties to XAML-activatable model types; generated activation uses parameterless construction.",
+      "fix": "It replaced required members with initialized properties."
+    },
+    {
+      "error": "Test-AppLaunch status=unavailable: no build output under bin\\x64\\Debug",
+      "root_cause": "The first dotnet build used the default output path rather than the helper's x64 convention.",
+      "fix": "It rebuilt with -p:Platform=x64."
+    },
+    {
+      "error": "CS2001 missing generated *.g.i.cs and WMC0001 during turn 42",
+      "root_cause": "Build, launch, and validation commands that mutate/read the same obj/bin trees were run concurrently.",
+      "fix": "A later clean sequential rebuild restored a clean build."
+    },
+    {
+      "error": "Startup crash 0xc000027b in Microsoft.UI.Xaml.dll",
+      "root_cause": "Unresolved native XAML startup failure; the trial left the superseded deferral directive in four XAML locations and the crash tooling captured no managed stack.",
+      "fix": "Not resolved in the trial."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Bootstrap turns 1-2",
+      "symptom": "Bootstrap and self-check ran before scaffolding completed and had to be repeated.",
+      "turns_or_retries": "2 turns",
+      "root_cause": "Dependent commands were parallelized.",
+      "how_resolved": "Reran bootstrap after scaffold completion.",
+      "preventable_by": "Following the already numbered Step 0 commands sequentially."
+    },
+    {
+      "where": "Build turns 19-32",
+      "symptom": "Multiple namespace and generated-code build failures followed agent-authored namespace and required-member changes.",
+      "turns_or_retries": "7 build/edit turns",
+      "root_cause": "Partial-class namespace reconciliation was done piecemeal, and required members were incompatible with XAML activation.",
+      "how_resolved": "Unified namespaces and used initialized properties.",
+      "preventable_by": "A pre-build invariant that x:Class, code-behind namespace, related partial classes, and XAML-activatable types remain constructible."
+    },
+    {
+      "where": "Startup diagnosis turns 36-46",
+      "symptom": "The agent merged resources and removed title-bar/backdrop features, but the same 0xc000027b crash persisted.",
+      "turns_or_retries": "3 launch attempts plus 2 speculative edits",
+      "root_cause": "The skill had no x:DeferLoadStrategy migration rule and the crash helper had no managed stack for the native stowed exception.",
+      "how_resolved": "Unresolved; the agent correctly reported the blocker.",
+      "preventable_by": "A bootstrap rewrite and validator residue rule for the superseded XAML deferral directive."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "A deterministic rewrite/check for superseded XAML language directives.",
+      "would_have_saved": "The unresolved startup-debugging loop and the final candidate launch failure."
+    }
+  ],
+  "env_issues": []
+}
