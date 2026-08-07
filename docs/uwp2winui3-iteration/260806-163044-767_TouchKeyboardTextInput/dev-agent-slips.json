@@ -1,0 +1,28 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The bootstrap self-check ran concurrently with the bootstrap and initially returned False.",
+      "evidence": "session-log.txt turn 2 started Initialize-UwpMigration.ps1 and Test-Path together; turn 3 reran Test-Path after completion and received True.",
+      "covered_clearly_at": "SKILL.md Step 0 commands 1-3 and hard rule: proceed only after step 3 returns True.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The sequence and gate are already explicit; a sequential rerun worked without additional guidance."
+    },
+    {
+      "problem": "The agent ran build, launch, and validation concurrently, causing launch to report that no build output existed.",
+      "evidence": "session-log.txt turn 16 started all three commands together; Test-AppLaunch returned unavailable before dotnet build completed.",
+      "covered_clearly_at": "SKILL.md Step 3: 'build -> fix the first error -> launch -> repeat.'",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The existing process clearly orders build before launch; later sequential attempts found the real startup crash."
+    },
+    {
+      "problem": "The agent regenerated source XAML manually and later deleted Styles.xaml while the app was still failing startup.",
+      "evidence": "session-log.txt turns 12-13 add newly authored MainPage and scenario XAML; turns 22-24 remove the merged Styles dictionary and delete Styles.xaml before replacing its consumers.",
+      "covered_clearly_at": "SKILL.md Critical Rules / Fidelity: 'Do not regenerate XAML from scratch. Copy each *.xaml verbatim, then transform.'",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The fidelity rule already prominently forbids reconstruction and silent omission. The bootstrap defect explains why source files were unavailable, but deleting a resource provider before its consumers were safely migrated was still a one-off execution mistake."
+    }
+  ]
+}

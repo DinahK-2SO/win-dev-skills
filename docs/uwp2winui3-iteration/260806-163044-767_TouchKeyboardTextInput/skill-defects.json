@@ -1,0 +1,37 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "The bootstrap omitted source, XAML, resource dictionaries, and assets linked from outside the UWP project directory.",
+      "evidence": "session-log.txt turns 2-14: the mapping contained only Package.appxmanifest, SampleConfiguration.cs, and two code-behind files. The UWP csproj explicitly linked App.xaml, MainPage.xaml, Styles.xaml, both scenario XAML files, shared code, and assets through Include/Link entries.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 and SKILL.md for linked, Link>, Compile Include, Page Include, and SharedContent; no linked-item handling existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 recursively copied only the physical Source tree and built mapping from that copy list.",
+      "proposed_fix": "Resolve explicit MSBuild Compile/ApplicationDefinition/Page/Content/EmbeddedResource/PRIResource Include entries and copy each source to its Link path before namespace rewriting and triage.",
+      "generalizes": "Legacy UWP projects frequently share shells, resource dictionaries, code, and assets through MSBuild Link metadata; omitting them causes incomplete migrations across many SDK samples and multi-project apps."
+    },
+    {
+      "problem": "Both scored features were unreachable because the app crashed in startup XAML, while the skill's 0xc000027b guidance pointed primarily to unsupported API projection and offered no resource-safe isolation when event 1026 was absent.",
+      "evidence": "migration-score.json marks Spelling and Text Suggestions and Scoped Views fail because startup crashed. session-log.txt turns 16-28 repeatedly show 0xc000027b in Microsoft.UI.Xaml.dll with empty managedType/message; the agent removed window chrome and then the Styles dictionary without resolving the crash.",
+      "skill_search": "Searched Test-AppLaunch.ps1 and MIGRATION-PATTERNS.md for 0xc000027b and startup-crashes.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Native stowed exception - frequently a legacy projection/activation incompatibility. If a UWP API/contract used at startup is unsupported on this OS, defer it.",
+      "root_cause": "A generic stowed XAML exception code was treated as evidence for one API class even though the faulting module was Microsoft.UI.Xaml.dll and no startup API invocation or managed stack supported that conclusion.",
+      "proposed_fix": "Correct the helper hint and startup pattern to prioritize startup XAML, merged dictionaries, resource keys, x:Class, and control properties, with blank-page and region bisection that preserves resource providers.",
+      "generalizes": "WinUI XAML load failures commonly surface as native stowed exceptions without a managed stack; migration agents need a conservative diagnostic sequence rather than unsupported-feature guessing."
+    },
+    {
+      "problem": "The skill instructed the agent to compile with a nonexistent winapp build command.",
+      "evidence": "session-log.txt turn 15: winapp rejected build and listed no build subcommand; turn 16 dotnet build succeeded with zero warnings and errors.",
+      "skill_search": "Searched SKILL.md for winapp build and dotnet build; Step 3 and the final confirmation explicitly preferred winapp build.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer winapp build to compile.",
+      "root_cause": "The skill conflated winapp packaged launch support with compilation.",
+      "proposed_fix": "Use dotnet build for compilation and reserve Test-AppLaunch.ps1/winapp run for packaged launch.",
+      "generalizes": "Every migrated WinUI project must compile, and standalone winapp installations may not expose a build command."
+    }
+  ]
+}

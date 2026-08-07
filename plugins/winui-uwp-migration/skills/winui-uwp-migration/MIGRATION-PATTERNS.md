@@ -434,7 +434,15 @@ Get-WinEvent -LogName Application -MaxEvents 40 |
 | `0x80004003` | `E_POINTER` | Static-window **init-order race** — a `Page` read `App.MainWindow` (or another static window reference) before `OnLaunched` assigned it. Keep `MainWindow`'s constructor inert and navigate after `Activate`. See [Initialization order](#windowing). |
 | `0x8001010E` | `RPC_E_WRONG_THREAD` | A **thread/apartment-affined object** was accessed during startup — commonly a view- or `CoreWindow`-affined UWP API touched from a `static` initializer, a type constructor, or off the UI thread. Construct/access it on the UI thread *after* `Activate`. If the API has no WinUI 3 desktop equivalent, defer it. |
 | `0xE0434352` | Managed CLR exception | Read the **.NET exception type** in event 1026. `TypeLoadException` / `FileNotFoundException` almost always means a missing or version-incompatible package reference, not your code. |
-| `0xC000027B` | Native stowed exception | Often a legacy projection/activation incompatibility for an API used at startup. If the API/contract is unsupported on the current OS, defer it. |
+| `0xC000027B` | Native stowed exception | Most often opaque XAML activation in a migration: inspect the startup `Window`/first `Page`, merged dictionaries, every custom `{StaticResource}` / `{ThemeResource}`, `x:Class`, and control properties first. Only classify it as an unsupported API when startup code actually invokes that API. |
+
+When event 1026 is absent and `0xC000027B` names `Microsoft.UI.Xaml.dll`, use a resource-preserving isolation sequence:
+
+1. Keep every source merged dictionary and custom keyed resource in place. Removing a dictionary while leaving references to its keys guarantees another native XAML startup failure.
+2. Temporarily navigate to a minimal blank `Page`. If that survives, restore the first real page and bisect its top-level child regions; if it does not, inspect `App.xaml`, the `Window`, and their code-behind class names.
+3. For each `{StaticResource Key}` / `{ThemeResource Key}` in the failing startup path, prove that `Key` comes from WinUI's `XamlControlsResources` or a still-merged application/page dictionary. Replace obsolete system keys individually; do not delete the dictionary wholesale.
+
+This code is a symptom class, not evidence that the app should be deferred.
 
 > Do **not** assume the entry point is the problem. A custom `Program.Main` for WinUI 3 **correctly** carries `[STAThread]` + `ComWrappersSupport.InitializeComWrappers()` + the `DispatcherQueueSynchronizationContext` setup — this matches the SDK's auto-generated `Main`. `[STAThread]` is **required**, not a bug. If you have a hand-written entry point and don't need single-instancing/redirection, the simplest path is to delete it and let the SDK generate `Main`.
 

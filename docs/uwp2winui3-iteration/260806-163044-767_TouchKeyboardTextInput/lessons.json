@@ -1,0 +1,125 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 2-3: copied four physical source files, rewrote three namespaces, and generated mapping/deferred/meta artifacts."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt turns 16, 20, and 28: each build completed with 0 warnings and 0 errors."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt turns 16, 20, and 28: passed residue, mapping, manifest, and build checks, then correctly failed the startup smoke gate."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "evidence": "session-log.txt turns 16, 20, and 28: detected that the packaged process died during startup and captured code 0xc000027b in Microsoft.UI.Xaml.dll."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "problem": "It copied only files physically below the project directory and ignored explicit MSBuild-linked items outside that tree.",
+      "evidence": "The bootstrap mapped only four files, while TouchKeyboardTextInput.csproj links App.xaml, MainPage.xaml, Styles.xaml, shared code, scenario XAML, and assets through Include/Link entries."
+    },
+    {
+      "tool": "winapp build",
+      "problem": "The installed standalone winapp CLI has no build command.",
+      "evidence": "session-log.txt turn 15: 'build was not matched' and the CLI listed run/package/sign but no build command."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "problem": "For 0xc000027b with no event 1026, its hint asserted a likely unsupported projection instead of prioritizing startup XAML/resource activation.",
+      "evidence": "session-log.txt turns 16-17: managedType and message were empty, but the hint directed the agent toward unsupported APIs; subsequent retries guessed at window chrome and resources."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Windows Application event log / Test-AppLaunch.ps1",
+      "limitation": "Only event 1000 was available for the crash, so there was no managed exception type, message, or stack frame.",
+      "suggested_tweak": "For 0xc000027b in Microsoft.UI.Xaml.dll without event 1026, direct the agent to a resource-preserving XAML isolation sequence and explicitly say the code is not evidence for deferral."
+    }
+  ],
+  "failed_apis": [],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build guidance",
+      "wrong": "Prefer winapp build.",
+      "correct": "Use dotnet build; the standalone winapp CLI is used for packaged launch, not compilation."
+    },
+    {
+      "where": "MIGRATION-PATTERNS.md startup-crashes and Test-AppLaunch.ps1 0xc000027b hint",
+      "wrong": "Treat 0xc000027b primarily as a legacy projection/activation incompatibility and defer unsupported APIs.",
+      "correct": "When Microsoft.UI.Xaml.dll is the faulting module and event 1026 is absent, first inspect startup XAML, merged dictionaries, resource keys, x:Class, and control properties; defer only with evidence of an invoked unsupported API."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "MSBuild Include/Link project items",
+      "special_handling": "Resolve linked Compile, ApplicationDefinition, Page, Content, EmbeddedResource, and PRIResource items to their source paths and copy them to their Link paths before namespace rewriting and mapping."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Bootstrap self-check initially returned False.",
+      "root_cause": "The agent launched the bootstrap and Test-Path in parallel, so the check raced artifact creation.",
+      "fix": "The agent reran Test-Path after the bootstrap completed and received True."
+    },
+    {
+      "error": "winapp build: required command was not provided; 'build' was not matched.",
+      "root_cause": "The migration skill documented a command absent from the installed winapp CLI.",
+      "fix": "The agent switched to dotnet build."
+    },
+    {
+      "error": "Test-AppLaunch reported no build output under bin\\x64\\Debug.",
+      "root_cause": "The agent started build and launch concurrently; launch inspected output before the build completed.",
+      "fix": "Later launches occurred after an x64 build produced the expected layout."
+    },
+    {
+      "error": "Startup crash 0xc000027b in Microsoft.UI.Xaml.dll.",
+      "root_cause": "The managed cause was not captured. The migration had manually reconstructed linked XAML/resources, and the final target removed Styles.xaml while startup pages still depended on keyed resources, leaving an inconsistent startup resource graph.",
+      "fix": "Not resolved in the trial. Preserve linked dictionaries and isolate startup XAML without deleting resource providers."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "session-log.txt turns 4-14",
+      "symptom": "The agent searched obj output and sibling SharedContent, then manually rebuilt MainPage, both scenario pages, Styles, and shell wiring.",
+      "turns_or_retries": "About 10 turns from source discovery through the first build.",
+      "root_cause": "The bootstrap did not resolve the UWP csproj's external Include/Link items, so its mapping falsely contained only four files.",
+      "how_resolved": "The agent used generated obj XAML and shared folders as references and recreated missing target files by hand.",
+      "preventable_by": "Teach Initialize-UwpMigration.ps1 to copy evaluated linked project items to their Link paths before inventory."
+    },
+    {
+      "where": "session-log.txt turns 17-28",
+      "symptom": "The agent retried the same native startup crash after removing window chrome, removing a merged dictionary, deleting Styles.xaml, and replacing resource references.",
+      "turns_or_retries": "At least three failed smoke launches across roughly 12 turns.",
+      "root_cause": "No managed stack was available and the supplied 0xc000027b hint pointed toward unsupported projections rather than XAML/resource activation.",
+      "how_resolved": "Unresolved; the final validator still reported the same startup crash.",
+      "preventable_by": "Correct the launch hint and startup pattern with a resource-preserving blank-page/bisection sequence."
+    },
+    {
+      "where": "session-log.txt turns 2 and 16",
+      "symptom": "Self-check and launch commands raced prerequisite commands and returned False/unavailable.",
+      "turns_or_retries": "Two one-off races.",
+      "root_cause": "The agent parallelized dependent commands despite the skill's ordered bootstrap and build-launch loop.",
+      "how_resolved": "It reran each command after its prerequisite completed.",
+      "preventable_by": "No new skill content; the existing ordered steps were already explicit."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Automatic migration inventory for MSBuild-linked source and resource items.",
+      "would_have_saved": "The manual search through generated obj files and reconstruction of the shared shell, pages, styles, code, and assets."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "The installed winapp CLI does not expose a build subcommand.",
+      "workaround": "Use dotnet build for compilation and Test-AppLaunch.ps1 for packaged launch."
+    }
+  ]
+}

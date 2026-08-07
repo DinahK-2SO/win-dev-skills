@@ -24,7 +24,7 @@ Some UWP features have no WinUI 3 desktop equivalent. See the [Unsupported on Wi
 
 Four scripts do every mechanical step. Your job is the judgement work in between — fixing each TODO at the marked line, the shell conversion, and reading the diagnostics.
 
-- `scripts/Initialize-UwpMigration.ps1` — bootstrap; runs once at the start of Step 0.
+- `scripts/Initialize-UwpMigration.ps1` — bootstrap; runs once at the start of Step 0. It resolves MSBuild-linked source items as well as files physically under the UWP project directory, so shared pages, dictionaries, code, and assets enter the mapping.
 - `scripts/Get-MigrationPattern.ps1` — fetches a single anchored section from `MIGRATION-PATTERNS.md`. Used to resolve each `TODO[migrate-NNN]`. **Prefer this over opening MIGRATION-PATTERNS.md directly** — the full patterns file is API-name-dense and loading it floods your context.
 - `scripts/Test-AppLaunch.ps1` — launches the built app and tells you whether it survived startup; on a crash it captures the real exception (native code + .NET type/stack) and points at the fix. Your launch step throughout Step 3.
 - `scripts/Validate-UwpMigration.ps1` — final-validation gate at the end of Step 4.
@@ -123,7 +123,7 @@ Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are in
 Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
 
 ```powershell
-winapp build                                                                # compile; never run the .exe directly
+dotnet build "<winui3-project-root>\<ProjectName>.csproj"                   # compile; never run the .exe directly
 & "<skill-root>/scripts/Test-AppLaunch.ps1" -Target "<winui3-project-root>"  # launch AND verify it survives startup
 ```
 
@@ -135,8 +135,8 @@ When the app **crashes at launch**, fix the frame the captured stack names — t
 
 > **Build command discipline (avoid agent stalls):**
 >
-> - Prefer `winapp build` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (A bare `winapp run` works too, but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
-> - If you must shell out to `dotnet build` / `dotnet run`, **do not** pipe the output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
+> - Use `dotnet build` to compile and `Test-AppLaunch.ps1` to launch. The standalone `winapp` CLI has no `build` command; it is only the packaged-app launcher used internally by the launch helper.
+> - Do not pipe `dotnet build` / `dotnet run` output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
 > - When using `dotnet` from the powershell tool, either (a) run **sync**, or (b) leave output unfiltered, or (c) append an exit sentinel so there is always a final line to read, e.g. `dotnet build -c Debug; "BUILD_EXIT=$LASTEXITCODE"`.
 
 ### Step 4 — Validate (mandatory before declaring done)
@@ -167,7 +167,7 @@ If any check fails, read the diagnostic, fix the root cause, re-run. **Do not re
 - *`Status = copied` rows* → those files were never finished. Either complete the migration and flip to `done`, or defer with rationale.
 - *Build healthcheck FAIL* → open `.validator-diagnostics.txt`; for each unique CS#### code, look up the pattern in PATTERNS.md via `Get-MigrationPattern.ps1`.
 
-After PASS, do a final `winapp build` to confirm the build is still clean. Only then declare done.
+After PASS, do a final `dotnet build` to confirm the build is still clean. Only then declare done.
 
 ## Critical Rules
 

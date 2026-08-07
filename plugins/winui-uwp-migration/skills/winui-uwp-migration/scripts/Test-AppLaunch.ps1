@@ -206,7 +206,7 @@ function Get-CrashSignature {
             $sig.anchor = 'startup-crashes'
         }
         '0xc000027b' {
-            $sig.hint   = "Native stowed exception - frequently a legacy projection/activation incompatibility. If a UWP API/contract used at startup is unsupported on this OS, defer it per MIGRATION-DEFERRED.md."
+            $sig.hint   = "Native stowed exception - first inspect XAML loaded at startup for a missing StaticResource/ThemeResource, removed merged dictionary, invalid control property, or class mismatch. Only suspect an unsupported API when startup code actually invokes one."
             $sig.anchor = 'startup-crashes'
         }
         default {

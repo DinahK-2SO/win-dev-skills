@@ -1,0 +1,50 @@
+{
+  "scenario": "TouchKeyboardTextInput",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap inventory omitted MSBuild-linked files outside the source directory.",
+      "evidence": "lessons.json dev_agent_struggles[0] and skill-defects.json items[0]: only four files were mapped although the csproj linked the complete shared shell/resource graph.",
+      "root_cause": "Filesystem recursion cannot see external Include/Link project items.",
+      "tier": 1,
+      "hierarchy_justification": "Tier 1 is the highest in-scope reliable fix: the bootstrap can deterministically carry the project graph. A template or prose reminder would still leave agents to discover and reconstruct linked files manually; Tier 0 harness changes are unnecessary.",
+      "devils_advocate": "This is not redundant with physical recursion because the omitted files live outside Source. If the agent ignores prose, the script still copies and maps them. A rerun can directly count the required linked outputs.",
+      "change": "Extend Initialize-UwpMigration.ps1 to resolve common MSBuild path properties and copy explicit linked source/resource items to their Link paths before rewrite and triage.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared shells, pages, dictionaries, code, and assets are copied and represented in MIGRATION-MAPPING.md without manual reconstruction.",
+      "falsifiable_check": "Running the bootstrap on TouchKeyboardTextInput copies App.xaml, MainPage.xaml, both scenario XAML files, Styles\\Styles.xaml, shared code, and linked assets; required missing count is 0 and legacy Windows.UI.Xaml residue outside .uwp-source is 0."
+    },
+    {
+      "problem": "The 0xc000027b startup hint misclassified an opaque Microsoft.UI.Xaml failure and lacked a safe no-stack diagnostic path.",
+      "evidence": "migration-score.json features[0..1] and lessons.json dev_agent_struggles[1]: both features were unreachable after repeated speculative edits driven by the unsupported-projection hint.",
+      "root_cause": "The native code is a broad symptom class, not proof of an unsupported startup API.",
+      "tier": 1,
+      "hierarchy_justification": "The first diagnostic is emitted by Tier 1 launch tooling, so correcting it there is harder to miss than prose alone. Detailed XAML bisection remains Tier 3 because a generic script cannot safely infer which application resource or control is invalid.",
+      "devils_advocate": "The existing helper detected the crash but supplied the wrong likely cause; this changes the actionable signal rather than duplicating detection. If the detailed prose is ignored, the corrected helper still directs the first investigation toward XAML/resources.",
+      "change": "Correct Test-AppLaunch.ps1's executable hint and add resource-preserving XAML isolation guidance to the existing startup-crashes pattern.",
+      "file": "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents inspect startup XAML/resource integrity before deleting dictionaries or deferring features when no managed stack exists.",
+      "falsifiable_check": "A rerun that captures 0xc000027b in Microsoft.UI.Xaml.dll prints the XAML/resource-first hint, retains custom resource providers during isolation, and either identifies the failing XAML region or reaches a running window."
+    },
+    {
+      "problem": "The skill prescribed the unsupported winapp build command.",
+      "evidence": "session-log.txt turn 15 rejected the command; turn 16 dotnet build succeeded.",
+      "root_cause": "Compilation and packaged launch responsibilities were conflated.",
+      "tier": 3,
+      "hierarchy_justification": "This is command selection, so no new Tier 1 wrapper or Tier 2 scaffold is warranted; the plugin explicitly uses native dotnet commands. Correcting the invoked command at its instruction sites is the smallest reliable change.",
+      "devils_advocate": "dotnet build was already mentioned elsewhere, but the prominent Step 3 command contradicted it and the agent followed the wrong command. The observable rerun signal is the complete absence of winapp build.",
+      "change": "Replace winapp build instructions with dotnet build and clarify that Test-AppLaunch.ps1 owns packaged launch.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "The first compile command works across supported environments without a wasted retry.",
+      "falsifiable_check": "On rerun, no winapp build invocation occurs and the initial dotnet build reaches a normal MSBuild success or actionable compiler error."
+    }
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Test-AppLaunch.ps1",
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md"
+  ],
+  "deferred_to_human": []
+}
