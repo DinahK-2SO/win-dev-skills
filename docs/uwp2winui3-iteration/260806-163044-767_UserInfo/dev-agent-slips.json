@@ -1,0 +1,28 @@
+{
+  "scenario": "UserInfo",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The agent removed MicaBackdrop as a speculative fix for the 0xc000027b startup crash, without evidence tying the backdrop to the failure.",
+      "evidence": "session-log.txt turns 38-42: event 1000 showed only a native stowed exception; turn 40 removed Mica, and the next launch crashed with the same code.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md #startup-crashes says to capture the real exception first and fix the frame/signature it identifies rather than guessing.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The existing startup-crash section already rejects speculative diagnosis; the durable missing-resource cause is separately addressed by linked-item bootstrap."
+    },
+    {
+      "problem": "The agent ran an unqualified dotnet build from the parent directory after switching away from winapp.",
+      "evidence": "session-log.txt lines 2898-2909: MSB1003 reported no project or solution in the current directory; the next turn supplied UserInfo.csproj.",
+      "covered_clearly_at": "SKILL.md Step 2 identifies the scaffold csproj as the project to reconcile, and the corrected Step 3 command takes the explicit project path.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "Once the command includes the explicit csproj, a capable rerun has no path ambiguity."
+    },
+    {
+      "problem": "The agent left Windows.UI.Colors in manually reconstructed shell code until the compiler rejected it.",
+      "evidence": "session-log.txt lines 3000-3018 show CS0234; turn 25 changes the references to Microsoft.UI.Colors.",
+      "covered_clearly_at": "MIGRATION-PATTERNS.md #namespace-mapping explicitly maps Windows.UI.Colors to Microsoft.UI.Colors.",
+      "slip_type": "did-not-read",
+      "why_no_skill_change": "The mapping is already a prominent dedicated table, and linked-item bootstrap removes the need to reconstruct this shell code manually."
+    }
+  ]
+}

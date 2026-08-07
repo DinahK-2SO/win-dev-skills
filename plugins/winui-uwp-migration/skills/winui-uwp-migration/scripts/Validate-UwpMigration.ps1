@@ -10,8 +10,8 @@ declare done with FAIL." All [FAIL] output is sanitized — full diagnostics
 root, not to stdout, to keep concentrated API-name lists out of the agent's
 assistant turn.
 
-Does NOT run `winapp build` itself — build cleanliness is a separate gate
-the agent invokes alongside this (`winapp build` then this script).
+Runs its own `dotnet build` healthcheck. Do not run another build, launch, or
+validator concurrently because WinUI build outputs are process-locked.
 
 Checks (numbering matches the `# ─── N.` sections in the code):
 1. Residue grep — leftover Windows.UI.Xaml using/xmlns, unsupported APIs not deferred, UWP-only csproj markers
@@ -263,10 +263,10 @@ if (-not (Test-Path -LiteralPath $mapPath)) {
     } else {
         if (Test-Path -LiteralPath $deferPath) {
             $deferText = Get-Content -LiteralPath $deferPath -Raw
-            if ($deferText -notmatch 'No items deferred') {
+            if ($deferText -notmatch 'No items deferred' -and $deferText -notmatch '(?m)^\|\s*\(none\)\s*\|') {
                 Write-Host "[WARN] MIGRATION-DEFERRED.md exists with content but mapping has no defer rows — check consistency"
             } else {
-                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md correctly notes 'No items deferred.'"
+                Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md contains the empty sentinel"
             }
         } else {
             Write-Host "[PASS] No defer rows; MIGRATION-DEFERRED.md not required"

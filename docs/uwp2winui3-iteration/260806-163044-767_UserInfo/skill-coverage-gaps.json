@@ -1,0 +1,15 @@
+{
+  "scenario": "UserInfo",
+  "index": 2,
+  "category": "skill-coverage-gap",
+  "items": [
+    {
+      "problem": "Dependent scaffold/bootstrap/self-check and build/launch/validation commands were repeatedly issued in parallel, causing races and file locks.",
+      "evidence": "session-log.txt turns 1-2 show bootstrap racing the scaffold; lines 2913-2923, 3382-3415, 3572-3608, and 4467-4518 show input.json/CS2012/WMC9999 locks and contradictory launch outcomes.",
+      "covered_at": "SKILL.md Step 0 called them the 'first three commands'; Step 3 said 'build -> fix -> launch -> repeat'; Step 4 required validation.",
+      "why_missed": "ambiguous",
+      "proposed_improvement": "State that each dependent command must finish before the next is issued, prohibit batching/parallel execution, and name the lock signatures this prevents.",
+      "generalizes": "WinUI XAML compilation and packaged app launches share obj/bin files, so parallel orchestration destabilizes any migration."
+    }
+  ]
+}

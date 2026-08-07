@@ -1,0 +1,57 @@
+{
+  "scenario": "UserInfo",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap omitted csproj-linked shared XAML, code, resource dictionaries, and assets; this led to manual reconstruction, duplicate type/XAML errors, a missing-style startup crash, and loss of source theme/branding.",
+      "evidence": "session-log.txt lines 123-151 report only 6 copied files; the source csproj links App.xaml, MainPage.xaml/.cs, Styles.xaml, scenario XAML, and assets. Turns 11-19 reconstruct files manually; lines 2927-2953 show duplicate/XAML errors; lines 4115-4190 show the startup crash and missing Styles.xaml.",
+      "skill_search": "Searched Initialize-UwpMigration.ps1 and skill docs for Link, linked, and SharedContent; no linked-item handling existed.",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "Initialize-UwpMigration.ps1 used only a recursive filesystem crawl rooted at -Source, so MSBuild items outside that folder were invisible.",
+      "proposed_fix": "Resolve declared Compile/ApplicationDefinition/Page/Content/AppxManifest items with Link metadata, expand common project properties, copy them to Link paths, then include them in rewrite/triage/mapping.",
+      "generalizes": "Legacy UWP solutions commonly centralize shell XAML, styles, code-behind, and branded assets in shared folders via linked project items."
+    },
+    {
+      "problem": "The skill prescribed a nonexistent winapp build command.",
+      "evidence": "session-log.txt lines 2827-2893: winapp rejected build; lines 2895-2914 show the agent switching to dotnet build.",
+      "skill_search": "winapp build appeared in SKILL.md Step 3, build discipline, final build, and the validator header.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer `winapp build` to compile.",
+      "root_cause": "The documentation assumed a winapp subcommand not present in the installed CLI.",
+      "proposed_fix": "Use explicit `dotnet build <project.csproj> -p:Platform=x64` throughout and state that winapp has no build command.",
+      "generalizes": "Every migration follows the same compile loop and otherwise loses time before receiving any source diagnostic."
+    },
+    {
+      "problem": "The threading replacement used an unqualified DispatcherQueue name that becomes ambiguous in files retaining Windows.System.",
+      "evidence": "session-log.txt lines 2929-2930: CS0104 between Microsoft.UI.Dispatching.DispatcherQueue and Windows.System.DispatcherQueue; turn 23 fixes it by fully qualifying the type.",
+      "skill_search": "MIGRATION-PATTERNS.md threading showed unqualified DispatcherQueue calls and had no CS0104 warning.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "DispatcherQueue.TryEnqueue(...) and cache via DispatcherQueue.GetForCurrentThread().",
+      "root_cause": "Many Windows API samples import Windows.System for User and Launcher APIs, exposing a second DispatcherQueue type.",
+      "proposed_fix": "Show the fully qualified Microsoft.UI.Dispatching.DispatcherQueue and document the Windows.System collision.",
+      "generalizes": "Windows.System imports are common in UWP samples that also require UI-thread dispatch."
+    },
+    {
+      "problem": "Manifest guidance preferred scaffold branding, and shell conversion did not require preservation of RequestedTheme, visible window title, or custom title-bar icon.",
+      "evidence": "migration-score.json marks all 3 features partial; discrepancies.json reports dark UWP versus light WinUI and source title/icon versus scaffold values. Final MainWindow.xaml retained Title/UserInfo, TitleBar/UserInfo, and Assets/AppIcon.ico.",
+      "skill_search": "RequestedTheme and window title were absent; MIGRATION-PATTERNS.md explicitly called scaffold image references preferred.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Preferred - keep the scaffold's manifest image references.",
+      "root_cause": "The skill prioritized launch-safe template assets but lacked a shell identity parity pass.",
+      "proposed_fix": "Preserve source RequestedTheme and display name, apply the name to Window/custom TitleBar, prefer resolvable source branding, and reject scaffold project-name/placeholder icon values.",
+      "generalizes": "Every scaffold introduces default theme, title, and icon values that can silently replace the source app identity."
+    },
+    {
+      "problem": "The validator warned on the initializer's own empty deferred-file sentinel.",
+      "evidence": "session-log.txt lines 3400-3406, 3584-3590, and 4507-4513 show the warning despite zero deferred mapping rows.",
+      "skill_search": "Initialize-UwpMigration.ps1 writes '| (none) | - |'; Validate-UwpMigration.ps1 recognized only the phrase 'No items deferred'.",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Validator empty-state check did not accept the initializer's generated table sentinel.",
+      "root_cause": "Producer and consumer used different representations for an empty deferred list.",
+      "proposed_fix": "Accept the '(none)' row as the empty sentinel.",
+      "generalizes": "Every migration with no deferred files otherwise emits a misleading consistency warning."
+    }
+  ]
+}

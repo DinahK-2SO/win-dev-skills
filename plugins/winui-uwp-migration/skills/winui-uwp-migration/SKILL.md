@@ -31,7 +31,7 @@ Four scripts do every mechanical step. Your job is the judgement work in between
 
 ### Step 0 — Bootstrap (mandatory)
 
-🛑 **Before any file edit, any `view` of the source, any analysis** — your literal first three powershell commands when this skill is invoked MUST be:
+🛑 **Before any file edit, any `view` of the source, any analysis** — your literal first three powershell commands when this skill is invoked MUST be the following **in sequence**. Wait for each command to finish successfully before issuing the next; never batch or parallelize these commands.
 
 ```powershell
 # 1. Scaffold the WinUI 3 shell in the target directory
@@ -59,6 +59,8 @@ Do:
 - Only after step 3 returns `True` may you read source files, plan transformations, or edit anything.
 
 The script prints a structured `=== BOOTSTRAP COMPLETE ===` block telling you exactly what it did, what artifacts now exist, and what to do next. Read that block; do not re-derive the same info by browsing the tree.
+
+The bootstrap resolves UWP project items with `<Link>` metadata, including shared XAML, code-behind, resource dictionaries, and assets outside the project folder. If it reports an unresolved linked item, stop and fix that resolution before migration; do not recreate the missing file from memory.
 
 ### Step 1 — Migrate, file by file
 
@@ -108,6 +110,8 @@ If the source shell doesn't match anything above, preserve its structure as fait
 3. Titles match the source (modulo trivial wording cleanup — capitalization, punctuation).
 4. Deferred items are **omitted** from the navigation surface — do not include disabled or broken entries. They are accounted for in `MIGRATION-DEFERRED.md`.
 
+**Shell identity invariants:** preserve the source `Application.RequestedTheme`, package/visual `DisplayName`, and branded icon assets. Apply the source display name to both `Window.Title` and any custom `TitleBar.Title`. Do not ship scaffold values such as the project namespace or `Assets\AppIcon.ico`; if the source has no desktop `.ico`, remove the scaffold custom icon/title-bar override and let packaged manifest branding supply the identity rather than showing a placeholder.
+
 ### Step 2 — Reconcile the project file
 
 The scaffold's `.csproj` is wired for WinAppSDK; the UWP `.csproj` at `.uwp-source/` is your reference for what extras to merge. Fetch the cheat-sheet:
@@ -120,10 +124,10 @@ Do **not** copy the UWP `.csproj` over the scaffold's — the two formats are in
 
 ### Step 3 — Build, fix what tooling missed
 
-Work in a tight loop: **build → fix the first error → launch → repeat.** For the **launch** step, use `Test-AppLaunch.ps1` rather than a bare `winapp run`:
+Work in a tight, **strictly sequential** loop: **build → wait for success → launch → wait for completion → repeat.** Never run build, launch, and validation concurrently: WinUI's XAML compiler and the app process lock `obj`/`bin` files and produce misleading `input.json`, `CS2012`, and `WMC9999` failures. For the **launch** step, use `Test-AppLaunch.ps1`:
 
 ```powershell
-winapp build                                                                # compile; never run the .exe directly
+dotnet build "<winui3-project-root>\<ProjectName>.csproj" -p:Platform=x64  # compile; never run the .exe directly
 & "<skill-root>/scripts/Test-AppLaunch.ps1" -Target "<winui3-project-root>"  # launch AND verify it survives startup
 ```
 
@@ -135,7 +139,7 @@ When the app **crashes at launch**, fix the frame the captured stack names — t
 
 > **Build command discipline (avoid agent stalls):**
 >
-> - Prefer `winapp build` to compile and `Test-AppLaunch.ps1` to launch — both exit cleanly with an obvious final line. (A bare `winapp run` works too, but `Test-AppLaunch.ps1` also tells you *why* on a crash.)
+> - Use `dotnet build <project.csproj> -p:Platform=x64` to compile and `Test-AppLaunch.ps1` to launch. `winapp` has no `build` command.
 > - If you must shell out to `dotnet build` / `dotnet run`, **do not** pipe the output through a filter like `Where-Object { $_ -match "error|warning|success|failed" }` while running in **async / background** mode. On a clean build the filter swallows every line, and any subsequent `read_powershell` returns no output even though the process has already exited — the agent ends up polling an empty buffer for the rest of its budget.
 > - When using `dotnet` from the powershell tool, either (a) run **sync**, or (b) leave output unfiltered, or (c) append an exit sentinel so there is always a final line to read, e.g. `dotnet build -c Debug; "BUILD_EXIT=$LASTEXITCODE"`.
 
@@ -167,7 +171,7 @@ If any check fails, read the diagnostic, fix the root cause, re-run. **Do not re
 - *`Status = copied` rows* → those files were never finished. Either complete the migration and flip to `done`, or defer with rationale.
 - *Build healthcheck FAIL* → open `.validator-diagnostics.txt`; for each unique CS#### code, look up the pattern in PATTERNS.md via `Get-MigrationPattern.ps1`.
 
-After PASS, do a final `winapp build` to confirm the build is still clean. Only then declare done.
+After PASS, do a final `dotnet build "<project.csproj>" -p:Platform=x64` to confirm the build is still clean. Only then declare done.
 
 ## Critical Rules
 

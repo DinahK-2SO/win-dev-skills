@@ -1,0 +1,38 @@
+{
+  "scenario": "UserInfo",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "The bootstrap omitted linked shared project items and the validator disagreed with the initializer's empty deferred sentinel.",
+      "evidence": "lessons.json dev_agent_struggles[1] and errors_encountered entries for duplicate types, missing Styles.xaml crash, and deferred warning; skill-defects.json items 0 and 4.",
+      "root_cause": "Filesystem-only inventory ignored MSBuild Link metadata, and the bootstrap/validator empty-state contract was inconsistent.",
+      "tier": 1,
+      "change": "Resolve linked Compile/ApplicationDefinition/Page/Content/AppxManifest items into their Link paths before rewrite/triage, and accept the generated '(none)' deferred sentinel.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Shared shell XAML, styles, code, and branding enter the mapping automatically; no manual reconstruction, missing-resource crash, or false deferred warning.",
+      "falsifiable_check": "On the UserInfo source, bootstrap reports 17 resolved linked items and copies App.xaml, MainPage.xaml, Styles\\Styles.xaml, and branded assets; validator emits no empty-deferred warning."
+    },
+    {
+      "problem": "Operational and threading guidance caused an unsupported build command, parallel file-lock failures, and ambiguous DispatcherQueue compilation.",
+      "evidence": "lessons.json errors for winapp build, input.json/CS2012/WMC9999 locks, and CS0104; skill-defects.json items 1-2; skill-coverage-gaps.json item 0.",
+      "root_cause": "The prose named the wrong compiler command, did not prohibit parallel dependent operations, and showed an unqualified replacement type.",
+      "tier": 3,
+      "change": "Use explicit x64 dotnet build, require serialized scaffold/bootstrap and build/launch/validation operations, and fully qualify Microsoft.UI.Dispatching.DispatcherQueue when Windows.System is in scope.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "The first compile runs successfully against the intended project without command rejection, orchestration races, or DispatcherQueue ambiguity.",
+      "falsifiable_check": "A rerun contains no 'winapp build', Target-not-found race, input.json/CS2012 lock, or DispatcherQueue CS0104 error."
+    },
+    {
+      "problem": "All behavior passed but every feature scored partial because scaffold theme, title, and placeholder icon replaced source identity.",
+      "evidence": "migration-score.json features[0..2], discrepancies.json visual items, and skill-defects.json item 3.",
+      "root_cause": "Shell conversion lacked identity invariants and manifest guidance preferred scaffold assets.",
+      "tier": 3,
+      "change": "Require preservation of RequestedTheme and source display name across Window/custom TitleBar, prefer resolvable source branding, and reject scaffold title/icon placeholders.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Migrated shell identity matches the source instead of silently adopting template defaults.",
+      "falsifiable_check": "On rerun, the app launches dark, shows 'User Info C# Sample', and has no UserInfo/AppIcon.ico placeholder; the three visual partial verdicts can become pass."
+    }
+  ],
+  "deferred_to_human": []
+}

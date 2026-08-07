@@ -1,0 +1,231 @@
+{
+  "scenario": "UserInfo",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 123-151: after the scaffold existed, the bootstrap copied six physical files, rewrote namespaces, injected five threading TODOs, and produced the mapping artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt turn 4 and turn 37: the threading and startup-crashes anchors supplied focused guidance without loading the full patterns file."
+    },
+    {
+      "tool": "dotnet build",
+      "evidence": "session-log.txt lines 3049-3074 and 4490-4501: project-qualified builds exposed actionable compiler errors and later succeeded."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "evidence": "session-log.txt lines 4115-4121: it distinguished a clean build from an immediate 0xc000027b startup crash."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 4504-4520: the final run checked residue, TODOs, mapping, manifest, build, and smoke launch and reported PASS."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed winapp CLI has no build command.",
+      "evidence": "session-log.txt lines 2838-2893: winapp rejected build as an unrecognized command."
+    },
+    {
+      "tool": "parallel PowerShell build/run/validation calls",
+      "problem": "Concurrent stateful commands locked XAML compiler inputs and outputs and created contradictory launch results.",
+      "evidence": "session-log.txt lines 2913-2923, 3382-3415, 3572-3608, and 4467-4518 show input.json/CS2012 locks, WMC9999, a direct launch crash, and a concurrent validator launch pass."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1 0xc000027b hint",
+      "problem": "With only event 1000 available, the generic legacy-projection hint did not identify the missing shared resource dictionary.",
+      "evidence": "session-log.txt lines 4115-4121 and 4136-4190: the agent had to search unresolved StaticResource keys before discovering Styles.xaml was absent."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "It crawled only the project directory and ignored csproj items linked from SharedContent and sibling folders.",
+      "suggested_tweak": "Resolve Compile/ApplicationDefinition/Page/Content/AppxManifest items with Link metadata and copy them to their Link paths before namespace rewrite and inventory."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "limitation": "A native stowed exception without a .NET event 1026 stack yields only a broad cause class.",
+      "suggested_tweak": "Keep the generic hint, but ensure bootstrap completeness prevents missing linked XAML/resources from reaching startup."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "limitation": "It warned on the bootstrap's own '(none)' deferred-file sentinel.",
+      "suggested_tweak": "Treat the '(none)' row as an empty, consistent deferred list."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "winapp build",
+      "why_tried": "SKILL.md prescribed it as the compile command.",
+      "root_cause": "The installed winapp CLI supports run but not build.",
+      "fix": "Use dotnet build against the explicit csproj and x64 platform."
+    },
+    {
+      "api": "DispatcherQueue",
+      "why_tried": "The threading pattern replaced CoreDispatcher callbacks with DispatcherQueue.",
+      "root_cause": "using Windows.System and Microsoft.UI.Dispatching made the unqualified type ambiguous.",
+      "fix": "Fully qualify Microsoft.UI.Dispatching.DispatcherQueue for the field and GetForCurrentThread call."
+    },
+    {
+      "api": "Windows.UI.Colors",
+      "why_tried": "Shared shell status brushes were manually reconstructed from UWP code.",
+      "root_cause": "Windows.UI.Colors is not the WinUI 3 namespace.",
+      "fix": "Use Microsoft.UI.Colors."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build guidance",
+      "wrong": "Use winapp build.",
+      "correct": "Use dotnet build <project.csproj> -p:Platform=x64; winapp has no build command."
+    },
+    {
+      "where": "MIGRATION-PATTERNS.md manifest image guidance",
+      "wrong": "Prefer scaffold manifest images even when source branding exists.",
+      "correct": "Prefer resolvable source branding for fidelity; use scaffold assets only as a documented fallback."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "Windows.System.UserWatcher callbacks",
+      "special_handling": "Watcher events arrive off the UI thread; cache Microsoft.UI.Dispatching.DispatcherQueue on the UI thread and enqueue collection/button updates."
+    },
+    {
+      "api": "MSBuild linked UWP project items",
+      "special_handling": "Resolve Include plus Link metadata, including project properties such as SharedContentDir, then copy the external source to the linked target path before migration."
+    },
+    {
+      "api": "WinUI resource dictionaries",
+      "special_handling": "Every StaticResource/ThemeResource dictionary referenced by copied XAML must be carried over and merged; a missing dictionary can build but crash during XAML activation."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initialize-UwpMigration.ps1: Target not found; Test-Path returned False.",
+      "root_cause": "The scaffold, bootstrap, and self-check were issued concurrently, so bootstrap ran before dotnet new completed.",
+      "fix": "Re-run bootstrap after scaffold completion and serialize the three mandatory commands."
+    },
+    {
+      "error": "winapp: unrecognized command or argument 'build'.",
+      "root_cause": "Incorrect skill guidance for the installed CLI.",
+      "fix": "Switch to dotnet build with the explicit project path."
+    },
+    {
+      "error": "MSB1003: current working directory does not contain a project or solution.",
+      "root_cause": "dotnet build was run from the parent app directory rather than against UserInfo.csproj.",
+      "fix": "Pass the absolute csproj path."
+    },
+    {
+      "error": "Test-AppLaunch status=unavailable: no build output under bin\\x64\\Debug.",
+      "root_cause": "Launch was issued concurrently with a failed/default-platform build.",
+      "fix": "Build x64 successfully before invoking the launch helper."
+    },
+    {
+      "error": "XAML compiler input.json was in use by another process.",
+      "root_cause": "dotnet build and dotnet run compiled the same project concurrently.",
+      "fix": "Run build, launch, and validation sequentially."
+    },
+    {
+      "error": "CS0101/CS0102/CS0111 duplicate Scenario, UserViewModel, scenarios, FEATURE_NAME, and GetUserViewModelsAsync.",
+      "root_cause": "Missing linked MainPage/shared files were manually recreated while SampleConfiguration.cs still defined the same partial members and helper types.",
+      "fix": "Remove duplicate definitions; the durable fix is to bootstrap linked project items instead of reconstructing them."
+    },
+    {
+      "error": "CS0104: DispatcherQueue is ambiguous between Microsoft.UI.Dispatching and Windows.System.",
+      "root_cause": "The migrated file retained using Windows.System and used an unqualified replacement type.",
+      "fix": "Fully qualify Microsoft.UI.Dispatching.DispatcherQueue."
+    },
+    {
+      "error": "WMC0909/WMC1111 could not resolve local:Scenario and x:Bind DataType; cascading WMC9999.",
+      "root_cause": "The manually reconstructed shell had conflicting/unresolved local type declarations.",
+      "fix": "Remove duplicates and temporarily use Binding; bootstrapping the original linked MainPage avoids reconstruction."
+    },
+    {
+      "error": "CS0234: Windows.UI.Colors does not exist.",
+      "root_cause": "A stale UWP color namespace remained in manually reconstructed shell code.",
+      "fix": "Replace it with Microsoft.UI.Colors."
+    },
+    {
+      "error": "CS2012 and WMC9999 while validator rebuilt intermediate XAML assemblies.",
+      "root_cause": "Build, launch, and validator processes ran concurrently and locked obj/bin outputs.",
+      "fix": "Stop the specific locking processes and serialize subsequent commands."
+    },
+    {
+      "error": "Startup crash 0xc000027b in Microsoft.UI.Xaml.dll.",
+      "root_cause": "The linked shared Styles.xaml dictionary was not copied or merged, leaving shell StaticResource references unresolved at activation.",
+      "fix": "Copy/adapt the shared styles and merge the dictionary; the durable fix is linked-item bootstrap support."
+    },
+    {
+      "error": "MSB3026 retry copying Microsoft.Windows.SDK.NET.dll.",
+      "root_cause": "A concurrently launched app held the output DLL.",
+      "fix": "Do not build while the launch helper or app is using the same output."
+    },
+    {
+      "error": "Validator warned that MIGRATION-DEFERRED.md had content with no defer rows.",
+      "root_cause": "The initializer writes a '(none)' table row while the validator recognized only prose saying 'No items deferred'.",
+      "fix": "Accept the initializer's empty sentinel in the validator."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Turns 1-2 bootstrap",
+      "symptom": "Bootstrap failed and both self-checks initially printed False.",
+      "turns_or_retries": "2 turns, 1 bootstrap retry",
+      "root_cause": "The required dependent commands were parallelized.",
+      "how_resolved": "Waited for dotnet new, reran bootstrap, then read the mapping.",
+      "preventable_by": "Explicitly require the scaffold/bootstrap/self-check commands to run sequentially."
+    },
+    {
+      "where": "Turns 11-19 shell reconstruction",
+      "symptom": "The agent deleted/recreated MainPage and scenario XAML, copied shared media manually, and duplicated types.",
+      "turns_or_retries": "9 turns before first build",
+      "root_cause": "Bootstrap missed 17 csproj-linked shared files and assets.",
+      "how_resolved": "Manually recreated/copied a subset and removed duplicate SampleConfiguration definitions.",
+      "preventable_by": "Resolve and copy linked MSBuild items in Initialize-UwpMigration.ps1."
+    },
+    {
+      "where": "Turns 20-28 build loop",
+      "symptom": "Unsupported winapp command, wrong working-directory build, concurrent build/run lock, then 11 compiler/XAML errors.",
+      "turns_or_retries": "4 failed build attempts before success",
+      "root_cause": "Wrong build documentation, non-serialized commands, and missing linked source structure.",
+      "how_resolved": "Used explicit dotnet build, qualified DispatcherQueue, removed duplicate types, and fixed namespace/XAML errors.",
+      "preventable_by": "Correct build command guidance, sequential command discipline, and linked-item bootstrap."
+    },
+    {
+      "where": "Turns 31-48 validation/startup",
+      "symptom": "Repeated CS2012/WMC9999 locks and three 0xc000027b startup-crash reports.",
+      "turns_or_retries": "18 turns including 3 launch attempts and 3 validator attempts",
+      "root_cause": "Commands continued in parallel, while the missing shared Styles.xaml caused the real startup failure.",
+      "how_resolved": "Stopped specific processes, added the styles dictionary, and let the final validator run complete.",
+      "preventable_by": "Serialize build/launch/validation and include linked resource dictionaries during bootstrap."
+    },
+    {
+      "where": "Scored visual parity",
+      "symptom": "All behavior worked, but all three features remained partial due to light theme, project-name title, and placeholder icon.",
+      "turns_or_retries": "Not corrected during migration",
+      "root_cause": "The source RequestedTheme and branded linked assets were missed, while scaffold title/icon values were retained.",
+      "how_resolved": "Not resolved in the migrated app.",
+      "preventable_by": "Make source theme/title/icon shell invariants explicit and prefer source branding."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Legacy csproj linked-item resolver",
+      "would_have_saved": "Manual reconstruction of MainPage, App, styles, and assets; duplicate type errors; missing-resource startup crashes; and the theme/icon parity regression."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "Installed winapp CLI lacks a build command.",
+      "workaround": "Use dotnet build with the explicit csproj."
+    },
+    {
+      "issue": "WinUI XAML compiler and running app lock shared obj/bin files.",
+      "workaround": "Run build, launch, and validation sequentially and stop only the specific app/compiler process when recovering."
+    }
+  ]
+}

@@ -143,11 +143,17 @@ await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => StatusText.Text =
 WinUI 3:
 
 ```csharp
-DispatcherQueue.TryEnqueue(() => StatusText.Text = "Done");
-DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () => ProgressBar.Value = 100);
+Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()
+    .TryEnqueue(() => StatusText.Text = "Done");
 ```
 
 Cache the queue off the UI thread via `DispatcherQueue.GetForCurrentThread()`. UWP's ASTA reentrancy protection is gone — watch for reentrancy in async code that pumps messages. See the official [threading guide](https://learn.microsoft.com/windows/apps/windows-app-sdk/migrate-to-windows-app-sdk/guides/threading).
+
+> **`CS0104: 'DispatcherQueue' is an ambiguous reference`:** files that retain
+> `using Windows.System;` can see both `Windows.System.DispatcherQueue` and
+> `Microsoft.UI.Dispatching.DispatcherQueue`. Use the fully qualified
+> `Microsoft.UI.Dispatching.DispatcherQueue` type (or a namespace alias) for the
+> cached field and `GetForCurrentThread()` call.
 
 <a id="dialogs"></a>
 ## Dialogs: MessageDialog → ContentDialog
@@ -596,11 +602,11 @@ AppxManifest.xml(...): error 0x80070002: ... splash screen image [Splash-sdk.png
 
 (Failure code on the AppX side is typically `0x80073CF6` — "package could not be registered".)
 
-You have two options. Pick one **before** the first `winapp run`:
+You have two options. Pick one **before** the first launch:
 
-- **Preferred — keep the scaffold's manifest image references** (`Assets\SplashScreen.scale-200.png`, etc.). When you merge any other content from the UWP manifest into the scaffold's (capabilities, file-type associations, `<uap:Extension>`, `<Application Id>`, etc.), do **not** overwrite the `Logo`, `<uap:SplashScreen Image>`, `Square150x150Logo`, `Square44x44Logo`, or `Wide310x150Logo` attribute values. The scaffold's defaults already match the files in its `Assets/` folder.
+- **Preferred for fidelity — keep the UWP app's branded assets.** `Initialize-UwpMigration.ps1` resolves linked `<Content>` items, so assets declared outside the project folder should already be copied to their `<Link>` paths. Preserve the source manifest's `Logo`, splash, tile, and visual-element references when all referenced files resolve.
 
-- **Alternative — keep the UWP sample's branded assets.** Copy every file the UWP manifest references from `.uwp-source/Assets/` (or `.uwp-source/<SampleName>/Assets/`) into the new project's `Assets/` folder, preserving the exact filename (including the `-sdk` suffix and any scale qualifiers). Verify by re-reading each `Image=`/`Logo>` value in the manifest and confirming `Test-Path "Assets\<that filename>"` for every one of them. Don't rename files to look prettier — the manifest reference is the source of truth.
+- **Fallback only — keep the scaffold's manifest image references** (`Assets\SplashScreen.scale-200.png`, etc.) when a source asset truly cannot be resolved. Record the missing source asset; do not silently present scaffold branding as parity.
 
 Either way, before the first `winapp run`, sanity-check every asset reference in the manifest resolves:
 
@@ -615,6 +621,16 @@ Either way, before the first `winapp run`, sanity-check every asset reference in
     if (-not (Test-Path $_)) { Write-Host "[MISSING] $_" -ForegroundColor Red }
 }
 ```
+
+### Shell theme, title, and icon identity
+
+The WinUI scaffold contributes its own light/default theme, project-name title, custom `TitleBar`, and placeholder `Assets\AppIcon.ico`. Those are template values, not source behavior. During shell conversion:
+
+1. Preserve `RequestedTheme` from the source `App.xaml` (`Dark`, `Light`, or omitted/system default).
+2. Read the source manifest's `<Properties><DisplayName>` or `uap:VisualElements DisplayName` and apply it to `Window.Title` plus `TitleBar.Title` when a custom title bar remains.
+3. Preserve the source manifest branding and linked assets. Never call `AppWindow.SetIcon("Assets/AppIcon.ico")` merely because the scaffold generated that file. If no equivalent `.ico` exists, remove the scaffold custom icon override and use the packaged manifest identity.
+
+**Falsifiable check:** the migrated launch must have the same effective light/dark theme and visible window title as the source, and no scaffold project-name title or placeholder icon may remain.
 
 ### Manifest migration checklist (Windows.Desktop + runFullTrust)
 
@@ -664,7 +680,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The benchmark build gate injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |
