@@ -1,0 +1,48 @@
+{
+  "scenario": "TouchKeyboard",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "Bootstrap omitted linked shared source, forcing error-prone shell reconstruction.",
+      "evidence": "lessons.json dev_agent_struggles[0]; session-log.txt lines 119-143, 639-685, and 2208-2765",
+      "root_cause": "Recursive filesystem copying did not honor legacy csproj Include/Link items.",
+      "tier": 1,
+      "change": "Extend Initialize-UwpMigration.ps1 to resolve common project path properties and copy linked Compile/Page/ApplicationDefinition/Content/None items to their Link paths.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "Shared XAML/code/assets enter mapping and transformation automatically, preserving source fidelity and avoiding reconstruction from obj.",
+      "falsifiable_check": "Running bootstrap on TouchKeyboard copies App.xaml, MainPage.xaml, all four scenario XAML files, Styles/Styles.xaml, and shared assets without reading obj."
+    },
+    {
+      "problem": "Invalid GetForCurrentView calls survived a validator PASS and later emitted WUI0004.",
+      "evidence": "lessons.json failed_apis and tools_problematic; build-output.txt lines 8-12",
+      "root_cause": "The API-specific replacement was undocumented and validator residue checks excluded adaptable patterns.",
+      "tier": 1,
+      "change": "Mark GetForCurrentView as mustResolve, validate such adaptable patterns without relying on analyzers, and document InputPane/CoreInputView as HWND interop cases with no projected factory.",
+      "file": "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Agents cannot delete a TODO and retain a compiling but runtime-invalid current-view call.",
+      "falsifiable_check": "Validator reports FAIL for any non-deferred GetForCurrentView call even when Microsoft.WindowsAppSDK.Analyzers is absent; a rerun produces zero WUI0004 warnings."
+    },
+    {
+      "problem": "The documented compile command did not exist.",
+      "evidence": "lessons.json doc_errors[0]; session-log.txt lines 3107-3168",
+      "root_cause": "SKILL.md conflated winapp package/launch responsibilities with compilation.",
+      "tier": 3,
+      "change": "Replace winapp build with native dotnet build and state that final build follows validator completion.",
+      "file": "skills/winui-uwp-migration/SKILL.md",
+      "expected_effect": "The first compile command works and avoids concurrent generated-XAML races.",
+      "falsifiable_check": "A rerun has no unrecognized winapp build error and the post-validation dotnet build exits successfully.",
+      "tier_3_justification": "This is command-selection and sequencing guidance; no template or migration script can redefine the installed CLI's command surface."
+    }
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json"
+  ],
+  "deferred_to_human": [
+    "Investigate the scoring harness's splash-only UWP baseline capture; it limited behavioral comparison but is an evaluation-instrument issue and must not be changed in the migration skill."
+  ]
+}

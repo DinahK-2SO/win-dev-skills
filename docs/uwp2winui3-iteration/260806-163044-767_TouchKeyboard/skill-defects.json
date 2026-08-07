@@ -1,0 +1,37 @@
+{
+  "scenario": "TouchKeyboard",
+  "index": 2,
+  "category": "skill-defect",
+  "items": [
+    {
+      "problem": "Bootstrap omitted csproj-linked source files outside the project directory.",
+      "evidence": "session-log.txt lines 119-143 copied only seven files; lines 639-685 and 2208-2765 show manual recovery from obj and SharedContent.",
+      "skill_search": "Initialize-UwpMigration.ps1 copy loop and searches for Link/SharedContent",
+      "skill_state": "absent",
+      "wrong_text_if_any": "",
+      "root_cause": "The script recursively copied only physical descendants of -Source and ignored evaluated Include/Link project items.",
+      "proposed_fix": "Parse legacy csproj Link metadata, resolve shared path properties, and copy linked files to their logical paths before namespace rewrite and mapping.",
+      "generalizes": "Legacy UWP projects and SDK samples frequently share App/MainPage, resource dictionaries, code, and assets through linked project items."
+    },
+    {
+      "problem": "GetForCurrentView guidance omitted InputPane/CoreInputView and validation allowed the forbidden calls to remain.",
+      "evidence": "session-log.txt lines 3324-3700 shows fabricated replacements and reversion; build-output.txt lines 8-12 shows five WUI0004 warnings after validator PASS.",
+      "skill_search": "MIGRATION-PATTERNS.md#getforcurrentview, unsupported-api-inventory.json, Validate-UwpMigration.ps1 residuePatterns",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Replace GetForCurrentView() with a window-scoped factory; the table had no InputPane/CoreInputView exception, and the validator scanned unsupported/residueOnly but not this adaptable pattern.",
+      "root_cause": "These input APIs have no Microsoft.UI.Input projection/GetForWindowId factory, while the validator assumed analyzer availability would catch unresolved adaptable calls.",
+      "proposed_fix": "Document HWND COM interop for InputPane/CoreInputView, mark GetForCurrentView mustResolve, and re-scan mustResolve patterns during validation.",
+      "generalizes": "Any UWP app using view-scoped APIs can compile with invalid legacy calls when analyzer packages are absent."
+    },
+    {
+      "problem": "The skill instructed agents to use a nonexistent winapp build command.",
+      "evidence": "session-log.txt lines 3107-3168: winapp rejected build and the agent had to switch commands.",
+      "skill_search": "SKILL.md searches for winapp build",
+      "skill_state": "wrong",
+      "wrong_text_if_any": "Prefer winapp build to compile.",
+      "root_cause": "winapp handles package identity/launch but does not expose a build subcommand in this environment.",
+      "proposed_fix": "Use native dotnet build throughout and reserve Test-AppLaunch/winapp for registration and launch.",
+      "generalizes": "Every migration must compile, and stale command guidance wastes a turn in every environment with the current CLI."
+    }
+  ]
+}

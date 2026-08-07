@@ -1,0 +1,170 @@
+{
+  "scenario": "TouchKeyboard",
+  "index": 2,
+  "tools_helpful": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 116-145: the bootstrap copied local sources, rewrote namespaces, injected five TODOs, and produced mapping/meta artifacts."
+    },
+    {
+      "tool": "Get-MigrationPattern.ps1",
+      "evidence": "session-log.txt lines 694-695 and 1091-1164: the navigation shell anchor described the exact first-page-sticks failure and a falsifiable second-item check."
+    },
+    {
+      "tool": "Test-AppLaunch.ps1",
+      "evidence": "session-log.txt lines 3723-3733: it registered the package and confirmed that the app stayed alive for 10 seconds."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1",
+      "evidence": "session-log.txt lines 3735-3757: it caught all seven mapping rows still marked copied and later passed build and smoke launch."
+    }
+  ],
+  "tools_problematic": [
+    {
+      "tool": "winapp build",
+      "problem": "The installed winapp CLI has no build subcommand.",
+      "evidence": "session-log.txt lines 3107-3165: winapp rejected build and the agent switched to dotnet build."
+    },
+    {
+      "tool": "Validate-UwpMigration.ps1 residue/analyzer gate",
+      "problem": "It passed while GetForCurrentView calls remained because adaptable patterns were not re-scanned and the project did not reference the analyzer used later by scoring.",
+      "evidence": "session-log.txt lines 3700-3820 reports residue/analyzer PASS; build-output.txt lines 8-12 later reports five WUI0004 warnings for the retained calls."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Initialize-UwpMigration.ps1",
+      "limitation": "The recursive source copy ignored csproj items linked from sibling shared-content directories.",
+      "suggested_tweak": "Parse Link metadata and copy referenced project items to their logical target paths before namespace rewrite and mapping generation."
+    },
+    {
+      "tool": "python",
+      "limitation": "Python was unavailable in the environment.",
+      "suggested_tweak": "Use PowerShell/.NET reflection or installed SDK metadata rather than assuming Python exists."
+    }
+  ],
+  "failed_apis": [
+    {
+      "api": "Microsoft.UI.Input.InputPane / CoreInputView GetForWindowId",
+      "why_tried": "The generic GetForCurrentView guidance said to use a window-scoped factory.",
+      "root_cause": "Those projected Microsoft.UI.Input types/factories do not exist.",
+      "fix": "Use HWND-based COM interop for required input-pane behavior; never fabricate the projected API."
+    },
+    {
+      "api": "Windows.UI.ViewManagement.InputPane.GetForCurrentView / Windows.UI.ViewManagement.Core.CoreInputView.GetForCurrentView",
+      "why_tried": "The agent restored the compiling UWP calls after the fabricated replacement failed.",
+      "root_cause": "The calls require a CoreWindow/current UWP view and are invalid in WinUI 3 desktop despite compiling.",
+      "fix": "Remove the view-scoped entry points and implement the behavior through HWND interop."
+    }
+  ],
+  "doc_errors": [
+    {
+      "where": "SKILL.md Step 3 and final build",
+      "wrong": "Use winapp build.",
+      "correct": "Use native dotnet build; winapp has no build subcommand."
+    },
+    {
+      "where": "MIGRATION-PATTERNS.md#getforcurrentview",
+      "wrong": "The generic window-scoped-factory guidance omitted InputPane/CoreInputView and encouraged a nonexistent Microsoft.UI.Input replacement.",
+      "correct": "Call out these APIs as HWND-COM-interoperability cases with no projected GetForWindowId factory."
+    }
+  ],
+  "special_apis": [
+    {
+      "api": "InputPane / CoreInputView",
+      "special_handling": "Their UWP current-view accessors must not remain; feature parity requires HWND-based COM interop rather than a namespace substitution."
+    },
+    {
+      "api": "Legacy csproj Link items",
+      "special_handling": "Resolve Include plus Link metadata, including shared path properties, and copy the physical source to the logical project path."
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Initialize-UwpMigration.ps1: Target not found",
+      "root_cause": "The scaffold and bootstrap commands were launched in parallel, so bootstrap ran before dotnet new created the target.",
+      "fix": "The agent waited for scaffold completion and reran bootstrap."
+    },
+    {
+      "error": "winapp: Unrecognized command or argument 'build'",
+      "root_cause": "The skill documented a nonexistent subcommand.",
+      "fix": "The agent switched to dotnet build."
+    },
+    {
+      "error": "CS0246 for InputPane/InputPaneVisibilityEventArgs",
+      "root_cause": "The agent fabricated Microsoft.UI.Input projections that are not present in Windows App SDK.",
+      "fix": "It reverted to Windows.UI.ViewManagement types, which compiled but remained a runtime-invalid migration."
+    },
+    {
+      "error": "CS0103 for CoreInputView/CoreInputViewKind",
+      "root_cause": "The same nonexistent projected replacement was attempted for CoreInputView.",
+      "fix": "It reverted to the UWP namespace, leaving WUI0004 residue."
+    },
+    {
+      "error": "WMC0909/WMC1111/WMC9999 in MainPage.xaml",
+      "root_cause": "Reconstructed XAML used x:Bind with an unresolved local:Scenario DataType.",
+      "fix": "The template was changed to runtime Binding without x:DataType."
+    },
+    {
+      "error": "Python was not found",
+      "root_cause": "The agent assumed an unavailable interpreter while probing SDK projections.",
+      "fix": "It continued with installed XML metadata and repository searches."
+    },
+    {
+      "error": "CS2001 missing generated .g.i.cs files and WMC9999 on the final build",
+      "root_cause": "The final dotnet build ran concurrently with validator's rebuild against the same obj directory.",
+      "fix": "The validator's own rebuild completed successfully; future builds must run sequentially."
+    },
+    {
+      "error": "WUI0004 warnings for five GetForCurrentView calls",
+      "root_cause": "The migration validator did not treat a must-resolve adaptable pattern as residue and no analyzer was referenced during its build.",
+      "fix": "Re-scan mustResolve adaptable patterns independently of analyzer availability."
+    }
+  ],
+  "dev_agent_struggles": [
+    {
+      "where": "Source discovery and shell reconstruction",
+      "symptom": "The agent searched generated obj XAML and sibling SharedContent, then recreated multiple XAML files manually.",
+      "turns_or_retries": "Turns 5-10",
+      "root_cause": "Bootstrap copied only files physically below the project directory and omitted linked csproj items.",
+      "how_resolved": "The agent manually located linked/generated content and authored target XAML.",
+      "preventable_by": "Teach Initialize-UwpMigration.ps1 to copy linked project items to their Link paths."
+    },
+    {
+      "where": "Touch keyboard API adaptation",
+      "symptom": "The agent fabricated projected APIs, searched docs and installed packages repeatedly, then restored invalid UWP calls.",
+      "turns_or_retries": "Turns 15-26",
+      "root_cause": "The GetForCurrentView anchor omitted the InputPane/CoreInputView special case.",
+      "how_resolved": "It achieved a clean local build by reverting to calls that the later analyzer flagged.",
+      "preventable_by": "Document the HWND interop requirement and make the validator reject any remaining GetForCurrentView call."
+    },
+    {
+      "where": "Final validation",
+      "symptom": "A final build failed after the validator passed.",
+      "turns_or_retries": "Turns 27-30",
+      "root_cause": "Validator and final dotnet build ran concurrently and raced on generated XAML output.",
+      "how_resolved": "The agent relied on the validator's successful internal rebuild.",
+      "preventable_by": "State that final build starts only after validator exits."
+    }
+  ],
+  "missing_tooling": [
+    {
+      "need": "Mechanical linked-item import from legacy csproj Link metadata",
+      "would_have_saved": "Manual discovery/reconstruction of App, MainPage, scenario XAML, styles, shared code, and assets."
+    },
+    {
+      "need": "Analyzer-independent must-resolve pattern validation",
+      "would_have_saved": "The false validator PASS and five later WUI0004 warnings."
+    }
+  ],
+  "env_issues": [
+    {
+      "issue": "Python executable was not installed.",
+      "workaround": "Use PowerShell/.NET and SDK XML metadata."
+    },
+    {
+      "issue": "The installed winapp CLI did not expose a build command.",
+      "workaround": "Use dotnet build for compilation."
+    }
+  ]
+}

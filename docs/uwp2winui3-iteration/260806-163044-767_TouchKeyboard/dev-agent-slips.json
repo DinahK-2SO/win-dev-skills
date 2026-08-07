@@ -1,0 +1,42 @@
+{
+  "scenario": "TouchKeyboard",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "Scaffold and bootstrap were launched in parallel, causing Target not found.",
+      "evidence": "session-log.txt lines 12-33 shows bootstrap failing before dotnet new completed.",
+      "covered_clearly_at": "SKILL.md Step 0 numbers scaffold, bootstrap, and self-check in order and says scaffold first.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The ordering was explicit; rerunning sequentially immediately resolved it."
+    },
+    {
+      "problem": "The agent regenerated XAML and introduced x:Bind DataType compiler errors.",
+      "evidence": "session-log.txt lines 2763-2766 and 3330-3346; fixed by switching to Binding.",
+      "covered_clearly_at": "SKILL.md Critical Rules > Fidelity: Do not regenerate XAML from scratch; copy verbatim, then transform.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The skill already prohibited the action that created the error."
+    },
+    {
+      "problem": "Scenario navigation highlighted items 2/3 but left scenario 1 content displayed.",
+      "evidence": "migration-score.json features 2 and 3 fail; discrepancies.json records first-page content sticking.",
+      "covered_clearly_at": "SKILL.md Shell conversion table and MIGRATION-PATTERNS.md#navigationview-frame-wiring explicitly name first-page-sticks, require reliable event wiring, and require a second-item UIA check.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The migration agent fetched the exact anchor in session-log.txt lines 1091-1164 but retained a different ListBox/SelectionChanged shell and did not perform the stated switch check."
+    },
+    {
+      "problem": "The final build ran concurrently with validation and failed on missing generated XAML files.",
+      "evidence": "session-log.txt lines 3769-3802 shows both commands launched together and CS2001/WMC9999 failures.",
+      "covered_clearly_at": "SKILL.md Step 4 says after PASS, do a final build.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The required sequencing was already explicit; the prose was only tightened while correcting the build command."
+    },
+    {
+      "problem": "The agent invoked unavailable Python to inspect SDK types.",
+      "evidence": "session-log.txt lines 3603-3607 reports Python was not found.",
+      "covered_clearly_at": "SKILL.md API-level rule directs uncertain API work to the migration anchor or official API mapping table, not an assumed local interpreter.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "An unavailable optional probing tool is environment-specific and the documented research path did not require it."
+    }
+  ]
+}

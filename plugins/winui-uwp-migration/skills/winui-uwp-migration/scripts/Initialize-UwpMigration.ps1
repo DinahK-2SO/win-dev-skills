@@ -111,6 +111,95 @@ if ($uwpCsprojs.Count -gt 0) {
         Copy-Item -LiteralPath $p.FullName -Destination $dst -Force
         Write-Host "    Preserved $($p.Name) at .uwp-source/ (reference only — do not edit, do not include in build)"
     }
+
+    # Legacy UWP projects commonly link shared source from outside the project
+    # directory. A recursive copy cannot see those files, so honor Link metadata
+    # and place each referenced item at its logical project path.
+    function Expand-UwpProjectValue([string]$value, [hashtable]$properties, [string]$projectDir) {
+        $expanded = $value
+        for ($pass = 0; $pass -lt 10; $pass++) {
+            $before = $expanded
+            $expanded = $expanded.Replace('$(MSBuildThisFileDirectory)', $projectDir + [System.IO.Path]::DirectorySeparatorChar)
+            foreach ($name in $properties.Keys) {
+                $token = '$(' + $name + ')'
+                $expanded = $expanded.Replace($token, [string]$properties[$name])
+            }
+
+            $findAbove = '\$\(\[MSBuild\]::GetDirectoryNameOfFileAbove\(([^,]+),\s*([^)]+)\)\)'
+            $expanded = [regex]::Replace($expanded, $findAbove, [System.Text.RegularExpressions.MatchEvaluator]{
+                param($m)
+                $start = $m.Groups[1].Value.Trim().Trim('"', "'")
+                $marker = $m.Groups[2].Value.Trim().Trim('"', "'")
+                if (-not [System.IO.Path]::IsPathRooted($start)) { $start = Join-Path $projectDir $start }
+                $cursor = [System.IO.DirectoryInfo]::new([System.IO.Path]::GetFullPath($start))
+                while ($cursor) {
+                    if (Test-Path -LiteralPath (Join-Path $cursor.FullName $marker)) { return $cursor.FullName }
+                    $cursor = $cursor.Parent
+                }
+                return $m.Value
+            })
+
+            if ($expanded -eq $before) { break }
+        }
+        return $expanded
+    }
+
+    foreach ($p in $uwpCsprojs) {
+        [xml]$projectXml = Get-Content -LiteralPath $p.FullName -Raw
+        $projectDir = [System.IO.Path]::GetDirectoryName($p.FullName)
+        $properties = @{}
+
+        # Resolve the simple path properties and GetDirectoryNameOfFileAbove form
+        # used by Windows SDK samples. Unresolved imports/properties are reported.
+        foreach ($pass in 1..10) {
+            $changed = $false
+            foreach ($group in @($projectXml.Project.PropertyGroup)) {
+                foreach ($property in @($group.ChildNodes | Where-Object { $_.NodeType -eq 'Element' })) {
+                    $value = Expand-UwpProjectValue ([string]$property.InnerText) $properties $projectDir
+                    if (-not $properties.ContainsKey($property.LocalName) -or $properties[$property.LocalName] -ne $value) {
+                        $properties[$property.LocalName] = $value
+                        $changed = $true
+                    }
+                }
+            }
+            if (-not $changed) { break }
+        }
+
+        $linkedCount = 0
+        $itemNames = @('Compile', 'Page', 'ApplicationDefinition', 'Content', 'None')
+        foreach ($group in @($projectXml.Project.ItemGroup)) {
+            foreach ($item in @($group.ChildNodes | Where-Object { $_.NodeType -eq 'Element' -and $itemNames -contains $_.LocalName })) {
+                $linkNode = $item.ChildNodes | Where-Object { $_.NodeType -eq 'Element' -and $_.LocalName -eq 'Link' } | Select-Object -First 1
+                if (-not $linkNode -or -not $item.Include) { continue }
+
+                $include = Expand-UwpProjectValue ([string]$item.Include) $properties $projectDir
+                if ($include -match '\$\(' -or $include -match '[*?]') {
+                    Write-Warning "    Linked item could not be resolved automatically: $($item.Include)"
+                    continue
+                }
+                if (-not [System.IO.Path]::IsPathRooted($include)) { $include = Join-Path $projectDir $include }
+                $include = [System.IO.Path]::GetFullPath($include)
+                if (-not (Test-Path -LiteralPath $include -PathType Leaf)) {
+                    Write-Warning "    Linked item source not found: $include"
+                    continue
+                }
+
+                $link = ([string]$linkNode.InnerText).Replace('/', '\')
+                $destination = [System.IO.Path]::GetFullPath((Join-Path $Target $link))
+                if (-not $destination.StartsWith($Target + '\', [System.StringComparison]::OrdinalIgnoreCase)) {
+                    throw "Linked item escapes target directory: $link"
+                }
+                $destinationDir = [System.IO.Path]::GetDirectoryName($destination)
+                if (-not (Test-Path -LiteralPath $destinationDir)) {
+                    New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
+                }
+                Copy-Item -LiteralPath $include -Destination $destination -Force
+                if (-not $copied.Contains($link)) { [void]$copied.Add($link) }
+                $linkedCount++
+            }
+        }
+        if ($linkedCount -gt 0) { Write-Host "    Copied $linkedCount linked project item(s) from shared source paths" }
+    }
 } else {
     Write-Warning "    No .csproj found under Source — agent has no reference for original PackageReference list"
 }

@@ -376,8 +376,13 @@ The `GetForCurrentView()` *entry point* is gone in WinUI 3 desktop — there is 
 | `DisplayInformation.GetForCurrentView()` | `Microsoft.Graphics.Display.DisplayInformation.CreateForWindowId(windowId)` — keeps `NativeOrientation` / `CurrentOrientation` / DPI / color members. (For DPI *only*, `XamlRoot.RasterizationScale` or Win32 `GetDpiForWindow` is a shortcut.) |
 | `CoreApplication.GetCurrentView()` | Track windows manually in `App` |
 | `SystemNavigationManager.GetForCurrentView()` | Wire back handling in `NavigationView` / `BackRequested` directly |
+| `InputPane.GetForCurrentView()` / `CoreInputView.GetForCurrentView()` | These types have no `Microsoft.UI.Input` projection or `GetForWindowId` factory. Use HWND-based COM interop when the behavior is required; do not invent a projected replacement and do not keep the UWP call merely because it compiles. |
 
 `DisplayInformation.GetForCurrentView()` **throws** on desktop (`GetForCurrentView must be called on a thread associated with a CoreWindow`) — swap it for the window-scoped factory rather than catching the exception. `CreateForWindowId` must run on a thread with a running `DispatcherQueue`; cache the instance and de-register its events.
+
+`GetForCurrentView()` is a must-resolve marker: deleting its injected TODO without
+removing the call is not a migration. `Validate-UwpMigration.ps1` re-scans for the
+entry point even when the project does not reference the Windows App SDK analyzer.
 
 ```csharp
 using Microsoft.Graphics.Display; // WinApp SDK DisplayInformation
@@ -664,7 +669,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+When `Microsoft.WindowsAppSDK.Analyzers` is referenced, it flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` fails the build healthcheck for each unique warning. The validator also re-scans inventory entries marked `mustResolve`, so critical residue such as `GetForCurrentView()` is rejected even without the analyzer package.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |
