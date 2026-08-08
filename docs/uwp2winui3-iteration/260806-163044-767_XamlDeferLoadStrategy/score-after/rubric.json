@@ -1,0 +1,45 @@
+{
+  "scenario": "XamlDeferLoadStrategy",
+  "created_at": "2026-08-07T23:50:00.000Z",
+  "uwp_capture_status": "partial: runner launched the UWP process, but the app remained on its splash screen and its CoreWindow exposed no scenario controls",
+  "features": [
+    {
+      "id": "basic-deferral",
+      "area": "Basic Deferral",
+      "name": "Deferred element realization",
+      "description": "The page initially defers a four-color grid and realizes it when the Realize Elements button is clicked.",
+      "expected_behaviour": [
+        "The explanatory text and Realize Elements button are visible.",
+        "Clicking Realize Elements makes the orange, green, blue, and yellow grid visible."
+      ],
+      "screenshot": "parity/baseline/screenshots/01_Basic_Deferral__a01_Realize_Elements.png",
+      "weight": 2
+    },
+    {
+      "id": "adaptive-deferral",
+      "area": "Adaptive Deferral",
+      "name": "Adaptive mail panes",
+      "description": "The mail sample realizes its account and reading panes at responsive width thresholds while retaining the mail list.",
+      "expected_behaviour": [
+        "The mail list displays sender, subject, body preview, and received date data.",
+        "At wider widths the account list and reading pane become visible.",
+        "The reading pane contains Send and Discard buttons, To and CC fields, and an editable message body."
+      ],
+      "screenshot": "parity/baseline/screenshots/02_Adaptive_Deferral__a01_Send.png",
+      "weight": 2
+    },
+    {
+      "id": "control-template-deferral",
+      "area": "Control Template Deferral",
+      "name": "Deferred template header",
+      "description": "Two TitledImage controls demonstrate that the optional header template part is created only when a header is supplied.",
+      "expected_behaviour": [
+        "The explanatory text is visible.",
+        "The Rainier image displays with its Rainier header.",
+        "The valley image displays without an empty header area."
+      ],
+      "screenshot": "parity/baseline/screenshots/03_Control_Template_Deferral.png",
+      "weight": 1
+    }
+  ]
+}

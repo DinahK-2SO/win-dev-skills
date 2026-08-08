@@ -1,0 +1,77 @@
+{
+  "featureName": "x:DeferLoadStrategy",
+  "parityScore": 66.7,
+  "counts": {
+    "partial": 0,
+    "fail": 1,
+    "pass": 2
+  },
+  "totalScenarios": 3,
+  "pass": false,
+  "thresholds": {
+    "strictPartial": false,
+    "partial": 0.4,
+    "pass": 0.8
+  },
+  "scenarios": [
+    {
+      "number": 1,
+      "title": "Basic Deferral",
+      "verdict": "pass",
+      "coverage": 1.0,
+      "controlsTotal": 1,
+      "controlsFound": 1,
+      "reachable": true,
+      "screenshotBytes": 39892,
+      "actionsTotal": 1,
+      "actionsInvoked": 1,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [],
+      "reason": "",
+      "screenshot": "01_Basic_Deferral.png"
+    },
+    {
+      "number": 2,
+      "title": "Adaptive Deferral",
+      "verdict": "fail",
+      "coverage": 0.0,
+      "controlsTotal": 4,
+      "controlsFound": 0,
+      "reachable": true,
+      "screenshotBytes": 40577,
+      "actionsTotal": 1,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [
+        "ListView (AccountsList)",
+        "ListView (MailList)",
+        "Button (Send)",
+        "RichEditBox (Body)"
+      ],
+      "reason": "Missing 4/4 control(s): ListView (AccountsList); ListView (MailList); Button (Send); RichEditBox (Body)",
+      "screenshot": "02_Adaptive_Deferral.png"
+    },
+    {
+      "number": 3,
+      "title": "Control Template Deferral",
+      "verdict": "pass",
+      "coverage": 1.0,
+      "controlsTotal": 0,
+      "controlsFound": 0,
+      "reachable": true,
+      "screenshotBytes": 40577,
+      "actionsTotal": 0,
+      "actionsInvoked": 0,
+      "actionsResponded": 0,
+      "behaviorRegressions": [],
+      "behaviorNote": "",
+      "missing": [],
+      "reason": "",
+      "screenshot": "03_Control_Template_Deferral.png"
+    }
+  ]
+}

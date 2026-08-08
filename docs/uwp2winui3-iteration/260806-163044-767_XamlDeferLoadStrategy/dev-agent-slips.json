@@ -1,0 +1,35 @@
+{
+  "scenario": "XamlDeferLoadStrategy",
+  "index": 2,
+  "category": "dev-agent-slip",
+  "items": [
+    {
+      "problem": "The scaffold, bootstrap, and bootstrap self-check were launched concurrently, causing Target not found and a false self-check.",
+      "evidence": "session-log.txt turn 1: Test-Path returned False and bootstrap threw Target not found before dotnet new completed.",
+      "covered_clearly_at": "SKILL.md Step 0 numbers the scaffold, bootstrap, and self-check as commands 1, 2, and 3; it says not to proceed unless command 3 returns True.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The dependency order and stop condition are already explicit and prominent."
+    },
+    {
+      "problem": "The agent introduced inconsistent namespaces across MainPage, SampleConfiguration, XAML x:Class, and MainWindow, causing CS0246/WMC0001/WMC9999.",
+      "evidence": "session-log.txt turns 19-30: successive edits moved only part of the related type set before later reconciling all references.",
+      "covered_clearly_at": "SKILL.md Critical Rules / Fidelity says to copy XAML verbatim then transform while preserving names and event handlers; Step 1 assigns file-level completion rather than partial cross-file rewrites.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The failures came from an inconsistent intermediate edit, not an undocumented UWP-to-WinUI API difference."
+    },
+    {
+      "problem": "The agent added required members to types activated by generated XAML code, causing CS9035.",
+      "evidence": "session-log.txt turns 23 and 30-31: required was agent-authored, XamlTypeInfo.g.cs failed, and initialized properties fixed it.",
+      "covered_clearly_at": "SKILL.md Step 3 requires fixing the first build error in a tight loop and preserving source behavior rather than redesigning model construction.",
+      "slip_type": "one-off-mistake",
+      "why_no_skill_change": "The source did not require this refactor; a rerun that avoids speculative required-member changes would not hit the error."
+    },
+    {
+      "problem": "Build, launch, and validation ran concurrently against the same obj/bin tree, producing transient CS2001 missing generated-file errors.",
+      "evidence": "session-log.txt turn 42 launched all three commands together; build output reported missing *.g.i.cs while the validator's later rebuild succeeded.",
+      "covered_clearly_at": "SKILL.md Step 3 explicitly defines the loop as build, then fix, then launch, then repeat; Step 4 runs validation only after migration work is complete.",
+      "slip_type": "read-but-ignored",
+      "why_no_skill_change": "The process order is already explicit; dependent build and launch operations should not have been parallelized."
+    }
+  ]
+}

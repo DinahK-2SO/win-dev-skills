@@ -1,0 +1,20 @@
+{
+  "scenario": "XamlDeferLoadStrategy",
+  "index": 2,
+  "applied": true,
+  "bullets": [
+    "Rewrite legacy XAML deferral to x:Load=False during bootstrap and reject residue so deferred UI uses the supported equivalent.",
+    "Replace nonexistent winapp build guidance with native x64 dotnet builds so launch diagnostics find the expected layout.",
+    "Align the no-deferred-files sentinel across bootstrap and validation to remove false consistency warnings."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json"
+  ],
+  "deferred_to_human": [
+    "Consider a future Tier-1 unresolved ms-appx asset inventory for linked sibling SharedContent trees."
+  ]
+}

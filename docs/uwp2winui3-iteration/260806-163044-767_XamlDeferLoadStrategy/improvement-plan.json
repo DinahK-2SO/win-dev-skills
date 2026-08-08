@@ -1,0 +1,47 @@
+{
+  "scenario": "XamlDeferLoadStrategy",
+  "index": 2,
+  "applied": true,
+  "items": [
+    {
+      "problem": "The bootstrap and validator ignored the superseded XAML deferral directive, leaving four legacy occurrences in a candidate that crashed during native XAML startup.",
+      "evidence": "skill-defects.json item 1; migration-score.json reports all three features failed; session-log.txt turn 38 lists four occurrences and turns 36/46 show 0xc000027b.",
+      "root_cause": "No migration inventory, mechanical rewrite, residue rule, or focused pattern existed for XAML deferral.",
+      "tier": 1,
+      "change": "Mechanically rewrite the exact equivalent Lazy value to x:Load=False during bootstrap, reject remaining legacy directives in validation, and document realization behavior and the Window-root caveat.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1; skills/winui-uwp-migration/scripts/unsupported-api-inventory.json; skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+      "expected_effect": "Older UWP deferred elements enter WinUI 3 in the supported equivalent form without relying on agent recall.",
+      "falsifiable_check": "A rerun produces zero x:DeferLoadStrategy matches, corresponding x:Load=False attributes remain, and the validator residue gate passes."
+    },
+    {
+      "problem": "SKILL.md prescribed a nonexistent winapp build command.",
+      "evidence": "skill-defects.json item 2; session-log.txt turn 8 exited 1 because 'build' was not matched.",
+      "root_cause": "The instructions conflated native compilation with packaged registration/launch.",
+      "tier": 3,
+      "change": "Replace every migration build instruction with native dotnet build -p:Platform=x64 and state that winapp is only used for launch.",
+      "file": "skills/winui-uwp-migration/SKILL.md; skills/winui-uwp-migration/MIGRATION-PATTERNS.md; skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+      "expected_effect": "Agents use an available build command and produce the x64 layout expected by Test-AppLaunch.ps1 on the first attempt.",
+      "falsifiable_check": "A rerun contains no attempted winapp build command and the first documented build exits successfully under bin\\x64\\Debug."
+    },
+    {
+      "problem": "Zero-defer migrations always triggered a deferred-file consistency warning.",
+      "evidence": "skill-defects.json item 3; session-log.txt turns 36 and 46 show the warning.",
+      "root_cause": "Bootstrap and validator used different empty-state sentinels.",
+      "tier": 1,
+      "change": "Emit the validator's canonical No items deferred sentinel from the bootstrap.",
+      "file": "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+      "expected_effect": "The generated deferred manifest and validator agree for zero-defer migrations.",
+      "falsifiable_check": "A bootstrap with zero deferred rows makes validation print the no-defer PASS line instead of WARN."
+    }
+  ],
+  "deferred_to_human": [
+    "Consider a future Tier-1 unresolved ms-appx asset inventory for content linked from sibling SharedContent trees; it was lower leverage than the three applied items."
+  ],
+  "files_touched": [
+    "skills/winui-uwp-migration/SKILL.md",
+    "skills/winui-uwp-migration/MIGRATION-PATTERNS.md",
+    "skills/winui-uwp-migration/scripts/Initialize-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/Validate-UwpMigration.ps1",
+    "skills/winui-uwp-migration/scripts/unsupported-api-inventory.json"
+  ]
+}

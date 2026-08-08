@@ -1,0 +1,41 @@
+{
+  "scenario": "XamlDeferLoadStrategy",
+  "uwp_launchable": true,
+  "score": 33,
+  "features_total": 3,
+  "features_pass": 1,
+  "features_partial": 0,
+  "features_fail": 2,
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true, but the live UWP app remained on its splash screen and exposed no scenario controls",
+  "parity_result": "parity/winui3/parity-result.json",
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Basic Deferral",
+      "verdict": "pass",
+      "uwp_responded": false,
+      "winui_responded": true,
+      "uwp_screenshot": "parity/baseline/screenshots/01_Basic_Deferral__a01_Realize_Elements.png",
+      "winui_screenshot": "parity/winui3/screenshots/01_Basic_Deferral__a01_Realize_Elements.png",
+      "note": "The control is present and visual inspection of the before/after candidate frames confirms that Realize Elements reveals the four-color deferred grid. The automated text-token response detector reported false because the response is graphical."
+    },
+    {
+      "name": "Adaptive Deferral",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": "parity/baseline/screenshots/02_Adaptive_Deferral__a01_Send.png",
+      "winui_screenshot": "parity/winui3/screenshots/02_Adaptive_Deferral__a01_Send.png",
+      "note": "The feature is unreachable because its navigation item is mislabeled SDKTemplate.Scenario. The candidate frame remains on Basic Deferral and all four expected controls are missing."
+    },
+    {
+      "name": "Control Template Deferral",
+      "verdict": "fail",
+      "uwp_responded": null,
+      "winui_responded": null,
+      "uwp_screenshot": "parity/baseline/screenshots/03_Control_Template_Deferral.png",
+      "winui_screenshot": "parity/winui3/screenshots/03_Control_Template_Deferral.png",
+      "note": "The feature is unreachable because its navigation item is mislabeled SDKTemplate.Scenario. The candidate screenshot shows Basic Deferral instead of the two TitledImage examples."
+    }
+  ]
+}

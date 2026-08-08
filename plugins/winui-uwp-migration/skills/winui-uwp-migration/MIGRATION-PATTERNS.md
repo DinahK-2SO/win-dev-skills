@@ -50,6 +50,21 @@ Get-ChildItem -Path $Target -Recurse -Directory -Include bin,obj |
 
 Generated sources never belong in source control or the migrated tree — only `.xaml/.cs/.resw/.appxmanifest`/assets are real inputs.
 
+<a id="xaml-deferral"></a>
+## XAML deferral: `x:DeferLoadStrategy="Lazy"` → `x:Load="False"`
+
+The bootstrap performs this exact rewrite mechanically. `x:Load="False"` is the supported successor and is behaviorally equivalent to the legacy lazy value while also allowing unloading.
+
+Keep the element's `x:Name`. Existing realization paths remain valid when the deferred root is a `Page` or `UserControl`: `FindName`, `GetTemplateChild`, a `VisualState` setter/storyboard, or a binding that targets the element. For a `Window` XAML root, do not rely on `FindName` to realize an `x:Load` element; bind `x:Load` to a boolean with `x:Bind` instead.
+
+```xml
+<Grid x:Name="DeferredGrid" x:Load="False">
+    <!-- deferred content -->
+</Grid>
+```
+
+The validator treats any remaining `x:DeferLoadStrategy` as residue, because it means the bootstrap rewrite was bypassed or an unsupported value was used.
+
 ### `CS0246` / `WMC0001: 'CaptureElement' could not be found`
 
 `<CaptureElement>` does not exist in WinUI 3, but the **live camera preview is not a defer** — it has a standard replacement: render `MediaCapture` preview frames into an `<Image>` via `SoftwareBitmapSource`. See the [Camera preview](#capture) section below for the full recipe. Do **not** mark the camera page `defer` — that deletes the whole feature and leaves a blank window. (`MediaPlayerElement` is only for media playback, not the live camera surface.)
@@ -664,7 +679,7 @@ When merging the UWP manifest into the scaffold's, make sure all of these are tr
 
 ### WUI analyzer warnings (UWP API residue)
 
-The benchmark's `winapp build` injects the `Microsoft.WindowsAppSDK.Analyzers` package, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
+The validator's native `dotnet build` healthcheck uses `Microsoft.WindowsAppSDK.Analyzers`, which flags UWP-only APIs that compile cleanly under WinUI 3 but throw `COMException` at runtime — typically inside `Microsoft.UI.Xaml.Application.Start(...)` before any window can render. The runner sees this as `builds=true, runs=false`, and `Validate-UwpMigration.ps1` will FAIL the build healthcheck for each unique warning.
 
 | Rule | Symptom | Fix |
 | --- | --- | --- |

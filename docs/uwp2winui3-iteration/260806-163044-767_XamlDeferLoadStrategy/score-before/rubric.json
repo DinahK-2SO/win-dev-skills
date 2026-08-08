@@ -1,0 +1,79 @@
+{
+  "scenario": "XamlDeferLoadStrategy",
+  "created_at": "2026-08-07T23:31:00Z",
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true, but the live UWP window remained on the Windows platform sample splash frame after an extended wait; scenario navigation and actions were not exposed through UIA",
+  "features": [
+    {
+      "id": "basic-deferral-content",
+      "area": "Basic Deferral",
+      "name": "Deferred content starts unrealized",
+      "description": "The page explains lazy realization and initially omits the deferred two-by-two color grid.",
+      "expected_behaviour": [
+        "The explanatory text and Realize Elements button are visible.",
+        "The four colored rectangles are absent before the button is invoked."
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "basic-deferral-realize",
+      "area": "Basic Deferral",
+      "name": "Realize deferred elements",
+      "description": "Invoking Realize Elements realizes the deferred grid through FindName.",
+      "expected_behaviour": [
+        "Clicking Realize Elements displays a two-by-two grid of orange, green, blue, and yellow rectangles.",
+        "The realized grid remains visible after the click."
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "adaptive-mail-list",
+      "area": "Adaptive Deferral",
+      "name": "Mail list content",
+      "description": "The adaptive mail layout presents seeded messages with sender, subject, body preview, and received time.",
+      "expected_behaviour": [
+        "Five seeded email rows are visible in the mail list.",
+        "Each row includes sender, subject, body preview, and received time."
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "adaptive-pane-realization",
+      "area": "Adaptive Deferral",
+      "name": "Responsive pane realization",
+      "description": "Visual states realize the reading pane at tablet width and the accounts pane at desktop width.",
+      "expected_behaviour": [
+        "At widths of at least 768 pixels, the reading pane is visible.",
+        "At desktop width, the account list is visible with four seeded accounts."
+      ],
+      "screenshot": null,
+      "weight": 2
+    },
+    {
+      "id": "adaptive-compose-pane",
+      "area": "Adaptive Deferral",
+      "name": "Compose controls",
+      "description": "The realized reading pane contains Send and Discard actions, To and CC fields, and an editable message body.",
+      "expected_behaviour": [
+        "Send and Discard buttons are visible with their icons and labels.",
+        "To, CC, and message body editing controls are present in the reading pane."
+      ],
+      "screenshot": null,
+      "weight": 1
+    },
+    {
+      "id": "template-part-deferral",
+      "area": "Control Template Deferral",
+      "name": "Conditional header template part",
+      "description": "Two TitledImage controls demonstrate that the deferred header presenter is created only when Header is supplied.",
+      "expected_behaviour": [
+        "The Rainier image shows the Rainier header above it.",
+        "The valley image appears without an empty header element above it."
+      ],
+      "screenshot": null,
+      "weight": 2
+    }
+  ]
+}

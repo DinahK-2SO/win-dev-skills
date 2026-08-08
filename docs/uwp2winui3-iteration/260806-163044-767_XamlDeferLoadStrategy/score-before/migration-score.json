@@ -1,0 +1,42 @@
+{
+  "scenario": "XamlDeferLoadStrategy",
+  "uwp_launchable": true,
+  "score": 0,
+  "features_total": 3,
+  "features_pass": 0,
+  "features_partial": 0,
+  "features_fail": 3,
+  "uwp_capture_status": "partial: uwp-app-runner returned ok:true, but the UWP window remained on the Windows platform sample splash frame after an extended wait; all saved UWP capture frames show only that splash screen",
+  "candidate_launch_status": "failed: dotnet run exited with -1073741189 (0xC000027B) after reporting packaged application PID 89824",
+  "parity_result": null,
+  "behavioral_regressions": 0,
+  "features": [
+    {
+      "name": "Basic Deferral",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": null,
+      "note": "Candidate launch failed before the deferred grid and Realize Elements behavior could be captured."
+    },
+    {
+      "name": "Adaptive Deferral",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": null,
+      "note": "Candidate launch failed before the adaptive panes, seeded lists, compose controls, and Send behavior could be captured."
+    },
+    {
+      "name": "Control Template Deferral",
+      "verdict": "fail",
+      "uwp_responded": false,
+      "winui_responded": false,
+      "uwp_screenshot": null,
+      "winui_screenshot": null,
+      "note": "Candidate launch failed before the conditional template header and image layout could be captured."
+    }
+  ]
+}

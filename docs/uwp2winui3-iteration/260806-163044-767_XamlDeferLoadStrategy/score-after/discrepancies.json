@@ -1,0 +1,30 @@
+{
+  "scenario": "XamlDeferLoadStrategy",
+  "uwp_capture_status": "partial: the launched UWP app remained on its splash screen",
+  "discrepancies": [
+    {
+      "feature": "Navigation",
+      "severity": "high",
+      "kind": "wrong text",
+      "detail": "All three migrated navigation items display SDKTemplate.Scenario instead of Basic Deferral, Adaptive Deferral, and Control Template Deferral."
+    },
+    {
+      "feature": "Adaptive Deferral",
+      "severity": "high",
+      "kind": "unreachable feature",
+      "detail": "Title-driven navigation fails and the capture remains on Basic Deferral. AccountsList, MailList, Send, and Body are all absent from the UIA tree."
+    },
+    {
+      "feature": "Control Template Deferral",
+      "severity": "high",
+      "kind": "unreachable feature",
+      "detail": "Title-driven navigation fails and the captured frame shows Basic Deferral rather than the Rainier and valley TitledImage examples."
+    },
+    {
+      "feature": "UWP visual baseline",
+      "severity": "measurement",
+      "kind": "capture limitation",
+      "detail": "The UWP runner returned ok:true, but every saved UWP scenario frame shows only the splash screen, so exact pixel-level layout comparison was unavailable."
+    }
+  ]
+}
